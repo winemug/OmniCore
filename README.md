@@ -1,4 +1,4 @@
 # OmniCore
-Omnipod integration for Android (and iOS - maaaybe)
+Omnipod integration with clients for Android (and iOS - maybe) and libraries for use in Windows & Linux.
 
 .. Coming soon ..
