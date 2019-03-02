@@ -31,7 +31,7 @@ namespace OmniCore.Model
         public async Task InitializeRadio(uint address)
         {
             this.Address = address;
-            this.PacketRadio.Initialize();
+            await this.PacketRadio.Initialize();
             this.Initialized = true;
         }
 
@@ -55,7 +55,7 @@ namespace OmniCore.Model
             int contentLen = content.Length;
             var data = new byte[contentLen + 2];
             data[0] = request.WillFollowUpWithCriticalRequest ? (byte)0x80 : (byte)0x00;
-            data[0] |= (byte)(this.MessageSequence << 2);
+            data[0] |= (byte)(GetNextMessageSequence() << 2);
             data[0] |= (byte)((contentLen >> 8) & 0x03);
             data[1] = (byte)(contentLen & 0xFF);
             Buffer.BlockCopy(content, 0, data, 2, contentLen);
@@ -69,6 +69,7 @@ namespace OmniCore.Model
                 index = GetPacket(data, index, out packetData);
             }
 
+            var responsePackets = new List<byte[]>();
             foreach(var packet in packets)
             {
                 var response = await this.PacketRadio.SendPacketAndGetPacket(packet);
@@ -91,6 +92,7 @@ namespace OmniCore.Model
                 packetData = new byte[packetDataLength + 10];
                 packetData.PutUint32BigEndian(this.Address, 0);
                 packetData[4] = 0xA0;
+                packetData[4] |= GetNextPacketSequence();
                 packetData.PutUint32BigEndian(this.Address, 5);
                 Buffer.BlockCopy(data, startIndex, packetData, 9, packetDataLength);
             }
@@ -99,9 +101,24 @@ namespace OmniCore.Model
                 packetData = new byte[packetDataLength + 6];
                 packetData.PutUint32BigEndian(this.Address, 0);
                 packetData[4] = 0x80;
+                packetData[4] |=  GetNextPacketSequence();
                 Buffer.BlockCopy(data, startIndex, packetData, 5, packetDataLength);
             }
             return startIndex + packetDataLength;
+        }
+
+        private byte GetNextPacketSequence()
+        {
+            var seq = this.PacketSequence;
+            this.PacketSequence = (this.PacketSequence + 1) % 32;
+            return (byte)seq;
+        }
+
+        private byte GetNextMessageSequence()
+        {
+            var seq = this.MessageSequence;
+            this.MessageSequence = (this.MessageSequence + 1) % 16;
+            return (byte)seq;
         }
 
         public async Task SetLowTxLevel()
@@ -117,6 +134,5 @@ namespace OmniCore.Model
         {
             this.NonceGenerator = new NonceGenerator(lot, tid, nonce, seed);
         }
-
     }
 }
