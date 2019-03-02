@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nexus.protocols.ble;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -7,7 +8,7 @@ namespace OmniCore.Mobile
 {
     public partial class App : Application
     {
-        public App()
+        public App(IBluetoothLowEnergyAdapter ble)
         {
             InitializeComponent();
 
