@@ -5,6 +5,7 @@
              x:Class="OmniCore.Mobile.MainPage">
 
     <StackLayout>
+        <Button Text="A fine button" Clicked="Button_ClickedAsync"/>
     </StackLayout>
 
 </ContentPage>

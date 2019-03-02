@@ -12,7 +12,7 @@ namespace OmniCore.Mobile
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new MainPage(ble);
         }
 
         protected override void OnStart()
