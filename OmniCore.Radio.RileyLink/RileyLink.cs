@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Protocol.Base;
 
 namespace OmniCore.Radio.RileyLink
 {
@@ -33,7 +34,7 @@ namespace OmniCore.Radio.RileyLink
         {
             if (this.Ble.CurrentState.IsDisabledOrDisabling() && this.Ble.AdapterCanBeEnabled)
             {
-                Debug.WriteLine("Enabling ble adapter");
+                Console.WriteLine("Enabling ble adapter");
                 await this.Ble.EnableAdapter();
             }
 
@@ -42,7 +43,7 @@ namespace OmniCore.Radio.RileyLink
 
             using (var cts = new CancellationTokenSource(10000))
             {
-                Debug.WriteLine("Scanning");
+                Console.WriteLine("Scanning");
                 await this.Ble.ScanForBroadcasts(
                    new ScanSettings()
                    {
@@ -55,7 +56,7 @@ namespace OmniCore.Radio.RileyLink
                    },
                    (peripheral) =>
                    {
-                       Debug.WriteLine($"Found peripheral at address {peripheral.Address}, name: {peripheral.Advertisement.DeviceName}");
+                       Console.WriteLine($"Found peripheral at address {peripheral.Address}, name: {peripheral.Advertisement.DeviceName}");
 
                        _peripheral = peripheral;
                        cts.Cancel();
@@ -74,11 +75,11 @@ namespace OmniCore.Radio.RileyLink
 
             if (_connection == null || _connection.State != ConnectionState.Connected)
             {
-                Debug.WriteLine($"Starting new connection");
+                Console.WriteLine($"Starting new connection");
                 var connectionRequest = await this.Ble.ConnectToDevice(_peripheral, TimeSpan.FromSeconds(10));
                 if (connectionRequest.IsSuccessful())
                 {
-                    Debug.WriteLine($"Connected");
+                    Console.WriteLine($"Connected");
                     _connection = connectionRequest.GattServer;
                     if (_disconnectTimer != null)
                     {
@@ -98,14 +99,14 @@ namespace OmniCore.Radio.RileyLink
                     _connection.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
                     async (byte[] data) =>
                     {
-                        Debug.WriteLine($"Notify counter: {data[0]}");
+                        Console.WriteLine($"Notify counter: {data[0]}");
                         var response = await _connection.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
                         ResponseQueue.Enqueue(response);
                         NotificationQueued.Set();
                         ResetTimer();
                     });
 
-                    Debug.WriteLine($"Emptying queue");
+                    Console.WriteLine($"Emptying queue");
                     await _connection.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, new byte[] { 0x01, 0x00 });
 
                     while (true)
@@ -117,7 +118,7 @@ namespace OmniCore.Radio.RileyLink
                             break;
                         NotificationQueued.Reset();
                     }
-                    Debug.WriteLine($"Queue emptied");
+                    Console.WriteLine($"Queue emptied");
                 }
             }
             ResetTimer();
@@ -134,7 +135,7 @@ namespace OmniCore.Radio.RileyLink
                 return;
 
 
-            Debug.WriteLine("Initializing variables");
+            Console.WriteLine("Initializing variables");
             await SendCommand(conn, RileyLinkCommandType.ResetRadioConfig);
             await SendCommand(conn, RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.Manchester });
             var frequency = (int)(433910000.0 / (24000000.0 / Math.Pow(2, 16)));
@@ -163,8 +164,19 @@ namespace OmniCore.Radio.RileyLink
             await SendCommand(conn, RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC1, 0xA5 });
             await SendCommand(conn, RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0x5A });
 
-            Debug.WriteLine("Done initializing");
+            Console.WriteLine("Done initializing");
             _variablesInitialized = true;
+        }
+
+        public async Task<byte[]> GetPacket(uint timeout)
+        {
+            var conn = await GetRLConnection();
+            if (conn == null)
+                throw new Exception("Couldn't create a connection to RL");
+
+            var cmdParams = new byte[] { 0 };
+            await SendCommand(conn, RileyLinkCommandType.GetPacket, new byte[] { 0 });
+            throw new NotImplementedException();
         }
 
         public async Task<byte[]> SendPacketAndExpectSilence(byte[] packetData)
@@ -204,7 +216,7 @@ namespace OmniCore.Radio.RileyLink
             }
 
             NotificationQueued.Reset();
-            Debug.WriteLine("writing data");
+            Console.WriteLine("writing data");
             await connection.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, data);
             if (!NotificationQueued.Wait(timeout))
                 throw new Exception("timed out expecting a response from rileylink");
@@ -240,71 +252,15 @@ namespace OmniCore.Radio.RileyLink
         {
             _disconnectTimer?.Change(2500, Timeout.Infinite);
         }
-    }
 
-    public enum RileyLinkResponseType
-    {
-        Timeout = 0xaa,
-        Interrupted = 0xbb,
-        NoData = 0xcc,
-        OK = 0xdd
-    }
+        public Task SetHighTx()
+        {
+            throw new NotImplementedException();
+        }
 
-    public enum RileyLinkCommandType
-    {
-        GetState = 1,
-        GetVersion = 2,
-        GetPacket = 3,
-        SendPacket = 4,
-        SendAndListen = 5,
-        UpdateRegister = 6,
-        Reset = 7,
-        Led = 8,
-        ReadRegister = 9,
-        SetModeRegisters = 10,
-        SetSwEncoding = 11,
-        SetPreamble = 12,
-        ResetRadioConfig = 13,
-
-    }
-
-    public enum RileyLinkSoftwareEncoding
-    {
-        None = 0,
-        Manchester = 1,
-        FourBySix = 2
-    }
-
-    public enum RileyLinkRegister
-    {
-        SYNC1 = 0x00,
-        SYNC0 = 0x01,
-        PKTLEN = 0x02,
-        PKTCTRL1 = 0x03,
-        PKTCTRL0 = 0x04,
-        FSCTRL1 = 0x07,
-        FREQ2 = 0x09,
-        FREQ1 = 0x0a,
-        FREQ0 = 0x0b,
-        MDMCFG4 = 0x0c,
-        MDMCFG3 = 0x0d,
-        MDMCFG2 = 0x0e,
-        MDMCFG1 = 0x0f,
-        MDMCFG0 = 0x10,
-        DEVIATN = 0x11,
-        MCSM0 = 0x14,
-        FOCCFG = 0x15,
-        AGCCTRL2 = 0x17,
-        AGCCTRL1 = 0x18,
-        AGCCTRL0 = 0x19,
-        FREND1 = 0x1a,
-        FREND0 = 0x1b,
-        FSCAL3 = 0x1c,
-        FSCAL2 = 0x1d,
-        FSCAL1 = 0x1e,
-        FSCAL0 = 0x1f,
-        TEST1 = 0x24,
-        TEST0 = 0x25,
-        PATABLE0 = 0x2e
+        public Task<byte[]> GetPacket(long timeout)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
