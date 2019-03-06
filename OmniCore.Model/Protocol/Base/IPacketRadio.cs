@@ -13,8 +13,12 @@ namespace OmniCore.Model.Protocol.Base
 
         Task SetNormalTx();
 
+        Task SetHighTx();
+
         Task<byte[]> SendPacketAndGetPacket(byte[] packetData);
 
         Task<byte[]> SendPacketAndExpectSilence(byte[] packetData);
+
+        Task<byte[]> GetPacket(long timeout);
     }
 }
