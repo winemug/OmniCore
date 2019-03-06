@@ -37,5 +37,23 @@ namespace OmniCore.Model.Protocol.Base
             array[index++] = (byte)((value & 0xFF00) >> 8);
             array[index] = (byte)(value & 0x00FF);
         }
+
+        public static byte[] AsBigEndian(this ushort value)
+        {
+            var result = new byte[2];
+            result[0] = (byte)((value & 0xFF00) >> 8);
+            result[1] = (byte)(value & 0x00FF);
+            return result;
+        }
+
+        public static byte[] AsBigEndian(this uint value)
+        {
+            var result = new byte[4];
+            result[0] = (byte)((value & 0xFF000000) >> 24);
+            result[1] = (byte)((value & 0x00FF0000) >> 16);
+            result[2] = (byte)((value & 0x0000FF00) >> 8);
+            result[3] = (byte)(value & 0x000000FF);
+            return result;
+        }
     }
 }
