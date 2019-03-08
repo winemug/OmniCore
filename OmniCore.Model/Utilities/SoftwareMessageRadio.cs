@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Utilities
 {
     public class SoftwareMessageRadio : IMessageRadio
     {

@@ -1,0 +1,57 @@
+# ---------------------------------------------------
+# Packet sniffer stttings for CC1111
+# ---------------------------------------------------
+SYNC1      |0xDF00|0xA5|Sync Word, High Byte 
+SYNC0      |0xDF01|0x5A|Sync Word, Low Byte 
+PKTLEN     |0xDF02|0xFE|Packet Length 
+PKTCTRL1   |0xDF03|0x04|Packet Automation Control 
+PKTCTRL0   |0xDF04|0x04|Packet Automation Control 
+ADDR       |0xDF05|0x00|Device Address 
+CHANNR     |0xDF06|0x00|Channel Number 
+FSCTRL1    |0xDF07|0x06|Frequency Synthesizer Control 
+FSCTRL0    |0xDF08|0x00|Frequency Synthesizer Control 
+FREQ2      |0xDF09|0x12|Frequency Control Word, High Byte 
+FREQ1      |0xDF0A|0x14|Frequency Control Word, Middle Byte 
+FREQ0      |0xDF0B|0x5F|Frequency Control Word, Low Byte 
+MDMCFG4    |0xDF0C|0xCA|Modem configuration 
+MDMCFG3    |0xDF0D|0xBC|Modem Configuration 
+MDMCFG2    |0xDF0E|0x05|Modem Configuration 
+MDMCFG1    |0xDF0F|0x70|Modem Configuration 
+MDMCFG0    |0xDF10|0x11|Modem Configuration 
+DEVIATN    |0xDF11|0x44|Modem Deviation Setting 
+MCSM2      |0xDF12|0x07|Main Radio Control State Machine Configuration 
+MCSM1      |0xDF13|0x30|Main Radio Control State Machine Configuration 
+MCSM0      |0xDF14|0x18|Main Radio Control State Machine Configuration 
+FOCCFG     |0xDF15|0x17|Frequency Offset Compensation Configuration 
+BSCFG      |0xDF16|0x6C|Bit Synchronization Configuration 
+AGCCTRL2   |0xDF17|0x03|AGC Control 
+AGCCTRL1   |0xDF18|0x40|AGC Control 
+AGCCTRL0   |0xDF19|0x91|AGC Control 
+FREND1     |0xDF1A|0x56|Front End RX Configuration 
+FREND0     |0xDF1B|0x10|Front End TX Configuration 
+FSCAL3     |0xDF1C|0xE9|Frequency Synthesizer Calibration 
+FSCAL2     |0xDF1D|0x2A|Frequency Synthesizer Calibration 
+FSCAL1     |0xDF1E|0x00|Frequency Synthesizer Calibration 
+FSCAL0     |0xDF1F|0x1F|Frequency Synthesizer Calibration 
+TEST2      |0xDF23|0x81|Various Test Settings 
+TEST1      |0xDF24|0x35|Various Test Settings 
+TEST0      |0xDF25|0x09|Various Test Settings 
+PA_TABLE7  |0xDF27|0x00|PA Power Setting 7 
+PA_TABLE6  |0xDF28|0x00|PA Power Setting 6 
+PA_TABLE5  |0xDF29|0x00|PA Power Setting 5 
+PA_TABLE4  |0xDF2A|0x00|PA Power Setting 4 
+PA_TABLE3  |0xDF2B|0x00|PA Power Setting 3 
+PA_TABLE2  |0xDF2C|0x00|PA Power Setting 2 
+PA_TABLE1  |0xDF2D|0x00|PA Power Setting 1 
+PA_TABLE0  |0xDF2E|0x84|PA Power Setting 0 
+IOCFG2     |0xDF2F|0x00|Radio Test Signal Configuration (P1_7) 
+IOCFG1     |0xDF30|0x00|Radio Test Signal Configuration (P1_6) 
+IOCFG0     |0xDF31|0x00|Radio Test Signal Configuration (P1_5) 
+PARTNUM    |0xDF36|0x11|Chip ID[15:8] 
+VERSION    |0xDF37|0x04|Chip ID[7:0] 
+FREQEST    |0xDF38|0xE1|Frequency Offset Estimate from Demodulator 
+LQI        |0xDF39|0x00|Demodulator Estimate for Link Quality 
+RSSI       |0xDF3A|0xB2|Received Signal Strength Indication 
+MARCSTATE  |0xDF3B|0x01|Main Radio Control State Machine State 
+PKTSTATUS  |0xDF3C|0x00|Packet Status 
+VCO_VC_DAC |0xDF3D|0xFD|Current Setting from PLL Calibration Module 

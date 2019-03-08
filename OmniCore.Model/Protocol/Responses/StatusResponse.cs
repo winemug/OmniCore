@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Protocol.Base;
+using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;

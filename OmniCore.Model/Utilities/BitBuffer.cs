@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace OmniCore.Model.Protocol.Base
+namespace OmniCore.Model.Utilities
 {
     public class BitBuffer
     {
-        private long bufferPosition = 0;
+        private long bitPosition = 0;
         private MemoryStream buffer;
 
         public long ByteLength { get => this.buffer.Length; }
@@ -17,15 +17,17 @@ namespace OmniCore.Model.Protocol.Base
             buffer = new MemoryStream(1024);
         }
 
-        public BitBuffer(byte[] data):this()
+        public BitBuffer(byte[] data, int? offset = null, int? length = null):this()
         {
-            if (data.Length > 1024)
+            if (offset.HasValue && length.HasValue)
             {
-                buffer.Write(data, 0, data.Length);
+                buffer.Write(data, offset.Value, length.Value);
+                buffer.Position = 0;
             }
             else
             {
-                buffer = new MemoryStream(1024);
+                buffer.Write(data, 0, data.Length);
+                buffer.Position = 0;
             }
         }
 
@@ -36,7 +38,12 @@ namespace OmniCore.Model.Protocol.Base
 
         public void Skip(int bitCount)
         {
-            throw new NotImplementedException();
+            bitPosition += bitCount;
+        }
+
+        public void GoToEnd()
+        {
+
         }
 
         public void ByteAlign()

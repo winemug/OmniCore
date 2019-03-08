@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Protocol.Base
+namespace OmniCore.Model.Utilities
 {
     public static class ByteExtensions
     {

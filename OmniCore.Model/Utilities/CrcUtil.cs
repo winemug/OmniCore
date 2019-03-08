@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Protocol.Base
+namespace OmniCore.Model.Utilities
 {
     public static class CrcUtil
     {
@@ -79,29 +79,29 @@ namespace OmniCore.Model.Protocol.Base
 
         public static byte Crc8(byte[] data, int length = 0)
         {
-            byte crc = 0x00;
+            uint crc = 0;
 
             if (length == 0)
                 length = data.Length;
 
             for(int i=0; i<length; i++)
             {
-
+                crc = (crc >> 8) ^ crc8_table[(crc ^ data[i]) & 0xff];
             }
-            return crc;
+            return (byte) (crc & 0xff);
         }
 
         public static ushort Crc16(byte[] data, int length = 0)
         {
-            ushort crc = 0x0000;
+            uint crc = 0;
             if (length == 0)
                 length = data.Length;
 
             for (int i = 0; i < length; i++)
             {
-
+                crc = (crc >> 8) ^ crc8_table[(crc ^ data[i]) & 0xff];
             }
-            return crc;
+            return (ushort)(crc & 0xffff);
         }
     }
 }

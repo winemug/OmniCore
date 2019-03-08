@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using OmniCore.Model.Utilities;
 
 namespace OmniCore.Model.Protocol
 {
