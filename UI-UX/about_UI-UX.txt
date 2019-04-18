@@ -1,0 +1,4 @@
+the items in this folder contain UI and UX created for the app interface
+some items may not be the final polished version. each item will have a version number (v1, v2, etc)
+the license used by the omnicore project also applies to all items in this folder.
+thanks :)
