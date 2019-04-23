@@ -1,6 +1,7 @@
 ﻿using nexus.protocols.ble;
 using OmniCore.Model;
 using OmniCore.Model.Protocol.Base;
+using OmniCore.Model.Utilities;
 using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;

@@ -1,8 +1,5 @@
 ﻿using OmniCore.Model.Protocol.Base;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Protocol
@@ -12,7 +9,6 @@ namespace OmniCore.Model.Protocol
         //private static object ConversationLock = new object();
         private IMessageRadio Radio;
         private Pod Pod;
-        private bool PendingAck = false;
 
         private Conversation(IMessageRadio radio, Pod pod)
         {
@@ -34,21 +30,14 @@ namespace OmniCore.Model.Protocol
             return new Conversation(radio, pod);
         }
 
-        public async Task<Message> SendRequest(Message request)
+        public async Task<IMessage> SendRequest(IMessage request)
         {
             Message response = null;
-
-            PendingAck = response != null;
-            return response;
+            return await this.Radio.SendRequestAndGetResponse(request);
         }
 
         public void End()
         {
-            if (PendingAck)
-            {
-                this.Radio.AcknowledgeResponse();
-                this.PendingAck = false;
-            }
             //Monitor.Exit(ConversationLock);
         }
 

@@ -14,6 +14,5 @@ namespace OmniCore.Model.Protocol.Base
         Task SetNormalTxLevel();
         Task SetLowTxLevel();
         Task<IMessage> SendRequestAndGetResponse(IMessage request);
-        Task AcknowledgeResponse();
     }
 }
