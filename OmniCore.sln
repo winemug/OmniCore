@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Mobile.Android", "OmniCore.Mobile\OmniCore.Mobile.Android\OmniCore.Mobile.Android.csproj", "{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}"
 EndProject
@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model", "OmniCore.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", "OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj", "{9A759E4A-8A7E-474F-BFDD-EB3FBAA9A5A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Scratch", "OmniCore.Scratch\OmniCore.Scratch.csproj", "{60BAB36B-4D19-44B3-87F5-82CD001B6762}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Scratch", "OmniCore.Scratch\OmniCore.Scratch.csproj", "{60BAB36B-4D19-44B3-87F5-82CD001B6762}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Py", "OmniCore.Py\OmniCore.Py.csproj", "{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
