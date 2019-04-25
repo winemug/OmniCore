@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -8,12 +8,14 @@
     <Compile Remove="crc.cs" />
     <Compile Remove="definitions.cs" />
     <Compile Remove="exceptions.cs" />
+    <Compile Remove="nonce.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="crc.cs" />
     <None Include="definitions.cs" />
     <None Include="exceptions.cs" />
+    <None Include="nonce.cs" />
   </ItemGroup>
 
 </Project>
