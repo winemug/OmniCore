@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:OmniCore.Mobile"
-             x:Class="OmniCore.Mobile.MainPage">
+             x:Class="OmniCore.Mobile.Views.TestPage">
 
     <StackLayout>
         <Button Text="A fine button" Clicked="Button_ClickedAsync"/>

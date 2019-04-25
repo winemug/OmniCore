@@ -1,0 +1,26 @@
+﻿<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:views="clr-namespace:OmniCore.Mobile.Views"
+            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+            x:Class="OmniCore.Mobile.Views.MainPage"
+            android:TabbedPage.ToolbarPlacement="Bottom">
+    <TabbedPage.Children>
+        <NavigationPage Title="Status">
+            <x:Arguments>
+                <views:StatusPage />
+            </x:Arguments>
+        </NavigationPage>
+
+        <NavigationPage Title="Radio">
+            <x:Arguments>
+                <views:ActionPage />
+            </x:Arguments>
+        </NavigationPage>
+
+        <NavigationPage Title="Data">
+            <x:Arguments>
+                <views:TestPage />
+            </x:Arguments>
+        </NavigationPage>
+    </TabbedPage.Children>
+</TabbedPage>

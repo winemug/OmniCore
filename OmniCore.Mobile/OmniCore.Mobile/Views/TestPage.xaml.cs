@@ -13,17 +13,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile
+namespace OmniCore.Mobile.Views
 {
-    public partial class MainPage : ContentPage
+    public partial class TestPage : ContentPage
     {
-        private readonly IBluetoothLowEnergyAdapter Ble;
         private readonly IPacketRadio PacketRadio;
 
-        public MainPage(IBluetoothLowEnergyAdapter ble)
+        public TestPage()
         {
-            this.Ble = ble;
-            this.PacketRadio = new RileyLink(ble);
+            this.PacketRadio = new RileyLink(App.Instance.BleAdapter);
             this.BindingContext = this;
             InitializeComponent();
         }
