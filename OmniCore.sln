@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Scratch", "OmniCore.Scratch\OmniCore.Scratch.csproj", "{60BAB36B-4D19-44B3-87F5-82CD001B6762}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Py", "OmniCore.Py\OmniCore.Py.csproj", "{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +41,6 @@ Global
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60BAB36B-4D19-44B3-87F5-82CD001B6762}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A1EC632-4F6A-49E1-B40D-CF142303ADA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
