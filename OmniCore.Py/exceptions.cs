@@ -1,4 +1,4 @@
-namespace OmniCore.py
+namespace OmniCore.Py
 {
     using System;
 

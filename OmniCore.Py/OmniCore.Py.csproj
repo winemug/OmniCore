@@ -9,6 +9,9 @@
     <Compile Remove="definitions.cs" />
     <Compile Remove="exceptions.cs" />
     <Compile Remove="nonce.cs" />
+    <Compile Remove="packet_radio.cs" />
+    <Compile Remove="pod.cs" />
+    <Compile Remove="protocol_common.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +19,9 @@
     <None Include="definitions.cs" />
     <None Include="exceptions.cs" />
     <None Include="nonce.cs" />
+    <None Include="packet_radio.cs" />
+    <None Include="pod.cs" />
+    <None Include="protocol_common.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace OmniCore.py
+namespace OmniCore.Py
 {
     public static class definitions
     {
