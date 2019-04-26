@@ -10,7 +10,7 @@ namespace OmniCore.Py
     public class PacketRadioError : OmnipyError
     {
         private int? err_code;
-        public OmnipyError(string message = "Unknown RL error", int? err_code = null) : base(message)
+        public PacketRadioError(string message = "Unknown RL error", int? err_code = null) : base(message)
         {
             this.err_code = err_code;
         }

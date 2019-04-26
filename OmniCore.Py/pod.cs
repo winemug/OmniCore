@@ -1,3 +1,5 @@
+using System;
+
 namespace OmniCore.Py
 {
     public class Pod
@@ -34,9 +36,9 @@ namespace OmniCore.Py
         public int? fault_table_access = null;
         public int? fault_insulin_state_table_corruption = null;
         public int? fault_internal_variables = null;
-        public bool fault_immediate_bolus_in_progress = null;
-        public PodState? fault_progress_before = null;
-        public PodState? fault_progress_before2 = null;
+        public bool? fault_immediate_bolus_in_progress = null;
+        public PodProgress? fault_progress_before = null;
+        public PodProgress? fault_progress_before2 = null;
         public uint? fault_information_type2_last_word = null;
 
         public decimal insulin_reservoir = 0;
@@ -49,7 +51,7 @@ namespace OmniCore.Py
 
         public string last_command = null;
 
-        public int last_command_db_id = null;
+        public int? last_command_db_id = null;
         public DateTime? last_enacted_temp_basal_start = null;
         public TimeSpan? last_enacted_temp_basal_duration = null;
         public decimal? last_enacted_temp_basal_amount = null;
@@ -66,7 +68,7 @@ namespace OmniCore.Py
             return new Pod();
         }
 
-        public boolean is_active()
+        public bool is_active()
         {
             return !(this.id_lot == null || this.id_t == null || this.radio_address == null)
                 & (this.state_progress == PodProgress.Running || this.state_progress == PodProgress.RunningLow)

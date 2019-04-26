@@ -2,7 +2,7 @@ namespace OmniCore.py
 {
     public static class CrcUtil
     {
-        private static byte[] crc8_table =
+        public static byte[] crc8_table =
             new byte[]
             {
                 0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
@@ -39,7 +39,7 @@ namespace OmniCore.py
                 0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3
             };
 
-        private static ushort[] crc16_table =
+        public static ushort[] crc16_table =
             new ushort[]
             {
                 0x0000,0x8005,0x800f,0x000a,0x801b,0x001e,0x0014,0x8011,0x8033,

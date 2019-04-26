@@ -1,15 +1,18 @@
+using OmniCore.py;
+
 namespace OmniCore.Py
 {
 
 	public class Nonce
     {
-        public static const uint FAKE_NONCE = 0xD012FA62;
+        public static uint FAKE_NONCE = 0xD012FA62;
         private int lot;
         private int tid;
         private uint? lastNonce;
         private int seed;
         private int? ptr;
         private int nonce_runs;
+        private uint[] table;
 
 		public Nonce(int lot, int tid, uint? seekNonce = null, int seed = 0)
         {
@@ -36,9 +39,9 @@ namespace OmniCore.Py
                 this.lastNonce = FAKE_NONCE;
                 return FAKE_NONCE;
             }
-            nonce = this.table[self.ptr];
-            this.table[self.ptr] = this._generate();
-            this.ptr = (nonce & 0xF) + 2;
+            var nonce = this.table[this.ptr.Value];
+            this.table[this.ptr.Value] = this._generate();
+            this.ptr = (int)(nonce & 0xF) + 2;
             this.lastNonce = nonce;
             this.nonce_runs += 1;
             return nonce;
@@ -52,9 +55,9 @@ namespace OmniCore.Py
 
 	    public void sync(uint syncWord, int msgSequence)
         {
-            w_sum = (this.lastNonce & 0xFFFF) + (crc16_table[msgSequence] & 0xFFFF)
+            var w_sum = (this.lastNonce & 0xFFFF) + (CrcUtil.crc16_table[msgSequence] & 0xFFFF)
                         + (this.lot & 0xFFFF) + (this.tid & 0xFFFF);
-            this.seed = ((w_sum & 0xFFFF) ^ syncWord) & 0xff;
+            this.seed = (int)((w_sum & 0xFFFF) ^ syncWord) & 0xff;
             this.lastNonce = null;
             this.nonce_runs = 0;
             this._initialize();
@@ -69,14 +72,14 @@ namespace OmniCore.Py
 
         public void _initialize()
         {
-            this.table = [0] * 18;
-            this.table[0] = ((this.lot & 0xFFFF) + 0x55543DC3 + (this.lot >> 16) + (this.seed & 0xFF)) & 0xFFFFFFFF;
-            this.table[1] = ((this.tid & 0xFFFF) + 0xAAAAE44E + (this.tid >> 16) + (this.seed >> 8)) & 0xFFFFFFFF;
+            this.table = new uint[18];
+            this.table[0] = (((uint)this.lot & 0xFFFF) + 0x55543DC3 + ((uint)this.lot >> 16) + ((uint)this.seed & 0xFF)) & 0xFFFFFFFF;
+            this.table[1] = (((uint)this.tid & 0xFFFF) + 0xAAAAE44E + ((uint)this.tid >> 16) + ((uint)this.seed >> 8)) & 0xFFFFFFFF;
 
             for (int i = 2; i < 18; i++)
                 this.table[i] = this._generate();
 
-            this.ptr = ((this.table[0] + this.table[1]) & 0xF) + 2;
+            this.ptr = (int)((this.table[0] + this.table[1]) & 0xF) + 2;
             this.lastNonce = null;
         }
     }
