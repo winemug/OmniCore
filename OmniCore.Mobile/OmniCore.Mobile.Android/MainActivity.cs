@@ -23,8 +23,14 @@ namespace OmniCore.Mobile.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
-            BluetoothLowEnergyAdapter.Init(this);
-            var ble = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
+
+
+            IBluetoothLowEnergyAdapter ble = null;
+            if (PackageManager.HasSystemFeature(PackageManager.FeatureBluetoothLe))
+            {
+                BluetoothLowEnergyAdapter.Init(this);
+                ble = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
+            }
 
             LoadApplication(new App(ble));
         }
