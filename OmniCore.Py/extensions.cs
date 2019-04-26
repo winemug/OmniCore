@@ -52,6 +52,20 @@ namespace OmniCore.Py
             return newArray;
         }
 
+        public static ushort[] Sub(this ushort[] array, int startIndex)
+        {
+            ushort[] newArray = new ushort[array.Length - startIndex];
+            Buffer.BlockCopy(array, startIndex, newArray, 0, newArray.Length);
+            return newArray;
+        }
+
+        public static ushort[] Sub(this ushort[] array, int startIndex, int endIndex)
+        {
+            ushort[] newArray = new ushort[endIndex - startIndex];
+            Buffer.BlockCopy(array, startIndex, newArray, 0, newArray.Length);
+            return newArray;
+        }
+
         public static byte[] Append(this byte[] array, byte[] array2)
         {
             byte[] newArray = new byte[array.Length + array2.Length];
@@ -95,5 +109,11 @@ namespace OmniCore.Py
             result[3] = (byte)(value & 0x000000FF);
             return result;
         }
+
+        public static byte[] ToBytes(this int value)
+        {
+            return ((uint)value).ToBytes();
+        }
+
     }
 }
