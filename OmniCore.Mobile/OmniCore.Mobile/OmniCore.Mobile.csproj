@@ -16,11 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model.csproj" />
-    <ProjectReference Include="..\..\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="Views\TestPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
