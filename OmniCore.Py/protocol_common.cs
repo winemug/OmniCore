@@ -1,6 +1,7 @@
 using OmniCore.py;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace OmniCore.Py
 {
@@ -103,15 +104,15 @@ namespace OmniCore.Py
 
     public class BaseMessage
     {
-        uint? address = null;
-        int? sequence = null;
-        bool expect_critical_followup = false;
-        int body_length = 0;
-        byte[] body = null;
-        byte[] body_prefix = null;
-        List<Tuple<byte, byte[],uint?>> parts = new List<Tuple<byte, byte[],uint?>>();
-        string message_str_prefix = "\n";
-        RadioPacketType? type = null;
+        public uint? address = null;
+        public int? sequence = null;
+        public bool expect_critical_followup = false;
+        public int body_length = 0;
+        public byte[] body = null;
+        public byte[] body_prefix = null;
+        public List<Tuple<byte, byte[],uint?>> parts = new List<Tuple<byte, byte[],uint?>>();
+        public string message_str_prefix = "\n";
+        public RadioPacketType? type = null;
 
         public bool add_radio_packet(RadioPacket radio_packet)
         {
@@ -277,44 +278,58 @@ namespace OmniCore.Py
             this.parts.Add(new Tuple<byte, byte[], uint?>(cmd_type, cmd_body, null));
         }
     }
+
+    public class PodMessage : BaseMessage
+    {
+        public PodMessage():base()
+        {
+            base.type = RadioPacketType.POD;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append($"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ");
+            foreach(var p in this.parts)
+            {
+                sb.Append($"{p.Item1:%02X} {p.Item2.Hex()} ");
+            }
+            return sb.ToString();
+        }
+    }
+
+    public class PdmMessage : BaseMessage
+    {
+        public PdmMessage(byte cmd_type, byte[] cmd_body):base()
+        {
+            this.add_part(cmd_type, cmd_body);
+            this.message_str_prefix = "\n";
+            this.type = RadioPacketType.PDM;
+        }
+
+        public void set_nonce(uint nonce)
+        {
+            var part = this.parts[0];
+            this.parts[0] = new Tuple<byte, byte[], uint?>(part.Item1, part.Item2, nonce);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append(this.message_str_prefix);
+            foreach (var p in this.parts)
+            {
+                if (p.Item3 == null)
+                    sb.Append($"{p.Item1:%02X} {p.Item2.Hex()} ");
+                else
+                    sb.Append($"{p.Item1:%02X} {p.Item3.Value:%08X} {p.Item2.Hex()} ");
+            }
+            return sb.ToString();
+        }
+    }
 }
 
 
-
-
-//class PodMessage(BaseMessage):
-//    def __init__(self):
-//        super(PodMessage, self).__init__()
-//        self.type = RadioPacketType.POD
-
-//    def __str__(self):
-//        s = "%08X %02X %s " % ( self.address,self.sequence,self.expect_critical_followup)
-
-//        for r_type, r_body in self.parts:
-//            s += "%02x %s " % (r_type, r_body.hex())
-//        return s
-
-
-//class PdmMessage(BaseMessage):
-//    def __init__(self, cmd_type, cmd_body):
-//        super(PdmMessage, self).__init__()
-//        self.add_part(cmd_type, cmd_body)
-//        self.message_str_prefix = "\n"
-//        self.type = RadioPacketType.PDM
-
-
-//    def set_nonce(self, nonce):
-//        cmd_type, cmd_body, _ = self.parts[0]
-//        self.parts[0] = cmd_type, cmd_body, nonce
-
-//    def __str__(self):
-//        s = self.message_str_prefix
-//        for cmd_type, cmd_body, nonce in self.parts:
-//            if nonce is None:
-//                s += "%02x %s " % (cmd_type, cmd_body.hex())
-//            else:
-//                s += "%02x %08x %s " % (cmd_type, nonce, cmd_body.hex())
-//        return s
 
 
 
