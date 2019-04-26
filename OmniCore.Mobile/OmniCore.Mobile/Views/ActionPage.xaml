@@ -4,9 +4,10 @@
              x:Class="OmniCore.Mobile.Views.ActionPage">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+            <Label>actions like:</Label>
+            <Label>Clear Alerts</Label>
+            <Label>Deactivate Pod</Label>
+            <Label>New Pod</Label>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

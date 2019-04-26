@@ -4,9 +4,19 @@
              x:Class="OmniCore.Mobile.Views.StatusPage">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+            <Label>Things to display here:</Label>
+            <Label>Pod status</Label>
+            <Label>Current communication status</Label>
+            <Label>Last checked</Label>
+            <Label>Pod lifetime</Label>
+            <Label>Insulin status</Label>
+            <Label>Alerts</Label>
+            <Label>Fault status</Label>
+            <Label>Active Basalprogram</Label>
+            <Label>Active Basalrate</Label>
+            <Label>Pod datetime</Label>
+            <Label>Pod identification</Label>
+            <Label>Pod version</Label>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

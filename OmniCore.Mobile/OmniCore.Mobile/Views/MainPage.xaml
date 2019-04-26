@@ -11,13 +11,13 @@
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="Radio">
+        <NavigationPage Title="Actions">
             <x:Arguments>
                 <views:ActionPage />
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="Data">
+        <NavigationPage Title="Test">
             <x:Arguments>
                 <views:TestPage />
             </x:Arguments>
