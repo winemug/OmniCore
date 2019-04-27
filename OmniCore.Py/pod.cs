@@ -4,20 +4,24 @@ namespace OmniCore.Py
 {
     public class Pod
     {
-        public int? id_lot = null;
-        public int? id_t = null;
+        public uint? id_lot = null;
+        public uint? id_t = null;
         public string id_version_pm = null;
         public string id_version_pi = null;
         public byte? id_version_unknown_byte = null;
         public byte[] id_version_unknown_7_bytes = null;
-        public uint? radio_address = null;
+        public uint radio_address;
         public int radio_packet_sequence = 0;
         public int radio_message_sequence = 0;
         public int? radio_low_gain = null;
         public int? radio_rssi = null;
+
         public uint? nonce_last = null;
-        public int nonce_seed = 0;
+        public uint nonce_seed = 0;
         public uint? nonce_syncword = null;
+        public int nonce_ptr = 0;
+        public int nonce_runs = 0;
+
         public DateTime? state_last_updated = null;
         public PodProgress state_progress = PodProgress.InitialState;
         public BasalState state_basal = BasalState.NotRunning;
@@ -70,7 +74,7 @@ namespace OmniCore.Py
 
         public bool is_active()
         {
-            return !(this.id_lot == null || this.id_t == null || this.radio_address == null)
+            return !(this.id_lot == null || this.id_t == null)
                 & (this.state_progress == PodProgress.Running || this.state_progress == PodProgress.RunningLow)
                 & !this.state_faulted;
         }

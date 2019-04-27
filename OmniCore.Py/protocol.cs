@@ -514,8 +514,8 @@ namespace OmniCore.Py
 
             pod.id_version_unknown_byte = response[6];
             pod.state_progress = (PodProgress)(response[7] & 0x0F);
-            pod.id_lot = (int)response.GetUInt32(8);
-            pod.id_t = (int)response.GetUInt32(12);
+            pod.id_lot = response.GetUInt32(8);
+            pod.id_t = response.GetUInt32(12);
 
             if (response.Length == 21)
             {

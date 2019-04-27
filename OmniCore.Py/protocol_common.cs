@@ -1,3 +1,4 @@
+using Omni.Py;
 using OmniCore.py;
 using System;
 using System.Collections.Generic;
@@ -301,6 +302,10 @@ namespace OmniCore.Py
 
     public class PdmMessage : BaseMessage
     {
+        public TxPower? TxLevel;
+        public uint? AckAddressOverride;
+        public bool DoubleTake;
+
         public PdmMessage(PdmRequest cmd_type, byte[] cmd_body):base()
         {
             this.add_part(cmd_type, cmd_body);
