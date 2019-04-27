@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using nexus.protocols.ble;
+using Omni.Py;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OmniCore.Py
 {
@@ -14,16 +16,19 @@ namespace OmniCore.Py
 
         public Pdm Pdm { get; private set; }
         public Pod Pod { get; private set; }
+        public PrRileyLink PacketRadio { get; private set; }
 
         public OmnipyStub(IBluetoothLowEnergyAdapter ble)
         {
             this.Ble = ble;
             this.PodPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "pod.json");
             LoadPod();
-            this.Pdm = new Pdm(this.Pod, new pr_rileylink(this.Ble));
+            this.PacketRadio = new PrRileyLink(this.Ble);
+            this.Pdm = new Pdm(this.PacketRadio);
+            this.Pdm.Pod = this.Pod;
         }
 
-        public void NewPod(uint radioAddress, int lot, int tid)
+        public void NewPod(uint radioAddress, uint lot, uint tid)
         {
             var pod = new Pod();
             pod.radio_address = radioAddress;
@@ -32,7 +37,7 @@ namespace OmniCore.Py
 
             SavePod();
             this.Pod = pod;
-            this.Pdm = new Pdm(this.Pod, new pr_rileylink(this.Ble));
+            this.Pdm = new Pdm(new PrRileyLink(this.Ble));
         }
 
         private void LoadPod()
@@ -73,5 +78,6 @@ namespace OmniCore.Py
                 }
             }
         }
+
     }
 }
