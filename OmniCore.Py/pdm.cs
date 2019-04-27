@@ -11,9 +11,11 @@ namespace OmniCore.Py
         private Nonce nonce;
         private Radio radio;
         private logger logger;
+        private PacketRadio packetRadio;
 
-        public Pdm(Pod pod)
+        public Pdm(Pod pod, PacketRadio packetRadio)
         {
+            this.packetRadio = packetRadio;
             this.pod = pod;
             this.nonce = null;
             this.logger = definitions.getLogger();
@@ -56,7 +58,8 @@ namespace OmniCore.Py
 
             this.radio = new Radio(this.pod.radio_address.Value,
                                   this.pod.radio_message_sequence,
-                                  this.pod.radio_packet_sequence);
+                                  this.pod.radio_packet_sequence,
+                                  this.packetRadio);
 
             return this.radio;
         }

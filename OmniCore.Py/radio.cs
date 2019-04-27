@@ -50,8 +50,9 @@ namespace OmniCore.Py
         private logger logger = definitions.getLogger();
         private logger packet_logger = definitions.get_packet_logger();
 
-        public Radio(uint radio_address, int msg_sequence, int pkt_sequence)
+        public Radio(uint radio_address, int msg_sequence, int pkt_sequence, PacketRadio pr)
         {
+            this.packet_radio = pr;
             start();
         }
 

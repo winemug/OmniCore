@@ -15,7 +15,6 @@ namespace OmniCore.Mobile.Views
     {
         public TestPage()
         {
-            this.BindingContext = this;
             InitializeComponent();
         }
 
@@ -53,9 +52,9 @@ namespace OmniCore.Mobile.Views
             if (!await CheckPermission(Permission.Storage))
                 return;
 
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mytestpdm.json");
-            if (File.Exists(path))
-                File.Delete(path);
+            var py = App.Instance.Py;
+            py.NewPod(889134425, 44425, 470096);
+            py.Pdm.UpdateStatus();
 
         }
     }

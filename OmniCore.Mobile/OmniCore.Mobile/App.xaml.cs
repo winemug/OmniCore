@@ -1,4 +1,5 @@
 ﻿using nexus.protocols.ble;
+using OmniCore.Py;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -10,10 +11,12 @@ namespace OmniCore.Mobile
         public static App Instance => Application.Current as App;
 
         public IBluetoothLowEnergyAdapter BleAdapter { get; private set; }
+        public OmnipyStub Py { get; private set; }
 
         public App(IBluetoothLowEnergyAdapter ble)
         {
             this.BleAdapter = ble;
+            this.Py = new OmnipyStub(ble);
             InitializeComponent();
             MainPage = new Views.MainPage();
         }

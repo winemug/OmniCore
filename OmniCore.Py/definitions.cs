@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace OmniCore.Py
 {
@@ -56,15 +57,15 @@ namespace OmniCore.Py
 
     public class logger
     {
-        //TODO: all logger methods used
         public void log(string text)
         {
-            //TODO: where do we log?
+            Debug.WriteLine(text);
         }
 
         public void exception(string text, Exception e)
         {
-            //TODO:
+            Debug.WriteLine(text);
+            Debug.WriteLine($"Exception: {e}");
         }
     }
 
