@@ -6,81 +6,85 @@ namespace OmniCore.Py
 	public class Nonce
     {
         public static uint FAKE_NONCE = 0xD012FA62;
-        private int lot;
-        private int tid;
-        public uint? lastNonce;
-        public int seed;
-        private int? ptr;
-        private int nonce_runs;
         private uint[] table;
 
-		public Nonce(int lot, int tid, uint? seekNonce = null, int seed = 0)
+        public Pod Pod { get; private set; }
+
+        public Nonce(Pod pod)
         {
-            this.lot = lot;
-            this.tid = tid;
-            this.lastNonce = null;
-            this.seed = seed;
-            this.ptr = null;
-            this.nonce_runs = 0;
-            this._initialize();
-			if (seekNonce != null)
+            this.Pod = pod;
+            this.Pod.nonce_syncword = null;
+
+            if (pod.nonce_last.HasValue)
             {
-                while (this.lastNonce != seekNonce.Value)
+                var nonce_ptr = this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, this.Pod.nonce_seed);
+                int nonce_runs = 0;
+                uint nonce_generated = pod.nonce_last.Value ^ FAKE_NONCE;
+                while (nonce_generated != pod.nonce_last)
                 {
-                    getNext(true);
+                    nonce_generated = GetNextInternal(ref nonce_ptr);
+                    nonce_runs++;
                 }
+                this.Pod.nonce_runs = nonce_runs;
+                this.Pod.nonce_ptr = nonce_ptr;
             }
-        }
-
-		public uint getNext(bool seeking = false)
-        {
-            if (!seeking && this.nonce_runs > 25)
+            else
             {
-                this.lastNonce = FAKE_NONCE;
-                return FAKE_NONCE;
+                this.Pod.nonce_runs = 0;
+                this.Pod.nonce_seed = 0;
+                this.Pod.nonce_ptr = this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, 0);
             }
-            var nonce = this.table[this.ptr.Value];
-            this.table[this.ptr.Value] = this._generate();
-            this.ptr = (int)(nonce & 0xF) + 2;
-            this.lastNonce = nonce;
-            this.nonce_runs += 1;
-            return nonce;
         }
 
-        public void reset()
+        public uint GetNext()
         {
-            this.nonce_runs = 255;
+            if (this.Pod.nonce_runs++ > 25)
+                this.Pod.nonce_last = FAKE_NONCE;
+            else
+                this.Pod.nonce_last = GetNextInternal(ref this.Pod.nonce_ptr);
+            return this.Pod.nonce_last.Value;
         }
-        
 
-	    public void sync(uint syncWord, int msgSequence)
+        private uint GetNextInternal(ref int nonce_ptr)
         {
-            var w_sum = (this.lastNonce & 0xFFFF) + (CrcUtil.crc16_table[msgSequence] & 0xFFFF)
-                        + (this.lot & 0xFFFF) + (this.tid & 0xFFFF);
-            this.seed = (int)((w_sum & 0xFFFF) ^ syncWord) & 0xff;
-            this.lastNonce = null;
-            this.nonce_runs = 0;
-            this._initialize();
+            var nonce_value = this.table[nonce_ptr];
+            this.table[nonce_ptr] = Shuffle();
+            nonce_ptr = (int)(nonce_value & 0xF) + 2;
+            return nonce_value;
         }
 
-        public uint _generate()
+        public void Reset()
+        {
+            this.Pod.nonce_runs = 32;
+        }
+
+	    public void Sync(int msgSequence)
+        {
+            var w_sum = (this.Pod.nonce_last & 0xFFFF) + (CrcUtil.crc16_table[msgSequence] & 0xFFFF)
+                        + (this.Pod.id_lot.Value & 0xFFFF) + (this.Pod.id_t.Value & 0xFFFF);
+            this.Pod.nonce_seed = (uint)((w_sum & 0xFFFF) ^ this.Pod.nonce_syncword) & 0xff;
+            this.Pod.nonce_runs = 0;
+            this.Pod.nonce_syncword = null;
+            this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, this.Pod.nonce_seed);
+        }
+
+        private uint Shuffle()
         {
             this.table[0] = ((this.table[0] >> 16) + (this.table[0] & 0xFFFF) * 0x5D7F) & 0xFFFFFFFF;
             this.table[1] = ((this.table[1] >> 16) + (this.table[1] & 0xFFFF) * 0x8CA0) & 0xFFFFFFFF;
             return (this.table[1] + (this.table[0] << 16)) & 0xFFFFFFFF;
         }
 
-        public void _initialize()
+        private int Initialize(uint lot, uint tid, uint seed)
         {
             this.table = new uint[18];
-            this.table[0] = (((uint)this.lot & 0xFFFF) + 0x55543DC3 + ((uint)this.lot >> 16) + ((uint)this.seed & 0xFF)) & 0xFFFFFFFF;
-            this.table[1] = (((uint)this.tid & 0xFFFF) + 0xAAAAE44E + ((uint)this.tid >> 16) + ((uint)this.seed >> 8)) & 0xFFFFFFFF;
+            this.table[0] = ((lot & 0xFFFF) + 0x55543DC3 + (lot >> 16) + (seed & 0xFF)) & 0xFFFFFFFF;
+            this.table[1] = ((tid & 0xFFFF) + 0xAAAAE44E + (tid >> 16) + (seed >> 8)) & 0xFFFFFFFF;
 
             for (int i = 2; i < 18; i++)
-                this.table[i] = this._generate();
+                this.table[i] = Shuffle();
 
-            this.ptr = (int)((this.table[0] + this.table[1]) & 0xF) + 2;
-            this.lastNonce = null;
+            return (int)((this.table[0] + this.table[1]) & 0xF) + 2;
         }
     }
 }
