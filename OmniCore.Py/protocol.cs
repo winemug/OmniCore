@@ -78,7 +78,7 @@ namespace OmniCore.Py
             return new PdmMessage(PdmRequest.ConfigureAlerts, cmd_body);
         }
 
-        public static PdmMessage request_status(int status_request_type= 0)
+        public static PdmMessage request_status(int status_request_type = 0)
         {
             var cmd_body = new byte[] { (byte)status_request_type };
             return new PdmMessage(PdmRequest.Status, cmd_body);
@@ -152,7 +152,7 @@ namespace OmniCore.Py
             cmd_body.Append(firstPte.Item1.ToBytes());
             cmd_body.Append(firstPte.Item2.ToBytes());
 
-            foreach(var pte in pulseEntries)
+            foreach (var pte in pulseEntries)
             {
                 cmd_body.Append(pte.Item1.ToBytes());
                 cmd_body.Append(pte.Item2.ToBytes());
@@ -162,6 +162,45 @@ namespace OmniCore.Py
             return msg;
         }
 
+        public static PdmMessage request_prime_cannula()
+        {
+            return bolus_message(52, 8, 1);
+        }
+
+        public static PdmMessage request_insert_cannula()
+        {
+            return bolus_message(10, 8, 1);
+        }
+
+        public static PdmMessage request_bolus(decimal iu_bolus)
+        {
+            return bolus_message((ushort)(iu_bolus / 0.05m));
+        }
+
+        private static PdmMessage bolus_message(ushort pulse_count,
+        int pulse_speed = 16, int delivery_delay = 2)
+        {
+            var commandBody = new byte[] { 0x02 };
+            var bodyForChecksum = new byte[] { 0x01 };
+            var pulse_span = (ushort)(pulse_speed * pulse_count);
+            bodyForChecksum.Append(pulse_span.ToBytes());
+            bodyForChecksum.Append(pulse_count.ToBytes());
+            bodyForChecksum.Append(pulse_count.ToBytes());
+            var checksum = getChecksum(bodyForChecksum);
+            commandBody.Append(checksum.ToBytes());
+            commandBody.Append(bodyForChecksum);
+
+            var msg = new PdmMessage(PdmRequest.InsulinSchedule, commandBody);
+
+            commandBody = new byte[] { 0x00 };
+            ushort p10 = (ushort)(pulse_count * 10);
+            commandBody.Append(p10.ToBytes());
+            uint dd = (uint)delivery_delay * (uint)100000;
+            commandBody.Append(dd.ToBytes());
+            commandBody.Append(new byte[] { 0, 0, 0, 0, 0, 0 });
+            msg.add_part(PdmRequest.BolusSchedule, commandBody);
+            return msg;
+        }
 
         private static ushort[] getPulsesForHalfHours(decimal[] halfHourUnits)
         {
@@ -190,7 +229,7 @@ namespace OmniCore.Py
         private static ushort getIse(ushort pulses, ushort repeat, bool alternate)
         {
             var ise = (ushort)(pulses & 0x03ff);
-            ise |= (ushort) (repeat << 12);
+            ise |= (ushort)(repeat << 12);
             if (alternate)
                 ise |= 0x0800;
             return ise;
@@ -199,7 +238,7 @@ namespace OmniCore.Py
         private static ushort getRepeatCount(ushort pulse, ushort[] others)
         {
             ushort repeatCount = 0;
-            foreach(var other in others)
+            foreach (var other in others)
             {
                 if (pulse != other)
                     break;
@@ -253,10 +292,10 @@ namespace OmniCore.Py
         private static byte[] getBodyFromTable(ushort[] table)
         {
             byte[] body = new byte[table.Length * 2];
-            for(int i=0; i<table.Length; i++)
+            for (int i = 0; i < table.Length; i++)
             {
                 var v = table[i];
-                body[i*2] = (byte)(v >> 8);
+                body[i * 2] = (byte)(v >> 8);
                 body[i * 2 + 1] = (byte)(v & 0xff);
             }
             return body;
@@ -265,7 +304,7 @@ namespace OmniCore.Py
         private static ushort getChecksum(byte[] body)
         {
             ushort checksum = 0;
-            foreach(byte b in body)
+            foreach (byte b in body)
             {
                 checksum += b;
             }
@@ -280,11 +319,11 @@ namespace OmniCore.Py
                 return (int)(180000000 / pulseCount);
         }
 
-        private static Tuple<ushort,uint,int[]>[] getPulseIntervalEntries(decimal[] halfHourUnits)
+        private static Tuple<ushort, uint, int[]>[] getPulseIntervalEntries(decimal[] halfHourUnits)
         {
             var count = halfHourUnits.Length;
-            var list1 = new Tuple<ushort,uint>[count];
-            for(int i=0; i<count; i++)
+            var list1 = new Tuple<ushort, uint>[count];
+            for (int i = 0; i < count; i++)
             {
                 var hhu = halfHourUnits[i];
                 var p10 = (ushort)(hhu * 200m);
@@ -304,7 +343,7 @@ namespace OmniCore.Py
             ushort subTotalPulses = 0;
             var hh_indices = new List<int>();
 
-            for(int i=0; i<count; i++)
+            for (int i = 0; i < count; i++)
             {
                 var pulses = list1[i].Item1;
                 var interval = list1[i].Item2;
@@ -324,9 +363,9 @@ namespace OmniCore.Py
                     }
                     else
                     {
-                        list2.Add(new Tuple<ushort,uint,int[]>(subTotalPulses, lastPulseInterval, hh_indices.ToArray()));
+                        list2.Add(new Tuple<ushort, uint, int[]>(subTotalPulses, lastPulseInterval, hh_indices.ToArray()));
                         subTotalPulses = pulses;
-                        hh_indices = new List<int>(new int[] { i } );
+                        hh_indices = new List<int>(new int[] { i });
                     }
                 }
                 else
@@ -345,252 +384,236 @@ namespace OmniCore.Py
 
             return list2.ToArray();
         }
+
+        public static PdmMessage request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
+        {
+            var halved_schedule = new decimal[48];
+            for (int i = 0; i < 47; i++)
+                halved_schedule[i] = schedule[i] / 2m;
+
+            int current_hh = hour * 2;
+            ushort seconds_past_hh = 0;
+            if (minute < 30)
+            {
+                seconds_past_hh = (ushort)(minute * 60 + second);
+            }
+            else
+            {
+                seconds_past_hh = (ushort)((minute - 30) * 60 + second);
+            }
+
+            var seconds_to_hh = (ushort)(1800 - seconds_past_hh);
+            var seconds_to_hh8 = (ushort)(seconds_to_hh * 8);
+
+            var pulse_list = getPulsesForHalfHours(halved_schedule);
+            var ise_list = getInsulinScheduleTableFromPulses(pulse_list);
+            var ise_body = getBodyFromTable(ise_list);
+            var pulse_body = getBodyFromTable(pulse_list);
+
+            var command_body = new byte[] { 0 };
+            var body_checksum = new byte[] { (byte)current_hh };
+
+            var current_hh_pulse_count = pulse_list[current_hh];
+            var remaining_pulse_count = (ushort)(current_hh_pulse_count * seconds_to_hh / 1800);
+
+            body_checksum.Append(seconds_to_hh8.ToBytes());
+            body_checksum.Append(remaining_pulse_count.ToBytes());
+
+            command_body.Append(getChecksum(body_checksum.Append(pulse_body)).ToBytes());
+            command_body.Append(body_checksum);
+            command_body.Append(ise_body);
+
+            var msg = new PdmMessage(PdmRequest.InsulinSchedule, command_body);
+
+            command_body = new byte[] { 0 };
+
+            var pulse_entries = getPulseIntervalEntries(halved_schedule);
+            for (int i = 0; i < pulse_entries.Length; i++)
+            {
+                var pti = pulse_entries[i];
+                var pulses10 = pti.Item1;
+                var interval = pti.Item2;
+                var indices = pti.Item3;
+
+                var ii = Array.IndexOf<int>(indices, current_hh);
+                if (ii >= 0)
+                {
+                    command_body.Append((byte)i);
+                    var pulses_past_intervals = (ushort)((uint)ii * (uint)1800000000 / (uint)interval);
+                    var pulses_past_this_interval = (ushort)((uint)seconds_past_hh * (uint)1000000 / (uint)interval + 1);
+                    var remaining_pulses_this_interval =(ushort)( pulses10 - pulses_past_this_interval - pulses_past_intervals);
+                    var microseconds_to_next_interval = (uint)interval - ((uint)seconds_past_hh * (uint)1000000 % (uint)interval);
+
+                    command_body.Append(remaining_pulses_this_interval.ToBytes());
+                    command_body.Append(microseconds_to_next_interval.ToBytes());
+                    break;
+                }
+            }
+
+            for (int i = 0; i < pulse_entries.Length; i++)
+            {
+                var pti = pulse_entries[i];
+                var pulses10 = pti.Item1;
+                var interval = pti.Item2;
+
+                command_body.Append(pulses10.ToBytes());
+                command_body.Append(interval.ToBytes());
+            }
+
+            msg.add_part(PdmRequest.BasalSchedule, command_body);
+            return msg;
+        }
+
+        public static void response_parse(PodMessage response, Pod pod)
+        {
+            pod.nonce_syncword = null;
+            var parts = response.get_parts();
+            foreach(var part in parts)
+            {
+                var response_type = (PodResponse)part.Item1;
+                var response_body = part.Item2;
+
+                switch(response_type)
+                {
+                    case PodResponse.VersionInfo:
+                        parse_version_response(response_body, pod);
+                        break;
+                    case PodResponse.DetailInfo:
+                        parse_information_response(response_body, pod);
+                        break;
+                    case PodResponse.ResyncRequest:
+                        parse_resync_response(response_body, pod);
+                        break;
+                    case PodResponse.Status:
+                        parse_status_response(response_body, pod);
+                        break;
+                    default:
+                        throw new ProtocolError($"Unknown response type {response_type}");
+                }
+            }
+        }
+
+        private static void parse_version_response(byte[] response, Pod pod)
+        {
+            pod.state_last_updated = DateTime.UtcNow;
+            if (response.Length == 27)
+            {
+                pod.id_version_unknown_7_bytes = response.Sub(0, 7);
+                response = response.Sub(7);
+            }
+
+            var mx = response[0];
+            var my = response[1];
+            var mz = response[2];
+            pod.id_version_pm = $"{mx}.{my}.{mz}";
+
+            var ix = response[3];
+            var iy = response[4];
+            var iz = response[5];
+            pod.id_version_pi = $"{ix}.{iy}.{iz}";
+
+            pod.id_version_unknown_byte = response[6];
+            pod.state_progress = (PodProgress)(response[7] & 0x0F);
+            pod.id_lot = (int)response.GetUInt32(8);
+            pod.id_t = (int)response.GetUInt32(12);
+
+            if (response.Length == 21)
+            {
+                pod.radio_low_gain = response[17] >> 6;
+                pod.radio_rssi = response[17] & 0b00111111;
+                pod.radio_address = response.GetUInt32(17);
+            }
+            else
+                pod.radio_address = response.GetUInt32(16);
+        }
+
+        private static void parse_information_response(byte[] response, Pod pod)
+        {
+            switch(response[0])
+            {
+                case 0x01:
+                    pod.state_alerts = new ushort[]
+                    {
+                        response.GetUInt16(3),
+                        response.GetUInt16(5),
+                        response.GetUInt16(7),
+                        response.GetUInt16(9),
+                        response.GetUInt16(11),
+                        response.GetUInt16(13),
+                        response.GetUInt16(15),
+                        response.GetUInt16(17)
+                    };
+                    break;
+                case 0x02:
+                    pod.state_last_updated = DateTime.UtcNow;
+                    pod.state_faulted = true;
+                    pod.state_progress = (PodProgress)response[1];
+                    parse_delivery_state(pod, response[2]);
+                    pod.insulin_canceled = response.GetUInt16(3) * 0.05m;
+                    pod.radio_message_sequence = response[5];
+                    pod.insulin_delivered = response.GetUInt16(6) * 0.05m;
+                    pod.fault_event = response[8];
+                    pod.fault_event_rel_time = response.GetUInt16(9);
+                    pod.insulin_reservoir = response.GetUInt16(11) * 0.05m;
+                    pod.state_active_minutes = response.GetUInt16(13);
+                    pod.state_alert = response[15];
+                    pod.fault_table_access = response[16];
+                    pod.fault_insulin_state_table_corruption = response[17] >> 7;
+                    pod.fault_internal_variables = (response[17] & 0x60) >> 6;
+                    pod.fault_immediate_bolus_in_progress = (response[17] & 0x10) > 0;
+                    pod.fault_progress_before = (PodProgress)(response[17] & 0x0F);
+                    pod.radio_low_gain = (response[18] & 0xC0) >> 6;
+                    pod.radio_rssi = response[18] & 0x3F;
+                    pod.fault_progress_before2 = (PodProgress)(response[19] & 0x0F);
+                    pod.fault_information_type2_last_word = response.GetUInt16(20);
+                    break;
+                default:
+                    throw new ProtocolError($"Failed to parse the information response of type {response[0]}");
+            }
+        }
+
+        private static void parse_delivery_state(Pod pod, byte delivery_state)
+        {
+            if ((delivery_state & 8) > 0)
+                pod.state_bolus = BolusState.Extended;
+            else if ((delivery_state & 4) > 0)
+                pod.state_bolus = BolusState.Immediate;
+            else
+                pod.state_bolus = BolusState.NotRunning;
+
+            if ((delivery_state & 2) > 0)
+                pod.state_basal = BasalState.TempBasal;
+            else if ((delivery_state & 1) > 0)
+                pod.state_basal = BasalState.Program;
+            else
+                pod.state_basal = BasalState.NotRunning;
+        }
+
+        private static void parse_resync_response(byte[] response, Pod pod)
+        {
+            if (response[0] == 0x14)
+                pod.nonce_syncword = response.GetUInt16(1);
+            else
+                throw new ProtocolError($"Unknown resync request {response[0]} from pod");
+        }
+
+        private static void parse_status_response(byte[] response, Pod pod)
+        {
+            pod.state_last_updated = DateTime.UtcNow;
+            var s0 = response[0];
+            uint s1 = response.GetUInt32(1);
+            uint s2 = response.GetUInt32(5);
+
+            parse_delivery_state(pod, (byte)(s0 >> 4));
+            pod.state_progress = (PodProgress)(s0 & 0xF);
+
+            pod.radio_message_sequence = (int)(s1 & 0x00007800) >> 11;
+            pod.insulin_delivered = ((s1 & 0x0FFF8000) >> 15) * 0.05m;
+            pod.insulin_canceled = (s1 & 0x000007FF) * 0.05m;
+            pod.state_faulted = ((s2 >> 31) != 0);
+            pod.state_alert = (byte) (s2 >> 23) & 0xFF;
+            pod.state_active_minutes = (uint)((s2 & 0x007FFC00) >> 10);
+            pod.insulin_reservoir = (s2 & 0x000003FF) * 0.05m;
+        }
     }
 }
-
-
-        /*
-
-def request_set_basal_schedule(schedule, hour, minute, second):
-    halved_schedule = []
-
-    for entry in schedule:
-        halved_schedule.append(entry / DECIMAL_2_00)
-
-    current_hh = hour* 2
-    if minute< 30:
-        seconds_past_hh = minute* 60
-    else:
-        seconds_past_hh = (minute - 30) * 60
-        current_hh += 1
-
-    seconds_past_hh += second
-    seconds_to_hh = 1800 - seconds_past_hh
-
-    pulse_list = getPulsesForHalfHours(halved_schedule)
-    ise_list = getInsulinScheduleTableFromPulses(pulse_list)
-    ise_body = getStringBodyFromTable(ise_list)
-    pulse_body = getStringBodyFromTable(pulse_list)
-
-    command_body = bytes([0])
-
-    body_checksum = bytes([current_hh])
-
-    current_hh_pulse_count = pulse_list[current_hh]
-    remaining_pulse_count = int(current_hh_pulse_count * seconds_to_hh / 1800)
-
-    body_checksum += struct.pack(">H", seconds_to_hh* 8)
-    body_checksum += struct.pack(">H", remaining_pulse_count)
-
-    checksum = getChecksum(body_checksum + pulse_body)
-
-    command_body += struct.pack(">H", checksum)
-    command_body += body_checksum
-    command_body += ise_body
-
-    msg = PdmMessage(PdmRequest.InsulinSchedule, command_body)
-
-    reminders = 0
-#if confidenceReminder:
-# reminders |= 0x40
-
-    command_body = bytes([reminders])
-
-    pulse_entries = getPulseIntervalEntries(halved_schedule)
-    table_index = 0
-    for pulses10, interval, indices in pulse_entries:
-        if current_hh in indices:
-            command_body += bytes([table_index])
-            ii = indices.index(current_hh)
-
-            pulses_past_intervals = int(ii * 1800000000 / interval)
-            pulses_past_this_interval = int(seconds_past_hh * 1000000 / interval) + 1
-            remaining_pulses_this_interval = pulses10 - pulses_past_this_interval - pulses_past_intervals
-            microseconds_to_next_interval = interval - (seconds_past_hh * 1000000 % interval)
-
-            command_body += struct.pack(">H", remaining_pulses_this_interval)
-            command_body += struct.pack(">I", microseconds_to_next_interval)
-            break
-        else:
-            table_index += 1
-
-    for pulse_count, interval, _ in pulse_entries:
-        command_body += struct.pack(">H", pulse_count)
-        command_body += struct.pack(">I", interval)
-
-    msg.add_part(PdmRequest.BasalSchedule, command_body)
-    return msg
-
-def request_prime_cannula():
-    return _bolus_message(52, pulse_speed=8, delivery_delay=1)
-
-
-def request_insert_cannula():
-    return _bolus_message(10, pulse_speed=8, delivery_delay=1)
-
-
-def request_purge_insulin(iu_to_purge):
-    return _bolus_message(pulse_count=int(iu_to_purge / DECIMAL_0_05),
-                          pulse_speed=8,
-                          delivery_delay=1)
-
-
-def request_bolus(iu_bolus):
-    return _bolus_message(pulse_count=int(iu_bolus / DECIMAL_0_05))
-
-
-
-def response_parse(response, pod):
-    pod.nonce_syncword = None
-    parts = response.get_parts()
-    for response_type, response_body in parts:
-        if response_type == PodResponse.VersionInfo:
-            parse_version_response(response_body, pod)
-        elif response_type == PodResponse.DetailInfo:
-            parse_information_response(response_body, pod)
-        elif response_type == PodResponse.ResyncRequest:
-            parse_resync_response(response_body, pod)
-        elif response_type == PodResponse.Status:
-            parse_status_response(response_body, pod)
-        else:
-            raise ProtocolError("Unknown response type %02X" % response_type)
-
-
-def parse_information_response(response, pod):
-        if response[0] == 0x01:
-            pod.state_alerts = struct.unpack(">8H", response[3:])
-        elif response[0] == 0x02:
-            pod.state_last_updated = time.time()
-            pod.state_faulted = True
-            pod.state_progress = response[1]
-            parse_delivery_state(pod, response[2])
-            pod.insulin_canceled = struct.unpack(">H", response[3:5])[0] * 0.05
-            pod.radio_message_sequence = response[5]
-            pod.insulin_delivered = struct.unpack(">H", response[6:8])[0] * 0.05
-            pod.fault_event = response[8]
-            pod.fault_event_rel_time = struct.unpack(">H", response[9:11])[0]
-            pod.insulin_reservoir = struct.unpack(">H", response[11:13])[0] * 0.05
-            pod.state_active_minutes = struct.unpack(">H", response[13:15])[0]
-            pod.state_alert = response[15]
-            pod.fault_table_access = response[16]
-            pod.fault_insulin_state_table_corruption = response[17] >> 7
-            pod.fault_internal_variables = (response[17] & 0x60) >> 6
-            pod.fault_immediate_bolus_in_progress = (response[17] & 0x10) >> 4
-            pod.fault_progress_before = (response[17] & 0x0F)
-            pod.radio_low_gain = (response[18] & 0xC0) >> 6
-            pod.radio_rssi = response[18] & 0x3F
-            pod.fault_progress_before_2 = (response[19] & 0x0F)
-            pod.fault_information_type2_last_word = struct.unpack(">H", response[20:22])[0]
-        elif response[0] == 0x03:
-            pass
-        elif response[0] == 0x05:
-            pass
-        elif response[0] == 0x06:
-            pass
-        elif response[0] == 0x46:
-            pass
-        elif response[0] == 0x50:
-            pass
-        elif response[0] == 0x51:
-            pass
-        else:
-            raise ProtocolError("Failed to parse the information response of type 0x%2X with content: %s"
-                                % (response[0], response.hex()))
-
-
-def parse_resync_response(response, pod):
-    if response[0] == 0x14:
-        pod.nonce_syncword = struct.unpack(">H", response[1:])[0]
-    else:
-        raise ProtocolError("Unknown resync request 0x%2x from pod" % response[0])
-
-
-def parse_status_response(response, pod):
-    pod.state_last_updated = time.time()
-    s = struct.unpack(">BII", response)
-
-    parse_delivery_state(pod, s[0] >> 4)
-    pod.state_progress = PodProgress(s[0] & 0xF)
-
-    pod.radio_message_sequence = (s[1] & 0x00007800) >> 11
-
-    pod.insulin_delivered = ((s[1] & 0x0FFF8000) >> 15) * 0.05
-    pod.insulin_canceled = (s[1] & 0x000007FF) * 0.05
-
-    pod.state_faulted = ((s[2] >> 31) != 0)
-    pod.state_alert = (s[2] >> 23) & 0xFF
-    pod.state_active_minutes = (s[2] & 0x007FFC00) >> 10
-    pod.insulin_reservoir = (s[2] & 0x000003FF) * 0.05
-
-
-def parse_delivery_state(pod, delivery_state):
-    if delivery_state & 8 > 0:
-        pod.state_bolus = BolusState.Extended
-    elif delivery_state & 4 > 0:
-        pod.state_bolus = BolusState.Immediate
-    else:
-        pod.state_bolus = BolusState.NotRunning
-
-    if delivery_state & 2 > 0:
-        pod.state_basal = BasalState.TempBasal
-    elif delivery_state & 1 > 0:
-        pod.state_basal = BasalState.Program
-    else:
-        pod.state_basal = BasalState.NotRunning
-
-
-def parse_version_response(response, pod):
-    pod.state_last_updated = time.time()
-    if len(response) == 27:
-        pod.id_version_unknown_7_bytes = response[0:7].hex()
-        response = response[7:]
-
-    mx = response[0]
-    my = response[1]
-    mz = response[2]
-    pod.id_version_pm = "%d.%d.%d" % (mx, my, mz)
-
-    ix = response[3]
-    iy = response[4]
-    iz = response[5]
-    pod.id_version_pi = "%d.%d.%d" % (ix, iy, iz)
-
-    pod.id_version_unknown_byte = "%d" % response[6]
-    pod.state_progress = response[7] & 0x0F
-    pod.id_lot = struct.unpack(">I", response[8:12])[0]
-    pod.id_t = struct.unpack(">I", response[12:16])[0]
-    if len(response) == 21:
-        pod.radio_low_gain = response[17] >> 6
-        pod.radio_rssi = response[17] & 0b00111111
-        pod.radio_address = struct.unpack(">I", response[17:21])[0]
-    else:
-        pod.radio_address = struct.unpack(">I", response[16:20])[0]
-
-
-def _bolus_message(pulse_count, pulse_speed=16, reminders=0, delivery_delay=2):
-    commandBody = bytes([0x02])
-
-    bodyForChecksum = b"\x01"
-    pulse_span = pulse_speed * pulse_count
-    bodyForChecksum += struct.pack(">H", pulse_span)
-    bodyForChecksum += struct.pack(">H", pulse_count)
-    bodyForChecksum += struct.pack(">H", pulse_count)
-    checksum = getChecksum(bodyForChecksum)
-
-    commandBody += struct.pack(">H", checksum)
-    commandBody += bodyForChecksum
-
-    msg = PdmMessage(PdmRequest.InsulinSchedule, commandBody)
-
-    commandBody = bytes([reminders])
-    commandBody += struct.pack(">H", pulse_count * 10)
-    commandBody += struct.pack(">I", delivery_delay * 100000)
-    commandBody += b"\x00\x00\x00\x00\x00\x00"
-    msg.add_part(PdmRequest.BolusSchedule, commandBody)
-
-    return msg
-
-
-
-*/
-  

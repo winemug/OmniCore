@@ -6,8 +6,8 @@ namespace OmniCore.Py
     {
         public int? id_lot = null;
         public int? id_t = null;
-        public int? id_version_pm = null;
-        public int? id_version_pi = null;
+        public string id_version_pm = null;
+        public string id_version_pi = null;
         public byte? id_version_unknown_byte = null;
         public byte[] id_version_unknown_7_bytes = null;
         public uint? radio_address = null;
@@ -23,8 +23,8 @@ namespace OmniCore.Py
         public BasalState state_basal = BasalState.NotRunning;
         public BolusState state_bolus = BolusState.NotRunning;
         public int state_alert = 0;
-        public int[] state_alerts = null;
-        public int state_active_minutes = 0;
+        public ushort[] state_alerts = null;
+        public uint state_active_minutes = 0;
         public bool state_faulted = false;
 
         public decimal? var_alert_low_reservoir = null;
