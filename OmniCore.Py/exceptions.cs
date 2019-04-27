@@ -18,7 +18,11 @@ namespace OmniCore.Py
 
     public class ProtocolError : OmnipyError
     {
-        public ProtocolError(string message = "Unknown protocol error") : base(message) { }
+        public RadioPacket ReceivedPacket = null;
+        public ProtocolError(string message = "Unknown protocol error", RadioPacket received = null) : base(message)
+        {
+            this.ReceivedPacket = received;
+        }
     }
 
     public class OmnipyTimeoutError : OmnipyError

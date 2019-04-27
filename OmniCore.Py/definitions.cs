@@ -1,3 +1,5 @@
+using System;
+
 namespace OmniCore.Py
 {
     public static class definitions
@@ -58,6 +60,11 @@ namespace OmniCore.Py
         public void log(string text)
         {
             //TODO: where do we log?
+        }
+
+        public void exception(string text, Exception e)
+        {
+            //TODO:
         }
     }
 

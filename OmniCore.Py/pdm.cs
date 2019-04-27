@@ -51,16 +51,7 @@ namespace OmniCore.Py
                 this.radio = null;
             }
 
-            if (this.radio == null)
-            {
-                if (this.pod.radio_message_sequence == null || this.pod.radio_packet_sequence == null)
-                {
-                    this.pod.radio_message_sequence = 0;
-                    this.pod.radio_packet_sequence = 0;
-                }
-            }
-
-            this.radio = new Radio(this.pod.radio_address,
+            this.radio = new Radio(this.pod.radio_address.Value,
                                   this.pod.radio_message_sequence,
                                   this.pod.radio_packet_sequence);
 

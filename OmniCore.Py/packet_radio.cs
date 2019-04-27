@@ -18,7 +18,7 @@ namespace Omni.Py
         void tx_up();
 		void tx_down();
 		void set_tx_power(TxPower tx_power);
-		void get_packet(double timeout = 5.0);
+		byte[] get_packet(int timeout = 5000);
 		byte[] send_and_receive_packet(byte[] packet, int repeat_count, int delay_ms, int timeout_ms, int retry_count, int preamble_ext_ms);
 		void send_packet(byte[] packet, int repeat_count, int delay_ms, int preamble_extension_ms);
     }

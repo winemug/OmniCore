@@ -48,6 +48,7 @@ namespace OmniCore.Py
         public RadioPacketType type;
         public int sequence;
         public byte[] body;
+        public byte rssi;
 
         public RadioPacket(uint address, RadioPacketType type, int sequence, byte[] body)
         {
