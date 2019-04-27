@@ -8,8 +8,8 @@ namespace OmniCore.Py
         public static uint FAKE_NONCE = 0xD012FA62;
         private int lot;
         private int tid;
-        private uint? lastNonce;
-        private int seed;
+        public uint? lastNonce;
+        public int seed;
         private int? ptr;
         private int nonce_runs;
         private uint[] table;

@@ -4,7 +4,7 @@ namespace OmniCore.Py
 
     public class OmnipyError : Exception
     {
-        public OmnipyError(string message = "Unknown") : base(message) { }
+        public OmnipyError(string message = "Unknown", Exception inner = null) : base(message, inner) { }
     }
 
     public class PacketRadioError : OmnipyError
@@ -32,7 +32,9 @@ namespace OmniCore.Py
 
     public class PdmError : OmnipyError
     {
-        public PdmError(string message = "Unknown pdm error") : base(message) { }
+        public PdmError(string message = "Unknown pdm error", Exception inner = null) : base(message, inner)
+        {
+        }
     }
 
     public class PdmBusyError : PdmError

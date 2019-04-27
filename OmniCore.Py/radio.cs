@@ -626,7 +626,7 @@ namespace OmniCore.Py
                     rp.rssi = rssi;
                     return rp;
                 }
-                catch (Exception e)
+                catch
                 {
                     this.packet_logger.log($"RECV INVALID DATA {data.Sub(2)}");
                 }
