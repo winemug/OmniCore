@@ -7,99 +7,81 @@ namespace OmniCore.Py
 {
     public class Pdm
     {
-        private Pod pod;
-        private Nonce nonce;
-        private Radio radio;
-        private logger logger;
-        private PacketRadio packetRadio;
 
-        public Pdm(Pod pod, PacketRadio packetRadio)
-        {
-            this.packetRadio = packetRadio;
-            this.pod = pod;
-            this.nonce = null;
-            this.logger = definitions.getLogger();
-        }
+        private IPacketRadio _packetRadio;
 
-        public void stop_radio()
+        private Pod _pod;
+        public Pod Pod
         {
-            if (this.radio != null)
-                this.radio.stop();
-            this.radio = null;
-        }
-
-        public Radio start_radio()
-        {
-            return this.get_radio(true);
-        }
-
-        private Nonce get_nonce()
-        {
-            if (this.nonce == null)
+            get => this._pod;
+            set
             {
-                if (this.pod.id_lot == null || this.pod.id_t == null)
-                    return null;
-                if (this.pod.nonce_last == null)
-                    this.nonce = new Nonce(this.pod.id_lot.Value, this.pod.id_t.Value);
-                else
-                    this.nonce = new Nonce(this.pod.id_lot.Value,
-                        this.pod.id_t.Value, this.pod.nonce_last.Value, this.pod.nonce_seed);
-            }
-            return this.nonce;
-        }
-
-        private Radio get_radio(bool getNew = false)
-        {
-            if (this.radio != null && getNew)
-            {
-                this.radio.stop();
-                this.radio = null;
-            }
-
-            this.radio = new Radio(this.pod.radio_address.Value,
-                                  this.pod.radio_message_sequence,
-                                  this.pod.radio_packet_sequence,
-                                  this.packetRadio);
-
-            return this.radio;
-        }
-
-        private void send_request(PdmMessage request, bool with_nonce = false, bool double_take = false,
-                    bool expect_critical_follow_up = false,
-                    TxPower tx_power = TxPower.Normal)
-        {
-            var nonce_obj = this.get_nonce();
-            if (with_nonce)
-            {
-                var nonce_val = nonce_obj.getNext();
-                request.set_nonce(nonce_val);
-                this.pod.nonce_syncword = null;
-            }
-
-            var response = this.get_radio().SendAndGet(request, null, null, tx_power, double_take, expect_critical_follow_up);
-            protocol.response_parse(response, this.pod);
-
-            if (with_nonce && this.pod.nonce_syncword != null)
-            {
-                this.logger.log("Nonce resync requested");
-                nonce_obj.sync(this.pod.nonce_syncword.Value, request.sequence.Value);
-                var nonce_val = nonce_obj.getNext();
-                request.set_nonce(nonce_val);
-                this.pod.nonce_syncword = null;
-                this.get_radio().message_sequence = request.sequence.Value;
-                response = this.get_radio().SendAndGet(request, null, null, tx_power, double_take, expect_critical_follow_up);
-                protocol.response_parse(response, this.pod);
-                if (this.pod.nonce_syncword != null)
+                if (this._pod != value)
                 {
-                    this.get_nonce().reset();
-                    throw new PdmError("Nonce sync failed");
+                    this._pod = value;
+                    if (value == null)
+                    {
+                        this.Radio = null;
+                        this.Nonce = null;
+                    }
+                    else
+                    {
+                        if (this.Radio == null)
+                            this.Radio = new Radio(_packetRadio, value);
+                        else
+                            this.Radio.Pod = value;
+
+                        this.Nonce = new Nonce(value);
+                    }
                 }
             }
         }
 
+        private Radio Radio { get; set; }
+
+        private Nonce Nonce { get; set; }
+
+        private logger logger;
+
+        public Pdm(IPacketRadio packetRadio)
+        {
+            this._packetRadio = packetRadio;
+            this.logger = definitions.getLogger();
+        }
+
+        private void send_request(PdmMessage request, bool with_nonce = false)
+        {
+            if (with_nonce)
+            {
+                var nonce_val = this.Nonce.GetNext();
+                request.set_nonce(nonce_val);
+                this.Pod.nonce_syncword = null;
+            }
+
+            //var response = this.Radio.SendAndGet(request);
+            //protocol.response_parse(response, this.Pod);
+
+            //if (with_nonce && this.Pod.nonce_syncword != null)
+            //{
+            //    this.logger.log("Nonce resync requested");
+            //    this.Nonce.Sync(request.sequence.Value);
+            //    var nonce_val = this.Nonce.GetNext();
+            //    request.set_nonce(nonce_val);
+            //    this.Pod.nonce_syncword = null;
+            //    this.Radio.message_sequence = request.sequence.Value;
+            //    response = this.Radio.SendAndGet(request);
+            //    protocol.response_parse(response, this.Pod);
+            //    if (this.Pod.nonce_syncword != null)
+            //    {
+            //        this.Nonce.Reset();
+            //        throw new PdmError("Nonce sync failed");
+            //    }
+            //}
+        }
+
         private void internal_update_status(int update_type = 0)
         {
-            _assert_pod_address_assigned();
+            _assert_pod();
             send_request(protocol.request_status(update_type));
         }
 
@@ -128,21 +110,7 @@ namespace OmniCore.Py
         {
             try
             {
-                radio = this.get_radio();
-                if (radio != null)
-                {
-                    this.pod.radio_message_sequence = radio.message_sequence;
-                    this.pod.radio_packet_sequence = radio.packet_sequence;
-                }
-
-                nonce = this.get_nonce();
-                if (nonce != null)
-                {
-                    this.pod.nonce_last = nonce.lastNonce;
-                    this.pod.nonce_seed = nonce.seed;
-                }
-
-                this.pod.Save();
+                this.Pod.Save();
             }
             catch(Exception e)
             {
@@ -150,10 +118,10 @@ namespace OmniCore.Py
             }
         }
 
-        private void _assert_pod_address_assigned()
+        private void _assert_pod()
         {
-            if (this.pod.radio_address == null)
-                throw new PdmError("Pod address not set");
+            if (this.Pod == null)
+                throw new PdmError("No pod registered");
         }
     }
 }
