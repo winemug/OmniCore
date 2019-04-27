@@ -61,10 +61,6 @@ class Pdm:
             self.radio = None
 
         if self.radio is None:
-            if self.pod.radio_message_sequence is None or self.pod.radio_packet_sequence is None:
-                self.pod.radio_message_sequence = 0
-                self.pod.radio_packet_sequence = 0
-
             self.radio = PdmRadio(self.pod.radio_address,
                                   msg_sequence=self.pod.radio_message_sequence,
                                   pkt_sequence=self.pod.radio_packet_sequence)
