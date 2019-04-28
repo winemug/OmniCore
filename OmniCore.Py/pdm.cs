@@ -9,7 +9,7 @@ namespace OmniCore.Py
     public class Pdm
     {
 
-        private IPacketRadio _packetRadio;
+        private IPacketRadio packetRadio;
 
         private Pod _pod;
         public Pod Pod
@@ -22,23 +22,15 @@ namespace OmniCore.Py
                     this._pod = value;
                     if (value == null)
                     {
-                        this.Radio = null;
                         this.Nonce = null;
                     }
                     else
                     {
-                        if (this.Radio == null)
-                            this.Radio = new Radio(_packetRadio, value);
-                        else
-                            this.Radio.Pod = value;
-
                         this.Nonce = new Nonce(value);
                     }
                 }
             }
         }
-
-        private Radio Radio { get; set; }
 
         private Nonce Nonce { get; set; }
 
@@ -46,7 +38,7 @@ namespace OmniCore.Py
 
         public Pdm(IPacketRadio packetRadio)
         {
-            this._packetRadio = packetRadio;
+            this.packetRadio = packetRadio;
             this.logger = definitions.getLogger();
         }
 
@@ -59,7 +51,9 @@ namespace OmniCore.Py
                 this.Pod.nonce_syncword = null;
             }
 
-            var response = await this.Radio.SendAndGet(request);
+            var me = new MessageExchange(request, this.packetRadio, this.Pod);
+
+            var response = await me.GetPodResponse();
             protocol.response_parse(response, this.Pod);
 
             if (with_nonce && this.Pod.nonce_syncword != null)
@@ -70,7 +64,7 @@ namespace OmniCore.Py
                 request.set_nonce(nonce_val);
                 this.Pod.nonce_syncword = null;
                 this.Pod.radio_message_sequence = request.sequence.Value;
-                response = await this.Radio.SendAndGet(request);
+                response = await me.GetPodResponse();
                 protocol.response_parse(response, this.Pod);
                 if (this.Pod.nonce_syncword != null)
                 {

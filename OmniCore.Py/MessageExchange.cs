@@ -57,6 +57,9 @@ namespace OmniCore.Py
             if (!this.PdmMessage.address.HasValue)
                 this.PdmMessage.address = this.Pod.radio_address;
 
+            if (!this.PdmMessage.AckAddressOverride.HasValue)
+                this.PdmMessage.AckAddressOverride = this.Pod.radio_address;
+
             if (!this.PdmMessage.sequence.HasValue)
                 this.PdmMessage.sequence = this.Pod.radio_message_sequence;
 

@@ -31,7 +31,9 @@ namespace OmniCore.Py
         private IBluetoothLowEnergyAdapter Ble;
         private logger Logger;
         private IBleGattServerConnection GattServerConnection;
-        private TaskCompletionSource<byte[]> MessageCounterNotifier;
+        //private TaskCompletionSource<byte[]> MessageCounterNotifier;
+        //private IObserver<Tuple<Guid,byte[]>> MessageCounterObserver;
+
         private Timer DisconnectTimer;
 
         private IBlePeripheral Peripheral;
@@ -48,26 +50,26 @@ namespace OmniCore.Py
 
         public async Task reset()
         {
-            try
-            {
-                await this.Disconnect();
-                this.VersionVerified = false;
-                this.RadioInitialized = false;
+            //try
+            //{
+            //    await this.Disconnect();
+            //    this.VersionVerified = false;
+            //    this.RadioInitialized = false;
 
-                if (this.Ble.AdapterCanBeDisabled)
-                {
-                    await this.Ble.DisableAdapter();
-                }
+            //    if (this.Ble.AdapterCanBeDisabled)
+            //    {
+            //        await this.Ble.DisableAdapter();
+            //    }
 
-                if (this.Ble.AdapterCanBeEnabled)
-                {
-                    await this.Ble.EnableAdapter();
-                }
-            }
-            catch(Exception)
-            {
-                // ignoring reset errors
-            }
+            //    if (this.Ble.AdapterCanBeEnabled)
+            //    {
+            //        await this.Ble.EnableAdapter();
+            //    }
+            //}
+            //catch(Exception)
+            //{
+            //    // ignoring reset errors
+            //}
         }
         public async Task<byte[]> get_packet(uint timeout = 5000)
         {
@@ -160,6 +162,7 @@ namespace OmniCore.Py
 
         private async Task Disconnect()
         {
+            this.Logger.log("Disconnecting from RL");
             if (this.DisconnectTimer != null)
             {
                 this.DisconnectTimer.Dispose();
@@ -228,12 +231,17 @@ namespace OmniCore.Py
         {
             try
             {
-                await SetupConnection();
+                var conn = await SetupConnection();
                 StopTicking();
-                this.MessageCounterNotifier = new TaskCompletionSource<byte[]>();
-                await this.GattServerConnection.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, dataToWrite);
-                await this.MessageCounterNotifier.Task;
-                return await this.GattServerConnection.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
+                var notifier = new TaskCompletionSource<byte[]>();
+                conn.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
+                    (g, data) =>
+                    {
+                        notifier.SetResult(data);
+                    });
+                await conn.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, dataToWrite);
+                await notifier.Task;
+                return await conn.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
             }
             catch(PacketRadioError)
             {
@@ -245,15 +253,15 @@ namespace OmniCore.Py
             }
             finally
             {
-                this.MessageCounterNotifier = null;
+                //this.MessageCounterNotifier = null;
                 StartTicking();
             }
         }
 
-        private async Task SetupConnection()
+        private async Task<IBleGattServerConnection> SetupConnection()
         {
             if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
-                return;
+                return this.GattServerConnection;
 
             if (this.GattServerConnection != null && this.GattServerConnection.State != ConnectionState.Connected)
             {
@@ -264,26 +272,17 @@ namespace OmniCore.Py
             {
                 this.GattServerConnection = await GetConnection();
 
-                this.GattServerConnection.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
-                    (Guid g, byte[] data) =>
-                    {
-                        if (this.MessageCounterNotifier != null)
-                            this.MessageCounterNotifier.TrySetResult(data);
-                    });
-
-                await this.WriteAndRead(new byte[] { 0x01, 0x00 });
+                //this.MessageCounterObserver = Observer.Create<Tuple<Guid, byte[]>> ( tu =>
+                //{
+                //    if (this.MessageCounterNotifier != null)
+                //        this.MessageCounterNotifier.TrySetResult(tu.Item2);
+                //});
 
                 if (this.DisconnectTimer != null)
                 {
                     this.DisconnectTimer.Dispose();
                     this.DisconnectTimer = null;
                 }
-
-                this.DisconnectTimer = new Timer(async (state) =>
-                {
-                    if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
-                        await this.Disconnect();
-                }, null, Timeout.Infinite, Timeout.Infinite);
 
                 if (!this.VersionVerified)
                 {
@@ -294,15 +293,24 @@ namespace OmniCore.Py
                 {
                     await this.InitializeRadio();
                 }
+
+                //this.DisconnectTimer = new Timer(async (state) =>
+                //{
+                //    if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
+                //        await this.Disconnect();
+                //}, null, Timeout.Infinite, Timeout.Infinite);
+
             }
             catch (Exception e)
             {
                 await Disconnect();
                 throw new PacketRadioError("Failed to set up the BLE connection", e);
             }
+            return this.GattServerConnection;
         }
         private async Task InitializeRadio()
         {
+            this.Logger.log("Initializing radio variables");
             await SendCommand(RileyLinkCommandType.ResetRadioConfig);
             await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte) RileyLinkSoftwareEncoding.None });
             await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
@@ -335,17 +343,24 @@ namespace OmniCore.Py
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC1, 0xA5 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0x5A });
 
+            var result = await SendCommand(RileyLinkCommandType.GetState);
+            if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
+                throw new PacketRadioError("RL returned status not OK.");
+
+            this.Logger.log("Initialization completed.");
             this.RadioInitialized = true;
         }
 
         private async Task VerifyVersion()
         {
+            this.Logger.log("Verifying RL version");
             try
             {
                 var versionData = await SendCommand(RileyLinkCommandType.GetVersion);
                 if (versionData != null && versionData.Length > 0)
                 {
                     var versionString = Encoding.ASCII.GetString(versionData);
+                    this.Logger.log($"RL reports version string: {versionString}");
                     var m = Regex.Match(versionString, ".+([0-9]+)\\.([0-9]+)");
                     var v_major = int.Parse(m.Groups[1].ToString());
                     var v_minor = int.Parse(m.Groups[2].ToString());
@@ -414,10 +429,10 @@ namespace OmniCore.Py
 
         private async Task<IBlePeripheral> FindRileyLink()
         {
-            var searchPeripheral = new TaskCompletionSource<IBlePeripheral>();
 
             try
             {
+                IBlePeripheral pFound = null;
                 using (var cts = new CancellationTokenSource(15000))
                 {
                     this.Logger.log("Scanning for RileyLink");
@@ -434,12 +449,13 @@ namespace OmniCore.Py
                         (peripheral) =>
                         {
                             this.Logger.log($"Found RL at address {peripheral.Address}, name: {peripheral.Advertisement.DeviceName}");
-                            searchPeripheral.SetResult(peripheral);
+                            pFound = peripheral;
                             cts.Cancel();
                         }, cts.Token);
                 }
+                return pFound;
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 throw new PacketRadioError("Timed out while searching for RL");
             }
@@ -447,8 +463,6 @@ namespace OmniCore.Py
             {
                 throw new PacketRadioError("Error during BLE scan", e);
             }
-
-            return await searchPeripheral.Task;
         }
     }
 
