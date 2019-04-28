@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Py
 {
-    public class PrRileyLink: IPacketRadio
+    public class PrRileyLink : IPacketRadio
     {
         private byte[] PA_LEVELS = new byte[] { 0x12,
              0x0E, 0x0E,
@@ -46,16 +46,72 @@ namespace OmniCore.Py
             this.Logger = definitions.getLogger();
         }
 
-        public async Task<byte[]> get_packet(int timeout = 5000)
+        public async Task<byte[]> get_packet(uint timeout = 5000)
         {
-            await DoSomething();
-            return null;
+            try
+            {
+                var cmdParams = new byte[] { 0 };
+                cmdParams.Append(timeout.ToBytes());
+
+                var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, (int)timeout + 500);
+                if (result != null)
+                {
+                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2)));
+                }
+                else
+                    return null;
+            }
+            catch (Exception e)
+            {
+                throw new PacketRadioError("Error while receiving data with RL", e);
+            }
         }
 
-        public async Task<byte[]> send_and_receive_packet(byte[] packet, int repeat_count, int delay_ms, int timeout_ms, int retry_count, int preamble_ext_ms)
+        public async Task send_packet(byte[] packet, byte repeat_count, ushort delay_ms, ushort preamble_ext_ms)
         {
-            return null;
+            try
+            {
+                var data = manchester.Encode(packet);
+                var cmdParams = new byte[] { 0, repeat_count };
+                cmdParams.Append(delay_ms.ToBytes());
+                cmdParams.Append(preamble_ext_ms.ToBytes());
+                cmdParams.Append(data);
+                await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 30000);
+            }
+            catch (Exception e)
+            {
+                throw new PacketRadioError("Error while sending data with RL", e);
+            }
         }
+
+        public async Task<byte[]> send_and_receive_packet(byte[] packet, byte repeat_count, ushort delay_ms, uint timeout_ms, byte retry_count, ushort preamble_ext_ms)
+        {
+            try
+            {
+                var data = manchester.Encode(packet);
+                var cmdParams = new byte[] { 0, repeat_count };
+                cmdParams.Append(delay_ms.ToBytes());
+                cmdParams.Append(0);
+                cmdParams.Append(timeout_ms.ToBytes());
+                cmdParams.Append(retry_count);
+                cmdParams.Append(preamble_ext_ms.ToBytes());
+                cmdParams.Append(data);
+
+                var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 30000);
+                if (result != null)
+                {
+                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2)));
+                }
+                else
+                    return null;
+            }
+            catch(Exception e)
+            {
+                throw new PacketRadioError("Error while sending and receiving data with RL", e);
+            }
+        }
+
+
 
         public void set_tx_power(TxPower tx_power)
         {
@@ -67,21 +123,6 @@ namespace OmniCore.Py
 
         public void tx_up()
         {
-        }
-
-        public async Task DoSomething()
-        {
-            try
-            {
-                await SetupConnection();
-                StopTicking();
-                Thread.Sleep(5000);
-                await Disconnect();
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"EXCEPTION!!!! {e}");
-            }
         }
 
         private void StartTicking()
