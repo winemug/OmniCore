@@ -115,6 +115,9 @@ namespace OmniCore.Py
         public List<Tuple<byte, byte[],uint?>> parts = new List<Tuple<byte, byte[],uint?>>();
         public string message_str_prefix = "\n";
         public RadioPacketType? type = null;
+        public TxPower? TxLevel;
+        public uint? AckAddressOverride;
+        public bool DoubleTake;
 
         public bool add_radio_packet(RadioPacket radio_packet)
         {
@@ -186,18 +189,9 @@ namespace OmniCore.Py
             return this.parts;
         }
 
-        public List<RadioPacket> get_radio_packets(uint message_address,
-                            int message_sequence,
-                            uint packet_address,
-                            int first_packet_sequence,
-                            bool expect_critical_follow_up=false,
-                            bool double_take=false)
+        public List<RadioPacket> get_radio_packets(int first_packet_sequence)
         {
-            this.message_str_prefix = $"{message_address:%08X} {message_sequence:%02X} {expect_critical_followup} ";
-
-            this.sequence = message_sequence;
-            this.expect_critical_followup = expect_critical_follow_up;
-            this.address = message_address;
+            this.message_str_prefix = $"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ";
 
             var message_body_len = 0;
             foreach(var p in this.parts)
@@ -210,14 +204,14 @@ namespace OmniCore.Py
             }
 
             byte b0 = 0;
-            if (expect_critical_follow_up)
+            if (this.expect_critical_followup)
                 b0 = 0x80;
 
-            b0 |= (byte)(message_sequence << 2);
+            b0 |= (byte)(this.sequence << 2);
             b0 |= (byte)((message_body_len >> 8) & 0x03);
             byte b1 = (byte)(message_body_len & 0xff);
 
-            var message_body = message_address.ToBytes();
+            var message_body = this.address.Value.ToBytes();
             message_body.Append(b0);
             message_body.Append(b1);
 
@@ -258,7 +252,7 @@ namespace OmniCore.Py
             {
                 var to_write = Math.Min(31, total_body_len - index);
                 var packet_body = message_body.Sub(index, index + to_write);
-                            radio_packets.Add(new RadioPacket(packet_address,
+                            radio_packets.Add(new RadioPacket(AckAddressOverride.Value,
                                                              first_packet ? this.type.Value : RadioPacketType.CON,
                                                              sequence,
                                                              packet_body));
@@ -267,7 +261,7 @@ namespace OmniCore.Py
                 sequence = (sequence + 2) % 32;
             }
 
-            if (double_take)
+            if (this.DoubleTake)
             {
                 var fp = radio_packets[0];
                 radio_packets.Insert(0, fp);
@@ -302,10 +296,6 @@ namespace OmniCore.Py
 
     public class PdmMessage : BaseMessage
     {
-        public TxPower? TxLevel;
-        public uint? AckAddressOverride;
-        public bool DoubleTake;
-
         public PdmMessage(PdmRequest cmd_type, byte[] cmd_body):base()
         {
             this.add_part(cmd_type, cmd_body);

@@ -46,6 +46,29 @@ namespace OmniCore.Py
             this.Logger = definitions.getLogger();
         }
 
+        public async Task reset()
+        {
+            try
+            {
+                await this.Disconnect();
+                this.VersionVerified = false;
+                this.RadioInitialized = false;
+
+                if (this.Ble.AdapterCanBeDisabled)
+                {
+                    await this.Ble.DisableAdapter();
+                }
+
+                if (this.Ble.AdapterCanBeEnabled)
+                {
+                    await this.Ble.EnableAdapter();
+                }
+            }
+            catch(Exception)
+            {
+                // ignoring reset errors
+            }
+        }
         public async Task<byte[]> get_packet(uint timeout = 5000)
         {
             try

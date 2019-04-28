@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OmniCore.Py
 {
@@ -49,7 +50,7 @@ namespace OmniCore.Py
             this.logger = definitions.getLogger();
         }
 
-        private void send_request(PdmMessage request, bool with_nonce = false)
+        private async Task send_request(PdmMessage request, bool with_nonce = false)
         {
             if (with_nonce)
             {
@@ -58,39 +59,39 @@ namespace OmniCore.Py
                 this.Pod.nonce_syncword = null;
             }
 
-            //var response = this.Radio.SendAndGet(request);
-            //protocol.response_parse(response, this.Pod);
+            var response = await this.Radio.SendAndGet(request);
+            protocol.response_parse(response, this.Pod);
 
-            //if (with_nonce && this.Pod.nonce_syncword != null)
-            //{
-            //    this.logger.log("Nonce resync requested");
-            //    this.Nonce.Sync(request.sequence.Value);
-            //    var nonce_val = this.Nonce.GetNext();
-            //    request.set_nonce(nonce_val);
-            //    this.Pod.nonce_syncword = null;
-            //    this.Radio.message_sequence = request.sequence.Value;
-            //    response = this.Radio.SendAndGet(request);
-            //    protocol.response_parse(response, this.Pod);
-            //    if (this.Pod.nonce_syncword != null)
-            //    {
-            //        this.Nonce.Reset();
-            //        throw new PdmError("Nonce sync failed");
-            //    }
-            //}
+            if (with_nonce && this.Pod.nonce_syncword != null)
+            {
+                this.logger.log("Nonce resync requested");
+                this.Nonce.Sync(request.sequence.Value);
+                var nonce_val = this.Nonce.GetNext();
+                request.set_nonce(nonce_val);
+                this.Pod.nonce_syncword = null;
+                this.Pod.radio_message_sequence = request.sequence.Value;
+                response = await this.Radio.SendAndGet(request);
+                protocol.response_parse(response, this.Pod);
+                if (this.Pod.nonce_syncword != null)
+                {
+                    this.Nonce.Reset();
+                    throw new PdmError("Nonce sync failed");
+                }
+            }
         }
 
-        private void internal_update_status(int update_type = 0)
+        private async Task internal_update_status(int update_type = 0)
         {
             _assert_pod();
-            send_request(protocol.request_status(update_type));
+            await send_request(protocol.request_status(update_type));
         }
 
-        public void UpdateStatus(int update_type = 0)
+        public async Task UpdateStatus(int update_type = 0)
         {
             try
             {
                 this.logger.log($"Updating pod status, request type {update_type}");
-                this.internal_update_status(update_type);
+                await this.internal_update_status(update_type);
             }
             catch(OmnipyError)
             {
@@ -99,22 +100,6 @@ namespace OmniCore.Py
             catch(Exception e)
             {
                 throw new PdmError("Unexpected error", e);
-            }
-            finally
-            {
-                SavePod();
-            }
-        }
-
-        private void SavePod()
-        {
-            try
-            {
-                this.Pod.Save();
-            }
-            catch(Exception e)
-            {
-                throw new PdmError("Pod status was not saved", e);
             }
         }
 

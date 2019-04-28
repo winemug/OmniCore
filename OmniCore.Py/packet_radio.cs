@@ -13,6 +13,7 @@ namespace Omni.Py
 
     public interface IPacketRadio
     {
+        Task reset();
         void tx_up();
         void tx_down();
         void set_tx_power(TxPower tx_power);
