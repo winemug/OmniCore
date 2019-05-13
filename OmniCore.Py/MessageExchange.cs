@@ -168,7 +168,7 @@ namespace OmniCore.Py
                         {
                             if (repeat_count < 3)
                             {
-                                this.PacketRadio.reset();
+                                await this.PacketRadio.reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -184,7 +184,7 @@ namespace OmniCore.Py
                         {
                             if (repeat_count < 6)
                             {
-                                this.PacketRadio.reset();
+                                await this.PacketRadio.reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -200,7 +200,7 @@ namespace OmniCore.Py
                         {
                             if (repeat_count < 10)
                             {
-                                this.PacketRadio.reset();
+                                await this.PacketRadio.reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -261,7 +261,8 @@ namespace OmniCore.Py
         {
             int start_time = 0;
             bool first = true;
-            byte[] received = null;
+            Bytes received = null;
+            this.PacketLogger.log($"SEND PKT {packet_to_send}");
             while (start_time == 0 || Environment.TickCount - start_time < timeout)
             {
                 if (first)
@@ -286,7 +287,7 @@ namespace OmniCore.Py
                     continue;
                 }
 
-                var p = await this.GetPacket(received);
+                var p = this.GetPacket(received.ToArray());
                 if (p == null)
                 {
                     this.bad_packets++;
@@ -343,7 +344,7 @@ namespace OmniCore.Py
         {
             int start_time = 0;
             this.unique_packets++;
-            byte[] received = null;
+            Bytes received = null;
             while (start_time == 0 || Environment.TickCount - start_time < timeout)
             {
                 try
@@ -376,7 +377,7 @@ namespace OmniCore.Py
                         }
                     }
 
-                    var p = await this.GetPacket(received);
+                    var p = this.GetPacket(received.ToArray());
                     if (p == null)
                     {
                         this.bad_packets++;
@@ -415,27 +416,27 @@ namespace OmniCore.Py
                 {
                     this.radio_errors++;
                     this.Logger.exception("Radio error during send, retrying", pre);
-                    this.PacketRadio.reset();
+                    await this.PacketRadio.reset();
                     start_time = Environment.TickCount;
                 }
             }
             this.Logger.log("Exceeded timeout while waiting for silence to fall");
         }
 
-        private async Task<RadioPacket> GetPacket(byte[] data)
+        private RadioPacket GetPacket(byte[] data)
         {
-            if (data != null && data.Length > 2)
+            if (data != null && data.Length > 1)
             {
                 byte rssi = data[0];
                 try
                 {
-                    var rp = RadioPacket.parse(data.Sub(2));
+                    var rp = RadioPacket.parse(new Bytes(data).Sub(1));
                     rp.rssi = rssi;
                     return rp;
                 }
                 catch
                 {
-                    this.PacketLogger.log($"RECV INVALID DATA {data.Sub(2)}");
+                    this.PacketLogger.log($"RECV INVALID DATA {data}");
                 }
             }
             return null;
@@ -443,7 +444,7 @@ namespace OmniCore.Py
 
         private RadioPacket _ack_data(uint address1, uint address2, int sequence)
         {
-            return new RadioPacket(address1, RadioPacketType.ACK, sequence, address2.ToBytes());
+            return new RadioPacket(address1, RadioPacketType.ACK, sequence, new Bytes(address2));
         }
 
         private RadioPacket interim_ack(uint ack_address_override, int sequence)

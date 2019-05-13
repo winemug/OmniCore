@@ -8,24 +8,24 @@ namespace OmniCore.Py
     {
         public static PdmMessage request_assign_address(uint address)
         {
-            var cmd_body = address.ToBytes();
-            return new PdmMessage(PdmRequest.AssignAddress, cmd_body);
+            return new PdmMessage(PdmRequest.AssignAddress, new Bytes(address));
         }
 
-        public static PdmMessage request_setup_pod(int lot, int tid, uint address,
+        public static PdmMessage request_setup_pod(uint lot, uint tid, uint address,
             int year, byte month, byte day, byte hour, byte minute)
         {
-            var cmd_body = address.ToBytes();
+            var cmd_body = new Bytes();
+            cmd_body.Append(address);
             cmd_body.Append(new byte[] { 0x14, 0x04 });
             cmd_body.Append(new byte[] { month, day, (byte)(year - 2000), hour, minute });
-            cmd_body.Append(lot.ToBytes());
-            cmd_body.Append(tid.ToBytes());
+            cmd_body.Append(lot);
+            cmd_body.Append(tid);
             return new PdmMessage(PdmRequest.SetupPod, cmd_body);
         }
 
         public static PdmMessage request_alert_setup(List<AlertConfiguration> alert_configurations)
         {
-            var cmd_body = new byte[0];
+            var cmd_body = new Bytes();
             foreach (var ac in alert_configurations)
             {
                 if (ac.alert_after_minutes == null && ac.alert_after_reservoir == null && ac.activate)
@@ -78,40 +78,39 @@ namespace OmniCore.Py
             return new PdmMessage(PdmRequest.ConfigureAlerts, cmd_body);
         }
 
-        public static PdmMessage request_status(int status_request_type = 0)
+        public static PdmMessage request_status(byte status_request_type = 0)
         {
-            var cmd_body = new byte[] { (byte)status_request_type };
-            return new PdmMessage(PdmRequest.Status, cmd_body);
+            return new PdmMessage(PdmRequest.Status, new Bytes().Append(status_request_type));
         }
 
         public static PdmMessage request_acknowledge_alerts(byte alert_mask)
         {
-            return new PdmMessage(PdmRequest.AcknowledgeAlerts, new byte[] { alert_mask });
+            return new PdmMessage(PdmRequest.AcknowledgeAlerts, new Bytes().Append(alert_mask));
         }
 
         public static PdmMessage request_deactivate()
         {
-            return new PdmMessage(PdmRequest.DeactivatePod, new byte[0]);
+            return new PdmMessage(PdmRequest.DeactivatePod, new Bytes());
         }
 
         public static PdmMessage request_delivery_flags(byte byte16, byte byte17)
         {
-            return new PdmMessage(PdmRequest.SetDeliveryFlags, new byte[] { byte16, byte17 });
+            return new PdmMessage(PdmRequest.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
         }
 
         public static PdmMessage request_cancel_bolus()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new byte[] { 0x04 });
+            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x04));
         }
 
         public static PdmMessage request_cancel_temp_basal()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new byte[] { 0x02 });
+            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x02));
         }
 
         public static PdmMessage request_stop_basal_insulin()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new byte[] { 0x01 });
+            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x01));
         }
 
         public static PdmMessage request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
@@ -127,15 +126,17 @@ namespace OmniCore.Py
             var iseBody = getBodyFromTable(iseList);
             var pulseBody = getBodyFromTable(pulseList);
 
-            var cmd_body = new byte[] { 0x01 };
+            var cmd_body = new Bytes();
+            cmd_body.Append(0x01);
 
-            var body_checksum = new byte[] { (byte)half_hour_count };
+            var body_checksum = new Bytes();
+            body_checksum.Append((byte)half_hour_count);
             ushort b1 = 0x3840;
-            body_checksum.Append(b1.ToBytes());
-            body_checksum.Append(pulseList[0].ToBytes());
-            var checksum = getChecksum(body_checksum.Append(pulseBody));
+            body_checksum.Append(b1);
+            body_checksum.Append(pulseList[0]);
+            var checksum = getChecksum(new Bytes(body_checksum, pulseBody));
 
-            cmd_body.Append(checksum.ToBytes());
+            cmd_body.Append(checksum);
             cmd_body.Append(body_checksum);
             cmd_body.Append(iseBody);
 
@@ -145,17 +146,18 @@ namespace OmniCore.Py
             //#if confidenceReminder:
             //# reminders |= 0x40
 
-            cmd_body = new byte[] { reminders, 0x00 };
+            cmd_body = new Bytes();
+            cmd_body.Append(reminders).Append(0x00);
             var pulseEntries = getPulseIntervalEntries(hh_units);
 
             var firstPte = pulseEntries[0];
-            cmd_body.Append(firstPte.Item1.ToBytes());
-            cmd_body.Append(firstPte.Item2.ToBytes());
+            cmd_body.Append(firstPte.Item1);
+            cmd_body.Append(firstPte.Item2);
 
             foreach (var pte in pulseEntries)
             {
-                cmd_body.Append(pte.Item1.ToBytes());
-                cmd_body.Append(pte.Item2.ToBytes());
+                cmd_body.Append(pte.Item1);
+                cmd_body.Append(pte.Item2);
             }
 
             msg.add_part(PdmRequest.TempBasalSchedule, cmd_body);
@@ -180,23 +182,23 @@ namespace OmniCore.Py
         private static PdmMessage bolus_message(ushort pulse_count,
         int pulse_speed = 16, int delivery_delay = 2)
         {
-            var commandBody = new byte[] { 0x02 };
-            var bodyForChecksum = new byte[] { 0x01 };
+            var commandBody = new Bytes().Append(0x02);
+            var bodyForChecksum = new Bytes().Append(0x01);
             var pulse_span = (ushort)(pulse_speed * pulse_count);
-            bodyForChecksum.Append(pulse_span.ToBytes());
-            bodyForChecksum.Append(pulse_count.ToBytes());
-            bodyForChecksum.Append(pulse_count.ToBytes());
+            bodyForChecksum.Append(pulse_span);
+            bodyForChecksum.Append(pulse_count);
+            bodyForChecksum.Append(pulse_count);
             var checksum = getChecksum(bodyForChecksum);
-            commandBody.Append(checksum.ToBytes());
+            commandBody.Append(checksum);
             commandBody.Append(bodyForChecksum);
 
             var msg = new PdmMessage(PdmRequest.InsulinSchedule, commandBody);
 
-            commandBody = new byte[] { 0x00 };
+            commandBody = new Bytes().Append(0x00);
             ushort p10 = (ushort)(pulse_count * 10);
-            commandBody.Append(p10.ToBytes());
+            commandBody.Append(p10);
             uint dd = (uint)delivery_delay * (uint)100000;
-            commandBody.Append(dd.ToBytes());
+            commandBody.Append(dd);
             commandBody.Append(new byte[] { 0, 0, 0, 0, 0, 0 });
             msg.add_part(PdmRequest.BolusSchedule, commandBody);
             return msg;
@@ -247,6 +249,13 @@ namespace OmniCore.Py
             return repeatCount;
         }
 
+        private static ushort[] SubBytes(ushort[] source, int startIndex)
+        {
+            var ret = new ushort[source.Length - startIndex];
+            Buffer.BlockCopy(source, startIndex, ret, 0, ret.Length);
+            return ret;
+        }
+
         private static ushort[] getInsulinScheduleTableFromPulses(ushort[] pulses)
         {
             var count = pulses.Length;
@@ -260,12 +269,12 @@ namespace OmniCore.Py
                     break;
                 }
 
-                var alternatingTable = pulses.Sub(ptr);
+                var alternatingTable = SubBytes(pulses, ptr);
                 for (int k = 1; k < alternatingTable.Length; k += 2)
                     alternatingTable[k] -= 1;
 
                 var pulse = alternatingTable[0];
-                var others = alternatingTable.Sub(1);
+                var others = SubBytes(alternatingTable, 1);
                 var repeats = getRepeatCount(pulse, others);
 
                 if (repeats > 15)
@@ -278,7 +287,7 @@ namespace OmniCore.Py
                 else
                 {
                     pulse = pulses[ptr];
-                    others = pulses.Sub(ptr + 1);
+                    others = SubBytes(pulses, ptr + 1);
                     repeats = getRepeatCount(pulse, others);
                     if (repeats > 15)
                         repeats = 15;
@@ -289,7 +298,7 @@ namespace OmniCore.Py
             return iseTable.ToArray();
         }
 
-        private static byte[] getBodyFromTable(ushort[] table)
+        private static Bytes getBodyFromTable(ushort[] table)
         {
             byte[] body = new byte[table.Length * 2];
             for (int i = 0; i < table.Length; i++)
@@ -298,13 +307,13 @@ namespace OmniCore.Py
                 body[i * 2] = (byte)(v >> 8);
                 body[i * 2 + 1] = (byte)(v & 0xff);
             }
-            return body;
+            return new Bytes(body);
         }
 
-        private static ushort getChecksum(byte[] body)
+        private static ushort getChecksum(Bytes body)
         {
             ushort checksum = 0;
-            foreach (byte b in body)
+            foreach (byte b in body.ToArray())
             {
                 checksum += b;
             }
@@ -410,22 +419,22 @@ namespace OmniCore.Py
             var ise_body = getBodyFromTable(ise_list);
             var pulse_body = getBodyFromTable(pulse_list);
 
-            var command_body = new byte[] { 0 };
-            var body_checksum = new byte[] { (byte)current_hh };
+            var command_body = new Bytes(0);
+            var body_checksum = new Bytes((byte)current_hh);
 
             var current_hh_pulse_count = pulse_list[current_hh];
             var remaining_pulse_count = (ushort)(current_hh_pulse_count * seconds_to_hh / 1800);
 
-            body_checksum.Append(seconds_to_hh8.ToBytes());
-            body_checksum.Append(remaining_pulse_count.ToBytes());
+            body_checksum.Append(seconds_to_hh8);
+            body_checksum.Append(remaining_pulse_count);
 
-            command_body.Append(getChecksum(body_checksum.Append(pulse_body)).ToBytes());
+            command_body.Append(getChecksum(new Bytes(body_checksum, pulse_body)));
             command_body.Append(body_checksum);
             command_body.Append(ise_body);
 
             var msg = new PdmMessage(PdmRequest.InsulinSchedule, command_body);
 
-            command_body = new byte[] { 0 };
+            command_body = new Bytes(new byte[] { 0, 0 });
 
             var pulse_entries = getPulseIntervalEntries(halved_schedule);
             for (int i = 0; i < pulse_entries.Length; i++)
@@ -444,8 +453,8 @@ namespace OmniCore.Py
                     var remaining_pulses_this_interval =(ushort)( pulses10 - pulses_past_this_interval - pulses_past_intervals);
                     var microseconds_to_next_interval = (uint)interval - ((uint)seconds_past_hh * (uint)1000000 % (uint)interval);
 
-                    command_body.Append(remaining_pulses_this_interval.ToBytes());
-                    command_body.Append(microseconds_to_next_interval.ToBytes());
+                    command_body.Append(remaining_pulses_this_interval);
+                    command_body.Append(microseconds_to_next_interval);
                     break;
                 }
             }
@@ -456,8 +465,8 @@ namespace OmniCore.Py
                 var pulses10 = pti.Item1;
                 var interval = pti.Item2;
 
-                command_body.Append(pulses10.ToBytes());
-                command_body.Append(interval.ToBytes());
+                command_body.Append(pulses10);
+                command_body.Append(interval);
             }
 
             msg.add_part(PdmRequest.BasalSchedule, command_body);
@@ -493,82 +502,93 @@ namespace OmniCore.Py
             }
         }
 
-        private static void parse_version_response(byte[] response, Pod pod)
+        private static void parse_version_response(Bytes response, Pod pod)
         {
+            bool lengthyResponse = false;
             pod.state_last_updated = DateTime.UtcNow;
+            int i = 1;
             if (response.Length == 27)
             {
-                pod.id_version_unknown_7_bytes = response.Sub(0, 7);
-                response = response.Sub(7);
+                pod.id_version_unknown_7_bytes = response.ToArray(i, i + 7);
+                i += 7;
+                lengthyResponse = true;
             }
 
-            var mx = response[0];
-            var my = response[1];
-            var mz = response[2];
+            var mx = response.Byte(i++);
+            var my = response.Byte(i++);
+            var mz = response.Byte(i++);
             pod.id_version_pm = $"{mx}.{my}.{mz}";
 
-            var ix = response[3];
-            var iy = response[4];
-            var iz = response[5];
+            var ix = response.Byte(i++);
+            var iy = response.Byte(i++);
+            var iz = response.Byte(i++);
             pod.id_version_pi = $"{ix}.{iy}.{iz}";
 
-            pod.id_version_unknown_byte = response[6];
-            pod.state_progress = (PodProgress)(response[7] & 0x0F);
-            pod.id_lot = response.GetUInt32(8);
-            pod.id_t = response.GetUInt32(12);
-
-            if (response.Length == 21)
+            pod.id_version_unknown_byte = response.Byte(i++);
+            pod.state_progress = (PodProgress)(response.Byte(i++) & 0x0F);
+            pod.id_lot = response.DWord(i);
+            pod.id_t = response.DWord(i+4);
+            i += 8;
+            if (!lengthyResponse)
             {
-                pod.radio_low_gain = response[17] >> 6;
-                pod.radio_rssi = response[17] & 0b00111111;
-                pod.radio_address = response.GetUInt32(17);
+                var rb = response.Byte(i++);
+                pod.radio_low_gain = rb >> 6;
+                pod.radio_rssi = rb & 0b00111111;
+                pod.radio_address = response.DWord(i);
             }
             else
-                pod.radio_address = response.GetUInt32(16);
+                pod.radio_address = response.DWord(i);
         }
 
-        private static void parse_information_response(byte[] response, Pod pod)
+        private static void parse_information_response(Bytes response, Pod pod)
         {
-            switch(response[0])
+            int i = 1;
+            var rt = response.Byte(i++);
+            switch(rt)
             {
                 case 0x01:
+                    pod.state_alert_w278 = response.Word(i);
+                    i += 2;
                     pod.state_alerts = new ushort[]
                     {
-                        response.GetUInt16(3),
-                        response.GetUInt16(5),
-                        response.GetUInt16(7),
-                        response.GetUInt16(9),
-                        response.GetUInt16(11),
-                        response.GetUInt16(13),
-                        response.GetUInt16(15),
-                        response.GetUInt16(17)
+                        response.Word(i),
+                        response.Word(i + 2),
+                        response.Word(i + 4),
+                        response.Word(i + 6),
+                        response.Word(i + 8),
+                        response.Word(i + 10),
+                        response.Word(i + 12),
+                        response.Word(i + 14),
                     };
                     break;
                 case 0x02:
                     pod.state_last_updated = DateTime.UtcNow;
                     pod.state_faulted = true;
-                    pod.state_progress = (PodProgress)response[1];
-                    parse_delivery_state(pod, response[2]);
-                    pod.insulin_canceled = response.GetUInt16(3) * 0.05m;
-                    pod.radio_message_sequence = response[5];
-                    pod.insulin_delivered = response.GetUInt16(6) * 0.05m;
-                    pod.fault_event = response[8];
-                    pod.fault_event_rel_time = response.GetUInt16(9);
-                    pod.insulin_reservoir = response.GetUInt16(11) * 0.05m;
-                    pod.state_active_minutes = response.GetUInt16(13);
-                    pod.state_alert = response[15];
-                    pod.fault_table_access = response[16];
-                    pod.fault_insulin_state_table_corruption = response[17] >> 7;
-                    pod.fault_internal_variables = (response[17] & 0x60) >> 6;
-                    pod.fault_immediate_bolus_in_progress = (response[17] & 0x10) > 0;
-                    pod.fault_progress_before = (PodProgress)(response[17] & 0x0F);
-                    pod.radio_low_gain = (response[18] & 0xC0) >> 6;
-                    pod.radio_rssi = response[18] & 0x3F;
-                    pod.fault_progress_before2 = (PodProgress)(response[19] & 0x0F);
-                    pod.fault_information_type2_last_word = response.GetUInt16(20);
+                    pod.state_progress = (PodProgress)response.Byte(i++);
+                    parse_delivery_state(pod, response.Byte(i++));
+                    pod.insulin_canceled = response.Byte(i++) * 0.05m;
+                    pod.radio_message_sequence = response.Byte(i++);
+                    pod.insulin_delivered = response.Byte(i++) * 0.05m;
+                    pod.fault_event = response.Byte(i++);
+                    pod.fault_event_rel_time = response.Word(i);
+                    pod.insulin_reservoir = response.Word(i + 2) * 0.05m;
+                    pod.state_active_minutes = response.Word(i + 4);
+                    i += 6;
+                    pod.state_alert = response.Byte(i++);
+                    pod.fault_table_access = response.Byte(i++);
+                    byte f17 = response.Byte(i++);
+                    pod.fault_insulin_state_table_corruption = f17 >> 7;
+                    pod.fault_internal_variables = (f17 & 0x60) >> 6;
+                    pod.fault_immediate_bolus_in_progress = (f17 & 0x10) > 0;
+                    pod.fault_progress_before = (PodProgress)(f17 & 0x0F);
+                    byte r18 = response.Byte(i++);
+                    pod.radio_low_gain = (r18 & 0xC0) >> 6;
+                    pod.radio_rssi = r18 & 0x3F;
+                    pod.fault_progress_before2 = (PodProgress)(response.Byte(i++) & 0x0F);
+                    pod.fault_information_type2_last_word = response.Byte(i++);
                     break;
                 default:
-                    throw new ProtocolError($"Failed to parse the information response of type {response[0]}");
+                    throw new ProtocolError($"Failed to parse the information response of type {rt}");
             }
         }
 
@@ -589,20 +609,20 @@ namespace OmniCore.Py
                 pod.state_basal = BasalState.NotRunning;
         }
 
-        private static void parse_resync_response(byte[] response, Pod pod)
+        private static void parse_resync_response(Bytes response, Pod pod)
         {
-            if (response[0] == 0x14)
-                pod.nonce_syncword = response.GetUInt16(1);
+            if (response[1] == 0x14)
+                pod.nonce_syncword = response.Word(2);
             else
-                throw new ProtocolError($"Unknown resync request {response[0]} from pod");
+                throw new ProtocolError($"Unknown resync request {response} from pod");
         }
 
-        private static void parse_status_response(byte[] response, Pod pod)
+        private static void parse_status_response(Bytes response, Pod pod)
         {
             pod.state_last_updated = DateTime.UtcNow;
             var s0 = response[0];
-            uint s1 = response.GetUInt32(1);
-            uint s2 = response.GetUInt32(5);
+            uint s1 = response.DWord(1);
+            uint s2 = response.DWord(5);
 
             parse_delivery_state(pod, (byte)(s0 >> 4));
             pod.state_progress = (PodProgress)(s0 & 0xF);

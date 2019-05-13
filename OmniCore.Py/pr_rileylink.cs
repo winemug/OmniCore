@@ -31,8 +31,9 @@ namespace OmniCore.Py
         private IBluetoothLowEnergyAdapter Ble;
         private logger Logger;
         private IBleGattServerConnection GattServerConnection;
-        //private TaskCompletionSource<byte[]> MessageCounterNotifier;
-        //private IObserver<Tuple<Guid,byte[]>> MessageCounterObserver;
+        private TaskCompletionSource<byte[]> MessageCounterNotifier;
+        private Action<Guid, byte[]> MessageCounterNotifierAction;
+        private IDisposable MessageCounterObserver;
 
         private Timer DisconnectTimer;
 
@@ -50,38 +51,35 @@ namespace OmniCore.Py
 
         public async Task reset()
         {
-            //try
-            //{
-            //    await this.Disconnect();
-            //    this.VersionVerified = false;
-            //    this.RadioInitialized = false;
+            try
+            {
+                await this.Disconnect();
+                this.RadioInitialized = false;
 
-            //    if (this.Ble.AdapterCanBeDisabled)
-            //    {
-            //        await this.Ble.DisableAdapter();
-            //    }
+                //if (this.Ble.AdapterCanBeDisabled && this.Ble.AdapterCanBeEnabled)
+                //{
+                //    await this.Ble.DisableAdapter();
+                //    await this.Ble.EnableAdapter();
+                //}
 
-            //    if (this.Ble.AdapterCanBeEnabled)
-            //    {
-            //        await this.Ble.EnableAdapter();
-            //    }
-            //}
-            //catch(Exception)
-            //{
-            //    // ignoring reset errors
-            //}
+                await this.InitializeRadio();
+            }
+            catch (Exception)
+            {
+                // ignoring reset errors
+            }
         }
-        public async Task<byte[]> get_packet(uint timeout = 5000)
+        public async Task<Bytes> get_packet(uint timeout = 5000)
         {
             try
             {
-                var cmdParams = new byte[] { 0 };
-                cmdParams.Append(timeout.ToBytes());
+                var cmdParams = new Bytes((byte)0);
+                cmdParams.Append(timeout);
 
                 var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, (int)timeout + 500);
                 if (result != null)
                 {
-                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2)));
+                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2).ToArray()));
                 }
                 else
                     return null;
@@ -92,14 +90,15 @@ namespace OmniCore.Py
             }
         }
 
-        public async Task send_packet(byte[] packet, byte repeat_count, ushort delay_ms, ushort preamble_ext_ms)
+        public async Task send_packet(Bytes packet, byte repeat_count, ushort delay_ms, ushort preamble_ext_ms)
         {
             try
             {
-                var data = manchester.Encode(packet);
-                var cmdParams = new byte[] { 0, repeat_count };
-                cmdParams.Append(delay_ms.ToBytes());
-                cmdParams.Append(preamble_ext_ms.ToBytes());
+                Debug.WriteLine($"SEND radio packet: {packet}");
+                var data = manchester.Encode(packet.ToArray());
+                var cmdParams = new Bytes((byte)0).Append(repeat_count);
+                cmdParams.Append(delay_ms);
+                cmdParams.Append(preamble_ext_ms);
                 cmdParams.Append(data);
                 await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 30000);
             }
@@ -109,23 +108,28 @@ namespace OmniCore.Py
             }
         }
 
-        public async Task<byte[]> send_and_receive_packet(byte[] packet, byte repeat_count, ushort delay_ms, uint timeout_ms, byte retry_count, ushort preamble_ext_ms)
+        public async Task<Bytes> send_and_receive_packet(Bytes packet, byte repeat_count, ushort delay_ms, uint timeout_ms, byte retry_count, ushort preamble_ext_ms)
         {
             try
             {
-                var data = manchester.Encode(packet);
-                var cmdParams = new byte[] { 0, repeat_count };
-                cmdParams.Append(delay_ms.ToBytes());
-                cmdParams.Append(0);
-                cmdParams.Append(timeout_ms.ToBytes());
-                cmdParams.Append(retry_count);
-                cmdParams.Append(preamble_ext_ms.ToBytes());
-                cmdParams.Append(data);
+                Debug.WriteLine($"SEND radio packet: {packet}");
+                var data = manchester.Encode(packet.ToArray());
+                var cmdParams = new Bytes()
+                    .Append((byte)0)
+                    .Append(repeat_count)
+                    .Append(delay_ms)
+                    .Append((byte)0)
+                    .Append(timeout_ms)
+                    .Append(retry_count)
+                    .Append(preamble_ext_ms)
+                    .Append(data);
 
-                var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 30000);
+                var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 5000);
                 if (result != null)
                 {
-                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2)));
+                    var decoded = new Bytes(manchester.Decode(result.Sub(2).ToArray()));
+                    Debug.WriteLine($"RECV radio packet: {decoded.ToHex()}");
+                    return result.Sub(0, 2).Append(decoded);
                 }
                 else
                     return null;
@@ -152,22 +156,25 @@ namespace OmniCore.Py
 
         private void StartTicking()
         {
-            this.DisconnectTimer?.Change(3000, Timeout.Infinite);
+            //this.DisconnectTimer?.Change(3000, Timeout.Infinite);
         }
 
         private void StopTicking()
         {
-            this.DisconnectTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            //this.DisconnectTimer?.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         private async Task Disconnect()
         {
             this.Logger.log("Disconnecting from RL");
-            if (this.DisconnectTimer != null)
-            {
-                this.DisconnectTimer.Dispose();
-                this.DisconnectTimer = null;
-            }
+            //this.DisconnectTimer?.Dispose();
+            //this.DisconnectTimer = null;
+
+            this.MessageCounterObserver?.Dispose();
+            this.MessageCounterNotifier?.TrySetCanceled();
+
+            this.MessageCounterObserver = null;
+            this.MessageCounterNotifier = null;
 
             if (this.GattServerConnection != null && this.GattServerConnection.State != ConnectionState.Disconnected)
             {
@@ -180,7 +187,12 @@ namespace OmniCore.Py
             this.GattServerConnection = null;
         }
 
-        private async Task<byte[]> SendCommand(RileyLinkCommandType cmd, byte[] cmdData = null, int timeout = 2000)
+        private async Task<Bytes> SendCommand(RileyLinkCommandType cmd, Bytes cmdData, int timeout = 2000)
+        {
+            return new Bytes(await SendCommand(cmd, cmdData.ToArray(), timeout));
+        }
+
+        private async Task<byte[]> SendCommand(RileyLinkCommandType cmd, byte[] cmdData = null, int timeout = 5000)
         {
             try
             {
@@ -197,7 +209,7 @@ namespace OmniCore.Py
                     Buffer.BlockCopy(cmdData, 0, data, 2, cmdData.Length);
                 }
 
-                var result = await WriteAndRead(data);
+                var result = await WriteAndRead(data, false, timeout);
 
                 if (result == null || result.Length == 0)
                     throw new PacketRadioError("RL returned no result");
@@ -227,21 +239,26 @@ namespace OmniCore.Py
             }
         }
 
-        private async Task<byte[]> WriteAndRead(byte[] dataToWrite)
+        private async Task<byte[]> WriteAndRead(byte[] dataToWrite, bool noWait = false, int timeout = 5000)
         {
             try
             {
                 var conn = await SetupConnection();
                 StopTicking();
-                var notifier = new TaskCompletionSource<byte[]>();
-                conn.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
-                    (g, data) =>
-                    {
-                        notifier.SetResult(data);
-                    });
+                Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
+                if (!noWait)
+                    this.MessageCounterNotifier = new TaskCompletionSource<byte[]>();
                 await conn.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, dataToWrite);
-                await notifier.Task;
-                return await conn.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
+                Debug.WriteLine($"Written");
+                if (!noWait)
+                {
+                    await this.MessageCounterNotifier.Task;
+                    Debug.WriteLine($"Reading");
+                    var read = await conn.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
+                    Debug.WriteLine($"Read {BitConverter.ToString(read)}");
+                    return read;
+                }
+                return null;
             }
             catch(PacketRadioError)
             {
@@ -258,6 +275,22 @@ namespace OmniCore.Py
             }
         }
 
+        private void CreateNotifyObserver()
+        {
+            this.MessageCounterNotifier?.TrySetCanceled();
+            this.MessageCounterNotifier = null;
+            this.MessageCounterObserver?.Dispose();
+            this.MessageCounterObserver = null;
+
+            if (this.MessageCounterNotifierAction == null)
+                this.MessageCounterNotifierAction = new Action<Guid, byte[]>(
+                    (g, data) => { this.MessageCounterNotifier?.TrySetResult(data); }
+                    );
+
+            this.MessageCounterObserver = this.GattServerConnection.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
+                                                this.MessageCounterNotifierAction);
+        }
+
         private async Task<IBleGattServerConnection> SetupConnection()
         {
             if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
@@ -272,17 +305,13 @@ namespace OmniCore.Py
             {
                 this.GattServerConnection = await GetConnection();
 
-                //this.MessageCounterObserver = Observer.Create<Tuple<Guid, byte[]>> ( tu =>
-                //{
-                //    if (this.MessageCounterNotifier != null)
-                //        this.MessageCounterNotifier.TrySetResult(tu.Item2);
-                //});
+                CreateNotifyObserver();
 
-                if (this.DisconnectTimer != null)
-                {
-                    this.DisconnectTimer.Dispose();
-                    this.DisconnectTimer = null;
-                }
+                //if (this.DisconnectTimer != null)
+                //{
+                //    this.DisconnectTimer.Dispose();
+                //    this.DisconnectTimer = null;
+                //}
 
                 if (!this.VersionVerified)
                 {
@@ -315,10 +344,13 @@ namespace OmniCore.Py
             await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte) RileyLinkSoftwareEncoding.None });
             await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
 
-            var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
-            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
-            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
-            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
+            //var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
+            //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
+            //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
+            //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, 0x5f });
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, 0x14 });
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, 0x12 });
 
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.DEVIATN, 0x44 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL1, 0x20 });
@@ -338,7 +370,7 @@ namespace OmniCore.Py
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL0, 0x1F });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST1, 0x35 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST0, 0x09 });
-            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, 0x60 });
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, 0x84 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREND0, 0x00 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC1, 0xA5 });
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0x5A });
@@ -413,6 +445,7 @@ namespace OmniCore.Py
                 var connection = await this.Ble.ConnectToDevice(this.Peripheral);
                 if (connection.IsSuccessful())
                 {
+
                     return connection.GattServer;
                 }
                 else

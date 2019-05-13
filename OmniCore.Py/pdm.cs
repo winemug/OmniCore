@@ -40,6 +40,7 @@ namespace OmniCore.Py
         {
             this.packetRadio = packetRadio;
             this.logger = definitions.getLogger();
+            this.packetRadio.reset();
         }
 
         private async Task send_request(PdmMessage request, bool with_nonce = false)
@@ -74,13 +75,13 @@ namespace OmniCore.Py
             }
         }
 
-        private async Task internal_update_status(int update_type = 0)
+        private async Task internal_update_status(byte update_type = 0)
         {
             _assert_pod();
             await send_request(protocol.request_status(update_type));
         }
 
-        public async Task UpdateStatus(int update_type = 0)
+        public async Task UpdateStatus(byte update_type = 0)
         {
             try
             {

@@ -53,7 +53,7 @@ namespace OmniCore.Mobile.Views
                 return;
 
             var py = App.Instance.Py;
-            py.NewPod(0x1f0e89f0, 42485, 90644);
+            py.NewPod(0x3400e2a8, 44425, 470043);
             await py.Pdm.UpdateStatus();
 
         }

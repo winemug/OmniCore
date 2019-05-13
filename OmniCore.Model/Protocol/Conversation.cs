@@ -32,7 +32,6 @@ namespace OmniCore.Model.Protocol
 
         public async Task<IMessage> SendRequest(IMessage request)
         {
-            Message response = null;
             return await this.Radio.SendRequestAndGetResponse(request);
         }
 
