@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmniCore.Py
 {
-    public class PdmMessage : BaseMessage
+    public class PdmMessage : Message
     {
         public PdmMessage(PdmRequest cmd_type, Bytes cmd_body):base()
         {

@@ -2,7 +2,7 @@
 
 namespace OmniCore.Py
 {
-    public class PodMessage : BaseMessage
+    public class PodMessage : Message
     {
         public PodMessage():base()
         {

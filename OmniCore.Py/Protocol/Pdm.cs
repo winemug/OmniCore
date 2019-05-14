@@ -69,7 +69,7 @@ namespace OmniCore.Py
                 if (this.Pod.nonce_syncword != null)
                 {
                     this.Nonce.Reset();
-                    throw new PdmError("Nonce sync failed");
+                    throw new PdmException("Nonce sync failed");
                 }
             }
         }
@@ -87,20 +87,20 @@ namespace OmniCore.Py
                 this.logger.Log($"Updating pod status, request type {update_type}");
                 await this.internal_update_status(update_type);
             }
-            catch(OmnipyError)
+            catch(OmnipyException)
             {
                 throw;
             }
             catch(Exception e)
             {
-                throw new PdmError("Unexpected error", e);
+                throw new PdmException("Unexpected error", e);
             }
         }
 
         private void _assert_pod()
         {
             if (this.Pod == null)
-                throw new PdmError("No pod registered");
+                throw new PdmException("No pod registered");
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace OmniCore.Py
 {
-    public class RadioPacket
+    public class Packet
     {
         public uint address;
         public RadioPacketType type;
@@ -10,7 +10,7 @@ namespace OmniCore.Py
         public Bytes body;
         public byte rssi;
 
-        public RadioPacket(uint address, RadioPacketType type, int sequence, Bytes body)
+        public Packet(uint address, RadioPacketType type, int sequence, Bytes body)
         {
             this.address = address;
             this.type = type;
@@ -18,7 +18,7 @@ namespace OmniCore.Py
             this.body = body;
         }
 
-        public static RadioPacket parse(Bytes data)
+        public static Packet parse(Bytes data)
         {
             if (data.Length < 5)
                 return null;
@@ -33,10 +33,10 @@ namespace OmniCore.Py
             var type = (RadioPacketType)(d4 & 0b11100000);
             var sequence = d4 & 0b00011111;
             var body = data.Sub(5);
-            return new RadioPacket(address, type, sequence, body);
+            return new Packet(address, type, sequence, body);
         }
 
-        public RadioPacket with_sequence(int sequence)
+        public Packet with_sequence(int sequence)
         {
             this.sequence = sequence;
             return this;

@@ -28,7 +28,7 @@ namespace OmniCore.Py
         private PyLogger Logger = new PyLogger();
         private PyLogger PacketLogger = new PyLogger();
 
-        public RadioPacket last_received_packet;
+        public Packet last_received_packet;
         public int last_packet_timestamp = 0;
 
         public MessageExchange(PdmMessage pdmMessage, IPacketRadio packetRadio, Pod pod)
@@ -64,7 +64,7 @@ namespace OmniCore.Py
 
             var packets = this.PdmMessage.get_radio_packets(this.Pod.radio_packet_sequence);
 
-            RadioPacket received = null;
+            Packet received = null;
             var packet_count = packets.Count;
 
             this.unique_packets = packet_count * 2;
@@ -93,7 +93,7 @@ namespace OmniCore.Py
                         received = await this.ExchangePackets(packet.with_sequence(this.Pod.radio_packet_sequence), expected_type, timeout);
                         break;
                     }
-                    catch (OmnipyTimeoutError)
+                    catch (OmnipyTimeoutException)
                     {
                         this.Logger.Log("Trying to recover from timeout error");
                         if (part == 0)
@@ -158,7 +158,7 @@ namespace OmniCore.Py
                                 throw;
                         }
                     }
-                    catch (PacketRadioError)
+                    catch (PacketRadioException)
                     {
                         this.Logger.Log("Trying to recover from radio error");
                         this.radio_errors++;
@@ -211,7 +211,7 @@ namespace OmniCore.Py
                             }
                         }
                     }
-                    catch (ProtocolError pe)
+                    catch (ProtocolException pe)
                     {
                         if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
                         {
@@ -255,7 +255,7 @@ namespace OmniCore.Py
         }
 
 
-        private async Task<RadioPacket> ExchangePackets(RadioPacket packet_to_send, RadioPacketType expected_type, int timeout = 10000)
+        private async Task<Packet> ExchangePackets(Packet packet_to_send, RadioPacketType expected_type, int timeout = 10000)
         {
             int start_time = 0;
             bool first = true;
@@ -320,7 +320,7 @@ namespace OmniCore.Py
                 {
                     this.PacketLogger.Log("RECV PKT unexpected type");
                     this.protocol_errors++;
-                    throw new ProtocolError("Unexpected packet type received", p);
+                    throw new ProtocolException("Unexpected packet type received", p);
                 }
 
                 if (p.sequence != (packet_to_send.sequence + 1) % 32)
@@ -329,16 +329,16 @@ namespace OmniCore.Py
                     this.PacketLogger.Log("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
                     this.protocol_errors++;
-                    throw new ProtocolError("Incorrect packet sequence received", p);
+                    throw new ProtocolException("Incorrect packet sequence received", p);
                 }
 
                 return p;
 
             }
-            throw new OmnipyTimeoutError("Exceeded timeout while send and receive");
+            throw new OmnipyTimeoutException("Exceeded timeout while send and receive");
         }
 
-        private async Task SendPacket(RadioPacket packet_to_send, int allow_premature_exit_after = -1, int timeout = 25000)
+        private async Task SendPacket(Packet packet_to_send, int allow_premature_exit_after = -1, int timeout = 25000)
         {
             int start_time = 0;
             this.unique_packets++;
@@ -410,7 +410,7 @@ namespace OmniCore.Py
                     start_time = Environment.TickCount;
                     continue;
                 }
-                catch (PacketRadioError pre)
+                catch (PacketRadioException pre)
                 {
                     this.radio_errors++;
                     this.Logger.Error("Radio error during send, retrying", pre);
@@ -421,14 +421,14 @@ namespace OmniCore.Py
             this.Logger.Log("Exceeded timeout while waiting for silence to fall");
         }
 
-        private RadioPacket GetPacket(byte[] data)
+        private Packet GetPacket(byte[] data)
         {
             if (data != null && data.Length > 1)
             {
                 byte rssi = data[0];
                 try
                 {
-                    var rp = RadioPacket.parse(new Bytes(data).Sub(2));
+                    var rp = Packet.parse(new Bytes(data).Sub(2));
                     if (rp != null)
                         rp.rssi = rssi;
                     return rp;
@@ -441,12 +441,12 @@ namespace OmniCore.Py
             return null;
         }
 
-        private RadioPacket _ack_data(uint address1, uint address2, int sequence)
+        private Packet _ack_data(uint address1, uint address2, int sequence)
         {
-            return new RadioPacket(address1, RadioPacketType.ACK, sequence, new Bytes(address2));
+            return new Packet(address1, RadioPacketType.ACK, sequence, new Bytes(address2));
         }
 
-        private RadioPacket interim_ack(uint ack_address_override, int sequence)
+        private Packet interim_ack(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.radio_address)
                 return _ack_data(this.Pod.radio_address, this.Pod.radio_address, sequence);
@@ -454,7 +454,7 @@ namespace OmniCore.Py
                 return _ack_data(this.Pod.radio_address, ack_address_override, sequence);
         }
 
-        private RadioPacket final_ack(uint ack_address_override, int sequence)
+        private Packet final_ack(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.radio_address)
                 return _ack_data(this.Pod.radio_address, 0, sequence);

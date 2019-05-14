@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OmniCore.Py
 {
-    public class BaseMessage
+    public class Message
     {
         public uint? address = null;
         public int? sequence = null;
@@ -20,7 +20,7 @@ namespace OmniCore.Py
         public uint? AckAddressOverride;
         public bool DoubleTake;
 
-        public bool add_radio_packet(RadioPacket radio_packet)
+        public bool add_radio_packet(Packet radio_packet)
         {
             if (radio_packet.type == RadioPacketType.POD || radio_packet.type == RadioPacketType.PDM)
             {
@@ -38,7 +38,7 @@ namespace OmniCore.Py
                 if (radio_packet.type == RadioPacketType.CON)
                     this.body.Append(radio_packet.body);
                 else
-                    throw new ProtocolError("Packet type invalid");
+                    throw new ProtocolException("Packet type invalid");
             }
 
             if (this.body_length == this.body.Length - 2)
@@ -72,7 +72,7 @@ namespace OmniCore.Py
                 }
                 else
                 {
-                    throw new ProtocolError("Message crc error");
+                    throw new ProtocolException("Message crc error");
                 }
             }
             else
@@ -86,7 +86,7 @@ namespace OmniCore.Py
             return this.parts;
         }
 
-        public List<RadioPacket> get_radio_packets(int first_packet_sequence)
+        public List<Packet> get_radio_packets(int first_packet_sequence)
         {
             this.message_str_prefix = $"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ";
 
@@ -143,13 +143,13 @@ namespace OmniCore.Py
             bool first_packet = true;
             int sequence = first_packet_sequence;
             int total_body_len = (int)message_body.Length;
-            var radio_packets = new List<RadioPacket>();
+            var radio_packets = new List<Packet>();
 
             while(index < message_body.Length)
             {
                 var to_write = Math.Min(31, message_body.Length - index);
                 var packet_body = message_body.Sub(index, index + to_write);
-                radio_packets.Add(new RadioPacket(AckAddressOverride.Value,
+                radio_packets.Add(new Packet(AckAddressOverride.Value,
                                                 first_packet ? this.type.Value : RadioPacketType.CON,
                                                 sequence,
                                                 packet_body));

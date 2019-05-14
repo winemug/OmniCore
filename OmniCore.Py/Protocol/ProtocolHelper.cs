@@ -29,24 +29,24 @@ namespace OmniCore.Py
             foreach (var ac in alert_configurations)
             {
                 if (ac.alert_after_minutes == null && ac.alert_after_reservoir == null && ac.activate)
-                    throw new PdmError("Either alert_after_minutes or alert_after_reservoir must be set");
+                    throw new PdmException("Either alert_after_minutes or alert_after_reservoir must be set");
                 else if (ac.alert_after_minutes != null && ac.alert_after_reservoir != null)
-                    throw new PdmError("Only one of alert_after_minutes or alert_after_reservoir must be set");
+                    throw new PdmException("Only one of alert_after_minutes or alert_after_reservoir must be set");
 
                 if (ac.alert_duration > 0x1FF)
-                    throw new PdmError($"Alert duration in minutes cannot be more than {0x1ff:%d}");
+                    throw new PdmException($"Alert duration in minutes cannot be more than {0x1ff:%d}");
                 else if (ac.alert_duration < 0)
-                    throw new PdmError("Invalid alert duration value");
+                    throw new PdmException("Invalid alert duration value");
 
                 if (ac.alert_after_minutes != null && ac.alert_after_minutes > 4800)
-                    throw new PdmError("Alert cannot be set beyond 80 hours");
+                    throw new PdmException("Alert cannot be set beyond 80 hours");
                 if (ac.alert_after_minutes != null && ac.alert_after_minutes < 0)
-                    throw new PdmError("Invalid value for alert_after_minutes");
+                    throw new PdmException("Invalid value for alert_after_minutes");
 
                 if (ac.alert_after_reservoir != null && ac.alert_after_reservoir > 50)
-                    throw new PdmError("Alert cannot be set for more than 50 units");
+                    throw new PdmException("Alert cannot be set for more than 50 units");
                 if (ac.alert_after_reservoir != null && ac.alert_after_reservoir < 0)
-                    throw new PdmError("Invalid value for alert_after_reservoir");
+                    throw new PdmException("Invalid value for alert_after_reservoir");
 
                 byte b0 = (byte)(ac.alert_index << 4);
                 if (ac.activate)
@@ -497,7 +497,7 @@ namespace OmniCore.Py
                         parse_status_response(response_body, pod);
                         break;
                     default:
-                        throw new ProtocolError($"Unknown response type {response_type}");
+                        throw new ProtocolException($"Unknown response type {response_type}");
                 }
             }
         }
@@ -588,7 +588,7 @@ namespace OmniCore.Py
                     pod.fault_information_type2_last_word = response.Byte(i++);
                     break;
                 default:
-                    throw new ProtocolError($"Failed to parse the information response of type {rt}");
+                    throw new ProtocolException($"Failed to parse the information response of type {rt}");
             }
         }
 
@@ -614,7 +614,7 @@ namespace OmniCore.Py
             if (response[1] == 0x14)
                 pod.nonce_syncword = response.Word(2);
             else
-                throw new ProtocolError($"Unknown resync request {response} from pod");
+                throw new ProtocolException($"Unknown resync request {response} from pod");
         }
 
         private static void parse_status_response(Bytes response, Pod pod)

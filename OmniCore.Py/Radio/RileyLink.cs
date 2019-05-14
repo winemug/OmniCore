@@ -61,7 +61,7 @@ namespace OmniCore.Py
                     this.Device = result?.Device;
 
                     if (this.Device == null)
-                        throw new PacketRadioError("Couldn't find RileyLink!");
+                        throw new PacketRadioException("Couldn't find RileyLink!");
                     else
                         this.Logger.Log("Found RL");
                 }
@@ -73,7 +73,7 @@ namespace OmniCore.Py
 
                     if (!this.Device.IsConnected())
                     {
-                        throw new PacketRadioError("Failed to connect to RL.");
+                        throw new PacketRadioException("Failed to connect to RL.");
                     }
                     else
                     {
@@ -99,10 +99,10 @@ namespace OmniCore.Py
                     await this.InitializeRadio();
                 }
             }
-            catch (PacketRadioError) { throw; }
+            catch (PacketRadioException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while connecting to BLE device", e);
+                throw new PacketRadioException("Error while connecting to BLE device", e);
             }
         }
 
@@ -152,7 +152,7 @@ namespace OmniCore.Py
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while receiving data with RL", e);
+                throw new PacketRadioException("Error while receiving data with RL", e);
             }
         }
 
@@ -171,7 +171,7 @@ namespace OmniCore.Py
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while sending data with RL", e);
+                throw new PacketRadioException("Error while sending data with RL", e);
             }
         }
 
@@ -209,7 +209,7 @@ namespace OmniCore.Py
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while sending and receiving data with RL", e);
+                throw new PacketRadioException("Error while sending and receiving data with RL", e);
             }
         }
 
@@ -252,7 +252,7 @@ namespace OmniCore.Py
                 var result = await WriteAndRead(data, false, timeout);
 
                 if (result == null || result.Length == 0)
-                    throw new PacketRadioError("RL returned no result");
+                    throw new PacketRadioException("RL returned no result");
 
                 else if (result[0] == (byte)RileyLinkResponseType.OK
                     || result[0] == (byte)RileyLinkResponseType.Interrupted)
@@ -269,15 +269,15 @@ namespace OmniCore.Py
                 else if (result[0] == (byte)RileyLinkResponseType.Timeout)
                     throw new TimeoutException();
                 else
-                    throw new PacketRadioError($"RL returned error code {result[0]}");
+                    throw new PacketRadioException($"RL returned error code {result[0]}");
             }
-            catch (PacketRadioError)
+            catch (PacketRadioException)
             {
                 throw;
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while sending a command via BLE", e);
+                throw new PacketRadioException("Error while sending a command via BLE", e);
             }
         }
 
@@ -309,13 +309,13 @@ namespace OmniCore.Py
                 }
                 return null;
             }
-            catch (PacketRadioError)
+            catch (PacketRadioException)
             {
                 throw;
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while writing to and reading from RL", e);
+                throw new PacketRadioException("Error while writing to and reading from RL", e);
             }
         }
 
@@ -359,7 +359,7 @@ namespace OmniCore.Py
 
             var result = await SendCommand(RileyLinkCommandType.GetState);
             if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
-                throw new PacketRadioError("RL returned status not OK.");
+                throw new PacketRadioException("RL returned status not OK.");
 
             this.Logger.Log("Initialization completed.");
             this.RadioInitialized = true;
@@ -380,7 +380,7 @@ namespace OmniCore.Py
                     var v_minor = int.Parse(m.Groups[2].ToString());
 
                     if (v_major < 2)
-                        throw new PacketRadioError("Firmware Version below 2, cannot be used for omnipod.");
+                        throw new PacketRadioException("Firmware Version below 2, cannot be used for omnipod.");
 
                     if (v_major == 2 && v_minor < 3)
                         this.WorkaroundRequired = true;
@@ -388,12 +388,12 @@ namespace OmniCore.Py
                     this.VersionVerified = true;
                 }
                 else
-                    throw new PacketRadioError("Version info couldn't be obtained from RL");
+                    throw new PacketRadioException("Version info couldn't be obtained from RL");
             }
-            catch (PacketRadioError) { throw; }
+            catch (PacketRadioException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error verifying RL version", e);
+                throw new PacketRadioException("Error verifying RL version", e);
             }
         }
     }
