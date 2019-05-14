@@ -13,12 +13,12 @@ namespace OmniCore.Py
         private string PodPath;
 
         public Pdm Pdm { get; private set; }
-        public PrRileyLink PacketRadio { get; private set; }
+        public RileyLink PacketRadio { get; private set; }
 
         public OmnipyStub()
         {
             this.PodPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "pod.json");
-            this.PacketRadio = new PrRileyLink();
+            this.PacketRadio = new RileyLink();
             this.Pdm = new Pdm(this.PacketRadio);
         }
 

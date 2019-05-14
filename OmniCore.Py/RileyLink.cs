@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Py
 {
-    public class PrRileyLink : IPacketRadio
+    public class RileyLink : IPacketRadio
     {
         private byte[] PA_LEVELS = new byte[] { 0x12,
              0x0E, 0x0E,
@@ -38,7 +38,7 @@ namespace OmniCore.Py
         private IGattCharacteristic ResponseCharacteristic;
         private IObservable<CharacteristicGattResult> ResponseObservable;
 
-        public PrRileyLink()
+        public RileyLink()
         {
             this.Logger = definitions.getLogger();
         }
@@ -147,7 +147,7 @@ namespace OmniCore.Py
                 var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, (int)timeout + 500);
                 if (result != null)
                 {
-                    return result.Sub(0, 2).Append(manchester.Decode(result.Sub(2).ToArray()));
+                    return result.Sub(0, 2).Append(Manchester.Decode(result.Sub(2).ToArray()));
                 }
                 else
                     return null;
@@ -164,7 +164,7 @@ namespace OmniCore.Py
             {
                 await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
-                var data = manchester.Encode(packet.ToArray());
+                var data = Manchester.Encode(packet.ToArray());
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
                 cmdParams.Append(delay_ms);
                 cmdParams.Append(preamble_ext_ms);
@@ -183,7 +183,7 @@ namespace OmniCore.Py
             {
                 await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
-                var data = manchester.Encode(packet.ToArray());
+                var data = Manchester.Encode(packet.ToArray());
                 var cmdParams = new Bytes()
                     .Append((byte)0)
                     .Append(repeat_count)
@@ -202,7 +202,7 @@ namespace OmniCore.Py
                 var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 5000);
                 if (result != null)
                 {
-                    var decoded = new Bytes(manchester.Decode(result.Sub(2).ToArray()));
+                    var decoded = new Bytes(Manchester.Decode(result.Sub(2).ToArray()));
                     Debug.WriteLine($"RECV radio packet: {decoded.ToHex()}");
                     return result.Sub(0, 2).Append(decoded);
                 }

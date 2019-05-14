@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Py
 {
-    public static class manchester
+    public static class Manchester
     {
         private static byte[] EncodedHi;
         private static byte[] EncodedLo;
@@ -15,7 +15,7 @@ namespace OmniCore.Py
         private static byte[] Noise;
         private static Random Rnd;
 
-        static manchester()
+        static Manchester()
         {
             EncodedHi = new byte[256];
             EncodedLo = new byte[256];
