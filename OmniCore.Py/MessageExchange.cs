@@ -25,8 +25,8 @@ namespace OmniCore.Py
         private IPacketRadio PacketRadio;
         private Pod Pod;
 
-        private logger Logger;
-        private logger PacketLogger;
+        private PyLogger Logger = new PyLogger();
+        private PyLogger PacketLogger = new PyLogger();
 
         public RadioPacket last_received_packet;
         public int last_packet_timestamp = 0;
@@ -36,8 +36,6 @@ namespace OmniCore.Py
             this.PdmMessage = pdmMessage;
             this.PacketRadio = packetRadio;
             this.Pod = pod;
-            this.Logger = definitions.getLogger();
-            this.PacketLogger = definitions.get_packet_logger();
         }
 
         private void reset_sequences()
@@ -80,9 +78,9 @@ namespace OmniCore.Py
                 {
                     repeat_count++;
                     if (repeat_count == 0)
-                        this.Logger.log($"Sending PDM message part {part + 1}/{packet_count}");
+                        this.Logger.Log($"Sending PDM message part {part + 1}/{packet_count}");
                     else
-                        this.Logger.log($"Sending PDM message part {part + 1}/{packet_count} (Repeat: {repeat_count})");
+                        this.Logger.Log($"Sending PDM message part {part + 1}/{packet_count} (Repeat: {repeat_count})");
 
                     RadioPacketType expected_type;
                     if (part == packet_count - 1)
@@ -97,7 +95,7 @@ namespace OmniCore.Py
                     }
                     catch (OmnipyTimeoutError)
                     {
-                        this.Logger.log("Trying to recover from timeout error");
+                        this.Logger.Log("Trying to recover from timeout error");
                         if (part == 0)
                         {
                             if (repeat_count == 0)
@@ -120,10 +118,10 @@ namespace OmniCore.Py
                             }
                             else
                             {
-                                this.Logger.log("Failed recovery");
+                                this.Logger.Log("Failed recovery");
                                 if (packet_count == 1)
                                 {
-                                    this.Logger.log("Calming pod down in case it's still broadcasting");
+                                    this.Logger.Log("Calming pod down in case it's still broadcasting");
                                     var ack_packet = this.final_ack(this.PdmMessage.AckAddressOverride.Value, 2);
                                     try
                                     {
@@ -132,7 +130,7 @@ namespace OmniCore.Py
                                     }
                                     catch (Exception e)
                                     {
-                                        this.Logger.exception("Ignored.", e);
+                                        this.Logger.Error("Ignored.", e);
                                     }
                                 }
                                 this.reset_sequences();
@@ -162,7 +160,7 @@ namespace OmniCore.Py
                     }
                     catch (PacketRadioError)
                     {
-                        this.Logger.log("Trying to recover from radio error");
+                        this.Logger.Log("Trying to recover from radio error");
                         this.radio_errors++;
                         if (part == 0)
                         {
@@ -175,7 +173,7 @@ namespace OmniCore.Py
                             }
                             else
                             {
-                                this.Logger.log("Failed recovery");
+                                this.Logger.Log("Failed recovery");
                                 this.reset_sequences();
                                 throw;
                             }
@@ -191,7 +189,7 @@ namespace OmniCore.Py
                             }
                             else
                             {
-                                this.Logger.log("Failed recovery");
+                                this.Logger.Log("Failed recovery");
                                 this.reset_sequences();
                                 throw;
                             }
@@ -207,7 +205,7 @@ namespace OmniCore.Py
                             }
                             else
                             {
-                                this.Logger.log("Failed recovery");
+                                this.Logger.Log("Failed recovery");
                                 this.reset_sequences();
                                 throw;
                             }
@@ -217,7 +215,7 @@ namespace OmniCore.Py
                     {
                         if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
                         {
-                            this.Logger.log("Trying to recover from protocol error");
+                            this.Logger.Log("Trying to recover from protocol error");
                             this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
                             packet = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
                             continue;
@@ -230,13 +228,13 @@ namespace OmniCore.Py
                 this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
             }
 
-            this.PacketLogger.log($"SENT MSG {this.PdmMessage}");
+            this.PacketLogger.Log($"SENT MSG {this.PdmMessage}");
 
             var part_count = 0;
             if (received.type == RadioPacketType.POD)
             {
                 part_count = 1;
-                this.Logger.log($"Received POD message part {part_count}");
+                this.Logger.Log($"Received POD message part {part_count}");
             }
             var pod_response = new PodMessage();
             while (!pod_response.add_radio_packet(received))
@@ -244,11 +242,11 @@ namespace OmniCore.Py
                 var ack_packet = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, (received.sequence + 1) % 32);
                 received = await this.ExchangePackets(ack_packet, RadioPacketType.CON);
                 part_count++;
-                this.Logger.log($"Received POD message part {part_count}");
+                this.Logger.Log($"Received POD message part {part_count}");
             }
 
-            this.PacketLogger.log($"RCVD MSG {pod_response}");
-            this.Logger.log("Send and receive completed.");
+            this.PacketLogger.Log($"RCVD MSG {pod_response}");
+            this.Logger.Log("Send and receive completed.");
             this.Pod.radio_message_sequence = (pod_response.sequence.Value + 1) % 16;
             this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
 
@@ -262,7 +260,7 @@ namespace OmniCore.Py
             int start_time = 0;
             bool first = true;
             Bytes received = null;
-            this.PacketLogger.log($"SEND PKT {packet_to_send}");
+            this.PacketLogger.Log($"SEND PKT {packet_to_send}");
             while (start_time == 0 || Environment.TickCount - start_time < timeout)
             {
                 if (first)
@@ -277,12 +275,12 @@ namespace OmniCore.Py
                 if (start_time == 0)
                     start_time = Environment.TickCount;
 
-                this.PacketLogger.log($"SEND PKT {packet_to_send}");
+                this.PacketLogger.Log($"SEND PKT {packet_to_send}");
 
                 if (received == null)
                 {
                     this.receive_timeouts++;
-                    this.PacketLogger.log("RECV PKT None");
+                    this.PacketLogger.Log("RECV PKT None");
                     this.PacketRadio.tx_up();
                     continue;
                 }
@@ -295,11 +293,11 @@ namespace OmniCore.Py
                     continue;
                 }
 
-                this.PacketLogger.log($"RECV PKT {p}");
+                this.PacketLogger.Log($"RECV PKT {p}");
                 if (p.address != this.Pod.radio_address)
                 {
                     this.bad_packets++;
-                    this.PacketLogger.log("RECV PKT ADDR MISMATCH");
+                    this.PacketLogger.Log("RECV PKT ADDR MISMATCH");
                     this.PacketRadio.tx_down();
                     continue;
                 }
@@ -310,7 +308,7 @@ namespace OmniCore.Py
                     && p.type == this.last_received_packet.type)
                 {
                     this.repeated_receives++;
-                    this.PacketLogger.log("RECV PKT previous");
+                    this.PacketLogger.Log("RECV PKT previous");
                     this.PacketRadio.tx_up();
                     continue;
                 }
@@ -320,7 +318,7 @@ namespace OmniCore.Py
 
                 if (p.type != expected_type)
                 {
-                    this.PacketLogger.log("RECV PKT unexpected type");
+                    this.PacketLogger.Log("RECV PKT unexpected type");
                     this.protocol_errors++;
                     throw new ProtocolError("Unexpected packet type received", p);
                 }
@@ -328,7 +326,7 @@ namespace OmniCore.Py
                 if (p.sequence != (packet_to_send.sequence + 1) % 32)
                 {
                     this.Pod.radio_packet_sequence = (p.sequence + 1) % 32;
-                    this.PacketLogger.log("RECV PKT unexpected sequence");
+                    this.PacketLogger.Log("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
                     this.protocol_errors++;
                     throw new ProtocolError("Incorrect packet sequence received", p);
@@ -349,7 +347,7 @@ namespace OmniCore.Py
             {
                 try
                 {
-                    this.PacketLogger.log($"SEND PKT {packet_to_send}");
+                    this.PacketLogger.Log($"SEND PKT {packet_to_send}");
 
                     received = await this.PacketRadio.send_and_receive_packet(packet_to_send.get_data(), 0, 0, 300, 0, 40);
 
@@ -360,7 +358,7 @@ namespace OmniCore.Py
                     //{
                     //    if (this.request_arrived.WaitOne(0))
                     //    {
-                    //        this.logger.log("Prematurely exiting final phase to process next request");
+                    //        this.Logger.Log("Prematurely exiting final phase to process next request");
                     //        this.packet_sequence = (this.packet_sequence + 1) % 32;
                     //        break;
                     //    }
@@ -371,7 +369,7 @@ namespace OmniCore.Py
                         received = await this.PacketRadio.get_packet(600);
                         if (received == null)
                         {
-                            this.PacketLogger.log("Silence fell.");
+                            this.PacketLogger.Log("Silence fell.");
                             this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
                             break;
                         }
@@ -388,7 +386,7 @@ namespace OmniCore.Py
                     if (p.address != this.Pod.radio_address)
                     {
                         this.bad_packets++;
-                        this.PacketLogger.log("RECV PKT ADDR MISMATCH");
+                        this.PacketLogger.Log("RECV PKT ADDR MISMATCH");
                         this.PacketRadio.tx_down();
                         continue;
                     }
@@ -398,13 +396,13 @@ namespace OmniCore.Py
                         && p.sequence == this.last_received_packet.sequence)
                     {
                         this.repeated_receives++;
-                        this.PacketLogger.log("RECV PKT previous");
+                        this.PacketLogger.Log("RECV PKT previous");
                         this.PacketRadio.tx_up();
                         continue;
                     }
 
-                    this.PacketLogger.log($"RECV PKT {p}");
-                    this.PacketLogger.log($"RECEIVED unexpected packet");
+                    this.PacketLogger.Log($"RECV PKT {p}");
+                    this.PacketLogger.Log($"RECEIVED unexpected packet");
                     this.protocol_errors++;
                     this.last_received_packet = p;
                     this.Pod.radio_packet_sequence = (p.sequence + 1) % 32;
@@ -415,12 +413,12 @@ namespace OmniCore.Py
                 catch (PacketRadioError pre)
                 {
                     this.radio_errors++;
-                    this.Logger.exception("Radio error during send, retrying", pre);
+                    this.Logger.Error("Radio error during send, retrying", pre);
                     await this.PacketRadio.reset();
                     start_time = Environment.TickCount;
                 }
             }
-            this.Logger.log("Exceeded timeout while waiting for silence to fall");
+            this.Logger.Log("Exceeded timeout while waiting for silence to fall");
         }
 
         private RadioPacket GetPacket(byte[] data)
@@ -437,7 +435,7 @@ namespace OmniCore.Py
                 }
                 catch
                 {
-                    this.PacketLogger.log($"RECV INVALID DATA {data}");
+                    this.PacketLogger.Log($"RECV INVALID DATA {data}");
                 }
             }
             return null;

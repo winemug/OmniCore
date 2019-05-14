@@ -27,7 +27,7 @@ namespace OmniCore.Py
         private Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
         private Guid RileyLinkResponseCharacteristicUUID = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
-        private logger Logger;
+        private PyLogger Logger = new PyLogger();
 
         private bool VersionVerified;
         private bool WorkaroundRequired;
@@ -36,11 +36,9 @@ namespace OmniCore.Py
         private IDevice Device;
         private IGattCharacteristic DataCharacteristic;
         private IGattCharacteristic ResponseCharacteristic;
-        private IObservable<CharacteristicGattResult> ResponseObservable;
 
         public RileyLink()
         {
-            this.Logger = definitions.getLogger();
         }
 
         private async Task Connect()
@@ -52,7 +50,7 @@ namespace OmniCore.Py
                     this.VersionVerified = false;
                     this.RadioInitialized = false;
 
-                    this.Logger.log("Searching RL");
+                    this.Logger.Log("Searching RL");
                     var result = await CrossBleAdapter.Current.Scan(
                             new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } })
                             .FirstOrDefaultAsync();
@@ -65,12 +63,12 @@ namespace OmniCore.Py
                     if (this.Device == null)
                         throw new PacketRadioError("Couldn't find RileyLink!");
                     else
-                        this.Logger.log("Found RL");
+                        this.Logger.Log("Found RL");
                 }
 
                 if (!this.Device.IsConnected())
                 {
-                    this.Logger.log("Connecting to RL");
+                    this.Logger.Log("Connecting to RL");
                     await this.Device.ConnectWait();
 
                     if (!this.Device.IsConnected())
@@ -79,7 +77,7 @@ namespace OmniCore.Py
                     }
                     else
                     {
-                        this.Logger.log("Connected to RL.");
+                        this.Logger.Log("Connected to RL.");
                         var dataService = this.Device.GetKnownService(RileyLinkServiceUUID);
                         var characteristics = this.Device.GetKnownCharacteristics(RileyLinkServiceUUID,
                             new Guid[] { RileyLinkDataCharacteristicUUID, RileyLinkResponseCharacteristicUUID });
@@ -116,10 +114,10 @@ namespace OmniCore.Py
             if (this.Device.IsDisconnected())
                 return;
 
-            this.Logger.log("Disconnecting from RL");
+            this.Logger.Log("Disconnecting from RL");
             this.Device.CancelConnection();
             await this.Device.WhenDisconnected();
-            this.Logger.log("Disconnected");
+            this.Logger.Log("Disconnected");
         }
 
         public async Task reset()
@@ -317,13 +315,13 @@ namespace OmniCore.Py
             }
             catch (Exception e)
             {
-                throw new PacketRadioError("Error while writing to and reading from RL");
+                throw new PacketRadioError("Error while writing to and reading from RL", e);
             }
         }
 
         private async Task InitializeRadio()
         {
-            this.Logger.log("Initializing radio variables");
+            this.Logger.Log("Initializing radio variables");
             await SendCommand(RileyLinkCommandType.ResetRadioConfig);
             await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
             await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
@@ -363,20 +361,20 @@ namespace OmniCore.Py
             if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
                 throw new PacketRadioError("RL returned status not OK.");
 
-            this.Logger.log("Initialization completed.");
+            this.Logger.Log("Initialization completed.");
             this.RadioInitialized = true;
         }
 
         private async Task VerifyVersion()
         {
-            this.Logger.log("Verifying RL version");
+            this.Logger.Log("Verifying RL version");
             try
             {
                 var versionData = await SendCommand(RileyLinkCommandType.GetVersion);
                 if (versionData != null && versionData.Length > 0)
                 {
                     var versionString = Encoding.ASCII.GetString(versionData);
-                    this.Logger.log($"RL reports version string: {versionString}");
+                    this.Logger.Log($"RL reports version string: {versionString}");
                     var m = Regex.Match(versionString, ".+([0-9]+)\\.([0-9]+)");
                     var v_major = int.Parse(m.Groups[1].ToString());
                     var v_minor = int.Parse(m.Groups[2].ToString());

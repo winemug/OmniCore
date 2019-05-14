@@ -34,12 +34,11 @@ namespace OmniCore.Py
 
         private Nonce Nonce { get; set; }
 
-        private logger logger;
+        private PyLogger logger = new PyLogger();
 
         public Pdm(IPacketRadio packetRadio)
         {
             this.packetRadio = packetRadio;
-            this.logger = definitions.getLogger();
             this.packetRadio.reset();
         }
 
@@ -59,7 +58,7 @@ namespace OmniCore.Py
 
             if (with_nonce && this.Pod.nonce_syncword != null)
             {
-                this.logger.log("Nonce resync requested");
+                this.logger.Log("Nonce resync requested");
                 this.Nonce.Sync(request.sequence.Value);
                 var nonce_val = this.Nonce.GetNext();
                 request.set_nonce(nonce_val);
@@ -85,7 +84,7 @@ namespace OmniCore.Py
         {
             try
             {
-                this.logger.log($"Updating pod status, request type {update_type}");
+                this.logger.Log($"Updating pod status, request type {update_type}");
                 await this.internal_update_status(update_type);
             }
             catch(OmnipyError)
