@@ -430,8 +430,9 @@ namespace OmniCore.Py
                 byte rssi = data[0];
                 try
                 {
-                    var rp = RadioPacket.parse(new Bytes(data).Sub(1));
-                    rp.rssi = rssi;
+                    var rp = RadioPacket.parse(new Bytes(data).Sub(2));
+                    if (rp != null)
+                        rp.rssi = rssi;
                     return rp;
                 }
                 catch

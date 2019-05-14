@@ -70,7 +70,7 @@ namespace OmniCore.Py
 
         public static byte[] Encode(byte[] decodedBytes)
         {
-            var encodedBytes = new byte[160];
+            var encodedBytes = new byte[80];
             var di = 0;
             var de = decodedBytes.Length * 2;
             for (int i = 0; i < de; i += 2)

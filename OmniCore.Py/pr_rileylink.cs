@@ -194,6 +194,11 @@ namespace OmniCore.Py
                     .Append(preamble_ext_ms)
                     .Append(data);
 
+                //570500000000000000012c01012c
+                //AD0500000000000000012C01012C
+
+                //a59aaaaa56a6666a66aaa59aaaaa56a6666aaaaaaaa5aa56aaa9aaaaaaa66959a566 //// f3078e31c7ff318c44783f8ee0cdff844384e1843d31cf84dcccd3b10c3774f23d847007bb2ef1c2
+                //A59AAAAA56A6666A66AAA59AAAAA56A6666AAAAAAAA5AA56AAA9AAAAAAAAA695A555 //// CC33F3CC0FFCCCFC30C30FF0FC000C3C0F33F00CF3F0CCC0C3F0F0FCF3C3FFF3CFF030000F3CFCCC3FFCF3C3303300FC0F0CFFFC00C330F0CFF30C3FFF3033CC0F30C33FF3F0CC3F33C03CFC3CFF3FCC033F00FCCF333030FC00FC0C300F
                 var result = await this.SendCommand(RileyLinkCommandType.SendAndListen, cmdParams, 5000);
                 if (result != null)
                 {
