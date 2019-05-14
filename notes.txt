@@ -1,0 +1,52 @@
+
+
+
+
+omnipy
+
+omnicore v1 - the pie wasn't a lie edition
+
+rftp: eros radio
+
+
+v1 rftp support
+
+omnipod dash support
+
+data tools and features
+
+
+v1: feature update: ui, display, history etc
+
+v1 ios version
+
+rftp: +cgm.dexcom
+omnicore.mobile.cgm (receiver)
+omnicore.tizen.cgm
+omnicore.wearos.cgm 
+
+omnicore.tizen.ui
+omnicore.wearos.ui
+
+omnicore aps - basic
+omnicore aps - enhanced
+
+omnicore v2.x aps edition
+
+
+
+---- blog ideas rants
+
+
+community, doing together
+designed around security
+nightscout
+aaps
+history of omnipy
+
+
+(x - 11)/x = 0.8095
+
+1 - 0.8095 = 11/x
+
+x = 11/(1-0.8095)

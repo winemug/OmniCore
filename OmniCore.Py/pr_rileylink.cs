@@ -268,6 +268,8 @@ namespace OmniCore.Py
                     else
                         return null;
                 }
+                else if (result[0] == (byte)RileyLinkResponseType.Timeout)
+                    throw new TimeoutException();
                 else
                     throw new PacketRadioError($"RL returned error code {result[0]}");
             }

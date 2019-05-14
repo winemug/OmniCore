@@ -322,7 +322,7 @@ namespace OmniCore.Py
                 {
                     this.PacketLogger.log("RECV PKT unexpected type");
                     this.protocol_errors++;
-                    throw new ProtocolError("Unexpected packet type received");
+                    throw new ProtocolError("Unexpected packet type received", p);
                 }
 
                 if (p.sequence != (packet_to_send.sequence + 1) % 32)
@@ -331,7 +331,7 @@ namespace OmniCore.Py
                     this.PacketLogger.log("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
                     this.protocol_errors++;
-                    throw new ProtocolError("Incorrect packet sequence received");
+                    throw new ProtocolError("Incorrect packet sequence received", p);
                 }
 
                 return p;
