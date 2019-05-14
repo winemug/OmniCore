@@ -54,7 +54,7 @@ namespace OmniCore.Py
             var me = new MessageExchange(request, this.packetRadio, this.Pod);
 
             var response = await me.GetPodResponse();
-            protocol.response_parse(response, this.Pod);
+            ProtocolHelper.response_parse(response, this.Pod);
 
             if (with_nonce && this.Pod.nonce_syncword != null)
             {
@@ -65,7 +65,7 @@ namespace OmniCore.Py
                 this.Pod.nonce_syncword = null;
                 this.Pod.radio_message_sequence = request.sequence.Value;
                 response = await me.GetPodResponse();
-                protocol.response_parse(response, this.Pod);
+                ProtocolHelper.response_parse(response, this.Pod);
                 if (this.Pod.nonce_syncword != null)
                 {
                     this.Nonce.Reset();
@@ -77,7 +77,7 @@ namespace OmniCore.Py
         private async Task internal_update_status(byte update_type = 0)
         {
             _assert_pod();
-            await send_request(protocol.request_status(update_type));
+            await send_request(ProtocolHelper.request_status(update_type));
         }
 
         public async Task UpdateStatus(byte update_type = 0)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Py
 {
-    public static class protocol
+    public static class ProtocolHelper
     {
         public static PdmMessage request_assign_address(uint address)
         {
