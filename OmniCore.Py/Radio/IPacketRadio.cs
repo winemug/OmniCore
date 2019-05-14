@@ -3,15 +3,6 @@ using System.Threading.Tasks;
 
 namespace Omni.Py
 {
-    public enum TxPower
-    {
-        Lowest = 0,
-		Low = 1,
-		Normal = 2,
-		High = 3,
-		Highest = 4
-    }
-
     public interface IPacketRadio
     {
         Task reset();

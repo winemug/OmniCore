@@ -1,110 +1,10 @@
-using Omni.Py;
+﻿using Omni.Py;
 using OmniCore.py;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OmniCore.Py
 {
-    public enum PdmRequest
-    {
-        SetupPod = 0x03,
-        AssignAddress = 0x07,
-        SetDeliveryFlags = 0x08,
-        Status = 0x0e,
-        AcknowledgeAlerts = 0x11,
-        BasalSchedule = 0x13,
-        TempBasalSchedule = 0x16,
-        BolusSchedule = 0x17,
-        ConfigureAlerts = 0x19,
-        InsulinSchedule = 0x1a,
-        DeactivatePod = 0x1c,
-        CancelDelivery = 0x1f
-    }
-
-    public enum PodResponse
-    {
-        VersionInfo = 0x01,
-        DetailInfo = 0x02,
-        ResyncRequest = 0x06,
-        Status = 0x1d
-    }
-
-    public enum RadioPacketType
-    {
-        UN0 = 0b00000000,
-        UN1 = 0b00100000,
-        ACK = 0b01000000,
-        UN3 = 0b01100000,
-        CON = 0b10000000,
-        PDM = 0b10100000,
-        UN6 = 0b11000000,
-        POD = 0b11100000
-    }
-
-
-    public class RadioPacket
-    {
-        public uint address;
-        public RadioPacketType type;
-        public int sequence;
-        public Bytes body;
-        public byte rssi;
-
-        public RadioPacket(uint address, RadioPacketType type, int sequence, Bytes body)
-        {
-            this.address = address;
-            this.type = type;
-            this.sequence = sequence % 32;
-            this.body = body;
-        }
-
-        public static RadioPacket parse(Bytes data)
-        {
-            if (data.Length < 5)
-                return null;
-
-            var crc_computed = CrcUtil.Crc8(data.Sub(0, data.Length - 1).ToArray());
-            var crc = data[data.Length - 1];
-            if (crc != crc_computed)
-                return null;
-
-            var address = data.DWord(0);
-            var d4 = data.Byte(4);
-            var type = (RadioPacketType)(d4 & 0b11100000);
-            var sequence = d4 & 0b00011111;
-            var body = data.Sub(5);
-            return new RadioPacket(address, type, sequence, body);
-        }
-
-        public RadioPacket with_sequence(int sequence)
-        {
-            this.sequence = sequence;
-            return this;
-        }
-
-        public Bytes get_data()
-        {
-            var data = new Bytes().Append(this.address);
-            data.Append((byte)((int)this.type | this.sequence));
-            data.Append(this.body);
-            data.Append(CrcUtil.Crc8(data.ToArray()));
-            return data;
-        }
-
-        public override string ToString()
-        {
-            if (this.type == RadioPacketType.CON)
-            {
-                return $"0x{this.sequence:X2} {this.type.ToString().Substring(0, 3)} 0x{this.address:X8} {this.body.ToHex()}";
-            }
-            else
-            {
-                return $"0x{this.sequence:X2} {this.type.ToString().Substring(0, 3)} 0x{this.address:X8} 0x{this.body.ToHex(0, 4)} {this.body.ToHex(4)}";
-            }
-        }
-    }
-
     public class BaseMessage
     {
         public uint? address = null;
@@ -269,55 +169,6 @@ namespace OmniCore.Py
         public void add_part(PdmRequest cmd_type, Bytes cmd_body)
         {
             this.parts.Add(new Tuple<byte, Bytes, uint?>((byte)cmd_type, cmd_body, null));
-        }
-    }
-
-    public class PodMessage : BaseMessage
-    {
-        public PodMessage():base()
-        {
-            base.type = RadioPacketType.POD;
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-            sb.Append($"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ");
-            foreach(var p in this.parts)
-            {
-                sb.Append($"{p.Item1:%02X} {p.Item2.ToHex()} ");
-            }
-            return sb.ToString();
-        }
-    }
-
-    public class PdmMessage : BaseMessage
-    {
-        public PdmMessage(PdmRequest cmd_type, Bytes cmd_body):base()
-        {
-            this.add_part(cmd_type, cmd_body);
-            this.message_str_prefix = "\n";
-            this.type = RadioPacketType.PDM;
-        }
-
-        public void set_nonce(uint nonce)
-        {
-            var part = this.parts[0];
-            this.parts[0] = new Tuple<byte, Bytes, uint?>(part.Item1, part.Item2, nonce);
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-            sb.Append(this.message_str_prefix);
-            foreach (var p in this.parts)
-            {
-                if (p.Item3 == null)
-                    sb.Append($"{p.Item1:%02X} {p.Item2.ToHex()} ");
-                else
-                    sb.Append($"{p.Item1:%02X} {p.Item3.Value:%08X} {p.Item2.ToHex()} ");
-            }
-            return sb.ToString();
         }
     }
 }
