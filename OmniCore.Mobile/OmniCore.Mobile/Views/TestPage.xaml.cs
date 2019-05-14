@@ -1,5 +1,4 @@
-﻿using nexus.protocols.ble;
-using Plugin.Permissions;
+﻿using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -47,6 +46,9 @@ namespace OmniCore.Mobile.Views
         private async void Button_ClickedAsync(object sender, EventArgs e)
         {
             if (!await CheckPermission(Permission.LocationAlways))
+                return;
+
+            if (!await CheckPermission(Permission.Location))
                 return;
 
             if (!await CheckPermission(Permission.Storage))

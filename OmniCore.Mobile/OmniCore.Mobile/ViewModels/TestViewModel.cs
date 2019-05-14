@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Plugin.BluetoothLE;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace OmniCore.Mobile.ViewModels
         {
             Title = "Testing 1, 2..";
 
-            BlePresent = (App.Instance.BleAdapter != null);
+            BlePresent = (CrossBleAdapter.Current != null);
         }
     }
 }

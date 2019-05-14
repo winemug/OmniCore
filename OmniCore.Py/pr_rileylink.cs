@@ -1,10 +1,9 @@
-﻿using nexus.core;
-using nexus.protocols.ble;
-using nexus.protocols.ble.scan;
-using Omni.Py;
+﻿using Omni.Py;
+using Plugin.BluetoothLE;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,41 +27,109 @@ namespace OmniCore.Py
         private Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
         private Guid RileyLinkResponseCharacteristicUUID = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
-        private IBluetoothLowEnergyAdapter Ble;
         private logger Logger;
-        private IBleGattServerConnection GattServerConnection;
-        private TaskCompletionSource<byte[]> MessageCounterNotifier;
-        private Action<Guid, byte[]> MessageCounterNotifierAction;
-        private IDisposable MessageCounterObserver;
 
-        private Timer DisconnectTimer;
-
-        private IBlePeripheral Peripheral;
         private bool VersionVerified;
         private bool WorkaroundRequired;
         private bool RadioInitialized;
 
+        private IDevice Device;
+        private IGattCharacteristic DataCharacteristic;
+        private IGattCharacteristic ResponseCharacteristic;
+        private IObservable<CharacteristicGattResult> ResponseObservable;
 
-        public PrRileyLink(IBluetoothLowEnergyAdapter ble)
+        public PrRileyLink()
         {
-            this.Ble = ble;
             this.Logger = definitions.getLogger();
+        }
+
+        private async Task Connect()
+        {
+            try
+            {
+                if (this.Device == null)
+                {
+                    this.VersionVerified = false;
+                    this.RadioInitialized = false;
+
+                    this.Logger.log("Searching RL");
+                    var result = await CrossBleAdapter.Current.Scan(
+                            new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } })
+                            .FirstOrDefaultAsync();
+
+                    if (CrossBleAdapter.Current.IsScanning)
+                        CrossBleAdapter.Current.StopScan();
+
+                    this.Device = result?.Device;
+
+                    if (this.Device == null)
+                        throw new PacketRadioError("Couldn't find RileyLink!");
+                    else
+                        this.Logger.log("Found RL");
+                }
+
+                if (!this.Device.IsConnected())
+                {
+                    this.Logger.log("Connecting to RL");
+                    await this.Device.ConnectWait();
+
+                    if (!this.Device.IsConnected())
+                    {
+                        throw new PacketRadioError("Failed to connect to RL.");
+                    }
+                    else
+                    {
+                        this.Logger.log("Connected to RL.");
+                        var dataService = this.Device.GetKnownService(RileyLinkServiceUUID);
+                        var characteristics = this.Device.GetKnownCharacteristics(RileyLinkServiceUUID,
+                            new Guid[] { RileyLinkDataCharacteristicUUID, RileyLinkResponseCharacteristicUUID });
+
+                        this.DataCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkDataCharacteristicUUID);
+                        this.ResponseCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
+                        await this.ResponseCharacteristic.EnableNotifications();
+                        //this.ResponseObservable = this.ResponseCharacteristic.WhenNotificationReceived();
+                    }
+                }
+
+                if (!this.VersionVerified)
+                {
+                    await this.VerifyVersion();
+                }
+
+                if (!this.RadioInitialized)
+                {
+                    await this.InitializeRadio();
+                }
+            }
+            catch (PacketRadioError) { throw; }
+            catch (Exception e)
+            {
+                throw new PacketRadioError("Error while connecting to BLE device", e);
+            }
+        }
+
+        private async Task Disconnect()
+        {
+            if (this.Device == null)
+                return;
+
+            if (this.Device.IsDisconnected())
+                return;
+
+            this.Logger.log("Disconnecting from RL");
+            this.Device.CancelConnection();
+            await this.Device.WhenDisconnected();
+            this.Logger.log("Disconnected");
         }
 
         public async Task reset()
         {
             try
             {
-                await this.Disconnect();
+                await Disconnect();
+                this.VersionVerified = false;
                 this.RadioInitialized = false;
-
-                //if (this.Ble.AdapterCanBeDisabled && this.Ble.AdapterCanBeEnabled)
-                //{
-                //    await this.Ble.DisableAdapter();
-                //    await this.Ble.EnableAdapter();
-                //}
-
-                await this.InitializeRadio();
+                await Connect();
             }
             catch (Exception)
             {
@@ -73,6 +140,7 @@ namespace OmniCore.Py
         {
             try
             {
+                await Connect();
                 var cmdParams = new Bytes((byte)0);
                 cmdParams.Append(timeout);
 
@@ -94,6 +162,7 @@ namespace OmniCore.Py
         {
             try
             {
+                await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = manchester.Encode(packet.ToArray());
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
@@ -112,6 +181,7 @@ namespace OmniCore.Py
         {
             try
             {
+                await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = manchester.Encode(packet.ToArray());
                 var cmdParams = new Bytes()
@@ -134,7 +204,7 @@ namespace OmniCore.Py
                 else
                     return null;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new PacketRadioError("Error while sending and receiving data with RL", e);
             }
@@ -152,39 +222,6 @@ namespace OmniCore.Py
 
         public void tx_up()
         {
-        }
-
-        private void StartTicking()
-        {
-            //this.DisconnectTimer?.Change(3000, Timeout.Infinite);
-        }
-
-        private void StopTicking()
-        {
-            //this.DisconnectTimer?.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        private async Task Disconnect()
-        {
-            this.Logger.log("Disconnecting from RL");
-            //this.DisconnectTimer?.Dispose();
-            //this.DisconnectTimer = null;
-
-            this.MessageCounterObserver?.Dispose();
-            this.MessageCounterNotifier?.TrySetCanceled();
-
-            this.MessageCounterObserver = null;
-            this.MessageCounterNotifier = null;
-
-            if (this.GattServerConnection != null && this.GattServerConnection.State != ConnectionState.Disconnected)
-            {
-                try
-                {
-                    await this.GattServerConnection.Disconnect();
-                }
-                catch { }
-            }
-            this.GattServerConnection = null;
         }
 
         private async Task<Bytes> SendCommand(RileyLinkCommandType cmd, Bytes cmdData, int timeout = 2000)
@@ -229,11 +266,11 @@ namespace OmniCore.Py
                 else
                     throw new PacketRadioError($"RL returned error code {result[0]}");
             }
-            catch(PacketRadioError)
+            catch (PacketRadioError)
             {
                 throw;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new PacketRadioError("Error while sending a command via BLE", e);
             }
@@ -243,105 +280,45 @@ namespace OmniCore.Py
         {
             try
             {
-                var conn = await SetupConnection();
-                StopTicking();
-                Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
-                if (!noWait)
-                    this.MessageCounterNotifier = new TaskCompletionSource<byte[]>();
-                await conn.WriteCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID, dataToWrite);
-                Debug.WriteLine($"Written");
-                if (!noWait)
+                if (noWait)
                 {
-                    await this.MessageCounterNotifier.Task;
+                    Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
+                    await DataCharacteristic.WriteWithoutResponse(dataToWrite);
+                    Debug.WriteLine($"Written and done");
+                }
+                else
+                { 
+                    Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
+                    var tc = new TaskCompletionSource<CharacteristicGattResult>();
+                    ResponseCharacteristic.WhenNotificationReceived().Subscribe(result =>
+                    {
+                        tc.TrySetResult(result);
+                    });
+                    await DataCharacteristic.Write(dataToWrite);
+                    Debug.WriteLine($"Written, waiting..");
+                    await tc.Task;
                     Debug.WriteLine($"Reading");
-                    var read = await conn.ReadCharacteristicValue(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
-                    Debug.WriteLine($"Read {BitConverter.ToString(read)}");
-                    return read;
+                    var readResult = await DataCharacteristic.Read();
+                    Debug.WriteLine($"Read {BitConverter.ToString(readResult.Data)}");
+                    return readResult.Data;
                 }
                 return null;
             }
-            catch(PacketRadioError)
+            catch (PacketRadioError)
             {
                 throw;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new PacketRadioError("Error while writing to and reading from RL");
             }
-            finally
-            {
-                //this.MessageCounterNotifier = null;
-                StartTicking();
-            }
         }
 
-        private void CreateNotifyObserver()
-        {
-            this.MessageCounterNotifier?.TrySetCanceled();
-            this.MessageCounterNotifier = null;
-            this.MessageCounterObserver?.Dispose();
-            this.MessageCounterObserver = null;
-
-            if (this.MessageCounterNotifierAction == null)
-                this.MessageCounterNotifierAction = new Action<Guid, byte[]>(
-                    (g, data) => { this.MessageCounterNotifier?.TrySetResult(data); }
-                    );
-
-            this.MessageCounterObserver = this.GattServerConnection.NotifyCharacteristicValue(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID,
-                                                this.MessageCounterNotifierAction);
-        }
-
-        private async Task<IBleGattServerConnection> SetupConnection()
-        {
-            if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
-                return this.GattServerConnection;
-
-            if (this.GattServerConnection != null && this.GattServerConnection.State != ConnectionState.Connected)
-            {
-                await Disconnect();
-            }
-
-            try
-            {
-                this.GattServerConnection = await GetConnection();
-
-                CreateNotifyObserver();
-
-                //if (this.DisconnectTimer != null)
-                //{
-                //    this.DisconnectTimer.Dispose();
-                //    this.DisconnectTimer = null;
-                //}
-
-                if (!this.VersionVerified)
-                {
-                    await this.VerifyVersion();
-                }
-
-                if (!this.RadioInitialized)
-                {
-                    await this.InitializeRadio();
-                }
-
-                //this.DisconnectTimer = new Timer(async (state) =>
-                //{
-                //    if (this.GattServerConnection != null && this.GattServerConnection.State == ConnectionState.Connected)
-                //        await this.Disconnect();
-                //}, null, Timeout.Infinite, Timeout.Infinite);
-
-            }
-            catch (Exception e)
-            {
-                await Disconnect();
-                throw new PacketRadioError("Failed to set up the BLE connection", e);
-            }
-            return this.GattServerConnection;
-        }
         private async Task InitializeRadio()
         {
             this.Logger.log("Initializing radio variables");
             await SendCommand(RileyLinkCommandType.ResetRadioConfig);
-            await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte) RileyLinkSoftwareEncoding.None });
+            await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
             await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
 
             //var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
@@ -412,89 +389,6 @@ namespace OmniCore.Py
             catch (Exception e)
             {
                 throw new PacketRadioError("Error verifying RL version", e);
-            }
-        }
-
-        private async Task<IBleGattServerConnection> GetConnection()
-        {
-            try
-            {
-                if (this.Ble.CurrentState.IsDisabledOrDisabling() && this.Ble.AdapterCanBeEnabled)
-                {
-                    this.Logger.log("Enabling BLE adapter");
-                    await this.Ble.EnableAdapter();
-                }
-            }
-            catch(Exception e)
-            {
-                throw new PacketRadioError("Failed to enable BLE adapter", e);
-            }
-
-            if (this.Peripheral == null)
-            {
-                this.VersionVerified = false;
-                this.RadioInitialized = false;
-                var p = await FindRileyLink();
-                if (p == null)
-                    throw new PacketRadioError("Couldn't find RileyLink!");
-                this.Peripheral = p;
-            }
-
-            try
-            {
-                var connection = await this.Ble.ConnectToDevice(this.Peripheral);
-                if (connection.IsSuccessful())
-                {
-
-                    return connection.GattServer;
-                }
-                else
-                {
-                    throw new PacketRadioError("Failed to establish BLE connection");
-                }
-            }
-            catch (PacketRadioError) { throw; }
-            catch (Exception e)
-            {
-                throw new PacketRadioError("Error while connecting to BLE device", e);
-            }
-        }
-
-        private async Task<IBlePeripheral> FindRileyLink()
-        {
-
-            try
-            {
-                IBlePeripheral pFound = null;
-                using (var cts = new CancellationTokenSource(15000))
-                {
-                    this.Logger.log("Scanning for RileyLink");
-                    await this.Ble.ScanForBroadcasts(
-                        new ScanSettings()
-                        {
-                            Mode = ScanMode.LowPower,
-                            IgnoreRepeatBroadcasts = true,
-                            Filter = new ScanFilter()
-                            {
-                                AdvertisedServiceIsInList = new List<Guid>() { RileyLinkServiceUUID },
-                            }
-                        },
-                        (peripheral) =>
-                        {
-                            this.Logger.log($"Found RL at address {peripheral.Address}, name: {peripheral.Advertisement.DeviceName}");
-                            pFound = peripheral;
-                            cts.Cancel();
-                        }, cts.Token);
-                }
-                return pFound;
-            }
-            catch (TaskCanceledException)
-            {
-                throw new PacketRadioError("Timed out while searching for RL");
-            }
-            catch(Exception e)
-            {
-                throw new PacketRadioError("Error during BLE scan", e);
             }
         }
     }

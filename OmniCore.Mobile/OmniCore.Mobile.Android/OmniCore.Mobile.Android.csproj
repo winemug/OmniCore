@@ -60,8 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ble.net-android">
-      <Version>1.2.1</Version>
+    <PackageReference Include="Plugin.BluetoothLE">
+      <Version>6.2.3</Version>
     </PackageReference>
     <PackageReference Include="Plugin.Permissions">
       <Version>3.0.0.12</Version>

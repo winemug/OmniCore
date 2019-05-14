@@ -6,7 +6,6 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
-using nexus.protocols.ble;
 using Plugin.Permissions;
 using Android.Content;
 
@@ -24,15 +23,7 @@ namespace OmniCore.Mobile.Droid
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
 
-
-            IBluetoothLowEnergyAdapter ble = null;
-            if (PackageManager.HasSystemFeature(PackageManager.FeatureBluetoothLe))
-            {
-                BluetoothLowEnergyAdapter.Init(this);
-                ble = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
-            }
-
-            LoadApplication(new App(ble));
+            LoadApplication(new App());
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -41,11 +32,6 @@ namespace OmniCore.Mobile.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
-        {
-            BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
-            base.OnActivityResult(requestCode, resultCode, data);
-        }
     }
 
 }
