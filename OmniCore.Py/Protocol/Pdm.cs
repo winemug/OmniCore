@@ -1,4 +1,5 @@
 ﻿using Omni.Py;
+using OmniCore.Py.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -39,7 +40,6 @@ namespace OmniCore.Py
         public Pdm(IPacketRadio packetRadio)
         {
             this.packetRadio = packetRadio;
-            this.packetRadio.reset();
         }
 
         private async Task send_request(PdmMessage request, bool with_nonce = false)
@@ -87,10 +87,12 @@ namespace OmniCore.Py
                 this.logger.Log($"Updating pod status, request type {update_type}");
                 await this.internal_update_status(update_type);
             }
-            catch(OmnipyException)
+            catch(StatusUpdateRequiredException)
             {
-                throw;
+                await this.internal_update_status();
+                await this.UpdateStatus(update_type);
             }
+            catch(OmnipyException) { throw; }
             catch(Exception e)
             {
                 throw new PdmException("Unexpected error", e);

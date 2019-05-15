@@ -5,12 +5,9 @@
              xmlns:local="clr-namespace:OmniCore.Mobile"
              x:Class="OmniCore.Mobile.Views.TestPage">
 
-    <ContentPage.BindingContext>
-        <vm:TestViewModel />
-    </ContentPage.BindingContext>
-    
+  
     <StackLayout>
-        <Button Text="A fine button" Clicked="Button_ClickedAsync" IsEnabled="{Binding BlePresent}"/>
+        <Button Text="A fine button" Clicked="Button_ClickedAsync" IsEnabled="{Binding TestButtonEnabled}"/>
     </StackLayout>
 
 </ContentPage>

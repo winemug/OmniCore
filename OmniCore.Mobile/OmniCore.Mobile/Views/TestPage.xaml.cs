@@ -1,4 +1,5 @@
-﻿using Plugin.Permissions;
+﻿using OmniCore.Mobile.ViewModels;
+using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,12 @@ namespace OmniCore.Mobile.Views
 {
     public partial class TestPage : ContentPage
     {
+        TestViewModel viewModel;
+
         public TestPage()
         {
             InitializeComponent();
+            BindingContext = viewModel = new TestViewModel();
         }
 
         private async Task<bool> CheckPermission(Permission p)
@@ -56,8 +60,9 @@ namespace OmniCore.Mobile.Views
 
             var py = App.Instance.Py;
             py.NewPod(0x3400e2a8, 44425, 470043);
+            viewModel.TestButtonEnabled = false;
             await py.Pdm.UpdateStatus();
-
+            viewModel.TestButtonEnabled = true;
         }
     }
 }

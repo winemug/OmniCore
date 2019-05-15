@@ -1,4 +1,5 @@
 ﻿using Omni.Py;
+using OmniCore.Py.Exceptions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace OmniCore.Py
         private void reset_sequences()
         {
             this.Pod.radio_packet_sequence = 0;
-            this.Pod.radio_message_sequence = 0;
+            this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
         }
 
         public async Task<PodMessage> GetPodResponse()
@@ -49,7 +50,7 @@ namespace OmniCore.Py
             this.Started = DateTime.UtcNow;
             if (this.PdmMessage.TxLevel.HasValue)
             {
-                this.PacketRadio.set_tx_power(this.PdmMessage.TxLevel.Value);
+                this.PacketRadio.SetTxLevel(this.PdmMessage.TxLevel.Value);
             }
 
             if (!this.PdmMessage.address.HasValue)
@@ -105,34 +106,19 @@ namespace OmniCore.Py
                             }
                             else if (repeat_count == 1)
                             {
-                                this.reset_sequences();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
                             }
                             else if (repeat_count == 2)
                             {
-                                this.reset_sequences();
+                                await this.PacketRadio.Reset();
                                 timeout = 15000;
                                 continue;
                             }
                             else
                             {
                                 this.Logger.Log("Failed recovery");
-                                if (packet_count == 1)
-                                {
-                                    this.Logger.Log("Calming pod down in case it's still broadcasting");
-                                    var ack_packet = this.final_ack(this.PdmMessage.AckAddressOverride.Value, 2);
-                                    try
-                                    {
-                                        this.PacketRadio.set_tx_power(TxPower.Highest);
-                                        await this.SendPacket(ack_packet);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        this.Logger.Error("Ignored.", e);
-                                    }
-                                }
                                 this.reset_sequences();
                                 throw;
                             }
@@ -164,9 +150,14 @@ namespace OmniCore.Py
                         this.radio_errors++;
                         if (part == 0)
                         {
-                            if (repeat_count < 3)
+                            if (repeat_count < 2)
                             {
-                                await this.PacketRadio.reset();
+                                await this.PacketRadio.Reset();
+                                continue;
+                            }
+                            else if (repeat_count < 4)
+                            {
+                                await this.PacketRadio.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -174,7 +165,6 @@ namespace OmniCore.Py
                             else
                             {
                                 this.Logger.Log("Failed recovery");
-                                this.reset_sequences();
                                 throw;
                             }
                         }
@@ -182,7 +172,7 @@ namespace OmniCore.Py
                         {
                             if (repeat_count < 6)
                             {
-                                await this.PacketRadio.reset();
+                                await this.PacketRadio.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -190,7 +180,6 @@ namespace OmniCore.Py
                             else
                             {
                                 this.Logger.Log("Failed recovery");
-                                this.reset_sequences();
                                 throw;
                             }
                         }
@@ -198,7 +187,7 @@ namespace OmniCore.Py
                         {
                             if (repeat_count < 10)
                             {
-                                await this.PacketRadio.reset();
+                                await this.PacketRadio.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -216,9 +205,34 @@ namespace OmniCore.Py
                         if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
                         {
                             this.Logger.Log("Trying to recover from protocol error");
-                            this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
-                            packet = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
+                            received = pe.ReceivedPacket;
+                            while(true)
+                            {
+                                this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
+                                var interimAck = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
+                                try
+                                {
+                                    received = await this.ExchangePackets(interimAck, RadioPacketType.POD, timeout);
+                                    break;
+                                }
+                                catch (PacketRadioException) { }
+                                catch (ProtocolException)
+                                {
+
+                                }
+                                catch (OmnipyTimeoutException) { }
+                            }
                             continue;
+                        }
+                        if (pe.ReceivedPacket != null)
+                        {
+                            this.Logger.Log("Trying to recover from protocol error");
+                            this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
+                            this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
+                            if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
+                            {
+                                throw new StatusUpdateRequiredException(pe);
+                            }
                         }
                         else
                             throw;
@@ -269,9 +283,9 @@ namespace OmniCore.Py
                     this.repeated_sends += 1;
 
                 if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 4000)
-                    received = await this.PacketRadio.send_and_receive_packet(packet_to_send.get_data(), 0, 0, 300, 1, 300);
+                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
                 else
-                    received = await this.PacketRadio.send_and_receive_packet(packet_to_send.get_data(), 0, 0, 120, 0, 40);
+                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
                 if (start_time == 0)
                     start_time = Environment.TickCount;
 
@@ -281,15 +295,15 @@ namespace OmniCore.Py
                 {
                     this.receive_timeouts++;
                     this.PacketLogger.Log("RECV PKT None");
-                    this.PacketRadio.tx_up();
+                    this.PacketRadio.TxLevelUp();
                     continue;
                 }
 
-                var p = this.GetPacket(received.ToArray());
+                var p = this.GetPacket(received);
                 if (p == null)
                 {
                     this.bad_packets++;
-                    this.PacketRadio.tx_down();
+                    this.PacketRadio.TxLevelDown();
                     continue;
                 }
 
@@ -298,7 +312,7 @@ namespace OmniCore.Py
                 {
                     this.bad_packets++;
                     this.PacketLogger.Log("RECV PKT ADDR MISMATCH");
-                    this.PacketRadio.tx_down();
+                    this.PacketRadio.TxLevelDown();
                     continue;
                 }
 
@@ -309,7 +323,7 @@ namespace OmniCore.Py
                 {
                     this.repeated_receives++;
                     this.PacketLogger.Log("RECV PKT previous");
-                    this.PacketRadio.tx_up();
+                    this.PacketRadio.TxLevelUp();
                     continue;
                 }
 
@@ -349,7 +363,7 @@ namespace OmniCore.Py
                 {
                     this.PacketLogger.Log($"SEND PKT {packet_to_send}");
 
-                    received = await this.PacketRadio.send_and_receive_packet(packet_to_send.get_data(), 0, 0, 300, 0, 40);
+                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
 
                     if (start_time == 0)
                         start_time = Environment.TickCount;
@@ -366,7 +380,7 @@ namespace OmniCore.Py
 
                     if (received == null)
                     {
-                        received = await this.PacketRadio.get_packet(600);
+                        received = await this.PacketRadio.GetPacket(600);
                         if (received == null)
                         {
                             this.PacketLogger.Log("Silence fell.");
@@ -375,11 +389,11 @@ namespace OmniCore.Py
                         }
                     }
 
-                    var p = this.GetPacket(received.ToArray());
+                    var p = this.GetPacket(received);
                     if (p == null)
                     {
                         this.bad_packets++;
-                        this.PacketRadio.tx_down();
+                        this.PacketRadio.TxLevelDown();
                         continue;
                     }
 
@@ -387,7 +401,7 @@ namespace OmniCore.Py
                     {
                         this.bad_packets++;
                         this.PacketLogger.Log("RECV PKT ADDR MISMATCH");
-                        this.PacketRadio.tx_down();
+                        this.PacketRadio.TxLevelDown();
                         continue;
                     }
 
@@ -397,7 +411,7 @@ namespace OmniCore.Py
                     {
                         this.repeated_receives++;
                         this.PacketLogger.Log("RECV PKT previous");
-                        this.PacketRadio.tx_up();
+                        this.PacketRadio.TxLevelUp();
                         continue;
                     }
 
@@ -414,21 +428,21 @@ namespace OmniCore.Py
                 {
                     this.radio_errors++;
                     this.Logger.Error("Radio error during send, retrying", pre);
-                    await this.PacketRadio.reset();
+                    await this.PacketRadio.Reset();
                     start_time = Environment.TickCount;
                 }
             }
             this.Logger.Log("Exceeded timeout while waiting for silence to fall");
         }
 
-        private Packet GetPacket(byte[] data)
+        private Packet GetPacket(Bytes data)
         {
             if (data != null && data.Length > 1)
             {
                 byte rssi = data[0];
                 try
                 {
-                    var rp = Packet.parse(new Bytes(data).Sub(2));
+                    var rp = Packet.parse(data.Sub(2));
                     if (rp != null)
                         rp.rssi = rssi;
                     return rp;
