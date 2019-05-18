@@ -26,7 +26,7 @@ namespace OmniCore.Py
         public PodProgress state_progress = PodProgress.InitialState;
         public BasalState state_basal = BasalState.NotRunning;
         public BolusState state_bolus = BolusState.NotRunning;
-        public int state_alert = 0;
+        public byte state_alert = 0;
         public ushort? state_alert_w278 = null;
         public ushort[] state_alerts = null;
         public uint state_active_minutes = 0;

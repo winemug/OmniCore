@@ -88,7 +88,6 @@ namespace OmniCore.Py
                         this.DataCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkDataCharacteristicUUID);
                         this.ResponseCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
                         await this.ResponseCharacteristic.EnableNotifications();
-                        //this.ResponseObservable = this.ResponseCharacteristic.WhenNotificationReceived();
                     }
                 }
 
@@ -193,7 +192,6 @@ namespace OmniCore.Py
             try
             {
                 await Connect();
-                // Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = Manchester.Encode(packet.ToArray());
                 var cmdParams = new Bytes()
                     .Append((byte)0)
@@ -208,7 +206,6 @@ namespace OmniCore.Py
                 if (result != null)
                 {
                     var decoded = new Bytes(Manchester.Decode(result.Sub(2).ToArray()));
-                    // Debug.WriteLine($"RECV radio packet: {decoded.ToHex()}");
                     return result.Sub(0, 2).Append(decoded);
                 }
                 else
@@ -292,24 +289,18 @@ namespace OmniCore.Py
             {
                 if (noWait)
                 {
-                    //Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
                     await DataCharacteristic.WriteWithoutResponse(dataToWrite);
-                    //Debug.WriteLine($"Written and done");
                 }
                 else
                 { 
-                    //Debug.WriteLine($"Write {BitConverter.ToString(dataToWrite)}");
                     var tc = new TaskCompletionSource<CharacteristicGattResult>();
                     ResponseCharacteristic.WhenNotificationReceived().Subscribe(result =>
                     {
                         tc.TrySetResult(result);
                     });
                     await DataCharacteristic.Write(dataToWrite);
-                    //Debug.WriteLine($"Written, waiting..");
                     await tc.Task;
-                    //Debug.WriteLine($"Reading");
                     var readResult = await DataCharacteristic.Read();
-                    //Debug.WriteLine($"Read {BitConverter.ToString(readResult.Data)}");
                     return readResult.Data;
                 }
                 return null;

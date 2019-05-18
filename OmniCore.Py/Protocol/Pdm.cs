@@ -99,10 +99,53 @@ namespace OmniCore.Py
             }
         }
 
+        public async Task AcknowledgeAlerts(byte alert_mask)
+        {
+            try
+            {
+                this.logger.Log($"Acknowledging alerts, bitmask: {alert_mask}");
+                _assert_pod();
+                await internal_update_status();
+                _assert_immediate_bolus_not_active();
+                if (this.Pod.state_progress < PodProgress.PairingSuccess)
+                    throw new PdmException("Pod not paired completely yet.");
+
+                if (this.Pod.state_progress == PodProgress.ErrorShuttingDown)
+                    throw new PdmException("Pod is shutting down, cannot acknowledge alerts.");
+
+                if (this.Pod.state_progress == PodProgress.AlertExpiredShuttingDown)
+                    throw new PdmException("Acknowledgement period expired, pod is shutting down");
+
+                if (this.Pod.state_progress > PodProgress.AlertExpiredShuttingDown)
+                    throw new PdmException("Pod is not active");
+
+                if ((this.Pod.state_alert & alert_mask) != alert_mask)
+                    throw new PdmException("Bitmask is invalid for current alert state");
+
+                await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
+            }
+            catch (StatusUpdateRequiredException)
+            {
+                await this.internal_update_status();
+                await this.AcknowledgeAlerts(alert_mask);
+            }
+            catch (OmnipyException) { throw; }
+            catch (Exception e)
+            {
+                throw new PdmException("Unexpected error", e);
+            }
+        }
+
         private void _assert_pod()
         {
             if (this.Pod == null)
                 throw new PdmException("No pod registered");
+        }
+
+        private void _assert_immediate_bolus_not_active()
+        {
+            if (this.Pod.state_bolus == BolusState.Immediate)
+                throw new PdmException("Bolus operation in progress");
         }
     }
 }

@@ -631,7 +631,7 @@ namespace OmniCore.Py
             pod.insulin_delivered = ((s1 & 0x0FFF8000) >> 15) * 0.05m;
             pod.insulin_canceled = (s1 & 0x000007FF) * 0.05m;
             pod.state_faulted = ((s2 >> 31) != 0);
-            pod.state_alert = (byte) (s2 >> 23) & 0xFF;
+            pod.state_alert = (byte) ((s2 >> 23) & 0xFF);
             pod.state_active_minutes = (uint)((s2 & 0x007FFC00) >> 10);
             pod.insulin_reservoir = (s2 & 0x000003FF) * 0.05m;
         }
