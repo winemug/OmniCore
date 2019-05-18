@@ -136,6 +136,75 @@ namespace OmniCore.Py
             }
         }
 
+        public async Task Bolus(decimal bolusAmount)
+        {
+            try
+            {
+                this.logger.Log($"Bolusing {bolusAmount}U");
+                _assert_pod();
+                await internal_update_status();
+                _assert_status_running();
+                _assert_immediate_bolus_not_active();
+
+                if (bolusAmount < 0.05m)
+                    throw new PdmException("Cannot bolus less than 0.05U");
+
+                if (bolusAmount % 0.05m != 0)
+                    throw new PdmException("Bolus must be multiples of 0.05U");
+
+                if (bolusAmount > 30m)
+                    throw new PdmException("Cannot bolus more than 30U");
+
+                await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
+
+                if (this.Pod.state_bolus != BolusState.Immediate)
+                    throw new PdmException("Pod did not start bolusing");
+
+                this.Pod.last_enacted_bolus_start = DateTime.UtcNow;
+                this.Pod.last_enacted_bolus_amount = bolusAmount;
+            }
+            catch (StatusUpdateRequiredException)
+            {
+                await this.internal_update_status();
+                await this.Bolus(bolusAmount);
+            }
+            catch (OmnipyException) { throw; }
+            catch (Exception e)
+            {
+                throw new PdmException("Unexpected error", e);
+            }
+        }
+
+        public async Task CancelBolus()
+        {
+            try
+            {
+                _assert_pod();
+                await internal_update_status();
+                _assert_status_running();
+
+                if (this.Pod.state_bolus != BolusState.Immediate)
+                    throw new PdmException("Immediate bolus is not running");
+
+                await send_request(ProtocolHelper.request_cancel_bolus(), true);
+
+                if (this.Pod.state_bolus == BolusState.Immediate)
+                    throw new PdmException("Failed to cancel running bolus");
+
+                this.Pod.last_enacted_bolus_amount = this.Pod.insulin_canceled;
+            }
+            catch (StatusUpdateRequiredException)
+            {
+                await this.internal_update_status();
+                await this.CancelBolus();
+            }
+            catch (OmnipyException) { throw; }
+            catch (Exception e)
+            {
+                throw new PdmException("Unexpected error", e);
+            }
+        }
+
         private void _assert_pod()
         {
             if (this.Pod == null)
@@ -146,6 +215,15 @@ namespace OmniCore.Py
         {
             if (this.Pod.state_bolus == BolusState.Immediate)
                 throw new PdmException("Bolus operation in progress");
+        }
+
+        private void _assert_status_running()
+        {
+            if (this.Pod.state_progress < PodProgress.Running)
+                throw new PdmException("Pod is not yet running");
+
+            if (this.Pod.state_progress > PodProgress.RunningLow)
+                throw new PdmException("Pod is not running");
         }
     }
 }
