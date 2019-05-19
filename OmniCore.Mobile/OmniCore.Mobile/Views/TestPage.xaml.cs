@@ -1,4 +1,5 @@
 ﻿using OmniCore.Mobile.ViewModels;
+using OmniCore.Model;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
@@ -61,8 +62,7 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                //var py = App.Instance.Py;
-                //py.NewPod(0x34ff1d53, 44538, 1181076);
+                var p = new Pod() { id_lot = 44538, id_t = 1181076, radio_address = 0x34ff1d53 };
                 //await py.Pdm.UpdateStatus();
                 //await py.Pdm.Bolus(0.5m);
             }

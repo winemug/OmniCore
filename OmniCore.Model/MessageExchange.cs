@@ -44,7 +44,7 @@ namespace OmniCore.Model
             this.Pod.radio_packet_sequence = 0;
         }
 
-        public async Task<PodMessage> GetPodResponse()
+        public async Task<PodMessage> GetResponse(IMessageExchangeProgress messageExchangeProgress)
         {
             this.Started = DateTime.UtcNow;
             if (this.PdmMessage.TxLevel.HasValue)

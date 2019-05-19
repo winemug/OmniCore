@@ -11,16 +11,14 @@ namespace OmniCore.Model
 
         private Task CurrentExchange;
 
-        public ProtocolHandler(Pod pod)
+        internal ProtocolHandler(Pod pod)
         {
-            Pod = pod ?? throw new ArgumentNullException();
             CurrentExchange = Task.Run(() => { });
         }
 
         public async Task<PodMessage> PerformExchange(MessageExchange me)
         {
-            return await me.GetPodResponse();
+            return await me.GetPodResponse().ConfigureAwait(false);
         }
-
     }
 }

@@ -1,5 +1,6 @@
 using OmniCore.Model.Enums;
 using System;
+using System.IO;
 
 namespace OmniCore.Model
 {
@@ -12,6 +13,8 @@ namespace OmniCore.Model
         public byte? id_version_unknown_byte = null;
         public byte[] id_version_unknown_7_bytes = null;
         public uint radio_address;
+
+
         private int _packet_seq = 0;
         private int _message_seq = 0;
 
@@ -82,27 +85,47 @@ namespace OmniCore.Model
         public DateTime? last_enacted_bolus_start = null;
         public decimal? last_enacted_bolus_amount = null;
 
+
+        //private static Pod Load(uint lot, uint tid)
+        //{
+        //    //var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"pod_{lot}_{tid}.json");
+        //    //if (string.IsNullOrEmpty(path))
+        //    //    throw new ArgumentException();
+
+        //    //if (!File.Exists(path)
+        //    //{
+        //    //    SavePod();
+        //    //}
+        //    //else
+        //    //{
+        //    //    Pod pod = null;
+        //    //    var js = new JsonSerializer();
+        //    //    using (var sr = new StreamReader(this.PodPath))
+        //    //    {
+        //    //        using (var jr = new JsonTextReader(sr))
+        //    //        {
+        //    //            pod = js.Deserialize<Pod>(jr);
+        //    //        }
+        //    //    }
+        //    //    this.Pdm.Pod = pod;
+        //    //}
+        //    throw new NotImplementedException();
+        //}
+
         public void Save()
         {
-            //TODO:
-        }
-        public static Pod Load()
-        {
-            //TODO:
-            return new Pod();
-        }
+            //var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"pod_{lot}_{tid}.json");
+            //if (string.IsNullOrEmpty(this.PodPath))
+            //    throw new ArgumentException();
 
-        public bool is_active()
-        {
-            return !(this.id_lot == null || this.id_t == null)
-                & (this.state_progress == PodProgress.Running || this.state_progress == PodProgress.RunningLow)
-                & !this.state_faulted;
-        }
-
-        public int log()
-        {
-            //TODO:
-            return 0; //dbid
+            //var js = new JsonSerializer();
+            //using (var sw = new StreamWriter(this.PodPath, false, Encoding.UTF8))
+            //{
+            //    using (var jw = new JsonTextWriter(sw))
+            //    {
+            //        js.Serialize(jw, this.Pdm.Pod);
+            //    }
+            //}
         }
     }
 }
