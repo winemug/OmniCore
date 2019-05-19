@@ -9,12 +9,12 @@ namespace OmniCore.Model
 {
     public static class ProtocolHelper
     {
-        public static PdmMessage request_assign_address(uint address)
+        public static RequestMessage request_assign_address(uint address)
         {
-            return new PdmMessage(PdmRequest.AssignAddress, new Bytes(address));
+            return new RequestMessage(PdmRequest.AssignAddress, new Bytes(address));
         }
 
-        public static PdmMessage request_setup_pod(uint lot, uint tid, uint address,
+        public static RequestMessage request_setup_pod(uint lot, uint tid, uint address,
             int year, byte month, byte day, byte hour, byte minute)
         {
             var cmd_body = new Bytes();
@@ -23,10 +23,10 @@ namespace OmniCore.Model
             cmd_body.Append(new byte[] { month, day, (byte)(year - 2000), hour, minute });
             cmd_body.Append(lot);
             cmd_body.Append(tid);
-            return new PdmMessage(PdmRequest.SetupPod, cmd_body);
+            return new RequestMessage(PdmRequest.SetupPod, cmd_body);
         }
 
-        public static PdmMessage request_alert_setup(List<AlertConfiguration> alert_configurations)
+        public static RequestMessage request_alert_setup(List<AlertConfiguration> alert_configurations)
         {
             var cmd_body = new Bytes();
             foreach (var ac in alert_configurations)
@@ -78,45 +78,45 @@ namespace OmniCore.Model
 
                 cmd_body.Append(new byte[] { b0, b1, b2, b3, (byte)ac.beep_repeat_type, (byte)ac.beep_type });
             }
-            return new PdmMessage(PdmRequest.ConfigureAlerts, cmd_body);
+            return new RequestMessage(PdmRequest.ConfigureAlerts, cmd_body);
         }
 
-        public static PdmMessage request_status(byte status_request_type = 0)
+        public static RequestMessage request_status(byte status_request_type = 0)
         {
-            return new PdmMessage(PdmRequest.Status, new Bytes().Append(status_request_type));
+            return new RequestMessage(PdmRequest.Status, new Bytes().Append(status_request_type));
         }
 
-        public static PdmMessage request_acknowledge_alerts(byte alert_mask)
+        public static RequestMessage request_acknowledge_alerts(byte alert_mask)
         {
-            return new PdmMessage(PdmRequest.AcknowledgeAlerts, new Bytes().Append(alert_mask));
+            return new RequestMessage(PdmRequest.AcknowledgeAlerts, new Bytes().Append(alert_mask));
         }
 
-        public static PdmMessage request_deactivate()
+        public static RequestMessage request_deactivate()
         {
-            return new PdmMessage(PdmRequest.DeactivatePod, new Bytes());
+            return new RequestMessage(PdmRequest.DeactivatePod, new Bytes());
         }
 
-        public static PdmMessage request_delivery_flags(byte byte16, byte byte17)
+        public static RequestMessage request_delivery_flags(byte byte16, byte byte17)
         {
-            return new PdmMessage(PdmRequest.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
+            return new RequestMessage(PdmRequest.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
         }
 
-        public static PdmMessage request_cancel_bolus()
+        public static RequestMessage request_cancel_bolus()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x04));
+            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x04));
         }
 
-        public static PdmMessage request_cancel_temp_basal()
+        public static RequestMessage request_cancel_temp_basal()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x02));
+            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x02));
         }
 
-        public static PdmMessage request_stop_basal_insulin()
+        public static RequestMessage request_stop_basal_insulin()
         {
-            return new PdmMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x01));
+            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x01));
         }
 
-        public static PdmMessage request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
+        public static RequestMessage request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
         {
             var half_hour_count = (int)(duration_hours * 2.0m);
             var hh_units = new decimal[half_hour_count];
@@ -143,7 +143,7 @@ namespace OmniCore.Model
             cmd_body.Append(body_checksum);
             cmd_body.Append(iseBody);
 
-            var msg = new PdmMessage(PdmRequest.InsulinSchedule, cmd_body);
+            var msg = new RequestMessage(PdmRequest.InsulinSchedule, cmd_body);
 
             byte reminders = 0;
             //#if confidenceReminder:
@@ -167,22 +167,22 @@ namespace OmniCore.Model
             return msg;
         }
 
-        public static PdmMessage request_prime_cannula()
+        public static RequestMessage request_prime_cannula()
         {
             return bolus_message(52, 8, 1);
         }
 
-        public static PdmMessage request_insert_cannula()
+        public static RequestMessage request_insert_cannula()
         {
             return bolus_message(10, 8, 1);
         }
 
-        public static PdmMessage request_bolus(decimal iu_bolus)
+        public static RequestMessage request_bolus(decimal iu_bolus)
         {
             return bolus_message((ushort)(iu_bolus / 0.05m));
         }
 
-        private static PdmMessage bolus_message(ushort pulse_count,
+        private static RequestMessage bolus_message(ushort pulse_count,
         int pulse_speed = 16, int delivery_delay = 2)
         {
             var commandBody = new Bytes().Append(0x02);
@@ -195,7 +195,7 @@ namespace OmniCore.Model
             commandBody.Append(checksum);
             commandBody.Append(bodyForChecksum);
 
-            var msg = new PdmMessage(PdmRequest.InsulinSchedule, commandBody);
+            var msg = new RequestMessage(PdmRequest.InsulinSchedule, commandBody);
 
             commandBody = new Bytes().Append(0x00);
             ushort p10 = (ushort)(pulse_count * 10);
@@ -397,7 +397,7 @@ namespace OmniCore.Model
             return list2.ToArray();
         }
 
-        public static PdmMessage request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
+        public static RequestMessage request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
         {
             var halved_schedule = new decimal[48];
             for (int i = 0; i < 47; i++)
@@ -435,7 +435,7 @@ namespace OmniCore.Model
             command_body.Append(body_checksum);
             command_body.Append(ise_body);
 
-            var msg = new PdmMessage(PdmRequest.InsulinSchedule, command_body);
+            var msg = new RequestMessage(PdmRequest.InsulinSchedule, command_body);
 
             command_body = new Bytes(new byte[] { 0, 0 });
 
@@ -476,7 +476,7 @@ namespace OmniCore.Model
             return msg;
         }
 
-        public static void response_parse(PodMessage response, Pod pod)
+        public static void response_parse(ResponseMessage response, Pod pod)
         {
             pod.nonce_syncword = null;
             var parts = response.get_parts();

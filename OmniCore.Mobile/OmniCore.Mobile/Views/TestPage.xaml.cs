@@ -1,5 +1,6 @@
 ﻿using OmniCore.Mobile.ViewModels;
 using OmniCore.Model;
+using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
@@ -62,9 +63,13 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                var p = new Pod() { id_lot = 44538, id_t = 1181076, radio_address = 0x34ff1d53 };
-                //await py.Pdm.UpdateStatus();
-                //await py.Pdm.Bolus(0.5m);
+                var rlp = new RileyLinkProvider();
+                var pod = new Pod(rlp)
+                {
+                    id_lot = 44538, id_t = 1181076, radio_address = 0x34ff1d53
+                };
+                await pod.UpdateStatus();
+                await pod.Bolus(0.5m);
             }
             finally
             {

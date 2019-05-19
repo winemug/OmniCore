@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IMessageExchange
+    public interface IMessageExchangeProvider
     {
-        Task<PodMessage> GetResponse(IMessageExchangeProgress messageExchangeProgress);
+        Task<IMessageExchange> GetMessageExchanger();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Model.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,15 +11,18 @@ namespace OmniCore.Model
         public Pod Pod { get; private set; }
 
         private Task CurrentExchange;
+        private readonly IMessageExchangeProvider MessageExchangeProvider;
 
-        internal ProtocolHandler(Pod pod)
+        internal ProtocolHandler(IMessageExchangeProvider messageExchangeProvider)
         {
+            MessageExchangeProvider = messageExchangeProvider;
             CurrentExchange = Task.Run(() => { });
         }
 
-        public async Task<PodMessage> PerformExchange(MessageExchange me)
+        public async Task<ResponseMessage> PerformExchange(RequestMessage requestMessage, IMessageProgress messageProgress = null)
         {
-            return await me.GetPodResponse().ConfigureAwait(false);
+            var messageExchange = await MessageExchangeProvider.GetMessageExchanger().ConfigureAwait(false);
+            return await messageExchange.GetResponse(requestMessage, messageProgress);
         }
     }
 }

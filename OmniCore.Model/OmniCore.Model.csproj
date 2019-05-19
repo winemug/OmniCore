@@ -23,5 +23,8 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OmniCore.Model.Interfaces\OmniCore.Model.Interfaces.csproj" />
+  </ItemGroup>
 
 </Project>

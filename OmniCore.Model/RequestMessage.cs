@@ -5,9 +5,9 @@ using System.Text;
 
 namespace OmniCore.Model
 {
-    public class PdmMessage : Message
+    public class RequestMessage : Message
     {
-        public PdmMessage(PdmRequest cmd_type, Bytes cmd_body):base()
+        public RequestMessage(PdmRequest cmd_type, Bytes cmd_body):base()
         {
             this.add_part(cmd_type, cmd_body);
             this.message_str_prefix = "\n";

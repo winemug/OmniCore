@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OmniCore.Model\OmniCore.Model.csproj" />
+    <ProjectReference Include="..\OmniCore.Model.Interfaces\OmniCore.Model.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

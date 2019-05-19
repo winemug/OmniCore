@@ -3,9 +3,9 @@ using System.Text;
 
 namespace OmniCore.Model
 {
-    public class PodMessage : Message
+    public class ResponseMessage : Message
     {
-        public PodMessage():base()
+        public ResponseMessage():base()
         {
             base.type = PacketType.POD;
         }

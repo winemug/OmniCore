@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model
 {
-    public class MessageExchange
+    public class RileyLinkMessageExchange : IMessageExchange
     {
         public int unique_packets = 0;
         public int repeated_sends = 0;
@@ -22,19 +22,14 @@ namespace OmniCore.Model
         public DateTime Started;
         public DateTime Ended;
 
-        public PdmMessage PdmMessage;
-        public PodMessage PodMessage;
-        public Exception Error;
-
         private IPacketRadio PacketRadio;
-        private Pod Pod;
 
+        private Pod Pod;
         public Packet last_received_packet;
         public int last_packet_timestamp = 0;
 
-        public MessageExchange(PdmMessage pdmMessage, IPacketRadio packetRadio, Pod pod)
+        public RileyLinkMessageExchange(RequestMessage pdmMessage, IPacketRadio packetRadio, Pod pod)
         {
-            this.PdmMessage = pdmMessage;
             this.PacketRadio = packetRadio;
             this.Pod = pod;
         }
@@ -44,7 +39,7 @@ namespace OmniCore.Model
             this.Pod.radio_packet_sequence = 0;
         }
 
-        public async Task<PodMessage> GetResponse(IMessageExchangeProgress messageExchangeProgress)
+        public async Task<ResponseMessage> GetResponse(RequestMessage requestMessage, IMessageProgress messageExchangeProgress)
         {
             this.Started = DateTime.UtcNow;
             if (this.PdmMessage.TxLevel.HasValue)
@@ -272,7 +267,7 @@ namespace OmniCore.Model
                 part_count = 1;
                 Debug.WriteLine($"Received POD message part {part_count}");
             }
-            var pod_response = new PodMessage();
+            var pod_response = new ResponseMessage();
             while (!pod_response.add_radio_packet(received))
             {
                 var ack_packet = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, (received.sequence + 1) % 32);
