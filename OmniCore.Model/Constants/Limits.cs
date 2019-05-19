@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Model.Constants
 {
-    class BasalConstants
+    class Limits
     {
         internal static readonly decimal MinimumRate = 0.05m;
         internal static readonly decimal MaximumRate = 30m;

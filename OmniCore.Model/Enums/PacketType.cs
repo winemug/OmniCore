@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Protocol
+namespace OmniCore.Model.Enum
 {
     public enum PacketType
     {

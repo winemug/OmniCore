@@ -22,13 +22,13 @@ namespace OmniCore.Model
 
         public BasalSchedule(IEnumerable<BasalEntry> basalEntries)
         {
-            var tableSize = (int) Math.Round(TimeSpan.FromDays(1).TotalSeconds / BasalConstants.TimeIncrements.TotalSeconds);
+            var tableSize = (int) Math.Round(TimeSpan.FromDays(1).TotalSeconds / Limits.TimeIncrements.TotalSeconds);
             this.Table = new decimal?[tableSize];
 
             foreach (var entry in basalEntries)
             {
-                var startIndex = (int) Math.Round(entry.StartOffset.TotalSeconds / BasalConstants.TimeIncrements.TotalSeconds);
-                var endIndex = (int) Math.Round(entry.EndOffset.TotalSeconds / BasalConstants.TimeIncrements.TotalSeconds);
+                var startIndex = (int) Math.Round(entry.StartOffset.TotalSeconds / Limits.TimeIncrements.TotalSeconds);
+                var endIndex = (int) Math.Round(entry.EndOffset.TotalSeconds / Limits.TimeIncrements.TotalSeconds);
 
                 for (int i=startIndex; i<endIndex; i++)
                 {

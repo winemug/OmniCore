@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Mobile", "OmniCore
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Py", "OmniCore.Py\OmniCore.Py.csproj", "{90C7FB7C-99D9-428A-83E1-8EC34363844D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model", "OmniCore.Model\OmniCore.Model.csproj", "{AF45ED3A-CC93-4448-991F-9D44845D66AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", "OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj", "{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		badbg|Any CPU = badbg|Any CPU
@@ -37,6 +41,18 @@ Global
 		{90C7FB7C-99D9-428A-83E1-8EC34363844D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90C7FB7C-99D9-428A-83E1-8EC34363844D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90C7FB7C-99D9-428A-83E1-8EC34363844D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.badbg|Any CPU.ActiveCfg = badbg|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.badbg|Any CPU.Build.0 = badbg|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF45ED3A-CC93-4448-991F-9D44845D66AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.badbg|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.badbg|Any CPU.Build.0 = Debug|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D265A5E-58AE-4BCC-B5B0-C8C5F847C141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

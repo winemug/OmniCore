@@ -105,7 +105,7 @@ namespace OmniCore.Py
             {
                 this.logger.Log($"Acknowledging alerts, bitmask: {alert_mask}");
                 _assert_pod();
-                await internal_update_status();
+                await internal_update_status().ConfigureAwait(false);
                 _assert_immediate_bolus_not_active();
                 if (this.Pod.state_progress < PodProgress.PairingSuccess)
                     throw new PdmException("Pod not paired completely yet.");
