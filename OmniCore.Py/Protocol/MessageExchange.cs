@@ -42,7 +42,6 @@ namespace OmniCore.Py
         private void reset_sequences()
         {
             this.Pod.radio_packet_sequence = 0;
-            this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
         }
 
         public async Task<PodMessage> GetPodResponse()
@@ -205,38 +204,61 @@ namespace OmniCore.Py
                         if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
                         {
                             this.Logger.Log("Trying to recover from protocol error");
-                            received = pe.ReceivedPacket;
-                            while(true)
-                            {
-                                this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
-                                var interimAck = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
-                                try
-                                {
-                                    received = await this.ExchangePackets(interimAck, RadioPacketType.POD, timeout);
-                                    break;
-                                }
-                                catch (PacketRadioException) { }
-                                catch (ProtocolException)
-                                {
+                            //this.Pod.radio_packet_sequence++;
+                            this.Pod.radio_message_sequence++;
+                            this.PdmMessage.sequence = this.Pod.radio_message_sequence;
 
-                                }
-                                catch (OmnipyTimeoutException) { }
-                            }
-                            continue;
-                        }
-                        if (pe.ReceivedPacket != null)
-                        {
-                            this.Logger.Log("Trying to recover from protocol error");
-                            this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
-                            this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
-                            if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
-                            {
-                                throw new StatusUpdateRequiredException(pe);
-                            }
+                            return await GetPodResponse();
                         }
                         else
-                            throw;
+                            throw pe;
                     }
+                    //catch (ProtocolException pe)
+                    //{
+                    //    if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
+                    //    {
+                    //        this.Logger.Log("Trying to recover from protocol error");
+                    //        received = pe.ReceivedPacket;
+                    //        while(true)
+                    //        {
+                    //            this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
+                    //            var interimAck = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
+                    //            try
+                    //            {
+                    //                received = await this.ExchangePackets(interimAck, RadioPacketType.POD, timeout);
+                    //                break;
+                    //            }
+                    //            catch (ProtocolException)
+                    //            {
+                    //                this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
+                    //                continue;
+                    //            }
+                    //            catch (OmnipyTimeoutException)
+                    //            {
+                    //                this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
+                    //                throw new StatusUpdateRequiredException(pe);
+                    //            }
+                    //            catch(Exception)
+                    //            {
+                    //                throw;
+                    //            }
+                    //        }
+                    //        continue;
+                    //    }
+                    //    if (pe.ReceivedPacket != null)
+                    //    {
+                    //        this.Logger.Log("Trying to recover from protocol error");
+                    //        this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
+                    //        this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
+                    //        if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
+                    //        {
+                    //            throw new StatusUpdateRequiredException(pe);
+                    //        }
+                    //    }
+                    //    else
+                    //        throw;
+                    //}
+                    catch (Exception) { throw; }
                 }
                 part++;
                 this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
@@ -282,7 +304,7 @@ namespace OmniCore.Py
                 else
                     this.repeated_sends += 1;
 
-                if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 4000)
+                if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 2000)
                     received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
                 else
                     received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
@@ -431,6 +453,10 @@ namespace OmniCore.Py
                     await this.PacketRadio.Reset();
                     start_time = Environment.TickCount;
                 }
+                catch (OmnipyTimeoutException)
+                {
+                }
+                catch (Exception) { throw; }
             }
             this.Logger.Log("Exceeded timeout while waiting for silence to fall");
         }

@@ -82,7 +82,7 @@ namespace OmniCore.py
 
             for (int i = 0; i < length; i++)
             {
-                crc = (crc >> 8) ^ crc8_table[(crc ^ data[i]) & 0xff];
+                crc = (crc >> 8) ^ crc8_table[(crc ^ (uint)data[i]) & 0xff];
             }
             return (byte)(crc & 0xff);
         }
@@ -95,7 +95,7 @@ namespace OmniCore.py
 
             for (int i = 0; i < length; i++)
             {
-                crc = (crc >> 8) ^ crc8_table[(crc ^ data[i]) & 0xff];
+                crc = (crc >> 8) ^ crc16_table[(crc ^ data[i]) & 0xff];
             }
             return (ushort)(crc & 0xffff);
         }

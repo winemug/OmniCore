@@ -119,8 +119,9 @@ namespace OmniCore.Py
                     return;
 
                 this.Logger.Log("Disconnecting from RL");
-                this.Device.CancelConnection();
-                await this.Device.WhenDisconnected();
+                // await this.ResponseCharacteristic.DisableNotifications();
+                // this.Device.CancelConnection();
+                // await this.Device.WhenDisconnected();
                 this.Logger.Log("Disconnected");
             }
             catch (Exception e)
@@ -144,6 +145,7 @@ namespace OmniCore.Py
                 throw new PacketRadioException("Error while resetting rileylink", e);
             }
         }
+
         public async Task<Bytes> GetPacket(uint timeout = 5000)
         {
             try
@@ -321,13 +323,13 @@ namespace OmniCore.Py
                 await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
                 await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
 
-                //var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
-                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
-                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
-                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, 0x5f });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, 0x14 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, 0x12 });
+                var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
+                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
+                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
+                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
+                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, 0x5f });
+                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, 0x14 });
+                //await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, 0x12 });
 
                 await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.DEVIATN, 0x44 });
                 await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL1, 0x20 });

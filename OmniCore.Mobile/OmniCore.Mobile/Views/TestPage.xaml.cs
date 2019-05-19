@@ -58,11 +58,17 @@ namespace OmniCore.Mobile.Views
             if (!await CheckPermission(Permission.Storage))
                 return;
 
-            var py = App.Instance.Py;
-            py.NewPod(0x34ff1d53, 44425, 470043);
             viewModel.TestButtonEnabled = false;
-            await py.Pdm.UpdateStatus();
-            viewModel.TestButtonEnabled = true;
+            try
+            {
+                var py = App.Instance.Py;
+                py.NewPod(0x34ff1d53, 44538, 1181076);
+                await py.Pdm.UpdateStatus();
+            }
+            finally
+            {
+                viewModel.TestButtonEnabled = true;
+            }
         }
     }
 }

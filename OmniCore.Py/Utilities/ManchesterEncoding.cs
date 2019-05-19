@@ -33,7 +33,7 @@ namespace OmniCore.Py
                 encoding1[b] = (ushort)(1 << (b * 2));
             }
 
-            for (byte dec = 0; dec < 255; dec++)
+            for (int dec = 0; dec < 256; dec++)
             {
                 ushort enc = 0;
                 for (int b = 0; b < 8; b++)

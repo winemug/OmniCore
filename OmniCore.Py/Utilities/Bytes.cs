@@ -7,7 +7,7 @@ namespace OmniCore.Py
 {
     public class Bytes
     {
-        private const int PAGE_SIZE = 128;
+        private const int PAGE_SIZE = 256;
         public byte[] ByteBuffer = new byte[PAGE_SIZE];
         public int Length { get; private set; }
 

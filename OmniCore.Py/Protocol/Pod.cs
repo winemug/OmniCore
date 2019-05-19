@@ -11,8 +11,26 @@ namespace OmniCore.Py
         public byte? id_version_unknown_byte = null;
         public byte[] id_version_unknown_7_bytes = null;
         public uint radio_address;
-        public int radio_packet_sequence = 0;
-        public int radio_message_sequence = 0;
+        private int _packet_seq = 0;
+        private int _message_seq = 0;
+
+        public int radio_packet_sequence {
+            get => _packet_seq;
+            set
+            {
+                _packet_seq = value % 32;
+            }
+        }
+
+        public int radio_message_sequence
+        {
+            get => _message_seq;
+            set
+            {
+                _message_seq = value % 16;
+            }
+        }
+
         public int? radio_low_gain = null;
         public int? radio_rssi = null;
 
