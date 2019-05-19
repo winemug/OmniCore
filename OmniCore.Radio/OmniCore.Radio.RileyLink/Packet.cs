@@ -1,16 +1,17 @@
-﻿using OmniCore.py;
+﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Utilities;
 
-namespace OmniCore.Py
+namespace OmniCore.Radio.RileyLink
 {
     public class Packet
     {
         public uint address;
-        public RadioPacketType type;
+        public PacketType type;
         public int sequence;
         public Bytes body;
         public byte rssi;
 
-        public Packet(uint address, RadioPacketType type, int sequence, Bytes body)
+        public Packet(uint address, PacketType type, int sequence, Bytes body)
         {
             this.address = address;
             this.type = type;
@@ -30,7 +31,7 @@ namespace OmniCore.Py
 
             var address = data.DWord(0);
             var d4 = data.Byte(4);
-            var type = (RadioPacketType)(d4 & 0b11100000);
+            var type = (PacketType)(d4 & 0b11100000);
             var sequence = d4 & 0b00011111;
             var body = data.Sub(5);
             return new Packet(address, type, sequence, body);
@@ -53,7 +54,7 @@ namespace OmniCore.Py
 
         public override string ToString()
         {
-            if (this.type == RadioPacketType.CON)
+            if (this.type == PacketType.CON)
             {
                 return $"0x{this.sequence:X2} {this.type.ToString().Substring(0, 3)} 0x{this.address:X8} {this.body.ToHex()}";
             }

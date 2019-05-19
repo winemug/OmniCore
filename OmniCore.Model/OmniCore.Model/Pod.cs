@@ -1,6 +1,5 @@
 using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -139,34 +138,34 @@ namespace OmniCore.Model
 
         private async Task send_request(RequestMessage request, bool with_nonce = false)
         {
-            if (with_nonce)
-            {
-                var nonce_val = this.Nonce.GetNext();
-                request.set_nonce(nonce_val);
-                nonce_syncword = null;
-            }
+            //if (with_nonce)
+            //{
+            //    var nonce_val = this.Nonce.GetNext();
+            //    request.set_nonce(nonce_val);
+            //    nonce_syncword = null;
+            //}
 
-            var me = new MessageExchange(request, this.packetRadio, this.Pod);
+            //var me = new MessageExchange(request, this.packetRadio, this.Pod);
 
-            var response = await me.GetPodResponse();
-            ProtocolHelper.response_parse(response, this.Pod);
+            //var response = await me.GetPodResponse();
+            //ProtocolHelper.response_parse(response, this.Pod);
 
-            if (with_nonce && nonce_syncword != null)
-            {
-                Debug.WriteLine("Nonce resync requested");
-                this.Nonce.Sync(request.sequence.Value);
-                var nonce_val = this.Nonce.GetNext();
-                request.set_nonce(nonce_val);
-                nonce_syncword = null;
-                radio_message_sequence = request.sequence.Value;
-                response = await me.GetPodResponse();
-                ProtocolHelper.response_parse(response, this.Pod);
-                if (nonce_syncword != null)
-                {
-                    this.Nonce.Reset();
-                    throw new PdmException("Nonce sync failed");
-                }
-            }
+            //if (with_nonce && nonce_syncword != null)
+            //{
+            //    Debug.WriteLine("Nonce resync requested");
+            //    this.Nonce.Sync(request.sequence.Value);
+            //    var nonce_val = this.Nonce.GetNext();
+            //    request.set_nonce(nonce_val);
+            //    nonce_syncword = null;
+            //    radio_message_sequence = request.sequence.Value;
+            //    response = await me.GetPodResponse();
+            //    ProtocolHelper.response_parse(response, this.Pod);
+            //    if (nonce_syncword != null)
+            //    {
+            //        this.Nonce.Reset();
+            //        throw new PdmException("Nonce sync failed");
+            //    }
+            //}
         }
 
         private async Task internal_update_status(byte update_type = 0)

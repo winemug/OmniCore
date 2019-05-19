@@ -7,6 +7,6 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchange
     {
-        Task<ResponseMessage> GetResponse(RequestMessage requestMessage, IMessageProgress messageProgress);
+        Task<IResponse> GetResponse(IRequest request, IMessageProgress messageProgress);
     }
 }

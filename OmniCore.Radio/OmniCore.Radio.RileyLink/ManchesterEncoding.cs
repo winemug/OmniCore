@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace OmniCore.Model.Utilities
+namespace OmniCore.Radio.RileyLink
 {
     public static class ManchesterEncoding
     {
