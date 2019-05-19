@@ -12,7 +12,7 @@ namespace OmniCore.Model.Enums
         PairingSuccess = 3,
         Purging = 4,
         ReadyForInjection = 5,
-        InjectionDone = 6,
+        BasalScheduleSet = 6,
         Priming = 7,
         Running = 8,
         RunningLow = 9,

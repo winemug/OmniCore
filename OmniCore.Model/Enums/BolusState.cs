@@ -7,7 +7,7 @@ namespace OmniCore.Model.Enums
     public enum BolusState
     {
         Inactive = 0,
-        ExtendedBolus = 1,
-        Running = 2
+        Extended = 1,
+        Immediate = 2
     }
 }

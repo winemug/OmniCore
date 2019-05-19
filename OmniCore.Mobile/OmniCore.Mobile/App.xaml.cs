@@ -1,5 +1,4 @@
-﻿using OmniCore.Py;
-using System;
+﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -9,11 +8,8 @@ namespace OmniCore.Mobile
     {
         public static App Instance => Application.Current as App;
 
-        public OmnipyStub Py { get; private set; }
-
         public App()
         {
-            this.Py = new OmnipyStub();
             InitializeComponent();
             MainPage = new Views.MainPage();
         }

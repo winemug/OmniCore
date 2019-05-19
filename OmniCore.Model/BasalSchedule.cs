@@ -43,8 +43,6 @@ namespace OmniCore.Model
                 if (!rate.HasValue)
                     throw new ArgumentException($"Gap found in basal entries. The entire day should be covered.");
             }
-        }
-
-        
+        }       
     }
 }

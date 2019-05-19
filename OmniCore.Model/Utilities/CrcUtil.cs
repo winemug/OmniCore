@@ -2,7 +2,7 @@ namespace OmniCore.Model.Utilities
 {
     public static class CrcUtil
     {
-        public static ushort[] crc8_table =
+        public static ushort[] Crc8Table =
             new ushort[]
             {
                 0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
@@ -39,7 +39,7 @@ namespace OmniCore.Model.Utilities
                 0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3
             };
 
-        public static ushort[] crc16_table =
+        public static ushort[] Crc16Table =
             new ushort[]
             {
                 0x0000,0x8005,0x800f,0x000a,0x801b,0x001e,0x0014,0x8011,0x8033,
@@ -82,7 +82,7 @@ namespace OmniCore.Model.Utilities
 
             for (int i = 0; i < length; i++)
             {
-                crc = (crc >> 8) ^ crc8_table[(crc ^ (uint)data[i]) & 0xff];
+                crc = (crc >> 8) ^ Crc8Table[(crc ^ (uint)data[i]) & 0xff];
             }
             return (byte)(crc & 0xff);
         }
@@ -95,7 +95,7 @@ namespace OmniCore.Model.Utilities
 
             for (int i = 0; i < length; i++)
             {
-                crc = (crc >> 8) ^ crc16_table[(crc ^ data[i]) & 0xff];
+                crc = (crc >> 8) ^ Crc16Table[(crc ^ data[i]) & 0xff];
             }
             return (ushort)(crc & 0xffff);
         }

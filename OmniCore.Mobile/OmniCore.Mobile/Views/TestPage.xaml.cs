@@ -61,10 +61,10 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                var py = App.Instance.Py;
-                py.NewPod(0x34ff1d53, 44538, 1181076);
-                await py.Pdm.UpdateStatus();
-                await py.Pdm.Bolus(0.5m);
+                //var py = App.Instance.Py;
+                //py.NewPod(0x34ff1d53, 44538, 1181076);
+                //await py.Pdm.UpdateStatus();
+                //await py.Pdm.Bolus(0.5m);
             }
             finally
             {

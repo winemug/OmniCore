@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ble.net" Version="1.2.1" />
+    <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OmniCore.Model\OmniCore.Model.csproj" />
   </ItemGroup>
 
 </Project>
