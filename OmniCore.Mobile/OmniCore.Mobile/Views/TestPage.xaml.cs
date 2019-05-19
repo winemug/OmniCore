@@ -64,7 +64,7 @@ namespace OmniCore.Mobile.Views
             try
             {
                 var rlp = new RileyLinkProvider();
-                var pod = new Pod(rlp)
+                var pod = new ErosPod(rlp)
                 {
                     id_lot = 44538, id_t = 1181076, radio_address = 0x34ff1d53
                 };

@@ -1,11 +1,12 @@
 using OmniCore.Model.Enums;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
 using System.Text;
 
 namespace OmniCore.Model
 {
-    public class RequestMessage : Message
+    public class RequestMessage : Message, IRequest
     {
         public RequestMessage(PdmRequest cmd_type, Bytes cmd_body):base()
         {

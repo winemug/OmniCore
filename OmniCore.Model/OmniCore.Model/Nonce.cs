@@ -41,7 +41,11 @@ namespace OmniCore.Model
             if (this.Pod.nonce_runs++ > 25)
                 this.Pod.nonce_last = FAKE_NONCE;
             else
-                this.Pod.nonce_last = GetNextInternal(ref this.Pod.nonce_ptr);
+            {
+                var ptr = this.Pod.nonce_ptr;
+                this.Pod.nonce_last = GetNextInternal(ref ptr);
+                this.Pod.nonce_ptr = ptr;
+            }
             return this.Pod.nonce_last.Value;
         }
 

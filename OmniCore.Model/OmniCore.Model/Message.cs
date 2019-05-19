@@ -1,25 +1,26 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 
 namespace OmniCore.Model
 {
-    public class Message
+    public class Message : IMessage
     {
-        public uint? address = null;
-        public int? sequence = null;
-        public bool expect_critical_followup = false;
-        public int body_length = 0;
-        public Bytes body = null;
-        public Bytes body_prefix = null;
-        public List<Tuple<byte, Bytes, uint?>> parts = new List<Tuple<byte, Bytes, uint?>>();
-        public string message_str_prefix = "\n";
-        public PacketType? type = null;
-        public TxPower? TxLevel;
-        public uint? AckAddressOverride;
-        public bool DoubleTake;
+        public uint? address { get; set; }
+        public int? sequence { get; set; }
+        public bool expect_critical_followup { get; set; }
+        public int body_length { get; set; }
+        public Bytes body { get; set; }
+        public Bytes body_prefix { get; set; }
+        public List<Tuple<byte, Bytes, uint?>> parts { get; set; }
+        public string message_str_prefix { get; set; }
+        public PacketType? type { get; set; }
+        public TxPower? TxLevel { get; set; }
+        public uint? AckAddressOverride { get; set; }
+        public bool DoubleTake { get; set; }
 
         public bool add_radio_packet(Packet radio_packet)
         {
@@ -63,7 +64,7 @@ namespace OmniCore.Model
                         }
                         else
                         {
-                            var response_len = this.body[bi+1];
+                            var response_len = this.body[bi + 1];
                             response_body = this.body.Sub(bi + 2, bi + 2 + response_len);
                             bi += response_len + 2;
                         }
@@ -82,17 +83,12 @@ namespace OmniCore.Model
             }
         }
 
-        public List<Tuple<byte, Bytes, uint?>> get_parts()
-        {
-            return this.parts;
-        }
-
         public List<Packet> get_radio_packets(int first_packet_sequence)
         {
             this.message_str_prefix = $"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ";
 
             var message_body_len = 0;
-            foreach(var p in this.parts)
+            foreach (var p in this.parts)
             {
                 var cmd_body = p.Item2;
                 var nonce = p.Item3;
@@ -113,7 +109,7 @@ namespace OmniCore.Model
             message_body.Append(b0);
             message_body.Append(b1);
 
-            foreach(var p in this.parts)
+            foreach (var p in this.parts)
             {
                 var cmd_type = p.Item1;
                 var cmd_body = p.Item2;
@@ -146,7 +142,7 @@ namespace OmniCore.Model
             int total_body_len = (int)message_body.Length;
             var radio_packets = new List<Packet>();
 
-            while(index < message_body.Length)
+            while (index < message_body.Length)
             {
                 var to_write = Math.Min(31, message_body.Length - index);
                 var packet_body = message_body.Sub(index, index + to_write);

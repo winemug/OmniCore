@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IResponse
+    public interface IResponse : IMessage
     {
     }
 }

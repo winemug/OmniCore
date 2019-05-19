@@ -479,7 +479,7 @@ namespace OmniCore.Model
         public static void response_parse(ResponseMessage response, Pod pod)
         {
             pod.nonce_syncword = null;
-            var parts = response.get_parts();
+            var parts = response.parts;
             foreach(var part in parts)
             {
                 var response_type = (PodResponse)part.Item1;

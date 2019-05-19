@@ -1,9 +1,10 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Interfaces;
 using System.Text;
 
 namespace OmniCore.Model
 {
-    public class ResponseMessage : Message
+    public class ResponseMessage : Message, IResponse
     {
         public ResponseMessage():base()
         {

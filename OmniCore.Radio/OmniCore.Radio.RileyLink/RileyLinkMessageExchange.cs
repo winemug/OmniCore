@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Model;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
@@ -7,7 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model
+namespace OmniCore.Radio.RileyLink
 {
     public class RileyLinkMessageExchange : IMessageExchange
     {
@@ -24,14 +25,12 @@ namespace OmniCore.Model
 
         private IPacketRadio PacketRadio;
 
-        private Pod Pod;
+        private IPod Pod;
         public Packet last_received_packet;
         public int last_packet_timestamp = 0;
 
-        public RileyLinkMessageExchange(RequestMessage pdmMessage, IPacketRadio packetRadio, Pod pod)
+        internal RileyLinkMessageExchange()
         {
-            this.PacketRadio = packetRadio;
-            this.Pod = pod;
         }
 
         private void reset_sequences()
@@ -39,25 +38,25 @@ namespace OmniCore.Model
             this.Pod.radio_packet_sequence = 0;
         }
 
-        public async Task<ResponseMessage> GetResponse(RequestMessage requestMessage, IMessageProgress messageExchangeProgress)
+        public async Task<IResponse> GetResponse(IRequest requestMessage, IMessageProgress messageExchangeProgress)
         {
             this.Started = DateTime.UtcNow;
-            if (this.PdmMessage.TxLevel.HasValue)
+            if (requestMessage.TxLevel.HasValue)
             {
-                this.PacketRadio.SetTxLevel(this.PdmMessage.TxLevel.Value);
+                this.PacketRadio.SetTxLevel(requestMessage.TxLevel.Value);
             }
 
-            if (!this.PdmMessage.address.HasValue)
-                this.PdmMessage.address = this.Pod.radio_address;
+            if (!requestMessage.address.HasValue)
+                requestMessage.address = this.Pod.radio_address;
 
-            if (!this.PdmMessage.AckAddressOverride.HasValue)
-                this.PdmMessage.AckAddressOverride = this.Pod.radio_address;
+            if (!requestMessage.AckAddressOverride.HasValue)
+                requestMessage.AckAddressOverride = this.Pod.radio_address;
 
-            if (!this.PdmMessage.sequence.HasValue)
-                this.PdmMessage.sequence = this.Pod.radio_message_sequence;
+            if (!requestMessage.sequence.HasValue)
+                requestMessage.sequence = this.Pod.radio_message_sequence;
 
 
-            var packets = this.PdmMessage.get_radio_packets(this.Pod.radio_packet_sequence);
+            var packets = requestMessage.get_radio_packets(this.Pod.radio_packet_sequence);
 
             Packet received = null;
             var packet_count = packets.Count;
@@ -201,9 +200,9 @@ namespace OmniCore.Model
                             Debug.WriteLine("Trying to recover from protocol error");
                             //this.Pod.radio_packet_sequence++;
                             this.Pod.radio_message_sequence++;
-                            this.PdmMessage.sequence = this.Pod.radio_message_sequence;
+                            requestMessage.sequence = this.Pod.radio_message_sequence;
 
-                            return await GetPodResponse();
+                            return await GetResponse(requestMessage, messageExchangeProgress);
                         }
                         else
                             throw pe;
@@ -259,7 +258,7 @@ namespace OmniCore.Model
                 this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
             }
 
-            Debug.WriteLine($"SENT MSG {this.PdmMessage}");
+            Debug.WriteLine($"SENT MSG {requestMessage}");
 
             var part_count = 0;
             if (received.type == PacketType.POD)
@@ -270,7 +269,7 @@ namespace OmniCore.Model
             var pod_response = new ResponseMessage();
             while (!pod_response.add_radio_packet(received))
             {
-                var ack_packet = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, (received.sequence + 1) % 32);
+                var ack_packet = this.interim_ack(requestMessage.AckAddressOverride.Value, (received.sequence + 1) % 32);
                 received = await this.ExchangePackets(ack_packet, PacketType.CON);
                 part_count++;
                 Debug.WriteLine($"Received POD message part {part_count}");

@@ -13,13 +13,13 @@ namespace OmniCore.Model
         private Task CurrentExchange;
         private readonly IMessageExchangeProvider MessageExchangeProvider;
 
-        internal ProtocolHandler(IMessageExchangeProvider messageExchangeProvider)
+        public ProtocolHandler(IMessageExchangeProvider messageExchangeProvider)
         {
             MessageExchangeProvider = messageExchangeProvider;
             CurrentExchange = Task.Run(() => { });
         }
 
-        public async Task<ResponseMessage> PerformExchange(RequestMessage requestMessage, IMessageProgress messageProgress = null)
+        public async Task<IResponse> PerformExchange(IRequest requestMessage, IMessageProgress messageProgress = null)
         {
             var messageExchange = await MessageExchangeProvider.GetMessageExchanger().ConfigureAwait(false);
             return await messageExchange.GetResponse(requestMessage, messageProgress);
