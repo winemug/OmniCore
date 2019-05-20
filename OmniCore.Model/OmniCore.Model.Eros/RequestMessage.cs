@@ -4,7 +4,7 @@ using OmniCore.Model.Utilities;
 using System;
 using System.Text;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public class RequestMessage : Message, IRequest
     {

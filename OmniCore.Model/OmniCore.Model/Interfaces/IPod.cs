@@ -6,9 +6,9 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPod : IPodVariables
     {
-        Task AcknowledgeAlerts(byte alert_mask);
+        Task AcknowledgeAlerts(byte alertMask);
         Task Bolus(decimal bolusAmount);
         Task CancelBolus();
-        Task UpdateStatus(byte update_type = 0);
+        Task UpdateStatus(StatusRequestType requestType);
     }
 }

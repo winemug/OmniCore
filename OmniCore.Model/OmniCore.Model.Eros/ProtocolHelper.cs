@@ -1,20 +1,22 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public static class ProtocolHelper
     {
-        public static RequestMessage request_assign_address(uint address)
+        public static IRequest request_assign_address(uint address)
         {
             return new RequestMessage(PdmRequest.AssignAddress, new Bytes(address));
         }
 
-        public static RequestMessage request_setup_pod(uint lot, uint tid, uint address,
+        public static IRequest request_setup_pod(uint lot, uint tid, uint address,
             int year, byte month, byte day, byte hour, byte minute)
         {
             var cmd_body = new Bytes();
@@ -26,7 +28,7 @@ namespace OmniCore.Model
             return new RequestMessage(PdmRequest.SetupPod, cmd_body);
         }
 
-        public static RequestMessage request_alert_setup(List<AlertConfiguration> alert_configurations)
+        public static IRequest request_alert_setup(List<AlertConfiguration> alert_configurations)
         {
             var cmd_body = new Bytes();
             foreach (var ac in alert_configurations)
@@ -81,42 +83,42 @@ namespace OmniCore.Model
             return new RequestMessage(PdmRequest.ConfigureAlerts, cmd_body);
         }
 
-        public static RequestMessage request_status(byte status_request_type = 0)
+        public static IRequest request_status(StatusRequestType status_request_type = StatusRequestType.Standard)
         {
-            return new RequestMessage(PdmRequest.Status, new Bytes().Append(status_request_type));
+            return new RequestMessage(PdmRequest.Status, new Bytes().Append((byte)status_request_type));
         }
 
-        public static RequestMessage request_acknowledge_alerts(byte alert_mask)
+        public static IRequest request_acknowledge_alerts(byte alert_mask)
         {
             return new RequestMessage(PdmRequest.AcknowledgeAlerts, new Bytes().Append(alert_mask));
         }
 
-        public static RequestMessage request_deactivate()
+        public static IRequest request_deactivate()
         {
             return new RequestMessage(PdmRequest.DeactivatePod, new Bytes());
         }
 
-        public static RequestMessage request_delivery_flags(byte byte16, byte byte17)
+        public static IRequest request_delivery_flags(byte byte16, byte byte17)
         {
             return new RequestMessage(PdmRequest.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
         }
 
-        public static RequestMessage request_cancel_bolus()
+        public static IRequest request_cancel_bolus()
         {
             return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x04));
         }
 
-        public static RequestMessage request_cancel_temp_basal()
+        public static IRequest request_cancel_temp_basal()
         {
             return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x02));
         }
 
-        public static RequestMessage request_stop_basal_insulin()
+        public static IRequest request_stop_basal_insulin()
         {
             return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x01));
         }
 
-        public static RequestMessage request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
+        public static IRequest request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
         {
             var half_hour_count = (int)(duration_hours * 2.0m);
             var hh_units = new decimal[half_hour_count];
@@ -167,22 +169,22 @@ namespace OmniCore.Model
             return msg;
         }
 
-        public static RequestMessage request_prime_cannula()
+        public static IRequest request_prime_cannula()
         {
             return bolus_message(52, 8, 1);
         }
 
-        public static RequestMessage request_insert_cannula()
+        public static IRequest request_insert_cannula()
         {
             return bolus_message(10, 8, 1);
         }
 
-        public static RequestMessage request_bolus(decimal iu_bolus)
+        public static IRequest request_bolus(decimal iu_bolus)
         {
             return bolus_message((ushort)(iu_bolus / 0.05m));
         }
 
-        private static RequestMessage bolus_message(ushort pulse_count,
+        private static IRequest bolus_message(ushort pulse_count,
         int pulse_speed = 16, int delivery_delay = 2)
         {
             var commandBody = new Bytes().Append(0x02);
@@ -397,7 +399,7 @@ namespace OmniCore.Model
             return list2.ToArray();
         }
 
-        public static RequestMessage request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
+        public static IRequest request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
         {
             var halved_schedule = new decimal[48];
             for (int i = 0; i < 47; i++)
@@ -476,7 +478,7 @@ namespace OmniCore.Model
             return msg;
         }
 
-        public static void response_parse(ResponseMessage response, Pod pod)
+        public static void response_parse(IResponse response, IPod pod)
         {
             pod.nonce_syncword = null;
             var parts = response.parts;
@@ -505,7 +507,7 @@ namespace OmniCore.Model
             }
         }
 
-        private static void parse_version_response(Bytes response, Pod pod)
+        private static void parse_version_response(Bytes response, IPod pod)
         {
             bool lengthyResponse = false;
             pod.state_last_updated = DateTime.UtcNow;
@@ -543,7 +545,7 @@ namespace OmniCore.Model
                 pod.radio_address = response.DWord(i);
         }
 
-        private static void parse_information_response(Bytes response, Pod pod)
+        private static void parse_information_response(Bytes response, IPod pod)
         {
             int i = 1;
             var rt = response.Byte(i++);
@@ -595,7 +597,7 @@ namespace OmniCore.Model
             }
         }
 
-        private static void parse_delivery_state(Pod pod, byte delivery_state)
+        private static void parse_delivery_state(IPod pod, byte delivery_state)
         {
             if ((delivery_state & 8) > 0)
                 pod.state_bolus = BolusState.Extended;
@@ -612,7 +614,7 @@ namespace OmniCore.Model
                 pod.state_basal = BasalState.Suspended;
         }
 
-        private static void parse_resync_response(Bytes response, Pod pod)
+        private static void parse_resync_response(Bytes response, IPod pod)
         {
             if (response[1] == 0x14)
                 pod.nonce_syncword = response.Word(2);
@@ -620,7 +622,7 @@ namespace OmniCore.Model
                 throw new ProtocolException($"Unknown resync request {response} from pod");
         }
 
-        private static void parse_status_response(Bytes response, Pod pod)
+        private static void parse_status_response(Bytes response, IPod pod)
         {
             pod.state_last_updated = DateTime.UtcNow;
             var s0 = response[0];

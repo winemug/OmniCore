@@ -2,7 +2,7 @@
 using OmniCore.Model.Interfaces;
 using System.Text;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public class ResponseMessage : Message, IResponse
     {

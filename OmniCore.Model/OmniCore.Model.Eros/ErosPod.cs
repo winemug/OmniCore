@@ -1,4 +1,5 @@
 using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using System;
@@ -6,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public class ErosPod : Pod, IPod
     {
@@ -58,7 +59,7 @@ namespace OmniCore.Model
             //}
         }
 
-        private async Task send_request(RequestMessage request, bool with_nonce = false)
+        private async Task send_request(IRequest request, bool with_nonce = false)
         {
             //if (with_nonce)
             //{
@@ -90,12 +91,12 @@ namespace OmniCore.Model
             //}
         }
 
-        private async Task internal_update_status(byte update_type = 0)
+        private async Task internal_update_status(StatusRequestType update_type = StatusRequestType.Standard)
         {
             await send_request(ProtocolHelper.request_status(update_type));
         }
 
-        public async Task UpdateStatus(byte update_type = 0)
+        public async Task UpdateStatus(StatusRequestType update_type)
         {
             try
             {

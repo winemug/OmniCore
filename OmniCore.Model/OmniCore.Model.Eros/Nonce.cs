@@ -1,6 +1,6 @@
 using OmniCore.Model.Utilities;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
 
 	public class Nonce

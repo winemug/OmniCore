@@ -1,8 +1,9 @@
-﻿using System;
+﻿using OmniCore.Model.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Exceptions
+namespace OmniCore.Model.Eros
 {
     public class StatusUpdateRequiredException : OmniCoreException
     {

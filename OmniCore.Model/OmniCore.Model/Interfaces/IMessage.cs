@@ -21,7 +21,7 @@ namespace OmniCore.Model.Interfaces
         PacketType? type { get; set; }
 
         void add_part(PdmRequest cmd_type, Bytes cmd_body);
-        bool add_radio_packet(Packet radio_packet);
-        List<Packet> get_radio_packets(int first_packet_sequence);
+        //bool add_radio_packet(Packet radio_packet);
+        //List<Packet> get_radio_packets(int first_packet_sequence);
     }
 }

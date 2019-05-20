@@ -5,7 +5,7 @@ using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public class Message : IMessage
     {

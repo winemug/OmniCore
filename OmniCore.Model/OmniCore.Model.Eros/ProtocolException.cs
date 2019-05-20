@@ -1,4 +1,6 @@
-﻿namespace OmniCore.Model.Exceptions
+﻿using OmniCore.Model.Exceptions;
+
+namespace OmniCore.Model.Eros
 {
     public class ProtocolException : OmniCoreException
     {

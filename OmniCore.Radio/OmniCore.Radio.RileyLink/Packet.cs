@@ -1,7 +1,7 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Utilities;
 
-namespace OmniCore.Model
+namespace OmniCore.Radio.RileyLink
 {
     public class Packet
     {
