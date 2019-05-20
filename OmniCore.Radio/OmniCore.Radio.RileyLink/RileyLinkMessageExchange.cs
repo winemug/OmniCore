@@ -23,7 +23,7 @@ namespace OmniCore.Radio.RileyLink
         public DateTime Started;
         public DateTime Ended;
 
-        private IPacketRadio PacketRadio;
+        private RileyLink RileyLink;
 
         private IPod Pod;
         public Packet last_received_packet;
@@ -31,6 +31,7 @@ namespace OmniCore.Radio.RileyLink
 
         internal RileyLinkMessageExchange()
         {
+            this.RileyLink = new RileyLink();
         }
 
         private void reset_sequences()
@@ -43,7 +44,7 @@ namespace OmniCore.Radio.RileyLink
             this.Started = DateTime.UtcNow;
             if (requestMessage.TxLevel.HasValue)
             {
-                this.PacketRadio.SetTxLevel(requestMessage.TxLevel.Value);
+                RileyLink.SetTxLevel(requestMessage.TxLevel.Value);
             }
 
             if (!requestMessage.address.HasValue)
@@ -105,7 +106,7 @@ namespace OmniCore.Radio.RileyLink
                             }
                             else if (repeat_count == 2)
                             {
-                                await this.PacketRadio.Reset();
+                                await RileyLink.Reset();
                                 timeout = 15000;
                                 continue;
                             }
@@ -145,12 +146,12 @@ namespace OmniCore.Radio.RileyLink
                         {
                             if (repeat_count < 2)
                             {
-                                await this.PacketRadio.Reset();
+                                await RileyLink.Reset();
                                 continue;
                             }
                             else if (repeat_count < 4)
                             {
-                                await this.PacketRadio.Reset();
+                                await RileyLink.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -165,7 +166,7 @@ namespace OmniCore.Radio.RileyLink
                         {
                             if (repeat_count < 6)
                             {
-                                await this.PacketRadio.Reset();
+                                await RileyLink.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -180,7 +181,7 @@ namespace OmniCore.Radio.RileyLink
                         {
                             if (repeat_count < 10)
                             {
-                                await this.PacketRadio.Reset();
+                                await RileyLink.Reset();
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -299,9 +300,9 @@ namespace OmniCore.Radio.RileyLink
                     this.repeated_sends += 1;
 
                 if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 2000)
-                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
+                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
                 else
-                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
+                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
                 if (start_time == 0)
                     start_time = Environment.TickCount;
 
@@ -311,7 +312,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.receive_timeouts++;
                     Debug.WriteLine("RECV PKT None");
-                    this.PacketRadio.TxLevelUp();
+                    RileyLink.TxLevelUp();
                     continue;
                 }
 
@@ -319,7 +320,7 @@ namespace OmniCore.Radio.RileyLink
                 if (p == null)
                 {
                     this.bad_packets++;
-                    this.PacketRadio.TxLevelDown();
+                    RileyLink.TxLevelDown();
                     continue;
                 }
 
@@ -328,7 +329,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.bad_packets++;
                     Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                    this.PacketRadio.TxLevelDown();
+                    RileyLink.TxLevelDown();
                     continue;
                 }
 
@@ -339,7 +340,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.repeated_receives++;
                     Debug.WriteLine("RECV PKT previous");
-                    this.PacketRadio.TxLevelUp();
+                    RileyLink.TxLevelUp();
                     continue;
                 }
 
@@ -379,7 +380,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     Debug.WriteLine($"SEND PKT {packet_to_send}");
 
-                    received = await this.PacketRadio.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
+                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
 
                     if (start_time == 0)
                         start_time = Environment.TickCount;
@@ -396,7 +397,7 @@ namespace OmniCore.Radio.RileyLink
 
                     if (received == null)
                     {
-                        received = await this.PacketRadio.GetPacket(600);
+                        received = await RileyLink.GetPacket(600);
                         if (received == null)
                         {
                             Debug.WriteLine("Silence fell.");
@@ -409,7 +410,7 @@ namespace OmniCore.Radio.RileyLink
                     if (p == null)
                     {
                         this.bad_packets++;
-                        this.PacketRadio.TxLevelDown();
+                        RileyLink.TxLevelDown();
                         continue;
                     }
 
@@ -417,7 +418,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         this.bad_packets++;
                         Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                        this.PacketRadio.TxLevelDown();
+                        RileyLink.TxLevelDown();
                         continue;
                     }
 
@@ -427,7 +428,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         this.repeated_receives++;
                         Debug.WriteLine("RECV PKT previous");
-                        this.PacketRadio.TxLevelUp();
+                        RileyLink.TxLevelUp();
                         continue;
                     }
 
@@ -444,7 +445,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.radio_errors++;
                     Debug.WriteLine($"Radio error during send, retrying {pre}");
-                    await this.PacketRadio.Reset();
+                    await RileyLink.Reset();
                     start_time = Environment.TickCount;
                 }
                 catch (OmniCoreTimeoutException)

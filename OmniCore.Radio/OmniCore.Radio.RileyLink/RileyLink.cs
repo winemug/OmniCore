@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Radio.RileyLink
 {
-    public class RileyLink : IPacketRadio
+    public class RileyLink
     {
         private byte[] PA_LEVELS = new byte[] {
              0x0E,
