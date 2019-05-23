@@ -1,9 +1,10 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radio.RileyLink
 {
-    public class Packet
+    public class RadioPacket
     {
         public uint address;
         public PacketType type;
@@ -11,7 +12,15 @@ namespace OmniCore.Radio.RileyLink
         public Bytes body;
         public byte rssi;
 
-        public Packet(uint address, PacketType type, int sequence, Bytes body)
+        public Bytes PartialData
+        {
+            get
+            {
+                return get_data();
+            }
+        }
+
+        public RadioPacket(uint address, PacketType type, int sequence, Bytes body)
         {
             this.address = address;
             this.type = type;
@@ -19,7 +28,7 @@ namespace OmniCore.Radio.RileyLink
             this.body = body;
         }
 
-        public static Packet parse(Bytes data)
+        public static RadioPacket parse(Bytes data)
         {
             if (data.Length < 5)
                 return null;
@@ -34,10 +43,10 @@ namespace OmniCore.Radio.RileyLink
             var type = (PacketType)(d4 & 0b11100000);
             var sequence = d4 & 0b00011111;
             var body = data.Sub(5);
-            return new Packet(address, type, sequence, body);
+            return new RadioPacket(address, type, sequence, body);
         }
 
-        public Packet with_sequence(int sequence)
+        public RadioPacket with_sequence(int sequence)
         {
             this.sequence = sequence;
             return this;

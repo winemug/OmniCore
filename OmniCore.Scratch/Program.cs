@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace OmniCore.Scratch
 {
@@ -9,12 +10,12 @@ namespace OmniCore.Scratch
         {
             Console.WriteLine("Scratch world!");
 
-            var di = new DirectoryInfo(@"D:\omnipod\ti_captures\");
-            foreach (var fi in di.GetFiles("*.psd"))
+            foreach (var fi in new DirectoryInfo(@"C:\test\").GetFiles("*.omni").OrderBy(x => x.Name))
             {
-                SnifferUtils.ExtractPacketsFromTISniffer(fi.FullName);
+                Console.Write(fi.Name);
+                SnifferUtils.ExtractPacketsFromOpenOmniRTL(fi.FullName, @"C:\test\result.txt");
             }
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }

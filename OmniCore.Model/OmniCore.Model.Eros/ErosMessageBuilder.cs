@@ -1,5 +1,4 @@
 ﻿using OmniCore.Model.Enums;
-using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
@@ -9,14 +8,39 @@ using System.Text;
 
 namespace OmniCore.Model.Eros
 {
-    public static class ProtocolHelper
+    public class ErosMessageBuilder : IMessageBuilder
     {
-        public static IRequest request_assign_address(uint address)
+
+        private Bytes MessageBody = new Bytes();
+        private List<IMessagePart> Parts = new List<IMessagePart>();
+
+        public bool IsValid => throw new NotImplementedException();
+
+        public bool CanBuild
         {
-            return new RequestMessage(PdmRequest.AssignAddress, new Bytes(address));
+            get
+            {
+                return Parts.Count > 0;
+            }
         }
 
-        public static IRequest request_setup_pod(uint lot, uint tid, uint address,
+        public IMessage Build()
+        {
+            return new ErosMessage();
+        }
+
+        public IMessageBuilder WithPart(IMessagePart request)
+        {
+            Parts.Add(request);
+            return this;
+        }
+
+        public IMessageBuilder WithAssignAddress(uint address)
+        {
+            return WithPart(new ErosRequest(PartType.RequestAssignAddress, new Bytes(address)));
+        }
+
+        public IMessageBuilder WithSetupPod(uint lot, uint tid, uint address,
             int year, byte month, byte day, byte hour, byte minute)
         {
             var cmd_body = new Bytes();
@@ -25,10 +49,10 @@ namespace OmniCore.Model.Eros
             cmd_body.Append(new byte[] { month, day, (byte)(year - 2000), hour, minute });
             cmd_body.Append(lot);
             cmd_body.Append(tid);
-            return new RequestMessage(PdmRequest.SetupPod, cmd_body);
+            return WithPart(new ErosRequest(PartType.RequestSetupPod, cmd_body));
         }
 
-        public static IRequest request_alert_setup(List<AlertConfiguration> alert_configurations)
+        public IMessageBuilder WithAlertSetup(List<AlertConfiguration> alert_configurations)
         {
             var cmd_body = new Bytes();
             foreach (var ac in alert_configurations)
@@ -80,42 +104,43 @@ namespace OmniCore.Model.Eros
 
                 cmd_body.Append(new byte[] { b0, b1, b2, b3, (byte)ac.beep_repeat_type, (byte)ac.beep_type });
             }
-            return new RequestMessage(PdmRequest.ConfigureAlerts, cmd_body);
+            return WithPart(new ErosRequest(PartType.RequestConfigureAlerts, cmd_body, true));
         }
 
-        public static IRequest request_status(StatusRequestType status_request_type = StatusRequestType.Standard)
+        public IMessageBuilder WithStatus(StatusRequestType statusRequestType = StatusRequestType.Standard)
         {
-            return new RequestMessage(PdmRequest.Status, new Bytes().Append((byte)status_request_type));
+            return WithPart(new ErosRequest(PartType.RequestStatus, new Bytes().Append((byte)statusRequestType)));
         }
 
+        /*
         public static IRequest request_acknowledge_alerts(byte alert_mask)
         {
-            return new RequestMessage(PdmRequest.AcknowledgeAlerts, new Bytes().Append(alert_mask));
+            return new MessagePart(RequestType.AcknowledgeAlerts, new Bytes().Append(alert_mask));
         }
 
         public static IRequest request_deactivate()
         {
-            return new RequestMessage(PdmRequest.DeactivatePod, new Bytes());
+            return new MessagePart(RequestType.DeactivatePod, new Bytes());
         }
 
         public static IRequest request_delivery_flags(byte byte16, byte byte17)
         {
-            return new RequestMessage(PdmRequest.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
+            return new MessagePart(RequestType.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
         }
 
         public static IRequest request_cancel_bolus()
         {
-            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x04));
+            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x04));
         }
 
         public static IRequest request_cancel_temp_basal()
         {
-            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x02));
+            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x02));
         }
 
         public static IRequest request_stop_basal_insulin()
         {
-            return new RequestMessage(PdmRequest.CancelDelivery, new Bytes().Append(0x01));
+            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x01));
         }
 
         public static IRequest request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
@@ -145,7 +170,7 @@ namespace OmniCore.Model.Eros
             cmd_body.Append(body_checksum);
             cmd_body.Append(iseBody);
 
-            var msg = new RequestMessage(PdmRequest.InsulinSchedule, cmd_body);
+            var msg = new MessagePart(RequestType.InsulinSchedule, cmd_body);
 
             byte reminders = 0;
             //#if confidenceReminder:
@@ -165,7 +190,7 @@ namespace OmniCore.Model.Eros
                 cmd_body.Append(pte.Item2);
             }
 
-            msg.add_part(PdmRequest.TempBasalSchedule, cmd_body);
+            msg.add_part(RequestType.TempBasalSchedule, cmd_body);
             return msg;
         }
 
@@ -197,7 +222,7 @@ namespace OmniCore.Model.Eros
             commandBody.Append(checksum);
             commandBody.Append(bodyForChecksum);
 
-            var msg = new RequestMessage(PdmRequest.InsulinSchedule, commandBody);
+            var msg = new MessagePart(RequestType.InsulinSchedule, commandBody);
 
             commandBody = new Bytes().Append(0x00);
             ushort p10 = (ushort)(pulse_count * 10);
@@ -205,7 +230,7 @@ namespace OmniCore.Model.Eros
             uint dd = (uint)delivery_delay * (uint)100000;
             commandBody.Append(dd);
             commandBody.Append(new byte[] { 0, 0, 0, 0, 0, 0 });
-            msg.add_part(PdmRequest.BolusSchedule, commandBody);
+            msg.add_part(RequestType.BolusSchedule, commandBody);
             return msg;
         }
 
@@ -437,7 +462,7 @@ namespace OmniCore.Model.Eros
             command_body.Append(body_checksum);
             command_body.Append(ise_body);
 
-            var msg = new RequestMessage(PdmRequest.InsulinSchedule, command_body);
+            var msg = new MessagePart(RequestType.InsulinSchedule, command_body);
 
             command_body = new Bytes(new byte[] { 0, 0 });
 
@@ -455,7 +480,7 @@ namespace OmniCore.Model.Eros
                     command_body.Append((byte)i);
                     var pulses_past_intervals = (ushort)((uint)ii * (uint)1800000000 / (uint)interval);
                     var pulses_past_this_interval = (ushort)((uint)seconds_past_hh * (uint)1000000 / (uint)interval + 1);
-                    var remaining_pulses_this_interval =(ushort)( pulses10 - pulses_past_this_interval - pulses_past_intervals);
+                    var remaining_pulses_this_interval = (ushort)(pulses10 - pulses_past_this_interval - pulses_past_intervals);
                     var microseconds_to_next_interval = (uint)interval - ((uint)seconds_past_hh * (uint)1000000 % (uint)interval);
 
                     command_body.Append(remaining_pulses_this_interval);
@@ -474,7 +499,7 @@ namespace OmniCore.Model.Eros
                 command_body.Append(interval);
             }
 
-            msg.add_part(PdmRequest.BasalSchedule, command_body);
+            msg.add_part(RequestType.BasalSchedule, command_body);
             return msg;
         }
 
@@ -482,23 +507,23 @@ namespace OmniCore.Model.Eros
         {
             pod.nonce_syncword = null;
             var parts = response.parts;
-            foreach(var part in parts)
+            foreach (var part in parts)
             {
-                var response_type = (PodResponse)part.Item1;
+                var response_type = (ResponseType)part.Item1;
                 var response_body = part.Item2;
 
-                switch(response_type)
+                switch (response_type)
                 {
-                    case PodResponse.VersionInfo:
+                    case ResponseType.VersionInfo:
                         parse_version_response(response_body, pod);
                         break;
-                    case PodResponse.DetailInfo:
+                    case ResponseType.DetailInfo:
                         parse_information_response(response_body, pod);
                         break;
-                    case PodResponse.ResyncRequest:
+                    case ResponseType.ResyncRequest:
                         parse_resync_response(response_body, pod);
                         break;
-                    case PodResponse.Status:
+                    case ResponseType.Status:
                         parse_status_response(response_body, pod);
                         break;
                     default:
@@ -532,7 +557,7 @@ namespace OmniCore.Model.Eros
             pod.id_version_unknown_byte = response.Byte(i++);
             pod.state_progress = (PodProgress)(response.Byte(i++) & 0x0F);
             pod.id_lot = response.DWord(i);
-            pod.id_t = response.DWord(i+4);
+            pod.id_t = response.DWord(i + 4);
             i += 8;
             if (!lengthyResponse)
             {
@@ -549,7 +574,7 @@ namespace OmniCore.Model.Eros
         {
             int i = 1;
             var rt = response.Byte(i++);
-            switch(rt)
+            switch (rt)
             {
                 case 0x01:
                     pod.state_alert_w278 = response.Word(i);
@@ -636,9 +661,11 @@ namespace OmniCore.Model.Eros
             pod.insulin_delivered = ((s1 & 0x0FFF8000) >> 15) * 0.05m;
             pod.insulin_canceled = (s1 & 0x000007FF) * 0.05m;
             pod.state_faulted = ((s2 >> 31) != 0);
-            pod.state_alert = (byte) ((s2 >> 23) & 0xFF);
+            pod.state_alert = (byte)((s2 >> 23) & 0xFF);
             pod.state_active_minutes = (uint)((s2 & 0x007FFC00) >> 10);
             pod.insulin_reservoir = (s2 & 0x000003FF) * 0.05m;
         }
+        */
+
     }
 }

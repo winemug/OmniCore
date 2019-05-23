@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
@@ -400,5 +401,67 @@ namespace OmniCore.Radio.RileyLink
                 throw new PacketRadioException("Error verifying RL version", e);
             }
         }
+
+        //private bool add_radio_packet(RadioPacket radio_packet)
+        //{
+        //    if (radio_packet.type == PacketType.POD || radio_packet.type == PacketType.PDM)
+        //    {
+        //        this.type = radio_packet.type;
+        //        this.address = radio_packet.body.DWord(0);
+        //        var r4 = radio_packet.body.Byte(4);
+        //        this.sequence = (r4 >> 2) & 0x0f;
+        //        this.expect_critical_followup = (r4 & 0x80) > 0;
+        //        this.body_length = ((r4 & 0x03) << 8) | radio_packet.body.Byte(5);
+        //        this.body_prefix = radio_packet.body.Sub(0, 5);
+        //        this.body = radio_packet.body.Sub(5);
+        //    }
+        //    else
+        //    {
+        //        if (radio_packet.type == PacketType.CON)
+        //            this.body.Append(radio_packet.body);
+        //        else
+        //            throw new ProtocolException("Packet type invalid");
+        //    }
+
+        //    if (this.body_length == this.body.Length - 2)
+        //    {
+        //        var bodyWithoutCrc = this.body.Sub(0, this.body.Length - 2);
+        //        var crc = this.body.DWord(this.body.Length - 2);
+        //        var crc_calculated = CrcUtil.Crc16(new Bytes(this.body_prefix, bodyWithoutCrc).ToArray());
+
+        //        if (crc == crc_calculated)
+        //        {
+        //            this.body = bodyWithoutCrc;
+        //            var bi = 0;
+        //            while (bi < this.body.Length)
+        //            {
+        //                var response_type = this.body[bi];
+        //                Bytes response_body;
+        //                if (response_type == 0x1d)
+        //                {
+        //                    response_body = this.body.Sub(bi + 1);
+        //                    bi = this.body.Length;
+        //                }
+        //                else
+        //                {
+        //                    var response_len = this.body[bi + 1];
+        //                    response_body = this.body.Sub(bi + 2, bi + 2 + response_len);
+        //                    bi += response_len + 2;
+        //                }
+        //                this.parts.Add(new Tuple<byte, Bytes, uint?>(response_type, response_body, null));
+        //            }
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            throw new ProtocolException("Message crc error");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
+
     }
 }

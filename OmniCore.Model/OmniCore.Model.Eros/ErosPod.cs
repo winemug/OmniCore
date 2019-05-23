@@ -9,12 +9,14 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
-    public class ErosPod : Pod, IPod
+    public class ErosPod : Pod
     {
-        private readonly ProtocolHandler ProtocolHandler;
+        IMessageExchangeProvider MessageExchangeProvider;
+        IMessageExchange MessageExchange;
+
         public ErosPod(IMessageExchangeProvider messageExchangeProvider)
         {
-            ProtocolHandler = new ProtocolHandler(messageExchangeProvider);
+            MessageExchangeProvider = messageExchangeProvider;
         }
 
         //private static Pod Load(uint lot, uint tid)
@@ -59,8 +61,8 @@ namespace OmniCore.Model.Eros
             //}
         }
 
-        private async Task send_request(IRequest request, bool with_nonce = false)
-        {
+        //private async Task send_request(IRequest request, bool with_nonce = false)
+        //{
             //if (with_nonce)
             //{
             //    var nonce_val = this.Nonce.GetNext();
@@ -89,24 +91,19 @@ namespace OmniCore.Model.Eros
             //        throw new PdmException("Nonce sync failed");
             //    }
             //}
-        }
+        //}
 
         private async Task internal_update_status(StatusRequestType update_type = StatusRequestType.Standard)
         {
-            await send_request(ProtocolHelper.request_status(update_type));
+            // await send_request(ProtocolHelper.request_status(update_type));
         }
 
-        public async Task UpdateStatus(StatusRequestType update_type)
+        public override async Task UpdateStatus(StatusRequestType update_type = StatusRequestType.Standard)
         {
             try
             {
                 Debug.WriteLine($"Updating pod status, request type {update_type}");
                 await this.internal_update_status(update_type);
-            }
-            catch (StatusUpdateRequiredException)
-            {
-                await this.internal_update_status();
-                await this.UpdateStatus(update_type);
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -115,7 +112,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task AcknowledgeAlerts(byte alert_mask)
+        public override async Task AcknowledgeAlerts(byte alert_mask)
         {
             try
             {
@@ -137,12 +134,7 @@ namespace OmniCore.Model.Eros
                 if ((state_alert & alert_mask) != alert_mask)
                     throw new PdmException("Bitmask is invalid for current alert state");
 
-                await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
-            }
-            catch (StatusUpdateRequiredException)
-            {
-                await this.internal_update_status();
-                await this.AcknowledgeAlerts(alert_mask);
+                // await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -151,7 +143,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task Bolus(decimal bolusAmount)
+        public override async Task Bolus(decimal bolusAmount)
         {
             try
             {
@@ -169,18 +161,13 @@ namespace OmniCore.Model.Eros
                 if (bolusAmount > 30m)
                     throw new PdmException("Cannot bolus more than 30U");
 
-                await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
+                // await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
 
                 if (state_bolus != BolusState.Immediate)
                     throw new PdmException("Pod did not start bolusing");
 
                 last_enacted_bolus_start = DateTime.UtcNow;
                 last_enacted_bolus_amount = bolusAmount;
-            }
-            catch (StatusUpdateRequiredException)
-            {
-                await this.internal_update_status();
-                await this.Bolus(bolusAmount);
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -189,7 +176,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task CancelBolus()
+        public override async Task CancelBolus()
         {
             try
             {
@@ -199,17 +186,12 @@ namespace OmniCore.Model.Eros
                 if (state_bolus != BolusState.Immediate)
                     throw new PdmException("Immediate bolus is not running");
 
-                await send_request(ProtocolHelper.request_cancel_bolus(), true);
+                // await send_request(ProtocolHelper.request_cancel_bolus(), true);
 
                 if (state_bolus == BolusState.Immediate)
                     throw new PdmException("Failed to cancel running bolus");
 
                 last_enacted_bolus_amount = insulin_canceled;
-            }
-            catch (StatusUpdateRequiredException)
-            {
-                await this.internal_update_status();
-                await this.CancelBolus();
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)

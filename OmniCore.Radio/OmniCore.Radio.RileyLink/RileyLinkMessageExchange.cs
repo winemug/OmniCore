@@ -1,9 +1,11 @@
 ﻿using OmniCore.Model;
 using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,12 +28,20 @@ namespace OmniCore.Radio.RileyLink
         private RileyLink RileyLink;
 
         private IPod Pod;
-        public Packet last_received_packet;
+        public RadioPacket last_received_packet;
         public int last_packet_timestamp = 0;
 
-        internal RileyLinkMessageExchange()
+        private ErosMessageExchangeParameters MessageExchangeParameters;
+
+        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
         {
-            this.RileyLink = new RileyLink();
+            RileyLink = new RileyLink();
+            Pod = pod;
+            MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
+        }
+
+        public async Task InitializeExchange(IMessageProgress messageProgress, CancellationToken ct)
+        {
         }
 
         private void reset_sequences()
@@ -39,27 +49,18 @@ namespace OmniCore.Radio.RileyLink
             this.Pod.radio_packet_sequence = 0;
         }
 
-        public async Task<IResponse> GetResponse(IRequest requestMessage, IMessageProgress messageExchangeProgress)
+        public async Task<IMessage> GetResponse(IMessage requestMessage, IMessageProgress messageExchangeProgress, CancellationToken ct)
         {
             this.Started = DateTime.UtcNow;
-            if (requestMessage.TxLevel.HasValue)
+            if (MessageExchangeParameters.TransmissionLevelOverride.HasValue)
             {
-                RileyLink.SetTxLevel(requestMessage.TxLevel.Value);
+                RileyLink.SetTxLevel(MessageExchangeParameters.TransmissionLevelOverride.Value);
             }
 
-            if (!requestMessage.address.HasValue)
-                requestMessage.address = this.Pod.radio_address;
+            var erosRequestMessage = requestMessage as ErosMessage;
+            var packets = GetRadioPackets(erosRequestMessage);
 
-            if (!requestMessage.AckAddressOverride.HasValue)
-                requestMessage.AckAddressOverride = this.Pod.radio_address;
-
-            if (!requestMessage.sequence.HasValue)
-                requestMessage.sequence = this.Pod.radio_message_sequence;
-
-
-            var packets = requestMessage.get_radio_packets(this.Pod.radio_packet_sequence);
-
-            Packet received = null;
+            RadioPacket received = null;
             var packet_count = packets.Count;
 
             this.unique_packets = packet_count * 2;
@@ -194,16 +195,14 @@ namespace OmniCore.Radio.RileyLink
                             }
                         }
                     }
-                    catch (ProtocolException pe)
+                    catch (ErosProtocolException pe)
                     {
                         if (pe.ReceivedPacket != null && expected_type == PacketType.POD && pe.ReceivedPacket.type == PacketType.ACK)
                         {
                             Debug.WriteLine("Trying to recover from protocol error");
-                            //this.Pod.radio_packet_sequence++;
-                            this.Pod.radio_message_sequence++;
-                            requestMessage.sequence = this.Pod.radio_message_sequence;
+                            this.Pod.radio_packet_sequence++;
 
-                            return await GetResponse(requestMessage, messageExchangeProgress);
+                            return await GetResponse(requestMessage, messageExchangeProgress, ct);
                         }
                         else
                             throw pe;
@@ -267,26 +266,37 @@ namespace OmniCore.Radio.RileyLink
                 part_count = 1;
                 Debug.WriteLine($"Received POD message part {part_count}");
             }
-            var pod_response = new ResponseMessage();
-            while (!pod_response.add_radio_packet(received))
+            var responseBuilder = new ErosResponseBuilder();
+
+            var radioAddress = Pod.radio_address;
+            if (MessageExchangeParameters.AddressOverride.HasValue)
+                radioAddress = MessageExchangeParameters.AddressOverride.Value;
+
+            var ackAddress = radioAddress;
+            if (MessageExchangeParameters.AckAddressOverride.HasValue)
+                ackAddress = MessageExchangeParameters.AckAddressOverride.Value;
+
+            while (!responseBuilder.WithRadioPacket(received))
             {
-                var ack_packet = this.interim_ack(requestMessage.AckAddressOverride.Value, (received.sequence + 1) % 32);
-                received = await this.ExchangePackets(ack_packet, PacketType.CON);
+                var ackPacket = this.interim_ack(ackAddress, (received.sequence + 1) % 32);
+                received = await this.ExchangePackets(ackPacket, PacketType.CON);
                 part_count++;
                 Debug.WriteLine($"Received POD message part {part_count}");
             }
 
-            Debug.WriteLine($"RCVD MSG {pod_response}");
+            var podResponse = responseBuilder.Build();
+
+            Debug.WriteLine($"RCVD MSG {podResponse}");
             Debug.WriteLine("Send and receive completed.");
-            this.Pod.radio_message_sequence = (pod_response.sequence.Value + 1) % 16;
+            this.Pod.radio_message_sequence = (podResponse.sequence.Value + 1) % 16;
             this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
 
-            return pod_response;
+            return podResponse;
 
         }
 
 
-        private async Task<Packet> ExchangePackets(Packet packet_to_send, PacketType expected_type, int timeout = 10000)
+        private async Task<RadioPacket> ExchangePackets(RadioPacket packet_to_send, PacketType expected_type, int timeout = 10000)
         {
             int start_time = 0;
             bool first = true;
@@ -351,7 +361,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     Debug.WriteLine("RECV PKT unexpected type");
                     this.protocol_errors++;
-                    throw new ProtocolException("Unexpected packet type received", p);
+                    throw new ErosProtocolException("Unexpected packet type received", p);
                 }
 
                 if (p.sequence != (packet_to_send.sequence + 1) % 32)
@@ -360,7 +370,7 @@ namespace OmniCore.Radio.RileyLink
                     Debug.WriteLine("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
                     this.protocol_errors++;
-                    throw new ProtocolException("Incorrect packet sequence received", p);
+                    throw new ErosProtocolException("Incorrect packet sequence received", p);
                 }
 
                 return p;
@@ -369,7 +379,7 @@ namespace OmniCore.Radio.RileyLink
             throw new OmniCoreTimeoutException("Exceeded timeout while send and receive");
         }
 
-        private async Task SendPacket(Packet packet_to_send, int allow_premature_exit_after = -1, int timeout = 25000)
+        private async Task SendPacket(RadioPacket packet_to_send, int allow_premature_exit_after = -1, int timeout = 25000)
         {
             int start_time = 0;
             this.unique_packets++;
@@ -456,14 +466,14 @@ namespace OmniCore.Radio.RileyLink
             Debug.WriteLine("Exceeded timeout while waiting for silence to fall");
         }
 
-        private Packet GetPacket(Bytes data)
+        private RadioPacket GetPacket(Bytes data)
         {
             if (data != null && data.Length > 1)
             {
                 byte rssi = data[0];
                 try
                 {
-                    var rp = Packet.parse(data.Sub(2));
+                    var rp = RadioPacket.parse(data.Sub(2));
                     if (rp != null)
                         rp.rssi = rssi;
                     return rp;
@@ -476,12 +486,12 @@ namespace OmniCore.Radio.RileyLink
             return null;
         }
 
-        private Packet _ack_data(uint address1, uint address2, int sequence)
+        private RadioPacket _ack_data(uint address1, uint address2, int sequence)
         {
-            return new Packet(address1, PacketType.ACK, sequence, new Bytes(address2));
+            return new RadioPacket(address1, PacketType.ACK, sequence, new Bytes(address2));
         }
 
-        private Packet interim_ack(uint ack_address_override, int sequence)
+        private RadioPacket interim_ack(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.radio_address)
                 return _ack_data(this.Pod.radio_address, this.Pod.radio_address, sequence);
@@ -489,12 +499,105 @@ namespace OmniCore.Radio.RileyLink
                 return _ack_data(this.Pod.radio_address, ack_address_override, sequence);
         }
 
-        private Packet final_ack(uint ack_address_override, int sequence)
+        private RadioPacket final_ack(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.radio_address)
                 return _ack_data(this.Pod.radio_address, 0, sequence);
             else
                 return _ack_data(this.Pod.radio_address, ack_address_override, sequence);
+        }
+
+        public List<RadioPacket> GetRadioPackets(ErosMessage message)
+        {
+            // this.message_str_prefix = $"{this.address:%08X} {this.sequence:%02X} {this.expect_critical_followup} ";
+
+            var message_body_len = 0;
+            foreach (var p in message.GetParts())
+            {
+                var ep = p as ErosRequest;
+                var cmd_body = ep.PartData;
+                var nonce = ep.Nonce;
+                message_body_len += (int)cmd_body.Length + 2;
+                if (ep.RequiresNonce)
+                    message_body_len += 4;
+            }
+
+            byte b0 = 0;
+            if (MessageExchangeParameters.CriticalWithFollowupRequired)
+                b0 = 0x80;
+
+            var msgSequence = Pod.radio_message_sequence;
+            if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
+                msgSequence = MessageExchangeParameters.MessageSequenceOverride.Value;
+
+            b0 |= (byte)(msgSequence << 2);
+            b0 |= (byte)((message_body_len >> 8) & 0x03);
+            byte b1 = (byte)(message_body_len & 0xff);
+
+            var msgAddress = Pod.radio_address;
+            if (MessageExchangeParameters.AddressOverride.HasValue)
+                msgAddress = MessageExchangeParameters.AddressOverride.Value;
+
+            var message_body = new Bytes(msgAddress);
+            message_body.Append(b0);
+            message_body.Append(b1);
+
+            foreach (var p in message.GetParts())
+            {
+                var ep = p as ErosRequest;
+                var cmd_type = (byte) ep.PartType;
+                var cmd_body = ep.PartData;
+                var nonce = ep.Nonce;
+
+                if (ep.RequiresNonce)
+                {
+                    message_body.Append(cmd_type);
+                    message_body.Append((byte)(cmd_body.Length + 4));
+                    message_body.Append(nonce);
+                }
+                else
+                {
+                    if (cmd_type == (byte)PartType.ResponseStatus)
+                        message_body.Append(cmd_type);
+                    else
+                    {
+                        message_body.Append(cmd_type);
+                        message_body.Append((byte)cmd_body.Length);
+                    }
+                }
+                message_body.Append(cmd_body[0]);
+            }
+            var crc_calculated = CrcUtil.Crc16(message_body.ToArray());
+            message_body.Append(crc_calculated);
+
+            int index = 0;
+            bool first_packet = true;
+            int sequence = Pod.radio_packet_sequence;
+            int total_body_len = (int)message_body.Length;
+            var radio_packets = new List<RadioPacket>();
+            var ackAddress = msgAddress;
+            if (MessageExchangeParameters.AckAddressOverride.HasValue)
+                ackAddress = MessageExchangeParameters.AckAddressOverride.Value;
+
+            while (index < message_body.Length)
+            {
+                var to_write = Math.Min(31, message_body.Length - index);
+                var packet_body = message_body.Sub(index, index + to_write);
+                radio_packets.Add(new RadioPacket(ackAddress,
+                                                first_packet ? PacketType.PDM : PacketType.CON,
+                                                sequence,
+                                                packet_body));
+                first_packet = false;
+                sequence = (sequence + 2) % 32;
+                index += to_write;
+            }
+
+            if (MessageExchangeParameters.RepeatFirstPacket)
+            {
+                var fp = radio_packets[0];
+                radio_packets.Insert(0, fp);
+            }
+            return radio_packets;
         }
 
     }

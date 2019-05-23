@@ -1,5 +1,6 @@
 ﻿using OmniCore.Mobile.ViewModels;
 using OmniCore.Model;
+using OmniCore.Model.Eros;
 using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
@@ -63,13 +64,17 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                var rlp = new RileyLinkProvider();
-                var pod = new ErosPod(rlp)
+                //radio_addr 0x34ff1d53, 44538, 1181076;
+                var exchangeProvider = new RileyLinkProvider();
+                var pod = new ErosPod(exchangeProvider)
                 {
-                    id_lot = 44538, id_t = 1181076, radio_address = 0x34ff1d53
+                    radio_address = 0x34ff1d53,
+                    id_lot = 44538,
+                    id_t = 1181076
                 };
+                    
                 await pod.UpdateStatus();
-                await pod.Bolus(0.5m);
+                //await pod.Bolus(0.5m);
             }
             finally
             {
