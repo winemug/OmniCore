@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enums;
 
@@ -6,9 +7,9 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPod : IPodVariables
     {
-        Task AcknowledgeAlerts(byte alertMask);
-        Task Bolus(decimal bolusAmount);
-        Task CancelBolus();
-        Task UpdateStatus(StatusRequestType requestType);
+        Task UpdateStatus(IMessageProgress progress, CancellationToken ct, StatusRequestType requestType);
+        Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alertMask);
+        Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount);
+        Task CancelBolus(IMessageProgress progress, CancellationToken ct);
     }
 }

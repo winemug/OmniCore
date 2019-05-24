@@ -9,22 +9,23 @@ namespace OmniCore.Model
 {
     public class MessageHandler
     {
-        public Pod Pod { get; private set; }
-
+        private IPod Pod;
         private Task CurrentExchange;
         private readonly IMessageExchangeProvider MessageExchangeProvider;
 
-        public MessageHandler(IMessageExchangeProvider messageExchangeProvider)
+        public MessageHandler(IPod pod, IMessageExchangeProvider messageExchangeProvider)
         {
+            Pod = pod;
             MessageExchangeProvider = messageExchangeProvider;
             CurrentExchange = Task.Run(() => { });
         }
 
-        public async Task<IMessage> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
+        public async Task<PodCommandResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
             IMessageProgress messageProgress, CancellationToken ct)
         {
-            var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, this.Pod, messageProgress, ct).ConfigureAwait(false);
-            return await messageExchange.GetResponse(requestMessage, messageProgress, ct);
+            var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod, messageProgress, ct).ConfigureAwait(false);
+            var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
+            return messageExchange.ParseResponse(response, Pod);
         }
     }
 }

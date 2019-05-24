@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -72,8 +73,10 @@ namespace OmniCore.Mobile.Views
                     id_lot = 44538,
                     id_t = 1181076
                 };
-                    
-                await pod.UpdateStatus();
+
+                var cts = new CancellationTokenSource();
+                var progress = new MessageProgress();
+                await pod.UpdateStatus(progress, cts.Token);
                 //await pod.Bolus(0.5m);
             }
             finally

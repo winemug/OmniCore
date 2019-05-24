@@ -600,5 +600,17 @@ namespace OmniCore.Radio.RileyLink
             return radio_packets;
         }
 
+        public PodCommandResult ParseResponse(IMessage response, IPod pod)
+        {
+            foreach(var mp in response.GetParts())
+            {
+                var er = mp as ErosResponse;
+                er.Parse(pod);
+            }
+
+            return new PodCommandResult()
+            {
+            };
+        }
     }
 }

@@ -5,18 +5,22 @@ using OmniCore.Model.Interfaces;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
     public class ErosPod : Pod
     {
-        IMessageExchangeProvider MessageExchangeProvider;
         IMessageExchange MessageExchange;
+        MessageHandler MessageHandler;
+
+        private readonly ErosMessageExchangeParameters StandardParameters;
 
         public ErosPod(IMessageExchangeProvider messageExchangeProvider)
         {
-            MessageExchangeProvider = messageExchangeProvider;
+            MessageHandler = new MessageHandler(this, messageExchangeProvider);
+            StandardParameters = new ErosMessageExchangeParameters() { };
         }
 
         //private static Pod Load(uint lot, uint tid)
@@ -93,17 +97,20 @@ namespace OmniCore.Model.Eros
             //}
         //}
 
-        private async Task internal_update_status(StatusRequestType update_type = StatusRequestType.Standard)
+        private async Task<PodCommandResult> internal_update_status(IMessageProgress progress, CancellationToken ct,
+            StatusRequestType update_type = StatusRequestType.Standard)
         {
-            // await send_request(ProtocolHelper.request_status(update_type));
+            var request = new ErosMessageBuilder().WithStatus(update_type).Build();
+            return await MessageHandler.PerformExchange(request, StandardParameters, progress, ct);
         }
 
-        public override async Task UpdateStatus(StatusRequestType update_type = StatusRequestType.Standard)
+        public override async Task UpdateStatus(IMessageProgress progress, CancellationToken ct,
+            StatusRequestType update_type = StatusRequestType.Standard)
         {
             try
             {
                 Debug.WriteLine($"Updating pod status, request type {update_type}");
-                await this.internal_update_status(update_type);
+                await this.internal_update_status(progress, ct, update_type);
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -112,12 +119,12 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public override async Task AcknowledgeAlerts(byte alert_mask)
+        public override async Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alert_mask)
         {
             try
             {
                 Debug.WriteLine($"Acknowledging alerts, bitmask: {alert_mask}");
-                await internal_update_status().ConfigureAwait(false);
+                await internal_update_status(progress, ct);
                 _assert_immediate_bolus_not_active();
                 if (state_progress < PodProgress.PairingSuccess)
                     throw new PdmException("Pod not paired completely yet.");
@@ -143,12 +150,12 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public override async Task Bolus(decimal bolusAmount)
+        public override async Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount)
         {
             try
             {
                 Debug.WriteLine($"Bolusing {bolusAmount}U");
-                await internal_update_status();
+                await internal_update_status(progress, ct);
                 _assert_status_running();
                 _assert_immediate_bolus_not_active();
 
@@ -176,11 +183,11 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public override async Task CancelBolus()
+        public override async Task CancelBolus(IMessageProgress progress, CancellationToken ct)
         {
             try
             {
-                await internal_update_status();
+                await internal_update_status(progress, ct);
                 _assert_status_running();
 
                 if (state_bolus != BolusState.Immediate)
