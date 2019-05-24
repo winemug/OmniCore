@@ -14,19 +14,9 @@ namespace OmniCore.Model.Eros
         private Bytes MessageBody = new Bytes();
         private List<IMessagePart> Parts = new List<IMessagePart>();
 
-        public bool IsValid => throw new NotImplementedException();
-
-        public bool CanBuild
-        {
-            get
-            {
-                return Parts.Count > 0;
-            }
-        }
-
         public IMessage Build()
         {
-            return new ErosMessage();
+            return new ErosMessage() { parts = Parts };
         }
 
         public IMessageBuilder WithPart(IMessagePart request)

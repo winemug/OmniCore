@@ -11,7 +11,7 @@ namespace OmniCore.Model.Eros
     {
         public IList<IMessagePart> GetParts()
         {
-            throw new NotImplementedException();
+            return parts;
         }
 
         public uint? address { get; set; }
