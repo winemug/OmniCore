@@ -102,38 +102,37 @@ namespace OmniCore.Model.Eros
             return WithPart(new ErosRequest(PartType.RequestStatus, new Bytes().Append((byte)statusRequestType)));
         }
 
-        /*
-        public static IRequest request_acknowledge_alerts(byte alert_mask)
+        public IMessageBuilder WithAcknowledgeAlerts(byte alert_mask)
         {
-            return new MessagePart(RequestType.AcknowledgeAlerts, new Bytes().Append(alert_mask));
+            return WithPart(new ErosRequest(PartType.RequestAcknowledgeAlerts, new Bytes().Append(alert_mask), true));
         }
 
-        public static IRequest request_deactivate()
+        public IMessageBuilder WithDeactivate()
         {
-            return new MessagePart(RequestType.DeactivatePod, new Bytes());
+            return WithPart(new ErosRequest(PartType.RequestDeactivatePod, new Bytes(), true));
         }
 
-        public static IRequest request_delivery_flags(byte byte16, byte byte17)
+        public IMessageBuilder WithDeliveryFlags(byte byte16, byte byte17)
         {
-            return new MessagePart(RequestType.SetDeliveryFlags, new Bytes().Append(byte16).Append(byte17));
+            return WithPart(new ErosRequest(PartType.RequestSetDeliveryFlags, new Bytes().Append(byte16).Append(byte17), true));
         }
 
-        public static IRequest request_cancel_bolus()
+        public IMessageBuilder WithCancelBolus()
         {
-            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x04));
+            return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x04), true));
         }
 
-        public static IRequest request_cancel_temp_basal()
+        public IMessageBuilder WithCancelTempBasal()
         {
-            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x02));
+            return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x02), true));
         }
 
-        public static IRequest request_stop_basal_insulin()
+        public IMessageBuilder WithStopBasalInsulin()
         {
-            return new MessagePart(RequestType.CancelDelivery, new Bytes().Append(0x01));
+            return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x01), true));
         }
 
-        public static IRequest request_temp_basal(decimal basal_rate_iuhr, decimal duration_hours)
+        public IMessageBuilder WithTempBasal(decimal basal_rate_iuhr, decimal duration_hours)
         {
             var half_hour_count = (int)(duration_hours * 2.0m);
             var hh_units = new decimal[half_hour_count];
@@ -160,7 +159,7 @@ namespace OmniCore.Model.Eros
             cmd_body.Append(body_checksum);
             cmd_body.Append(iseBody);
 
-            var msg = new MessagePart(RequestType.InsulinSchedule, cmd_body);
+            WithPart(new ErosRequest(PartType.RequestInsulinSchedule, cmd_body, true));
 
             byte reminders = 0;
             //#if confidenceReminder:
@@ -180,26 +179,25 @@ namespace OmniCore.Model.Eros
                 cmd_body.Append(pte.Item2);
             }
 
-            msg.add_part(RequestType.TempBasalSchedule, cmd_body);
-            return msg;
+            return WithPart(new ErosRequest(PartType.RequestTempBasalSchedule, cmd_body));
         }
 
-        public static IRequest request_prime_cannula()
+        public IMessageBuilder WithPrimeCannula()
         {
-            return bolus_message(52, 8, 1);
+            return WithImmediatePulses(52, 8, 1);
         }
 
-        public static IRequest request_insert_cannula()
+        public IMessageBuilder WithInserCannula()
         {
-            return bolus_message(10, 8, 1);
+            return WithImmediatePulses(10, 8, 1);
         }
 
-        public static IRequest request_bolus(decimal iu_bolus)
+        public IMessageBuilder WithBolus(decimal iu_bolus)
         {
-            return bolus_message((ushort)(iu_bolus / 0.05m));
+            return WithImmediatePulses((ushort)(iu_bolus / 0.05m));
         }
 
-        private static IRequest bolus_message(ushort pulse_count,
+        private IMessageBuilder WithImmediatePulses(ushort pulse_count,
         int pulse_speed = 16, int delivery_delay = 2)
         {
             var commandBody = new Bytes().Append(0x02);
@@ -212,7 +210,7 @@ namespace OmniCore.Model.Eros
             commandBody.Append(checksum);
             commandBody.Append(bodyForChecksum);
 
-            var msg = new MessagePart(RequestType.InsulinSchedule, commandBody);
+            WithPart(new ErosRequest(PartType.RequestInsulinSchedule, commandBody, true));
 
             commandBody = new Bytes().Append(0x00);
             ushort p10 = (ushort)(pulse_count * 10);
@@ -220,11 +218,10 @@ namespace OmniCore.Model.Eros
             uint dd = (uint)delivery_delay * (uint)100000;
             commandBody.Append(dd);
             commandBody.Append(new byte[] { 0, 0, 0, 0, 0, 0 });
-            msg.add_part(RequestType.BolusSchedule, commandBody);
-            return msg;
+            return WithPart(new ErosRequest(PartType.RequestBolusSchedule, commandBody));
         }
 
-        private static ushort[] getPulsesForHalfHours(decimal[] halfHourUnits)
+        private ushort[] getPulsesForHalfHours(decimal[] halfHourUnits)
         {
             var count = halfHourUnits.Length;
             var halfHourlyDeliverySubtotals = new decimal[count];
@@ -248,7 +245,7 @@ namespace OmniCore.Model.Eros
             return pulses;
         }
 
-        private static ushort getIse(ushort pulses, ushort repeat, bool alternate)
+        private ushort getIse(ushort pulses, ushort repeat, bool alternate)
         {
             var ise = (ushort)(pulses & 0x03ff);
             ise |= (ushort)(repeat << 12);
@@ -257,7 +254,7 @@ namespace OmniCore.Model.Eros
             return ise;
         }
 
-        private static ushort getRepeatCount(ushort pulse, ushort[] others)
+        private ushort getRepeatCount(ushort pulse, ushort[] others)
         {
             ushort repeatCount = 0;
             foreach (var other in others)
@@ -269,14 +266,14 @@ namespace OmniCore.Model.Eros
             return repeatCount;
         }
 
-        private static ushort[] SubBytes(ushort[] source, int startIndex)
+        private ushort[] SubBytes(ushort[] source, int startIndex)
         {
             var ret = new ushort[source.Length - startIndex];
             Buffer.BlockCopy(source, startIndex, ret, 0, ret.Length);
             return ret;
         }
 
-        private static ushort[] getInsulinScheduleTableFromPulses(ushort[] pulses)
+        private ushort[] getInsulinScheduleTableFromPulses(ushort[] pulses)
         {
             var count = pulses.Length;
             var iseTable = new List<ushort>();
@@ -318,7 +315,7 @@ namespace OmniCore.Model.Eros
             return iseTable.ToArray();
         }
 
-        private static Bytes getBodyFromTable(ushort[] table)
+        private Bytes getBodyFromTable(ushort[] table)
         {
             byte[] body = new byte[table.Length * 2];
             for (int i = 0; i < table.Length; i++)
@@ -330,7 +327,7 @@ namespace OmniCore.Model.Eros
             return new Bytes(body);
         }
 
-        private static ushort getChecksum(Bytes body)
+        private ushort getChecksum(Bytes body)
         {
             ushort checksum = 0;
             foreach (byte b in body.ToArray())
@@ -340,7 +337,7 @@ namespace OmniCore.Model.Eros
             return checksum;
         }
 
-        private static int getHalfHourPulseInterval(uint pulseCount)
+        private int getHalfHourPulseInterval(uint pulseCount)
         {
             if (pulseCount == 0)
                 return 180000000;
@@ -348,7 +345,7 @@ namespace OmniCore.Model.Eros
                 return (int)(180000000 / pulseCount);
         }
 
-        private static Tuple<ushort, uint, int[]>[] getPulseIntervalEntries(decimal[] halfHourUnits)
+        private Tuple<ushort, uint, int[]>[] getPulseIntervalEntries(decimal[] halfHourUnits)
         {
             var count = halfHourUnits.Length;
             var list1 = new Tuple<ushort, uint>[count];
@@ -414,7 +411,7 @@ namespace OmniCore.Model.Eros
             return list2.ToArray();
         }
 
-        public static IRequest request_set_basal_schedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
+        public IMessageBuilder WithBasalSchedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
         {
             var halved_schedule = new decimal[48];
             for (int i = 0; i < 47; i++)
@@ -452,7 +449,7 @@ namespace OmniCore.Model.Eros
             command_body.Append(body_checksum);
             command_body.Append(ise_body);
 
-            var msg = new MessagePart(RequestType.InsulinSchedule, command_body);
+            WithPart(new ErosRequest(PartType.RequestInsulinSchedule, command_body, true));
 
             command_body = new Bytes(new byte[] { 0, 0 });
 
@@ -489,11 +486,7 @@ namespace OmniCore.Model.Eros
                 command_body.Append(interval);
             }
 
-            msg.add_part(RequestType.BasalSchedule, command_body);
-            return msg;
+            return WithPart(new ErosRequest(PartType.RequestBasalSchedule, command_body));
         }
-
-        */
-
     }
 }
