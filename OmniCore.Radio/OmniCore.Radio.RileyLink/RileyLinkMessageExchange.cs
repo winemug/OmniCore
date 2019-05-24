@@ -42,6 +42,7 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task InitializeExchange(IMessageProgress messageProgress, CancellationToken ct)
         {
+            await RileyLink.Connect();
         }
 
         private void reset_sequences()
@@ -299,24 +300,28 @@ namespace OmniCore.Radio.RileyLink
         private async Task<RadioPacket> ExchangePackets(RadioPacket packet_to_send, PacketType expected_type, int timeout = 10000)
         {
             int start_time = 0;
-            bool first = true;
             Bytes received = null;
             Debug.WriteLine($"SEND PKT {packet_to_send}");
             while (start_time == 0 || Environment.TickCount - start_time < timeout)
             {
-                if (first)
-                    first = false;
-                else
-                    this.repeated_sends += 1;
-
-                if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 2000)
-                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
-                else
-                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
-                if (start_time == 0)
-                    start_time = Environment.TickCount;
-
-                Debug.WriteLine($"SEND PKT {packet_to_send}");
+                try
+                {
+                    if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 2000)
+                        received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300);
+                    else
+                        received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40);
+                }
+                catch (OmniCoreTimeoutException)
+                {
+                    received = null;
+                }
+                finally
+                {
+                    if (start_time == 0)
+                        start_time = Environment.TickCount;
+                    else
+                        this.repeated_sends += 1;
+                }
 
                 if (received == null)
                 {
@@ -390,24 +395,28 @@ namespace OmniCore.Radio.RileyLink
                 {
                     Debug.WriteLine($"SEND PKT {packet_to_send}");
 
-                    received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
+                    try
+                    {
+                        received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
+                    }
+                    catch(OmniCoreTimeoutException)
+                    {
+                        received = null;
+                    }
 
                     if (start_time == 0)
                         start_time = Environment.TickCount;
 
-                    //if (allow_premature_exit_after >= 0 && Environment.TickCount - start_time >= allow_premature_exit_after)
-                    //{
-                    //    if (this.request_arrived.WaitOne(0))
-                    //    {
-                    //        Debug.WriteLine("Prematurely exiting final phase to process next request");
-                    //        this.packet_sequence = (this.packet_sequence + 1) % 32;
-                    //        break;
-                    //    }
-                    //}
-
                     if (received == null)
                     {
-                        received = await RileyLink.GetPacket(600);
+                        try
+                        {
+                            received = await RileyLink.GetPacket(600);
+                        }
+                        catch (OmniCoreTimeoutException)
+                        {
+
+                        }
                         if (received == null)
                         {
                             Debug.WriteLine("Silence fell.");
@@ -457,9 +466,6 @@ namespace OmniCore.Radio.RileyLink
                     Debug.WriteLine($"Radio error during send, retrying {pre}");
                     await RileyLink.Reset();
                     start_time = Environment.TickCount;
-                }
-                catch (OmniCoreTimeoutException)
-                {
                 }
                 catch (Exception) { throw; }
             }

@@ -40,7 +40,7 @@ namespace OmniCore.Radio.RileyLink
 
             var address = data.DWord(0);
             var d4 = data.Byte(4);
-            var type = (PacketType)(d4 & 0b11100000);
+            var type = (PacketType)(d4 >> 5);
             var sequence = d4 & 0b00011111;
             var body = data.Sub(5);
             return new RadioPacket(address, type, sequence, body);
@@ -55,7 +55,7 @@ namespace OmniCore.Radio.RileyLink
         public Bytes get_data()
         {
             var data = new Bytes().Append(this.address);
-            data.Append((byte)((int)this.type | this.sequence));
+            data.Append((byte)(((int)this.type << 5) | this.sequence));
             data.Append(this.body);
             data.Append(CrcUtil.Crc8(data.ToArray()));
             return data;

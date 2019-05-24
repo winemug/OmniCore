@@ -23,9 +23,16 @@ namespace OmniCore.Model
         public async Task<PodCommandResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
             IMessageProgress messageProgress, CancellationToken ct)
         {
-            var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod, messageProgress, ct).ConfigureAwait(false);
-            var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
-            return messageExchange.ParseResponse(response, Pod);
+            try
+            {
+                var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod, messageProgress, ct).ConfigureAwait(false);
+                var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
+                return messageExchange.ParseResponse(response, Pod);
+            }
+            catch (Exception e)
+            {
+                return new PodCommandResult() { Success = false };
+            }
         }
     }
 }

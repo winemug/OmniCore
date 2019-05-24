@@ -41,7 +41,7 @@ namespace OmniCore.Radio.RileyLink
         {
         }
 
-        private async Task Connect()
+        public async Task Connect()
         {
             try
             {

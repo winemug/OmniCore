@@ -1,6 +1,7 @@
 ﻿using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace OmniCore.Radio.RileyLink
 {
@@ -65,7 +66,7 @@ namespace OmniCore.Radio.RileyLink
         {
             var encoded = new Bytes();
             int noiseIndex = Rnd.Next(0, 256);
-            for (int i = 0; i < 45; i++)
+            for (int i = 0; i < 40; i++)
             {
                 if (i < toEncode.Length)
                 {

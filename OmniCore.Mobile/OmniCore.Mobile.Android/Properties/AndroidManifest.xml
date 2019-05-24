@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="net.balya.OmniCore.Mobile.Android" android:installLocation="auto">
-	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
+	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="27" />
 	<application android:label="OmniCore.Mobile.Android" android:largeHeap="true"></application>
 	<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 </manifest>

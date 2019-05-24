@@ -69,9 +69,9 @@ namespace OmniCore.Mobile.Views
                 var exchangeProvider = new RileyLinkProvider();
                 var pod = new ErosPod(exchangeProvider)
                 {
-                    radio_address = 0x34ff1d53,
-                    id_lot = 44538,
-                    id_t = 1181076
+                    radio_address = 0x1f0e89f2,
+                    id_lot = 42692,
+                    id_t = 481446
                 };
 
                 var cts = new CancellationTokenSource();
