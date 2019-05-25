@@ -10,10 +10,15 @@ namespace OmniCore.Radio.RileyLink
 {
     public class RileyLinkProvider : IMessageExchangeProvider
     {
+        private static RileyLink RileyLinkInstance;
+
         public async Task<IMessageExchange> GetMessageExchanger(IMessageExchangeParameters messageExchangeParameters, IPod pod,
             IMessageProgress messageProgress, CancellationToken ct)
         {
-            var rme = new RileyLinkMessageExchange(messageExchangeParameters, pod);
+            if (RileyLinkInstance == null)
+                RileyLinkInstance = new RileyLink();
+
+            var rme = new RileyLinkMessageExchange(messageExchangeParameters, pod, RileyLinkInstance);
             await rme.InitializeExchange(messageProgress, ct);
             return rme;
         }

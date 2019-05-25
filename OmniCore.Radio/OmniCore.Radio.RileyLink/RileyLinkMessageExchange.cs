@@ -33,9 +33,9 @@ namespace OmniCore.Radio.RileyLink
 
         private ErosMessageExchangeParameters MessageExchangeParameters;
 
-        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
+        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
         {
-            RileyLink = new RileyLink();
+            RileyLink = rileyLinkInstance;
             Pod = pod;
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
         }
