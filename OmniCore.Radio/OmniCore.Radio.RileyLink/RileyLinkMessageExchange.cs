@@ -32,6 +32,7 @@ namespace OmniCore.Radio.RileyLink
         public int last_packet_timestamp = 0;
 
         private ErosMessageExchangeParameters MessageExchangeParameters;
+        private Task FinalAckTask = null;
 
         internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
         {
@@ -40,8 +41,20 @@ namespace OmniCore.Radio.RileyLink
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
         }
 
+        public void UpdateParameters(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
+        {
+            RileyLink = rileyLinkInstance;
+            Pod = pod;
+            MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
+        }
+
         public async Task InitializeExchange(IMessageProgress messageProgress, CancellationToken ct)
         {
+            if (FinalAckTask != null)
+            {
+                await FinalAckTask;
+            }
+
             await RileyLink.Connect();
         }
 
@@ -247,8 +260,25 @@ namespace OmniCore.Radio.RileyLink
             this.Pod.radio_message_sequence = (podResponse.sequence.Value + 1) % 16;
             this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
 
+            var finalAckPacket = this.final_ack(ackAddress, (received.sequence + 1) % 32);
+            FinalAckTask = AcknowledgeEndOfMessage(finalAckPacket);
+            FinalAckTask.Start();
             return podResponse;
+        }
 
+        private async Task AcknowledgeEndOfMessage(RadioPacket ackPacket)
+        {
+            try
+            {
+                Debug.WriteLine("Sending final ack");
+                await SendPacket(ackPacket);
+                this.Pod.radio_packet_sequence++;
+                Debug.WriteLine("Message exchange finalized");
+            }
+            catch(Exception)
+            {
+                Debug.WriteLine("Final ack failed, ignoring.");
+            }
         }
 
 
