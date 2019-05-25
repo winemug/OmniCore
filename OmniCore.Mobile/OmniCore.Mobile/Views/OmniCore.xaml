@@ -6,20 +6,28 @@
              xmlns:views="clr-namespace:OmniCore.Mobile.Views"
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.OmniCore">
-    <FlyoutItem Title="Pods"
-                FlyoutDisplayOptions="AsMultipleItems">
-        <Tab Title="Status">
-            <ShellContent Title="Cats">
-                <views:StatusPage/>
-            </ShellContent>
-            <ShellContent Title="Dogs">
-                <views:ActionPage />
-            </ShellContent>
-        </Tab>
-        <Tab Title="Test">
-            <ShellContent Title="Test">
-                <views:TestPage />
+    <ShellContent>
+        <views:TestPage/>
+    </ShellContent>
+    <FlyoutItem Title="Settings">
+        <Tab Title="Settings">
+            <ShellContent>
+                <views:SettingsPage/>
             </ShellContent>
         </Tab>
     </FlyoutItem>
+    <FlyoutItem Title="Pods"
+                FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Pods">
+            <ShellContent Title="Status">
+                <views:StatusPage/>
+            </ShellContent>
+            <ShellContent Title="Actions">
+                <views:ActionPage />
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+    <ShellContent Title="About">
+        <views:AboutPage/>
+    </ShellContent>
 </Shell>

@@ -42,7 +42,7 @@ namespace OmniCore.Radio.RileyLink
             var d4 = data.Byte(4);
             var type = (PacketType)(d4 >> 5);
             var sequence = d4 & 0b00011111;
-            var body = data.Sub(5);
+            var body = data.Sub(5, data.Length - 1);
             return new RadioPacket(address, type, sequence, body);
         }
 

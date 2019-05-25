@@ -8,6 +8,7 @@ using Android.Widget;
 using Android.OS;
 using Plugin.Permissions;
 using Android.Content;
+using Plugin.BluetoothLE;
 
 namespace OmniCore.Mobile.Droid
 {
@@ -22,6 +23,9 @@ namespace OmniCore.Mobile.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
+
+            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = true;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
 
             LoadApplication(new App());
         }

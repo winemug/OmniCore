@@ -89,6 +89,7 @@ namespace OmniCore.Radio.RileyLink
 
                         this.DataCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkDataCharacteristicUUID);
                         this.ResponseCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
+
                         await this.ResponseCharacteristic.EnableNotifications();
                     }
                 }
@@ -258,7 +259,7 @@ namespace OmniCore.Radio.RileyLink
                     Buffer.BlockCopy(cmdData, 0, data, 2, cmdData.Length);
                 }
 
-                var result = await WriteAndRead(data, false, timeout);
+                var result = await WriteAndRead(data, timeout);
 
                 if (result == null || result.Length == 0)
                     throw new PacketRadioException("RL returned no result");
@@ -287,27 +288,19 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        private async Task<byte[]> WriteAndRead(byte[] dataToWrite, bool noWait = false, int timeout = 5000)
+        private async Task<byte[]> WriteAndRead(byte[] dataToWrite, int timeout = 5000)
         {
             try
             {
-                if (noWait)
+                var tc = new TaskCompletionSource<CharacteristicGattResult>();
+                ResponseCharacteristic.WhenNotificationReceived().Subscribe(result =>
                 {
-                    await DataCharacteristic.WriteWithoutResponse(dataToWrite);
-                }
-                else
-                {
-                    var tc = new TaskCompletionSource<CharacteristicGattResult>();
-                    ResponseCharacteristic.WhenNotificationReceived().Subscribe(result =>
-                    {
-                        tc.TrySetResult(result);
-                    });
-                    await DataCharacteristic.Write(dataToWrite);
-                    await tc.Task;
-                    var readResult = await DataCharacteristic.Read();
-                    return readResult.Data;
-                }
-                return null;
+                    tc.TrySetResult(result);
+                });
+                await DataCharacteristic.Write(dataToWrite);
+                await tc.Task;
+                var readResult = await DataCharacteristic.Read();
+                return readResult.Data;
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -320,43 +313,56 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                Debug.WriteLine("Initializing radio variables");
-                await SendCommand(RileyLinkCommandType.ResetRadioConfig);
-                await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
-                await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
+                byte[] response;
+                if (WorkaroundRequired)
+                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN, 0 });
+                else
+                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN});
 
-                var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.DEVIATN, 0x44 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL1, 0x20 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL0, 0x00 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN, 0x50 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCTRL1, 0x06 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG4, 0xCA });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG3, 0xBC });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG2, 0x06 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG1, 0x70 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG0, 0x11 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MCSM0, 0x18 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FOCCFG, 0x17 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL3, 0xE9 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL2, 0x2A });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL1, 0x00 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL0, 0x1F });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST1, 0x35 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST0, 0x09 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, 0x84 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREND0, 0x00 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC1, 0xA5 });
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0x5A });
+                if (response != null && response.Length > 0 && response[0] == 0x50)
+                {
+                    Debug.WriteLine("Radio configuration verified");
+                }
+                else
+                {
+                    Debug.WriteLine("Radio seems uninitialized, proceeding with initialization");
+                    await SendCommand(RileyLinkCommandType.ResetRadioConfig);
+                    await SendCommand(RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
+                    await SendCommand(RileyLinkCommandType.SetPreamble, new byte[] { 0x66, 0x65 });
+
+                    var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ0, (byte)(frequency & 0xff) });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ1, (byte)((frequency >> 8) & 0xff) });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREQ2, (byte)((frequency >> 16) & 0xff) });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.DEVIATN, 0x44 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL1, 0x20 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTCTRL0, 0x00 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN, 0x50 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCTRL1, 0x06 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG4, 0xCA });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG3, 0xBC });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG2, 0x06 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG1, 0x70 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MDMCFG0, 0x11 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.MCSM0, 0x18 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FOCCFG, 0x17 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL3, 0xE9 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL2, 0x2A });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL1, 0x00 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FSCAL0, 0x1F });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST1, 0x35 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.TEST0, 0x09 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, 0x84 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.FREND0, 0x00 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC1, 0xA5 });
+                    await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0x5A });
+                    Debug.WriteLine("Initialization completed.");
+                }
 
                 var result = await SendCommand(RileyLinkCommandType.GetState);
                 if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
                     throw new PacketRadioException("RL returned status not OK.");
 
-                Debug.WriteLine("Initialization completed.");
                 this.RadioInitialized = true;
             }
             catch (OmniCoreException) { throw; }
