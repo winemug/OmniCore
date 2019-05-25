@@ -208,51 +208,6 @@ namespace OmniCore.Radio.RileyLink
                         else
                             throw pe;
                     }
-                    //catch (ProtocolException pe)
-                    //{
-                    //    if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
-                    //    {
-                    //        Debug.WriteLine("Trying to recover from protocol error");
-                    //        received = pe.ReceivedPacket;
-                    //        while(true)
-                    //        {
-                    //            this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
-                    //            var interimAck = this.interim_ack(this.PdmMessage.AckAddressOverride.Value, this.Pod.radio_packet_sequence);
-                    //            try
-                    //            {
-                    //                received = await this.ExchangePackets(interimAck, RadioPacketType.POD, timeout);
-                    //                break;
-                    //            }
-                    //            catch (ProtocolException)
-                    //            {
-                    //                this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
-                    //                continue;
-                    //            }
-                    //            catch (OmnipyTimeoutException)
-                    //            {
-                    //                this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
-                    //                throw new StatusUpdateRequiredException(pe);
-                    //            }
-                    //            catch(Exception)
-                    //            {
-                    //                throw;
-                    //            }
-                    //        }
-                    //        continue;
-                    //    }
-                    //    if (pe.ReceivedPacket != null)
-                    //    {
-                    //        Debug.WriteLine("Trying to recover from protocol error");
-                    //        this.Pod.radio_packet_sequence = (pe.ReceivedPacket.sequence + 1) % 32;
-                    //        this.Pod.radio_message_sequence = (this.Pod.radio_message_sequence + 1) % 16;
-                    //        if (pe.ReceivedPacket != null && expected_type == RadioPacketType.POD && pe.ReceivedPacket.type == RadioPacketType.ACK)
-                    //        {
-                    //            throw new StatusUpdateRequiredException(pe);
-                    //        }
-                    //    }
-                    //    else
-                    //        throw;
-                    //}
                     catch (Exception) { throw; }
                 }
                 part++;

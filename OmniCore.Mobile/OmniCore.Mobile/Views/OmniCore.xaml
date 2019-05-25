@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:OmniCore.Mobile.Views"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.OmniCore">
+    <FlyoutItem Title="Pods"
+                FlyoutDisplayOptions="AsMultipleItems">
+        <Tab Title="Status">
+            <ShellContent Title="Cats">
+                <views:StatusPage/>
+            </ShellContent>
+            <ShellContent Title="Dogs">
+                <views:ActionPage />
+            </ShellContent>
+        </Tab>
+        <Tab Title="Test">
+            <ShellContent Title="Test">
+                <views:TestPage />
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+</Shell>
