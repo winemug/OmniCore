@@ -9,6 +9,11 @@ namespace OmniCore.Model.Eros
 {
     public class ErosMessage : IMessage
     {
+        public ErosMessage()
+        {
+            parts = new List<IMessagePart>();
+        }
+
         public IList<IMessagePart> GetParts()
         {
             return parts;

@@ -44,7 +44,7 @@ namespace OmniCore.Radio.RileyLink
             if (ResponseMessage.body_length == ResponseMessage.body.Length - 2)
             {
                 var bodyWithoutCrc = ResponseMessage.body.Sub(0, ResponseMessage.body.Length - 2);
-                var crc = ResponseMessage.body.DWord(ResponseMessage.body.Length - 2);
+                var crc = ResponseMessage.body.Word(ResponseMessage.body.Length - 2);
                 var crc_calculated = CrcUtil.Crc16(new Bytes(ResponseMessage.body_prefix, bodyWithoutCrc).ToArray());
 
                 if (crc == crc_calculated)

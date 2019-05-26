@@ -24,8 +24,9 @@ namespace OmniCore.Mobile.Droid
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
 
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = true;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
+            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
+            CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             LoadApplication(new App());
         }

@@ -261,8 +261,8 @@ namespace OmniCore.Radio.RileyLink
             this.Pod.radio_packet_sequence = (received.sequence + 1) % 32;
 
             var finalAckPacket = this.final_ack(ackAddress, (received.sequence + 1) % 32);
-            FinalAckTask = AcknowledgeEndOfMessage(finalAckPacket);
-            FinalAckTask.Start();
+
+            FinalAckTask = Task.Run(() => AcknowledgeEndOfMessage(finalAckPacket));
             return podResponse;
         }
 
@@ -369,7 +369,7 @@ namespace OmniCore.Radio.RileyLink
             throw new OmniCoreTimeoutException("Exceeded timeout while send and receive");
         }
 
-        private async Task SendPacket(RadioPacket packet_to_send, int allow_premature_exit_after = -1, int timeout = 25000)
+        private async Task SendPacket(RadioPacket packet_to_send, int timeout = 25000)
         {
             int start_time = 0;
             this.unique_packets++;
@@ -382,33 +382,17 @@ namespace OmniCore.Radio.RileyLink
 
                     try
                     {
-                        received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 0, 40);
+                        received = await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 3, 300);
                     }
                     catch(OmniCoreTimeoutException)
                     {
-                        received = null;
+                        Debug.WriteLine("Silence fell.");
+                        this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
+                        return;
                     }
 
                     if (start_time == 0)
                         start_time = Environment.TickCount;
-
-                    if (received == null)
-                    {
-                        try
-                        {
-                            received = await RileyLink.GetPacket(600);
-                        }
-                        catch (OmniCoreTimeoutException)
-                        {
-
-                        }
-                        if (received == null)
-                        {
-                            Debug.WriteLine("Silence fell.");
-                            this.Pod.radio_packet_sequence = (this.Pod.radio_packet_sequence + 1) % 32;
-                            break;
-                        }
-                    }
 
                     var p = this.GetPacket(received);
                     if (p == null)

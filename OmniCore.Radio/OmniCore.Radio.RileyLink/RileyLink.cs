@@ -83,6 +83,7 @@ namespace OmniCore.Radio.RileyLink
                     else
                     {
                         Debug.WriteLine("Connected to RL.");
+
                         var dataService = this.Device.GetKnownService(RileyLinkServiceUUID);
                         var characteristics = this.Device.GetKnownCharacteristics(RileyLinkServiceUUID,
                             new Guid[] { RileyLinkDataCharacteristicUUID, RileyLinkResponseCharacteristicUUID });
@@ -90,7 +91,23 @@ namespace OmniCore.Radio.RileyLink
                         this.DataCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkDataCharacteristicUUID);
                         this.ResponseCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
 
+                        await DataCharacteristic.Write(new byte[] { 0 });
                         await this.ResponseCharacteristic.EnableNotifications();
+                        byte[] lastResponse = null;
+                        while (true)
+                        {
+                            try
+                            {
+                                await ResponseCharacteristic.WhenNotificationReceived().Timeout(TimeSpan.FromMilliseconds(200));
+                                await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                                await ResponseCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                            }
+                            catch (TimeoutException)
+                            {
+                                break;
+                            }
+                        }
+                        await Task.Delay(500);
                     }
                 }
 
@@ -297,10 +314,18 @@ namespace OmniCore.Radio.RileyLink
                 {
                     tc.TrySetResult(result);
                 });
-                await DataCharacteristic.Write(dataToWrite);
-                await tc.Task;
-                var readResult = await DataCharacteristic.Read();
-                return readResult.Data;
+
+                try
+                {
+                    await DataCharacteristic.Write(dataToWrite);
+                    await tc.Task;
+                    var readResult = await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(timeout));
+                    return readResult.Data;
+                }
+                catch(TimeoutException)
+                {
+                    throw new OmniCoreTimeoutException();
+                }
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -377,6 +402,10 @@ namespace OmniCore.Radio.RileyLink
             Debug.WriteLine("Verifying RL version");
             try
             {
+                var result = await SendCommand(RileyLinkCommandType.GetState);
+                if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
+                    throw new PacketRadioException("RL returned status not OK.");
+
                 var versionData = await SendCommand(RileyLinkCommandType.GetVersion);
                 if (versionData != null && versionData.Length > 0)
                 {

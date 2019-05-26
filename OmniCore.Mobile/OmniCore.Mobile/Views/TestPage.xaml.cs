@@ -19,10 +19,19 @@ namespace OmniCore.Mobile.Views
     {
         TestViewModel viewModel;
 
+        ErosPod Pod;
+
         public TestPage()
         {
             InitializeComponent();
             BindingContext = viewModel = new TestViewModel();
+            var exchangeProvider = new RileyLinkProvider();
+            Pod = new ErosPod(exchangeProvider)
+            {
+                radio_address = 0x1f0e89f3,
+                id_lot = 42692,
+                id_t = 521355
+            };
         }
 
         private async Task<bool> CheckPermission(Permission p)
@@ -65,18 +74,9 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                //radio_addr 0x34ff1d53, 44538, 1181076;
-                var exchangeProvider = new RileyLinkProvider();
-                var pod = new ErosPod(exchangeProvider)
-                {
-                    radio_address = 0x1f0e89f3,
-                    id_lot = 42692,
-                    id_t = 521355
-                };
-
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
-                await pod.UpdateStatus(progress, cts.Token);
+                await Pod.UpdateStatus(progress, cts.Token);
                 //await pod.Bolus(0.5m);
             }
             finally
