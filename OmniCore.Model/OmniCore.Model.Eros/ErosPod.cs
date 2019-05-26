@@ -97,7 +97,7 @@ namespace OmniCore.Model.Eros
             //}
         //}
 
-        private async Task<PodCommandResult> internal_update_status(IMessageProgress progress, CancellationToken ct,
+        private async Task<PodCommandResult> UpdateStatusInternal(IMessageProgress progress, CancellationToken ct,
             StatusRequestType update_type = StatusRequestType.Standard)
         {
             var request = new ErosMessageBuilder().WithStatus(update_type).Build();
@@ -110,7 +110,7 @@ namespace OmniCore.Model.Eros
             try
             {
                 Debug.WriteLine($"Updating pod status, request type {update_type}");
-                await this.internal_update_status(progress, ct, update_type);
+                await this.UpdateStatusInternal(progress, ct, update_type);
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -124,8 +124,8 @@ namespace OmniCore.Model.Eros
             try
             {
                 Debug.WriteLine($"Acknowledging alerts, bitmask: {alert_mask}");
-                await internal_update_status(progress, ct);
-                _assert_immediate_bolus_not_active();
+                await UpdateStatusInternal(progress, ct);
+                AssertImmediateBolusInactive();
                 if (Progress < PodProgress.PairingSuccess)
                     throw new PdmException("Pod not paired completely yet.");
 
@@ -155,9 +155,9 @@ namespace OmniCore.Model.Eros
             try
             {
                 Debug.WriteLine($"Bolusing {bolusAmount}U");
-                await internal_update_status(progress, ct);
-                _assert_status_running();
-                _assert_immediate_bolus_not_active();
+                await UpdateStatusInternal(progress, ct);
+                AssertRunningStatus();
+                AssertImmediateBolusInactive();
 
                 if (bolusAmount < 0.05m)
                     throw new PdmException("Cannot bolus less than 0.05U");
@@ -185,8 +185,8 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                await internal_update_status(progress, ct);
-                _assert_status_running();
+                await UpdateStatusInternal(progress, ct);
+                AssertRunningStatus();
 
                 if (BolusState != BolusState.Immediate)
                     throw new PdmException("Immediate bolus is not running");
@@ -204,13 +204,13 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private void _assert_immediate_bolus_not_active()
+        private void AssertImmediateBolusInactive()
         {
             if (BolusState == BolusState.Immediate)
                 throw new PdmException("Bolus operation in progress");
         }
 
-        private void _assert_status_running()
+        private void AssertRunningStatus()
         {
             if (Progress < PodProgress.Running)
                 throw new PdmException("Pod is not yet running");

@@ -93,7 +93,6 @@ namespace OmniCore.Radio.RileyLink
 
                         await DataCharacteristic.Write(new byte[] { 0 });
                         await this.ResponseCharacteristic.EnableNotifications();
-                        byte[] lastResponse = null;
                         while (true)
                         {
                             try

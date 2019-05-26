@@ -58,11 +58,6 @@ namespace OmniCore.Radio.RileyLink
             await RileyLink.Connect();
         }
 
-        private void reset_sequences()
-        {
-            this.Pod.PacketSequence = 0;
-        }
-
         public async Task<IMessage> GetResponse(IMessage requestMessage, IMessageProgress messageExchangeProgress, CancellationToken ct)
         {
             this.Started = DateTime.UtcNow;
@@ -128,7 +123,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                this.reset_sequences();
+                                Pod.PacketSequence = 0;
                                 throw;
                             }
                         }
@@ -204,7 +199,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                this.reset_sequences();
+                                Pod.PacketSequence = 0;
                                 throw;
                             }
                         }
@@ -247,7 +242,7 @@ namespace OmniCore.Radio.RileyLink
 
             while (!responseBuilder.WithRadioPacket(received))
             {
-                var ackPacket = this.interim_ack(ackAddress, (received.sequence + 1) % 32);
+                var ackPacket = this.InterimAckPacket(ackAddress, (received.sequence + 1) % 32);
                 received = await this.ExchangePackets(ackPacket, PacketType.CON);
                 part_count++;
                 Debug.WriteLine($"Received POD message part {part_count}");
@@ -260,7 +255,7 @@ namespace OmniCore.Radio.RileyLink
             this.Pod.MessageSequence = (podResponse.sequence.Value + 1) % 16;
             this.Pod.PacketSequence = (received.sequence + 1) % 32;
 
-            var finalAckPacket = this.final_ack(ackAddress, (received.sequence + 1) % 32);
+            var finalAckPacket = this.FinalAckPacket(ackAddress, (received.sequence + 1) % 32);
 
             FinalAckTask = Task.Run(() => AcknowledgeEndOfMessage(finalAckPacket));
             return podResponse;
@@ -461,25 +456,25 @@ namespace OmniCore.Radio.RileyLink
             return null;
         }
 
-        private RadioPacket _ack_data(uint address1, uint address2, int sequence)
+        private RadioPacket CreateAckPacket(uint address1, uint address2, int sequence)
         {
             return new RadioPacket(address1, PacketType.ACK, sequence, new Bytes(address2));
         }
 
-        private RadioPacket interim_ack(uint ack_address_override, int sequence)
+        private RadioPacket InterimAckPacket(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.RadioAddress)
-                return _ack_data(this.Pod.RadioAddress, this.Pod.RadioAddress, sequence);
+                return CreateAckPacket(this.Pod.RadioAddress, this.Pod.RadioAddress, sequence);
             else
-                return _ack_data(this.Pod.RadioAddress, ack_address_override, sequence);
+                return CreateAckPacket(this.Pod.RadioAddress, ack_address_override, sequence);
         }
 
-        private RadioPacket final_ack(uint ack_address_override, int sequence)
+        private RadioPacket FinalAckPacket(uint ack_address_override, int sequence)
         {
             if (ack_address_override == this.Pod.RadioAddress)
-                return _ack_data(this.Pod.RadioAddress, 0, sequence);
+                return CreateAckPacket(this.Pod.RadioAddress, 0, sequence);
             else
-                return _ack_data(this.Pod.RadioAddress, ack_address_override, sequence);
+                return CreateAckPacket(this.Pod.RadioAddress, ack_address_override, sequence);
         }
 
         public List<RadioPacket> GetRadioPackets(ErosMessage message)
