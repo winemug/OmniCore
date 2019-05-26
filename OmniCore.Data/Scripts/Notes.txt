@@ -1,0 +1,40 @@
+﻿Commands table:
+
+TAKEOVER - lot, tid, address
+ASSIGN ADDRESS - address
+SETUP POD - lot, tid, address, year, month, day, hour, minute
+CONFIGURE ALERT - index, activate, trigger_auto_off, isReservoir, alert_minutes_or_reservoir, duration, beeptype, beeppattern
+SET BASAL SCHEDULE - schedule, hour, min, second
+BOLUS - pulses, speed, delay
+STATUS REQ - type
+ACK ALERTS - mask
+CANCEL - bolus, tempbasal, basal
+TEMPBASAL - rate, duration
+DEACTIVATE
+DELIVERY FLAGS - 0, 1
+
+
+Status:
+QUEUED
+RUNNING
+UNKNOWN
+FAILED
+SUCCEEDED
+
+Schedules:
+
+/*
+CREATE TABLE BasalSchedules(
+Id INTEGER PRIMARY KEY,
+Name TEXT
+);
+
+CREATE TABLE BasalScheduleRates(
+Id INTEGER PRIMARY KEY,
+BasalScheduleId INTEGER NOT NULL,
+HalfHour INTEGER NOT NULL,
+Rate REAL NOT NULL,
+	FOREIGN KEY(BasalScheduleId) REFERENCES BasalSchedules(Id),
+	UNIQUE(BasalScheduleId,HalfHour)
+);
+*/

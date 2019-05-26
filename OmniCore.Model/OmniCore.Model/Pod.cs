@@ -14,5 +14,19 @@ namespace OmniCore.Model
         public abstract Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alertMask);
         public abstract Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount);
         public abstract Task CancelBolus(IMessageProgress progress, CancellationToken ct);
+
+        public async Task<bool> WithLotAndTid(uint lot, uint tid)
+        {
+            this.id_lot = lot;
+            this.id_t = tid;
+            return await DataStore.Load(this);
+        }
+
+        private readonly IDataStore DataStore;
+
+        public Pod(IDataStore dataStore)
+        {
+            DataStore = dataStore;
+        }
     }
 }

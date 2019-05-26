@@ -1,14 +1,11 @@
-﻿using OmniCore.Mobile.ViewModels;
+﻿using OmniCore.Data;
+using OmniCore.Mobile.ViewModels;
 using OmniCore.Model;
 using OmniCore.Model.Eros;
 using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -26,12 +23,7 @@ namespace OmniCore.Mobile.Views
             InitializeComponent();
             BindingContext = viewModel = new TestViewModel();
             var exchangeProvider = new RileyLinkProvider();
-            Pod = new ErosPod(exchangeProvider)
-            {
-                radio_address = 0x1f0e89f3,
-                id_lot = 42692,
-                id_t = 521355
-            };
+            Pod = new ErosPod(exchangeProvider, DataStore.Instance);
         }
 
         private async Task<bool> CheckPermission(Permission p)
@@ -65,8 +57,8 @@ namespace OmniCore.Mobile.Views
             if (!await CheckPermission(Permission.LocationAlways))
                 return;
 
-            if (!await CheckPermission(Permission.Location))
-                return;
+            //if (!await CheckPermission(Permission.Location))
+            //    return;
 
             if (!await CheckPermission(Permission.Storage))
                 return;
@@ -74,6 +66,11 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
+                if (!await Pod.WithLotAndTid(42692, 521355))
+                {
+                    Pod.radio_address = 0x1f0e89f3;
+                }
+
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
                 await Pod.UpdateStatus(progress, cts.Token);

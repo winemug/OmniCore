@@ -16,6 +16,7 @@ namespace OmniCore.Model
         public string id_version_pi { get; set; }
         public byte? id_version_unknown_byte { get; set; }
         public byte[] id_version_unknown_7_bytes { get; set; }
+
         public uint radio_address { get; set; }
 
         private int _packet_seq = 0;

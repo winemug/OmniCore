@@ -17,7 +17,7 @@ namespace OmniCore.Model.Eros
 
         private readonly ErosMessageExchangeParameters StandardParameters;
 
-        public ErosPod(IMessageExchangeProvider messageExchangeProvider)
+        public ErosPod(IMessageExchangeProvider messageExchangeProvider, IDataStore dataStore) : base(dataStore)
         {
             MessageHandler = new MessageHandler(this, messageExchangeProvider);
             StandardParameters = new ErosMessageExchangeParameters() { };
