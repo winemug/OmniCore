@@ -10,19 +10,19 @@ namespace OmniCore.Model
 {
     public abstract partial class Pod : IPodVariables
     {
-        public uint? id_lot { get; set; }
-        public uint? id_t { get; set; }
-        public string id_version_pm { get; set; }
-        public string id_version_pi { get; set; }
-        public byte? id_version_unknown_byte { get; set; }
-        public byte[] id_version_unknown_7_bytes { get; set; }
+        public uint? Lot { get; set; }
+        public uint? Serial { get; set; }
+        public string VersionPm { get; set; }
+        public string VersionPi { get; set; }
+        public byte? VersionByte { get; set; }
+        public byte[] Version7Bytes { get; set; }
 
-        public uint radio_address { get; set; }
+        public uint RadioAddress { get; set; }
 
         private int _packet_seq = 0;
         private int _message_seq = 0;
 
-        public int radio_packet_sequence
+        public int PacketSequence
         {
             get => _packet_seq;
             set
@@ -31,7 +31,7 @@ namespace OmniCore.Model
             }
         }
 
-        public int radio_message_sequence
+        public int MessageSequence
         {
             get => _message_seq;
             set
@@ -40,55 +40,45 @@ namespace OmniCore.Model
             }
         }
 
-        public int? radio_low_gain { get; set; }
-        public int? radio_rssi { get; set; }
+        public int? RadioLowGain { get; set; }
+        public int? RadioRssi { get; set; }
 
-        public uint? nonce_last { get; set; }
-        public uint nonce_seed { get; set; }
-        public uint? nonce_syncword { get; set; }
-        public int nonce_ptr { get; set; }
-        public int nonce_runs { get; set; }
+        public uint? LastNonce { get; set; }
+        public uint NonceSeed { get; set; }
+        public uint? NonceSync { get; set; }
+        public int NoncePtr { get; set; }
+        public int NonceRuns { get; set; }
 
-        public DateTime? state_last_updated { get; set; }
-        public PodProgress state_progress { get; set; }
-        public BasalState state_basal { get; set; }
-        public BolusState state_bolus { get; set; }
-        public byte state_alert { get; set; }
-        public ushort? state_alert_w278 { get; set; }
-        public ushort[] state_alerts { get; set; }
-        public uint state_active_minutes { get; set; }
-        public bool state_faulted { get; set; }
+        public DateTime? LastUpdated { get; set; }
+        public PodProgress Progress { get; set; }
+        public BasalState BasalState { get; set; }
+        public BolusState BolusState { get; set; }
+        public byte AlertMask { get; set; }
+        public ushort? AlertW278 { get; set; }
+        public ushort[] AlertStates { get; set; }
+        public uint ActiveMinutes { get; set; }
+        public bool Faulted { get; set; }
 
-        public decimal? var_alert_low_reservoir { get; set; }
-        public int? var_alert_replace_pod { get; set; }
+        public decimal? ReservoirAlertLevel { get; set; }
+        public int? ExpiryAlertMinutes { get; set; }
 
-        public decimal[] var_basal_schedule { get; set; }
-        public int? fault_event { get; set; }
-        public int? fault_event_rel_time { get; set; }
-        public int? fault_table_access { get; set; }
-        public int? fault_insulin_state_table_corruption { get; set; }
-        public int? fault_internal_variables { get; set; }
-        public bool? fault_immediate_bolus_in_progress { get; set; }
-        public PodProgress? fault_progress_before { get; set; }
-        public PodProgress? fault_progress_before2 { get; set; }
-        public uint? fault_information_type2_last_word { get; set; }
+        public decimal[] BasalSchedule { get; set; }
+        public int? FaultCode { get; set; }
+        public int? FaultRelativeTime { get; set; }
+        public int? TableAccessFault { get; set; }
+        public int? InsulinStateTableCorruption { get; set; }
+        public int? InternalFaultVariables { get; set; }
+        public bool? FaultedWhileImmediateBolus { get; set; }
+        public PodProgress? ProgressBeforeFault { get; set; }
+        public PodProgress? ProgressBeforeFault2 { get; set; }
+        public uint? FaultInformation2LastWord { get; set; }
 
-        public decimal insulin_reservoir { get; set; }
-        public decimal insulin_delivered { get; set; }
-        public decimal insulin_canceled { get; set; }
+        public decimal Reservoir { get; set; }
+        public decimal DeliveredInsulin { get; set; }
+        public decimal NotDeliveredInsulin { get; set; }
 
-        public int? var_utc_offset { get; set; }
-        public DateTime? var_activation_date { get; set; }
-        public DateTime? var_insertion_date { get; set; }
-
-        public string last_command { get; set; }
-
-        public int? last_command_db_id { get; set; }
-        public DateTime? last_enacted_temp_basal_start { get; set; }
-        public TimeSpan? last_enacted_temp_basal_duration { get; set; }
-        public decimal? last_enacted_temp_basal_amount { get; set; }
-        public DateTime? last_enacted_bolus_start { get; set; }
-        public decimal? last_enacted_bolus_amount { get; set; }
-
+        public int? UtcOffset { get; set; }
+        public DateTime? ActivationDate { get; set; }
+        public DateTime? InsertionDate { get; set; }
     }
 }

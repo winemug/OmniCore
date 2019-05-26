@@ -17,8 +17,8 @@ namespace OmniCore.Model
 
         public async Task<bool> WithLotAndTid(uint lot, uint tid)
         {
-            this.id_lot = lot;
-            this.id_t = tid;
+            this.Lot = lot;
+            this.Serial = tid;
             return await DataStore.Load(this);
         }
 

@@ -68,7 +68,7 @@ namespace OmniCore.Mobile.Views
             {
                 if (!await Pod.WithLotAndTid(42692, 521355))
                 {
-                    Pod.radio_address = 0x1f0e89f3;
+                    Pod.RadioAddress = 0x1f0e89f3;
                 }
 
                 var cts = new CancellationTokenSource();

@@ -13,40 +13,40 @@ namespace OmniCore.Model.Eros
         public Nonce(Pod pod)
         {
             this.Pod = pod;
-            this.Pod.nonce_syncword = null;
+            this.Pod.NonceSync = null;
 
-            if (pod.nonce_last.HasValue)
+            if (pod.LastNonce.HasValue)
             {
-                var nonce_ptr = this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, this.Pod.nonce_seed);
+                var nonce_ptr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, this.Pod.NonceSeed);
                 int nonce_runs = 0;
-                uint nonce_generated = pod.nonce_last.Value ^ FAKE_NONCE;
-                while (nonce_generated != pod.nonce_last)
+                uint nonce_generated = pod.LastNonce.Value ^ FAKE_NONCE;
+                while (nonce_generated != pod.LastNonce)
                 {
                     nonce_generated = GetNextInternal(ref nonce_ptr);
                     nonce_runs++;
                 }
-                this.Pod.nonce_runs = nonce_runs;
-                this.Pod.nonce_ptr = nonce_ptr;
+                this.Pod.NonceRuns = nonce_runs;
+                this.Pod.NoncePtr = nonce_ptr;
             }
             else
             {
-                this.Pod.nonce_runs = 0;
-                this.Pod.nonce_seed = 0;
-                this.Pod.nonce_ptr = this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, 0);
+                this.Pod.NonceRuns = 0;
+                this.Pod.NonceSeed = 0;
+                this.Pod.NoncePtr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, 0);
             }
         }
 
         public uint GetNext()
         {
-            if (this.Pod.nonce_runs++ > 25)
-                this.Pod.nonce_last = FAKE_NONCE;
+            if (this.Pod.NonceRuns++ > 25)
+                this.Pod.LastNonce = FAKE_NONCE;
             else
             {
-                var ptr = this.Pod.nonce_ptr;
-                this.Pod.nonce_last = GetNextInternal(ref ptr);
-                this.Pod.nonce_ptr = ptr;
+                var ptr = this.Pod.NoncePtr;
+                this.Pod.LastNonce = GetNextInternal(ref ptr);
+                this.Pod.NoncePtr = ptr;
             }
-            return this.Pod.nonce_last.Value;
+            return this.Pod.LastNonce.Value;
         }
 
         private uint GetNextInternal(ref int nonce_ptr)
@@ -59,17 +59,17 @@ namespace OmniCore.Model.Eros
 
         public void Reset()
         {
-            this.Pod.nonce_runs = 32;
+            this.Pod.NonceRuns = 32;
         }
 
 	    public void Sync(int msgSequence)
         {
-            var w_sum = (this.Pod.nonce_last & 0xFFFF) + (CrcUtil.Crc16Table[msgSequence] & 0xFFFF)
-                        + (this.Pod.id_lot.Value & 0xFFFF) + (this.Pod.id_t.Value & 0xFFFF);
-            this.Pod.nonce_seed = (uint)((w_sum & 0xFFFF) ^ this.Pod.nonce_syncword) & 0xff;
-            this.Pod.nonce_runs = 0;
-            this.Pod.nonce_syncword = null;
-            this.Initialize(this.Pod.id_lot.Value, this.Pod.id_t.Value, this.Pod.nonce_seed);
+            var w_sum = (this.Pod.LastNonce & 0xFFFF) + (CrcUtil.Crc16Table[msgSequence] & 0xFFFF)
+                        + (this.Pod.Lot.Value & 0xFFFF) + (this.Pod.Serial.Value & 0xFFFF);
+            this.Pod.NonceSeed = (uint)((w_sum & 0xFFFF) ^ this.Pod.NonceSync) & 0xff;
+            this.Pod.NonceRuns = 0;
+            this.Pod.NonceSync = null;
+            this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, this.Pod.NonceSeed);
         }
 
         private uint Shuffle()

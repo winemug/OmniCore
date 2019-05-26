@@ -126,19 +126,19 @@ namespace OmniCore.Model.Eros
                 Debug.WriteLine($"Acknowledging alerts, bitmask: {alert_mask}");
                 await internal_update_status(progress, ct);
                 _assert_immediate_bolus_not_active();
-                if (state_progress < PodProgress.PairingSuccess)
+                if (Progress < PodProgress.PairingSuccess)
                     throw new PdmException("Pod not paired completely yet.");
 
-                if (state_progress == PodProgress.ErrorShuttingDown)
+                if (Progress == PodProgress.ErrorShuttingDown)
                     throw new PdmException("Pod is shutting down, cannot acknowledge alerts.");
 
-                if (state_progress == PodProgress.AlertExpiredShuttingDown)
+                if (Progress == PodProgress.AlertExpiredShuttingDown)
                     throw new PdmException("Acknowledgement period expired, pod is shutting down");
 
-                if (state_progress > PodProgress.AlertExpiredShuttingDown)
+                if (Progress > PodProgress.AlertExpiredShuttingDown)
                     throw new PdmException("Pod is not active");
 
-                if ((state_alert & alert_mask) != alert_mask)
+                if ((AlertMask & alert_mask) != alert_mask)
                     throw new PdmException("Bitmask is invalid for current alert state");
 
                 // await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
@@ -170,11 +170,9 @@ namespace OmniCore.Model.Eros
 
                 // await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
 
-                if (state_bolus != BolusState.Immediate)
+                if (BolusState != BolusState.Immediate)
                     throw new PdmException("Pod did not start bolusing");
 
-                last_enacted_bolus_start = DateTime.UtcNow;
-                last_enacted_bolus_amount = bolusAmount;
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -190,15 +188,14 @@ namespace OmniCore.Model.Eros
                 await internal_update_status(progress, ct);
                 _assert_status_running();
 
-                if (state_bolus != BolusState.Immediate)
+                if (BolusState != BolusState.Immediate)
                     throw new PdmException("Immediate bolus is not running");
 
                 // await send_request(ProtocolHelper.request_cancel_bolus(), true);
 
-                if (state_bolus == BolusState.Immediate)
+                if (BolusState == BolusState.Immediate)
                     throw new PdmException("Failed to cancel running bolus");
 
-                last_enacted_bolus_amount = insulin_canceled;
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -209,16 +206,16 @@ namespace OmniCore.Model.Eros
 
         private void _assert_immediate_bolus_not_active()
         {
-            if (state_bolus == BolusState.Immediate)
+            if (BolusState == BolusState.Immediate)
                 throw new PdmException("Bolus operation in progress");
         }
 
         private void _assert_status_running()
         {
-            if (state_progress < PodProgress.Running)
+            if (Progress < PodProgress.Running)
                 throw new PdmException("Pod is not yet running");
 
-            if (state_progress > PodProgress.RunningLow)
+            if (Progress > PodProgress.RunningLow)
                 throw new PdmException("Pod is not running");
         }
 
