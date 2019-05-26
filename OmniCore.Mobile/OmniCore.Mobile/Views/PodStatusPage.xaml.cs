@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Mobile.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,12 +11,14 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MainPage : TabbedPage
+    public partial class PodStatusPage : ContentPage
     {
-        public MainPage()
+        PodStatusViewModel viewModel;
+
+        public PodStatusPage()
         {
             InitializeComponent();
-            this.CurrentPage = this.Children.Last();
+            BindingContext = viewModel = new PodStatusViewModel();
         }
     }
 }

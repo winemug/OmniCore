@@ -22,25 +22,43 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\InsulinActionPage.xaml.cs">
+      <DependentUpon>InsulinActionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OmniCoreMain.xaml.cs">
+      <DependentUpon>OmniCoreMain.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OmniCoreSettingsPage.xaml.cs">
+      <DependentUpon>OmniCoreSettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\PodStatusPage.xaml.cs">
+      <DependentUpon>PodStatusPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Update="Views\AboutPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\OmniCore.xaml">
+    <EmbeddedResource Update="Views\OmniCoreMain.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\SettingsPage.xaml">
+    <EmbeddedResource Update="Views\OmniCoreSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\PodSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\RadioStatusPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\TestPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\StatusPage.xaml">
+    <EmbeddedResource Update="Views\PodStatusPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\ActionPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\MainPage.xaml">
+    <EmbeddedResource Update="Views\InsulinActionPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

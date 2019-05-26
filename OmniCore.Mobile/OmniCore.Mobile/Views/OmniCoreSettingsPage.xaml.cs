@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class StatusPage : ContentPage
+    public partial class OmniCoreSettingsPage : ContentPage
     {
-        public StatusPage()
+        public OmniCoreSettingsPage()
         {
             InitializeComponent();
         }

@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SettingsPage : ContentPage
+    public partial class RadioStatusPage : ContentPage
     {
-        public SettingsPage()
+        public RadioStatusPage()
         {
             InitializeComponent();
         }

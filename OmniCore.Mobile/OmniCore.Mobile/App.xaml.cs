@@ -11,7 +11,7 @@ namespace OmniCore.Mobile
         public App()
         {
             InitializeComponent();
-            MainPage = new Views.OmniCore();
+            MainPage = new Views.OmniCoreMain();
         }
 
         protected override void OnStart()

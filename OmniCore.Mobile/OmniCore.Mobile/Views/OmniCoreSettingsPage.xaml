@@ -4,10 +4,12 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="OmniCore.Mobile.Views.SettingsPage">
+             x:Class="OmniCore.Mobile.Views.OmniCoreSettingsPage">
     <ContentPage.Content>
       <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-      </StackLayout>
+            <Label Text="OmniCore settings"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand" />
+        </StackLayout>
   </ContentPage.Content>
 </ContentPage>
