@@ -40,7 +40,7 @@ namespace OmniCore.Model.Eros
             int i = 1;
             if (PartData.Length == 27)
             {
-                pod.Version7Bytes = PartData.ToArray(i, i + 7);
+                pod.VersionUnknown = PartData.ToHex(i, i + 7);
                 i += 7;
                 lengthyResponse = true;
             }
@@ -55,7 +55,7 @@ namespace OmniCore.Model.Eros
             var iz = PartData.Byte(i++);
             pod.VersionPi = $"{ix}.{iy}.{iz}";
 
-            pod.VersionByte = PartData.Byte(i++);
+            pod.VersionUnknown += PartData.ToHex(i++, i);
             pod.Progress = (PodProgress)(PartData.Byte(i++) & 0x0F);
             pod.Lot = PartData.DWord(i);
             pod.Serial = PartData.DWord(i + 4);

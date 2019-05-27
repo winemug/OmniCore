@@ -12,6 +12,7 @@ namespace OmniCore.Model.Interfaces
         Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount);
         Task CancelBolus(IMessageProgress progress, CancellationToken ct);
 
-        Task<bool> WithLotAndTid(uint lot, uint tid);
+        bool WithLotAndTid(uint lot, uint tid);
+        void Save();
     }
 }

@@ -15,11 +15,16 @@ namespace OmniCore.Model
         public abstract Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount);
         public abstract Task CancelBolus(IMessageProgress progress, CancellationToken ct);
 
-        public async Task<bool> WithLotAndTid(uint lot, uint tid)
+        public bool WithLotAndTid(uint lot, uint tid)
         {
             this.Lot = lot;
             this.Serial = tid;
-            return await DataStore.Load(this);
+            return DataStore.Load(this);
+        }
+
+        public void Save()
+        {
+            DataStore.Save(this);
         }
 
         private readonly IDataStore DataStore;

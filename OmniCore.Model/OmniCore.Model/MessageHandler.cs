@@ -26,7 +26,6 @@ namespace OmniCore.Model
             var previousContext = SynchronizationContext.Current;
             try
             {
-                // SynchronizationContext.SetSynchronizationContext(MessageSynchronizationContext);
                 var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod, messageProgress, ct).ConfigureAwait(false);
                 var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
                 return messageExchange.ParseResponse(response, Pod);
@@ -37,7 +36,7 @@ namespace OmniCore.Model
             }
             finally
             {
-                // SynchronizationContext.SetSynchronizationContext(previousContext);
+                Pod.Save();
             }
         }
     }

@@ -10,12 +10,12 @@ namespace OmniCore.Model
 {
     public abstract partial class Pod : IPodVariables
     {
+        public long? Id { get; set; }
         public uint? Lot { get; set; }
         public uint? Serial { get; set; }
         public string VersionPm { get; set; }
         public string VersionPi { get; set; }
-        public byte? VersionByte { get; set; }
-        public byte[] Version7Bytes { get; set; }
+        public string VersionUnknown { get; set; }
 
         public uint RadioAddress { get; set; }
 

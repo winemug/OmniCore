@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Data;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -17,6 +18,7 @@ namespace OmniCore.Mobile
         protected override void OnStart()
         {
             // Handle when your app starts
+            DataStore.Instance.Initialize();
         }
 
         protected override void OnSleep()

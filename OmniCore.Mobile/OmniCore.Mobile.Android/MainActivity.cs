@@ -9,14 +9,26 @@ using Android.OS;
 using Plugin.Permissions;
 using Android.Content;
 using Plugin.BluetoothLE;
+using System.Runtime.InteropServices;
+using Mono.Data.Sqlite;
 
 namespace OmniCore.Mobile.Droid
 {
     [Activity(Label = "OmniCore.Mobile", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        [DllImport("libsqlite.so")]
+        internal static extern int sqlite3_shutdown();
+
+        [DllImport("libsqlite.so")]
+        internal static extern int sqlite3_initialize();
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            sqlite3_shutdown();
+            SqliteConnection.SetConfig(SQLiteConfig.Serialized);
+            sqlite3_initialize();
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);

@@ -23,49 +23,7 @@ namespace OmniCore.Model.Eros
             StandardParameters = new ErosMessageExchangeParameters() { };
         }
 
-        //private static Pod Load(uint lot, uint tid)
-        //{
-        //    //var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"pod_{lot}_{tid}.json");
-        //    //if (string.IsNullOrEmpty(path))
-        //    //    throw new ArgumentException();
-
-        //    //if (!File.Exists(path)
-        //    //{
-        //    //    SavePod();
-        //    //}
-        //    //else
-        //    //{
-        //    //    Pod pod = null;
-        //    //    var js = new JsonSerializer();
-        //    //    using (var sr = new StreamReader(this.PodPath))
-        //    //    {
-        //    //        using (var jr = new JsonTextReader(sr))
-        //    //        {
-        //    //            pod = js.Deserialize<Pod>(jr);
-        //    //        }
-        //    //    }
-        //    //    this.Pdm.Pod = pod;
-        //    //}
-        //    throw new NotImplementedException();
-        //}
-
-        public void Save()
-        {
-            //var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"pod_{lot}_{tid}.json");
-            //if (string.IsNullOrEmpty(this.PodPath))
-            //    throw new ArgumentException();
-
-            //var js = new JsonSerializer();
-            //using (var sw = new StreamWriter(this.PodPath, false, Encoding.UTF8))
-            //{
-            //    using (var jw = new JsonTextWriter(sw))
-            //    {
-            //        js.Serialize(jw, this.Pdm.Pod);
-            //    }
-            //}
-        }
-
-        //private async Task send_request(IRequest request, bool with_nonce = false)
+         //private async Task send_request(IRequest request, bool with_nonce = false)
         //{
             //if (with_nonce)
             //{

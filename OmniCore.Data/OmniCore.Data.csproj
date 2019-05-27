@@ -13,11 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
+    <ProjectReference Include="..\OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj" />
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>..\..\..\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v1.0\Mono.Data.Sqlite.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

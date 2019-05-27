@@ -7,8 +7,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IDataStore
     {
-        Task Initialize();
-        Task<bool> Load(IPod pod);
-        Task<bool> Save(IPod pod);
+        void Initialize();
+        bool Load(IPod pod);
+        void Save(IPod pod);
     }
 }

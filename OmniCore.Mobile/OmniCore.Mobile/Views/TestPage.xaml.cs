@@ -66,7 +66,7 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
-                if (!await Pod.WithLotAndTid(42692, 521355))
+                if (!Pod.WithLotAndTid(42692, 521355))
                 {
                     Pod.RadioAddress = 0x1f0e89f3;
                 }

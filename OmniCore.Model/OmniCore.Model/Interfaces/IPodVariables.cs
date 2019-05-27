@@ -7,6 +7,7 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodVariables
     {
+        long? Id { get; set; }
         int? FaultCode { get; set; }
         int? FaultRelativeTime { get; set; }
         bool? FaultedWhileImmediateBolus { get; set; }
@@ -20,8 +21,7 @@ namespace OmniCore.Model.Interfaces
         uint? Serial { get; set; }
         string VersionPi { get; set; }
         string VersionPm { get; set; }
-        byte[] Version7Bytes { get; set; }
-        byte? VersionByte { get; set; }
+        string VersionUnknown { get; set; }
         decimal NotDeliveredInsulin { get; set; }
         decimal DeliveredInsulin { get; set; }
         decimal Reservoir { get; set; }

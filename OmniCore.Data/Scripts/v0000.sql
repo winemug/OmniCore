@@ -1,10 +1,10 @@
 ﻿DROP TABLE IF EXISTS DataStore;
 
 CREATE TABLE DataStore(
-Id INTEGER PRIMARY KEY,
 Version INTEGER NOT NULL
 );
 
+INSERT INTO DataStore(Version) VALUES(0);
 
 DROP TABLE IF EXISTS Pods;
 
@@ -16,7 +16,17 @@ RadioAddress INTEGER NOT NULL,
 VersionPm TEXT,
 VersionPi TEXT,
 VersionUnknown TEXT,
+PacketSequence INTEGER NOT NULL,
+MessageSequence INTEGER NOT NULL,
 	UNIQUE(Lot,Serial)
+);
+
+DROP TABLE IF EXISTS ActivePods;
+
+CREATE TABLE ActivePods(
+PodId INTEGER NOT NULL,
+	UNIQUE(PodId),
+	FOREIGN KEY(PodId) REFERENCES Pods(Id)
 );
 
 DROP TABLE IF EXISTS Commands;
