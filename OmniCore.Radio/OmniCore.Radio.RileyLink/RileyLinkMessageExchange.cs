@@ -27,7 +27,7 @@ namespace OmniCore.Radio.RileyLink
 
         private RileyLink RileyLink;
 
-        private IPod Pod;
+        private ErosPod Pod;
         public RadioPacket last_received_packet;
         public int last_packet_timestamp = 0;
 
@@ -37,14 +37,14 @@ namespace OmniCore.Radio.RileyLink
         internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
         {
             RileyLink = rileyLinkInstance;
-            Pod = pod;
+            Pod = pod as ErosPod;
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
         }
 
         public void UpdateParameters(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
         {
             RileyLink = rileyLinkInstance;
-            Pod = pod;
+            Pod = pod as ErosPod;
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
         }
 
@@ -95,7 +95,7 @@ namespace OmniCore.Radio.RileyLink
 
                     try
                     {
-                        received = await this.ExchangePackets(packet.with_sequence(this.Pod.PacketSequence), expected_type, timeout);
+                        received = await this.ExchangePackets(packet.with_sequence(this.Pod.RuntimeVariables.PacketSequence), expected_type, timeout);
                         break;
                     }
                     catch (OmniCoreTimeoutException)
@@ -123,7 +123,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                Pod.PacketSequence = 0;
+                                Pod.RuntimeVariables.PacketSequence = 0;
                                 throw;
                             }
                         }
@@ -199,7 +199,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                Pod.PacketSequence = 0;
+                                Pod.RuntimeVariables.PacketSequence = 0;
                                 throw;
                             }
                         }
@@ -209,7 +209,7 @@ namespace OmniCore.Radio.RileyLink
                         if (pe.ReceivedPacket != null && expected_type == PacketType.POD && pe.ReceivedPacket.type == PacketType.ACK)
                         {
                             Debug.WriteLine("Trying to recover from protocol error");
-                            this.Pod.PacketSequence++;
+                            this.Pod.RuntimeVariables.PacketSequence++;
 
                             return await GetResponse(requestMessage, messageExchangeProgress, ct);
                         }
@@ -219,7 +219,7 @@ namespace OmniCore.Radio.RileyLink
                     catch (Exception) { throw; }
                 }
                 part++;
-                this.Pod.PacketSequence = (received.sequence + 1) % 32;
+                this.Pod.RuntimeVariables.PacketSequence = (received.sequence + 1) % 32;
             }
 
             Debug.WriteLine($"SENT MSG {requestMessage}");
@@ -252,8 +252,7 @@ namespace OmniCore.Radio.RileyLink
 
             Debug.WriteLine($"RCVD MSG {podResponse}");
             Debug.WriteLine("Send and receive completed.");
-            this.Pod.MessageSequence = (podResponse.sequence.Value + 1) % 16;
-            this.Pod.PacketSequence = (received.sequence + 1) % 32;
+            this.Pod.RuntimeVariables.PacketSequence = (received.sequence + 1) % 32;
 
             var finalAckPacket = this.FinalAckPacket(ackAddress, (received.sequence + 1) % 32);
 
@@ -267,7 +266,7 @@ namespace OmniCore.Radio.RileyLink
             {
                 Debug.WriteLine("Sending final ack");
                 await SendPacket(ackPacket);
-                this.Pod.PacketSequence++;
+                this.Pod.RuntimeVariables.PacketSequence++;
                 Debug.WriteLine("Message exchange finalized");
             }
             catch(Exception)
@@ -340,7 +339,7 @@ namespace OmniCore.Radio.RileyLink
                 }
 
                 this.last_received_packet = p;
-                this.Pod.PacketSequence = (p.sequence + 1) % 32;
+                this.Pod.RuntimeVariables.PacketSequence = (p.sequence + 1) % 32;
 
                 if (p.type != expected_type)
                 {
@@ -351,7 +350,7 @@ namespace OmniCore.Radio.RileyLink
 
                 if (p.sequence != (packet_to_send.sequence + 1) % 32)
                 {
-                    this.Pod.PacketSequence = (p.sequence + 1) % 32;
+                    this.Pod.RuntimeVariables.PacketSequence = (p.sequence + 1) % 32;
                     Debug.WriteLine("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
                     this.protocol_errors++;
@@ -382,7 +381,7 @@ namespace OmniCore.Radio.RileyLink
                     catch(OmniCoreTimeoutException)
                     {
                         Debug.WriteLine("Silence fell.");
-                        this.Pod.PacketSequence = (this.Pod.PacketSequence + 1) % 32;
+                        this.Pod.RuntimeVariables.PacketSequence++;
                         return;
                     }
 
@@ -419,8 +418,8 @@ namespace OmniCore.Radio.RileyLink
                     Debug.WriteLine($"RECEIVED unexpected packet");
                     this.protocol_errors++;
                     this.last_received_packet = p;
-                    this.Pod.PacketSequence = (p.sequence + 1) % 32;
-                    packet_to_send.with_sequence(this.Pod.PacketSequence);
+                    this.Pod.RuntimeVariables.PacketSequence = p.sequence + 1;
+                    packet_to_send.with_sequence(this.Pod.RuntimeVariables.PacketSequence);
                     start_time = Environment.TickCount;
                     continue;
                 }
@@ -496,7 +495,7 @@ namespace OmniCore.Radio.RileyLink
             if (MessageExchangeParameters.CriticalWithFollowupRequired)
                 b0 = 0x80;
 
-            var msgSequence = Pod.MessageSequence;
+            var msgSequence = (Pod.Status.MessageSequence + 1 % 16);
             if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
                 msgSequence = MessageExchangeParameters.MessageSequenceOverride.Value;
 
@@ -542,7 +541,7 @@ namespace OmniCore.Radio.RileyLink
 
             int index = 0;
             bool first_packet = true;
-            int sequence = Pod.PacketSequence;
+            int sequence = Pod.RuntimeVariables.PacketSequence;
             int total_body_len = (int)message_body.Length;
             var radio_packets = new List<RadioPacket>();
             var ackAddress = msgAddress;
@@ -570,17 +569,22 @@ namespace OmniCore.Radio.RileyLink
             return radio_packets;
         }
 
-        public PodCommandResult ParseResponse(IMessage response, IPod pod)
+        public IMessageExchangeResult ParseResponse(IMessage response, IPod pod)
         {
-            foreach(var mp in response.GetParts())
+            try
             {
-                var er = mp as ErosResponse;
-                er.Parse(pod);
+                foreach (var mp in response.GetParts())
+                {
+                    var er = mp as ErosResponse;
+                    er.Parse(pod);
+                }
+            }
+            catch(Exception e)
+            {
+                return new MessageExchangeResult(false);
             }
 
-            return new PodCommandResult()
-            {
-            };
+            return new MessageExchangeResult(true);
         }
     }
 }

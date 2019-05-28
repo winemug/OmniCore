@@ -1,3 +1,4 @@
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Model.Eros
@@ -8,45 +9,45 @@ namespace OmniCore.Model.Eros
         public static uint FAKE_NONCE = 0xD012FA62;
         private uint[] table;
 
-        public Pod Pod { get; private set; }
+        private ErosPod Pod;
 
-        public Nonce(Pod pod)
+        public Nonce(ErosPod pod)
         {
-            this.Pod = pod;
-            this.Pod.NonceSync = null;
+            Pod = pod;
+            Pod.RuntimeVariables.NonceSync = null;
 
-            if (pod.LastNonce.HasValue)
+            if (pod.RuntimeVariables.LastNonce.HasValue)
             {
-                var nonce_ptr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, this.Pod.NonceSeed);
+                var nonce_ptr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, Pod.RuntimeVariables.NonceSeed);
                 int nonce_runs = 0;
-                uint nonce_generated = pod.LastNonce.Value ^ FAKE_NONCE;
-                while (nonce_generated != pod.LastNonce)
+                uint nonce_generated = Pod.RuntimeVariables.LastNonce.Value ^ FAKE_NONCE;
+                while (nonce_generated != Pod.RuntimeVariables.LastNonce)
                 {
                     nonce_generated = GetNextInternal(ref nonce_ptr);
                     nonce_runs++;
                 }
-                this.Pod.NonceRuns = nonce_runs;
-                this.Pod.NoncePtr = nonce_ptr;
+                Pod.RuntimeVariables.NonceRuns = nonce_runs;
+                Pod.RuntimeVariables.NoncePtr = nonce_ptr;
             }
             else
             {
-                this.Pod.NonceRuns = 0;
-                this.Pod.NonceSeed = 0;
-                this.Pod.NoncePtr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, 0);
+                Pod.RuntimeVariables.NonceRuns = 0;
+                Pod.RuntimeVariables.NonceSeed = 0;
+                Pod.RuntimeVariables.NoncePtr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, 0);
             }
         }
 
         public uint GetNext()
         {
-            if (this.Pod.NonceRuns++ > 25)
-                this.Pod.LastNonce = FAKE_NONCE;
+            if (Pod.RuntimeVariables.NonceRuns++ > 25)
+                Pod.RuntimeVariables.LastNonce = FAKE_NONCE;
             else
             {
-                var ptr = this.Pod.NoncePtr;
-                this.Pod.LastNonce = GetNextInternal(ref ptr);
-                this.Pod.NoncePtr = ptr;
+                var ptr = Pod.RuntimeVariables.NoncePtr;
+                Pod.RuntimeVariables.LastNonce = GetNextInternal(ref ptr);
+                Pod.RuntimeVariables.NoncePtr = ptr;
             }
-            return this.Pod.LastNonce.Value;
+            return Pod.RuntimeVariables.LastNonce.Value;
         }
 
         private uint GetNextInternal(ref int nonce_ptr)
@@ -59,17 +60,17 @@ namespace OmniCore.Model.Eros
 
         public void Reset()
         {
-            this.Pod.NonceRuns = 32;
+            Pod.RuntimeVariables.NonceRuns = 32;
         }
 
 	    public void Sync(int msgSequence)
         {
-            var w_sum = (this.Pod.LastNonce & 0xFFFF) + (CrcUtil.Crc16Table[msgSequence] & 0xFFFF)
+            var w_sum = (Pod.RuntimeVariables.LastNonce & 0xFFFF) + (CrcUtil.Crc16Table[msgSequence] & 0xFFFF)
                         + (this.Pod.Lot.Value & 0xFFFF) + (this.Pod.Serial.Value & 0xFFFF);
-            this.Pod.NonceSeed = (uint)((w_sum & 0xFFFF) ^ this.Pod.NonceSync) & 0xff;
-            this.Pod.NonceRuns = 0;
-            this.Pod.NonceSync = null;
-            this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, this.Pod.NonceSeed);
+            Pod.RuntimeVariables.NonceSeed = (uint)((w_sum & 0xFFFF) ^ Pod.RuntimeVariables.NonceSync) & 0xff;
+            Pod.RuntimeVariables.NonceRuns = 0;
+            Pod.RuntimeVariables.NonceSync = null;
+            this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, Pod.RuntimeVariables.NonceSeed);
         }
 
         private uint Shuffle()

@@ -10,172 +10,32 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
-    public class ErosPod : Pod
+    public class ErosPod : IPod
     {
-        IMessageExchange MessageExchange;
-        MessageHandler MessageHandler;
+        public uint? Id { get; set; }
+        public DateTime Created { get; set; }
 
-        private readonly ErosMessageExchangeParameters StandardParameters;
+        public uint? Lot { get; set; }
+        public uint? Serial { get; set; }
+        public uint RadioAddress { get; set; }
+        public DateTime? ActivationDate { get; set; }
+        public DateTime? InsertionDate { get; set; }
+        public string VersionPi { get; set; }
+        public string VersionPm { get; set; }
+        public string VersionUnknown { get; set; }
+        public bool Archived { get; set; }
 
-        public ErosPod(IMessageExchangeProvider messageExchangeProvider, IDataStore dataStore) : base(dataStore)
+        public IPodAlertStates AlertStates { get; set; }
+        public IPodBasalSchedule BasalSchedule { get; set; }
+        public IPodFault Fault { get; set; }
+        public IPodRadioIndicators RadioIndicators { get; set; }
+        public IPodStatus Status { get; set; }
+        public IPodUserSettings UserSettings { get; set; }
+        public ErosPodRuntimeVariables RuntimeVariables { get; set; }
+
+        public ErosPod()
         {
-            MessageHandler = new MessageHandler(this, messageExchangeProvider);
-            StandardParameters = new ErosMessageExchangeParameters() { };
+            RuntimeVariables = new ErosPodRuntimeVariables();
         }
-
-         //private async Task send_request(IRequest request, bool with_nonce = false)
-        //{
-            //if (with_nonce)
-            //{
-            //    var nonce_val = this.Nonce.GetNext();
-            //    request.set_nonce(nonce_val);
-            //    nonce_syncword = null;
-            //}
-
-            //var me = new MessageExchange(request, this.packetRadio, this.Pod);
-
-            //var response = await me.GetPodResponse();
-            //ProtocolHelper.response_parse(response, this.Pod);
-
-            //if (with_nonce && nonce_syncword != null)
-            //{
-            //    Debug.WriteLine("Nonce resync requested");
-            //    this.Nonce.Sync(request.sequence.Value);
-            //    var nonce_val = this.Nonce.GetNext();
-            //    request.set_nonce(nonce_val);
-            //    nonce_syncword = null;
-            //    radio_message_sequence = request.sequence.Value;
-            //    response = await me.GetPodResponse();
-            //    ProtocolHelper.response_parse(response, this.Pod);
-            //    if (nonce_syncword != null)
-            //    {
-            //        this.Nonce.Reset();
-            //        throw new PdmException("Nonce sync failed");
-            //    }
-            //}
-        //}
-
-        private async Task<PodCommandResult> UpdateStatusInternal(IMessageProgress progress, CancellationToken ct,
-            StatusRequestType update_type = StatusRequestType.Standard)
-        {
-            var request = new ErosMessageBuilder().WithStatus(update_type).Build();
-            return await MessageHandler.PerformExchange(request, StandardParameters, progress, ct);
-        }
-
-        public override async Task UpdateStatus(IMessageProgress progress, CancellationToken ct,
-            StatusRequestType update_type = StatusRequestType.Standard)
-        {
-            try
-            {
-                Debug.WriteLine($"Updating pod status, request type {update_type}");
-                await this.UpdateStatusInternal(progress, ct, update_type);
-            }
-            catch (OmniCoreException) { throw; }
-            catch (Exception e)
-            {
-                throw new PdmException("Unexpected error", e);
-            }
-        }
-
-        public override async Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alert_mask)
-        {
-            try
-            {
-                Debug.WriteLine($"Acknowledging alerts, bitmask: {alert_mask}");
-                await UpdateStatusInternal(progress, ct);
-                AssertImmediateBolusInactive();
-                if (Progress < PodProgress.PairingSuccess)
-                    throw new PdmException("Pod not paired completely yet.");
-
-                if (Progress == PodProgress.ErrorShuttingDown)
-                    throw new PdmException("Pod is shutting down, cannot acknowledge alerts.");
-
-                if (Progress == PodProgress.AlertExpiredShuttingDown)
-                    throw new PdmException("Acknowledgement period expired, pod is shutting down");
-
-                if (Progress > PodProgress.AlertExpiredShuttingDown)
-                    throw new PdmException("Pod is not active");
-
-                if ((AlertMask & alert_mask) != alert_mask)
-                    throw new PdmException("Bitmask is invalid for current alert state");
-
-                // await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
-            }
-            catch (OmniCoreException) { throw; }
-            catch (Exception e)
-            {
-                throw new PdmException("Unexpected error", e);
-            }
-        }
-
-        public override async Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount)
-        {
-            try
-            {
-                Debug.WriteLine($"Bolusing {bolusAmount}U");
-                await UpdateStatusInternal(progress, ct);
-                AssertRunningStatus();
-                AssertImmediateBolusInactive();
-
-                if (bolusAmount < 0.05m)
-                    throw new PdmException("Cannot bolus less than 0.05U");
-
-                if (bolusAmount % 0.05m != 0)
-                    throw new PdmException("Bolus must be multiples of 0.05U");
-
-                if (bolusAmount > 30m)
-                    throw new PdmException("Cannot bolus more than 30U");
-
-                // await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
-
-                if (BolusState != BolusState.Immediate)
-                    throw new PdmException("Pod did not start bolusing");
-
-            }
-            catch (OmniCoreException) { throw; }
-            catch (Exception e)
-            {
-                throw new PdmException("Unexpected error", e);
-            }
-        }
-
-        public override async Task CancelBolus(IMessageProgress progress, CancellationToken ct)
-        {
-            try
-            {
-                await UpdateStatusInternal(progress, ct);
-                AssertRunningStatus();
-
-                if (BolusState != BolusState.Immediate)
-                    throw new PdmException("Immediate bolus is not running");
-
-                // await send_request(ProtocolHelper.request_cancel_bolus(), true);
-
-                if (BolusState == BolusState.Immediate)
-                    throw new PdmException("Failed to cancel running bolus");
-
-            }
-            catch (OmniCoreException) { throw; }
-            catch (Exception e)
-            {
-                throw new PdmException("Unexpected error", e);
-            }
-        }
-
-        private void AssertImmediateBolusInactive()
-        {
-            if (BolusState == BolusState.Immediate)
-                throw new PdmException("Bolus operation in progress");
-        }
-
-        private void AssertRunningStatus()
-        {
-            if (Progress < PodProgress.Running)
-                throw new PdmException("Pod is not yet running");
-
-            if (Progress > PodProgress.RunningLow)
-                throw new PdmException("Pod is not running");
-        }
-
     }
 }

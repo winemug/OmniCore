@@ -67,11 +67,8 @@
     <PackageReference Include="Plugin.Permissions">
       <Version>3.0.0.12</Version>
     </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.android">
-      <Version>1.1.13</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3.android">
-      <Version>1.1.13</Version>
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.5.231</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.0.0.425677" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.1" />

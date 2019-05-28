@@ -1,7 +1,7 @@
-﻿using OmniCore.Data;
-using OmniCore.Mobile.ViewModels;
+﻿using OmniCore.Mobile.ViewModels;
 using OmniCore.Model;
 using OmniCore.Model.Eros;
+using OmniCore.Model.Interfaces;
 using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
@@ -16,14 +16,18 @@ namespace OmniCore.Mobile.Views
     {
         TestViewModel viewModel;
 
-        ErosPod Pod;
+        ErosPodProvider PodProvider;
 
         public TestPage()
         {
             InitializeComponent();
             BindingContext = viewModel = new TestViewModel();
-            var exchangeProvider = new RileyLinkProvider();
-            Pod = new ErosPod(exchangeProvider, DataStore.Instance);
+
+            PodProvider = new ErosPodProvider(new RileyLinkProvider());
+            if (PodProvider.Current == null)
+            {
+                PodProvider.Register(42692, 521355, 0x1f0e89f3);
+            }
         }
 
         private async Task<bool> CheckPermission(Permission p)
@@ -37,7 +41,7 @@ namespace OmniCore.Mobile.Views
                 }
 
                 var results = await CrossPermissions.Current.RequestPermissionsAsync(p);
-                //Best practice to always check that the key exists
+
                 if (results.ContainsKey(p))
                     status = results[p];
             }
@@ -57,24 +61,15 @@ namespace OmniCore.Mobile.Views
             if (!await CheckPermission(Permission.LocationAlways))
                 return;
 
-            //if (!await CheckPermission(Permission.Location))
-            //    return;
-
             if (!await CheckPermission(Permission.Storage))
                 return;
 
             viewModel.TestButtonEnabled = false;
             try
             {
-                if (!Pod.WithLotAndTid(42692, 521355))
-                {
-                    Pod.RadioAddress = 0x1f0e89f3;
-                }
-
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
-                await Pod.UpdateStatus(progress, cts.Token);
-                //await pod.Bolus(0.5m);
+                await PodProvider.Current.UpdateStatus(progress, cts.Token);
             }
             finally
             {
