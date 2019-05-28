@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,10 +8,12 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodAlertStates : IPodAlertStates
     {
-        public uint? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime Created { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Guid PodId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ushort? AlertW278 { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ushort[] AlertStates { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [PrimaryKey, AutoIncrement]
+        public uint? Id { get; set; }
+
+        public DateTime Created { get; set; }
+        public Guid PodId { get; set; }
+        public ushort? AlertW278 { get; set; }
+        public ushort[] AlertStates { get; set; }
     }
 }

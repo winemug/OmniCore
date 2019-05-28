@@ -7,5 +7,7 @@ namespace OmniCore.Model.Interfaces
     public interface IMessageExchangeResult
     {
         bool Success { get; }
+
+        Exception Error { get; }
     }
 }

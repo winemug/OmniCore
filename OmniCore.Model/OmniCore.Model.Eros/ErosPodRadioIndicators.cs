@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,10 +8,12 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodRadioIndicators : IPodRadioIndicators
     {
-        public uint? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime Created { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Guid PodId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? RadioLowGain { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? RadioRssi { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [PrimaryKey, AutoIncrement]
+        public uint? Id { get; set; }
+
+        public DateTime Created { get; set; }
+        public Guid PodId { get; set; }
+        public int? RadioLowGain { get; set; }
+        public int? RadioRssi { get; set; }
     }
 }

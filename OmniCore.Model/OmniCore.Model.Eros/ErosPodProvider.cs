@@ -50,7 +50,11 @@ namespace OmniCore.Model.Eros
                 Archive();
             }
 
-            var pod = new ErosPod();
+            var pod = new ErosPod
+            {
+                Id = Guid.NewGuid()
+            };
+
             PodManager = new ErosPodManager(pod, MessageExchangeProvider);
             var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
             if (lastActivatedPod != null)
@@ -68,7 +72,14 @@ namespace OmniCore.Model.Eros
 
         public IPodManager Register(uint lot, uint serial, uint radioAddress)
         {
-            throw new NotImplementedException();
+            if (PodManager != null)
+            {
+                Archive();
+            }
+
+            var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
+            pod.Created = DateTime.UtcNow;
+            return PodManager;
         }
 
         public uint GetRadioAddress()

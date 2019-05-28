@@ -63,7 +63,7 @@ namespace OmniCore.Radio.RileyLink
             this.Started = DateTime.UtcNow;
             if (MessageExchangeParameters.TransmissionLevelOverride.HasValue)
             {
-                RileyLink.SetTxLevel(MessageExchangeParameters.TransmissionLevelOverride.Value);
+                await RileyLink.SetTxLevel(MessageExchangeParameters.TransmissionLevelOverride.Value);
             }
 
             var erosRequestMessage = requestMessage as ErosMessage;
@@ -306,7 +306,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.receive_timeouts++;
                     Debug.WriteLine("RECV PKT None");
-                    RileyLink.TxLevelUp();
+                    await RileyLink.TxLevelUp();
                     continue;
                 }
 
@@ -314,7 +314,7 @@ namespace OmniCore.Radio.RileyLink
                 if (p == null)
                 {
                     this.bad_packets++;
-                    RileyLink.TxLevelDown();
+                    await RileyLink.TxLevelDown();
                     continue;
                 }
 
@@ -323,7 +323,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.bad_packets++;
                     Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                    RileyLink.TxLevelDown();
+                    await RileyLink.TxLevelDown();
                     continue;
                 }
 
@@ -334,7 +334,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     this.repeated_receives++;
                     Debug.WriteLine("RECV PKT previous");
-                    RileyLink.TxLevelUp();
+                    await RileyLink.TxLevelUp();
                     continue;
                 }
 
@@ -392,7 +392,7 @@ namespace OmniCore.Radio.RileyLink
                     if (p == null)
                     {
                         this.bad_packets++;
-                        RileyLink.TxLevelDown();
+                        await RileyLink.TxLevelDown();
                         continue;
                     }
 
@@ -400,7 +400,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         this.bad_packets++;
                         Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                        RileyLink.TxLevelDown();
+                        await RileyLink.TxLevelDown();
                         continue;
                     }
 
@@ -410,7 +410,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         this.repeated_receives++;
                         Debug.WriteLine("RECV PKT previous");
-                        RileyLink.TxLevelUp();
+                        await RileyLink.TxLevelUp();
                         continue;
                     }
 
@@ -542,7 +542,6 @@ namespace OmniCore.Radio.RileyLink
             int index = 0;
             bool first_packet = true;
             int sequence = Pod.RuntimeVariables.PacketSequence;
-            int total_body_len = (int)message_body.Length;
             var radio_packets = new List<RadioPacket>();
             var ackAddress = msgAddress;
             if (MessageExchangeParameters.AckAddressOverride.HasValue)
@@ -581,7 +580,7 @@ namespace OmniCore.Radio.RileyLink
             }
             catch(Exception e)
             {
-                return new MessageExchangeResult(false);
+                return new MessageExchangeResult(false, e);
             }
 
             return new MessageExchangeResult(true);

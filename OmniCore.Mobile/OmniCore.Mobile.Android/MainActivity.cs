@@ -10,6 +10,7 @@ using Plugin.Permissions;
 using Android.Content;
 using Plugin.BluetoothLE;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace OmniCore.Mobile.Droid
 {

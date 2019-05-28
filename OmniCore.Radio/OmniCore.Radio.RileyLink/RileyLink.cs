@@ -12,18 +12,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OmniCore.Radio.RileyLink
 {
     public class RileyLink
     {
-        private byte[] PA_LEVELS = new byte[] {
-             0x0E,
-             0x1D,
-             0x34,
-             0x60,
-             0x84, 0x84,
-             0xC8, 0xC8 };
+        private Dictionary<TxPower, byte> PaDictionary = new Dictionary<TxPower, byte>()
+            {
+                { TxPower.Lowest, 0x1D },
+                { TxPower.Low, 0x34 },
+                { TxPower.Normal, 0x60 },
+                { TxPower.High, 0x84 },
+                { TxPower.Highest, 0xC8 },
+            };
 
         private Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
         private Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
@@ -37,8 +39,11 @@ namespace OmniCore.Radio.RileyLink
         private IGattCharacteristic DataCharacteristic;
         private IGattCharacteristic ResponseCharacteristic;
 
+        private TxPower TxAmplification;
+
         public RileyLink()
         {
+            TxAmplification = TxPower.Normal;
         }
 
         public async Task Connect()
@@ -138,10 +143,10 @@ namespace OmniCore.Radio.RileyLink
                     return;
 
                 Debug.WriteLine("Disconnecting from RL");
-                // await this.ResponseCharacteristic.DisableNotifications();
-                // this.Device.CancelConnection();
+                await this.ResponseCharacteristic.DisableNotifications();
+                this.Device.CancelConnection();
                 // await this.Device.WhenDisconnected();
-                Debug.WriteLine("Disconnected");
+                Debug.WriteLine("Disconnect requested");
             }
             catch (Exception e)
             {
@@ -241,16 +246,28 @@ namespace OmniCore.Radio.RileyLink
 
 
 
-        public void SetTxLevel(TxPower tx_power)
+        public async Task SetTxLevel(TxPower tx_power)
         {
+            TxAmplification = tx_power;
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
         }
 
-        public void TxLevelDown()
+        public async Task TxLevelDown()
         {
+            if (TxAmplification > TxPower.Lowest)
+            {
+                TxAmplification--;
+                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
+            }
         }
 
-        public void TxLevelUp()
+        public async Task TxLevelUp()
         {
+            if (TxAmplification < TxPower.Highest)
+            {
+                TxAmplification++;
+                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
+            }
         }
 
         private async Task<Bytes> SendCommand(RileyLinkCommandType cmd, Bytes cmdData, int timeout = 2000)

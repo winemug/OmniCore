@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,17 +9,19 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodFault : IPodFault
     {
-        public uint? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime Created { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Guid PodId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? FaultCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? FaultRelativeTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool? FaultedWhileImmediateBolus { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public uint? FaultInformation2LastWord { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? InsulinStateTableCorruption { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? InternalFaultVariables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public PodProgress? ProgressBeforeFault { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public PodProgress? ProgressBeforeFault2 { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int? TableAccessFault { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [PrimaryKey, AutoIncrement]
+        public uint? Id { get; set; }
+
+        public DateTime Created { get; set; }
+        public Guid PodId { get; set; }
+        public int? FaultCode { get; set; }
+        public int? FaultRelativeTime { get; set; }
+        public bool? FaultedWhileImmediateBolus { get; set; }
+        public uint? FaultInformation2LastWord { get; set; }
+        public int? InsulinStateTableCorruption { get; set; }
+        public int? InternalFaultVariables { get; set; }
+        public PodProgress? ProgressBeforeFault { get; set; }
+        public PodProgress? ProgressBeforeFault2 { get; set; }
+        public int? TableAccessFault { get; set; }
     }
 }

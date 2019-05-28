@@ -7,7 +7,7 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPod
     {
-        uint? Id { get; set; }
+        Guid? Id { get; set; }
         DateTime Created { get; set; }
 
         uint? Lot { get; set; }

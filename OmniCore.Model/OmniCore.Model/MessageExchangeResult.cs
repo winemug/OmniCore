@@ -9,9 +9,12 @@ namespace OmniCore.Model
     {
         public bool Success { get; private set; }
 
-        public MessageExchangeResult(bool success)
+        public Exception Error { get; private set; }
+
+        public MessageExchangeResult(bool success, Exception error = null)
         {
             Success = success;
+            Error = error;
         }
     }
 }

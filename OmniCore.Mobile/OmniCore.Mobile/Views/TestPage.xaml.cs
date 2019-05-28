@@ -14,9 +14,9 @@ namespace OmniCore.Mobile.Views
 {
     public partial class TestPage : ContentPage
     {
-        TestViewModel viewModel;
+        readonly TestViewModel viewModel;
 
-        ErosPodProvider PodProvider;
+        readonly ErosPodProvider PodProvider;
 
         public TestPage()
         {

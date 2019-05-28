@@ -10,8 +10,7 @@ namespace OmniCore.Model.Interfaces
         DateTime Created { get; set; }
         Guid PodId { get; set; }
 
-
-        decimal? ReservoirAlertLevel { get; set; }
-        int? ExpiryAlertMinutes { get; set; }
+        decimal? ReservoirWarningAtLevel { get; set; }
+        int? ExpiryWarningAtMinute { get; set; }
     }
 }

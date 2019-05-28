@@ -2,6 +2,7 @@ using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +13,8 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPod : IPod
     {
-        public uint? Id { get; set; }
+        [PrimaryKey]
+        public Guid? Id { get; set; }
         public DateTime Created { get; set; }
 
         public uint? Lot { get; set; }

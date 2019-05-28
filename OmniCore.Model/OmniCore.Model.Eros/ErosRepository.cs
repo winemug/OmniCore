@@ -21,13 +21,13 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private string DbPath;
-        private string DbConnectionString;
+        private readonly string DbPath;
+        //private string DbConnectionString;
 
         private ErosRepository()
         {
             DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "omnicore.db3");
-            DbConnectionString = $"Data Source={DbPath}";
+            //DbConnectionString = $"Data Source={DbPath}";
             Initialize();
         }
 
@@ -37,6 +37,7 @@ namespace OmniCore.Model.Eros
             {
                 using (var conn = new SQLiteConnection(DbPath))
                 {
+                    conn.BeginTransaction();
                     conn.CreateTable<ErosPod>();
                     conn.CreateTable<ErosPodAlertStates>();
                     conn.CreateTable<ErosPodBasalSchedule>();
@@ -44,6 +45,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosPodRadioIndicators>();
                     conn.CreateTable<ErosPodStatus>();
                     conn.CreateTable<ErosPodUserSettings>();
+                    conn.Commit();
                 }
             }
             catch (SQLiteException sle)
@@ -62,8 +64,8 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return conn.Table<ErosPod>()
-                    .FirstOrDefault(x => !x.Archived);
+                return WithRelations(conn.Table<ErosPod>()
+                    .FirstOrDefault(x => !x.Archived), conn);
             }
         }
 
@@ -71,8 +73,8 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return conn.Table<ErosPod>()
-                    .FirstOrDefault(x => x.Lot == lot && x.Serial == tid);
+                return WithRelations(conn.Table<ErosPod>()
+                    .FirstOrDefault(x => x.Lot == lot && x.Serial == tid), conn);
             }
         }
 
@@ -80,8 +82,8 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate)
-                    .FirstOrDefault();
+                return WithRelations(conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate)
+                    .FirstOrDefault(), conn);
             }
         }
 
@@ -89,8 +91,42 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = new SQLiteConnection(DbPath))
             {
+                conn.BeginTransaction();
                 conn.InsertOrReplace(pod);
+                conn.InsertOrReplace(pod.AlertStates);
+                conn.InsertOrReplace(pod.BasalSchedule);
+                conn.InsertOrReplace(pod.Fault);
+                conn.InsertOrReplace(pod.RadioIndicators);
+                conn.InsertOrReplace(pod.Status);
+                conn.InsertOrReplace(pod.UserSettings);
+                conn.Commit();
             }
+        }
+
+        private ErosPod WithRelations(ErosPod pod, SQLiteConnection conn)
+        {
+            if (pod == null)
+                return null;
+
+            pod.AlertStates = conn.Table<ErosPodAlertStates>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            pod.BasalSchedule = conn.Table<ErosPodBasalSchedule>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            pod.Fault = conn.Table<ErosPodFault>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            pod.RadioIndicators = conn.Table<ErosPodRadioIndicators>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            pod.Status = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            pod.UserSettings = conn.Table<ErosPodUserSettings>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+
+            return pod;
         }
     }
 }

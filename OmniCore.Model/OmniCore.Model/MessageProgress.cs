@@ -2,24 +2,47 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace OmniCore.Model
 {
     public class MessageProgress : IMessageProgress
     {
-        public bool CanBeCanceled => throw new NotImplementedException();
+        public bool CanBeCanceled { get; set; }
 
-        public bool Queued => throw new NotImplementedException();
+        public bool Queued { get; set; }
 
-        public bool Running => throw new NotImplementedException();
+        public bool Running { get; set; }
 
-        public int Progress => throw new NotImplementedException();
+        public int Progress { get; set; }
 
-        public bool Finished => throw new NotImplementedException();
+        public bool Finished { get; set; }
 
-        public bool Successful => throw new NotImplementedException();
+        public bool Successful { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SetProperty<T>(ref T backingStore, T value,
+            [CallerMemberName]string propertyName = "",
+            Action onChanged = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(backingStore, value))
+                return false;
+
+            backingStore = value;
+            onChanged?.Invoke();
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            var changed = PropertyChanged;
+            if (changed == null)
+                return;
+
+            changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

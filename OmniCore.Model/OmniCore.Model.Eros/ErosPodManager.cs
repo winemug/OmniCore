@@ -48,9 +48,9 @@ namespace OmniCore.Model.Eros
 
         public IPod Pod { get => ErosPod; }
 
-        private IMessageExchangeProvider MessageExchangeProvider;
-        private readonly ErosMessageExchangeParameters StandardParameters;
-        private Task MessageExchangeTask;
+        readonly IMessageExchangeProvider MessageExchangeProvider;
+        readonly ErosMessageExchangeParameters StandardParameters;
+        readonly Task MessageExchangeTask;
 
         public ErosPodManager(ErosPod pod, IMessageExchangeProvider messageExchangeProvider)
         {
@@ -74,7 +74,7 @@ namespace OmniCore.Model.Eros
                         }
                         catch (Exception e)
                         {
-                            return new MessageExchangeResult(false);
+                            return new MessageExchangeResult(false, e);
                         }
                         finally
                         {

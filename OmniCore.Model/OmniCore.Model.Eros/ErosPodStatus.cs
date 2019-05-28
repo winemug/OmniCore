@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,19 +9,21 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodStatus : IPodStatus
     {
-        public uint? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime Created { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [PrimaryKey, AutoIncrement]
+        public uint? Id  { get; set; }
 
-        public Guid PodId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Faulted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public decimal NotDeliveredInsulin { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public decimal DeliveredInsulin { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public decimal Reservoir { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public PodProgress Progress { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public BasalState BasalState { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public BolusState BolusState { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public uint ActiveMinutes { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public byte AlertMask { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public DateTime Created  { get; set; }
+
+        public Guid PodId  { get; set; }
+        public bool Faulted  { get; set; }
+        public decimal NotDeliveredInsulin  { get; set; }
+        public decimal DeliveredInsulin  { get; set; }
+        public decimal Reservoir  { get; set; }
+        public PodProgress Progress  { get; set; }
+        public BasalState BasalState  { get; set; }
+        public BolusState BolusState  { get; set; }
+        public uint ActiveMinutes  { get; set; }
+        public byte AlertMask  { get; set; }
 
         private int _message_seq = 0;
         public int MessageSequence
