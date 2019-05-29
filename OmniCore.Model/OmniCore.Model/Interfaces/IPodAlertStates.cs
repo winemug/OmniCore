@@ -11,7 +11,7 @@ namespace OmniCore.Model.Interfaces
         Guid PodId { get; set; }
 
 
-        ushort? AlertW278 { get; set; }
-        ushort[] AlertStates { get; set; }
+        uint AlertW278 { get; set; }
+        uint[] AlertStates { get; set; }
     }
 }

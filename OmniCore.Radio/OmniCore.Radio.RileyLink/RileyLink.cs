@@ -46,84 +46,115 @@ namespace OmniCore.Radio.RileyLink
             TxAmplification = TxPower.Normal;
         }
 
-        public async Task Connect()
+        public async Task EnsureDevice()
         {
             try
             {
+                var tcsInitialized = new TaskCompletionSource<bool>();
                 if (this.Device == null)
                 {
                     this.VersionVerified = false;
                     this.RadioInitialized = false;
 
                     Debug.WriteLine("Searching RL");
-                    var result = await CrossBleAdapter.Current.Scan(
-                            new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } })
-                            .FirstOrDefaultAsync();
 
-                    if (CrossBleAdapter.Current.IsScanning)
-                        CrossBleAdapter.Current.StopScan();
+                    var tcsResultsReady = new TaskCompletionSource<List<IScanResult>>();
+
+                    var results = new List<IScanResult>();
+
+                    CrossBleAdapter.Current.ScanExtra(
+                            new ScanConfig()
+                            {
+                                ScanType = BleScanType.Balanced,
+                                ServiceUuids = new List<Guid>() { RileyLinkServiceUUID }
+                            }, true).Timeout(TimeSpan.FromSeconds(10)).Subscribe(
+                            (scanResult) =>
+                                {
+                                    results.Add(scanResult);
+                                    if (scanResult.Rssi < 70)
+                                    {
+                                        if (CrossBleAdapter.Current.IsScanning)
+                                            CrossBleAdapter.Current.StopScan();
+                                        tcsResultsReady.TrySetResult(results);
+                                    }
+                                }, 
+                            (exception) =>
+                                {
+                                    if (exception is TimeoutException)
+                                    {
+                                        if (CrossBleAdapter.Current.IsScanning)
+                                            CrossBleAdapter.Current.StopScan();
+                                        tcsResultsReady.TrySetResult(results);
+                                    }
+                                }
+                            );
+
+                    var result = (await tcsResultsReady.Task).OrderBy(x => x.Rssi).FirstOrDefault();
 
                     this.Device = result?.Device;
 
                     if (this.Device == null)
                         throw new PacketRadioException("Couldn't find RileyLink!");
                     else
-                        Debug.WriteLine("Found RL");
-                }
+                        Debug.WriteLine($"Found RL: {Device.Uuid}");
 
-                if (!this.Device.IsConnected())
-                {
-                    Debug.WriteLine("Connecting to RL");
-                    this.Device.Connect(new ConnectionConfig()
+                    this.Device.WhenStatusChanged().Subscribe(async (status) =>
                     {
-                        AndroidConnectionPriority = ConnectionPriority.Normal,
-                        AutoConnect = false
-                    });
-                    await this.Device.ConnectWait();
-
-                    if (!this.Device.IsConnected())
-                    {
-                        throw new PacketRadioException("Failed to connect to RL.");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Connected to RL.");
-
-                        var dataService = this.Device.GetKnownService(RileyLinkServiceUUID);
-                        var characteristics = this.Device.GetKnownCharacteristics(RileyLinkServiceUUID,
-                            new Guid[] { RileyLinkDataCharacteristicUUID, RileyLinkResponseCharacteristicUUID });
-
-                        this.DataCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkDataCharacteristicUUID);
-                        this.ResponseCharacteristic = await characteristics.FirstOrDefaultAsync(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
-
-                        await DataCharacteristic.Write(new byte[] { 0 });
-                        await this.ResponseCharacteristic.EnableNotifications();
-                        while (true)
+                        if (status == ConnectionStatus.Connected)
                         {
-                            try
+                            var services = await this.Device.DiscoverServices().ToList();
+
+                            var dataService = services.FirstOrDefault(x => x.Uuid == RileyLinkServiceUUID);
+                            var characteristics = await dataService.DiscoverCharacteristics().ToList();
+
+                            DataCharacteristic = characteristics.FirstOrDefault(x => x.Uuid == RileyLinkDataCharacteristicUUID);
+                            ResponseCharacteristic = characteristics.FirstOrDefault(x => x.Uuid == RileyLinkResponseCharacteristicUUID);
+
+                            await ResponseCharacteristic.EnableNotifications();
+                            await DataCharacteristic.Write(new byte[] { 0 });
+                            while (true)
                             {
-                                await ResponseCharacteristic.WhenNotificationReceived().Timeout(TimeSpan.FromMilliseconds(200));
-                                await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
-                                await ResponseCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                                try
+                                {
+                                    await ResponseCharacteristic.WhenNotificationReceived().Timeout(TimeSpan.FromMilliseconds(150));
+                                    await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                                    await ResponseCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                                }
+                                catch (TimeoutException)
+                                {
+                                    break;
+                                }
                             }
-                            catch (TimeoutException)
-                            {
-                                break;
-                            }
+                            tcsInitialized.TrySetResult(true);
                         }
-                        await Task.Delay(500);
+                        else if (status == ConnectionStatus.Disconnected)
+                        {
+                            DataCharacteristic = null;
+                            ResponseCharacteristic = null;
+                        }
+                    });
+
+                    this.Device.Connect();
+                    await tcsInitialized.Task;
+                    if (!this.VersionVerified)
+                    {
+                        await this.VerifyVersion();
+                    }
+
+                    if (!this.RadioInitialized)
+                    {
+                        await this.InitializeRadio();
                     }
                 }
-
-                if (!this.VersionVerified)
+                else
                 {
-                    await this.VerifyVersion();
+                    if (this.DataCharacteristic == null || this.ResponseCharacteristic == null || this.Device.Status != ConnectionStatus.Connected)
+                    {
+                        this.Device.Connect();
+                        await tcsInitialized.Task;
+                    }
                 }
-
-                if (!this.RadioInitialized)
-                {
-                    await this.InitializeRadio();
-                }
+                
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -136,17 +167,17 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                if (this.Device == null)
-                    return;
+                //if (this.Device == null)
+                //    return;
 
-                if (this.Device.IsDisconnected())
-                    return;
+                //if (this.Device.IsDisconnected())
+                //    return;
 
-                Debug.WriteLine("Disconnecting from RL");
-                await this.ResponseCharacteristic.DisableNotifications();
-                this.Device.CancelConnection();
-                // await this.Device.WhenDisconnected();
-                Debug.WriteLine("Disconnect requested");
+                //Debug.WriteLine("Disconnecting from RL");
+                //await this.ResponseCharacteristic.DisableNotifications();
+                //this.Device.CancelConnection();
+                //// await this.Device.WhenDisconnected();
+                //Debug.WriteLine("Disconnect requested");
             }
             catch (Exception e)
             {
@@ -161,7 +192,7 @@ namespace OmniCore.Radio.RileyLink
                 await Disconnect();
                 this.VersionVerified = false;
                 this.RadioInitialized = false;
-                await Connect();
+                await EnsureDevice();
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -174,7 +205,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await Connect();
+                await EnsureDevice();
                 var cmdParams = new Bytes((byte)0);
                 cmdParams.Append(timeout);
 
@@ -197,7 +228,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await Connect();
+                // await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
@@ -217,7 +248,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await Connect();
+                await EnsureDevice();
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes()
                     .Append((byte)0)

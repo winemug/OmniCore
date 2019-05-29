@@ -68,7 +68,8 @@ namespace OmniCore.Model.Eros
                     {
                         try
                         {
-                            var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod, messageProgress, ct).ConfigureAwait(false);
+                            var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
+                            await messageExchange.InitializeExchange(messageProgress, ct);
                             var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
                             return messageExchange.ParseResponse(response, Pod);
                         }

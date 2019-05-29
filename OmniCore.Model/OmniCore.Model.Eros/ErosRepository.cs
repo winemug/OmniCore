@@ -35,6 +35,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
+                File.Delete(DbPath);
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();
@@ -93,12 +94,18 @@ namespace OmniCore.Model.Eros
             {
                 conn.BeginTransaction();
                 conn.InsertOrReplace(pod);
-                conn.InsertOrReplace(pod.AlertStates);
-                conn.InsertOrReplace(pod.BasalSchedule);
-                conn.InsertOrReplace(pod.Fault);
-                conn.InsertOrReplace(pod.RadioIndicators);
-                conn.InsertOrReplace(pod.Status);
-                conn.InsertOrReplace(pod.UserSettings);
+                if (pod.AlertStates != null)
+                    conn.InsertOrReplace(pod.AlertStates);
+                if (pod.BasalSchedule != null)
+                    conn.InsertOrReplace(pod.BasalSchedule);
+                if (pod.Fault != null)
+                    conn.InsertOrReplace(pod.Fault);
+                if (pod.RadioIndicators!= null)
+                    conn.InsertOrReplace(pod.RadioIndicators);
+                if (pod.Status != null)
+                    conn.InsertOrReplace(pod.Status);
+                if (pod.UserSettings != null)
+                    conn.InsertOrReplace(pod.UserSettings);
                 conn.Commit();
             }
         }

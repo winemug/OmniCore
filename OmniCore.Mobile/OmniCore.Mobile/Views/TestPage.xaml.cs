@@ -6,6 +6,7 @@ using OmniCore.Radio.RileyLink;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -18,15 +19,19 @@ namespace OmniCore.Mobile.Views
 
         readonly ErosPodProvider PodProvider;
 
+        private const uint TestPodLot = 44538;
+        private const uint TestPodSerial = 1181021;
+        private const uint TestPodRadio = 0x34ff1d58;
+
         public TestPage()
         {
             InitializeComponent();
             BindingContext = viewModel = new TestViewModel();
 
-            PodProvider = new ErosPodProvider(new RileyLinkProvider());
-            if (PodProvider.Current == null)
+            PodProvider = new ErosPodProvider(new RileyLinkProvider(SynchronizationContext.Current));
+            if (PodProvider.Current == null || PodProvider.Current.Pod.Lot != TestPodLot || PodProvider.Current.Pod.Serial != TestPodSerial)
             {
-                PodProvider.Register(42692, 521355, 0x1f0e89f3);
+                PodProvider.Register(TestPodLot, TestPodSerial, TestPodRadio);
             }
         }
 
@@ -69,12 +74,18 @@ namespace OmniCore.Mobile.Views
             {
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
-                await PodProvider.Current.UpdateStatus(progress, cts.Token);
+                await Work(progress, cts.Token);
             }
             finally
             {
                 viewModel.TestButtonEnabled = true;
+                Debug.WriteLine($"Fault code: {PodProvider.Current.Pod.Fault?.FaultCode}");
             }
+        }
+
+        private async Task Work(IMessageProgress progress, CancellationToken token)
+        {
+            await PodProvider.Current.UpdateStatus(progress, token).ConfigureAwait(false);
         }
     }
 }

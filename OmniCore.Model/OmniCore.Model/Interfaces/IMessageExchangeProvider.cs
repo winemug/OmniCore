@@ -8,7 +8,6 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchangeProvider
     {
-        Task<IMessageExchange> GetMessageExchanger(IMessageExchangeParameters messageExchangeParameters, IPod pod,
-            IMessageProgress messageProgress, CancellationToken ct);
+        Task<IMessageExchange> GetMessageExchanger(IMessageExchangeParameters messageExchangeParameters, IPod pod);
     }
 }

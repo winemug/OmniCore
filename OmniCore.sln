@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Mobile.Android", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Mobile", "OmniCore.Mobile\OmniCore.Mobile\OmniCore.Mobile.csproj", "{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model.Dash", "OmniCore.Model\OmniCore.Model.Dash\OmniCore.Model.Dash.csproj", "{29893127-6DBF-44BB-86CB-893C86E616EA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model", "OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj", "{22AC504D-6B45-4FE9-97A6-E7404C15CE19}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", "OmniCore.Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj", "{94025655-119D-44BF-ADB8-A786354F72B2}"
@@ -37,12 +35,6 @@ Global
 		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.badbg|Any CPU.ActiveCfg = Debug|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.badbg|Any CPU.Build.0 = Debug|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{29893127-6DBF-44BB-86CB-893C86E616EA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.badbg|Any CPU.ActiveCfg = badbg|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.badbg|Any CPU.Build.0 = badbg|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

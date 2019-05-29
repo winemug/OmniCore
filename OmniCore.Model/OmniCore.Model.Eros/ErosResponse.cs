@@ -3,6 +3,7 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
+using System.Diagnostics;
 
 namespace OmniCore.Model.Eros
 {
@@ -14,6 +15,7 @@ namespace OmniCore.Model.Eros
 
         public void Parse(IPod pod)
         {
+            Debug.WriteLine($"Parsing response type {PartType}");
             switch (PartType)
             {
                 case PartType.ResponseVersionInfo:
@@ -85,7 +87,7 @@ namespace OmniCore.Model.Eros
                     pod.AlertStates = new ErosPodAlertStates();
                     pod.AlertStates.AlertW278 = PartData.Word(i);
                     i += 2;
-                    pod.AlertStates.AlertStates = new ushort[]
+                    pod.AlertStates.AlertStates = new uint[]
                     {
                         PartData.Word(i),
                         PartData.Word(i + 2),

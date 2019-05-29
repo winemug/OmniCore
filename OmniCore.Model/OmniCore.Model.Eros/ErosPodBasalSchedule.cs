@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Interfaces;
+﻿using Newtonsoft.Json;
+using OmniCore.Model.Interfaces;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,21 @@ namespace OmniCore.Model.Eros
         public DateTime Created { get; set; }
         public Guid PodId { get; set; }
         public int UtcOffset { get; set; }
+        [Ignore]
         public decimal[] BasalSchedule { get; set; }
+
+        public string BasalScheduleJson
+        {
+            get
+            {
+                return JsonConvert.SerializeObject(BasalSchedule);
+            }
+            set
+            {
+                BasalSchedule = JsonConvert.DeserializeObject<decimal[]>(value);
+            }
+        }
+
         public DateTime PodDateTime { get; set; }
         public DateTime Updated { get; set; }
     }

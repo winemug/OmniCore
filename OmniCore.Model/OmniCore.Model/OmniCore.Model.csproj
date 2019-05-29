@@ -19,6 +19,7 @@
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
     <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
   </ItemGroup>
 
