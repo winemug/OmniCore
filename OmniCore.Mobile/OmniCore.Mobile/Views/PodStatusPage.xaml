@@ -3,11 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Mobile.Views.PodStatusPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label>Things to display here:</Label>
-            <Label>Pod status</Label>
-            <Label>Current communication status</Label>
-            <Label>Last checked</Label>
+        <StackLayout Orientation="Vertical">
+            <StackLayout Orientation="Horizontal">
+                <Label>Identification: </Label>
+                <Label Text="{Binding Id}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label>Status:</Label>
+                <Label Text="{Binding Status}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label>Updated: </Label>
+                <Label Text="{Binding Updated}"/>
+            </StackLayout>
             <Label>Pod lifetime</Label>
             <Label>Insulin status</Label>
             <Label>Alerts</Label>

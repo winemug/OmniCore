@@ -8,15 +8,11 @@ namespace OmniCore.Model.Eros
 {
     public class ErosRepository
     {
-        private static ErosRepository instance;
+        private static readonly ErosRepository instance = new ErosRepository();
         public static ErosRepository Instance
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new ErosRepository();
-                }
                 return instance;
             }
         }
@@ -35,7 +31,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                File.Delete(DbPath);
+                //File.Delete(DbPath);
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();
@@ -95,17 +91,35 @@ namespace OmniCore.Model.Eros
                 conn.BeginTransaction();
                 conn.InsertOrReplace(pod);
                 if (pod.AlertStates != null)
+                {
+                    pod.AlertStates.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.AlertStates);
+                }
                 if (pod.BasalSchedule != null)
+                {
+                    pod.BasalSchedule.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.BasalSchedule);
+                }
                 if (pod.Fault != null)
+                {
+                    pod.Fault.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.Fault);
+                }
                 if (pod.RadioIndicators!= null)
+                {
+                    pod.RadioIndicators.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.RadioIndicators);
+                }
                 if (pod.Status != null)
+                {
+                    pod.Status.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.Status);
+                }
                 if (pod.UserSettings != null)
+                {
+                    pod.AlertStates.PodId = pod.Id.Value;
                     conn.InsertOrReplace(pod.UserSettings);
+                }
                 conn.Commit();
             }
         }
@@ -126,6 +140,8 @@ namespace OmniCore.Model.Eros
 
             pod.RadioIndicators = conn.Table<ErosPodRadioIndicators>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
+
+            var y = conn.Table<ErosPodStatus>().OrderByDescending(x => x.Id).ToList();
 
             pod.Status = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();

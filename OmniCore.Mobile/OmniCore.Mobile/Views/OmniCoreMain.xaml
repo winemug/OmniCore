@@ -6,13 +6,6 @@
              xmlns:views="clr-namespace:OmniCore.Mobile.Views"
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.OmniCoreMain">
-    <FlyoutItem Title="Test" FlyoutDisplayOptions="AsSingleItem">
-        <Tab>
-            <ShellContent>
-                <views:TestPage/>
-            </ShellContent>
-        </Tab>
-    </FlyoutItem>
     <FlyoutItem Title="Pod">
         <Tab Title="Status">
             <ShellContent>
@@ -41,6 +34,13 @@
         <Tab>
             <ShellContent>
                 <views:AboutPage/>
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+    <FlyoutItem Title="Test" FlyoutDisplayOptions="AsSingleItem">
+        <Tab>
+            <ShellContent>
+                <views:TestPage/>
             </ShellContent>
         </Tab>
     </FlyoutItem>

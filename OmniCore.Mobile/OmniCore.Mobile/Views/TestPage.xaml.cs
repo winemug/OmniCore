@@ -17,8 +17,6 @@ namespace OmniCore.Mobile.Views
     {
         readonly TestViewModel viewModel;
 
-        readonly ErosPodProvider PodProvider;
-
         private const uint TestPodLot = 44538;
         private const uint TestPodSerial = 1181021;
         private const uint TestPodRadio = 0x34ff1d58;
@@ -27,12 +25,6 @@ namespace OmniCore.Mobile.Views
         {
             InitializeComponent();
             BindingContext = viewModel = new TestViewModel();
-
-            PodProvider = new ErosPodProvider(new RileyLinkProvider(SynchronizationContext.Current));
-            if (PodProvider.Current == null || PodProvider.Current.Pod.Lot != TestPodLot || PodProvider.Current.Pod.Serial != TestPodSerial)
-            {
-                PodProvider.Register(TestPodLot, TestPodSerial, TestPodRadio);
-            }
         }
 
         private async Task<bool> CheckPermission(Permission p)
@@ -72,6 +64,11 @@ namespace OmniCore.Mobile.Views
             viewModel.TestButtonEnabled = false;
             try
             {
+                if (App.PodProvider.Current == null || App.PodProvider.Current.Pod.Lot != TestPodLot || App.PodProvider.Current.Pod.Serial != TestPodSerial)
+                {
+                    App.PodProvider.Register(TestPodLot, TestPodSerial, TestPodRadio);
+                }
+
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
                 await Work(progress, cts.Token);
@@ -79,13 +76,12 @@ namespace OmniCore.Mobile.Views
             finally
             {
                 viewModel.TestButtonEnabled = true;
-                Debug.WriteLine($"Fault code: {PodProvider.Current.Pod.Fault?.FaultCode}");
             }
         }
 
         private async Task Work(IMessageProgress progress, CancellationToken token)
         {
-            await PodProvider.Current.UpdateStatus(progress, token).ConfigureAwait(false);
+            await App.PodProvider.Current.UpdateStatus(progress, token).ConfigureAwait(false);
         }
     }
 }

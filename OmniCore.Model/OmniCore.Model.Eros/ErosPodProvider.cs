@@ -31,60 +31,69 @@ namespace OmniCore.Model.Eros
         {
             get
             {
-                if (PodManager == null)
+                lock (this)
                 {
-                    var pod = ErosRepository.Instance.LoadCurrent();
-                    if (pod != null)
+                    if (PodManager == null)
                     {
-                        PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                        var pod = ErosRepository.Instance.LoadCurrent();
+                        if (pod != null)
+                        {
+                            PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                        }
                     }
+                    return PodManager;
                 }
-                return PodManager;
             }
         }
 
         public IPodManager New()
         {
-            if (PodManager != null)
+            lock (this)
             {
-                Archive();
-            }
+                if (PodManager != null)
+                {
+                    Archive();
+                }
 
-            var pod = new ErosPod
-            {
-                Id = Guid.NewGuid()
-            };
+                var pod = new ErosPod
+                {
+                    Id = Guid.NewGuid()
+                };
 
-            PodManager = new ErosPodManager(pod, MessageExchangeProvider);
-            var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
-            if (lastActivatedPod != null)
-            {
-                var lastRadioAddress = lastActivatedPod.RadioAddress;
-                pod.RadioAddress = (lastRadioAddress & 0xFFFFFFF0) | (((lastRadioAddress & 0x0000000F) + 1) & 0x0000000F);
+                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
+                if (lastActivatedPod != null)
+                {
+                    var lastRadioAddress = lastActivatedPod.RadioAddress;
+                    pod.RadioAddress = (lastRadioAddress & 0xFFFFFFF0) | (((lastRadioAddress & 0x0000000F) + 1) & 0x0000000F);
+                }
+                else
+                {
+                    pod.RadioAddress = GetRadioAddress();
+                }
+                pod.Created = DateTime.UtcNow;
+                ErosRepository.Instance.Save(pod);
+                return PodManager;
             }
-            else
-            {
-                pod.RadioAddress = GetRadioAddress();
-            }
-            pod.Created = DateTime.UtcNow;
-            ErosRepository.Instance.Save(pod);
-            return PodManager;
         }
 
         public IPodManager Register(uint lot, uint serial, uint radioAddress)
         {
-            if (PodManager != null)
+            lock (this)
             {
-                Archive();
-            }
+                if (PodManager != null)
+                {
+                    Archive();
+                }
 
-            var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
-            pod.Created = DateTime.UtcNow;
-            ErosRepository.Instance.Save(pod);
-            return PodManager;
+                var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
+                pod.Created = DateTime.UtcNow;
+                ErosRepository.Instance.Save(pod);
+                return PodManager;
+            }
         }
 
-        public uint GetRadioAddress()
+        private uint GetRadioAddress()
         {
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
