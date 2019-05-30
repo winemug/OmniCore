@@ -79,7 +79,7 @@ namespace OmniCore.Model.Eros
 
         private void parse_information_response(IPod pod)
         {
-            int i = 1;
+            int i = 0;
             var rt = PartData.Byte(i++);
             switch (rt)
             {
