@@ -13,7 +13,10 @@ namespace OmniCore.Model.Interfaces
         Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct, StatusRequestType requestType = StatusRequestType.Standard);
         Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, CancellationToken ct, byte alertMask);
         Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, CancellationToken ct, decimal bolusAmount);
-        Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct);
+        //Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct);
         Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct);
+        Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, CancellationToken ct, int utcTimeOffsetMinutes);
+        Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress, CancellationToken ct);
+        Task<IMessageExchangeResult> Inject(IMessageExchangeProgress progress, CancellationToken ct);
     }
 }
