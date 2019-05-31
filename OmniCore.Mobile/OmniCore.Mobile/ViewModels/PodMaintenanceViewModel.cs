@@ -14,8 +14,7 @@ namespace OmniCore.Mobile.ViewModels
             set { SetProperty(ref deactivateButtonEnabled, value); }
         }
 
-
-        private bool activateButtonEnabled = false;
+        private bool activateButtonEnabled = true;
         public bool ActivateButtonEnabled
         {
             get { return activateButtonEnabled; }
@@ -23,7 +22,7 @@ namespace OmniCore.Mobile.ViewModels
         }
 
         private bool startButtonEnabled = false;
-        public bool StartButtonEnabled
+        public bool StartViewEnabled
         {
             get { return startButtonEnabled; }
             set { SetProperty(ref startButtonEnabled, value); }
@@ -31,21 +30,13 @@ namespace OmniCore.Mobile.ViewModels
 
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            ActivateButtonEnabled = false;
             DeactivateButtonEnabled = false;
 
-            if (Pod == null)
+            if (Pod != null && Pod.Status != null)
             {
-                ActivateButtonEnabled = true;
-            }
-            else if (Pod.Status != null)
-            {
-                if (Pod.Status.Progress < Model.Enums.PodProgress.ReadyForInjection)
-                    ActivateButtonEnabled = true;
-
                 if (Pod.Status.Progress >= Model.Enums.PodProgress.ReadyForInjection
                     && Pod.Status.Progress < Model.Enums.PodProgress.Running)
-                    StartButtonEnabled = true;
+                    StartViewEnabled = true;
 
                 if (Pod.Status.Progress >= Model.Enums.PodProgress.PairingSuccess)
                     DeactivateButtonEnabled = true;

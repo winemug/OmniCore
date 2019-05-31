@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.MessageExchangeView">
+  <ContentView.Content>
+      <StackLayout>
+            <Label Text="Updating Pod Status"/>
+            <StackLayout Orientation="Horizontal">
+                <Image Source="ic_phone_android.png" Scale="2"/>
+                <Image Source="ic_rl433.png" Scale="1"/>
+                <Image Source="ic_pod_drawing.png" Scale="1"/>
+            </StackLayout>
+            <ProgressBar HorizontalOptions="FillAndExpand" Progress="0.78"
+                         ProgressColor="GreenYellow"
+                         Opacity="0.6"
+                         ScaleY="2"
+                         />
+            <Button Text="Cancel" HeightRequest="40"/>
+        </StackLayout>
+  </ContentView.Content>
+</ContentView>

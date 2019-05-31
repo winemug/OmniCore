@@ -6,5 +6,12 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class AboutViewModel : BaseViewModel
     {
+        public string AboutText
+        {
+            get
+            {
+                return $"OmniCore v1.0.0.0";
+            }
+        }
     }
 }
