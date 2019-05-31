@@ -61,7 +61,7 @@ namespace OmniCore.Model.Eros
         }
 
         private async Task<IMessageExchangeResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
-                    IMessageProgress messageProgress, CancellationToken ct)
+                    IMessageExchangeProgress messageProgress, CancellationToken ct)
         {
             return await await MessageExchangeTask.ContinueWith(
                     async (IMessageExchangeResult) =>
@@ -75,7 +75,7 @@ namespace OmniCore.Model.Eros
                         }
                         catch (Exception e)
                         {
-                            return new MessageExchangeResult(false, e);
+                            return new MessageExchangeResult(e);
                         }
                         finally
                         {
@@ -84,60 +84,59 @@ namespace OmniCore.Model.Eros
                     });
         }
 
-        private async Task<IMessageExchangeResult> UpdateStatusInternal(IMessageProgress progress, CancellationToken ct,
-            StatusRequestType update_type = StatusRequestType.Standard)
+        private async Task<IMessageExchangeResult> UpdateStatusInternal(IMessageExchangeProgress progress, CancellationToken ct,
+            StatusRequestType updateType = StatusRequestType.Standard)
         {
-            var request = new ErosMessageBuilder().WithStatus(update_type).Build();
+            var request = new ErosMessageBuilder().WithStatus(updateType).Build();
             return await PerformExchange(request, StandardParameters, progress, ct);
         }
 
-        public async Task UpdateStatus(IMessageProgress progress, CancellationToken ct,
-            StatusRequestType update_type = StatusRequestType.Standard)
+        public async Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct,
+            StatusRequestType updateType = StatusRequestType.Standard)
         {
             try
             {
-                Debug.WriteLine($"Updating pod status, request type {update_type}");
-                await this.UpdateStatusInternal(progress, ct, update_type);
+                Debug.WriteLine($"Updating pod status, request type {updateType}");
+                return await this.UpdateStatusInternal(progress, ct, updateType);
             }
-            catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PdmException("Unexpected error", e);
+                return new MessageExchangeResult(e);
             }
         }
 
-        public async Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alert_mask)
+        public async Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, CancellationToken ct, byte alertMask)
         {
             try
             {
-                Debug.WriteLine($"Acknowledging alerts, bitmask: {alert_mask}");
+                Debug.WriteLine($"Acknowledging alerts, bitmask: {alertMask}");
                 await UpdateStatusInternal(progress, ct);
                 AssertImmediateBolusInactive();
                 if (Pod.Status.Progress < PodProgress.PairingSuccess)
-                    throw new PdmException("Pod not paired completely yet.");
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod not paired completely yet.");
 
                 if (Pod.Status.Progress == PodProgress.ErrorShuttingDown)
-                    throw new PdmException("Pod is shutting down, cannot acknowledge alerts.");
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is shutting down, cannot acknowledge alerts.");
 
                 if (Pod.Status.Progress == PodProgress.AlertExpiredShuttingDown)
-                    throw new PdmException("Acknowledgement period expired, pod is shutting down");
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Acknowledgement period expired, pod is shutting down");
 
                 if (Pod.Status.Progress > PodProgress.AlertExpiredShuttingDown)
-                    throw new PdmException("Pod is not active");
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is not active");
 
-                if ((Pod.Status.AlertMask & alert_mask) != alert_mask)
-                    throw new PdmException("Bitmask is invalid for current alert state");
+                if ((Pod.Status.AlertMask & alertMask) != alertMask)
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Bitmask is invalid for current alert state");
 
-                // await send_request(ProtocolHelper.request_acknowledge_alerts(alert_mask));
+                var request = new ErosMessageBuilder().WithAcknowledgeAlerts(alertMask).Build();
+                return await PerformExchange(request, StandardParameters, progress, ct);
             }
-            catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PdmException("Unexpected error", e);
+                return new MessageExchangeResult(e);
             }
         }
 
-        public async Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount)
+        public async Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, CancellationToken ct, decimal bolusAmount)
         {
             try
             {
@@ -147,28 +146,30 @@ namespace OmniCore.Model.Eros
                 AssertImmediateBolusInactive();
 
                 if (bolusAmount < 0.05m)
-                    throw new PdmException("Cannot bolus less than 0.05U");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Cannot bolus less than 0.05U");
 
                 if (bolusAmount % 0.05m != 0)
-                    throw new PdmException("Bolus must be multiples of 0.05U");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Bolus must be multiples of 0.05U");
 
                 if (bolusAmount > 30m)
-                    throw new PdmException("Cannot bolus more than 30U");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Cannot bolus more than 30U");
 
-                // await send_request(ProtocolHelper.request_bolus(bolusAmount), true);
+                var request = new ErosMessageBuilder().WithBolus(bolusAmount).Build();
+                var result = await PerformExchange(request, StandardParameters, progress, ct);
 
                 if (Pod.Status.BolusState != BolusState.Immediate)
-                    throw new PdmException("Pod did not start bolusing");
+                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start bolusing");
+
+                return result;
 
             }
-            catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PdmException("Unexpected error", e);
+                return new MessageExchangeResult(e);
             }
         }
 
-        public async Task CancelBolus(IMessageProgress progress, CancellationToken ct)
+        public async Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct)
         {
             try
             {
@@ -176,34 +177,68 @@ namespace OmniCore.Model.Eros
                 AssertRunningStatus();
 
                 if (Pod.Status.BolusState != BolusState.Immediate)
-                    throw new PdmException("Immediate bolus is not running");
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Immediate bolus is not running");
 
-                // await send_request(ProtocolHelper.request_cancel_bolus(), true);
+                var request = new ErosMessageBuilder().WithCancelBolus().Build();
+                var result = await PerformExchange(request, StandardParameters, progress, ct);
 
                 if (Pod.Status.BolusState == BolusState.Immediate)
-                    throw new PdmException("Failed to cancel running bolus");
+                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to cancel running bolus");
 
+                return result;
             }
-            catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PdmException("Unexpected error", e);
+                return new MessageExchangeResult(e);
             }
+
+        }
+
+        public async Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct)
+        {
+            try
+            {
+                AssertPaired();
+
+                await UpdateStatusInternal(progress, ct);
+
+                if (Pod.Status.Progress >= PodProgress.Inactive)
+                    throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod already deactivated");
+
+                var request = new ErosMessageBuilder().WithDeactivate().Build();
+                var result = await PerformExchange(request, StandardParameters, progress, ct);
+
+                if (Pod.Status.Progress != PodProgress.Inactive)
+                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to deactivate");
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                return new MessageExchangeResult(e);
+            }
+
         }
 
         private void AssertImmediateBolusInactive()
         {
-            if (Pod.Status.BolusState == BolusState.Immediate)
-                throw new PdmException("Bolus operation in progress");
+            if (Pod.Status != null && Pod.Status.BolusState == BolusState.Immediate)
+                throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Bolus operation in progress");
+        }
+
+        private void AssertPaired()
+        {
+            if (Pod.Status == null || Pod.Status.Progress < PodProgress.PairingSuccess)
+                throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is not paired");
         }
 
         private void AssertRunningStatus()
         {
-            if (Pod.Status.Progress < PodProgress.Running)
-                throw new PdmException("Pod is not yet running");
+            if (Pod.Status == null || Pod.Status.Progress < PodProgress.Running)
+                throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is not yet running");
 
-            if (Pod.Status.Progress > PodProgress.RunningLow)
-                throw new PdmException("Pod is not running");
+            if (Pod.Status == null || Pod.Status.Progress > PodProgress.RunningLow)
+                throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is not running");
         }
 
     }

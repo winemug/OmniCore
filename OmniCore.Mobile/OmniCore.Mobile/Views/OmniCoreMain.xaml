@@ -12,9 +12,14 @@
                 <views:PodStatusPage/>
             </ShellContent>
         </Tab>
-        <Tab Title="Insulin">
+        <Tab Title="Actions">
             <ShellContent>
-                <views:InsulinActionPage/>
+                <views:PodActionsPage/>
+            </ShellContent>
+        </Tab>
+        <Tab Title="Maintenance">
+            <ShellContent>
+                <views:PodMaintenancePage/>
             </ShellContent>
         </Tab>
     </FlyoutItem>
@@ -34,13 +39,6 @@
         <Tab>
             <ShellContent>
                 <views:AboutPage/>
-            </ShellContent>
-        </Tab>
-    </FlyoutItem>
-    <FlyoutItem Title="Test" FlyoutDisplayOptions="AsSingleItem">
-        <Tab>
-            <ShellContent>
-                <views:TestPage/>
             </ShellContent>
         </Tab>
     </FlyoutItem>

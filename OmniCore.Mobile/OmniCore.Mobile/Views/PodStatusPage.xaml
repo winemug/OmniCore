@@ -4,6 +4,7 @@
              x:Class="OmniCore.Mobile.Views.PodStatusPage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
+            <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding UpdateButtonEnabled}"/>
             <StackLayout Orientation="Horizontal">
                 <Label>Identification: </Label>
                 <Label Text="{Binding Id}"/>
@@ -16,12 +17,11 @@
                 <Label>Updated: </Label>
                 <Label Text="{Binding Updated}"/>
             </StackLayout>
+
             <Label>Pod lifetime</Label>
             <Label>Insulin status</Label>
             <Label>Alerts</Label>
             <Label>Fault status</Label>
-            <Label>Active Basalprogram</Label>
-            <Label>Active Basalrate</Label>
             <Label>Pod datetime</Label>
             <Label>Pod identification</Label>
             <Label>Pod version</Label>

@@ -22,14 +22,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\InsulinActionPage.xaml.cs">
-      <DependentUpon>InsulinActionPage.xaml</DependentUpon>
+    <Compile Update="Views\PodActionsPage.xaml.cs">
+      <DependentUpon>PodActionsPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\OmniCoreMain.xaml.cs">
       <DependentUpon>OmniCoreMain.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\OmniCoreSettingsPage.xaml.cs">
       <DependentUpon>OmniCoreSettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\PodMaintenancePage.xaml.cs">
+      <DependentUpon>PodMaintenancePage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\PodStatusPage.xaml.cs">
       <DependentUpon>PodStatusPage.xaml</DependentUpon>
@@ -46,19 +49,19 @@
     <EmbeddedResource Update="Views\OmniCoreSettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\PodMaintenancePage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\PodSettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\RadioStatusPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\TestPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Views\PodStatusPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\InsulinActionPage.xaml">
+    <EmbeddedResource Update="Views\PodActionsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

@@ -38,7 +38,7 @@ namespace OmniCore.Radio.RileyLink
                 if (radio_packet.type == PacketType.CON)
                     ResponseMessage.body.Append(radio_packet.body);
                 else
-                    throw new ErosProtocolException("Packet type invalid");
+                    throw new OmniCoreErosException(FailureType.InvalidDataReceived, "Packet type invalid");
             }
 
             if (ResponseMessage.body_length == ResponseMessage.body.Length - 2)
@@ -72,7 +72,7 @@ namespace OmniCore.Radio.RileyLink
                 }
                 else
                 {
-                    throw new ErosProtocolException("Message crc error");
+                    throw new OmniCoreErosException(FailureType.InvalidDataReceived, "Message crc error");
                 }
             }
             else

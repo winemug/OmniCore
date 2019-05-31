@@ -10,9 +10,10 @@ namespace OmniCore.Model.Interfaces
     public interface IPodManager
     {
         IPod Pod { get; }
-        Task UpdateStatus(IMessageProgress progress, CancellationToken ct, StatusRequestType requestType = StatusRequestType.Standard);
-        Task AcknowledgeAlerts(IMessageProgress progress, CancellationToken ct, byte alertMask);
-        Task Bolus(IMessageProgress progress, CancellationToken ct, decimal bolusAmount);
-        Task CancelBolus(IMessageProgress progress, CancellationToken ct);
+        Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct, StatusRequestType requestType = StatusRequestType.Standard);
+        Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, CancellationToken ct, byte alertMask);
+        Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, CancellationToken ct, decimal bolusAmount);
+        Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct);
+        Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct);
     }
 }

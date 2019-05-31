@@ -29,7 +29,7 @@ namespace OmniCore.Radio.RileyLink
             if (RileyLinkMessageExchange == null)
                 RileyLinkMessageExchange = new RileyLinkMessageExchange(messageExchangeParameters, pod, RileyLinkInstance, UiSyncContext);
             else
-                RileyLinkMessageExchange.UpdateParameters(messageExchangeParameters, pod, RileyLinkInstance);
+                RileyLinkMessageExchange.SetParameters(messageExchangeParameters, pod, RileyLinkInstance);
 
             return RileyLinkMessageExchange;
         }

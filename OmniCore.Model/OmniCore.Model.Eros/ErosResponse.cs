@@ -31,7 +31,7 @@ namespace OmniCore.Model.Eros
                     parse_status_response(pod);
                     break;
                 default:
-                    throw new OmniCoreException($"Unknown response type {PartType}");
+                    throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown response type {PartType}");
             }
         }
 
@@ -133,7 +133,7 @@ namespace OmniCore.Model.Eros
                     pod.Fault.FaultInformation2LastWord = PartData.Byte(i++);
                     break;
                 default:
-                    throw new OmniCoreException($"Failed to parse the information response of type {rt}");
+                    throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Failed to parse the information response of type {rt}");
             }
         }
 
@@ -159,7 +159,7 @@ namespace OmniCore.Model.Eros
             if (PartData[1] == 0x14)
                 pod.RuntimeVariables.NonceSync = PartData.Word(2);
             else
-                throw new OmniCoreException($"Unknown resync request {PartData} from pod");
+                throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown resync request {PartData} from pod");
         }
 
         private void parse_status_response(IPod pod)

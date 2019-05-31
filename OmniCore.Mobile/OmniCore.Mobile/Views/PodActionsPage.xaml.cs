@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class InsulinActionPage : ContentPage
+    public partial class PodActionsPage : ContentPage
     {
-        public InsulinActionPage()
+        public PodActionsPage()
         {
             InitializeComponent();
         }

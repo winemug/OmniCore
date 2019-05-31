@@ -7,7 +7,7 @@ using System.Text;
 
 namespace OmniCore.Model
 {
-    public class MessageProgress : IMessageProgress
+    public class MessageProgress : IMessageExchangeProgress
     {
         public bool CanBeCanceled { get; set; }
 

@@ -8,8 +8,9 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchange
     {
-        Task InitializeExchange(IMessageProgress messageProgress, CancellationToken ct);
-        Task<IMessage> GetResponse(IMessage request, IMessageProgress messageProgress, CancellationToken ct);
+        IMessageExchangeStatistics Statistics { get; }
+        Task InitializeExchange(IMessageExchangeProgress messageProgress, CancellationToken ct);
+        Task<IMessage> GetResponse(IMessage request, IMessageExchangeProgress messageProgress, CancellationToken ct);
         IMessageExchangeResult ParseResponse(IMessage response, IPod pod);
     }
 }

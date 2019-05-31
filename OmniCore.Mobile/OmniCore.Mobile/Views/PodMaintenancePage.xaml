@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.PodMaintenancePage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsEnabled="{Binding DeactivateButtonEnabled}"/>
+            <Button Text="Activate New Pod" Clicked="ActivateClicked" IsVisible="{Binding ActivateButtonEnabled}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

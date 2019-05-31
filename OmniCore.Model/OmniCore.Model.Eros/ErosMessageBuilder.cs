@@ -48,24 +48,24 @@ namespace OmniCore.Model.Eros
             foreach (var ac in alert_configurations)
             {
                 if (ac.alert_after_minutes == null && ac.alert_after_reservoir == null && ac.activate)
-                    throw new PdmException("Either alert_after_minutes or alert_after_reservoir must be set");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Either alert_after_minutes or alert_after_reservoir must be set");
                 else if (ac.alert_after_minutes != null && ac.alert_after_reservoir != null)
-                    throw new PdmException("Only one of alert_after_minutes or alert_after_reservoir must be set");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Only one of alert_after_minutes or alert_after_reservoir must be set");
 
                 if (ac.alert_duration > 0x1FF)
-                    throw new PdmException($"Alert duration in minutes cannot be more than {0x1ff:%d}");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, $"Alert duration in minutes cannot be more than {0x1ff:%d}");
                 else if (ac.alert_duration < 0)
-                    throw new PdmException("Invalid alert duration value");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Invalid alert duration value");
 
                 if (ac.alert_after_minutes != null && ac.alert_after_minutes > 4800)
-                    throw new PdmException("Alert cannot be set beyond 80 hours");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Alert cannot be set beyond 80 hours");
                 if (ac.alert_after_minutes != null && ac.alert_after_minutes < 0)
-                    throw new PdmException("Invalid value for alert_after_minutes");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Invalid value for alert_after_minutes");
 
                 if (ac.alert_after_reservoir != null && ac.alert_after_reservoir > 50)
-                    throw new PdmException("Alert cannot be set for more than 50 units");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Alert cannot be set for more than 50 units");
                 if (ac.alert_after_reservoir != null && ac.alert_after_reservoir < 0)
-                    throw new PdmException("Invalid value for alert_after_reservoir");
+                    throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Invalid value for alert_after_reservoir");
 
                 byte b0 = (byte)(ac.alert_index << 4);
                 if (ac.activate)

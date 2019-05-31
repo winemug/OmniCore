@@ -1,7 +1,9 @@
-﻿namespace OmniCore.Model.Exceptions
+﻿using OmniCore.Model.Enums;
+
+namespace OmniCore.Model.Exceptions
 {
     public class OmniCoreTimeoutException : OmniCoreException
     {
-        public OmniCoreTimeoutException(string message = "Timeout error") : base(message) { }
+        public OmniCoreTimeoutException(FailureType failureType, string message = "Timeout error") : base(failureType, message) { }
     }
 }

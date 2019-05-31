@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IMessageProgress : INotifyPropertyChanged
+    public interface IMessageExchangeProgress : INotifyPropertyChanged
     {
         bool CanBeCanceled { get; }
         bool Queued { get; }

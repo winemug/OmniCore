@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Mobile.Views.PodActionsPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Text="Start Temp. Basal"/>
+            <Button Text="Cancel Temp. Basal"/>
+            <Button Text="Bolus"/>
+            <Button Text="Cancel Bolus"/>
+            <Button Text="Suspend Insulin Delivery"/>
+            <Button Text="Resume Insulin Delivery"/>
+            <Label>Active Basalprogram</Label>
+            <Label>Active Basalrate</Label>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,14 @@
+﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Exceptions;
+
+namespace OmniCore.Radio.RileyLink
+{
+    public class OmniCoreErosException : OmniCoreException
+    {
+        public RadioPacket ReceivedPacket = null;
+        public OmniCoreErosException(FailureType failureType, string message = "Unknown protocol error", RadioPacket received = null) : base(failureType, message)
+        {
+            this.ReceivedPacket = received;
+        }
+    }
+}

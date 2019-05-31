@@ -10,5 +10,6 @@ namespace OmniCore.Model.Interfaces
         void Archive();
         IPodManager New();
         IPodManager Register(uint lot, uint serial, uint radioAddress);
+        event EventHandler PodChanged;
     }
 }

@@ -41,6 +41,8 @@ namespace OmniCore.Radio.RileyLink
 
         private TxPower TxAmplification;
 
+        internal RileyLinkStatistics Statistics = null;
+
         public RileyLink()
         {
             TxAmplification = TxPower.Normal;
@@ -50,6 +52,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
+                this.Statistics?.RadioOverheadStart();
                 var tcsInitialized = new TaskCompletionSource<bool>();
                 if (this.Device == null)
                 {
@@ -92,16 +95,24 @@ namespace OmniCore.Radio.RileyLink
                     var result = (await tcsResultsReady.Task).OrderBy(x => x.Rssi).FirstOrDefault();
 
                     this.Device = result?.Device;
+                    this.Statistics?.RadioRssiReported(result.Rssi);
 
                     if (this.Device == null)
-                        throw new PacketRadioException("Couldn't find RileyLink!");
+                        throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Couldn't find RileyLink!");
                     else
                         Debug.WriteLine($"Found RL: {Device.Uuid}");
+
+                    this.Device.WhenReadRssiContinuously(TimeSpan.FromSeconds(10)).Subscribe(
+                        (rssiRead) =>
+                        {
+                            this.Statistics?.RadioRssiReported(rssiRead);
+                        });
 
                     this.Device.WhenStatusChanged().Subscribe(async (status) =>
                     {
                         if (status == ConnectionStatus.Connected)
                         {
+                            this.Statistics?.RadioConnnected();
                             var services = await this.Device.DiscoverServices().ToList();
 
                             var dataService = services.FirstOrDefault(x => x.Uuid == RileyLinkServiceUUID);
@@ -129,6 +140,7 @@ namespace OmniCore.Radio.RileyLink
                         }
                         else if (status == ConnectionStatus.Disconnected)
                         {
+                            this.Statistics?.RadioDisconnected();
                             DataCharacteristic = null;
                             ResponseCharacteristic = null;
                         }
@@ -154,42 +166,45 @@ namespace OmniCore.Radio.RileyLink
                         await tcsInitialized.Task;
                     }
                 }
-                
+               
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while connecting to BLE device", e);
+                throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Error while connecting to BLE device", e);
+            }
+            finally
+            {
+                this.Statistics?.RadioOverheadEnd();
             }
         }
 
-        private async Task Disconnect()
-        {
-            try
-            {
-                //if (this.Device == null)
-                //    return;
+        //private async Task Disconnect()
+        //{
+        //    try
+        //    {
+        //        //if (this.Device == null)
+        //        //    return;
 
-                //if (this.Device.IsDisconnected())
-                //    return;
+        //        //if (this.Device.IsDisconnected())
+        //        //    return;
 
-                //Debug.WriteLine("Disconnecting from RL");
-                //await this.ResponseCharacteristic.DisableNotifications();
-                //this.Device.CancelConnection();
-                //// await this.Device.WhenDisconnected();
-                //Debug.WriteLine("Disconnect requested");
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Ignoring exception while disconnecting", e);
-            }
-        }
+        //        //Debug.WriteLine("Disconnecting from RL");
+        //        //await this.ResponseCharacteristic.DisableNotifications();
+        //        //this.Device.CancelConnection();
+        //        //// await this.Device.WhenDisconnected();
+        //        //Debug.WriteLine("Disconnect requested");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.WriteLine("Ignoring exception while disconnecting", e);
+        //    }
+        //}
 
         public async Task Reset()
         {
             try
             {
-                await Disconnect();
                 this.VersionVerified = false;
                 this.RadioInitialized = false;
                 await EnsureDevice();
@@ -197,7 +212,7 @@ namespace OmniCore.Radio.RileyLink
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while resetting rileylink", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while resetting rileylink", e);
             }
         }
 
@@ -220,7 +235,7 @@ namespace OmniCore.Radio.RileyLink
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while receiving data with RL", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while receiving data with RL", e);
             }
         }
 
@@ -228,7 +243,6 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                // await Connect();
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
@@ -240,7 +254,7 @@ namespace OmniCore.Radio.RileyLink
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while sending data with RL", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while sending data with RL", e);
             }
         }
 
@@ -271,16 +285,17 @@ namespace OmniCore.Radio.RileyLink
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while sending and receiving data with RL", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while sending and receiving data with RL", e);
             }
         }
 
-
-
-        public async Task SetTxLevel(TxPower tx_power)
+        public async Task SetTxLevel(TxPower txPower)
         {
-            TxAmplification = tx_power;
-            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
+            TxAmplification = txPower;
+            this.Statistics?.RadioOverheadStart();
+            await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[txPower] });
+            this.Statistics?.RadioOverheadEnd();
+            this.Statistics?.RadioTxLevelChange(txPower);
         }
 
         public async Task TxLevelDown()
@@ -288,7 +303,7 @@ namespace OmniCore.Radio.RileyLink
             if (TxAmplification > TxPower.Lowest)
             {
                 TxAmplification--;
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
+                await SetTxLevel(TxAmplification);
             }
         }
 
@@ -297,7 +312,7 @@ namespace OmniCore.Radio.RileyLink
             if (TxAmplification < TxPower.Highest)
             {
                 TxAmplification++;
-                await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[TxAmplification] });
+                await SetTxLevel(TxAmplification);
             }
         }
 
@@ -326,7 +341,7 @@ namespace OmniCore.Radio.RileyLink
                 var result = await WriteAndRead(data, timeout);
 
                 if (result == null || result.Length == 0)
-                    throw new PacketRadioException("RL returned no result");
+                    throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "RL returned no result");
 
                 else if (result[0] == (byte)RileyLinkResponseType.OK
                     || result[0] == (byte)RileyLinkResponseType.Interrupted)
@@ -341,14 +356,14 @@ namespace OmniCore.Radio.RileyLink
                         return null;
                 }
                 else if (result[0] == (byte)RileyLinkResponseType.Timeout)
-                    throw new OmniCoreTimeoutException();
+                    throw new OmniCoreTimeoutException(FailureType.PodUnreachable);
                 else
-                    throw new PacketRadioException($"RL returned error code {result[0]}");
+                    throw new OmniCoreRadioException(FailureType.RadioUnknownError, $"RL returned error code {result[0]}");
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while sending a command via BLE", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while sending a command via BLE", e);
             }
         }
 
@@ -371,13 +386,13 @@ namespace OmniCore.Radio.RileyLink
                 }
                 catch(TimeoutException)
                 {
-                    throw new OmniCoreTimeoutException();
+                    throw new OmniCoreTimeoutException(FailureType.RadioNotReachable);
                 }
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while writing to and reading from RL", e);
+                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while writing to and reading from RL", e);
             }
         }
 
@@ -433,14 +448,14 @@ namespace OmniCore.Radio.RileyLink
 
                 var result = await SendCommand(RileyLinkCommandType.GetState);
                 if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
-                    throw new PacketRadioException("RL returned status not OK.");
+                    throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
 
                 this.RadioInitialized = true;
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error while initializing radio", e);
+                throw new OmniCoreRadioException(FailureType.RadioUnknownError, "Error while initializing radio", e);
             }
         }
 
@@ -451,7 +466,7 @@ namespace OmniCore.Radio.RileyLink
             {
                 var result = await SendCommand(RileyLinkCommandType.GetState);
                 if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
-                    throw new PacketRadioException("RL returned status not OK.");
+                    throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
 
                 var versionData = await SendCommand(RileyLinkCommandType.GetVersion);
                 if (versionData != null && versionData.Length > 0)
@@ -463,7 +478,7 @@ namespace OmniCore.Radio.RileyLink
                     var v_minor = int.Parse(m.Groups[2].ToString());
 
                     if (v_major < 2)
-                        throw new PacketRadioException("Firmware Version below 2, cannot be used for omnipod.");
+                        throw new OmniCoreRadioException(FailureType.RadioStateError, "Firmware Version below 2, cannot be used for omnipod.");
 
                     if (v_major == 2 && v_minor < 3)
                         this.WorkaroundRequired = true;
@@ -471,12 +486,12 @@ namespace OmniCore.Radio.RileyLink
                     this.VersionVerified = true;
                 }
                 else
-                    throw new PacketRadioException("Version info couldn't be obtained from RL");
+                    throw new OmniCoreRadioException(FailureType.RadioStateError, "Version info couldn't be obtained from RL");
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
             {
-                throw new PacketRadioException("Error verifying RL version", e);
+                throw new OmniCoreRadioException(FailureType.RadioStateError, "Error verifying RL version", e);
             }
         }
     }
