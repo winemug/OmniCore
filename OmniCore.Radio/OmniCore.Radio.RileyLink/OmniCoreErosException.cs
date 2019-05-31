@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
+using OmniCore.Radio.RileyLink;
 
 namespace OmniCore.Radio.RileyLink
 {

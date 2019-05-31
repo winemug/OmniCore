@@ -60,6 +60,7 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task InitializeExchange(IMessageExchangeProgress messageProgress, CancellationToken ct)
         {
+            messageProgress.Statistics = RlStatistics;
             if (FinalAckTask != null)
             {
                 await FinalAckTask;
@@ -517,7 +518,6 @@ namespace OmniCore.Radio.RileyLink
             {
                 var ep = p as ErosRequest;
                 var cmd_body = ep.PartData;
-                var nonce = ep.Nonce;
                 message_body_len += (int)cmd_body.Length + 2;
                 if (ep.RequiresNonce)
                     message_body_len += 4;
@@ -548,12 +548,12 @@ namespace OmniCore.Radio.RileyLink
                 var ep = p as ErosRequest;
                 var cmd_type = (byte) ep.PartType;
                 var cmd_body = ep.PartData;
-                var nonce = ep.Nonce;
 
                 if (ep.RequiresNonce)
                 {
                     message_body.Append(cmd_type);
                     message_body.Append((byte)(cmd_body.Length + 4));
+                    var nonce = MessageExchangeParameters.Nonce.GetNext();
                     message_body.Append(nonce);
                 }
                 else

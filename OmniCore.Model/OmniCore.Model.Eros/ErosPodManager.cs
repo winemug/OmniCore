@@ -45,33 +45,56 @@ namespace OmniCore.Model.Eros
         //}
 
         public ErosPod ErosPod { get; private set; }
-
         public IPod Pod { get => ErosPod; }
 
         readonly IMessageExchangeProvider MessageExchangeProvider;
-        readonly ErosMessageExchangeParameters StandardParameters;
         readonly Task MessageExchangeTask;
+        readonly Nonce Nonce;
 
         public ErosPodManager(ErosPod pod, IMessageExchangeProvider messageExchangeProvider)
         {
-            StandardParameters = new ErosMessageExchangeParameters() { };
+            Nonce = new Nonce(pod);
             ErosPod = pod;
             MessageExchangeProvider = messageExchangeProvider;
             MessageExchangeTask = Task.Run(() => { });
         }
 
+        private ErosMessageExchangeParameters GetStandardParameters()
+        {
+            return new ErosMessageExchangeParameters() { Nonce = Nonce };
+        }
+
         private async Task<IMessageExchangeResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
                     IMessageExchangeProgress messageProgress, CancellationToken ct)
         {
+
+            var emp = messageExchangeParameters as ErosMessageExchangeParameters;
+
             return await await MessageExchangeTask.ContinueWith(
                     async (IMessageExchangeResult) =>
                     {
                         try
                         {
+                            ErosPod.RuntimeVariables.NonceSync = null;
                             var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
                             await messageExchange.InitializeExchange(messageProgress, ct);
                             var response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
-                            return messageExchange.ParseResponse(response, Pod);
+                            var result = messageExchange.ParseResponse(response, Pod);
+
+                            if (result.Success && ErosPod.RuntimeVariables.NonceSync.HasValue)
+                            {
+                                var responseMessage = response as ErosMessage;
+                                emp.MessageSequenceOverride = (responseMessage.sequence - 1) % 16;
+
+                                messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
+                                await messageExchange.InitializeExchange(messageProgress, ct);
+                                response = await messageExchange.GetResponse(requestMessage, messageProgress, ct);
+                                ErosPod.RuntimeVariables.NonceSync = null;
+                                result = messageExchange.ParseResponse(response, Pod);
+                                if (ErosPod.RuntimeVariables.NonceSync.HasValue)
+                                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Nonce re-negotiation failed");
+                            }
+                            return result;
                         }
                         catch (Exception e)
                         {
@@ -88,7 +111,7 @@ namespace OmniCore.Model.Eros
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             var request = new ErosMessageBuilder().WithStatus(updateType).Build();
-            return await PerformExchange(request, StandardParameters, progress, ct);
+            return await PerformExchange(request, GetStandardParameters(), progress, ct);
         }
 
         public async Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct,
@@ -128,7 +151,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Bitmask is invalid for current alert state");
 
                 var request = new ErosMessageBuilder().WithAcknowledgeAlerts(alertMask).Build();
-                return await PerformExchange(request, StandardParameters, progress, ct);
+                return await PerformExchange(request, GetStandardParameters(), progress, ct);
             }
             catch (Exception e)
             {
@@ -155,7 +178,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Cannot bolus more than 30U");
 
                 var request = new ErosMessageBuilder().WithBolus(bolusAmount).Build();
-                var result = await PerformExchange(request, StandardParameters, progress, ct);
+                var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
 
                 if (Pod.Status.BolusState != BolusState.Immediate)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start bolusing");
@@ -180,7 +203,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Immediate bolus is not running");
 
                 var request = new ErosMessageBuilder().WithCancelBolus().Build();
-                var result = await PerformExchange(request, StandardParameters, progress, ct);
+                var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
 
                 if (Pod.Status.BolusState == BolusState.Immediate)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to cancel running bolus");
@@ -206,7 +229,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod already deactivated");
 
                 var request = new ErosMessageBuilder().WithDeactivate().Build();
-                var result = await PerformExchange(request, StandardParameters, progress, ct);
+                var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
 
                 if (Pod.Status.Progress != PodProgress.Inactive)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to deactivate");

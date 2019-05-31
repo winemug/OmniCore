@@ -14,5 +14,6 @@ namespace OmniCore.Model.Eros
         public int? MessageSequenceOverride { get; set; }
         public bool RepeatFirstPacket { get; set;  }
         public bool CriticalWithFollowupRequired { get; set; }
+        public Nonce Nonce { get; set; }
     }
 }
