@@ -31,7 +31,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                //File.Delete(DbPath);
+                File.Delete(DbPath);
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();

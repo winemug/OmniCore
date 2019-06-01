@@ -21,10 +21,10 @@ namespace OmniCore.Radio.RileyLink
 
         public int RadioRssiAverage { get; set; }
 
-        private int startedQ;
+        private int started;
         public RileyLinkStatistics()
         {
-            startedQ = Environment.TickCount;
+            started = Environment.TickCount;
         }
 
         private int startedME;

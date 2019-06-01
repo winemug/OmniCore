@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg859"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="All3.svg">
+  <defs
+     id="defs853">
+    <inkscape:path-effect
+       simplify_just_coalesce="false"
+       simplify_individual_paths="true"
+       helper_size="5"
+       smooth_angles="20"
+       threshold="0.002"
+       steps="10"
+       is_visible="true"
+       id="path-effect9414"
+       effect="simplify" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect8777"
+       effect="bspline" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect8753"
+       effect="bspline" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect8753-2"
+       effect="bspline" />
+    <filter
+       id="filter10200"
+       inkscape:label="Matte Jelly"
+       style="color-interpolation-filters:sRGB;">
+      <feColorMatrix
+         id="feColorMatrix10188"
+         in="SourceGraphic"
+         result="color"
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.85 0" />
+      <feGaussianBlur
+         id="feGaussianBlur10190"
+         result="blur"
+         stdDeviation="7"
+         in="SourceAlpha" />
+      <feSpecularLighting
+         id="feSpecularLighting10194"
+         result="specular"
+         lighting-color="rgb(137,255,255)"
+         surfaceScale="5"
+         specularConstant="0.9"
+         specularExponent="25"
+         in="blur">
+        <feDistantLight
+           id="feDistantLight10192"
+           azimuth="225"
+           elevation="60" />
+      </feSpecularLighting>
+      <feComposite
+         id="feComposite10196"
+         result="composite1"
+         operator="arithmetic"
+         k2="1"
+         k3="1"
+         in2="SourceGraphic"
+         in="specular" />
+      <feComposite
+         id="feComposite10198"
+         result="composite2"
+         operator="atop"
+         in2="color"
+         in="composite1" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-920.96375"
+     inkscape:cy="418.34333"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer3"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1147"
+     inkscape:window-x="1672"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata856">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 2">
+    <g
+       id="g1516"
+       transform="matrix(11.41488,0,0,13.462252,-28.726206,-12.335711)">
+      <path
+         id="path1502"
+         d="M 16,1 H 8 C 6.34,1 5,2.34 5,4 v 16 c 0,1.66 1.34,3 3,3 h 8 c 1.66,0 3,-1.34 3,-3 V 4 C 19,2.34 17.66,1 16,1 Z m -2,20 h -4 v -1 h 4 z m 3.25,-3 H 6.75 V 4 h 10.5 z"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path1504"
+         d="M 0,0 H 24 V 24 H 0 Z"
+         inkscape:connector-curvature="0"
+         style="fill:none" />
+    </g>
+  </g>
+</svg>

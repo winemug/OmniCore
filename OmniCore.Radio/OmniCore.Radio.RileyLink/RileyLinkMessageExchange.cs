@@ -22,9 +22,7 @@ namespace OmniCore.Radio.RileyLink
         private ErosMessageExchangeParameters MessageExchangeParameters;
         private Task FinalAckTask = null;
         private SynchronizationContext UiContext;
-        public IMessageExchangeStatistics Statistics { get => RlStatistics as IMessageExchangeStatistics; }
 
-        private RileyLinkStatistics RlStatistics;
         internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance, SynchronizationContext uiContext)
         {
             UiContext = uiContext;
@@ -36,8 +34,6 @@ namespace OmniCore.Radio.RileyLink
             RileyLink = rileyLinkInstance;
             Pod = pod as ErosPod;
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
-            RlStatistics = new RileyLinkStatistics();
-            this.RileyLink.Statistics = RlStatistics;
         }
 
         private async Task RunInUiContext(Func<Task> a)
@@ -60,33 +56,27 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task InitializeExchange(IMessageExchangeProgress messageProgress, CancellationToken ct)
         {
-            messageProgress.Statistics = RlStatistics;
+            messageProgress.Statistics = new RileyLinkStatistics();
             if (FinalAckTask != null)
             {
+                messageProgress.ActionStatusText = "Waiting for previous radio operation to complete";
                 await FinalAckTask;
             }
 
-            await RunInUiContext(async () => await RileyLink.EnsureDevice());
+            await RunInUiContext(async () => await RileyLink.EnsureDevice(messageProgress, ct));
         }
 
         public async Task<IMessage> GetResponse(IMessage requestMessage, IMessageExchangeProgress messageExchangeProgress, CancellationToken ct)
         {
-            try
-            {
-                return await GetResponseInternal(requestMessage, messageExchangeProgress, ct);
-            }
-            finally
-            {
-                RileyLink.Statistics = null;
-            }
+            return await GetResponseInternal(requestMessage, messageExchangeProgress, ct);
         }
 
-        private async Task<IMessage> GetResponseInternal(IMessage requestMessage, IMessageExchangeProgress messageExchangeProgress, CancellationToken ct)
+        private async Task<IMessage> GetResponseInternal(IMessage requestMessage, IMessageExchangeProgress messageProgress, CancellationToken ct)
         {
-            this.RlStatistics.StartMessageExchange();
+            ((RileyLinkStatistics)messageProgress.Statistics).StartMessageExchange();
             if (MessageExchangeParameters.TransmissionLevelOverride.HasValue)
             {
-                await RunInUiContext(async () => await RileyLink.SetTxLevel(MessageExchangeParameters.TransmissionLevelOverride.Value));
+                await RunInUiContext(async () => await RileyLink.SetTxLevel(messageProgress, ct, MessageExchangeParameters.TransmissionLevelOverride.Value));
             }
 
             var erosRequestMessage = requestMessage as ErosMessage;
@@ -100,7 +90,7 @@ namespace OmniCore.Radio.RileyLink
                 var packet = packets[part];
                 int repeat_count = -1;
                 int timeout = 10000;
-                this.RlStatistics.StartPacketExchange();
+                ((RileyLinkStatistics)messageProgress.Statistics).StartPacketExchange();
                 while (true)
                 {
                     repeat_count++;
@@ -117,13 +107,14 @@ namespace OmniCore.Radio.RileyLink
 
                     try
                     {
-                        received = await this.ExchangePackets(packet.with_sequence(this.Pod.RuntimeVariables.PacketSequence), expected_type, timeout);
+                        received = await this.ExchangePackets(messageProgress, ct,
+                            packet.with_sequence(this.Pod.RuntimeVariables.PacketSequence), expected_type, timeout);
                         break;
                     }
                     catch (OmniCoreTimeoutException ote)
                     {
                         Debug.WriteLine("Trying to recover from timeout error");
-                        this.RlStatistics.TimeoutOccured(ote);
+                        ((RileyLinkStatistics)messageProgress.Statistics).TimeoutOccured(ote);
                         if (part == 0)
                         {
                             if (repeat_count == 0)
@@ -139,7 +130,7 @@ namespace OmniCore.Radio.RileyLink
                             }
                             else if (repeat_count == 2)
                             {
-                                await RunInUiContext(async () => await RileyLink.Reset());
+                                await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                                 timeout = 15000;
                                 continue;
                             }
@@ -147,7 +138,7 @@ namespace OmniCore.Radio.RileyLink
                             {
                                 Debug.WriteLine("Failed recovery");
                                 Pod.RuntimeVariables.PacketSequence = 0;
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
@@ -160,7 +151,7 @@ namespace OmniCore.Radio.RileyLink
                             }
                             else
                             {
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
@@ -173,25 +164,25 @@ namespace OmniCore.Radio.RileyLink
                             }
                             else
                             {
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
                     }
                     catch (OmniCoreRadioException pre)
                     {
-                        this.RlStatistics.RadioErrorOccured(pre);
+                        ((RileyLinkStatistics)messageProgress.Statistics).RadioErrorOccured(pre);
                         Debug.WriteLine("Trying to recover from radio error");
                         if (part == 0)
                         {
                             if (repeat_count < 2)
                             {
-                                await RunInUiContext(async () => await RileyLink.Reset());
+                                await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                                 continue;
                             }
                             else if (repeat_count < 4)
                             {
-                                await RunInUiContext(async () => await RileyLink.Reset());
+                                await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -199,7 +190,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
@@ -207,7 +198,7 @@ namespace OmniCore.Radio.RileyLink
                         {
                             if (repeat_count < 6)
                             {
-                                await RunInUiContext(async () => await RileyLink.Reset());
+                                await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -215,7 +206,7 @@ namespace OmniCore.Radio.RileyLink
                             else
                             {
                                 Debug.WriteLine("Failed recovery");
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
@@ -223,7 +214,7 @@ namespace OmniCore.Radio.RileyLink
                         {
                             if (repeat_count < 10)
                             {
-                                await RunInUiContext(async () => await RileyLink.Reset());
+                                await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                                 timeout = 10000;
                                 Thread.Sleep(2000);
                                 continue;
@@ -232,29 +223,29 @@ namespace OmniCore.Radio.RileyLink
                             {
                                 Debug.WriteLine("Failed recovery");
                                 Pod.RuntimeVariables.PacketSequence = 0;
-                                this.RlStatistics.ExitPrematurely();
+                                ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                                 throw;
                             }
                         }
                     }
                     catch (OmniCoreErosException pe)
                     {
-                        this.RlStatistics.ProtocolErrorOccured(pe);
+                        ((RileyLinkStatistics)messageProgress.Statistics).ProtocolErrorOccured(pe);
                         if (pe.ReceivedPacket != null && expected_type == PacketType.POD && pe.ReceivedPacket.type == PacketType.ACK)
                         {
                             this.Pod.RuntimeVariables.PacketSequence++;
                         }
-                        this.RlStatistics.ExitPrematurely();
+                        ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                         throw pe;
                     }
                     catch (Exception e)
                     {
-                        this.RlStatistics.UnknownErrorOccured(e);
-                        this.RlStatistics.ExitPrematurely();
+                        ((RileyLinkStatistics)messageProgress.Statistics).UnknownErrorOccured(e);
+                        ((RileyLinkStatistics)messageProgress.Statistics).ExitPrematurely();
                         throw;
                     }
                 }
-                this.RlStatistics.EndPacketExchange();
+                ((RileyLinkStatistics)messageProgress.Statistics).EndPacketExchange();
                 part++;
                 this.Pod.RuntimeVariables.PacketSequence = (received.sequence + 1) % 32;
             }
@@ -279,15 +270,15 @@ namespace OmniCore.Radio.RileyLink
 
             while (!responseBuilder.WithRadioPacket(received))
             {
-                this.RlStatistics.StartPacketExchange();
+                ((RileyLinkStatistics)messageProgress.Statistics).StartPacketExchange();
                 var ackPacket = this.InterimAckPacket(ackAddress, (received.sequence + 1) % 32);
-                received = await this.ExchangePackets(ackPacket, PacketType.CON);
+                received = await this.ExchangePackets(messageProgress, ct, ackPacket, PacketType.CON);
                 part_count++;
                 Debug.WriteLine($"Received POD message part {part_count}");
-                this.RlStatistics.EndPacketExchange();
+                ((RileyLinkStatistics)messageProgress.Statistics).EndPacketExchange();
             }
 
-            this.RlStatistics.EndMessageExchange();
+            ((RileyLinkStatistics)messageProgress.Statistics).EndMessageExchange();
             var podResponse = responseBuilder.Build();
 
             Debug.WriteLine($"RCVD MSG {podResponse}");
@@ -305,7 +296,7 @@ namespace OmniCore.Radio.RileyLink
             try
             {
                 Debug.WriteLine("Sending final ack");
-                await SendPacket(ackPacket);
+                await SendPacket(new MessageProgress(), CancellationToken.None, ackPacket);
                 this.Pod.RuntimeVariables.PacketSequence++;
                 Debug.WriteLine("Message exchange finalized");
             }
@@ -316,7 +307,8 @@ namespace OmniCore.Radio.RileyLink
         }
 
 
-        private async Task<RadioPacket> ExchangePackets(RadioPacket packet_to_send, PacketType expected_type, int timeout = 10000)
+        private async Task<RadioPacket> ExchangePackets(IMessageExchangeProgress messageProgress, CancellationToken ct, 
+            RadioPacket packet_to_send, PacketType expected_type, int timeout = 10000)
         {
             int start_time = 0;
             Bytes received = null;
@@ -326,9 +318,9 @@ namespace OmniCore.Radio.RileyLink
                 try
                 {
                     if (this.last_packet_timestamp == 0 || (Environment.TickCount - this.last_packet_timestamp) > 2000)
-                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 1, 300));
+                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, ct, packet_to_send.get_data(), 0, 0, 300, 1, 300));
                     else
-                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 120, 0, 40));
+                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, ct, packet_to_send.get_data(), 0, 0, 120, 0, 40));
                 }
                 catch (OmniCoreTimeoutException)
                 {
@@ -342,26 +334,26 @@ namespace OmniCore.Radio.RileyLink
 
                 if (received == null)
                 {
-                    this.RlStatistics.NoPacketReceived();
+                    ((RileyLinkStatistics)messageProgress.Statistics).NoPacketReceived();
                     Debug.WriteLine("RECV PKT None");
-                    await RunInUiContext(async () => await RileyLink.TxLevelUp());
+                    await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress, ct));
                     continue;
                 }
 
                 var p = this.GetPacket(received);
                 if (p == null)
                 {
-                    this.RlStatistics.BadDataReceived(received);
-                    await RunInUiContext(async () => await RileyLink.TxLevelDown());
+                    ((RileyLinkStatistics)messageProgress.Statistics).BadDataReceived(received);
+                    await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress, ct));
                     continue;
                 }
 
                 Debug.WriteLine($"RECV PKT {p}");
                 if (p.address != this.Pod.RadioAddress)
                 {
-                    this.RlStatistics.BadPacketReceived(p);
+                    ((RileyLinkStatistics)messageProgress.Statistics).BadPacketReceived(p);
                     Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                    await RunInUiContext(async () => await RileyLink.TxLevelDown());
+                    await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress, ct));
                     continue;
                 }
 
@@ -370,9 +362,9 @@ namespace OmniCore.Radio.RileyLink
                 if (this.last_received_packet != null && p.sequence == this.last_received_packet.sequence
                     && p.type == this.last_received_packet.type)
                 {
-                    this.RlStatistics.RepeatPacketReceived(p);
+                    ((RileyLinkStatistics)messageProgress.Statistics).RepeatPacketReceived(p);
                     Debug.WriteLine("RECV PKT previous");
-                    await RunInUiContext(async () => await RileyLink.TxLevelUp());
+                    await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress, ct));
                     continue;
                 }
 
@@ -381,7 +373,7 @@ namespace OmniCore.Radio.RileyLink
 
                 if (p.type != expected_type)
                 {
-                    this.RlStatistics.UnexpectedPacketReceived(p);
+                    ((RileyLinkStatistics)messageProgress.Statistics).UnexpectedPacketReceived(p);
                     Debug.WriteLine("RECV PKT unexpected type");
                     throw new OmniCoreErosException(FailureType.PodResponseUnexpected, "Unexpected packet type received", p);
                 }
@@ -391,18 +383,19 @@ namespace OmniCore.Radio.RileyLink
                     this.Pod.RuntimeVariables.PacketSequence = (p.sequence + 1) % 32;
                     Debug.WriteLine("RECV PKT unexpected sequence");
                     this.last_received_packet = p;
-                    this.RlStatistics.UnexpectedPacketReceived(p);
+                    ((RileyLinkStatistics)messageProgress.Statistics).UnexpectedPacketReceived(p);
                     throw new OmniCoreErosException(FailureType.PodResponseUnexpected, "Incorrect packet sequence received", p);
                 }
 
-                this.RlStatistics.PacketReceived(p);
+                ((RileyLinkStatistics)messageProgress.Statistics).PacketReceived(p);
                 return p;
 
             }
             throw new OmniCoreTimeoutException(FailureType.PodUnreachable, "Exceeded timeout while send and receive");
         }
 
-        private async Task SendPacket(RadioPacket packet_to_send, int timeout = 25000)
+        private async Task SendPacket(IMessageExchangeProgress messageProgress, CancellationToken ct,
+            RadioPacket packet_to_send, int timeout = 25000)
         {
             int start_time = 0;
             Bytes received = null;
@@ -414,7 +407,7 @@ namespace OmniCore.Radio.RileyLink
 
                     try
                     {
-                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(packet_to_send.get_data(), 0, 0, 300, 3, 300));
+                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, ct, packet_to_send.get_data(), 0, 0, 300, 3, 300));
                     }
                     catch(OmniCoreTimeoutException)
                     {
@@ -429,14 +422,14 @@ namespace OmniCore.Radio.RileyLink
                     var p = this.GetPacket(received);
                     if (p == null)
                     {
-                        await RunInUiContext(async () => await RileyLink.TxLevelDown());
+                        await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress, ct));
                         continue;
                     }
 
                     if (p.address != this.Pod.RadioAddress)
                     {
                         Debug.WriteLine("RECV PKT ADDR MISMATCH");
-                        await RunInUiContext(async () => await RileyLink.TxLevelDown());
+                        await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress, ct));
                         continue;
                     }
 
@@ -445,7 +438,7 @@ namespace OmniCore.Radio.RileyLink
                         && p.sequence == this.last_received_packet.sequence)
                     {
                         Debug.WriteLine("RECV PKT previous");
-                        await RunInUiContext(async () => await RileyLink.TxLevelUp());
+                        await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress, ct));
                         continue;
                     }
 
@@ -460,7 +453,7 @@ namespace OmniCore.Radio.RileyLink
                 catch (OmniCoreRadioException pre)
                 {
                     Debug.WriteLine($"Radio error during send, retrying {pre}");
-                    await RunInUiContext(async () => await RileyLink.Reset());
+                    await RunInUiContext(async () => await RileyLink.Reset(messageProgress, ct));
                     start_time = Environment.TickCount;
                 }
                 catch (Exception) { throw; }

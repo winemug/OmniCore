@@ -18,6 +18,10 @@ namespace OmniCore.Model
         private int outgoingFail;
         private int incomingSuccess;
         private int incomingFail;
+        private string commandText;
+        private string actionText;
+        private string actionStatusText;
+
         private IMessageExchangeStatistics statistics;
 
         public bool CanBeCanceled { get => canBeCanceled; set => SetProperty(ref canBeCanceled, value); }
@@ -26,11 +30,16 @@ namespace OmniCore.Model
         public int Progress { get => progress; set => SetProperty(ref progress, value); }
         public bool Finished { get => finished; set => SetProperty(ref finished, value); }
         public bool Successful { get => successful; set => SetProperty(ref successful, value); }
+
         public int OutgoingSuccess { get => outgoingSuccess; set => SetProperty(ref outgoingSuccess, value); }
         public int OutgoingFail { get => outgoingFail; set => SetProperty(ref outgoingFail, value); }
         public int IncomingSuccess { get => incomingSuccess; set => SetProperty(ref incomingSuccess, value); }
         public int IncomingFail { get => incomingFail; set => SetProperty(ref incomingFail, value); }
+
         public IMessageExchangeStatistics Statistics { get => statistics; set => SetProperty(ref statistics, value); }
+        public string CommandText { get => commandText; set => SetProperty(ref commandText, value); }
+        public string ActionText { get => actionText; set => SetProperty(ref actionText, value); }
+        public string ActionStatusText { get => actionStatusText; set => SetProperty(ref actionStatusText, value); }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

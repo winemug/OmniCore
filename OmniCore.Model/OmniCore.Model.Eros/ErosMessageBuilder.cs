@@ -187,7 +187,7 @@ namespace OmniCore.Model.Eros
             return WithImmediatePulses(52, 8, 1);
         }
 
-        public IMessageBuilder WithInserCannula()
+        public IMessageBuilder WithInsertCannula()
         {
             return WithImmediatePulses(10, 8, 1);
         }

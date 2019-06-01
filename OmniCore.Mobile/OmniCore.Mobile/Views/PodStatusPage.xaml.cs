@@ -31,17 +31,12 @@ namespace OmniCore.Mobile.Views
             {
                 var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
-                await UpdateStatus(progress, cts.Token);
+                await Task.Run(async () => await App.PodProvider.Current.UpdateStatus(progress, cts.Token).ConfigureAwait(false));
             }
             finally
             {
                 viewModel.UpdateButtonEnabled = true;
             }
-        }
-
-        private async Task<IMessageExchangeResult> UpdateStatus(MessageProgress mp, CancellationToken ct)
-        {
-            return await App.PodProvider.Current.UpdateStatus(mp, ct).ConfigureAwait(false);
         }
     }
 }

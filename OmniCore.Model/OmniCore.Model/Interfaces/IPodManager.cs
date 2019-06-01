@@ -17,6 +17,6 @@ namespace OmniCore.Model.Interfaces
         Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct);
         Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, CancellationToken ct, int utcTimeOffsetMinutes);
         Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress, CancellationToken ct);
-        Task<IMessageExchangeResult> Inject(IMessageExchangeProgress progress, CancellationToken ct);
+        Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, CancellationToken ct, decimal[] basalSchedule, int utcOffsetInMinutes);
     }
 }

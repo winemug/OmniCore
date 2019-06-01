@@ -7,18 +7,17 @@
              x:Class="OmniCore.Mobile.Views.MessageExchangeView">
   <ContentView.Content>
       <StackLayout>
-            <Label Text="Updating Pod Status"/>
+            <!--<StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                <Image Source="ic_android_phone.xml" Scale="0.2"/>
+                <Image Source="ic_rl433.xml"/>
+                <Image Source="ic_pod.xml"/>
+            </StackLayout>-->
+            <Label HorizontalTextAlignment="Center"
+                   FontSize="Large" Text="{Binding CommandText}"/>
             <StackLayout Orientation="Horizontal">
-                <Image Source="ic_phone_android.png" Scale="2"/>
-                <Image Source="ic_rl433.png" Scale="1"/>
-                <Image Source="ic_pod_drawing.png" Scale="1"/>
+                <Label Text="{Binding ActionText}"/>
             </StackLayout>
-            <ProgressBar HorizontalOptions="FillAndExpand" Progress="0.78"
-                         ProgressColor="GreenYellow"
-                         Opacity="0.6"
-                         ScaleY="2"
-                         />
-            <Button Text="Cancel" HeightRequest="40"/>
+            <Button Text="Cancel" IsEnabled="{Binding CanBeCanceled}"/>
         </StackLayout>
   </ContentView.Content>
 </ContentView>
