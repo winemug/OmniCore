@@ -10,9 +10,9 @@ The app is currently NOT released.
 
 Due to personal time constraints and a couple of Android related hiccups I had to delay the beta release about a week.
 
-The first functional beta is currently planned for release on **Monday, June 3rd.** and will be announced here.
+The first functional beta is currently planned for release on **Monday, June 3rd.** and will be announced here. First major version and the stable release will be created earliest a week after the first beta release, depending on the results of beta testing.
 
-First major version and the stable release will be created earliest a week after the first beta release, depending on the results of beta testing.
+You can follow the progress more closely [here](https://github.com/winemug/OmniCore/projects/1).
 
 Note: OmniCore currently does NOT support Omnipod Dash and can be used for Omnipod Eros only. See [roadmap](https://github.com/winemug/OmniCore/wiki/Roadmap).
 
