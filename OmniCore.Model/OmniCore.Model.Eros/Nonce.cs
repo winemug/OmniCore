@@ -70,7 +70,7 @@ namespace OmniCore.Model.Eros
             Pod.RuntimeVariables.NonceSeed = (uint)((w_sum & 0xFFFF) ^ Pod.RuntimeVariables.NonceSync) & 0xff;
             Pod.RuntimeVariables.NonceRuns = 0;
             Pod.RuntimeVariables.NonceSync = null;
-            this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, Pod.RuntimeVariables.NonceSeed);
+            Pod.RuntimeVariables.NoncePtr = this.Initialize(this.Pod.Lot.Value, this.Pod.Serial.Value, Pod.RuntimeVariables.NonceSeed);
         }
 
         private uint Shuffle()

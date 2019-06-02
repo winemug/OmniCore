@@ -9,7 +9,7 @@
 
         public OmniCoreException(FailureType failureType, string message = "Unknown", Exception inner = null) : base(message, inner)
         {
-            FailureType = FailureType;
+            FailureType = failureType;
         }
     }
 }

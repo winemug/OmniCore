@@ -9,7 +9,7 @@ namespace OmniCore.Model.Enums
         None,
         RadioNotReachable,
         RadioDisconnectPrematurely,
-        PodUnreachable,
+        RadioRecvTimeout,
         CommunicationInterrupted,
         PodStateInvalidForCommand,
         PodResponseUnexpected,
@@ -21,5 +21,6 @@ namespace OmniCore.Model.Enums
         RadioUnknownError,
         RadioStateError,
         InvalidDataReceived,
+        AlreadyExecuted,
     }
 }

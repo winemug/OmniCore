@@ -3,6 +3,7 @@ using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace OmniCore.Radio.RileyLink
@@ -109,6 +110,7 @@ namespace OmniCore.Radio.RileyLink
 
         internal void RadioRssiReported(int rssi)
         {
+            Debug.WriteLine($"RSSI BLE Radio: {rssi}");
         }
 
         internal void RadioOverheadEnd()

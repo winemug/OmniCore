@@ -7,18 +7,7 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class MessageExchangeViewModel : BaseViewModel
     {
-        private IMessageExchangeProgress ExchangeProgress;
-        public MessageExchangeViewModel(IMessageExchangeProgress progress):base()
-        {
-            ExchangeProgress.PropertyChanged += ExchangeProgress_PropertyChanged;
-        }
-
-        private void ExchangeProgress_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (ExchangeProgress.Finished)
-            {
-                ExchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
-            }
-        }
+        private IMessageExchangeProgress exchangeProgress;
+        public IMessageExchangeProgress ExchangeProgress { get => exchangeProgress; set => SetProperty(ref exchangeProgress, value); }
     }
 }

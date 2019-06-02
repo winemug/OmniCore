@@ -44,7 +44,7 @@ namespace OmniCore.Model.Eros
         }
 
         private async Task<IMessageExchangeResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
-                    IMessageExchangeProgress progress, CancellationToken ct)
+                    IMessageExchangeProgress progress)
         {
             progress.ActionStatusText = "Waiting in queue";
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
@@ -53,21 +53,18 @@ namespace OmniCore.Model.Eros
                     {
                         try
                         {
-                            ErosPod.RuntimeVariables.NonceSync = null;
                             var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
-                            await messageExchange.InitializeExchange(progress, ct);
-                            var response = await messageExchange.GetResponse(requestMessage, progress, ct);
+                            await messageExchange.InitializeExchange(progress);
+                            var response = await messageExchange.GetResponse(requestMessage, progress);
                             var result = messageExchange.ParseResponse(response, Pod);
 
                             if (result.Success && ErosPod.RuntimeVariables.NonceSync.HasValue)
                             {
                                 var responseMessage = response as ErosMessage;
                                 emp.MessageSequenceOverride = (responseMessage.sequence - 1) % 16;
-
                                 messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
-                                await messageExchange.InitializeExchange(progress, ct);
-                                response = await messageExchange.GetResponse(requestMessage, progress, ct);
-                                ErosPod.RuntimeVariables.NonceSync = null;
+                                await messageExchange.InitializeExchange(progress);
+                                response = await messageExchange.GetResponse(requestMessage, progress);
                                 result = messageExchange.ParseResponse(response, Pod);
                                 if (ErosPod.RuntimeVariables.NonceSync.HasValue)
                                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Nonce re-negotiation failed");
@@ -85,22 +82,22 @@ namespace OmniCore.Model.Eros
                     });
         }
 
-        private async Task<IMessageExchangeResult> UpdateStatusInternal(IMessageExchangeProgress progress, CancellationToken ct,
+        private async Task<IMessageExchangeResult> UpdateStatusInternal(IMessageExchangeProgress progress,
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             progress.ActionText = "Running status update";
             var request = new ErosMessageBuilder().WithStatus(updateType).Build();
-            return await PerformExchange(request, GetStandardParameters(), progress, ct);
+            return await PerformExchange(request, GetStandardParameters(), progress);
         }
 
-        public async Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct,
+        public async Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, 
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             try
             {
                 progress.CommandText = "Updating Status";
                 Debug.WriteLine($"Updating pod status, request type {updateType}");
-                return await this.UpdateStatusInternal(progress, ct, updateType);
+                return await this.UpdateStatusInternal(progress, updateType);
             }
             catch (Exception e)
             {
@@ -108,13 +105,13 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, CancellationToken ct, byte alertMask)
+        public async Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask)
         {
             try
             {
                 progress.CommandText = "Acknowledging Alerts";
                 Debug.WriteLine($"Acknowledging alerts, bitmask: {alertMask}");
-                var result = await UpdateStatusInternal(progress, ct);
+                var result = await UpdateStatusInternal(progress);
                 if (!result.Success)
                     return result;
 
@@ -135,7 +132,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Bitmask is invalid for current alert state");
 
                 var request = new ErosMessageBuilder().WithAcknowledgeAlerts(alertMask).Build();
-                result = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                result = await PerformExchange(request, GetStandardParameters(), progress);
                 if (!result.Success)
                     return result;
 
@@ -150,13 +147,13 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, CancellationToken ct, decimal bolusAmount)
+        public async Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, decimal bolusAmount)
         {
             try
             {
                 progress.CommandText = $"Bolusing {bolusAmount}U";
                 Debug.WriteLine($"Bolusing {bolusAmount}U");
-                await UpdateStatusInternal(progress, ct);
+                await UpdateStatusInternal(progress);
                 AssertRunningStatus();
                 AssertImmediateBolusInactive();
 
@@ -170,29 +167,30 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Cannot bolus more than 30U");
 
                 var request = new ErosMessageBuilder().WithBolus(bolusAmount).Build();
-                var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                var result = await PerformExchange(request, GetStandardParameters(), progress);
 
                 if (Pod.Status.BolusState != BolusState.Immediate)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start bolusing");
 
                 var tickCount = (int)(bolusAmount / 0.05m);
 
-                await Task.Delay(tickCount * 2000 + 500, ct);
+                await Task.Delay(tickCount * 2000 + 500, progress.Token);
 
-                if (ct.IsCancellationRequested)
+                if (progress.Token.IsCancellationRequested)
                 {
                     var cancelRequest = new ErosMessageBuilder().WithCancelBolus().Build();
-                    var cancelResult = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                    var cancelResult = await PerformExchange(request, GetStandardParameters(), progress);
 
-                    if (!cancelResult.Success)
+                    if (!cancelResult.Success || Pod.Status.BolusState == BolusState.Immediate)
+                    {
+                        progress.CancelFailed();
                         return cancelResult;
+                    }
 
-                    if (Pod.Status.BolusState == BolusState.Immediate)
-                        throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to cancel running bolus");
                 }
                 else
                 {
-                    result = await UpdateStatusInternal(progress, ct);
+                    result = await UpdateStatusInternal(progress);
                     if (Pod.Status.NotDeliveredInsulin != 0)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Not all insulin was delivered");
                 }
@@ -204,45 +202,20 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        //public async Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct)
-        //{
-        //    try
-        //    {
-        //        await UpdateStatusInternal(progress, ct);
-        //        AssertRunningStatus();
-
-        //        if (Pod.Status.BolusState != BolusState.Immediate)
-        //            throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Immediate bolus is not running");
-
-        //        var request = new ErosMessageBuilder().WithCancelBolus().Build();
-        //        var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
-
-        //        if (Pod.Status.BolusState == BolusState.Immediate)
-        //            throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to cancel running bolus");
-
-        //        return result;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return new MessageExchangeResult(e);
-        //    }
-
-        //}
-
-        public async Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct)
+        public async Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress)
         {
             try
             {
                 progress.CommandText = $"Deactivating Pod";
                 AssertPaired();
 
-                await UpdateStatusInternal(progress, ct);
+                await UpdateStatusInternal(progress);
 
                 if (Pod.Status.Progress >= PodProgress.Inactive)
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod already deactivated");
 
                 var request = new ErosMessageBuilder().WithDeactivate().Build();
-                var result = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                var result = await PerformExchange(request, GetStandardParameters(), progress);
 
                 if (Pod.Status.Progress != PodProgress.Inactive)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Failed to deactivate");
@@ -255,7 +228,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, CancellationToken ct, int utcOffsetMinutes)
+        public async Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, int utcOffsetMinutes)
         {
             try
             {
@@ -270,18 +243,20 @@ namespace OmniCore.Model.Eros
                     parameters.TransmissionLevelOverride = TxPower.Low;
 
                     var request = new ErosMessageBuilder().WithAssignAddress(Pod.RadioAddress).Build();
-                    var result = await PerformExchange(request, parameters, progress, ct);
+                    var result = await PerformExchange(request, parameters, progress);
 
-                    if (!result.Success)
+                    if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
+                    {
                         return result;
+                    }
 
                     if (Pod.Status == null)
-                        throw new OmniCoreWorkflowException(FailureType.PodUnreachable, "Pod did not respond to pairing request");
-                    else if (Pod.Status.Progress < PodProgress.TankFillCompleted)
-                        throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod is not filled with enough insulin for activation.");
+                        throw new OmniCoreWorkflowException(FailureType.RadioRecvTimeout, "Pod did not respond to pairing request");
+                    //else if (Pod.Status.Progress < PodProgress.TankFillCompleted)
+                    //    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod is not filled with enough insulin for activation.");
                 }
 
-                if (Pod.Status != null && Pod.Status.Progress == PodProgress.TankFillCompleted)
+                if (Pod.Status != null && Pod.Status.Progress < PodProgress.PairingSuccess)
                 {
                     Pod.ActivationDate = DateTime.UtcNow;
                     var podDate = Pod.ActivationDate.Value + TimeSpan.FromMinutes(utcOffsetMinutes);
@@ -295,10 +270,18 @@ namespace OmniCore.Model.Eros
                         podDate.Year, (byte)podDate.Month, (byte)podDate.Day,
                         (byte)podDate.Hour, (byte)podDate.Minute).Build();
 
-                    var result = await PerformExchange(request, parameters, progress, ct);
+                    var result = await PerformExchange(request, parameters, progress);
 
                     if (!result.Success)
+                    {
+                        if (result.FailureType == FailureType.AlreadyExecuted)
+                        {
+                            var updateStatusResult = await UpdateStatusInternal(progress);
+                            if (updateStatusResult.Success && Pod.Status.Progress >= PodProgress.PairingSuccess)
+                                return updateStatusResult;
+                        }
                         return result;
+                    }
 
                     AssertPaired();
 
@@ -312,12 +295,12 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress, CancellationToken ct)
+        public async Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress)
         {
             try
             {
                 progress.CommandText = $"Activating Pod";
-                var result = await UpdateStatusInternal(progress, ct);
+                var result = await UpdateStatusInternal(progress);
                 if (!result.Success)
                     return result;
 
@@ -343,39 +326,44 @@ namespace OmniCore.Model.Eros
                         .WithAlertSetup(new List<AlertConfiguration>(new[] { ac }))
                         .Build();
 
-                    result = await PerformExchange(request, parameters, progress, ct);
-                    if (!result.Success)
+                    result = await PerformExchange(request, parameters, progress);
+                    if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
                         return result;
 
                     request = new ErosMessageBuilder().WithDeliveryFlags(0, 0).Build();
-                    result = await PerformExchange(request, parameters, progress, ct);
-                    if (!result.Success)
+                    result = await PerformExchange(request, parameters, progress);
+                    if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
                         return result;
 
                     request = new ErosMessageBuilder().WithPrimeCannula().Build();
-                    result = await PerformExchange(request, parameters, progress, ct);
+                    result = await PerformExchange(request, parameters, progress);
                     if (!result.Success)
                         return result;
-
-                    await Task.Delay(57000, ct);
-
-                    if (ct.IsCancellationRequested)
-                    {
-                        request = new ErosMessageBuilder().WithCancelBolus().Build();
-                        return await PerformExchange(request, parameters, progress, ct);
-                    }
-                    else
-                    {
-                        if (Pod.Status.Progress != PodProgress.ReadyForInjection)
-                            throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not reach ready for injection state.");
-
-                        if (Pod.UserSettings?.ExpiryWarningAtMinute != null)
-                        {
-                            //TODO: expiry warning
-                        }
-                    }
                 }
-                return result;
+
+                if (Pod.Status.Progress == PodProgress.Purging)
+                {
+                    var ticks = 52;
+                    if (Pod.Status != null)
+                        ticks = (int)(Pod.Status.NotDeliveredInsulin / 0.05m);
+                    await Task.Delay(ticks * 1000 + 500);
+                }
+
+                while (Pod.Status.Progress == PodProgress.Purging)
+                {
+                    result = await UpdateStatusInternal(progress);
+                    var ticks = (int)(Pod.Status.NotDeliveredInsulin / 0.05m);
+                    await Task.Delay(ticks * 1000 + 500);
+                }
+
+                if (Pod.Status.Progress != PodProgress.ReadyForInjection)
+                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not reach ready for injection state.");
+
+                if (Pod.UserSettings?.ExpiryWarningAtMinute != null)
+                {
+                    //TODO: expiry warning
+                }
+                return new MessageExchangeResult();
             }
             catch (Exception e)
             {
@@ -383,12 +371,12 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, CancellationToken ct, decimal[] basalSchedule, int utcOffsetInMinutes)
+        public async Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, decimal[] basalSchedule, int utcOffsetInMinutes)
         {
             try
             {
                 progress.CommandText = $"Starting Pod";
-                var result = await UpdateStatusInternal(progress, ct);
+                var result = await UpdateStatusInternal(progress);
                 if (!result.Success)
                     return result;
 
@@ -410,7 +398,7 @@ namespace OmniCore.Model.Eros
                     var request = new ErosMessageBuilder()
                         .WithBasalSchedule(basalSchedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
                         .Build();
-                    result = await PerformExchange(request, parameters, progress, ct);
+                    result = await PerformExchange(request, parameters, progress);
 
                     if (!result.Success)
                         return result;
@@ -447,12 +435,12 @@ namespace OmniCore.Model.Eros
                     });
 
                     var request = new ErosMessageBuilder().WithAlertSetup(acs).Build();
-                    result = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                    result = await PerformExchange(request, GetStandardParameters(), progress);
                     if (!result.Success)
                         return result;
 
                     request = new ErosMessageBuilder().WithInsertCannula().Build();
-                    result = await PerformExchange(request, GetStandardParameters(), progress, ct);
+                    result = await PerformExchange(request, GetStandardParameters(), progress);
                     if (!result.Success)
                         return result;
 
@@ -464,9 +452,9 @@ namespace OmniCore.Model.Eros
 
                 if (Pod.Status.Progress == PodProgress.Priming)
                 {
-                    var waitTask = Task.Delay(10500, ct);
+                    var waitTask = Task.Delay(10500, progress.Token);
                     await waitTask;
-                    result = await UpdateStatusInternal(progress, ct);
+                    result = await UpdateStatusInternal(progress);
                     if (!result.Success)
                         return result;
 

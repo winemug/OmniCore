@@ -46,7 +46,7 @@ namespace OmniCore.Radio.RileyLink
             TxAmplification = TxPower.Normal;
         }
 
-        public async Task EnsureDevice(IMessageExchangeProgress messageProgress, CancellationToken ct)
+        public async Task EnsureDevice(IMessageExchangeProgress messageProgress)
         {
             try
             {
@@ -60,38 +60,30 @@ namespace OmniCore.Radio.RileyLink
                     messageProgress.ActionStatusText = "Searching for RileyLink";
                     Debug.WriteLine("Searching RL");
 
-                    var tcsResultsReady = new TaskCompletionSource<List<IScanResult>>();
 
-                    var results = new List<IScanResult>();
+                    var tcsResultsReady = new TaskCompletionSource<List<bool>>();
 
-                    CrossBleAdapter.Current.ScanExtra(
-                            new ScanConfig()
-                            {
-                                ScanType = BleScanType.Balanced,
-                                ServiceUuids = new List<Guid>() { RileyLinkServiceUUID }
-                            }, true).Timeout(TimeSpan.FromSeconds(10)).Subscribe(
+                    var scanResults = new List<IScanResult>();
+
+                    CrossBleAdapter.Current.Scan(
+                        new ScanConfig()
+                        {
+                            ScanType = BleScanType.Balanced,
+                            ServiceUuids = new List<Guid>() { RileyLinkServiceUUID }
+                        })
+                        .Subscribe(
                             (scanResult) =>
-                                {
-                                    results.Add(scanResult);
-                                    if (scanResult.Rssi < 70)
-                                    {
-                                        if (CrossBleAdapter.Current.IsScanning)
-                                            CrossBleAdapter.Current.StopScan();
-                                        tcsResultsReady.TrySetResult(results);
-                                    }
-                                }, 
-                            (exception) =>
-                                {
-                                    if (exception is TimeoutException)
-                                    {
-                                        if (CrossBleAdapter.Current.IsScanning)
-                                            CrossBleAdapter.Current.StopScan();
-                                        tcsResultsReady.TrySetResult(results);
-                                    }
-                                }
-                            );
+                            {
+                                if (!scanResults.Any(r => r.Device.Uuid == scanResult.Device.Uuid))
+                                    scanResults.Add(scanResult);
+                            });
 
-                    var result = (await tcsResultsReady.Task).OrderBy(x => x.Rssi).FirstOrDefault();
+                    await Task.WhenAny(tcsResultsReady.Task, Task.Delay(6000));
+                    CrossBleAdapter.Current.StopScan();
+
+                    //var result = scanResults.OrderByDescending(x => x.Rssi).FirstOrDefault();
+                    //var result = scanResults.FirstOrDefault(x => x.Device.Uuid == Guid.Parse("00000000-0000-0000-0000-886b0f44fc1b"));
+                    var result = scanResults.FirstOrDefault(x => x.Device.Uuid == Guid.Parse("00000000-0000-0000-0000-886b0fec4d1a")); // jiggle
 
                     this.Device = result?.Device;
 
@@ -147,7 +139,7 @@ namespace OmniCore.Radio.RileyLink
                     });
 
                     messageProgress.ActionStatusText = "Connecting to RileyLink";
-                    this.Device.Connect();
+                    this.Device.Connect(new ConnectionConfig() { AutoConnect = false });
                     await tcsInitialized.Task;
 
                     if (!this.VersionVerified)
@@ -167,7 +159,7 @@ namespace OmniCore.Radio.RileyLink
                     if (this.DataCharacteristic == null || this.ResponseCharacteristic == null || this.Device.Status != ConnectionStatus.Connected)
                     {
                         messageProgress.ActionStatusText = "Connecting to RileyLink";
-                        this.Device.Connect();
+                        this.Device.Connect(new ConnectionConfig() { AutoConnect = false });
                         await tcsInitialized.Task;
                     }
                 }
@@ -206,13 +198,13 @@ namespace OmniCore.Radio.RileyLink
         //    }
         //}
 
-        public async Task Reset(IMessageExchangeProgress messageProgress, CancellationToken ct)
+        public async Task Reset(IMessageExchangeProgress messageProgress)
         {
             try
             {
                 this.VersionVerified = false;
                 this.RadioInitialized = false;
-                await EnsureDevice(messageProgress, ct);
+                await EnsureDevice(messageProgress);
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)
@@ -221,11 +213,11 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        public async Task<Bytes> GetPacket(IMessageExchangeProgress messageProgress, CancellationToken ct, uint timeout = 5000)
+        public async Task<Bytes> GetPacket(IMessageExchangeProgress messageProgress, uint timeout = 5000)
         {
             try
             {
-                await EnsureDevice(messageProgress, ct);
+                await EnsureDevice(messageProgress);
                 var cmdParams = new Bytes((byte)0);
                 cmdParams.Append(timeout);
 
@@ -244,12 +236,12 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        public async Task SendPacket(IMessageExchangeProgress messageProgress, CancellationToken ct,
+        public async Task SendPacket(IMessageExchangeProgress messageProgress,
             Bytes packet, byte repeat_count, ushort delay_ms, ushort preamble_ext_ms)
         {
             try
             {
-                await EnsureDevice(messageProgress, ct);
+                await EnsureDevice(messageProgress);
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
@@ -265,12 +257,12 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        public async Task<Bytes> SendAndGetPacket(IMessageExchangeProgress messageProgress, CancellationToken ct,
+        public async Task<Bytes> SendAndGetPacket(IMessageExchangeProgress messageProgress,
             Bytes packet, byte repeat_count, ushort delay_ms, uint timeout_ms, byte retry_count, ushort preamble_ext_ms)
         {
             try
             {
-                await EnsureDevice(messageProgress, ct);
+                await EnsureDevice(messageProgress);
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes()
                     .Append((byte)0)
@@ -297,7 +289,7 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        public async Task SetTxLevel(IMessageExchangeProgress messageProgress, CancellationToken ct, TxPower txPower)
+        public async Task SetTxLevel(IMessageExchangeProgress messageProgress, TxPower txPower)
         {
             TxAmplification = txPower;
             ((RileyLinkStatistics)messageProgress.Statistics)?.RadioOverheadStart();
@@ -306,21 +298,21 @@ namespace OmniCore.Radio.RileyLink
             ((RileyLinkStatistics)messageProgress.Statistics)?.RadioTxLevelChange(txPower);
         }
 
-        public async Task TxLevelDown(IMessageExchangeProgress messageProgress, CancellationToken ct)
+        public async Task TxLevelDown(IMessageExchangeProgress messageProgress)
         {
             if (TxAmplification > TxPower.Lowest)
             {
                 TxAmplification--;
-                await SetTxLevel(messageProgress, ct, TxAmplification);
+                await SetTxLevel(messageProgress, TxAmplification);
             }
         }
 
-        public async Task TxLevelUp(IMessageExchangeProgress messageProgress, CancellationToken ct)
+        public async Task TxLevelUp(IMessageExchangeProgress messageProgress)
         {
             if (TxAmplification < TxPower.Highest)
             {
                 TxAmplification++;
-                await SetTxLevel(messageProgress, ct, TxAmplification);
+                await SetTxLevel(messageProgress, TxAmplification);
             }
         }
 
@@ -364,7 +356,7 @@ namespace OmniCore.Radio.RileyLink
                         return null;
                 }
                 else if (result[0] == (byte)RileyLinkResponseType.Timeout)
-                    throw new OmniCoreTimeoutException(FailureType.PodUnreachable);
+                    throw new OmniCoreTimeoutException(FailureType.RadioRecvTimeout);
                 else
                     throw new OmniCoreRadioException(FailureType.RadioUnknownError, $"RL returned error code {result[0]}");
             }
@@ -394,7 +386,7 @@ namespace OmniCore.Radio.RileyLink
                 }
                 catch(TimeoutException)
                 {
-                    throw new OmniCoreTimeoutException(FailureType.RadioNotReachable);
+                    throw new OmniCoreRadioException(FailureType.RadioNotReachable);
                 }
             }
             catch (OmniCoreException) { throw; }
@@ -410,11 +402,11 @@ namespace OmniCore.Radio.RileyLink
             {
                 byte[] response;
                 if (WorkaroundRequired)
-                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN, 0 });
+                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.SYNC0, 0 });
                 else
-                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN});
+                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.SYNC0 });
 
-                if (response != null && response.Length > 0 && response[0] == 0x50)
+                if (response != null && response.Length > 0 && response[0] == 0xA5)
                 {
                     Debug.WriteLine("Radio configuration verified");
                 }

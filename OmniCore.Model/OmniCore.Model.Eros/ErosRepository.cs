@@ -31,7 +31,6 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                File.Delete(DbPath);
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();
@@ -140,8 +139,6 @@ namespace OmniCore.Model.Eros
 
             pod.RadioIndicators = conn.Table<ErosPodRadioIndicators>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
-
-            var y = conn.Table<ErosPodStatus>().OrderByDescending(x => x.Id).ToList();
 
             pod.Status = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();

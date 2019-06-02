@@ -8,9 +8,10 @@
              x:Class="OmniCore.Mobile.Views.PodMaintenancePage">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsVisible="{Binding DeactivateButtonEnabled}"/>
-            <Button Text="Activate A New Pod" Clicked="ActivateClicked"/>
-            <vw:MessageExchangeView/>
+            <Button Text="Resume Pod Activation" Clicked="ResumeActivateClicked" IsVisible="{Binding ResumeActivationButtonVisible}"/>
+            <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsVisible="{Binding DeactivateButtonVisible}"/>
+            <Button Text="Activate A New Pod" Clicked="ActivateClicked" IsVisible="{Binding ActivateNewButtonVisible}"/>
+            <vw:MessageExchangeView x:Name="MessageExchangeDisplay"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

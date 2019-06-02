@@ -7,39 +7,44 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class PodMaintenanceViewModel : BaseViewModel
     {
-        private bool deactivateButtonEnabled = false;
-        public bool DeactivateButtonEnabled
+        private bool deactivateButtonVisible = false;
+        public bool DeactivateButtonVisible
         {
-            get { return deactivateButtonEnabled; }
-            set { SetProperty(ref deactivateButtonEnabled, value); }
+            get { return deactivateButtonVisible; }
+            set { SetProperty(ref deactivateButtonVisible, value); }
         }
 
-        private bool activateButtonEnabled = true;
-        public bool ActivateButtonEnabled
+        private bool activateNewButtonVisible;
+        public bool ActivateNewButtonVisible
         {
-            get { return activateButtonEnabled; }
-            set { SetProperty(ref activateButtonEnabled, value); }
+            get { return activateNewButtonVisible; }
+            set { SetProperty(ref activateNewButtonVisible, value); }
         }
 
-        private bool startButtonEnabled = false;
-        public bool StartViewEnabled
+        private bool resumeActivationButtonVisible = false;
+        public bool ResumeActivationButtonVisible
         {
-            get { return startButtonEnabled; }
-            set { SetProperty(ref startButtonEnabled, value); }
+            get { return resumeActivationButtonVisible; }
+            set { SetProperty(ref resumeActivationButtonVisible, value); }
         }
 
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            DeactivateButtonEnabled = false;
+            DeactivateButtonVisible = false;
+            ActivateNewButtonVisible = false;
+            ResumeActivationButtonVisible = false;
 
             if (Pod != null && Pod.Status != null)
             {
-                if (Pod.Status.Progress >= Model.Enums.PodProgress.ReadyForInjection
-                    && Pod.Status.Progress < Model.Enums.PodProgress.Running)
-                    StartViewEnabled = true;
+                if (Pod.Status.Progress < Model.Enums.PodProgress.Running)
+                    ResumeActivationButtonVisible = true;
 
-                if (Pod.Status.Progress >= Model.Enums.PodProgress.PairingSuccess)
-                    DeactivateButtonEnabled = true;
+                if (Pod.Status != null)
+                    DeactivateButtonVisible = true;
+            }
+            else
+            {
+                ActivateNewButtonVisible = true;
             }
         }
     }

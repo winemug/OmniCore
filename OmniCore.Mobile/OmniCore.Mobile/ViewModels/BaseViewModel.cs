@@ -7,9 +7,10 @@ using System.Text;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public class BaseViewModel : INotifyPropertyChanged, IDisposable
     {
-        protected IPod Pod;
+        private IPod pod;
+        public IPod Pod { get => pod; set => SetProperty(ref pod, value) ; }
 
         public BaseViewModel()
         {
@@ -20,7 +21,6 @@ namespace OmniCore.Mobile.ViewModels
         private void PodProvider_PodChanged(object sender, EventArgs e)
         {
             AttachToCurrentPod();
-            OnPropertyChanged(string.Empty);
         }
 
         private void AttachToCurrentPod()
@@ -78,7 +78,6 @@ namespace OmniCore.Mobile.ViewModels
             return true;
         }
 
-        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -88,6 +87,42 @@ namespace OmniCore.Mobile.ViewModels
 
             changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
+
+        private bool disposedValue = false; // To detect redundant calls
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    App.PodProvider.PodChanged -= PodProvider_PodChanged;
+                    if (Pod != null)
+                    {
+                        Pod.PropertyChanged -= Pod_PropertyChanged;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~BaseViewModel()
+        // {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
     }
 }

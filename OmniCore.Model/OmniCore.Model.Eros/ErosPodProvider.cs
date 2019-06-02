@@ -70,16 +70,16 @@ namespace OmniCore.Model.Eros
                 };
 
                 PodManager = new ErosPodManager(pod, MessageExchangeProvider);
-                var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
-                if (lastActivatedPod != null)
-                {
-                    var lastRadioAddress = lastActivatedPod.RadioAddress;
-                    pod.RadioAddress = (lastRadioAddress & 0xFFFFFFF0) | (((lastRadioAddress & 0x0000000F) + 1) & 0x0000000F);
-                }
-                else
-                {
+                //var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
+                //if (lastActivatedPod != null)
+                //{
+                //    var lastRadioAddress = lastActivatedPod.RadioAddress;
+                //    pod.RadioAddress = (lastRadioAddress & 0xFFFFFFF0) | (((lastRadioAddress & 0x0000000F) + 1) & 0x0000000F);
+                //}
+                //else
+                //{
                     pod.RadioAddress = GetRadioAddress();
-                }
+                //}
                 pod.Created = DateTime.UtcNow;
                 ErosRepository.Instance.Save(pod);
                 RaisePodChanged();
@@ -107,17 +107,25 @@ namespace OmniCore.Model.Eros
 
         private uint GetRadioAddress()
         {
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                {
-                    var addressBytes = ni.GetPhysicalAddress().GetAddressBytes();
-                    Array.Reverse(addressBytes);
-                    return (uint)0x20000000 | (uint)(addressBytes[0] << 20) | (uint)(addressBytes[1] << 12) | (uint)(addressBytes[2] << 4);
+            //foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            //{
+            //    if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+            //    {
+            //        var addressBytes = ni.GetPhysicalAddress().GetAddressBytes();
+            //        Array.Reverse(addressBytes);
+            //        return (uint)0x20000000 | (uint)(addressBytes[0] << 20) | (uint)(addressBytes[1] << 12) | (uint)(addressBytes[2] << 4);
 
-                }
-            }
-            return (uint)0x21721720;
+            //    }
+            //}
+            //return (uint)0x21721720;
+            var random = new Random();
+            var buffer = new byte[3];
+            random.NextBytes(buffer);
+            uint address = 0x34000000;
+            address |= (uint)buffer[0] << 16;
+            address |= (uint)buffer[1] << 8;
+            address |= (uint)buffer[2];
+            return address;
         }
     }
 }

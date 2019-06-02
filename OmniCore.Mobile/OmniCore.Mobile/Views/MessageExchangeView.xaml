@@ -4,7 +4,10 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="OmniCore.Mobile.Views.MessageExchangeView">
+             x:Class="OmniCore.Mobile.Views.MessageExchangeView"
+             BackgroundColor="LightYellow"
+             HorizontalOptions="FillAndExpand"
+             VerticalOptions="Start">
   <ContentView.Content>
       <StackLayout>
             <!--<StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -13,11 +16,11 @@
                 <Image Source="ic_pod.xml"/>
             </StackLayout>-->
             <Label HorizontalTextAlignment="Center"
-                   FontSize="Large" Text="{Binding CommandText}"/>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="{Binding ActionText}"/>
-            </StackLayout>
-            <Button Text="Cancel" IsEnabled="{Binding CanBeCanceled}"/>
+                   FontSize="Large" Text="{Binding ExchangeProgress.CommandText}"/>
+            <Label HorizontalTextAlignment="Center"
+                   FontSize="Medium" Text="{Binding ExchangeProgress.ActionText}"/>
+            <Label FontSize="Small" Text="{Binding ExchangeProgress.ActionStatusText}"/>
+            <Button Text="Cancel" IsEnabled="{Binding ExchangeProgress.CanBeCanceled}"/>
         </StackLayout>
   </ContentView.Content>
 </ContentView>

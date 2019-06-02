@@ -10,13 +10,13 @@ namespace OmniCore.Model.Interfaces
     public interface IPodManager
     {
         IPod Pod { get; }
-        Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, CancellationToken ct, StatusRequestType requestType = StatusRequestType.Standard);
-        Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, CancellationToken ct, byte alertMask);
-        Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, CancellationToken ct, decimal bolusAmount);
-        //Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress, CancellationToken ct);
-        Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress, CancellationToken ct);
-        Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, CancellationToken ct, int utcTimeOffsetMinutes);
-        Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress, CancellationToken ct);
-        Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, CancellationToken ct, decimal[] basalSchedule, int utcOffsetInMinutes);
+        Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, StatusRequestType requestType = StatusRequestType.Standard);
+        Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask);
+        Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, decimal bolusAmount);
+        //Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress);
+        Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress);
+        Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, int utcTimeOffsetMinutes);
+        Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress);
+        Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, decimal[] basalSchedule, int utcOffsetInMinutes);
     }
 }

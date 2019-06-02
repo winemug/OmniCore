@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IMessageExchangeProgress : INotifyPropertyChanged
+    public interface IMessageExchangeProgress : INotifyPropertyChanged, IDisposable
     {
         string CommandText { get; set; }
         string ActionText { get; set; }
@@ -26,5 +28,11 @@ namespace OmniCore.Model.Interfaces
         int Progress { get; set; }
 
         IMessageExchangeStatistics Statistics { get; set; }
+
+        CancellationToken Token { get; }
+
+        Task<bool> CancelExchange();
+        void CancelComplete();
+        void CancelFailed();
     }
 }

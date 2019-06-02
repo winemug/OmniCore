@@ -22,21 +22,21 @@ namespace OmniCore.Radio.RileyLink
 
         public bool WithRadioPacket(RadioPacket radio_packet)
         {
-            if (radio_packet.type == PacketType.POD || radio_packet.type == PacketType.PDM)
+            if (radio_packet.Type == PacketType.POD || radio_packet.Type == PacketType.PDM)
             {
-                ResponseMessage.type = radio_packet.type;
-                ResponseMessage.address = radio_packet.body.DWord(0);
-                var r4 = radio_packet.body.Byte(4);
+                ResponseMessage.type = radio_packet.Type;
+                ResponseMessage.address = radio_packet.Body.DWord(0);
+                var r4 = radio_packet.Body.Byte(4);
                 ResponseMessage.sequence = (r4 >> 2) & 0x0f;
                 ResponseMessage.expect_critical_followup = (r4 & 0x80) > 0;
-                ResponseMessage.body_length = ((r4 & 0x03) << 8) | radio_packet.body.Byte(5);
-                ResponseMessage.body_prefix = radio_packet.body.Sub(0, 6);
-                ResponseMessage.body = radio_packet.body.Sub(6);
+                ResponseMessage.body_length = ((r4 & 0x03) << 8) | radio_packet.Body.Byte(5);
+                ResponseMessage.body_prefix = radio_packet.Body.Sub(0, 6);
+                ResponseMessage.body = radio_packet.Body.Sub(6);
             }
             else
             {
-                if (radio_packet.type == PacketType.CON)
-                    ResponseMessage.body.Append(radio_packet.body);
+                if (radio_packet.Type == PacketType.CON)
+                    ResponseMessage.body.Append(radio_packet.Body);
                 else
                     throw new OmniCoreErosException(FailureType.InvalidDataReceived, "Packet type invalid");
             }

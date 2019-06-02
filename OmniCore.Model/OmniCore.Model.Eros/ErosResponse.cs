@@ -39,7 +39,7 @@ namespace OmniCore.Model.Eros
         {
             bool lengthyResponse = false;
             pod.Created = DateTime.UtcNow;
-            int i = 1;
+            int i = 0;
             if (PartData.Length == 27)
             {
                 pod.VersionUnknown = PartData.ToHex(i, i + 7);
@@ -156,8 +156,8 @@ namespace OmniCore.Model.Eros
 
         private void parse_resync_response(ErosPod pod)
         {
-            if (PartData[1] == 0x14)
-                pod.RuntimeVariables.NonceSync = PartData.Word(2);
+            if (PartData[0] == 0x14)
+                pod.RuntimeVariables.NonceSync = PartData.Word(1);
             else
                 throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown resync request {PartData} from pod");
         }

@@ -25,14 +25,98 @@ namespace OmniCore.Mobile.Views
             BindingContext = viewModel = new PodMaintenanceViewModel();
         }
 
-        private async void ActivateClicked(object sender, EventArgs e)
+        private async Task<bool> ActivationStep1Pairing()
         {
-            viewModel.ActivateButtonEnabled = false;
+            var progress = new MessageProgress();
+            MessageExchangeDisplay.SetProgress(progress);
+
+            var result = await Task.Run(async () => await App.PodProvider.Current.Pair(progress, 60).ConfigureAwait(false));
+            if (!result.Success)
+            {
+                await DisplayAlert("Pod Activation",
+                    "Failed to pair with the pod.", "OK");
+                return false;
+            }
+            return true;
+        }
+
+        private async Task<bool> ActivationStep2Priming()
+        {
+            var progress = new MessageProgress();
+            MessageExchangeDisplay.SetProgress(progress);
+
+            var result = await Task.Run(async () => await App.PodProvider.Current.Activate(progress).ConfigureAwait(false));
+            if (!result.Success)
+            {
+                await DisplayAlert("Pod Activation",
+                    "Failed to prime the pod.", "OK");
+                return false;
+            }
+            return true;
+        }
+
+        private async void ResumeActivateClicked(object sender, EventArgs e)
+        {
             try
             {
-                if (App.PodProvider.Current != null && App.PodProvider.Current.Pod.Status != null)
+                bool actDlgResult;
+                var podManager = App.PodProvider.Current;
+                if (podManager.Pod.Status.Progress < PodProgress.ReadyForInjection)
                 {
-                    if (App.PodProvider.Current.Pod.Status.Progress < PodProgress.Running)
+                    actDlgResult = await DisplayAlert(
+                                    "Pod Activation",
+                                    "Press Activate to resume activating this pod.",
+                                    "Activate", "Cancel");
+
+                    if (!actDlgResult)
+                        return;
+
+                    if (podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                    {
+                        if (!await ActivationStep1Pairing())
+                            return;
+                    }
+
+                    if (!await ActivationStep2Priming())
+                        return;
+                }
+
+                actDlgResult = await DisplayAlert(
+                                    "Pod Activation",
+                                    "Press Start to inject to cannula and start the pod.",
+                                    "Start", "Cancel");
+
+                if (!actDlgResult)
+                    return;
+
+                var basalSchedule = new decimal[48];
+                for (int i = 0; i < 48; i++)
+                    basalSchedule[i] = 0.60m;
+
+                var progress = new MessageProgress();
+                MessageExchangeDisplay.SetProgress(progress);
+                var result = await Task.Run(async () => await podManager.InjectAndStart(progress, basalSchedule, 60).ConfigureAwait(false));
+
+                if (!result.Success)
+                {
+                    await DisplayAlert("Pod Activation",
+                        "Failed to start the pod.", "OK");
+                }
+            }
+            finally
+            {
+            }
+        }
+
+        private async void ActivateClicked(object sender, EventArgs e)
+        {
+            viewModel.ActivateNewButtonVisible = false;
+            try
+            {
+                var podManager = App.PodProvider.Current;
+                if (podManager != null && podManager.Pod.Status != null)
+                {
+                    if (podManager.Pod.Status.Progress < PodProgress.Running)
                     {
                         var dlgResult = await DisplayAlert("Pod Activation",
                             @"There is already a pod in activation progress, do you really want to start over with a new pod activation?"
@@ -42,7 +126,7 @@ namespace OmniCore.Mobile.Views
                         if (!dlgResult)
                             return;
                     }
-                    else if (App.PodProvider.Current.Pod.Status.Progress <= PodProgress.RunningLow)
+                    else if (podManager.Pod.Status.Progress <= PodProgress.RunningLow)
                     {
                         var dlgResult = await DisplayAlert("Pod Activation",
                             @"There is already an active pod running. Are you sure you want to activate a new pod? ",
@@ -52,7 +136,7 @@ namespace OmniCore.Mobile.Views
                             return;
                     }
 
-                    if (App.PodProvider.Current.Pod.Status.Progress < PodProgress.Inactive)
+                    if (podManager.Pod.Status.Progress < PodProgress.Inactive)
                     {
                         var dlgResult = await DisplayAlert("Pod Activation",
                             @"Would you like to deactivate the current pod before starting activation of a new pod? ",
@@ -60,9 +144,10 @@ namespace OmniCore.Mobile.Views
 
                         while (dlgResult)
                         {
-                            var ctsDeactivate = new CancellationTokenSource();
                             var progressDeactivate = new MessageProgress();
-                            var resultDeactivate = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progressDeactivate, ctsDeactivate.Token).ConfigureAwait(false));
+                            MessageExchangeDisplay.SetProgress(progressDeactivate);
+
+                            var resultDeactivate = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progressDeactivate).ConfigureAwait(false));
                             if (resultDeactivate.Success)
                             {
                                 await DisplayAlert("Pod Activation", "Existing pod has been deactivated successfully.", "Continue");
@@ -91,34 +176,70 @@ namespace OmniCore.Mobile.Views
                 if (!actDlgResult)
                     return;
 
-                var newPodManager = App.PodProvider.New();
+                if (App.PodProvider.Current == null || App.PodProvider.Current.Pod.Status != null)
+                    podManager = App.PodProvider.New();
 
-                var cts = new CancellationTokenSource();
                 var progress = new MessageProgress();
-                var result = await Task.Run(async () => await newPodManager.Pair(progress, cts.Token, 60));
-                result = await Task.Run(async () => await newPodManager.Activate(progress, cts.Token));
+                MessageExchangeDisplay.SetProgress(progress);
+
+                var result = await Task.Run(async () => await podManager.Pair(progress, 60).ConfigureAwait(false));
+                if (!result.Success)
+                    return;
+
+                progress = new MessageProgress();
+                MessageExchangeDisplay.SetProgress(progress);
+
+                result = await Task.Run(async () => await podManager.Activate(progress).ConfigureAwait(false));
+                if (!result.Success)
+                    return;
 
                 var basalSchedule = new decimal[48];
                 for (int i = 0; i < 48; i++)
                     basalSchedule[i] = 0.60m;
 
-                result = await Task.Run(async () => await newPodManager.InjectAndStart(progress, cts.Token, basalSchedule, 60));
-
                 await DisplayAlert(
                                 "Pod Activation",
                                 "Ready... set.. go!", "OK");
+
+                progress = new MessageProgress();
+                MessageExchangeDisplay.SetProgress(progress);
+                result = await Task.Run(async () => await podManager.InjectAndStart(progress, basalSchedule, 60).ConfigureAwait(false));
+
             }
             finally
             {
-                viewModel.ActivateButtonEnabled = true;
+                viewModel.ActivateNewButtonVisible = true;
             }
         }
 
         private async void DeactivateClicked(object sender, EventArgs e)
         {
-            viewModel.DeactivateButtonEnabled = false;
+            viewModel.DeactivateButtonVisible = false;
             try
             {
+                var podManager = App.PodProvider.Current;
+                var progress = new MessageProgress();
+                MessageExchangeDisplay.SetProgress(progress);
+
+                if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                {
+                    var statusResult = await Task.Run(async () => await podManager.UpdateStatus(progress).ConfigureAwait(false));
+                }
+
+                if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                {
+                    var dlgResult = await DisplayAlert("Pod Deactivation",
+                        @"This pod has not been paired yet and cannot be deactivated. Would you like to remove the pod from the system? " +
+                        "Note: If you remove it, you won't be able to resume its activation process.",
+                        "Remove Pod", "Cancel");
+
+                    if (dlgResult)
+                    {
+                        App.PodProvider.Archive();
+                    }
+                    return;
+                }
+
                 if (App.PodProvider.Current.Pod.Status.Progress < PodProgress.Running)
                 {
                     var dlgResult = await DisplayAlert("Pod Deactivation",
@@ -139,10 +260,10 @@ namespace OmniCore.Mobile.Views
                     if (!dlgResult)
                         return;
                 }
-                var cts = new CancellationTokenSource();
-                var progress = new MessageProgress();
+                progress = new MessageProgress();
+                MessageExchangeDisplay.SetProgress(progress);
 
-                var result = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progress, cts.Token).ConfigureAwait(false));
+                var result = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progress).ConfigureAwait(false));
 
                 if (result.Success)
                 {
@@ -150,12 +271,18 @@ namespace OmniCore.Mobile.Views
                 }
                 else
                 {
-                    await DisplayAlert("Pod Deactivation", "Failed to deactivate the pod.", "OK");
+                    var dlgResult = await DisplayAlert("Pod Deactivation", "Failed to deactivate the pod. Would you like to remove the pod from the system?" +
+                        "Note: If you remove it, you won't be able to control this pod anymore and if the pod is working, it will continue to deliver basals as programmed.", "Remove Pod", "Cancel");
+
+                    if (dlgResult)
+                    {
+                        App.PodProvider.Archive();
+                    }
                 }
             }
             finally
             {
-                viewModel.DeactivateButtonEnabled = true;
+                viewModel.DeactivateButtonVisible = true;
             }
         }
     }

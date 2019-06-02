@@ -6,29 +6,29 @@ namespace OmniCore.Radio.RileyLink
 {
     public class RadioPacket
     {
-        public uint address;
-        public PacketType type;
-        public int sequence;
-        public Bytes body;
-        public byte rssi;
+        public uint Address;
+        public PacketType Type;
+        public int Sequence;
+        public Bytes Body;
+        public byte Rssi;
 
         public Bytes PartialData
         {
             get
             {
-                return get_data();
+                return GetPacketData();
             }
         }
 
         public RadioPacket(uint address, PacketType type, int sequence, Bytes body)
         {
-            this.address = address;
-            this.type = type;
-            this.sequence = sequence % 32;
-            this.body = body;
+            this.Address = address;
+            this.Type = type;
+            this.Sequence = sequence % 32;
+            this.Body = body;
         }
 
-        public static RadioPacket parse(Bytes data)
+        public static RadioPacket Parse(Bytes data)
         {
             if (data.Length < 5)
                 return null;
@@ -46,30 +46,30 @@ namespace OmniCore.Radio.RileyLink
             return new RadioPacket(address, type, sequence, body);
         }
 
-        public RadioPacket with_sequence(int sequence)
+        public RadioPacket WithSequence(int sequence)
         {
-            this.sequence = sequence;
+            this.Sequence = sequence;
             return this;
         }
 
-        public Bytes get_data()
+        public Bytes GetPacketData()
         {
-            var data = new Bytes().Append(this.address);
-            data.Append((byte)(((int)this.type << 5) | this.sequence));
-            data.Append(this.body);
+            var data = new Bytes().Append(this.Address);
+            data.Append((byte)(((int)this.Type << 5) | this.Sequence));
+            data.Append(this.Body);
             data.Append(CrcUtil.Crc8(data.ToArray()));
             return data;
         }
 
         public override string ToString()
         {
-            if (this.type == PacketType.CON)
+            if (this.Type == PacketType.CON)
             {
-                return $"0x{this.sequence:X2} {this.type.ToString().Substring(0, 3)} 0x{this.address:X8} {this.body.ToHex()}";
+                return $"0x{this.Sequence:X2} {this.Type.ToString().Substring(0, 3)} 0x{this.Address:X8} {this.Body.ToHex()}";
             }
             else
             {
-                return $"0x{this.sequence:X2} {this.type.ToString().Substring(0, 3)} 0x{this.address:X8} 0x{this.body.ToHex(0, 4)} {this.body.ToHex(4)}";
+                return $"0x{this.Sequence:X2} {this.Type.ToString().Substring(0, 3)} 0x{this.Address:X8} 0x{this.Body.ToHex(0, 4)} {this.Body.ToHex(4)}";
             }
         }
     }
