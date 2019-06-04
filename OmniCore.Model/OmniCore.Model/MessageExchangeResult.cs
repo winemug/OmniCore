@@ -9,6 +9,12 @@ namespace OmniCore.Model
 {
     public class MessageExchangeResult : IMessageExchangeResult
     {
+        public int? Id { get; set; }
+
+        public Guid PodId { get; set; }
+
+        public DateTime? ResultTime { get; set; }
+
         public bool Success { get; private set; }
 
         public Exception Exception { get; private set; }
@@ -16,7 +22,6 @@ namespace OmniCore.Model
         public FailureType FailureType { get; private set; }
 
         public IMessageExchangeStatistics Statistics { get; set; }
-
 
         public MessageExchangeResult(Exception exception)
         {

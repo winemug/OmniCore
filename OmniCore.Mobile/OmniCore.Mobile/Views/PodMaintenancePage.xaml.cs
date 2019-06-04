@@ -267,6 +267,7 @@ namespace OmniCore.Mobile.Views
 
                 if (result.Success)
                 {
+                    App.PodProvider.Archive();
                     await DisplayAlert("Pod Deactivation", "Pod has been deactivated successfully.", "OK");
                 }
                 else

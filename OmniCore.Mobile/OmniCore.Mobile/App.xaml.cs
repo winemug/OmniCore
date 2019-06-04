@@ -1,4 +1,6 @@
-﻿using OmniCore.Model.Eros;
+﻿using OmniCore.Mobile.Interfaces;
+using OmniCore.Mobile.Services;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
 using OmniCore.Radio.RileyLink;
 using System;
@@ -13,11 +15,16 @@ namespace OmniCore.Mobile
         public static App Instance => Application.Current as App;
         public static IPodProvider PodProvider;
 
-
+        public LocalRequestHandler LocalRequestHandler { get; set; }
         public App()
         {
             InitializeComponent();
             PodProvider =  new ErosPodProvider(new RileyLinkProvider(SynchronizationContext.Current));
+
+            LocalRequestHandler = new LocalRequestHandler();
+            var publisher = DependencyService.Get<ILocalRequestPublisher>();
+            publisher.Subscribe(LocalRequestHandler);
+
             MainPage = new Views.OmniCoreMain();
         }
 

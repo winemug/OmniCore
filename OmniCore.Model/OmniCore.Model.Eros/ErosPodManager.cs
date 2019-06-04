@@ -147,6 +147,29 @@ namespace OmniCore.Model.Eros
             }
         }
 
+        public async Task<IMessageExchangeResult> SetTempBasal(IMessageExchangeProgress progress, decimal basalRate, decimal durationInHours)
+        {
+            try
+            {
+                progress.CommandText = $"Set Temp Basal {basalRate}U/h for {durationInHours}h";
+                await UpdateStatusInternal(progress);
+                AssertRunningStatus();
+                AssertImmediateBolusInactive();
+
+                var request = new ErosMessageBuilder().WithTempBasal(basalRate, durationInHours).Build();
+                var result = await PerformExchange(request, GetStandardParameters(), progress);
+
+                if (Pod.Status.BasalState != BasalState.Temporary)
+                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start the temp basal");
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                return new MessageExchangeResult(e);
+            }
+        }
+
         public async Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, decimal bolusAmount)
         {
             try
@@ -330,15 +353,25 @@ namespace OmniCore.Model.Eros
                     if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
                         return result;
 
-                    request = new ErosMessageBuilder().WithDeliveryFlags(0, 0).Build();
-                    result = await PerformExchange(request, parameters, progress);
-                    if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
-                        return result;
+                    //request = new ErosMessageBuilder().WithDeliveryFlags(0, 0).Build();
+                    //result = await PerformExchange(request, parameters, progress);
+                    //if (!result.Success && result.FailureType != FailureType.AlreadyExecuted)
+                    //    return result;
 
                     request = new ErosMessageBuilder().WithPrimeCannula().Build();
                     result = await PerformExchange(request, parameters, progress);
                     if (!result.Success)
+                    {
+                        if (result.FailureType == FailureType.AlreadyExecuted)
+                        {
+                            result = await UpdateStatusInternal(progress);
+                            if (result.Success)
+                            {
+                                result = await PerformExchange(request, parameters, progress);
+                            }
+                        }
                         return result;
+                    }
                 }
 
                 if (Pod.Status.Progress == PodProgress.Purging)
@@ -514,5 +547,39 @@ namespace OmniCore.Model.Eros
                 throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod is not running");
         }
 
+        public Task<IMessageExchangeResult> ConfigureAlerts(IMessageExchangeProgress progress, AlertConfiguration[] alertConfigurations)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> CancelTempBasal(IMessageExchangeProgress progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> StartExtendedBolus(IMessageExchangeProgress progress, decimal bolusAmount, decimal durationInHours)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> CancelExtendedBolus(IMessageExchangeProgress progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> SetBasalSchedule(IMessageExchangeProgress progress, decimal[] schedule, int utcOffsetInMinutes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessageExchangeResult> SuspendBasal(IMessageExchangeProgress progress)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

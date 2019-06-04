@@ -96,33 +96,35 @@ namespace OmniCore.Radio.RileyLink
                             var packetToSend = packets[packetIndex];
                             ((RileyLinkStatistics)messageProgress.Statistics).StartPacketExchange();
                             if (packetIndex == 0)
-                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.CON, 15000);
+                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 15000);
                             else
-                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.CON, 30000);
+                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 30000);
 
                             ((RileyLinkStatistics)messageProgress.Statistics).EndPacketExchange();
-                            packetIndex++;
                             this.Pod.RuntimeVariables.PacketSequence = (received.Sequence + 1) % 32;
                         }
                     }
                     catch(OmniCoreProtocolException ocp)
                     {
-                        //if (ocp.FailureType == FailureType.AlreadyExecuted)
-                        //{
-                        //    if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
-                        //    {
-                        //        MessageExchangeParameters.MessageSequenceOverride += 1;
-                        //    }
-                        //    else
-                        //    {
-                        //        if (Pod.Status == null)
-                        //            MessageExchangeParameters.MessageSequenceOverride = 1;
-                        //        else
-                        //            Pod.Status.MessageSequence += 1;
-                        //    }
-                        //    sendMessage = true;
-                        //}
-                        //else
+                        if (ocp.FailureType == FailureType.AlreadyExecuted)
+                        {
+                            Pod.RuntimeVariables.PacketSequence--;
+                            Pod.RuntimeVariables.PacketSequence--;
+
+                            if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
+                            {
+                                MessageExchangeParameters.MessageSequenceOverride -= 1;
+                            }
+                            else
+                            {
+                                if (Pod.Status == null)
+                                    MessageExchangeParameters.MessageSequenceOverride = 0xF;
+                                else
+                                    Pod.Status.MessageSequence -= 1;
+                            }
+                            sendMessage = true;
+                        }
+                        else
                             throw;
                     }
                     catch(Exception)
@@ -256,21 +258,31 @@ namespace OmniCore.Radio.RileyLink
             {
                 if (pe.ReceivedPacket.Type == PacketType.ACK)
                 {
-                    var messageAddress = MessageExchangeParameters.AddressOverride ?? Pod.RadioAddress;
-                    var ackAddress = MessageExchangeParameters.AckAddressOverride ?? Pod.RadioAddress;
-                    var ackPacket = CreateAckPacket(messageAddress, ackAddress, this.Pod.RuntimeVariables.PacketSequence);
-                    try
-                    {
-                        await SendPacket(messageProgress, ackPacket, 5000);
-                    }
-                    catch(Exception)
-                    {
-                    }
-
+                    //await FindOutWhat(messageProgress);
+                    //Pod.Status.MessageSequence--;
                     throw new OmniCoreProtocolException(FailureType.AlreadyExecuted);
                 }
             }
             throw pe;
+        }
+
+        private async Task FindOutWhat(IMessageExchangeProgress progress)
+        {
+            var messageAddress = MessageExchangeParameters.AddressOverride ?? Pod.RadioAddress;
+            var ackAddress = MessageExchangeParameters.AckAddressOverride ?? Pod.RadioAddress;
+            var ackPacket = CreateAckPacket(messageAddress, ackAddress, this.Pod.RuntimeVariables.PacketSequence);
+            try
+            {
+                var received = await ExchangePacketWithRetries(progress, ackPacket, PacketType.POD, 10000);
+                Debug.WriteLine("YADA!!");
+            }
+            catch (OmniCoreTimeoutException)
+            {
+                this.Pod.RuntimeVariables.PacketSequence++;
+                return;
+                this.Pod.RuntimeVariables.PacketSequence++;
+                await FindOutWhat(progress);
+            }
         }
 
         private async Task AcknowledgeEndOfMessage(RadioPacket ackPacket)
@@ -279,7 +291,6 @@ namespace OmniCore.Radio.RileyLink
             {
                 Debug.WriteLine("Sending final ack");
                 await SendPacket(new MessageProgress(), ackPacket);
-                Pod.RuntimeVariables.PacketSequence++;
                 Debug.WriteLine("Message exchange finalized");
             }
             catch(Exception)
