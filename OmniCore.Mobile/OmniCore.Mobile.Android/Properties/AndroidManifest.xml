@@ -3,4 +3,5 @@
 	<uses-sdk android:minSdkVersion="25" android:targetSdkVersion="28" />
 	<application android:label="OmniCore.Mobile.Android" android:largeHeap="true"></application>
 	<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 </manifest>

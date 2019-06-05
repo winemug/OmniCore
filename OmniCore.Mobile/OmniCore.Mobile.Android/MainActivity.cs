@@ -30,6 +30,10 @@ namespace OmniCore.Mobile.Droid
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
+            var i = new Intent(this, typeof(OmniCoreIntentService));
+            i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);
+            StartService(i);
+
             LoadApplication(new App());
         }
 
