@@ -6,10 +6,10 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.OmniCoreSettingsPage">
     <ContentPage.Content>
-      <StackLayout>
-            <Label Text="OmniCore settings"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+      <StackLayout Orientation="Horizontal"
+                   VerticalOptions="Start">
+            <Label Text="Accept AndroidAPS commands" FontSize="Large" VerticalOptions="Center"/>
+            <Switch IsToggled="True" Scale="0.8" IsEnabled="False"/>
         </StackLayout>
   </ContentPage.Content>
 </ContentPage>

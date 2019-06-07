@@ -40,64 +40,70 @@ namespace OmniCore.Model.Eros
 
         private ErosMessageExchangeParameters GetStandardParameters()
         {
-            return new ErosMessageExchangeParameters() { Nonce = Nonce };
+            return new ErosMessageExchangeParameters() { Nonce = Nonce, AllowAutoLevelAdjustment = true };
         }
 
-        private async Task<IMessageExchangeResult> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
+        private async Task PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
                     IMessageExchangeProgress progress)
         {
+            progress.Waiting = true;
             progress.ActionStatusText = "Waiting in queue";
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
-            return await await MessageExchangeTask.ContinueWith(
+            await await MessageExchangeTask.ContinueWith(
                     async (IMessageExchangeResult) =>
                     {
                         try
                         {
+                            progress.ActionStatusText = string.Empty;
+                            progress.Waiting = false;
+                            progress.Running = true;
                             var messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
                             await messageExchange.InitializeExchange(progress);
                             var response = await messageExchange.GetResponse(requestMessage, progress);
-                            var result = messageExchange.ParseResponse(response, Pod);
+                            var result = messageExchange.ParseResponse(response, Pod, progress);
 
-                            if (result.Success && ErosPod.RuntimeVariables.NonceSync.HasValue)
+                            if (result && ErosPod.RuntimeVariables.NonceSync.HasValue)
                             {
                                 var responseMessage = response as ErosMessage;
                                 emp.MessageSequenceOverride = (responseMessage.sequence - 1) % 16;
                                 messageExchange = await MessageExchangeProvider.GetMessageExchanger(messageExchangeParameters, Pod);
                                 await messageExchange.InitializeExchange(progress);
                                 response = await messageExchange.GetResponse(requestMessage, progress);
-                                result = messageExchange.ParseResponse(response, Pod);
+                                result = messageExchange.ParseResponse(response, Pod, progress);
                                 if (ErosPod.RuntimeVariables.NonceSync.HasValue)
                                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Nonce re-negotiation failed");
                             }
-                            return result;
                         }
                         catch (Exception e)
                         {
-                            return new MessageExchangeResult(e);
+                            progress.SetException(e);
                         }
                         finally
                         {
                             ErosRepository.Instance.Save(ErosPod);
+                            progress.Waiting = false;
+                            progress.Running = false;
+                            progress.Finished = true;
                         }
                     });
         }
 
-        private async Task<IMessageExchangeResult> UpdateStatusInternal(IMessageExchangeProgress progress,
+        private async Task UpdateStatusInternal(IMessageExchangeProgress progress,
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             progress.ActionText = "Running status update";
             var request = new ErosMessageBuilder().WithStatus(updateType).Build();
-            return await PerformExchange(request, GetStandardParameters(), progress);
+            await PerformExchange(request, GetStandardParameters(), progress);
         }
 
-        public async Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, 
+        public async Task UpdateStatus(IMessageExchangeProgress progress, 
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             try
             {
                 progress.CommandText = "Updating Status";
                 Debug.WriteLine($"Updating pod status, request type {updateType}");
-                return await this.UpdateStatusInternal(progress, updateType);
+                await this.UpdateStatusInternal(progress, updateType);
             }
             catch (Exception e)
             {
@@ -105,7 +111,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask)
+        public async Task AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask)
         {
             try
             {
@@ -263,7 +269,7 @@ namespace OmniCore.Model.Eros
                     var parameters = GetStandardParameters();
                     parameters.AddressOverride = 0xffffffff;
                     parameters.AckAddressOverride = Pod.RadioAddress;
-                    parameters.TransmissionLevelOverride = TxPower.Low;
+                    parameters.TransmissionLevelOverride = TxPower.A2_Low;
 
                     var request = new ErosMessageBuilder().WithAssignAddress(Pod.RadioAddress).Build();
                     var result = await PerformExchange(request, parameters, progress);
@@ -286,7 +292,7 @@ namespace OmniCore.Model.Eros
                     var parameters = GetStandardParameters();
                     parameters.AddressOverride = 0xffffffff;
                     parameters.AckAddressOverride = Pod.RadioAddress;
-                    parameters.TransmissionLevelOverride = TxPower.Normal;
+                    parameters.TransmissionLevelOverride = TxPower.A3_BelowNormal;
                     parameters.MessageSequenceOverride = 1;
 
                     var request = new ErosMessageBuilder().WithSetupPod(Pod.Lot.Value, Pod.Serial.Value, Pod.RadioAddress,

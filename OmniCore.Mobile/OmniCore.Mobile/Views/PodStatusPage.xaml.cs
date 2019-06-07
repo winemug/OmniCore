@@ -30,7 +30,7 @@ namespace OmniCore.Mobile.Views
             try
             {
                 var cts = new CancellationTokenSource();
-                var progress = new MessageProgress();
+                var progress = new MessageExchangeProgress();
                 await Task.Run(async () => await App.PodProvider.Current.UpdateStatus(progress).ConfigureAwait(false));
             }
             finally

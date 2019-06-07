@@ -12,13 +12,10 @@ namespace OmniCore.Model.Interfaces
         Guid PodId { get; set; }
         DateTime? ResultTime { get; set; }
 
-        bool Success { get; }
-        FailureType FailureType { get; }
+        bool Success { get; set; }
 
-        [Ignore]
-        Exception Exception { get; }
+        FailureType FailureType { get; set;  }
 
-        [Ignore]
-        IMessageExchangeStatistics Statistics { get; }
+        Exception Exception { get; set;  }
     }
 }

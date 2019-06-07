@@ -81,7 +81,11 @@ namespace OmniCore.Mobile.Droid
                 notificationManager.CreateNotificationChannel(channel);
             }
 
+            var intent = new Intent(this, typeof(MainActivity));
+            var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+                .SetContentIntent(pendingIntent)
                 .SetContentTitle("OmniCore")
                 .SetContentText("OmniCore is running")
                 .SetSmallIcon(Resource.Drawable.ic_pod);

@@ -27,7 +27,7 @@ namespace OmniCore.Mobile.Views
 
         private async Task<bool> ActivationStep1Pairing()
         {
-            var progress = new MessageProgress();
+            var progress = new MessageExchangeProgress();
             MessageExchangeDisplay.SetProgress(progress);
 
             var result = await Task.Run(async () => await App.PodProvider.Current.Pair(progress, 60).ConfigureAwait(false));
@@ -42,7 +42,7 @@ namespace OmniCore.Mobile.Views
 
         private async Task<bool> ActivationStep2Priming()
         {
-            var progress = new MessageProgress();
+            var progress = new MessageExchangeProgress();
             MessageExchangeDisplay.SetProgress(progress);
 
             var result = await Task.Run(async () => await App.PodProvider.Current.Activate(progress).ConfigureAwait(false));
@@ -93,7 +93,7 @@ namespace OmniCore.Mobile.Views
                 for (int i = 0; i < 48; i++)
                     basalSchedule[i] = 0.60m;
 
-                var progress = new MessageProgress();
+                var progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
                 var result = await Task.Run(async () => await podManager.InjectAndStart(progress, basalSchedule, 60).ConfigureAwait(false));
 
@@ -144,7 +144,7 @@ namespace OmniCore.Mobile.Views
 
                         while (dlgResult)
                         {
-                            var progressDeactivate = new MessageProgress();
+                            var progressDeactivate = new MessageExchangeProgress();
                             MessageExchangeDisplay.SetProgress(progressDeactivate);
 
                             var resultDeactivate = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progressDeactivate).ConfigureAwait(false));
@@ -179,14 +179,14 @@ namespace OmniCore.Mobile.Views
                 if (App.PodProvider.Current == null || App.PodProvider.Current.Pod.Status != null)
                     podManager = App.PodProvider.New();
 
-                var progress = new MessageProgress();
+                var progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
 
                 var result = await Task.Run(async () => await podManager.Pair(progress, 60).ConfigureAwait(false));
                 if (!result.Success)
                     return;
 
-                progress = new MessageProgress();
+                progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
 
                 result = await Task.Run(async () => await podManager.Activate(progress).ConfigureAwait(false));
@@ -201,7 +201,7 @@ namespace OmniCore.Mobile.Views
                                 "Pod Activation",
                                 "Ready... set.. go!", "OK");
 
-                progress = new MessageProgress();
+                progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
                 result = await Task.Run(async () => await podManager.InjectAndStart(progress, basalSchedule, 60).ConfigureAwait(false));
 
@@ -218,7 +218,7 @@ namespace OmniCore.Mobile.Views
             try
             {
                 var podManager = App.PodProvider.Current;
-                var progress = new MessageProgress();
+                var progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
 
                 if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
@@ -260,7 +260,7 @@ namespace OmniCore.Mobile.Views
                     if (!dlgResult)
                         return;
                 }
-                progress = new MessageProgress();
+                progress = new MessageExchangeProgress();
                 MessageExchangeDisplay.SetProgress(progress);
 
                 var result = await Task.Run(async () => await App.PodProvider.Current.Deactivate(progress).ConfigureAwait(false));

@@ -8,5 +8,6 @@ namespace OmniCore.Model.Interfaces
     public interface IMessageExchangeParameters
     {
         TxPower? TransmissionLevelOverride { get; }
+        bool AllowAutoLevelAdjustment { get; }
     }
 }

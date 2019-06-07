@@ -18,13 +18,18 @@ namespace OmniCore.Radio.RileyLink
 {
     public class RileyLink
     {
+
+        // [0x0E, 0x1D, 0x34, 0x2C, 0x60, 0x84, 0xC8]
+
         private Dictionary<TxPower, byte> PaDictionary = new Dictionary<TxPower, byte>()
             {
-                { TxPower.Lowest, 0x1D },
-                { TxPower.Low, 0x34 },
-                { TxPower.Normal, 0x60 },
-                { TxPower.High, 0x84 },
-                { TxPower.Highest, 0xC8 },
+                { TxPower.A0_Lowest, 0x0E },   
+                { TxPower.A1_VeryLow, 0x1D },
+                { TxPower.A2_Low, 0x34 },
+                { TxPower.A3_BelowNormal, 0x2c },
+                { TxPower.A4_Normal, 0x60 },
+                { TxPower.A5_High, 0x84 },
+                { TxPower.A6_VeryHigh, 0xC8 },
             };
 
         private Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
@@ -43,7 +48,7 @@ namespace OmniCore.Radio.RileyLink
 
         public RileyLink()
         {
-            TxAmplification = TxPower.Normal;
+            TxAmplification = TxPower.A4_Normal;
         }
 
         public async Task EnsureDevice(IMessageExchangeProgress messageProgress)
@@ -301,7 +306,7 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task TxLevelDown(IMessageExchangeProgress messageProgress)
         {
-            if (TxAmplification > TxPower.Lowest)
+            if (TxAmplification > TxPower.A0_Lowest)
             {
                 TxAmplification--;
                 await SetTxLevel(messageProgress, TxAmplification);
@@ -310,7 +315,7 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task TxLevelUp(IMessageExchangeProgress messageProgress)
         {
-            if (TxAmplification < TxPower.Highest)
+            if (TxAmplification < TxPower.A6_VeryHigh)
             {
                 TxAmplification++;
                 await SetTxLevel(messageProgress, TxAmplification);

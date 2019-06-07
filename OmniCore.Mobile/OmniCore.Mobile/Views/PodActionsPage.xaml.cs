@@ -20,14 +20,14 @@ namespace OmniCore.Mobile.Views
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
-            var progress = new MessageProgress();
+            var progress = new MessageExchangeProgress();
             MeView.SetProgress(progress);
             await Task.Run(async () => await App.PodProvider.Current.Bolus(progress, 0.15m).ConfigureAwait(false));
         }
 
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
-            var progress = new MessageProgress();
+            var progress = new MessageExchangeProgress();
             MeView.SetProgress(progress);
             await Task.Run(async () => await App.PodProvider.Current.SetTempBasal(progress, 1.5m, 0.5m).ConfigureAwait(false));
         }

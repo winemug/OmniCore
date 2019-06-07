@@ -10,23 +10,23 @@ namespace OmniCore.Model.Interfaces
     public interface IPodManager
     {
         IPod Pod { get; }
-        Task<IMessageExchangeResult> UpdateStatus(IMessageExchangeProgress progress, StatusRequestType requestType = StatusRequestType.Standard);
-        Task<IMessageExchangeResult> AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask);
-        Task<IMessageExchangeResult> ConfigureAlerts(IMessageExchangeProgress progress, AlertConfiguration[] alertConfigurations);
+        Task UpdateStatus(IMessageExchangeProgress progress, StatusRequestType requestType = StatusRequestType.Standard);
+        Task AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask);
+        Task ConfigureAlerts(IMessageExchangeProgress progress, AlertConfiguration[] alertConfigurations);
 
-        Task<IMessageExchangeResult> Bolus(IMessageExchangeProgress progress, decimal bolusAmount);
-        Task<IMessageExchangeResult> CancelBolus(IMessageExchangeProgress progress);
-        Task<IMessageExchangeResult> SetTempBasal(IMessageExchangeProgress progress, decimal basalRate, decimal durationInHours);
-        Task<IMessageExchangeResult> CancelTempBasal(IMessageExchangeProgress progress);
-        Task<IMessageExchangeResult> StartExtendedBolus(IMessageExchangeProgress progress, decimal bolusAmount, decimal durationInHours);
-        Task<IMessageExchangeResult> CancelExtendedBolus(IMessageExchangeProgress progress);
-        Task<IMessageExchangeResult> SetBasalSchedule(IMessageExchangeProgress progress, decimal[] schedule, int utcOffsetInMinutes);
-        Task<IMessageExchangeResult> SuspendBasal(IMessageExchangeProgress progress);
+        Task Bolus(IMessageExchangeProgress progress, decimal bolusAmount);
+        Task CancelBolus(IMessageExchangeProgress progress);
+        Task SetTempBasal(IMessageExchangeProgress progress, decimal basalRate, decimal durationInHours);
+        Task CancelTempBasal(IMessageExchangeProgress progress);
+        Task StartExtendedBolus(IMessageExchangeProgress progress, decimal bolusAmount, decimal durationInHours);
+        Task CancelExtendedBolus(IMessageExchangeProgress progress);
+        Task SetBasalSchedule(IMessageExchangeProgress progress, decimal[] schedule, int utcOffsetInMinutes);
+        Task SuspendBasal(IMessageExchangeProgress progress);
 
-        Task<IMessageExchangeResult> Pair(IMessageExchangeProgress progress, int utcTimeOffsetMinutes);
-        Task<IMessageExchangeResult> Activate(IMessageExchangeProgress progress);
-        Task<IMessageExchangeResult> InjectAndStart(IMessageExchangeProgress progress, decimal[] basalSchedule, int utcOffsetInMinutes);
+        Task Pair(IMessageExchangeProgress progress, int utcTimeOffsetMinutes);
+        Task Activate(IMessageExchangeProgress progress);
+        Task InjectAndStart(IMessageExchangeProgress progress, decimal[] basalSchedule, int utcOffsetInMinutes);
 
-        Task<IMessageExchangeResult> Deactivate(IMessageExchangeProgress progress);
+        Task Deactivate(IMessageExchangeProgress progress);
     }
 }

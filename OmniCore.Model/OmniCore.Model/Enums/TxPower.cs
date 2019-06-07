@@ -2,10 +2,12 @@
 {
     public enum TxPower
     {
-        Lowest = 0,
-		Low = 1,
-		Normal = 2,
-		High = 3,
-		Highest = 4
+        A0_Lowest,
+        A1_VeryLow,
+		A2_Low,
+		A3_BelowNormal,
+		A4_Normal,
+		A5_High,
+        A6_VeryHigh
     }
 }

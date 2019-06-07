@@ -9,6 +9,7 @@ namespace OmniCore.Model.Eros
     public class ErosMessageExchangeParameters : IMessageExchangeParameters
     {
         public TxPower? TransmissionLevelOverride { get; set; }
+        public bool AllowAutoLevelAdjustment { get; set; }
         public uint? AckAddressOverride { get; set;  }
         public uint? AddressOverride { get; set;  }
         public int? MessageSequenceOverride { get; set; }
