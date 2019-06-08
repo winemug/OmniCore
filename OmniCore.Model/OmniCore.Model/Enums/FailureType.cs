@@ -21,5 +21,6 @@ namespace OmniCore.Model.Enums
         RadioUnknownError,
         RadioStateError,
         InvalidDataReceived,
+        WorkflowError
     }
 }

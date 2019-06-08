@@ -15,14 +15,18 @@ namespace OmniCore.Model
 
         public Guid PodId { get; set; }
 
+        public DateTime? RequestTime { get; set; }
         public DateTime? ResultTime { get; set; }
+
+        public RequestSource Source { get; set; }
+        public RequestType Type { get; set; }
+        public string Parameters { get; set; }
 
         public bool Success { get; set; }
 
-        public FailureType FailureType { get; set; }
+        public FailureType Failure { get; set; }
 
         [Ignore]
         public Exception Exception { get; set; }
-
     }
 }

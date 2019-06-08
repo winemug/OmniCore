@@ -41,6 +41,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosPodRadioIndicators>();
                     conn.CreateTable<ErosPodStatus>();
                     conn.CreateTable<ErosPodUserSettings>();
+                    conn.CreateTable<MessageExchangeResult>();
                     conn.Commit();
                 }
             }

@@ -7,25 +7,41 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class PodMaintenanceViewModel : BaseViewModel
     {
-        private bool deactivateButtonVisible = false;
+        private bool deactivateButtonVisible;
+        private bool deactivateButtonEnabled = true;
+        private bool activateNewButtonVisible;
+        private bool activateNewButtonEnabled = true;
+        private bool resumeActivationButtonVisible;
+        private bool resumeActivationButtonEnabled = true;
+
         public bool DeactivateButtonVisible
         {
-            get { return deactivateButtonVisible; }
-            set { SetProperty(ref deactivateButtonVisible, value); }
+            get => deactivateButtonVisible; set => SetProperty(ref deactivateButtonVisible, value);
         }
 
-        private bool activateNewButtonVisible;
+        public bool DeactivateButtonEnabled
+        {
+            get => deactivateButtonEnabled; set => SetProperty(ref deactivateButtonEnabled, value);
+        }
+
         public bool ActivateNewButtonVisible
         {
-            get { return activateNewButtonVisible; }
-            set { SetProperty(ref activateNewButtonVisible, value); }
+            get => activateNewButtonVisible; set => SetProperty(ref activateNewButtonVisible, value);
         }
 
-        private bool resumeActivationButtonVisible = false;
+        public bool ActivateNewButtonEnabled
+        {
+            get => activateNewButtonEnabled; set => SetProperty(ref activateNewButtonEnabled, value);
+        }
+
         public bool ResumeActivationButtonVisible
         {
-            get { return resumeActivationButtonVisible; }
-            set { SetProperty(ref resumeActivationButtonVisible, value); }
+            get => resumeActivationButtonVisible; set => SetProperty(ref resumeActivationButtonVisible, value);
+        }
+
+        public bool ResumeActivationButtonEnabled
+        {
+            get => resumeActivationButtonEnabled; set => SetProperty(ref resumeActivationButtonEnabled, value);
         }
 
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)

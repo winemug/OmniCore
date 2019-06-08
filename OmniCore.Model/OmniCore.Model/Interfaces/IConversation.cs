@@ -11,13 +11,16 @@ namespace OmniCore.Model.Interfaces
     public interface IConversation : INotifyPropertyChanged, IDisposable
     {
         bool CanCancel { get; set; }
-        bool IsWaiting { get; set; }
         bool IsRunning { get; set; }
         bool IsFinished { get; set; }
 
-        int Progress { get; set; }
+        Exception Exception { get; set; }
+        FailureType FailureType { get; set; }
+        bool Failed { get; set; }
+        bool Canceled { get; set; }
 
         IMessageExchangeProgress NewExchange();
+        IMessageExchangeProgress CurrentExchangeProgress { get; }
 
         CancellationToken Token { get; }
         Task<bool> Cancel();

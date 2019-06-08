@@ -11,12 +11,13 @@ using Android.Support.V4.App;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using OmniCore.Mobile.Droid;
 using OmniCore.Mobile.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Droid
 {
-    [Service(Exported = true, Name = "OmniCore.Mobile.Droid.OmniCoreIntentService", Enabled = true)]
+    [Service(Exported = true, Enabled = true)]
     public class OmniCoreIntentService : IntentService, ILocalRequestPublisher
     {
         public const string ACTION_START_SERVICE = "OmniCoreIntentService.START_SERVICE";
@@ -28,7 +29,7 @@ namespace OmniCore.Mobile.Droid
         private List<ILocalRequestSubscriber> Subscribers;
         private bool isStarted;
 
-        public OmniCoreIntentService() : base("OmniCoreIntentService")
+        public OmniCoreIntentService()
         {
             Subscribers = new List<ILocalRequestSubscriber>();
         }

@@ -3,6 +3,7 @@ using OmniCore.Mobile.Services;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
 using OmniCore.Radio.RileyLink;
+using Plugin.Permissions;
 using System;
 using System.Threading;
 using Xamarin.Forms;
@@ -13,24 +14,24 @@ namespace OmniCore.Mobile
     public partial class App : Application
     {
         public static App Instance => Application.Current as App;
-        public static IPodProvider PodProvider;
 
-        public LocalRequestHandler LocalRequestHandler { get; set; }
+        public IPodProvider PodProvider { get; private set; }
+        public LocalRequestHandler LocalRequestHandler { get; private set; }
+
         public App()
         {
             InitializeComponent();
-            PodProvider =  new ErosPodProvider(new RileyLinkProvider(SynchronizationContext.Current));
-
+            PodProvider =  new ErosPodProvider(new RileyLinkMessageExchangeProvider(SynchronizationContext.Current));
             LocalRequestHandler = new LocalRequestHandler();
-            var publisher = DependencyService.Get<ILocalRequestPublisher>();
-            publisher.Subscribe(LocalRequestHandler);
+            DependencyService.Get<ILocalRequestPublisher>().Subscribe(LocalRequestHandler);
+
+            // PodProvider.Register(44538, 1140293, 0x34FF1D52);
 
             MainPage = new Views.OmniCoreMain();
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
-            // Handle when your app starts
         }
 
         protected override void OnSleep()

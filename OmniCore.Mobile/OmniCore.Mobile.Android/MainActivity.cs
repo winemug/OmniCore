@@ -11,6 +11,8 @@ using Android.Content;
 using Plugin.BluetoothLE;
 using System.Runtime.InteropServices;
 using System.Security;
+using Xamarin.Forms;
+using OmniCore.Mobile.Interfaces;
 
 namespace OmniCore.Mobile.Droid
 {
@@ -29,6 +31,9 @@ namespace OmniCore.Mobile.Droid
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
+
+            DependencyService.Register<ILocalRequestPublisher, OmniCoreIntentService>();
+            DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
 
             var i = new Intent(this, typeof(OmniCoreIntentService));
             i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);

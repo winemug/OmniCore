@@ -10,23 +10,25 @@ namespace OmniCore.Model.Interfaces
     public interface IPodManager
     {
         IPod Pod { get; }
-        Task UpdateStatus(IMessageExchangeProgress progress, StatusRequestType requestType = StatusRequestType.Standard);
-        Task AcknowledgeAlerts(IMessageExchangeProgress progress, byte alertMask);
-        Task ConfigureAlerts(IMessageExchangeProgress progress, AlertConfiguration[] alertConfigurations);
+        Task<IConversation> StartConversation(int timeout=0);
 
-        Task Bolus(IMessageExchangeProgress progress, decimal bolusAmount);
-        Task CancelBolus(IMessageExchangeProgress progress);
-        Task SetTempBasal(IMessageExchangeProgress progress, decimal basalRate, decimal durationInHours);
-        Task CancelTempBasal(IMessageExchangeProgress progress);
-        Task StartExtendedBolus(IMessageExchangeProgress progress, decimal bolusAmount, decimal durationInHours);
-        Task CancelExtendedBolus(IMessageExchangeProgress progress);
-        Task SetBasalSchedule(IMessageExchangeProgress progress, decimal[] schedule, int utcOffsetInMinutes);
-        Task SuspendBasal(IMessageExchangeProgress progress);
+        Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard);
+        Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
+        Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
 
-        Task Pair(IMessageExchangeProgress progress, int utcTimeOffsetMinutes);
-        Task Activate(IMessageExchangeProgress progress);
-        Task InjectAndStart(IMessageExchangeProgress progress, decimal[] basalSchedule, int utcOffsetInMinutes);
+        Task Bolus(IConversation conversation, decimal bolusAmount);
+        Task CancelBolus(IConversation conversation);
+        Task SetTempBasal(IConversation conversation, decimal basalRate, decimal durationInHours);
+        Task CancelTempBasal(IConversation conversation);
+        Task StartExtendedBolus(IConversation conversation, decimal bolusAmount, decimal durationInHours);
+        Task CancelExtendedBolus(IConversation conversation);
+        Task SetBasalSchedule(IConversation conversation, decimal[] schedule, int utcOffsetInMinutes);
+        Task SuspendBasal(IConversation conversation);
 
-        Task Deactivate(IMessageExchangeProgress progress);
+        Task Pair(IConversation conversation, int utcTimeOffsetMinutes);
+        Task Activate(IConversation conversation);
+        Task InjectAndStart(IConversation conversation, decimal[] basalSchedule, int utcOffsetInMinutes);
+
+        Task Deactivate(IConversation conversation);
     }
 }

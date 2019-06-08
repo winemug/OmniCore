@@ -59,7 +59,7 @@ namespace OmniCore.Radio.RileyLink
             messageProgress.Statistics = new RileyLinkStatistics();
             if (FinalAckTask != null)
             {
-                messageProgress.ActionStatusText = "Waiting for previous radio operation to complete";
+                messageProgress.ActionText = "Waiting for previous radio operation to complete";
                 await FinalAckTask;
             }
 
@@ -290,7 +290,7 @@ namespace OmniCore.Radio.RileyLink
             try
             {
                 Debug.WriteLine("Sending final ack");
-                await SendPacket(new MessageExchangeProgress(), ackPacket);
+                await SendPacket(null, ackPacket);
                 Debug.WriteLine("Message exchange finalized");
             }
             catch(Exception)
@@ -549,22 +549,13 @@ namespace OmniCore.Radio.RileyLink
             return radio_packets;
         }
 
-        public bool ParseResponse(IMessage response, IPod pod, IMessageExchangeProgress progress)
+        public void ParseResponse(IMessage response, IPod pod, IMessageExchangeProgress progress)
         {
-            try
+            foreach (var mp in response.GetParts())
             {
-                foreach (var mp in response.GetParts())
-                {
-                    var er = mp as ErosResponse;
-                    er.Parse(pod);
-                }
+                var er = mp as ErosResponse;
+                er.Parse(pod);
             }
-            catch (Exception e)
-            {
-                return false;
-            }
-
-            return new MessageExchangeResult();
         }
     }
 }

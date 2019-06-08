@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Radio.RileyLink
 {
-    public class RileyLinkProvider : IMessageExchangeProvider
+    public class RileyLinkMessageExchangeProvider : IMessageExchangeProvider
     {
         private static RileyLink RileyLinkInstance;
         private static RileyLinkMessageExchange RileyLinkMessageExchange;
         private readonly SynchronizationContext UiSyncContext;
 
-        public RileyLinkProvider(SynchronizationContext uiSyncContext)
+        public RileyLinkMessageExchangeProvider(SynchronizationContext uiSyncContext)
         {
             UiSyncContext = uiSyncContext;
         }
 
-        public async Task<IMessageExchange> GetMessageExchanger(IMessageExchangeParameters messageExchangeParameters, IPod pod)
+        public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
         {
             if (RileyLinkInstance == null)
             {
