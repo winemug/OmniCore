@@ -61,9 +61,9 @@ namespace OmniCore.Mobile.ViewModels
                 if (Pod == null)
                     return $"No active pod";
                 else if (!Pod.Lot.HasValue)
-                    return $"Lot and Serial unknown. Radio address: 0x{Pod.RadioAddress:X8}";
+                    return $"R0x{Pod.RadioAddress:X8}";
                 else
-                    return $"Lot: {Pod.Lot} Serial: {Pod.Serial} Radio address: 0x{Pod.RadioAddress:X8}";
+                    return $"L{Pod.Lot} T{Pod.Serial} R0x{Pod.RadioAddress:X8}";
             }
         }
 
@@ -74,7 +74,7 @@ namespace OmniCore.Mobile.ViewModels
                 if (Pod == null)
                     return string.Empty;
                 else if (Pod.Status != null)
-                    return $"{Pod.Status.Created}";
+                    return $"{Pod.Status.Created.ToLocalTime()}";
                 else
                     return "Not yet updated";
             }
@@ -133,8 +133,15 @@ namespace OmniCore.Mobile.ViewModels
                     return Color.Beige;
                 else if (Pod.Status != null)
                 {
-                    var ts = TimeSpan.FromMinutes(Pod.Status.ActiveMinutes);
-                    return Color.LightGreen;
+                    var mins = Pod.Status.ActiveMinutes;
+                    if (mins < 24 * 60 * 3)
+                        return Color.LightGreen;
+                    if (mins < 24 * 60 * 3)
+                        return Color.Green;
+                    if (mins < 24 * 60 * 3)
+                        return Color.GreenYellow;
+
+                    return Color.IndianRed;
                 }
                 else
                     return Color.Beige;
