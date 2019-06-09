@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Mobile.Interfaces
 {
-    public interface ILocalRequestSubscriber
+    public interface IRemoteRequestSubscriber
     {
-        Task OnRequestReceived(string request);
+        Task<string> OnRequestReceived(string request);
     }
 }

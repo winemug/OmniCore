@@ -84,6 +84,7 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="OmniCoreApplication.cs" />
     <Compile Include="OmniCoreIntentService.cs" />
+    <Compile Include="RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

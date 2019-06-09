@@ -32,7 +32,7 @@ namespace OmniCore.Mobile.Droid
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
-            DependencyService.Register<ILocalRequestPublisher, OmniCoreIntentService>();
+            DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
 
             var i = new Intent(this, typeof(OmniCoreIntentService));

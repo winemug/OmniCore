@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Mobile.Services
 {
-    public class LocalRequestHandler : ILocalRequestSubscriber
+    public class RemoteRequestHandler : IRemoteRequestSubscriber
     {
-        public async Task OnRequestReceived(string request)
+        public async Task<string> OnRequestReceived(string request)
         {
-            Debug.WriteLine($"REQUEST RECEIVED: {request}");
+            return "{}";
         }
     }
 }

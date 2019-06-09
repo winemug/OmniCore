@@ -16,14 +16,16 @@ namespace OmniCore.Mobile
         public static App Instance => Application.Current as App;
 
         public IPodProvider PodProvider { get; private set; }
-        public LocalRequestHandler LocalRequestHandler { get; private set; }
+        public RemoteRequestHandler RequestHandler { get; private set; }
 
         public App()
         {
             InitializeComponent();
             PodProvider =  new ErosPodProvider(new RileyLinkMessageExchangeProvider(SynchronizationContext.Current));
-            LocalRequestHandler = new LocalRequestHandler();
-            DependencyService.Get<ILocalRequestPublisher>().Subscribe(LocalRequestHandler);
+            RequestHandler = new RemoteRequestHandler();
+            DependencyService
+                .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
+                .Subscribe(RequestHandler);
 
             // PodProvider.Register(44538, 1140293, 0x34FF1D52);
 
