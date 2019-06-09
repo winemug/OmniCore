@@ -75,7 +75,7 @@ namespace OmniCore.Model.Eros
                 if (ErosPod.RuntimeVariables.NonceSync.HasValue)
                 {
                     var responseMessage = response as ErosMessage;
-                    emp.MessageSequenceOverride = (responseMessage.sequence - 1) % 16;
+                    emp.MessageSequenceOverride = (responseMessage.sequence + 15) % 16;
                     messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
                     await messageExchange.InitializeExchange(progress);
                     response = await messageExchange.GetResponse(requestMessage, progress);
