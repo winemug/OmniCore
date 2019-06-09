@@ -182,6 +182,7 @@ namespace OmniCore.Radio.RileyLink
                 try
                 {
                     var receivedPacket = await this.ExchangePackets(messageProgress, packetToSend, expectedPacketType);
+                    ((RileyLinkStatistics)messageProgress.Statistics).PacketSent(packetToSend);
                     if (receivedPacket != null)
                         return receivedPacket;
                 }

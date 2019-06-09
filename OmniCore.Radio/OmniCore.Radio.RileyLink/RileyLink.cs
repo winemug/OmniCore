@@ -417,7 +417,7 @@ namespace OmniCore.Radio.RileyLink
                 else
                     response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN });
 
-                if (response != null && response.Length > 0 && response[0] == 0xe4)
+                if (response != null && response.Length > 0 && response[0] == 0x4e)
                 {
                     Debug.WriteLine("Radio configuration verified");
                 }

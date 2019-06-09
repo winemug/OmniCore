@@ -9,6 +9,8 @@ namespace OmniCore.Model.Interfaces
         int QueueWaitDuration { get; }
         int ExchangeDuration { get; }
 
+        int TotalRadioOverhead { get; }
+
         int PacketExchangeCount { get; }
         int PacketExchangeDurationAverage { get; }
 

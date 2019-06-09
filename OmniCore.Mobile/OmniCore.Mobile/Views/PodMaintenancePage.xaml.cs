@@ -205,7 +205,7 @@ namespace OmniCore.Mobile.Views
 
                 var basalSchedule = new decimal[48];
                 for (int i = 0; i < 48; i++)
-                    basalSchedule[i] = 0.05m;
+                    basalSchedule[i] = 0.40m;
 
                 await Task.Run(async () => await podManager.InjectAndStart(conversation, basalSchedule, 60).ConfigureAwait(false));
                 if (conversation.Failed)

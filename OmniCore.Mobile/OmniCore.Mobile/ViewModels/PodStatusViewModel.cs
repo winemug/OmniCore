@@ -46,10 +46,12 @@ namespace OmniCore.Mobile.ViewModels
                     OnPropertyChanged(nameof(Status));
                     OnPropertyChanged(nameof(LifetimeActive));
                     OnPropertyChanged(nameof(LifetimeRemaining));
+                    OnPropertyChanged(nameof(LifetimeProgress));
                     OnPropertyChanged(nameof(LifetimeColor));
-                    OnPropertyChanged(nameof(ReservoirColor));
                     OnPropertyChanged(nameof(ReservoirDelivered));
                     OnPropertyChanged(nameof(ReservoirRemaining));
+                    OnPropertyChanged(nameof(ReservoirProgress));
+                    OnPropertyChanged(nameof(ReservoirColor));
                 }
             }
         }
