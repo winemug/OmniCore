@@ -15,5 +15,10 @@ namespace OmniCore.Model.Eros
         public Guid PodId { get; set; }
         public decimal? ReservoirWarningAtLevel { get; set; }
         public int? ExpiryWarningAtMinute { get; set; }
+
+        public ErosPodUserSettings()
+        {
+            Created = DateTime.UtcNow;
+        }
     }
 }

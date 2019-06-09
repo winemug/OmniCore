@@ -23,5 +23,10 @@ namespace OmniCore.Model.Eros
         public PodProgress? ProgressBeforeFault { get; set; }
         public PodProgress? ProgressBeforeFault2 { get; set; }
         public int? TableAccessFault { get; set; }
+
+        public ErosPodFault()
+        {
+            Created = DateTime.UtcNow;
+        }
     }
 }

@@ -30,6 +30,11 @@ namespace OmniCore.Model.Eros
             }
         }
 
+        public ErosPodBasalSchedule()
+        {
+            Created = DateTime.UtcNow;
+        }
+
         public DateTime PodDateTime { get; set; }
         public DateTime Updated { get; set; }
     }

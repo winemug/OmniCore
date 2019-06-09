@@ -15,5 +15,10 @@ namespace OmniCore.Model.Eros
         public Guid PodId { get; set; }
         public int? RadioLowGain { get; set; }
         public int? RadioRssi { get; set; }
+
+        public ErosPodRadioIndicators()
+        {
+            Created = DateTime.UtcNow;
+        }
     }
 }

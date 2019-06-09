@@ -34,5 +34,10 @@ namespace OmniCore.Model.Eros
                 _message_seq = value % 16;
             }
         }
+
+        public ErosPodStatus()
+        {
+            Created = DateTime.UtcNow;
+        }
     }
 }

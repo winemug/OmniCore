@@ -19,6 +19,11 @@ namespace OmniCore.Model.Eros
         [Ignore]
         public uint[] AlertStates { get; set; }
 
+        public ErosPodAlertStates()
+        {
+            Created = DateTime.UtcNow;
+        }
+
         public string AlertStatesJson
         {
             get
