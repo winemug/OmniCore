@@ -5,28 +5,48 @@
              Appearing="ContentPage_Appearing"
              >
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical">
-            <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding UpdateButtonEnabled}"/>
-            <StackLayout Orientation="Horizontal">
-                <Label>Identification: </Label>
-                <Label Text="{Binding Id}"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label>Status:</Label>
-                <Label Text="{Binding Status}"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label>Updated: </Label>
-                <Label Text="{Binding Updated}"/>
-            </StackLayout>
+        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Image Source="ic_pod.svg" Scale="1.6" Opacity="0.2"/>
+            <ScrollView>
+                <StackLayout Orientation="Vertical">
+                    <Label Text="{Binding Id}" HorizontalOptions="Center"/>
+                    <Label Text="{Binding Status}" HorizontalOptions="Center"/>
 
-            <Label>Pod lifetime</Label>
-            <Label>Insulin status</Label>
-            <Label>Alerts</Label>
-            <Label>Fault status</Label>
-            <Label>Pod datetime</Label>
-            <Label>Pod identification</Label>
-            <Label>Pod version</Label>
-        </StackLayout>
+                    <Label/>
+                    <Label HorizontalOptions="Center" FontSize="Large">Lifetime</Label>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                        <Label Text="Remaining: "/>
+                        <Label Text="{Binding LifetimeRemaining}"/>
+                        <Label Text="Active for: " HorizontalOptions="End"/>
+                        <Label Text="{Binding LifetimeActive}" HorizontalOptions="End"/>
+                    </StackLayout>
+                    <ProgressBar ProgressColor="{Binding LifetimeColor}"
+                                 Progress="{Binding LifetimeProgress}" 
+                                 />
+
+                    <Label/>
+                    <Label HorizontalOptions="Center" FontSize="Large">Insulin</Label>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                        <Label Text="Remaining:"/>
+                        <Label Text="{Binding ReservoirRemaining}"/>
+                        <Label Text="Delivered:"/>
+                        <Label Text="{Binding ReservoirDelivered}" HorizontalOptions="End"/>
+                    </StackLayout>
+                    <ProgressBar ProgressColor="{Binding ReservoirColor}"
+                                 Progress="{Binding ReservoirProgress}" 
+                                 />
+
+
+                </StackLayout>
+            </ScrollView>
+            <StackLayout Orientation="Vertical" VerticalOptions="End">
+                <StackLayout Orientation="Horizontal">
+                    <Label>Status Updated:</Label>
+                    <Label Text="{Binding Updated}"/>
+                </StackLayout>
+                <Button Text="Update Status" Clicked="Update_Button_Clicked" IsEnabled="{Binding UpdateButtonEnabled}"
+                    VerticalOptions="End"/>
+            </StackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

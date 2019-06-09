@@ -367,6 +367,8 @@ namespace OmniCore.Model.Eros
 
                     if (Pod.Status.Progress != PodProgress.Purging)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start priming");
+
+                    Pod.ReservoirUsedForPriming = 2.60m;
                 }
 
                 while (Pod.Status.Progress == PodProgress.Purging)
@@ -462,6 +464,9 @@ namespace OmniCore.Model.Eros
 
                     if (Pod.Status.Progress != PodProgress.Priming)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start priming the cannula for insertion");
+
+                    if (Pod.ReservoirUsedForPriming.HasValue)
+                        Pod.ReservoirUsedForPriming += 0.50m;
 
                     Pod.InsertionDate = DateTime.UtcNow;
                 }

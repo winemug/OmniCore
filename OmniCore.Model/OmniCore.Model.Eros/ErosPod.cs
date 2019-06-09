@@ -23,20 +23,32 @@ namespace OmniCore.Model.Eros
         private IPodStatus status;
         private IPodUserSettings userSettings;
         private ErosPodRuntimeVariables runtimeVariables;
+        private DateTime created;
+        private uint? lot;
+        private uint? serial;
+        private uint radioAddress;
+        private DateTime? activationDate;
+        private DateTime? insertionDate;
+        private string versionPi;
+        private string versionPm;
+        private string versionUnknown;
+        private bool archived;
+        private decimal? reservoirUsedForPriming;
 
         [PrimaryKey]
         public Guid? Id { get; set; }
-        public DateTime Created { get; set; }
+        public DateTime Created { get => created; set { SetProperty(ref created, value); } }
 
-        public uint? Lot { get; set; }
-        public uint? Serial { get; set; }
-        public uint RadioAddress { get; set; }
-        public DateTime? ActivationDate { get; set; }
-        public DateTime? InsertionDate { get; set; }
-        public string VersionPi { get; set; }
-        public string VersionPm { get; set; }
-        public string VersionUnknown { get; set; }
-        public bool Archived { get; set; }
+        public uint? Lot { get => lot; set { SetProperty(ref lot, value); } }
+        public uint? Serial { get => serial; set { SetProperty(ref serial, value); } }
+        public uint RadioAddress { get => radioAddress; set { SetProperty(ref radioAddress, value); } }
+        public DateTime? ActivationDate { get => activationDate; set { SetProperty(ref activationDate, value); } }
+        public DateTime? InsertionDate { get => insertionDate; set { SetProperty(ref insertionDate, value); } }
+        public string VersionPi { get => versionPi; set { SetProperty(ref versionPi, value); } }
+        public string VersionPm { get => versionPm; set { SetProperty(ref versionPm, value); } }
+        public string VersionUnknown { get => versionUnknown; set { SetProperty(ref versionUnknown, value); } }
+        public bool Archived { get => archived; set { SetProperty(ref archived, value); } }
+        public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
 
         [Ignore]
         public IPodAlertStates AlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }

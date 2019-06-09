@@ -20,6 +20,7 @@ namespace OmniCore.Model.Interfaces
         string VersionPi { get; set; }
         string VersionPm { get; set; }
         string VersionUnknown { get; set; }
+        decimal? ReservoirUsedForPriming { get; set; }
 
         bool Archived { get; set; }
 
