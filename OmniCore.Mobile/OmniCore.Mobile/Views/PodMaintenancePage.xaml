@@ -11,7 +11,6 @@
             <Button Text="Resume Activation" Clicked="ResumeActivateClicked" IsVisible="{Binding ResumeActivationButtonVisible}"/>
             <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsVisible="{Binding DeactivateButtonVisible}"/>
             <Button Text="Activate New Pod" Clicked="ActivateClicked" IsVisible="{Binding ActivateNewButtonVisible}"/>
-            <vw:MessageExchangeView x:Name="MessageExchangeDisplay"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

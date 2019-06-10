@@ -27,12 +27,13 @@ namespace OmniCore.Mobile
                 .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
                 .Subscribe(RequestHandler);
 
-            // PodProvider.Register(44538, 1140293, 0x34FF1D52);
+            if (PodProvider.Current == null)
+                PodProvider.Register(44538, 1180299, 0x34FF1D55);
 
             MainPage = new Views.OmniCoreMain();
         }
 
-        protected override async void OnStart()
+        protected override void OnStart()
         {
         }
 

@@ -24,6 +24,7 @@ namespace OmniCore.Mobile.Droid
         public const string ACTION_START_SERVICE = "OmniCoreIntentService.START_SERVICE";
         public const string ACTION_STOP_SERVICE = "OmniCoreIntentService.STOP_SERVICE";
         public const string ACTION_REQUEST_COMMAND = "OmniCoreIntentService.REQUEST_COMMAND";
+
         public const string NOTIFICATION_CHANNEL = "OmniCore";
         public const string NOTIFICATION_CHANNEL_NAME = "OmniCore";
         public const string NOTIFICATION_CHANNEL_DESCRIPTION = "OmniCore";

@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Model;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
@@ -30,28 +31,8 @@ namespace OmniCore.Radio.RileyLink
 
     }
 
-    public class RileyLinkStatistics : IMessageExchangeStatistics
+    public class RileyLinkStatistics : MessageExchangeStatistics
     {
-        public int QueueWaitDuration { get; set; }
-
-        public int ExchangeDuration { get; set; }
-
-        public int TotalRadioOverhead { get; set; }
-
-        public int PacketExchangeCount { get; set; }
-
-        public int PacketExchangeDurationAverage { get; set; }
-
-        public int PacketExchangeDurationMin { get; set; }
-
-        public int PacketExchangeDurationMax { get; set; }
-
-        public int PodRssiAverage { get; set; }
-
-        public int RadioRssiAverage { get => radioRssiTotal / radioRssiCount; }
-
-
-
         private int started;
         public RileyLinkStatistics()
         {
@@ -71,12 +52,14 @@ namespace OmniCore.Radio.RileyLink
         {
             endedME = Environment.TickCount;
             ExchangeDuration = endedME - startedME;
+            RadioRssiAverage = radioRssiTotal / radioRssiCount;
         }
 
         internal void ExitPrematurely()
         {
             endedME = Environment.TickCount;
             ExchangeDuration = endedME - startedME;
+            RadioRssiAverage = radioRssiTotal / radioRssiCount;
         }
 
         private int radioOverheadStart;

@@ -6,9 +6,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodRadioIndicators
     {
-        uint? Id { get; set; }
-        DateTime Created { get; set; }
-        Guid PodId { get; set; }
+        long? Id { get; set; }
+        long ResultId { get; set; }
 
         int? RadioLowGain { get; set; }
         int? RadioRssi { get; set; }

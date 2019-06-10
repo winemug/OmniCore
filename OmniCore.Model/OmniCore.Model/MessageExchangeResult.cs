@@ -11,7 +11,7 @@ namespace OmniCore.Model
     public class MessageExchangeResult : IMessageExchangeResult
     {
         [PrimaryKey]
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         public Guid PodId { get; set; }
 

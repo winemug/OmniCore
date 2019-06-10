@@ -20,7 +20,6 @@ namespace OmniCore.Model
         private bool finished;
 
         private string actionText;
-        private IConversation Conversation;
 
         private IMessageExchangeStatistics statistics;
         private IMessageExchangeResult result;
@@ -34,6 +33,7 @@ namespace OmniCore.Model
 
         public IMessageExchangeStatistics Statistics { get => statistics; set => SetProperty(ref statistics, value); }
         public IMessageExchangeResult Result { get => result; set => SetProperty(ref result, value); }
+        public IConversation Conversation { get; set; }
 
         public string ActionText { get => actionText; set => SetProperty(ref actionText, value); }
 
@@ -41,10 +41,10 @@ namespace OmniCore.Model
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public MessageExchangeProgress(IConversation conversation)
+        public MessageExchangeProgress(IConversation conversation, RequestType type, string parameters = null)
         {
             Conversation = conversation;
-            Result = new MessageExchangeResult();
+            Result = new MessageExchangeResult() { Source = Conversation.RequestSource, Type = type, Parameters = parameters };
         }
 
         public void SetException(Exception exception)

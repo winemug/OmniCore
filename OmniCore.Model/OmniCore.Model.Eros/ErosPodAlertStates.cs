@@ -11,10 +11,9 @@ namespace OmniCore.Model.Eros
     public class ErosPodAlertStates : IPodAlertStates
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id { get; set; }
+        public long? Id { get; set; }
+        public long ResultId { get; set; }
 
-        public DateTime Created { get; set; }
-        public Guid PodId { get; set; }
         public uint AlertW278 { get; set; }
         [Ignore]
         public uint[] AlertStates { get; set; }

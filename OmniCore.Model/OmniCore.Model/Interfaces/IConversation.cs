@@ -19,8 +19,9 @@ namespace OmniCore.Model.Interfaces
         bool Failed { get; set; }
         bool Canceled { get; set; }
 
-        IMessageExchangeProgress NewExchange();
-        IMessageExchangeProgress CurrentExchangeProgress { get; }
+        IMessageExchangeProgress NewExchange(IMessage requestMessage);
+        RequestSource RequestSource { get; set; }
+        IMessageExchangeProgress CurrentExchange { get; }
 
         CancellationToken Token { get; }
         Task<bool> Cancel();

@@ -6,9 +6,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodAlertStates
     {
-        uint? Id { get; set; }
-        DateTime Created { get; set; }
-        Guid PodId { get; set; }
+        long? Id { get; set; }
+        long ResultId { get; set; }
 
 
         uint AlertW278 { get; set; }

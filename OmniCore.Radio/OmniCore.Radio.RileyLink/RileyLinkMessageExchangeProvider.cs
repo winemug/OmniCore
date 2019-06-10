@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Eros;
+﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;

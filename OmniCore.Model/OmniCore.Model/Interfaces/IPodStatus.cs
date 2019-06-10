@@ -7,9 +7,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodStatus
     {
-        uint? Id { get; set; }
-        DateTime Created { get; set; }
-        Guid PodId { get; set; }
+        long? Id { get; set; }
+        long ResultId { get; set; }
 
 
         bool Faulted { get; set; }

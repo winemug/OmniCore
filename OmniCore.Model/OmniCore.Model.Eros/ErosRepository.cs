@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using OmniCore.Model.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +23,7 @@ namespace OmniCore.Model.Eros
 
         private ErosRepository()
         {
-            DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "omnicore.db3");
+            DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
             //DbConnectionString = $"Data Source={DbPath}";
             Initialize();
         }
@@ -42,6 +43,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosPodStatus>();
                     conn.CreateTable<ErosPodUserSettings>();
                     conn.CreateTable<MessageExchangeResult>();
+                    conn.CreateTable<MessageExchangeStatistics>();
                     conn.Commit();
                 }
             }
@@ -84,40 +86,56 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public void Save(ErosPod pod)
+        public void Save(IPod pod, IMessageExchangeResult result = null, IMessageExchangeStatistics statistics = null)
         {
             using (var conn = new SQLiteConnection(DbPath))
             {
                 conn.BeginTransaction();
                 conn.InsertOrReplace(pod);
+
+                if (result != null)
+                {
+                    result.PodId = pod.Id.Value;
+                    conn.InsertOrReplace(result);
+                }
+                long? resultId = result?.Id;
+
+                if (statistics != null)
+                {
+                    if (resultId.HasValue)
+                        statistics.ResultId = resultId.Value;
+                    conn.InsertOrReplace(statistics);
+                }
+
                 if (pod.AlertStates != null)
                 {
-                    pod.AlertStates.PodId = pod.Id.Value;
+                    if (resultId.HasValue)
+                        pod.AlertStates.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.AlertStates);
                 }
                 if (pod.BasalSchedule != null)
                 {
-                    pod.BasalSchedule.PodId = pod.Id.Value;
+                    pod.BasalSchedule.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.BasalSchedule);
                 }
                 if (pod.Fault != null)
                 {
-                    pod.Fault.PodId = pod.Id.Value;
+                    pod.Fault.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.Fault);
                 }
                 if (pod.RadioIndicators!= null)
                 {
-                    pod.RadioIndicators.PodId = pod.Id.Value;
+                    pod.RadioIndicators.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.RadioIndicators);
                 }
                 if (pod.Status != null)
                 {
-                    pod.Status.PodId = pod.Id.Value;
+                    pod.Status.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.Status);
                 }
                 if (pod.UserSettings != null)
                 {
-                    pod.AlertStates.PodId = pod.Id.Value;
+                    pod.AlertStates.ResultId = resultId.Value;
                     conn.InsertOrReplace(pod.UserSettings);
                 }
                 conn.Commit();
@@ -128,6 +146,8 @@ namespace OmniCore.Model.Eros
         {
             if (pod == null)
                 return null;
+
+            var x = conn.Table<ErosPodAlertStates>().Jo
 
             pod.AlertStates = conn.Table<ErosPodAlertStates>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();

@@ -10,11 +10,9 @@ namespace OmniCore.Model.Eros
     public class ErosPodStatus : IPodStatus
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id  { get; set; }
+        public long? Id  { get; set; }
+        public long ResultId { get; set; }
 
-        public DateTime Created  { get; set; }
-
-        public Guid PodId  { get; set; }
         public bool Faulted  { get; set; }
         public decimal NotDeliveredInsulin  { get; set; }
         public decimal DeliveredInsulin  { get; set; }

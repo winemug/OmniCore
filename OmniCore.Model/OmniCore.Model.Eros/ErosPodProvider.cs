@@ -26,7 +26,7 @@ namespace OmniCore.Model.Eros
 
         public void Archive()
         {
-            if (PodManager != null)
+            if (Current != null)
             {
                 PodManager.Pod.Archived = true;
                 ErosRepository.Instance.Save(PodManager.Pod as ErosPod);
@@ -58,7 +58,7 @@ namespace OmniCore.Model.Eros
         {
             lock (this)
             {
-                if (PodManager != null)
+                if (Current != null)
                 {
                     Archive();
                     RaisePodChanged();
@@ -83,7 +83,7 @@ namespace OmniCore.Model.Eros
                 pod.Created = DateTime.UtcNow;
                 ErosRepository.Instance.Save(pod);
                 RaisePodChanged();
-                return PodManager;
+                return Current;
             }
         }
 
@@ -91,7 +91,7 @@ namespace OmniCore.Model.Eros
         {
             lock (this)
             {
-                if (PodManager != null)
+                if (Current != null)
                 {
                     Archive();
                     RaisePodChanged();
@@ -101,7 +101,7 @@ namespace OmniCore.Model.Eros
                 pod.Created = DateTime.UtcNow;
                 ErosRepository.Instance.Save(pod);
                 RaisePodChanged();
-                return PodManager;
+                return Current;
             }
         }
 

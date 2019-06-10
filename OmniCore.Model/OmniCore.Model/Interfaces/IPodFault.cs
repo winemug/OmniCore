@@ -7,9 +7,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodFault
     {
-        uint? Id { get; set; }
-        DateTime Created { get; set; }
-        Guid PodId { get; set; }
+        long? Id { get; set; }
+        long ResultId { get; set; }
 
         int? FaultCode { get; set; }
         int? FaultRelativeTime { get; set; }

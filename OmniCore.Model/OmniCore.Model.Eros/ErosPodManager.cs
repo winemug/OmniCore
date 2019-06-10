@@ -39,7 +39,7 @@ namespace OmniCore.Model.Eros
             ConversationMutex = new SemaphoreSlim(1, 1);
         }
 
-        public async Task<IConversation> StartConversation(int timeoutMilliseconds = 0)
+        public async Task<IConversation> StartConversation(int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
         {
             if (timeoutMilliseconds == 0)
             {
@@ -51,7 +51,7 @@ namespace OmniCore.Model.Eros
                     return null;
             }
 
-            return new ErosConversation(ConversationMutex);
+            return new ErosConversation(ConversationMutex) { RequestSource = source };
         }
 
         private ErosMessageExchangeParameters GetStandardParameters()
@@ -63,7 +63,7 @@ namespace OmniCore.Model.Eros
                     IConversation conversation)
         {
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
-            var progress = conversation.NewExchange();
+            var progress = conversation.NewExchange(requestMessage);
             try
             {
                 progress.Running = true;
@@ -90,12 +90,12 @@ namespace OmniCore.Model.Eros
             }
             finally
             {
-                ErosRepository.Instance.Save(ErosPod);
                 progress.Running = false;
                 progress.Finished = true;
+                ErosRepository.Instance.Save(ErosPod, progress.Result, progress.Statistics);
             }
 
-            return !conversation.Failed && !conversation.Canceled;
+            return progress.Result.Success;
         }
 
         private async Task<bool> UpdateStatusInternal(IConversation conversation,
@@ -110,7 +110,10 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                await this.UpdateStatusInternal(conversation, updateType);
+                if (!await this.UpdateStatusInternal(conversation, updateType))
+                {
+                    conversation.Exception = conversation.CurrentExchange.Result.Exception;
+                }
             }
             catch (Exception e)
             {

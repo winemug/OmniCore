@@ -9,16 +9,14 @@ namespace OmniCore.Model.Eros
     public class ErosPodRadioIndicators : IPodRadioIndicators
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id { get; set; }
+        public long? Id { get; set; }
+        public long ResultId { get; set; }
 
-        public DateTime Created { get; set; }
-        public Guid PodId { get; set; }
         public int? RadioLowGain { get; set; }
         public int? RadioRssi { get; set; }
 
         public ErosPodRadioIndicators()
         {
-            Created = DateTime.UtcNow;
         }
     }
 }

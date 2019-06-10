@@ -31,7 +31,8 @@ namespace OmniCore.Model.Eros
         public PacketType? type { get; set; }
         public IList<IMessagePart> Responses { get; private set; }
 
-
+        public RequestType RequestType { get; set; }
+        public string Parameters { get; set; }
     }
 }
 

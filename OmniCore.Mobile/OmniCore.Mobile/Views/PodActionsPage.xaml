@@ -10,7 +10,6 @@
             <Button Text="Bolus" Clicked="Button_Clicked"/>
             <Button Text="Suspend Insulin Delivery"/>
             <Button Text="Resume Insulin Delivery"/>
-            <vw:MessageExchangeView x:Name="MeView"/>
             <Label>Active Basalprogram</Label>
             <Label>Active Basalrate</Label>
         </StackLayout>

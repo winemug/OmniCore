@@ -21,6 +21,7 @@ namespace OmniCore.Model.Eros
         public bool Canceled { get; set; }
 
         public FailureType FailureType { get; set; }
+        public RequestSource RequestSource { get; set; }
 
         public Exception Exception
         {
@@ -40,7 +41,7 @@ namespace OmniCore.Model.Eros
         public CancellationToken Token => CancellationTokenSource.Token;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public IMessageExchangeProgress CurrentExchangeProgress { get; private set; }
+        public IMessageExchangeProgress CurrentExchange { get; private set; }
 
         private Exception exception;
         private readonly SemaphoreSlim ConversationMutex;
@@ -92,17 +93,17 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public IMessageExchangeProgress NewExchange()
+        public IMessageExchangeProgress NewExchange(IMessage requestMessage)
         {
-            if (CurrentExchangeProgress != null)
+            if (CurrentExchange != null)
             {
-                if (!CurrentExchangeProgress.Finished)
+                if (!CurrentExchange.Finished)
                 {
                     throw new OmniCoreWorkflowException(FailureType.WorkflowError, "Cannot start a new exchange while one is already running");
                 }
             }
-            CurrentExchangeProgress = new MessageExchangeProgress(this);
-            return CurrentExchangeProgress;
+            CurrentExchange = new MessageExchangeProgress(this, requestMessage.RequestType, requestMessage.Parameters);
+            return CurrentExchange;
         }
 
         #region IDisposable Support

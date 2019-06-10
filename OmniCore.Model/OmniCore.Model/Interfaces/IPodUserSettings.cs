@@ -6,9 +6,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodUserSettings
     {
-        uint? Id { get; set; }
-        DateTime Created { get; set; }
-        Guid PodId { get; set; }
+        long? Id { get; set; }
+        long ResultId { get; set; }
 
         decimal? ReservoirWarningAtLevel { get; set; }
         int? ExpiryWarningAtMinute { get; set; }

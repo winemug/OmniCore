@@ -23,7 +23,8 @@ namespace OmniCore.Radio.RileyLink
         private Task FinalAckTask = null;
         private SynchronizationContext UiContext;
 
-        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance, SynchronizationContext uiContext)
+        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance,
+            SynchronizationContext uiContext)
         {
             UiContext = uiContext;
             SetParameters(messageExchangeParameters, pod, rileyLinkInstance);

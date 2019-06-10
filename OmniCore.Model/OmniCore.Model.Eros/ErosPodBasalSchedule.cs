@@ -10,10 +10,9 @@ namespace OmniCore.Model.Eros
     public class ErosPodBasalSchedule : IPodBasalSchedule
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id { get; set; }
+        public long? Id { get; set; }
+        public long ResultId { get; set; }
 
-        public DateTime Created { get; set; }
-        public Guid PodId { get; set; }
         public int UtcOffset { get; set; }
         [Ignore]
         public decimal[] BasalSchedule { get; set; }

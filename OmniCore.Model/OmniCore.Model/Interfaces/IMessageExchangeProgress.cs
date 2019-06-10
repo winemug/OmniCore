@@ -9,6 +9,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchangeProgress : INotifyPropertyChanged
     {
+        IConversation Conversation { get; }
+
         string ActionText { get; set; }
 
         bool CanBeCanceled { get; set; }

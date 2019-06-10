@@ -9,7 +9,8 @@ namespace OmniCore.Model.Eros
     public class ErosPodUserSettings : IPodUserSettings
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id { get; set; }
+        public long? Id { get; set; }
+        public long ResultId { get; set; }
 
         public DateTime Created { get; set; }
         public Guid PodId { get; set; }

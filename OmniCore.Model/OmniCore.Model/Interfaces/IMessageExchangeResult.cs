@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchangeResult
     {
-        int? Id { get; set; }
+        long? Id { get; set; }
         Guid PodId { get; set; }
 
         DateTime? RequestTime { get; set; }

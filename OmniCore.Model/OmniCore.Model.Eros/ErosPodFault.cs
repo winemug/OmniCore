@@ -10,10 +10,9 @@ namespace OmniCore.Model.Eros
     public class ErosPodFault : IPodFault
     {
         [PrimaryKey, AutoIncrement]
-        public uint? Id { get; set; }
+        public long? Id { get; set; }
+        public long ResultId { get; set; }
 
-        public DateTime Created { get; set; }
-        public Guid PodId { get; set; }
         public int? FaultCode { get; set; }
         public int? FaultRelativeTime { get; set; }
         public bool? FaultedWhileImmediateBolus { get; set; }

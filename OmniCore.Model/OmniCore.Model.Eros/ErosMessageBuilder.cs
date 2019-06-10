@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Enums;
+﻿using Newtonsoft.Json;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
@@ -14,9 +15,15 @@ namespace OmniCore.Model.Eros
         private Bytes MessageBody = new Bytes();
         private List<IMessagePart> Parts = new List<IMessagePart>();
 
+        private RequestType? Type;
+        private object Parameters;
+
         public IMessage Build()
         {
-            return new ErosMessage() { parts = Parts };
+            return new ErosMessage() {
+                parts = Parts,
+                RequestType = Type.Value,
+                Parameters = Parameters == null ? null : JsonConvert.SerializeObject(Parameters)};
         }
 
         public IMessageBuilder WithPart(IMessagePart request)
@@ -27,12 +34,23 @@ namespace OmniCore.Model.Eros
 
         public IMessageBuilder WithAssignAddress(uint address)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.AssignAddress;
+                Parameters = new { Address = address };
+            }
             return WithPart(new ErosRequest(PartType.RequestAssignAddress, new Bytes(address)));
         }
 
         public IMessageBuilder WithSetupPod(uint lot, uint tid, uint address,
             int year, byte month, byte day, byte hour, byte minute)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.AssignAddress;
+                Parameters = new { Address = address };
+            }
+
             var cmd_body = new Bytes();
             cmd_body.Append(address);
             cmd_body.Append(new byte[] { 0x14, 0x04 });
@@ -44,6 +62,12 @@ namespace OmniCore.Model.Eros
 
         public IMessageBuilder WithAlertSetup(List<AlertConfiguration> alert_configurations)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.ConfigureAlerts;
+                Parameters = alert_configurations.ToArray();
+            }
+
             var cmd_body = new Bytes();
             foreach (var ac in alert_configurations)
             {
@@ -99,41 +123,82 @@ namespace OmniCore.Model.Eros
 
         public IMessageBuilder WithStatus(StatusRequestType statusRequestType = StatusRequestType.Standard)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.Status;
+                Parameters = new { StatusRequestType = statusRequestType };
+            }
             return WithPart(new ErosRequest(PartType.RequestStatus, new Bytes().Append((byte)statusRequestType)));
         }
 
         public IMessageBuilder WithAcknowledgeAlerts(byte alert_mask)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.AcknowledgeAlerts;
+                Parameters = new { AlertMask = alert_mask };
+            }
             return WithPart(new ErosRequest(PartType.RequestAcknowledgeAlerts, new Bytes().Append(alert_mask), true));
         }
 
         public IMessageBuilder WithDeactivate()
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.DeactivatePod;
+                Parameters = null;
+            }
             return WithPart(new ErosRequest(PartType.RequestDeactivatePod, new Bytes(), true));
         }
 
         public IMessageBuilder WithDeliveryFlags(byte byte16, byte byte17)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.SetDeliveryFlags;
+                Parameters = new { Byte16 = byte16, Byte17 = byte17 };
+            }
             return WithPart(new ErosRequest(PartType.RequestSetDeliveryFlags, new Bytes().Append(byte16).Append(byte17), true));
         }
 
         public IMessageBuilder WithCancelBolus()
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.CancelBolus;
+                Parameters = null;
+            }
             return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x04), true));
         }
 
         public IMessageBuilder WithCancelTempBasal()
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.CancelTempBasal;
+                Parameters = null;
+            }
             return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x02), true));
         }
 
         public IMessageBuilder WithStopBasalInsulin()
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.CancelBasal;
+                Parameters = null;
+            }
+
             return WithPart(new ErosRequest(PartType.RequestCancelDelivery, new Bytes().Append(0x01), true));
         }
 
         public IMessageBuilder WithTempBasal(decimal basal_rate_iuhr, decimal duration_hours)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.SetTempBasal;
+                Parameters = new { BasalRate = basal_rate_iuhr, Duration = duration_hours };
+            }
             var half_hour_count = (int)(duration_hours * 2.0m);
             var hh_units = new decimal[half_hour_count];
             for (int i = 0; i < half_hour_count; i++)
@@ -184,16 +249,31 @@ namespace OmniCore.Model.Eros
 
         public IMessageBuilder WithPrimeCannula()
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.PrimeCannula;
+                Parameters = null;
+            }
             return WithImmediatePulses(52, 8, 1);
         }
 
-        public IMessageBuilder WithInsertCannula()
+        public IMessageBuilder WithInsertCannula(ushort additionalTicks = 0)
         {
-            return WithImmediatePulses(10, 8, 1);
+            if (!Type.HasValue)
+            {
+                Type = RequestType.InsertCannula;
+                Parameters = new { AdditionalTicks = additionalTicks };
+            }
+            return WithImmediatePulses((ushort)(10 + additionalTicks), 8, 1);
         }
 
         public IMessageBuilder WithBolus(decimal iu_bolus)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.Bolus;
+                Parameters = new { ImmediateUnits = iu_bolus };
+            }
             return WithImmediatePulses((ushort)(iu_bolus / 0.05m));
         }
 
