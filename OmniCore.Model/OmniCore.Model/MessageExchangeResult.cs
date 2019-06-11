@@ -5,6 +5,7 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SQLiteNetExtensions.Attributes;
 
 namespace OmniCore.Model
 {
@@ -29,17 +30,29 @@ namespace OmniCore.Model
 
         [Ignore]
         public Exception Exception { get; set; }
-        [Ignore]
+
+        public long? StatisticsId { get; set; }
+        [OneToOne(nameof(StatisticsId))]
         public IMessageExchangeStatistics Statistics { get; set; }
-        [Ignore]
+
+        public long? AlertStatesId { get; set; }
+        [OneToOne(nameof(AlertStatesId))]
         public IPodAlertStates AlertStates { get; set; }
-        [Ignore]
+
+        public long? BasalScheduleId { get; set; }
+        [OneToOne(nameof(BasalScheduleId))]
         public IPodBasalSchedule BasalSchedule { get; set; }
-        [Ignore]
+
+        public long? FaultId { get; set; }
+        [OneToOne(nameof(FaultId))]
         public IPodFault Fault { get; set; }
-        [Ignore]
+
+        public long? StatusId { get; set; }
+        [OneToOne(nameof(StatusId))]
         public IPodStatus Status { get; set; }
-        [Ignore]
+
+        public long? UserSettingsId { get; set; }
+        [OneToOne(nameof(UserSettingsId))]
         public IPodUserSettings UserSettings { get; set; }
 
     }

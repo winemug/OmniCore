@@ -1,10 +1,12 @@
 ﻿using OmniCore.Mobile.Interfaces;
 using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OmniCore.Mobile.Services
 {
@@ -17,33 +19,21 @@ namespace OmniCore.Mobile.Services
 
         public async Task<string> OnRequestReceived(string requestText)
         {
-            var result = new RemoteResult();
             var request = RemoteRequest.FromJson(requestText);
 
             if (request.Type.HasValue)
             {
-                await Execute(request, result);
+                var result = await Execute(request);
+                return result.ToJson();
             }
-
-            return result.ToJson();
+            return null;
         }
 
-        private async Task Execute(RemoteRequest request, RemoteResult result)
+        private async Task<RemoteResult> Execute(RemoteRequest request)
         {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-
-            using (var conversation = await podManager.StartConversation())
-            {
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
-            }
-
             switch (request.Type.Value)
             {
                 case RemoteRequestType.Bolus:
-                    result.Status = CreateFromCurrentStatus();
-                    result.Success = false;
                     break;
                 case RemoteRequestType.CancelBolus:
                     result.Success = false;
@@ -58,8 +48,32 @@ namespace OmniCore.Mobile.Services
                     result.Success = false;
                     break;
                 case RemoteRequestType.UpdateStatus:
-                    break;
+                    return await UpdateStatus(request.StatusRequestType ?? 0);
             }
+        }
+
+        private async Task<RemoteResult> UpdateStatus(int reqType)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+
+            var result = new RemoteResult();
+            using (var conversation = await podManager.StartConversation())
+            {
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+
+                result.Status = CreateFromCurrentStatus();
+                result.Success = !conversation.Failed;
+                result.RequestsToDate = GetRequestsToDate(int fromRequestId);
+            }
+            return result;
+        }
+
+        private RemoteRequest[] GetRequestsToDate(int earliestRequestId)
+        {
+            var rep = ErosRepository.Instance;
+            var unfiltered = rep.GetResults(earliestRequestId);
         }
 
         private RemoteResultPodStatus CreateFromCurrentStatus()

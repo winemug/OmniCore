@@ -30,5 +30,12 @@ namespace OmniCore.Model.Interfaces
         IPodStatus Status { get; set; }
         IPodUserSettings UserSettings { get; set; }
 
+        long? StatisticsId { get; set; }
+        long? AlertStatesId { get; set; }
+        long? BasalScheduleId { get; set; }
+        long? FaultId { get; set; }
+        long? StatusId { get; set; }
+        long? UserSettingsId { get; set; }
+
     }
 }
