@@ -35,10 +35,10 @@ namespace OmniCore.Mobile.Views
 
                 using(var conversation = await podManager.StartConversation())
                 {
-                    if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                    if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                         await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
 
-                    if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                    if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                     {
                         var dlgResult = await DisplayAlert("Pod Deactivation",
                             @"This pod has not been paired yet and cannot be deactivated. Would you like to remove the pod from the system? " +
@@ -52,7 +52,7 @@ namespace OmniCore.Mobile.Views
                         return;
                     }
 
-                    if (podManager.Pod.Status.Progress < PodProgress.Running)
+                    if (podManager.Pod.LastStatus.Progress < PodProgress.Running)
                     {
                         var dlgResult = await DisplayAlert("Pod Deactivation",
                             @"This pod has not been started yet. Are you sure you want to deactivate it without starting? " +
@@ -62,7 +62,7 @@ namespace OmniCore.Mobile.Views
                         if (!dlgResult)
                             return;
                     }
-                    else if (podManager.Pod.Status.Progress <= PodProgress.RunningLow)
+                    else if (podManager.Pod.LastStatus.Progress <= PodProgress.RunningLow)
                     {
                         var dlgResult = await DisplayAlert("Pod Deactivation",
                             @"This pod is currently active and running. Are you sure you want to deactivate it? " +
@@ -131,7 +131,7 @@ namespace OmniCore.Mobile.Views
             var podProvider = App.Instance.PodProvider;
             bool actDlgResult;
 
-            if (podProvider.Current == null || podProvider.Current.Pod.Status == null)
+            if (podProvider.Current == null || podProvider.Current.Pod.LastStatus == null)
             {
 
                 actDlgResult = await DisplayAlert(
@@ -159,12 +159,12 @@ namespace OmniCore.Mobile.Views
 
             using (var conversation = await podManager.StartConversation())
             {
-                if (podManager.Pod.Status != null)
+                if (podManager.Pod.LastStatus != null)
                 {
                     await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
                 }
 
-                if (podManager.Pod.Status == null || podManager.Pod.Status.Progress < PodProgress.PairingSuccess)
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
                     await Task.Run(async () => await podManager.Pair(conversation, 60).ConfigureAwait(false));
 
@@ -175,7 +175,7 @@ namespace OmniCore.Mobile.Views
                     }
                 }
 
-                if (podManager.Pod.Status.Progress < PodProgress.ReadyForInjection)
+                if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
                 {
                     await Task.Run(async () => await podManager.Activate(conversation).ConfigureAwait(false));
                     if (conversation.Failed)

@@ -40,7 +40,7 @@ namespace OmniCore.Mobile.ViewModels
                     OnPropertyChanged(nameof(ReservoirRemaining));
                 }
 
-                if (e.PropertyName == nameof(IPod.Status))
+                if (e.PropertyName == nameof(IPod.LastStatus))
                 {
                     OnPropertyChanged(nameof(Updated));
                     OnPropertyChanged(nameof(Status));
@@ -75,8 +75,8 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
-                    return $"{Pod.Status.Created.ToLocalTime()}";
+                else if (Pod.LastStatus != null)
+                    return $"{Pod.LastStatus.Created.ToLocalTime()}";
                 else
                     return "Not yet updated";
             }
@@ -88,8 +88,8 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
-                    return $"{Pod.Status.Progress}";
+                else if (Pod.LastStatus != null)
+                    return $"{Pod.LastStatus.Progress}";
                 else
                     return "Unknown";
             }
@@ -101,9 +101,9 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    var ts = TimeSpan.FromMinutes(4800 - Pod.Status.ActiveMinutes);
+                    var ts = TimeSpan.FromMinutes(4800 - Pod.LastStatus.ActiveMinutes);
                     return $"{ts.Days}d {ts.Hours}h {ts.Minutes}m";
                 }
                 else
@@ -117,9 +117,9 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    var ts = TimeSpan.FromMinutes(Pod.Status.ActiveMinutes);
+                    var ts = TimeSpan.FromMinutes(Pod.LastStatus.ActiveMinutes);
                     return $"{ts.Days}d {ts.Hours}h {ts.Minutes}m";
                 }
                 else
@@ -133,9 +133,9 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return Color.Beige;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    var mins = Pod.Status.ActiveMinutes;
+                    var mins = Pod.LastStatus.ActiveMinutes;
                     if (mins < 24 * 60 * 3)
                         return Color.LightGreen;
                     if (mins < 24 * 60 * 3)
@@ -156,11 +156,11 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return 0;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    if (Pod.Status.ActiveMinutes >= 4800)
+                    if (Pod.LastStatus.ActiveMinutes >= 4800)
                         return 0;
-                    return ((4800 - Pod.Status.ActiveMinutes) / 4800.0);
+                    return ((4800 - Pod.LastStatus.ActiveMinutes) / 4800.0);
                 }
                 else
                     return 0;
@@ -173,12 +173,12 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    if (Pod.Status.Progress < PodProgress.RunningLow)
+                    if (Pod.LastStatus.Progress < PodProgress.RunningLow)
                         return "More than 50U";
 
-                    return $"{Pod.Status.Reservoir}U";
+                    return $"{Pod.LastStatus.Reservoir}U";
                 }
                 else
                     return "Unknown";
@@ -191,12 +191,12 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
                     if (Pod.ReservoirUsedForPriming.HasValue)
-                        return $"{Pod.Status.DeliveredInsulin - Pod.ReservoirUsedForPriming.Value}U";
+                        return $"{Pod.LastStatus.DeliveredInsulin - Pod.ReservoirUsedForPriming.Value}U";
                     else
-                        return $"{Pod.Status.DeliveredInsulin}U (incl. reservoir used for priming)";
+                        return $"{Pod.LastStatus.DeliveredInsulin}U (incl. reservoir used for priming)";
                 }
                 else
                     return "Unknown";
@@ -209,12 +209,12 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return Color.Beige;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    if (Pod.Status.Progress < PodProgress.RunningLow)
+                    if (Pod.LastStatus.Progress < PodProgress.RunningLow)
                         return Color.LightGreen;
 
-                    if (Pod.Status.Reservoir < 10)
+                    if (Pod.LastStatus.Reservoir < 10)
                         return Color.Red;
                     else
                         return Color.Yellow;
@@ -230,11 +230,11 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return 0;
-                else if (Pod.Status != null)
+                else if (Pod.LastStatus != null)
                 {
-                    if (Pod.Status.Reservoir >= 50m)
+                    if (Pod.LastStatus.Reservoir >= 50m)
                         return 1;
-                    return (double)Pod.Status.Reservoir / 50.0;
+                    return (double)Pod.LastStatus.Reservoir / 50.0;
                 }
                 else
                     return 0;

@@ -71,22 +71,22 @@ namespace OmniCore.Mobile.Services
                     status.PodId = $"L{pod.Lot}T{pod.Id}R{pod.RadioAddress}";
                 }
 
-                if (pod.BasalSchedule != null)
+                if (pod.LastBasalSchedule != null)
                 {
-                    status.BasalSchedule = pod.BasalSchedule.BasalSchedule;
-                    status.UtcOffset = pod.BasalSchedule.UtcOffset;
+                    status.BasalSchedule = pod.LastBasalSchedule.BasalSchedule;
+                    status.UtcOffset = pod.LastBasalSchedule.UtcOffset;
                 }
 
-                if (pod.Status != null)
+                if (pod.LastStatus != null)
                 {
                     status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
-                    status.ResultId = pod.Status.Id ?? 0;
-                    status.PodRunning = pod.Status.Progress >= PodProgress.Running && pod.Status.Progress <= PodProgress.RunningLow
-                        && pod.Fault == null;
-                    status.ReservoirLevel = (double)pod.Status.Reservoir;
-                    status.InsulinCanceled = (double)pod.Status.NotDeliveredInsulin;
-                    if (pod.Status.Id.HasValue)
-                        status.ResultId = pod.Status.Id.Value;
+                    status.ResultId = pod.LastStatus.Id ?? 0;
+                    status.PodRunning = pod.LastStatus.Progress >= PodProgress.Running && pod.LastStatus.Progress <= PodProgress.RunningLow
+                        && pod.LastFault == null;
+                    status.ReservoirLevel = (double)pod.LastStatus.Reservoir;
+                    status.InsulinCanceled = (double)pod.LastStatus.NotDeliveredInsulin;
+                    if (pod.LastStatus.Id.HasValue)
+                        status.ResultId = pod.LastStatus.Id.Value;
 
                     if (status.PodRunning)
                         status.StatusText = $"Pod running";

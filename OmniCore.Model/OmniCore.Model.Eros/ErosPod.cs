@@ -52,17 +52,17 @@ namespace OmniCore.Model.Eros
         public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
 
         [Ignore]
-        public IPodAlertStates AlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
+        public IPodAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
         [Ignore]
-        public IPodBasalSchedule BasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
+        public IPodBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
         [Ignore]
-        public IPodFault Fault { get => fault; set { SetProperty(ref fault, value); } }
+        public IPodFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
         [Ignore]
-        public IPodRadioIndicators RadioIndicators { get => radioIndicators; set { SetProperty(ref radioIndicators, value); } }
+        public IPodRadioIndicators LastRadioIndicators { get => radioIndicators; set { SetProperty(ref radioIndicators, value); } }
         [Ignore]
-        public IPodStatus Status { get => status; set { SetProperty(ref status, value); } }
+        public IPodStatus LastStatus { get => status; set { SetProperty(ref status, value); } }
         [Ignore]
-        public IPodUserSettings UserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
+        public IPodUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
         [Ignore]
         public ErosPodRuntimeVariables RuntimeVariables { get => runtimeVariables; set { SetProperty(ref runtimeVariables, value); } }
 

@@ -111,47 +111,47 @@ namespace OmniCore.Model.Eros
                     result.AlertStates.PodId = pod.Id.Value;
                     result.AlertStates.Created = DateTime.UtcNow;
                     conn.InsertOrReplace(result.AlertStates);
-                    pod.AlertStates = result.AlertStates;
+                    pod.LastAlertStates = result.AlertStates;
                 }
 
                 if (result.BasalSchedule != null)
                 {
                     result.BasalSchedule.PodId = pod.Id.Value;
                     result.BasalSchedule.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(pod.BasalSchedule);
-                    pod.BasalSchedule = result.BasalSchedule;
+                    conn.InsertOrReplace(result.BasalSchedule);
+                    pod.LastBasalSchedule = result.BasalSchedule;
                 }
 
                 if (result.Fault != null)
                 {
                     result.Fault.PodId = pod.Id.Value;
                     result.Fault.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(pod.Fault);
-                    pod.Fault = result.Fault;
+                    conn.InsertOrReplace(result.Fault);
+                    pod.LastFault = result.Fault;
                 }
 
                 if (result.RadioIndicators!= null)
                 {
                     result.RadioIndicators.PodId = pod.Id.Value;
                     result.RadioIndicators.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(pod.RadioIndicators);
-                    pod.RadioIndicators = result.RadioIndicators;
+                    conn.InsertOrReplace(result.RadioIndicators);
+                    pod.LastRadioIndicators = result.RadioIndicators;
                 }
 
                 if (result.Status != null)
                 {
                     result.Status.PodId = pod.Id.Value;
                     result.Status.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(pod.Status);
-                    pod.Status = result.Status;
+                    conn.InsertOrReplace(result.Status);
+                    pod.LastStatus = result.Status;
                 }
 
                 if (result.UserSettings != null)
                 {
                     result.UserSettings.PodId = pod.Id.Value;
                     result.UserSettings.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(pod.UserSettings);
-                    pod.UserSettings = result.UserSettings;
+                    conn.InsertOrReplace(result.UserSettings);
+                    pod.LastUserSettings = result.UserSettings;
                 }
 
                 conn.Commit();
@@ -163,22 +163,22 @@ namespace OmniCore.Model.Eros
             if (pod == null)
                 return null;
 
-            pod.AlertStates = conn.Table<ErosPodAlertStates>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastAlertStates = conn.Table<ErosPodAlertStates>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.BasalSchedule = conn.Table<ErosPodBasalSchedule>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastBasalSchedule = conn.Table<ErosPodBasalSchedule>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.Fault = conn.Table<ErosPodFault>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastFault = conn.Table<ErosPodFault>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.RadioIndicators = conn.Table<ErosPodRadioIndicators>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastRadioIndicators = conn.Table<ErosPodRadioIndicators>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.Status = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastStatus = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.UserSettings = conn.Table<ErosPodUserSettings>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastUserSettings = conn.Table<ErosPodUserSettings>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
             return pod;

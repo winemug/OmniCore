@@ -24,11 +24,11 @@ namespace OmniCore.Model.Interfaces
 
         bool Archived { get; set; }
 
-        IPodAlertStates AlertStates { get; set; }
-        IPodBasalSchedule BasalSchedule { get; set; }
-        IPodFault Fault { get; set; }
-        IPodRadioIndicators RadioIndicators { get; set; }
-        IPodStatus Status { get; set; }
-        IPodUserSettings UserSettings { get; set; }
+        IPodAlertStates LastAlertStates { get; set; }
+        IPodBasalSchedule LastBasalSchedule { get; set; }
+        IPodFault LastFault { get; set; }
+        IPodRadioIndicators LastRadioIndicators { get; set; }
+        IPodStatus LastStatus { get; set; }
+        IPodUserSettings LastUserSettings { get; set; }
     }
 }

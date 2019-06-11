@@ -477,7 +477,7 @@ namespace OmniCore.Radio.RileyLink
             if (MessageExchangeParameters.CriticalWithFollowupRequired)
                 b0 = 0x80;
 
-            var msgSequence = Pod.Status != null ? (Pod.Status.MessageSequence + 1 % 16) : 0;
+            var msgSequence = Pod.LastStatus != null ? (Pod.LastStatus.MessageSequence + 1 % 16) : 0;
             if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
                 msgSequence = MessageExchangeParameters.MessageSequenceOverride.Value;
 
@@ -556,7 +556,7 @@ namespace OmniCore.Radio.RileyLink
             foreach (var mp in response.GetParts())
             {
                 var er = mp as ErosResponse;
-                er.Parse(pod);
+                er.Parse(pod, progress.Result);
             }
         }
     }

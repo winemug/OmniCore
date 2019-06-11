@@ -50,12 +50,12 @@ namespace OmniCore.Mobile.ViewModels
             ActivateNewButtonVisible = false;
             ResumeActivationButtonVisible = false;
 
-            if (Pod != null && Pod.Status != null)
+            if (Pod != null && Pod.LastStatus != null)
             {
-                if (Pod.Status.Progress < Model.Enums.PodProgress.Running)
+                if (Pod.LastStatus.Progress < Model.Enums.PodProgress.Running)
                     ResumeActivationButtonVisible = true;
 
-                if (Pod.Status != null)
+                if (Pod.LastStatus != null)
                     DeactivateButtonVisible = true;
             }
             else

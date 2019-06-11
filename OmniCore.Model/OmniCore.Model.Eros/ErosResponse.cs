@@ -13,29 +13,29 @@ namespace OmniCore.Model.Eros
 
         public Bytes PartData { get; set; }
 
-        public void Parse(IPod pod)
+        public void Parse(IPod pod, IMessageExchangeResult result)
         {
             Debug.WriteLine($"Parsing response type {PartType}");
             switch (PartType)
             {
                 case PartType.ResponseVersionInfo:
-                    parse_version_response(pod);
+                    parse_version_response(pod, result);
                     break;
                 case PartType.ResponseDetailInfoResponse:
-                    parse_information_response(pod);
+                    parse_information_response(pod, result);
                     break;
                 case PartType.ResponseResyncResponse:
-                    parse_resync_response(pod as ErosPod);
+                    parse_resync_response(pod as ErosPod, result);
                     break;
                 case PartType.ResponseStatus:
-                    parse_status_response(pod);
+                    parse_status_response(pod, result);
                     break;
                 default:
                     throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown response type {PartType}");
             }
         }
 
-        private void parse_version_response(IPod pod)
+        private void parse_version_response(IPod pod, IMessageExchangeResult result)
         {
             bool lengthyResponse = false;
             pod.Created = DateTime.UtcNow;
@@ -71,15 +71,15 @@ namespace OmniCore.Model.Eros
                 var ri = new ErosPodRadioIndicators();
                 ri.RadioLowGain = rb >> 6;
                 ri.RadioRssi = rb & 0b00111111;
-                pod.RadioIndicators = ri;
+                result.RadioIndicators = ri;
                 pod.RadioAddress = PartData.DWord(i);
             }
             else
                 pod.RadioAddress = PartData.DWord(i);
-            pod.Status = status;
+            result.Status = status;
         }
 
-        private void parse_information_response(IPod pod)
+        private void parse_information_response(IPod pod, IMessageExchangeResult result)
         {
             int i = 0;
             var rt = PartData.Byte(i++);
@@ -101,7 +101,7 @@ namespace OmniCore.Model.Eros
                         PartData.Word(i + 12),
                         PartData.Word(i + 14),
                     };
-                    pod.AlertStates = alrs;
+                    result.AlertStates = alrs;
                     break;
                 case 0x02:
                     var status = new ErosPodStatus();
@@ -137,9 +137,9 @@ namespace OmniCore.Model.Eros
                     fault.ProgressBeforeFault2 = (PodProgress)(PartData.Byte(i++) & 0x0F);
                     fault.FaultInformation2LastWord = PartData.Byte(i++);
 
-                    pod.Status = status;
-                    pod.Fault = fault;
-                    pod.RadioIndicators = ri;
+                    result.Status = status;
+                    result.Fault = fault;
+                    result.RadioIndicators = ri;
                     break;
                 default:
                     throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Failed to parse the information response of type {rt}");
@@ -163,7 +163,7 @@ namespace OmniCore.Model.Eros
                 podStatus.BasalState = BasalState.Suspended;
         }
 
-        private void parse_resync_response(ErosPod pod)
+        private void parse_resync_response(ErosPod pod, IMessageExchangeResult result)
         {
             if (PartData[0] == 0x14)
                 pod.RuntimeVariables.NonceSync = PartData.Word(1);
@@ -171,7 +171,7 @@ namespace OmniCore.Model.Eros
                 throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown resync request {PartData} from pod");
         }
 
-        private void parse_status_response(IPod pod)
+        private void parse_status_response(IPod pod, IMessageExchangeResult result)
         {
             var status = new ErosPodStatus();
             status.Created = DateTime.UtcNow;
@@ -189,7 +189,7 @@ namespace OmniCore.Model.Eros
             status.AlertMask = (byte)((s2 >> 23) & 0xFF);
             status.ActiveMinutes = (uint)((s2 & 0x007FFC00) >> 10);
             status.Reservoir = (s2 & 0x000003FF) * 0.05m;
-            pod.Status = status;
+            result.Status = status;
         }
     }
 }
