@@ -60,7 +60,8 @@ namespace OmniCore.Model.Eros
         [Ignore]
         public IPodRadioIndicators LastRadioIndicators { get => radioIndicators; set { SetProperty(ref radioIndicators, value); } }
         [Ignore]
-        public IPodStatus LastStatus { get => status; set { SetProperty(ref status, value); } }
+        public IPodStatus LastStatus { get => status;
+            set { SetProperty(ref status, value); } }
         [Ignore]
         public IPodUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
         [Ignore]

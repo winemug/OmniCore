@@ -31,7 +31,7 @@ namespace OmniCore.Mobile.Views
             try
             {
                 var podProvider = App.Instance.PodProvider;
-                var podManager = podProvider.Current;
+                var podManager = podProvider.PodManager;
 
                 using(var conversation = await podManager.StartConversation())
                 {
@@ -131,7 +131,7 @@ namespace OmniCore.Mobile.Views
             var podProvider = App.Instance.PodProvider;
             bool actDlgResult;
 
-            if (podProvider.Current == null || podProvider.Current.Pod.LastStatus == null)
+            if (podProvider.PodManager == null || podProvider.PodManager.Pod.LastStatus == null)
             {
 
                 actDlgResult = await DisplayAlert(
@@ -155,7 +155,7 @@ namespace OmniCore.Mobile.Views
                     return;
             }
 
-            var podManager = podProvider.Current;
+            var podManager = podProvider.PodManager;
 
             using (var conversation = await podManager.StartConversation())
             {

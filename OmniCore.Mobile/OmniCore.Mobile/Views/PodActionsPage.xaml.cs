@@ -20,7 +20,7 @@ namespace OmniCore.Mobile.Views
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
-            var podManager = App.Instance.PodProvider.Current;
+            var podManager = App.Instance.PodProvider.PodManager;
             using(var conversation = await podManager.StartConversation())
             {
                 await Task.Run(async () => await podManager.Bolus(conversation, 1.0m).ConfigureAwait(false));

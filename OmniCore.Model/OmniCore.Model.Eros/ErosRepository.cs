@@ -97,61 +97,61 @@ namespace OmniCore.Model.Eros
                 if (result != null)
                 {
                     result.PodId = pod.Id.Value;
-                    conn.InsertOrReplace(result);
-                }
+                    result.Id = conn.InsertOrReplace(result, typeof(MessageExchangeResult));
 
-                if (result.Statistics != null)
-                {
-                    result.Statistics.PodId = pod.Id.Value;
-                    conn.InsertOrReplace(result.Statistics);
-                }
+                    if (result.Statistics != null)
+                    {
+                        result.Statistics.PodId = pod.Id.Value;
+                        result.Statistics.Id = conn.InsertOrReplace(result.Statistics, typeof(MessageExchangeStatistics));
+                    }
 
-                if (result.AlertStates != null)
-                {
-                    result.AlertStates.PodId = pod.Id.Value;
-                    result.AlertStates.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.AlertStates);
-                    pod.LastAlertStates = result.AlertStates;
-                }
+                    if (result.AlertStates != null)
+                    {
+                        result.AlertStates.PodId = pod.Id.Value;
+                        result.AlertStates.Created = DateTime.UtcNow;
+                        result.AlertStates.Id = conn.InsertOrReplace(result.AlertStates, typeof(ErosPodAlertStates));
+                        pod.LastAlertStates = result.AlertStates;
+                    }
 
-                if (result.BasalSchedule != null)
-                {
-                    result.BasalSchedule.PodId = pod.Id.Value;
-                    result.BasalSchedule.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.BasalSchedule);
-                    pod.LastBasalSchedule = result.BasalSchedule;
-                }
+                    if (result.BasalSchedule != null)
+                    {
+                        result.BasalSchedule.PodId = pod.Id.Value;
+                        result.BasalSchedule.Created = DateTime.UtcNow;
+                        result.BasalSchedule.Id = conn.InsertOrReplace(result.BasalSchedule, typeof(ErosPodBasalSchedule));
+                        pod.LastBasalSchedule = result.BasalSchedule;
+                    }
 
-                if (result.Fault != null)
-                {
-                    result.Fault.PodId = pod.Id.Value;
-                    result.Fault.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.Fault);
-                    pod.LastFault = result.Fault;
-                }
+                    if (result.Fault != null)
+                    {
+                        result.Fault.PodId = pod.Id.Value;
+                        result.Fault.Created = DateTime.UtcNow;
+                        result.Fault.Id = conn.InsertOrReplace(result.Fault, typeof(ErosPodFault));
+                        pod.LastFault = result.Fault;
+                    }
 
-                if (result.RadioIndicators!= null)
-                {
-                    result.RadioIndicators.PodId = pod.Id.Value;
-                    result.RadioIndicators.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.RadioIndicators);
-                    pod.LastRadioIndicators = result.RadioIndicators;
-                }
+                    if (result.RadioIndicators!= null)
+                    {
+                        result.RadioIndicators.PodId = pod.Id.Value;
+                        result.RadioIndicators.Created = DateTime.UtcNow;
+                        result.RadioIndicators.Id = conn.InsertOrReplace(result.RadioIndicators, typeof(ErosPodRadioIndicators));
+                        pod.LastRadioIndicators = result.RadioIndicators;
+                    }
 
-                if (result.Status != null)
-                {
-                    result.Status.PodId = pod.Id.Value;
-                    result.Status.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.Status);
-                    pod.LastStatus = result.Status;
-                }
+                    if (result.Status != null)
+                    {
+                        result.Status.PodId = pod.Id.Value;
+                        result.Status.Created = DateTime.UtcNow;
+                        result.Status.Id = conn.InsertOrReplace(result.Status, typeof(ErosPodStatus));
+                        pod.LastStatus = result.Status;
+                    }
 
-                if (result.UserSettings != null)
-                {
-                    result.UserSettings.PodId = pod.Id.Value;
-                    result.UserSettings.Created = DateTime.UtcNow;
-                    conn.InsertOrReplace(result.UserSettings);
-                    pod.LastUserSettings = result.UserSettings;
+                    if (result.UserSettings != null)
+                    {
+                        result.UserSettings.PodId = pod.Id.Value;
+                        result.UserSettings.Created = DateTime.UtcNow;
+                        result.UserSettings.Id = conn.InsertOrReplace(result.UserSettings, typeof(ErosPodUserSettings));
+                        pod.LastUserSettings = result.UserSettings;
+                    }
                 }
 
                 conn.Commit();

@@ -6,10 +6,10 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodProvider
     {
-        IPodManager Current { get; }
+        IPodManager PodManager { get; }
         void Archive();
         IPodManager New();
         IPodManager Register(uint lot, uint serial, uint radioAddress);
-        event EventHandler PodChanged;
+        event EventHandler ManagerChanged;
     }
 }

@@ -32,7 +32,7 @@ namespace OmniCore.Mobile.Views
             viewModel.UpdateButtonEnabled = false;
             try
             {
-                var podManager = App.Instance.PodProvider.Current;
+                var podManager = App.Instance.PodProvider.PodManager;
                 using (var conversation = await podManager.StartConversation())
                 {
                     await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));

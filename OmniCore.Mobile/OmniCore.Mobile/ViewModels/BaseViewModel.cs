@@ -14,7 +14,7 @@ namespace OmniCore.Mobile.ViewModels
 
         public BaseViewModel()
         {
-            App.Instance.PodProvider.PodChanged += PodProvider_PodChanged;
+            App.Instance.PodProvider.ManagerChanged += PodProvider_PodChanged;
             AttachToCurrentPod();
         }
 
@@ -30,9 +30,9 @@ namespace OmniCore.Mobile.ViewModels
                 Pod.PropertyChanged -= Pod_PropertyChanged;
             }
 
-            if (App.Instance.PodProvider.Current != null)
+            if (App.Instance.PodProvider.PodManager != null)
             {
-                Pod = App.Instance.PodProvider.Current.Pod;
+                Pod = App.Instance.PodProvider.PodManager.Pod;
                 Pod.PropertyChanged += Pod_PropertyChanged;
             }
             else
@@ -95,7 +95,7 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (disposing)
                 {
-                    App.Instance.PodProvider.PodChanged -= PodProvider_PodChanged;
+                    App.Instance.PodProvider.ManagerChanged -= PodProvider_PodChanged;
                     if (Pod != null)
                     {
                         Pod.PropertyChanged -= Pod_PropertyChanged;

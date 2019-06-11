@@ -10,46 +10,49 @@ namespace OmniCore.Model.Eros
     {
         readonly IMessageExchangeProvider MessageExchangeProvider;
 
-        IPodManager PodManager;
+        private IPodManager _PodManager;
+        public IPodManager PodManager
+        {
+            get
+            {
+                return _PodManager;
+            }
+            private set
+            {
+                if (_PodManager != value)
+                {
+                    _PodManager = value;
+                    ManagerChanged?.Invoke(this, new EventArgs());
+                }
+            }
+        }
 
-        public event EventHandler PodChanged;
+        public event EventHandler ManagerChanged;
 
         public ErosPodProvider(IMessageExchangeProvider messageExchangeProvider)
         {
             MessageExchangeProvider = messageExchangeProvider;
+            var pod = ErosRepository.Instance.LoadCurrent();
+            if (pod != null)
+            {
+                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+            }
         }
 
         private void RaisePodChanged()
         {
-            PodChanged?.Invoke(this, new EventArgs());
+            
         }
 
         public void Archive()
         {
-            if (Current != null)
+            lock (this)
             {
-                PodManager.Pod.Archived = true;
-                ErosRepository.Instance.Save(PodManager.Pod as ErosPod);
-                PodManager = null;
-                RaisePodChanged();
-            }
-        }
-
-        public IPodManager Current
-        {
-            get
-            {
-                lock (this)
+                if (PodManager != null)
                 {
-                    if (PodManager == null)
-                    {
-                        var pod = ErosRepository.Instance.LoadCurrent();
-                        if (pod != null)
-                        {
-                            PodManager = new ErosPodManager(pod, MessageExchangeProvider);
-                        }
-                    }
-                    return PodManager;
+                    PodManager.Pod.Archived = true;
+                    ErosRepository.Instance.Save(PodManager.Pod as ErosPod);
+                    PodManager = null;
                 }
             }
         }
@@ -58,32 +61,18 @@ namespace OmniCore.Model.Eros
         {
             lock (this)
             {
-                if (Current != null)
-                {
-                    Archive();
-                    RaisePodChanged();
-                }
+                Archive();
 
                 var pod = new ErosPod
                 {
                     Id = Guid.NewGuid()
                 };
 
-                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
-                //var lastActivatedPod = ErosRepository.Instance.GetLastActivated();
-                //if (lastActivatedPod != null)
-                //{
-                //    var lastRadioAddress = lastActivatedPod.RadioAddress;
-                //    pod.RadioAddress = (lastRadioAddress & 0xFFFFFFF0) | (((lastRadioAddress & 0x0000000F) + 1) & 0x0000000F);
-                //}
-                //else
-                //{
-                    pod.RadioAddress = GetRadioAddress();
-                //}
+                pod.RadioAddress = GetRadioAddress();
                 pod.Created = DateTime.UtcNow;
                 ErosRepository.Instance.Save(pod);
-                RaisePodChanged();
-                return Current;
+                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                return PodManager;
             }
         }
 
@@ -91,33 +80,18 @@ namespace OmniCore.Model.Eros
         {
             lock (this)
             {
-                if (Current != null)
-                {
-                    Archive();
-                    RaisePodChanged();
-                }
+                Archive();
 
                 var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
                 pod.Created = DateTime.UtcNow;
                 ErosRepository.Instance.Save(pod);
-                RaisePodChanged();
-                return Current;
+                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                return PodManager;
             }
         }
 
         private uint GetRadioAddress()
         {
-            //foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            //{
-            //    if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-            //    {
-            //        var addressBytes = ni.GetPhysicalAddress().GetAddressBytes();
-            //        Array.Reverse(addressBytes);
-            //        return (uint)0x20000000 | (uint)(addressBytes[0] << 20) | (uint)(addressBytes[1] << 12) | (uint)(addressBytes[2] << 4);
-
-            //    }
-            //}
-            //return (uint)0x21721720;
             var random = new Random();
             var buffer = new byte[3];
             random.NextBytes(buffer);

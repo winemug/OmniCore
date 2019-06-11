@@ -27,7 +27,7 @@ namespace OmniCore.Mobile
                 .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
                 .Subscribe(RequestHandler);
 
-            if (PodProvider.Current == null)
+            if (PodProvider.PodManager == null)
                 PodProvider.Register(44538, 1180299, 0x34FF1D55);
 
             MainPage = new Views.OmniCoreMain();

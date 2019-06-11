@@ -60,7 +60,7 @@ namespace OmniCore.Mobile.Services
                 LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
 
-            var podManager = App.Instance.PodProvider.Current;
+            var podManager = App.Instance.PodProvider.PodManager;
             if (podManager != null)
             {
                 var pod = podManager.Pod;

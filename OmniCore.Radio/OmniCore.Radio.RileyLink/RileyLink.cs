@@ -147,7 +147,7 @@ namespace OmniCore.Radio.RileyLink
 
                     if (messageProgress != null)
                         messageProgress.ActionText = "Connecting to RileyLink";
-                    this.Device.Connect(new ConnectionConfig() { AutoConnect = false });
+                    this.Device.Connect(new ConnectionConfig() { AutoConnect = false, AndroidConnectionPriority = ConnectionPriority.High });
                     await tcsInitialized.Task;
 
                     if (!this.VersionVerified)

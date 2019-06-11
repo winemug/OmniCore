@@ -53,14 +53,14 @@ namespace OmniCore.Radio.RileyLink
         {
             endedME = Environment.TickCount;
             ExchangeDuration = endedME - startedME;
-            RadioRssiAverage = radioRssiTotal / radioRssiCount;
+            RadioRssiAverage = radioRssiCount == 0 ? 0 : radioRssiTotal / radioRssiCount;
         }
 
         internal void ExitPrematurely()
         {
             endedME = Environment.TickCount;
             ExchangeDuration = endedME - startedME;
-            RadioRssiAverage = radioRssiTotal / radioRssiCount;
+            RadioRssiAverage = radioRssiCount == 0 ? 0 : radioRssiTotal / radioRssiCount;
         }
 
         private int radioOverheadStart;
