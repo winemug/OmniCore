@@ -7,11 +7,13 @@ using System.Text;
 
 namespace OmniCore.Model.Eros
 {
+    [Table("Fault")]
     public class ErosPodFault : IPodFault
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
-        public long ResultId { get; set; }
+        public Guid PodId { get; set; }
+        public DateTime Created { get; set; }
 
         public int? FaultCode { get; set; }
         public int? FaultRelativeTime { get; set; }

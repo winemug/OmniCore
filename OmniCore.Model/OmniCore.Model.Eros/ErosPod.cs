@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
+    [Table("Eros")]
     public class ErosPod : IPod
     {
         private IPodAlertStates alertStates;

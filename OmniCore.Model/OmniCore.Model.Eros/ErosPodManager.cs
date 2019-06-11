@@ -92,7 +92,7 @@ namespace OmniCore.Model.Eros
             {
                 progress.Running = false;
                 progress.Finished = true;
-                ErosRepository.Instance.Save(ErosPod, progress.Result, progress.Statistics);
+                ErosRepository.Instance.Save(ErosPod, progress.Result);
             }
 
             return progress.Result.Success;

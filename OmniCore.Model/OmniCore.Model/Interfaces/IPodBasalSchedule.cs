@@ -7,7 +7,8 @@ namespace OmniCore.Model.Interfaces
     public interface IPodBasalSchedule
     {
         long? Id { get; set; }
-        long ResultId { get; set; }
+        Guid PodId { get; set; }
+        DateTime Created { get; set; }
 
         int UtcOffset { get; set; }
         decimal[] BasalSchedule { get; set; }

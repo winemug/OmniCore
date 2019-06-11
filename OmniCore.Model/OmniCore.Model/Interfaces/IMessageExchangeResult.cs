@@ -22,5 +22,14 @@ namespace OmniCore.Model.Interfaces
         FailureType Failure { get; set;  }
 
         Exception Exception { get; set;  }
+
+        IMessageExchangeStatistics Statistics { get; set; }
+        IPodAlertStates AlertStates { get; set; }
+        IPodBasalSchedule BasalSchedule { get; set; }
+        IPodFault Fault { get; set; }
+        IPodRadioIndicators RadioIndicators { get; set; }
+        IPodStatus Status { get; set; }
+        IPodUserSettings UserSettings { get; set; }
+
     }
 }

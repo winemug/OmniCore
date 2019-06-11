@@ -9,7 +9,8 @@ namespace OmniCore.Model.Interfaces
     {
         [PrimaryKey]
         long? Id { get; set; }
-        long ResultId { get; set; }
+        Guid PodId { get; set; }
+        DateTime Created { get; set; }
 
         int QueueWaitDuration { get; set; }
         int ExchangeDuration { get; set; }

@@ -6,11 +6,13 @@ using System.Text;
 
 namespace OmniCore.Model
 {
+    [Table("Statistics")]
     public class MessageExchangeStatistics : IMessageExchangeStatistics
     {
         [PrimaryKey]
         public long? Id { get; set; }
-        public long ResultId { get; set; }
+        public Guid PodId { get; set; }
+        public DateTime Created { get; set; }
 
         public int QueueWaitDuration { get; set; }
 

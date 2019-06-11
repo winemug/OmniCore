@@ -8,6 +8,7 @@ using System.Text;
 
 namespace OmniCore.Model
 {
+    [Table("Result")]
     public class MessageExchangeResult : IMessageExchangeResult
     {
         [PrimaryKey]
@@ -28,5 +29,20 @@ namespace OmniCore.Model
 
         [Ignore]
         public Exception Exception { get; set; }
+        [Ignore]
+        public IMessageExchangeStatistics Statistics { get; set; }
+        [Ignore]
+        public IPodAlertStates AlertStates { get; set; }
+        [Ignore]
+        public IPodBasalSchedule BasalSchedule { get; set; }
+        [Ignore]
+        public IPodFault Fault { get; set; }
+        [Ignore]
+        public IPodRadioIndicators RadioIndicators { get; set; }
+        [Ignore]
+        public IPodStatus Status { get; set; }
+        [Ignore]
+        public IPodUserSettings UserSettings { get; set; }
+
     }
 }

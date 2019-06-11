@@ -2,16 +2,22 @@
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;
+using SQLiteNetExtensions.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace OmniCore.Model.Eros
 {
+    [Table("AlertState")]
     public class ErosPodAlertStates : IPodAlertStates
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
+        public Guid PodId { get; set; }
+        public DateTime Created { get; set; }
+
+        [ForeignKey(typeof(MessageExchangeResult))]
         public long ResultId { get; set; }
 
         public uint AlertW278 { get; set; }
@@ -20,7 +26,6 @@ namespace OmniCore.Model.Eros
 
         public ErosPodAlertStates()
         {
-            Created = DateTime.UtcNow;
         }
 
         public string AlertStatesJson

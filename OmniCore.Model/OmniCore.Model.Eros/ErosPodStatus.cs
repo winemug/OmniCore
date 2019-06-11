@@ -7,11 +7,14 @@ using System.Text;
 
 namespace OmniCore.Model.Eros
 {
+    [Table("Status")]
     public class ErosPodStatus : IPodStatus
     {
         [PrimaryKey, AutoIncrement]
         public long? Id  { get; set; }
-        public long ResultId { get; set; }
+        public Guid PodId { get; set; }
+        public DateTime Created { get; set; }
+
 
         public bool Faulted  { get; set; }
         public decimal NotDeliveredInsulin  { get; set; }

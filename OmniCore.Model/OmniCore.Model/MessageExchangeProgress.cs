@@ -44,7 +44,10 @@ namespace OmniCore.Model
         public MessageExchangeProgress(IConversation conversation, RequestType type, string parameters = null)
         {
             Conversation = conversation;
-            Result = new MessageExchangeResult() { Source = Conversation.RequestSource, Type = type, Parameters = parameters };
+            Result = new MessageExchangeResult() {
+                Source = Conversation.RequestSource,
+                Type = type,
+                Parameters = parameters};
         }
 
         public void SetException(Exception exception)

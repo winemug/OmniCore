@@ -7,11 +7,14 @@ using System.Text;
 
 namespace OmniCore.Model.Eros
 {
+    [Table("BasalSchedule")]
     public class ErosPodBasalSchedule : IPodBasalSchedule
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
-        public long ResultId { get; set; }
+        public Guid PodId { get; set; }
+        public DateTime Created { get; set; }
+
 
         public int UtcOffset { get; set; }
         [Ignore]

@@ -21,7 +21,6 @@ namespace OmniCore.Model.Interfaces
 
         int Progress { get; set; }
 
-        IMessageExchangeStatistics Statistics { get; set; }
         IMessageExchangeResult Result { get; set; }
 
         CancellationToken Token { get; }

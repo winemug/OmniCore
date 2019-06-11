@@ -55,7 +55,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioOverheadStart();
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadStart();
                 var tcsInitialized = new TaskCompletionSource<bool>();
                 if (this.Device == null)
                 {
@@ -98,20 +98,20 @@ namespace OmniCore.Radio.RileyLink
                     else
                         Debug.WriteLine($"Found RL: {Device.Uuid}");
 
-                    ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioRssiReported(result.Rssi);
+                    ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioRssiReported(result.Rssi);
 
                     this.Device.WhenReadRssiContinuously(TimeSpan.FromSeconds(10)).Subscribe(
                         (rssiRead) =>
                         {
                             if (rssiRead != 0)
-                                ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioRssiReported(rssiRead);
+                                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioRssiReported(rssiRead);
                         });
 
                     this.Device.WhenStatusChanged().Subscribe(async (status) =>
                     {
                         if (status == ConnectionStatus.Connected)
                         {
-                            ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioConnnected();
+                            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
                             var services = await this.Device.DiscoverServices().ToList();
 
                             var dataService = services.FirstOrDefault(x => x.Uuid == RileyLinkServiceUUID);
@@ -139,7 +139,7 @@ namespace OmniCore.Radio.RileyLink
                         }
                         else if (status == ConnectionStatus.Disconnected)
                         {
-                            ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioDisconnected();
+                            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioDisconnected();
                             DataCharacteristic = null;
                             ResponseCharacteristic = null;
                         }
@@ -183,7 +183,7 @@ namespace OmniCore.Radio.RileyLink
             }
             finally
             {
-                ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioOverheadEnd();
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadEnd();
             }
         }
 
@@ -303,10 +303,10 @@ namespace OmniCore.Radio.RileyLink
         public async Task SetTxLevel(IMessageExchangeProgress messageProgress, TxPower txPower)
         {
             TxAmplification = txPower;
-            ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioOverheadStart();
+            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadStart();
             await SendCommand(RileyLinkCommandType.UpdateRegister, new byte[] { (byte)RileyLinkRegister.PATABLE0, PaDictionary[txPower] });
-            ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioOverheadEnd();
-            ((RileyLinkStatistics)messageProgress?.Statistics)?.RadioTxLevelChange(txPower);
+            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadEnd();
+            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioTxLevelChange(txPower);
         }
 
         public async Task TxLevelDown(IMessageExchangeProgress messageProgress)
