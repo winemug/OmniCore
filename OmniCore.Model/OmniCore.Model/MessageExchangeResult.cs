@@ -38,8 +38,6 @@ namespace OmniCore.Model
         [Ignore]
         public IPodFault Fault { get; set; }
         [Ignore]
-        public IPodRadioIndicators RadioIndicators { get; set; }
-        [Ignore]
         public IPodStatus Status { get; set; }
         [Ignore]
         public IPodUserSettings UserSettings { get; set; }

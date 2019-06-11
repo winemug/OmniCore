@@ -30,11 +30,19 @@ namespace OmniCore.Mobile.Services
 
         private async Task Execute(RemoteRequest request, RemoteResult result)
         {
-            var podStatus = CreateCurrentStatus();
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+
+            using (var conversation = await podManager.StartConversation())
+            {
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+            }
 
             switch (request.Type.Value)
             {
                 case RemoteRequestType.Bolus:
+                    result.Status = CreateFromCurrentStatus();
                     result.Success = false;
                     break;
                 case RemoteRequestType.CancelBolus:
@@ -54,7 +62,7 @@ namespace OmniCore.Mobile.Services
             }
         }
 
-        private RemoteResultPodStatus CreateCurrentStatus()
+        private RemoteResultPodStatus CreateFromCurrentStatus()
         {
             var status = new RemoteResultPodStatus() { PodRunning = false,
                 LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
@@ -85,8 +93,6 @@ namespace OmniCore.Mobile.Services
                         && pod.LastFault == null;
                     status.ReservoirLevel = (double)pod.LastStatus.Reservoir;
                     status.InsulinCanceled = (double)pod.LastStatus.NotDeliveredInsulin;
-                    if (pod.LastStatus.Id.HasValue)
-                        status.ResultId = pod.LastStatus.Id.Value;
 
                     if (status.PodRunning)
                         status.StatusText = $"Pod running";

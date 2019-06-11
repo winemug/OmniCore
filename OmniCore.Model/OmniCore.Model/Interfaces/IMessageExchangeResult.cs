@@ -27,7 +27,6 @@ namespace OmniCore.Model.Interfaces
         IPodAlertStates AlertStates { get; set; }
         IPodBasalSchedule BasalSchedule { get; set; }
         IPodFault Fault { get; set; }
-        IPodRadioIndicators RadioIndicators { get; set; }
         IPodStatus Status { get; set; }
         IPodUserSettings UserSettings { get; set; }
 

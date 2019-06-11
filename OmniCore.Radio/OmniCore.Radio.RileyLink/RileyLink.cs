@@ -98,13 +98,13 @@ namespace OmniCore.Radio.RileyLink
                     else
                         Debug.WriteLine($"Found RL: {Device.Uuid}");
 
-                    ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioRssiReported(result.Rssi);
+                    ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.MobileDeviceRssiReported(result.Rssi);
 
                     this.Device.WhenReadRssiContinuously(TimeSpan.FromSeconds(10)).Subscribe(
                         (rssiRead) =>
                         {
                             if (rssiRead != 0)
-                                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioRssiReported(rssiRead);
+                                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.MobileDeviceRssiReported(rssiRead);
                         });
 
                     this.Device.WhenStatusChanged().Subscribe(async (status) =>

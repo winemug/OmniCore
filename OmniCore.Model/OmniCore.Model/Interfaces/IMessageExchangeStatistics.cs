@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using OmniCore.Model.Enums;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +21,15 @@ namespace OmniCore.Model.Interfaces
         int PacketExchangeCount { get; set; }
         int PacketExchangeDurationAverage { get; set; }
 
-        int PodRssiAverage { get; set; }
-        int RadioRssiAverage { get; set; }
+        int? RadioRssiAverage { get; set; }
+        int? MobileDeviceRssiAverage { get; set; }
+
+        int? PodRssi { get; set; }
+        int? PodLowGain { get; set; }
+
+        int PowerAdjustmentCount { get; set; }
+
+        void BeforeSave();
+
     }
 }

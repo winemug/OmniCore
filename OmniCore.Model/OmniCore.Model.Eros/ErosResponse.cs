@@ -68,10 +68,8 @@ namespace OmniCore.Model.Eros
             if (!lengthyResponse)
             {
                 var rb = PartData.Byte(i++);
-                var ri = new ErosPodRadioIndicators();
-                ri.RadioLowGain = rb >> 6;
-                ri.RadioRssi = rb & 0b00111111;
-                result.RadioIndicators = ri;
+                result.Statistics.PodLowGain = rb >> 6;
+                result.Statistics.PodRssi = rb & 0b00111111;
                 pod.RadioAddress = PartData.DWord(i);
             }
             else
@@ -106,7 +104,6 @@ namespace OmniCore.Model.Eros
                 case 0x02:
                     var status = new ErosPodStatus();
                     var fault = new ErosPodFault();
-                    var ri = new ErosPodRadioIndicators();
 
                     status.Created = DateTime.UtcNow;
                     status.Faulted = true;
@@ -131,15 +128,14 @@ namespace OmniCore.Model.Eros
                     fault.ProgressBeforeFault = (PodProgress)(f17 & 0x0F);
                     byte r18 = PartData.Byte(i++);
 
-                    ri.RadioLowGain = (r18 & 0xC0) >> 6;
-                    ri.RadioRssi = r18 & 0x3F;
+                    result.Statistics.PodLowGain = (r18 & 0xC0) >> 6;
+                    result.Statistics.PodRssi = r18 & 0x3F;
 
                     fault.ProgressBeforeFault2 = (PodProgress)(PartData.Byte(i++) & 0x0F);
                     fault.FaultInformation2LastWord = PartData.Byte(i++);
 
                     result.Status = status;
                     result.Fault = fault;
-                    result.RadioIndicators = ri;
                     break;
                 default:
                     throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Failed to parse the information response of type {rt}");

@@ -20,11 +20,11 @@ namespace OmniCore.Model.Eros
         private IPodAlertStates alertStates;
         private IPodBasalSchedule basalSchedule;
         private IPodFault fault;
-        private IPodRadioIndicators radioIndicators;
         private IPodStatus status;
         private IPodUserSettings userSettings;
         private ErosPodRuntimeVariables runtimeVariables;
         private DateTime created;
+
         private uint? lot;
         private uint? serial;
         private uint radioAddress;
@@ -57,8 +57,6 @@ namespace OmniCore.Model.Eros
         public IPodBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
         [Ignore]
         public IPodFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
-        [Ignore]
-        public IPodRadioIndicators LastRadioIndicators { get => radioIndicators; set { SetProperty(ref radioIndicators, value); } }
         [Ignore]
         public IPodStatus LastStatus { get => status;
             set { SetProperty(ref status, value); } }
