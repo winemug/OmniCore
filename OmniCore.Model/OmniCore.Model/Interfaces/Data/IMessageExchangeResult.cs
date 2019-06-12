@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Data
 {
     public interface IMessageExchangeResult
     {
@@ -24,13 +24,15 @@ namespace OmniCore.Model.Interfaces
         Exception Exception { get; set;  }
 
         IMessageExchangeStatistics Statistics { get; set; }
-        IPodAlertStates AlertStates { get; set; }
-        IPodBasalSchedule BasalSchedule { get; set; }
-        IPodFault Fault { get; set; }
-        IPodStatus Status { get; set; }
-        IPodUserSettings UserSettings { get; set; }
+        IMessageExchangeParameters ExchangeParameters { get; set; }
+        IAlertStates AlertStates { get; set; }
+        IBasalSchedule BasalSchedule { get; set; }
+        IFault Fault { get; set; }
+        IStatus Status { get; set; }
+        IUserSettings UserSettings { get; set; }
 
         long? StatisticsId { get; set; }
+        long? ParametersId { get; set; }
         long? AlertStatesId { get; set; }
         long? BasalScheduleId { get; set; }
         long? FaultId { get; set; }

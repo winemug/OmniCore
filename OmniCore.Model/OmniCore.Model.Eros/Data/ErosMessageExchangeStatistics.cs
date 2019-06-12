@@ -1,16 +1,16 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("Statistics")]
-    public class MessageExchangeStatistics : IMessageExchangeStatistics
+    public class ErosMessageExchangeStatistics : IMessageExchangeStatistics
     {
-        [PrimaryKey]
+        [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
         public Guid PodId { get; set; }
         public DateTime Created { get; set; }

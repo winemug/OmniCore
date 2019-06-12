@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Interfaces;
+﻿using OmniCore.Model.Eros.Data;
+using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;

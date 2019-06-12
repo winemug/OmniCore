@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Data
 {
-    public interface IPodFault
+    public interface IFault
     {
         long? Id { get; set; }
         Guid PodId { get; set; }

@@ -1,3 +1,4 @@
+using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 

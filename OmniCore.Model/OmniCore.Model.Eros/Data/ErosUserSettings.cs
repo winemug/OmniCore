@@ -1,13 +1,13 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("UserSettings")]
-    public class ErosPodUserSettings : IPodUserSettings
+    public class ErosUserSettings : IUserSettings
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
@@ -18,7 +18,7 @@ namespace OmniCore.Model.Eros
         public decimal? ReservoirWarningAtLevel { get; set; }
         public int? ExpiryWarningAtMinute { get; set; }
 
-        public ErosPodUserSettings()
+        public ErosUserSettings()
         {
         }
     }

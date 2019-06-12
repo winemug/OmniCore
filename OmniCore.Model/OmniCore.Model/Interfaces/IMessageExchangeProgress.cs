@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Model.Interfaces.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;

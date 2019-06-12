@@ -1,4 +1,6 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +9,7 @@ using System.Text;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged, IDisposable
+    public class BaseViewModel : PropertyChangedImpl, IDisposable
     {
         private IPod pod;
         public IPod Pod { get => pod; set => SetProperty(ref pod, value) ; }
@@ -63,29 +65,6 @@ namespace OmniCore.Mobile.ViewModels
         {
             get { return title; }
             set { SetProperty(ref title, value); }
-        }
-
-        protected bool SetProperty<T>(ref T backingStore, T value,
-            [CallerMemberName]string propertyName = "",
-            Action onChanged = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
-            backingStore = value;
-            onChanged?.Invoke();
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            var changed = PropertyChanged;
-            if (changed == null)
-                return;
-
-            changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private bool disposedValue = false; // To detect redundant calls

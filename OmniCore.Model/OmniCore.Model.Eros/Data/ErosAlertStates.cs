@@ -7,24 +7,23 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("AlertState")]
-    public class ErosPodAlertStates : IPodAlertStates
+    public class ErosAlertStates : IAlertStates
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
         public Guid PodId { get; set; }
         public DateTime Created { get; set; }
 
-        [ForeignKey(typeof(MessageExchangeResult))]
+        [ForeignKey(typeof(ErosMessageExchangeResult))]
         public long ResultId { get; set; }
 
         public uint AlertW278 { get; set; }
         [Ignore]
         public uint[] AlertStates { get; set; }
 
-        public ErosPodAlertStates()
+        public ErosAlertStates()
         {
         }
 

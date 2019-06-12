@@ -33,23 +33,24 @@ namespace OmniCore.Mobile.Services
         {
             switch (request.Type.Value)
             {
-                case RemoteRequestType.Bolus:
-                    break;
-                case RemoteRequestType.CancelBolus:
-                    result.Success = false;
-                    break;
-                case RemoteRequestType.CancelTempBasal:
-                    result.Success = false;
-                    break;
-                case RemoteRequestType.SetBasalSchedule:
-                    result.Success = false;
-                    break;
-                case RemoteRequestType.SetTempBasal:
-                    result.Success = false;
-                    break;
+                //case RemoteRequestType.Bolus:
+                //    break;
+                //case RemoteRequestType.CancelBolus:
+                //    result.Success = false;
+                //    break;
+                //case RemoteRequestType.CancelTempBasal:
+                //    result.Success = false;
+                //    break;
+                //case RemoteRequestType.SetBasalSchedule:
+                //    result.Success = false;
+                //    break;
+                //case RemoteRequestType.SetTempBasal:
+                //    result.Success = false;
+                //    break;
                 case RemoteRequestType.UpdateStatus:
                     return await UpdateStatus(request.StatusRequestType ?? 0);
             }
+            return null;
         }
 
         private async Task<RemoteResult> UpdateStatus(int reqType)
@@ -65,7 +66,7 @@ namespace OmniCore.Mobile.Services
 
                 result.Status = CreateFromCurrentStatus();
                 result.Success = !conversation.Failed;
-                result.RequestsToDate = GetRequestsToDate(int fromRequestId);
+                // result.RequestsToDate = GetRequestsToDate(int fromRequestId);
             }
             return result;
         }
@@ -74,6 +75,7 @@ namespace OmniCore.Mobile.Services
         {
             var rep = ErosRepository.Instance;
             var unfiltered = rep.GetResults(earliestRequestId);
+            return null;
         }
 
         private RemoteResultPodStatus CreateFromCurrentStatus()

@@ -2,6 +2,8 @@ using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Utilities;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -12,16 +14,15 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("Eros")]
-    public class ErosPod : IPod
+    public class ErosPod : PropertyChangedImpl, IPod
     {
-        private IPodAlertStates alertStates;
-        private IPodBasalSchedule basalSchedule;
-        private IPodFault fault;
-        private IPodStatus status;
-        private IPodUserSettings userSettings;
+        private IAlertStates alertStates;
+        private IBasalSchedule basalSchedule;
+        private IFault fault;
+        private IStatus status;
+        private IUserSettings userSettings;
         private ErosPodRuntimeVariables runtimeVariables;
         private DateTime created;
 
@@ -36,7 +37,7 @@ namespace OmniCore.Model.Eros
         private bool archived;
         private decimal? reservoirUsedForPriming;
 
-        [PrimaryKey]
+        [PrimaryKey, AutoIncrement]
         public Guid? Id { get; set; }
         public DateTime Created { get => created; set { SetProperty(ref created, value); } }
 
@@ -52,46 +53,22 @@ namespace OmniCore.Model.Eros
         public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
 
         [Ignore]
-        public IPodAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
+        public IAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
         [Ignore]
-        public IPodBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
+        public IBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
         [Ignore]
-        public IPodFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
+        public IFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
         [Ignore]
-        public IPodStatus LastStatus { get => status;
+        public IStatus LastStatus { get => status;
             set { SetProperty(ref status, value); } }
         [Ignore]
-        public IPodUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
+        public IUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
         [Ignore]
         public ErosPodRuntimeVariables RuntimeVariables { get => runtimeVariables; set { SetProperty(ref runtimeVariables, value); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public ErosPod()
         {
             RuntimeVariables = new ErosPodRuntimeVariables();
-        }
-
-        private void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            var changed = PropertyChanged;
-            if (changed == null)
-                return;
-
-            changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private bool SetProperty<T>(ref T backingStore, T value,
-            [CallerMemberName]string propertyName = "",
-            Action onChanged = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
-            backingStore = value;
-            onChanged?.Invoke();
-            OnPropertyChanged(propertyName);
-            return true;
         }
     }
 }

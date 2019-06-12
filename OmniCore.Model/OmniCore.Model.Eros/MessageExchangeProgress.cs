@@ -1,6 +1,8 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros
 {
     public class MessageExchangeProgress : IMessageExchangeProgress
     {
@@ -44,7 +46,7 @@ namespace OmniCore.Model
         public MessageExchangeProgress(IConversation conversation, RequestType type, string parameters = null)
         {
             Conversation = conversation;
-            Result = new MessageExchangeResult() {
+            Result = new ErosMessageExchangeResult() {
                 Source = Conversation.RequestSource,
                 Type = type,
                 Parameters = parameters};

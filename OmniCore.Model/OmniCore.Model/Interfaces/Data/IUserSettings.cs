@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Data
 {
-    public interface IPodUserSettings
+    public interface IUserSettings
     {
         long? Id { get; set; }
         Guid PodId { get; set; }

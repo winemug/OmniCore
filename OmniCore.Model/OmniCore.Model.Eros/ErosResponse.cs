@@ -1,6 +1,8 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using System;
 using System.Diagnostics;
@@ -84,7 +86,7 @@ namespace OmniCore.Model.Eros
             switch (rt)
             {
                 case 0x01:
-                    var alrs = new ErosPodAlertStates();
+                    var alrs = new ErosAlertStates();
 
                     alrs.AlertW278 = PartData.Word(i);
                     i += 2;
@@ -103,7 +105,7 @@ namespace OmniCore.Model.Eros
                     break;
                 case 0x02:
                     var status = new ErosPodStatus();
-                    var fault = new ErosPodFault();
+                    var fault = new ErosFault();
 
                     status.Created = DateTime.UtcNow;
                     status.Faulted = true;
@@ -142,7 +144,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private void parse_delivery_state(IPodStatus podStatus, byte delivery_state)
+        private void parse_delivery_state(IStatus podStatus, byte delivery_state)
         {
             if ((delivery_state & 8) > 0)
                 podStatus.BolusState = BolusState.Extended;

@@ -1,14 +1,14 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("Fault")]
-    public class ErosPodFault : IPodFault
+    public class ErosFault : IFault
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
@@ -25,7 +25,7 @@ namespace OmniCore.Model.Eros
         public PodProgress? ProgressBeforeFault2 { get; set; }
         public int? TableAccessFault { get; set; }
 
-        public ErosPodFault()
+        public ErosFault()
         {
             Created = DateTime.UtcNow;
         }

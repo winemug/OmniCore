@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 namespace OmniCore.Model.Eros
 {
     [Table("Status")]
-    public class ErosPodStatus : IPodStatus
+    public class ErosPodStatus : IStatus
     {
         [PrimaryKey, AutoIncrement]
         public long? Id  { get; set; }

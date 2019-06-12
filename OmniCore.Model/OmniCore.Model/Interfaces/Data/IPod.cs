@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enums;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Data
 {
     public interface IPod : INotifyPropertyChanged
     {
@@ -24,10 +24,10 @@ namespace OmniCore.Model.Interfaces
 
         bool Archived { get; set; }
 
-        IPodAlertStates LastAlertStates { get; set; }
-        IPodBasalSchedule LastBasalSchedule { get; set; }
-        IPodFault LastFault { get; set; }
-        IPodStatus LastStatus { get; set; }
-        IPodUserSettings LastUserSettings { get; set; }
+        IAlertStates LastAlertStates { get; set; }
+        IBasalSchedule LastBasalSchedule { get; set; }
+        IFault LastFault { get; set; }
+        IStatus LastStatus { get; set; }
+        IUserSettings LastUserSettings { get; set; }
     }
 }

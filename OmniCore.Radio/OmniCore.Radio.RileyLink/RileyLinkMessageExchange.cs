@@ -1,8 +1,10 @@
 ﻿using OmniCore.Model;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
+using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
@@ -58,6 +60,7 @@ namespace OmniCore.Radio.RileyLink
         public async Task InitializeExchange(IMessageExchangeProgress messageProgress)
         {
             messageProgress.Result.Statistics = new RileyLinkStatistics();
+            messageProgress.Result.ExchangeParameters = MessageExchangeParameters;
             if (FinalAckTask != null)
             {
                 messageProgress.ActionText = "Waiting for previous radio operation to complete";

@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Linq;
+using OmniCore.Model.Eros;
+using OmniCore.Model.Eros.Data;
 
 namespace OmniCore.Radio.RileyLink
 {
@@ -32,7 +34,7 @@ namespace OmniCore.Radio.RileyLink
         public int RssiCount { get; set; }
     }
 
-    public class RileyLinkStatistics : MessageExchangeStatistics
+    public class RileyLinkStatistics : ErosMessageExchangeStatistics
     {
         private int started;
         private int startedME;
@@ -177,6 +179,7 @@ namespace OmniCore.Radio.RileyLink
 
         int mobileRssiCount = 0;
         int mobileRssiTotal = 0;
+
         internal void MobileDeviceRssiReported(int rssi)
         {
             if (rssi != 0)

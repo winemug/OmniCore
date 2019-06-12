@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("BasalSchedule")]
-    public class ErosPodBasalSchedule : IPodBasalSchedule
+    public class ErosBasalSchedule : IBasalSchedule
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
@@ -32,7 +32,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public ErosPodBasalSchedule()
+        public ErosBasalSchedule()
         {
             Created = DateTime.UtcNow;
         }

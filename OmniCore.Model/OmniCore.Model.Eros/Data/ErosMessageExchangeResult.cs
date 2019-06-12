@@ -6,13 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SQLiteNetExtensions.Attributes;
+using OmniCore.Model.Interfaces.Data;
 
-namespace OmniCore.Model
+namespace OmniCore.Model.Eros.Data
 {
-    [Table("Result")]
-    public class MessageExchangeResult : IMessageExchangeResult
+    public class ErosMessageExchangeResult : IMessageExchangeResult
     {
-        [PrimaryKey]
+        [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
 
         public Guid PodId { get; set; }
@@ -35,25 +35,29 @@ namespace OmniCore.Model
         [OneToOne(nameof(StatisticsId))]
         public IMessageExchangeStatistics Statistics { get; set; }
 
+        public long? ParametersId { get; set; }
+        [OneToOne(nameof(ParametersId))]
+        public IMessageExchangeParameters ExchangeParameters { get; set; }
+
         public long? AlertStatesId { get; set; }
         [OneToOne(nameof(AlertStatesId))]
-        public IPodAlertStates AlertStates { get; set; }
+        public IAlertStates AlertStates { get; set; }
 
         public long? BasalScheduleId { get; set; }
         [OneToOne(nameof(BasalScheduleId))]
-        public IPodBasalSchedule BasalSchedule { get; set; }
+        public IBasalSchedule BasalSchedule { get; set; }
 
         public long? FaultId { get; set; }
         [OneToOne(nameof(FaultId))]
-        public IPodFault Fault { get; set; }
+        public IFault Fault { get; set; }
 
         public long? StatusId { get; set; }
         [OneToOne(nameof(StatusId))]
-        public IPodStatus Status { get; set; }
+        public IStatus Status { get; set; }
 
         public long? UserSettingsId { get; set; }
         [OneToOne(nameof(UserSettingsId))]
-        public IPodUserSettings UserSettings { get; set; }
+        public IUserSettings UserSettings { get; set; }
 
     }
 }
