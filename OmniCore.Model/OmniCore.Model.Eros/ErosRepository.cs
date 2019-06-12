@@ -44,7 +44,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosAlertStates>();
                     conn.CreateTable<ErosBasalSchedule>();
                     conn.CreateTable<ErosFault>();
-                    conn.CreateTable<ErosPodStatus>();
+                    conn.CreateTable<ErosStatus>();
                     conn.CreateTable<ErosUserSettings>();
                     conn.CreateTable<ErosMessageExchangeParameters>();
                     conn.CreateTable<ErosMessageExchangeResult>();
@@ -148,7 +148,7 @@ namespace OmniCore.Model.Eros
                     {
                         result.Status.PodId = pod.Id.Value;
                         result.Status.Created = DateTime.UtcNow;
-                        result.Status.Id = conn.InsertOrReplace(result.Status, typeof(ErosPodStatus));
+                        result.Status.Id = conn.InsertOrReplace(result.Status, typeof(ErosStatus));
                         result.StatusId = result.Status.Id;
                         pod.LastStatus = result.Status;
                     }
@@ -194,7 +194,7 @@ namespace OmniCore.Model.Eros
             pod.LastFault = conn.Table<ErosFault>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
-            pod.LastStatus = conn.Table<ErosPodStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
+            pod.LastStatus = conn.Table<ErosStatus>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)
                 .FirstOrDefault();
 
             pod.LastUserSettings = conn.Table<ErosUserSettings>().Where(x => x.PodId == pod.Id).OrderByDescending(x => x.Id)

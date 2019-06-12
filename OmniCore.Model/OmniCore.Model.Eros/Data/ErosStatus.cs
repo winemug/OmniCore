@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Eros
+namespace OmniCore.Model.Eros.Data
 {
     [Table("Status")]
-    public class ErosPodStatus : IStatus
+    public class ErosStatus : IStatus
     {
         [PrimaryKey, AutoIncrement]
         public long? Id  { get; set; }
@@ -37,7 +37,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public ErosPodStatus()
+        public ErosStatus()
         {
             Created = DateTime.UtcNow;
         }

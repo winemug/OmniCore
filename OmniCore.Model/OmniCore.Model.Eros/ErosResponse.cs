@@ -61,7 +61,7 @@ namespace OmniCore.Model.Eros
 
             pod.VersionUnknown += PartData.ToHex(i++, i);
 
-            var status = new ErosPodStatus() { Created = DateTime.UtcNow };
+            var status = new ErosStatus() { Created = DateTime.UtcNow };
             status.Progress = (PodProgress)(PartData.Byte(i++) & 0x0F);
 
             pod.Lot = PartData.DWord(i);
@@ -104,7 +104,7 @@ namespace OmniCore.Model.Eros
                     result.AlertStates = alrs;
                     break;
                 case 0x02:
-                    var status = new ErosPodStatus();
+                    var status = new ErosStatus();
                     var fault = new ErosFault();
 
                     status.Created = DateTime.UtcNow;
@@ -171,7 +171,7 @@ namespace OmniCore.Model.Eros
 
         private void parse_status_response(IPod pod, IMessageExchangeResult result)
         {
-            var status = new ErosPodStatus();
+            var status = new ErosStatus();
             status.Created = DateTime.UtcNow;
             var s0 = PartData[0];
             uint s1 = PartData.DWord(1);
