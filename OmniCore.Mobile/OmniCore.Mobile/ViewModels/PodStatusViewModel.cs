@@ -15,12 +15,24 @@ namespace OmniCore.Mobile.ViewModels
     {
         public PodStatusViewModel()
         {
-            Pod?.LastStatus?.UpdateWithEstimates(Pod);
-            Device.StartTimer(TimeSpan.FromSeconds(10), () =>
+        }
+
+        private void StartTimer()
+        {
+            if (Pod != null && Pod.LastStatus != null && Pod.LastStatus.Progress >= PodProgress.Running)
             {
-                Pod?.LastStatus?.UpdateWithEstimates(Pod);
-                return true;
-            });
+                Pod.LastStatus.UpdateWithEstimates(Pod);
+                Device.StartTimer(TimeSpan.FromSeconds(15), () =>
+                {
+                    if (Pod != null && Pod.LastStatus != null && Pod.LastStatus.Progress >= PodProgress.Running)
+                    {
+                        Pod.LastStatus.UpdateWithEstimates(Pod);
+                        return true;
+                    }
+                    else
+                        return false;
+                });
+            }
         }
 
         private bool updateButtonEnabled = false;

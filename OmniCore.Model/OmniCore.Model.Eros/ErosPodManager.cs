@@ -117,9 +117,7 @@ namespace OmniCore.Model.Eros
             try
             {
                 if (!await this.UpdateStatusInternal(conversation, updateType))
-                {
-                    conversation.Exception = conversation.CurrentExchange.Result.Exception;
-                }
+                    return;
             }
             catch (Exception e)
             {
@@ -192,6 +190,8 @@ namespace OmniCore.Model.Eros
 
                 if (Pod.LastStatus.BasalState != BasalState.Temporary)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start the temp basal");
+
+                Pod.LastTempBasalResult = conversation.CurrentExchange.Result;
             }
             catch (Exception e)
             {
@@ -268,9 +268,6 @@ namespace OmniCore.Model.Eros
             {
                 // progress.CommandText = $"Deactivating Pod";
                 AssertPaired();
-
-                if (!await UpdateStatusInternal(conversation))
-                    return;
 
                 if (Pod.LastStatus.Progress >= PodProgress.Inactive)
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod already deactivated");
@@ -560,6 +557,8 @@ namespace OmniCore.Model.Eros
 
                 if (Pod.LastStatus.BasalState != BasalState.Scheduled)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not cancel the temp basal");
+
+                Pod.LastTempBasalResult = null;
             }
             catch (Exception e)
             {
@@ -594,15 +593,15 @@ namespace OmniCore.Model.Eros
                         return;
                 }
 
-                if (Pod.LastStatus.BasalState != BasalState.Scheduled)
+                if (Pod.LastStatus.BasalState == BasalState.Temporary)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not cancel the temp basal");
 
                 AssertBasalScheduleValid(schedule);
 
                 var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(utcOffsetInMinutes);
                 var parameters = GetStandardParameters();
-                parameters.RepeatFirstPacket = true;
-                parameters.CriticalWithFollowupRequired = true;
+                //parameters.RepeatFirstPacket = true;
+                parameters.CriticalWithFollowupRequired = false;
 
                 var request = new ErosMessageBuilder()
                     .WithBasalSchedule(schedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)

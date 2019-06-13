@@ -59,15 +59,15 @@ namespace OmniCore.Mobile.Services
             var podManager = podProvider.PodManager;
 
             var result = new RemoteResult();
-            using (var conversation = await podManager.StartConversation())
-            {
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+            //using (var conversation = await podManager.StartConversation())
+            //{
+            //    if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+            //        await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
 
-                result.Status = CreateFromCurrentStatus();
-                result.Success = !conversation.Failed;
-                // result.RequestsToDate = GetRequestsToDate(int fromRequestId);
-            }
+            //    result.Status = CreateFromCurrentStatus();
+            //    result.Success = !conversation.Failed;
+            //    // result.RequestsToDate = GetRequestsToDate(int fromRequestId);
+            //}
             return result;
         }
 

@@ -23,7 +23,7 @@ namespace OmniCore.Mobile.Views
             var podManager = App.Instance.PodProvider.PodManager;
             using(var conversation = await podManager.StartConversation())
             {
-                await Task.Run(async () => await podManager.Bolus(conversation, 1.0m).ConfigureAwait(false));
+                await podManager.Bolus(conversation, 1.0m);
             }
             
         }
@@ -33,7 +33,7 @@ namespace OmniCore.Mobile.Views
             var podManager = App.Instance.PodProvider.PodManager;
             using (var conversation = await podManager.StartConversation())
             {
-                await Task.Run(async () => await podManager.SetTempBasal(conversation, 30m, 0.5m).ConfigureAwait(false));
+                await podManager.SetTempBasal(conversation, 30m, 0.5m);
             }
         }
 
@@ -42,7 +42,7 @@ namespace OmniCore.Mobile.Views
             var podManager = App.Instance.PodProvider.PodManager;
             using (var conversation = await podManager.StartConversation())
             {
-                await Task.Run(async () => await podManager.CancelTempBasal(conversation).ConfigureAwait(false));
+                await podManager.CancelTempBasal(conversation);
             }
         }
 
@@ -55,7 +55,7 @@ namespace OmniCore.Mobile.Views
                 for (int i = 0; i < 48; i++)
                     schedule[i] = 8.85m;
 
-                await Task.Run(async () => await podManager.SetBasalSchedule(conversation, schedule, 60).ConfigureAwait(false));
+                await podManager.SetBasalSchedule(conversation, schedule, 60);
             }
         }
     }

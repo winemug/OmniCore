@@ -58,6 +58,7 @@ namespace OmniCore.Model.Eros
             var oe = exception as OmniCoreException;
             Result.Failure = oe?.FailureType ?? FailureType.Unknown;
             Result.Exception = exception;
+            Conversation.Exception = exception;
         }
 
         protected bool SetProperty<T>(ref T backingStore, T value,

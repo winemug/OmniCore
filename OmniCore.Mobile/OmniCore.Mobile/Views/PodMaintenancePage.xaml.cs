@@ -33,63 +33,66 @@ namespace OmniCore.Mobile.Views
                 var podProvider = App.Instance.PodProvider;
                 var podManager = podProvider.PodManager;
 
-                using(var conversation = await podManager.StartConversation())
+                IConversation conversation;
+
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                        await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+                    using (conversation = await podManager.StartConversation())
+                        await podManager.UpdateStatus(conversation);
+                }
 
-                    if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                    {
-                        var dlgResult = await DisplayAlert("Pod Deactivation",
-                            @"This pod has not been paired yet and cannot be deactivated. Would you like to remove the pod from the system? " +
-                            "Note: If you remove it, you won't be able to resume its activation process.",
-                            "Remove Pod", "Cancel");
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                {
+                    var dlgResult = await DisplayAlert("Pod Deactivation",
+                        @"This pod has not been paired yet and cannot be deactivated. Would you like to remove the pod from the system? " +
+                        "Note: If you remove it, you won't be able to resume its activation process.",
+                        "Remove Pod", "Cancel");
 
-                        if (dlgResult)
-                        {
-                            podProvider.Archive();
-                        }
-                        return;
-                    }
-
-                    if (podManager.Pod.LastStatus.Progress < PodProgress.Running)
-                    {
-                        var dlgResult = await DisplayAlert("Pod Deactivation",
-                            @"This pod has not been started yet. Are you sure you want to deactivate it without starting? " +
-                            "Note: After successful deactivation the pod will shut down and will become unusable.",
-                            "Deactivate", "Cancel");
-
-                        if (!dlgResult)
-                            return;
-                    }
-                    else if (podManager.Pod.LastStatus.Progress <= PodProgress.RunningLow)
-                    {
-                        var dlgResult = await DisplayAlert("Pod Deactivation",
-                            @"This pod is currently active and running. Are you sure you want to deactivate it? " +
-                            "Note: After successful deactivation the pod will stop insulin delivery completely and will shut down.",
-                            "Deactivate", "Cancel");
-
-                        if (!dlgResult)
-                            return;
-                    }
-
-                    await Task.Run(async () => await podManager.Deactivate(conversation).ConfigureAwait(false));
-
-                    if (!conversation.Failed)
+                    if (dlgResult)
                     {
                         podProvider.Archive();
-                        await DisplayAlert("Pod Deactivation", "Pod has been deactivated successfully.", "OK");
                     }
-                    else
-                    {
-                        var dlgResult = await DisplayAlert("Pod Deactivation", "Failed to deactivate the pod. Would you like to remove the pod from the system?" +
-                            "Note: If you remove it, you won't be able to control this pod anymore and if the pod is working, it will continue to deliver basals as programmed.", "Remove Pod", "Cancel");
+                    return;
+                }
 
-                        if (dlgResult)
-                        {
-                            podProvider.Archive();
-                            await DisplayAlert("Pod Deactivation", "Pod has been removed.", "OK");
-                        }
+                if (podManager.Pod.LastStatus.Progress < PodProgress.Running)
+                {
+                    var dlgResult = await DisplayAlert("Pod Deactivation",
+                        @"This pod has not been started yet. Are you sure you want to deactivate it without starting? " +
+                        "Note: After successful deactivation the pod will shut down and will become unusable.",
+                        "Deactivate", "Cancel");
+
+                    if (!dlgResult)
+                        return;
+                }
+                else if (podManager.Pod.LastStatus.Progress <= PodProgress.RunningLow)
+                {
+                    var dlgResult = await DisplayAlert("Pod Deactivation",
+                        @"This pod is currently active and running. Are you sure you want to deactivate it? " +
+                        "Note: After successful deactivation the pod will stop insulin delivery completely and will shut down.",
+                        "Deactivate", "Cancel");
+
+                    if (!dlgResult)
+                        return;
+                }
+
+                using (conversation = await podManager.StartConversation())
+                    await podManager.Deactivate(conversation);
+
+                if (!conversation.Failed)
+                {
+                    podProvider.Archive();
+                    await DisplayAlert("Pod Deactivation", "Pod has been deactivated successfully.", "OK");
+                }
+                else
+                {
+                    var dlgResult = await DisplayAlert("Pod Deactivation", "Failed to deactivate the pod. Would you like to remove the pod from the system?" +
+                        "Note: If you remove it, you won't be able to control this pod anymore and if the pod is working, it will continue to deliver basals as programmed.", "Remove Pod", "Cancel");
+
+                    if (dlgResult)
+                    {
+                        podProvider.Archive();
+                        await DisplayAlert("Pod Deactivation", "Pod has been removed.", "OK");
                     }
                 }
             }
@@ -161,13 +164,13 @@ namespace OmniCore.Mobile.Views
             if (podManager.Pod.LastStatus == null)
             {
                 using (conversation = await podManager.StartConversation())
-                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+                    await podManager.UpdateStatus(conversation);
             }
 
             if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
             {
                 using (conversation = await podManager.StartConversation())
-                    await Task.Run(async () => await podManager.Pair(conversation, 60).ConfigureAwait(false));
+                    await podManager.Pair(conversation, 60);
                 if (conversation.Failed)
                 {
                     await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
@@ -179,7 +182,7 @@ namespace OmniCore.Mobile.Views
             {
                 using (conversation = await podManager.StartConversation())
                 {
-                    await Task.Run(async () => await podManager.Activate(conversation).ConfigureAwait(false));
+                    await podManager.Activate(conversation);
                 }
                 if (conversation.Failed)
                 {
@@ -210,7 +213,7 @@ namespace OmniCore.Mobile.Views
                 basalSchedule[i] = 0.40m;
             using (conversation = await podManager.StartConversation())
             {
-                await Task.Run(async () => await podManager.InjectAndStart(conversation, basalSchedule, 60).ConfigureAwait(false));
+                await podManager.InjectAndStart(conversation, basalSchedule, 60);
             }
             if (conversation.Failed)
             {

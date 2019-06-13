@@ -500,7 +500,7 @@ namespace OmniCore.Model.Eros
             }
 
             var halved_schedule = new decimal[48];
-            for (int i = 0; i < 47; i++)
+            for (int i = 0; i < 48; i++)
                 halved_schedule[i] = schedule[i] / 2m;
 
             int current_hh = hour * 2;
@@ -522,11 +522,11 @@ namespace OmniCore.Model.Eros
             var ise_body = getBodyFromTable(ise_list);
             var pulse_body = getBodyFromTable(pulse_list);
 
-            var command_body = new Bytes(0);
-            var body_checksum = new Bytes((byte)current_hh);
+            var command_body = new Bytes().Append(0x00);
+            var body_checksum = new Bytes().Append((byte)current_hh);
 
             var current_hh_pulse_count = pulse_list[current_hh];
-            var remaining_pulse_count = (ushort)(current_hh_pulse_count * seconds_to_hh / 1800);
+            var remaining_pulse_count = (ushort)((int)current_hh_pulse_count * (int)seconds_to_hh / 1800);
 
             body_checksum.Append(seconds_to_hh8);
             body_checksum.Append(remaining_pulse_count);
@@ -537,7 +537,7 @@ namespace OmniCore.Model.Eros
 
             WithPart(new ErosRequest(PartType.RequestInsulinSchedule, command_body, true));
 
-            command_body = new Bytes(new byte[] { 0, 0 });
+            command_body = new Bytes().Append(0x00);
 
             var pulse_entries = getPulseIntervalEntries(halved_schedule);
             for (int i = 0; i < pulse_entries.Length; i++)
@@ -554,7 +554,7 @@ namespace OmniCore.Model.Eros
                     var pulses_past_intervals = (ushort)((uint)ii * (uint)1800000000 / (uint)interval);
                     var pulses_past_this_interval = (ushort)((uint)seconds_past_hh * (uint)1000000 / (uint)interval + 1);
                     var remaining_pulses_this_interval = (ushort)(pulses10 - pulses_past_this_interval - pulses_past_intervals);
-                    var microseconds_to_next_interval = (uint)interval - ((uint)seconds_past_hh * (uint)1000000 % (uint)interval);
+                    var microseconds_to_next_interval = (uint)interval - (((uint)seconds_past_hh * (uint)1000000) % (uint)interval);
 
                     command_body.Append(remaining_pulses_this_interval);
                     command_body.Append(microseconds_to_next_interval);

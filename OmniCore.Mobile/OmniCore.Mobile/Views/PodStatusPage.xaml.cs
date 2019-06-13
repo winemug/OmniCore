@@ -35,7 +35,7 @@ namespace OmniCore.Mobile.Views
                 var podManager = App.Instance.PodProvider.PodManager;
                 using (var conversation = await podManager.StartConversation())
                 {
-                    await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
+                    await podManager.UpdateStatus(conversation);
                 }
             }
             finally

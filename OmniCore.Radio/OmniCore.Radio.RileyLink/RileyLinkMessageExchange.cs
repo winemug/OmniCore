@@ -41,18 +41,18 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task RunInUiContext(Func<Task> a)
         {
-            var current = SynchronizationContext.Current;
-            SynchronizationContext.SetSynchronizationContext(UiContext);
+            //var current = SynchronizationContext.Current;
+            //SynchronizationContext.SetSynchronizationContext(UiContext);
             await a.Invoke();
-            SynchronizationContext.SetSynchronizationContext(current);
+            //SynchronizationContext.SetSynchronizationContext(current);
         }
 
         private async Task<T> RunInUiContext<T>(Func<Task<T>> a)
         {
-            var current = SynchronizationContext.Current;
-            SynchronizationContext.SetSynchronizationContext(UiContext);
+            //var current = SynchronizationContext.Current;
+            //SynchronizationContext.SetSynchronizationContext(UiContext);
             var ret = await a.Invoke();
-            SynchronizationContext.SetSynchronizationContext(current);
+            //SynchronizationContext.SetSynchronizationContext(current);
             return ret;
         }
 
