@@ -51,6 +51,12 @@ namespace OmniCore.Mobile.Views
                 return;
             ensureCalled = true;
             await EnsurePermissions();
+            viewModel.StartUpdateTimer();
+        }
+
+        private void ContentPage_Disappearing(object sender, EventArgs e)
+        {
+            viewModel.StopUpdateTimer();
         }
 
         private async Task EnsurePermissions()

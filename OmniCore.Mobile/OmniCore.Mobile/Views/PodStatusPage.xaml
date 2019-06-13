@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Mobile.Views.PodStatusPage"
              Appearing="ContentPage_Appearing"
+             Disappearing="ContentPage_Disappearing"
              >
     <ContentPage.Content>
         <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
@@ -10,47 +11,54 @@
             <ScrollView>
                 <StackLayout Orientation="Vertical">
                     <StackLayout Orientation="Vertical">
-                            <Label Text="{Binding Id}" HorizontalOptions="Center"/>
                             <Label Text="{Binding Status}" HorizontalOptions="Center" FontSize="Large"/>
-                        </StackLayout>
-                    <StackLayout Orientation="Vertical">
-                        <Label HorizontalOptions="Center" FontSize="Large">Pod Life</Label>
-                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
-                            <Label Text="Remaining: "/>
-                            <Label Text="{Binding LifetimeRemaining}"/>
-                            <Label Text="Active for: " HorizontalOptions="End"/>
-                            <Label Text="{Binding LifetimeActive}" HorizontalOptions="End"/>
-                        </StackLayout>
-                        <ProgressBar ProgressColor="{Binding LifetimeColor}"
-                                Progress="{Binding LifetimeProgress}" 
-                                />
+                        <Label Text="{Binding Id}" HorizontalOptions="Center" FontSize="Micro"/>
                     </StackLayout>
-                    <StackLayout Orientation="Vertical">
-                            <Label HorizontalOptions="Center" FontSize="Large">Insulin Reservoir</Label>
+                    <Frame BackgroundColor="#20FFE999">
+                        <StackLayout Orientation="Vertical">
                             <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
-                                <Label Text="Remaining:"/>
+                                <Label FontSize="Large">Pod active for</Label>
+                                <Label FontSize="Large" Text="{Binding LifetimeActive}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <Label Text="Remaining"/>
+                                <Label Text="{Binding LifetimeRemaining}"/>
+                            </StackLayout>
+                            <ProgressBar ProgressColor="{Binding LifetimeColor}"
+                                    Progress="{Binding LifetimeProgress}" 
+                                    />
+                        </StackLayout>
+                    </Frame>
+                    <Frame BackgroundColor="#20E9FF99">
+                        <StackLayout Orientation="Vertical">
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <Label FontSize="Large">Insulin delivered</Label>
+                                <Label FontSize="Large" Text="{Binding ReservoirDelivered}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <Label Text="Remaining"/>
                                 <Label Text="{Binding ReservoirRemaining}"/>
-                                <Label Text="Delivered:"/>
-                                <Label Text="{Binding ReservoirDelivered}" HorizontalOptions="End"/>
                             </StackLayout>
                             <ProgressBar ProgressColor="{Binding ReservoirColor}"
                                  Progress="{Binding ReservoirProgress}" 
                                  />
                         </StackLayout>
-                        <StackLayout Orientation="Vertical">
-                            <Label Text="{Binding BasalStatus}" HorizontalOptions="Center" FontSize="Large"/>
-                            <Label Text="{Binding BasalText1}" HorizontalOptions="Center"/>
-                            <Label Text="{Binding BasalText2}" HorizontalOptions="Center"/>
+                    </Frame>
+                    <Frame BackgroundColor="#2099FFE9">
+                        <StackLayout Orientation="Vertical" HorizontalOptions="Fill">
+                            <Label Text="{Binding BasalStatus}" FontSize="Large"/>
+                            <Label Text="{Binding BasalText1}" />
+                            <Label Text="{Binding BasalText2}" />
                         </StackLayout>
+                    </Frame>
                 </StackLayout>
             </ScrollView>
             <StackLayout Orientation="Vertical" VerticalOptions="End">
-                <StackLayout Orientation="Horizontal">
-                    <Label>Status Updated:</Label>
-                    <Label Text="{Binding Updated}"/>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="End">
+                    <Label VerticalOptions="Center">Updated</Label>
+                    <Label VerticalOptions="Center" Text="{Binding Updated}"/>
+                    <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding UpdateButtonEnabled}"/>
                 </StackLayout>
-                <Button Text="Update Status" Clicked="Update_Button_Clicked" IsEnabled="{Binding UpdateButtonEnabled}"
-                    VerticalOptions="End"/>
             </StackLayout>
         </Grid>
     </ContentPage.Content>

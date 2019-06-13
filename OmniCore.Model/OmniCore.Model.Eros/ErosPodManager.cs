@@ -3,6 +3,7 @@ using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,7 +50,7 @@ namespace OmniCore.Model.Eros
             }
             else
             {
-                if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
+                if (!await ConversationMutex.WaitAsync(timeoutMilliseconds).NoSync())
                     return null;
             }
 
@@ -71,18 +72,18 @@ namespace OmniCore.Model.Eros
             {
                 progress.Result.RequestTime = DateTime.UtcNow;
                 progress.Running = true;
-                var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
-                await messageExchange.InitializeExchange(progress);
-                var response = await messageExchange.GetResponse(requestMessage, progress);
+                var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod).NoSync();
+                await messageExchange.InitializeExchange(progress).NoSync();
+                var response = await messageExchange.GetResponse(requestMessage, progress).NoSync();
                 messageExchange.ParseResponse(response, Pod, progress);
 
                 if (ErosPod.RuntimeVariables.NonceSync.HasValue)
                 {
                     var responseMessage = response as ErosMessage;
                     emp.MessageSequenceOverride = (responseMessage.sequence + 15) % 16;
-                    messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
-                    await messageExchange.InitializeExchange(progress);
-                    response = await messageExchange.GetResponse(requestMessage, progress);
+                    messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod).NoSync();
+                    await messageExchange.InitializeExchange(progress).NoSync();
+                    response = await messageExchange.GetResponse(requestMessage, progress).NoSync();
                     messageExchange.ParseResponse(response, Pod, progress);
                     if (ErosPod.RuntimeVariables.NonceSync.HasValue)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Nonce re-negotiation failed");
@@ -108,7 +109,7 @@ namespace OmniCore.Model.Eros
             StatusRequestType updateType = StatusRequestType.Standard)
         {
             var request = new ErosMessageBuilder().WithStatus(updateType).Build();
-            return await PerformExchange(request, GetStandardParameters(), conversation);
+            return await PerformExchange(request, GetStandardParameters(), conversation).NoSync();
         }
 
         public async Task UpdateStatus(IConversation conversation, 
@@ -116,7 +117,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                if (!await this.UpdateStatusInternal(conversation, updateType))
+                if (!await this.UpdateStatusInternal(conversation, updateType).NoSync())
                     return;
             }
             catch (Exception e)
@@ -130,7 +131,7 @@ namespace OmniCore.Model.Eros
             try
             {
                 Debug.WriteLine($"Acknowledging alerts, bitmask: {alertMask}");
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 AssertImmediateBolusInactive();
@@ -150,7 +151,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Bitmask is invalid for current alert state");
 
                 var request = new ErosMessageBuilder().WithAcknowledgeAlerts(alertMask).Build();
-                if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                     return;
 
                 if ((Pod.LastStatus.AlertMask & alertMask) != 0)
@@ -177,7 +178,7 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus.BasalState == BasalState.Temporary)
                 {
                     var cancelReq = new ErosMessageBuilder().WithCancelTempBasal().Build();
-                    if (!await PerformExchange(cancelReq, GetStandardParameters(), conversation))
+                    if (!await PerformExchange(cancelReq, GetStandardParameters(), conversation).NoSync())
                         return;
                 }
 
@@ -185,7 +186,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod is still executing a temp basal");
 
                 var request = new ErosMessageBuilder().WithTempBasal(basalRate, durationInHours).Build();
-                if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.BasalState != BasalState.Temporary)
@@ -205,7 +206,7 @@ namespace OmniCore.Model.Eros
             {
                 //progress.CommandText = $"Bolusing {bolusAmount}U";
                 Debug.WriteLine($"Bolusing {bolusAmount}U");
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 AssertRunningStatus();
@@ -221,7 +222,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Cannot bolus more than 30U");
 
                 var request = new ErosMessageBuilder().WithBolus(bolusAmount).Build();
-                if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.BolusState != BolusState.Immediate)
@@ -230,12 +231,12 @@ namespace OmniCore.Model.Eros
                 while (Pod.LastStatus.BolusState == BolusState.Immediate)
                 {
                     var tickCount = (int)(Pod.LastStatus.NotDeliveredInsulin / 0.05m);
-                    await Task.Delay(tickCount * 2000 + 500, conversation.Token);
+                    await Task.Delay(tickCount * 2000 + 500, conversation.Token).NoSync();
 
                     if (conversation.Token.IsCancellationRequested)
                     {
                         var cancelRequest = new ErosMessageBuilder().WithCancelBolus().Build();
-                        var cancelResult = await PerformExchange(request, GetStandardParameters(), conversation);
+                        var cancelResult = await PerformExchange(request, GetStandardParameters(), conversation).NoSync();
 
                         if (!cancelResult || Pod.LastStatus.BolusState == BolusState.Immediate)
                         {
@@ -246,7 +247,7 @@ namespace OmniCore.Model.Eros
                             break;
                         }
                     }
-                    if (!await UpdateStatusInternal(conversation))
+                    if (!await UpdateStatusInternal(conversation).NoSync())
                         return;
                 }
 
@@ -273,7 +274,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.PodStateInvalidForCommand, "Pod already deactivated");
 
                 var request = new ErosMessageBuilder().WithDeactivate().Build();
-                if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.Progress != PodProgress.Inactive)
@@ -302,7 +303,7 @@ namespace OmniCore.Model.Eros
                     parameters.AllowAutoLevelAdjustment = false;
 
                     var request = new ErosMessageBuilder().WithAssignAddress(Pod.RadioAddress).Build();
-                    if (!await PerformExchange(request, parameters, conversation))
+                    if (!await PerformExchange(request, parameters, conversation).NoSync())
                         return;
 
                     if (Pod.LastStatus == null)
@@ -327,7 +328,7 @@ namespace OmniCore.Model.Eros
                         podDate.Year, (byte)podDate.Month, (byte)podDate.Day,
                         (byte)podDate.Hour, (byte)podDate.Minute).Build();
 
-                    if (!await PerformExchange(request, parameters, conversation))
+                    if (!await PerformExchange(request, parameters, conversation).NoSync())
                         return;
 
                     AssertPaired();
@@ -344,7 +345,7 @@ namespace OmniCore.Model.Eros
             try
             {
                 // progress.CommandText = $"Activating Pod";
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.Progress > PodProgress.ReadyForInjection)
@@ -369,21 +370,20 @@ namespace OmniCore.Model.Eros
                         .WithAlertSetup(new List<AlertConfiguration>(new[] { ac }))
                         .Build();
 
-                    if (!await PerformExchange(request, parameters, conversation))
+                    if (!await PerformExchange(request, parameters, conversation).NoSync())
                         return;
 
                     request = new ErosMessageBuilder().WithDeliveryFlags(0, 0).Build();
-                    if (!await PerformExchange(request, parameters, conversation))
+                    if (!await PerformExchange(request, parameters, conversation).NoSync())
                         return;
 
                     request = new ErosMessageBuilder().WithPrimeCannula().Build();
-                    if (!await PerformExchange(request, parameters, conversation))
+                    if (!await PerformExchange(request, parameters, conversation).NoSync())
                         return;
 
                     if (Pod.LastStatus.Progress != PodProgress.Purging)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start priming");
 
-                    Pod.ReservoirUsedForPriming = 2.60m;
                 }
 
                 while (Pod.LastStatus.Progress == PodProgress.Purging)
@@ -391,7 +391,7 @@ namespace OmniCore.Model.Eros
                     var ticks = (int)(Pod.LastStatus.NotDeliveredInsulin / 0.05m);
                     await Task.Delay(ticks * 1000 + 200);
 
-                    if (!await UpdateStatusInternal(conversation))
+                    if (!await UpdateStatusInternal(conversation).NoSync())
                         return;
                 }
 
@@ -414,7 +414,7 @@ namespace OmniCore.Model.Eros
             try
             {
                 // progress.CommandText = $"Starting Pod";
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.Progress >= PodProgress.Running)
@@ -444,7 +444,7 @@ namespace OmniCore.Model.Eros
                         UtcOffset = utcOffsetInMinutes
                     };
 
-                    if (!await PerformExchange(request, parameters, null, progress))
+                    if (!await PerformExchange(request, parameters, null, progress).NoSync())
                         return;
 
                     if (Pod.LastStatus.Progress != PodProgress.BasalScheduleSet)
@@ -479,18 +479,15 @@ namespace OmniCore.Model.Eros
                     });
 
                     var request = new ErosMessageBuilder().WithAlertSetup(acs).Build();
-                    if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                    if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                         return;
 
                     request = new ErosMessageBuilder().WithInsertCannula().Build();
-                    if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                    if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                         return;
 
                     if (Pod.LastStatus.Progress != PodProgress.Priming)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start priming the cannula for insertion");
-
-                    if (Pod.ReservoirUsedForPriming.HasValue)
-                        Pod.ReservoirUsedForPriming += 0.50m;
 
                     Pod.InsertionDate = DateTime.UtcNow;
                 }
@@ -498,14 +495,17 @@ namespace OmniCore.Model.Eros
                 while (Pod.LastStatus.Progress == PodProgress.Priming)
                 {
                     var ticks = (int)(Pod.LastStatus.NotDeliveredInsulin / 0.05m);
-                    await Task.Delay(ticks * 1000 + 200);
+                    await Task.Delay(ticks * 1000 + 200).NoSync();
 
-                    if (!await UpdateStatusInternal(conversation))
+                    if (!await UpdateStatusInternal(conversation).NoSync())
                         return;
                 }
 
                 if (Pod.LastStatus.Progress != PodProgress.Running)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not enter the running state");
+
+                Pod.ReservoirUsedForPriming = Pod.LastStatus.DeliveredInsulin;
+
             }
             catch (Exception e)
             {
@@ -526,7 +526,7 @@ namespace OmniCore.Model.Eros
                 AssertImmediateBolusActive();
 
                 var request = new ErosMessageBuilder().WithCancelBolus().Build();
-                if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                     return;
 
                 if (Pod.LastStatus.BolusState != BolusState.Inactive)
@@ -542,7 +542,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 AssertRunningStatus();
@@ -551,7 +551,7 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus.BasalState == BasalState.Temporary)
                 {
                     var request = new ErosMessageBuilder().WithCancelTempBasal().Build();
-                    if (!await PerformExchange(request, GetStandardParameters(), conversation))
+                    if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                         return;
                 }
 
@@ -580,7 +580,7 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                if (!await UpdateStatusInternal(conversation))
+                if (!await UpdateStatusInternal(conversation).NoSync())
                     return;
 
                 AssertRunningStatus();
@@ -589,7 +589,7 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus.BasalState == BasalState.Temporary)
                 {
                     var cancelReq = new ErosMessageBuilder().WithCancelTempBasal().Build();
-                    if (!await PerformExchange(cancelReq, GetStandardParameters(), conversation))
+                    if (!await PerformExchange(cancelReq, GetStandardParameters(), conversation).NoSync())
                         return;
                 }
 
@@ -615,7 +615,7 @@ namespace OmniCore.Model.Eros
                     UtcOffset = utcOffsetInMinutes
                 };
 
-                if (!await PerformExchange(request, parameters, null, progress))
+                if (!await PerformExchange(request, parameters, null, progress).NoSync())
                     return;
 
             }

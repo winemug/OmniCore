@@ -99,19 +99,19 @@ namespace OmniCore.Model.Eros.Data
                     var parameters = JsonConvert.DeserializeAnonymousType(pod.LastTempBasalResult.Parameters, anon);
 
                     var tempBasalEnd = pod.LastTempBasalResult.ResultTime.Value.AddHours((double)parameters.Duration);
-                    if (tempBasalEnd > utcNow)
+                    if (tempBasalEnd < utcNow)
+                    {
+                        basalInsulinEstimate += parameters.Duration * parameters.BasalRate;
+                        basalInsulinEstimate += GetScheduledBasalTotals(tempBasalEnd, utcNow, pod);
+                        BasalStateEstimate = BasalState.Scheduled;
+                    }
+                    else
                     {
                         TemporaryBasalTotalHours = parameters.Duration;
                         TemporaryBasalRate = parameters.BasalRate;
                         TemporaryBasalRemaining = tempBasalEnd - utcNow;
-
-                        basalInsulinEstimate += parameters.Duration * parameters.BasalRate;
-                        BasalStateEstimate = BasalState.Scheduled;
-                        basalInsulinEstimate += GetScheduledBasalTotals(tempBasalEnd, utcNow, pod);
-                    }
-                    else
-                    {
                         basalInsulinEstimate += (decimal)timePast.TotalHours * parameters.BasalRate;
+                        BasalStateEstimate = BasalState.Temporary;
                     }
                 }
             }
@@ -126,6 +126,7 @@ namespace OmniCore.Model.Eros.Data
             {
                 ReservoirEstimate -= basalInsulinEstimate;
             }
+            DeliveredInsulinEstimate += basalInsulinEstimate;
 
             ActiveMinutesEstimate = ActiveMinutes + (uint)timePast.TotalMinutes;
 
@@ -142,22 +143,25 @@ namespace OmniCore.Model.Eros.Data
             if (pod.LastBasalSchedule == null)
                 return 0m;
 
-            var podTime1 = start + TimeSpan.FromMinutes(pod.LastBasalSchedule.UtcOffset);
-            var podTime2 = end + TimeSpan.FromMinutes(pod.LastBasalSchedule.UtcOffset);
+            var podTimeStart = start + TimeSpan.FromMinutes(pod.LastBasalSchedule.UtcOffset);
+            var podTimeEnd = end + TimeSpan.FromMinutes(pod.LastBasalSchedule.UtcOffset);
 
             decimal scheduledEstimate = 0;
-            var podTimeCurrent = podTime1;
+            var podTimeCurrent = podTimeStart;
             while (true)
             {
                 var currentRate = pod.LastBasalSchedule.BasalSchedule[CurrentHalfHourIndex(podTimeCurrent)];
                 var podTimeNext = NextHalfHour(podTimeCurrent);
-                if (podTimeNext > podTime2)
+                if (podTimeNext < podTimeEnd)
                 {
-                    scheduledEstimate += (currentRate / 2);
+                    var ratio = (decimal)((podTimeNext - podTimeCurrent).TotalMinutes / 30.0);
+                    if (ratio > 0)
+                        scheduledEstimate += (currentRate / 2) * ratio;
+                    podTimeCurrent = podTimeNext;
                 }
                 else
                 {
-                    var ratio = (decimal)((podTime2 - podTimeCurrent).TotalMinutes / 30.0);
+                    var ratio = (decimal)((podTimeEnd - podTimeCurrent).TotalMinutes / 30.0);
                     if (ratio > 0)
                         scheduledEstimate += (currentRate / 2) * ratio;
                     break;

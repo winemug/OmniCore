@@ -36,6 +36,7 @@ namespace OmniCore.Model.Eros.Data
         private string versionUnknown;
         private bool archived;
         private decimal? reservoirUsedForPriming;
+        private IMessageExchangeResult lastTempBasalResult;
 
         [PrimaryKey, AutoIncrement]
         public Guid? Id { get; set; }
@@ -53,7 +54,7 @@ namespace OmniCore.Model.Eros.Data
         public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
 
         [Ignore]
-        public IMessageExchangeResult LastTempBasalResult { get; set; }
+        public IMessageExchangeResult LastTempBasalResult { get => lastTempBasalResult; set => SetProperty(ref lastTempBasalResult, value); }
         [Ignore]
         public IAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
         [Ignore]
@@ -61,8 +62,7 @@ namespace OmniCore.Model.Eros.Data
         [Ignore]
         public IFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
         [Ignore]
-        public IStatus LastStatus { get => status;
-            set { SetProperty(ref status, value); } }
+        public IStatus LastStatus{ get => status; set { SetProperty(ref status, value); } }
         [Ignore]
         public IUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
         [Ignore]

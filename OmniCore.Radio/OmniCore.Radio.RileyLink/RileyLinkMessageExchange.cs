@@ -39,24 +39,6 @@ namespace OmniCore.Radio.RileyLink
             MessageExchangeParameters = messageExchangeParameters as ErosMessageExchangeParameters;
         }
 
-        private async Task RunInUiContext(Func<Task> a)
-        {
-            //var current = SynchronizationContext.Current;
-            //SynchronizationContext.SetSynchronizationContext(UiContext);
-            await a.Invoke();
-            //SynchronizationContext.SetSynchronizationContext(current);
-        }
-
-        private async Task<T> RunInUiContext<T>(Func<Task<T>> a)
-        {
-            //var current = SynchronizationContext.Current;
-            //SynchronizationContext.SetSynchronizationContext(UiContext);
-            var ret = await a.Invoke();
-            //SynchronizationContext.SetSynchronizationContext(current);
-            return ret;
-        }
-
-
         public async Task InitializeExchange(IMessageExchangeProgress messageProgress)
         {
             messageProgress.Result.Statistics = new RileyLinkStatistics();
@@ -67,7 +49,7 @@ namespace OmniCore.Radio.RileyLink
                 await FinalAckTask;
             }
 
-            await RunInUiContext(async () => await RileyLink.EnsureDevice(messageProgress));
+            await RileyLink.EnsureDevice(messageProgress).NoSync();
         }
 
         public async Task<IMessage> GetResponse(IMessage requestMessage, IMessageExchangeProgress messageExchangeProgress)
@@ -82,7 +64,7 @@ namespace OmniCore.Radio.RileyLink
                 ((RileyLinkStatistics)messageProgress.Result.Statistics).StartMessageExchange();
                 if (MessageExchangeParameters.TransmissionLevelOverride.HasValue)
                 {
-                    await RunInUiContext(async () => await RileyLink.SetTxLevel(messageProgress, MessageExchangeParameters.TransmissionLevelOverride.Value));
+                    await RileyLink.SetTxLevel(messageProgress, MessageExchangeParameters.TransmissionLevelOverride.Value).NoSync();
                 }
 
                 RadioPacket received = null;
@@ -227,13 +209,13 @@ namespace OmniCore.Radio.RileyLink
             Debug.WriteLine("RECV PKT None");
 
             if (timeoutCount %3 == 0)
-                await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress));
+                await RileyLink.TxLevelUp(messageProgress).NoSync();
 
             if (timeoutCount == 10)
                 await Task.Delay(2000);
 
             if (timeoutCount == 15)
-                await RunInUiContext(async () => await RileyLink.Reset(messageProgress));
+                await RileyLink.Reset(messageProgress).NoSync();
 
             if (timeoutCount == 25)
                 await Task.Delay(2000);
@@ -248,7 +230,7 @@ namespace OmniCore.Radio.RileyLink
         private async Task HandleRadioException(OmniCoreRadioException pre, IMessageExchangeProgress messageProgress, int radioErrorCount)
         {
             if (radioErrorCount % 2 == 1)
-                await RunInUiContext(async () => await RileyLink.Reset(messageProgress));
+                await RileyLink.Reset(messageProgress).NoSync();
 
             if (radioErrorCount == 6)
                 Pod.RuntimeVariables.PacketSequence = 0;
@@ -311,16 +293,16 @@ namespace OmniCore.Radio.RileyLink
             Bytes receivedData = null;
             Debug.WriteLine($"SEND PKT {packet_to_send}");
             if (this.LastPacketSent == 0 || (Environment.TickCount - this.LastPacketSent) > 2000)
-                receivedData = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 300, 1, 300));
+                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 300, 1, 300).NoSync();
             else
-                receivedData = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 120, 0, 40));
+                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 120, 0, 40).NoSync();
 
             var receivedPacket = this.GetPacket(receivedData);
             if (receivedPacket == null)
             {
                 ((RileyLinkStatistics)messageProgress.Result.Statistics).BadDataReceived(receivedData);
                 if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                    await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress));
+                    await RileyLink.TxLevelDown(messageProgress).NoSync();
                 return null;
             }
 
@@ -330,7 +312,7 @@ namespace OmniCore.Radio.RileyLink
                 ((RileyLinkStatistics)messageProgress.Result.Statistics).BadPacketReceived(receivedPacket);
                 Debug.WriteLine("RECV PKT ADDR MISMATCH");
                 if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                    await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress));
+                    await RileyLink.TxLevelDown(messageProgress).NoSync();
                 return null;
             }
 
@@ -342,7 +324,7 @@ namespace OmniCore.Radio.RileyLink
                 ((RileyLinkStatistics)messageProgress.Result.Statistics).RepeatPacketReceived(receivedPacket);
                 Debug.WriteLine("RECV PKT previous");
                 if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                    await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress));
+                    await RileyLink.TxLevelUp(messageProgress).NoSync();
                 return null;
             }
 
@@ -382,7 +364,7 @@ namespace OmniCore.Radio.RileyLink
 
                     try
                     {
-                        received = await RunInUiContext(async () => await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 300, 3, 300));
+                        received = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 300, 3, 300).NoSync();
                     }
                     catch(OmniCoreTimeoutException)
                     {
@@ -398,7 +380,7 @@ namespace OmniCore.Radio.RileyLink
                     if (p == null)
                     {
                         if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                            await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress));
+                            await RileyLink.TxLevelDown(messageProgress).NoSync();
                         continue;
                     }
 
@@ -406,7 +388,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         Debug.WriteLine("RECV PKT ADDR MISMATCH");
                         if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                            await RunInUiContext(async () => await RileyLink.TxLevelDown(messageProgress));
+                            await RileyLink.TxLevelDown(messageProgress).NoSync();
                         continue;
                     }
 
@@ -416,7 +398,7 @@ namespace OmniCore.Radio.RileyLink
                     {
                         Debug.WriteLine("RECV PKT previous");
                         if (MessageExchangeParameters.AllowAutoLevelAdjustment)
-                            await RunInUiContext(async () => await RileyLink.TxLevelUp(messageProgress));
+                            await RileyLink.TxLevelUp(messageProgress).NoSync();
                         continue;
                     }
 
@@ -431,7 +413,7 @@ namespace OmniCore.Radio.RileyLink
                 catch (OmniCoreRadioException pre)
                 {
                     Debug.WriteLine($"Radio error during send, retrying {pre}");
-                    await RunInUiContext(async () => await RileyLink.Reset(messageProgress));
+                    await RileyLink.Reset(messageProgress).NoSync();
                     start_time = Environment.TickCount;
                 }
                 catch (Exception) { throw; }
