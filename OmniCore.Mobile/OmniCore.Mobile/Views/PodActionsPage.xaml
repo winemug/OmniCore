@@ -6,12 +6,9 @@
     <ContentPage.Content>
         <StackLayout>
             <Button Text="Start Temp. Basal" Clicked="Button_Clicked_1"/>
-            <Button Text="Cancel Temp. Basal"/>
+            <Button Text="Cancel Temp. Basal" Clicked="Button_Clicked_2"/>
             <Button Text="Bolus" Clicked="Button_Clicked"/>
-            <Button Text="Suspend Insulin Delivery"/>
-            <Button Text="Resume Insulin Delivery"/>
-            <Label>Active Basalprogram</Label>
-            <Label>Active Basalrate</Label>
+            <Button Text="Set Basal schedule" Clicked="Button_Clicked_3"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

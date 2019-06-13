@@ -493,6 +493,12 @@ namespace OmniCore.Model.Eros
 
         public IMessageBuilder WithBasalSchedule(decimal[] schedule, ushort hour, ushort minute, ushort second)
         {
+            if (!Type.HasValue)
+            {
+                Type = RequestType.SetBasalSchedule;
+                Parameters = new { Schedule = schedule, Hour = hour, Minute = minute, Second = second };
+            }
+
             var halved_schedule = new decimal[48];
             for (int i = 0; i < 47; i++)
                 halved_schedule[i] = schedule[i] / 2m;

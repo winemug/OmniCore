@@ -53,6 +53,8 @@ namespace OmniCore.Model.Eros.Data
         public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
 
         [Ignore]
+        public IMessageExchangeResult LastTempBasalResult { get; set; }
+        [Ignore]
         public IAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
         [Ignore]
         public IBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }

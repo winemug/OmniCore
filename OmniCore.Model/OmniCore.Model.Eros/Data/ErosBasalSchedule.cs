@@ -15,8 +15,8 @@ namespace OmniCore.Model.Eros.Data
         public Guid PodId { get; set; }
         public DateTime Created { get; set; }
 
-
         public int UtcOffset { get; set; }
+
         [Ignore]
         public decimal[] BasalSchedule { get; set; }
 
@@ -32,12 +32,6 @@ namespace OmniCore.Model.Eros.Data
             }
         }
 
-        public ErosBasalSchedule()
-        {
-            Created = DateTime.UtcNow;
-        }
-
         public DateTime PodDateTime { get; set; }
-        public DateTime Updated { get; set; }
     }
 }

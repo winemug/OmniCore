@@ -9,34 +9,50 @@
             <Image Source="ic_pod.svg" Scale="1.6" Opacity="0.2"/>
             <ScrollView>
                 <StackLayout Orientation="Vertical">
-                    <Label Text="{Binding Id}" HorizontalOptions="Center"/>
-                    <Label Text="{Binding Status}" HorizontalOptions="Center"/>
+                    <Frame>
+                        <StackLayout Orientation="Vertical">
+                            <Label Text="{Binding Id}" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Status}" HorizontalOptions="Center" FontSize="Large"/>
+                        </StackLayout>
+                    </Frame>
 
-                    <Label/>
-                    <Label HorizontalOptions="Center" FontSize="Large">Lifetime</Label>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
-                        <Label Text="Remaining: "/>
-                        <Label Text="{Binding LifetimeRemaining}"/>
-                        <Label Text="Active for: " HorizontalOptions="End"/>
-                        <Label Text="{Binding LifetimeActive}" HorizontalOptions="End"/>
-                    </StackLayout>
-                    <ProgressBar ProgressColor="{Binding LifetimeColor}"
-                                 Progress="{Binding LifetimeProgress}" 
-                                 />
+                    <Frame>
+                        <StackLayout Orientation="Vertical">
+                            <Label HorizontalOptions="Center" FontSize="Large">Pod Life</Label>
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <Label Text="Remaining: "/>
+                                <Label Text="{Binding LifetimeRemaining}"/>
+                                <Label Text="Active for: " HorizontalOptions="End"/>
+                                <Label Text="{Binding LifetimeActive}" HorizontalOptions="End"/>
+                            </StackLayout>
+                            <ProgressBar ProgressColor="{Binding LifetimeColor}"
+                                Progress="{Binding LifetimeProgress}" 
+                                />
+                        </StackLayout>
+                    </Frame>
 
-                    <Label/>
-                    <Label HorizontalOptions="Center" FontSize="Large">Insulin</Label>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
-                        <Label Text="Remaining:"/>
-                        <Label Text="{Binding ReservoirRemaining}"/>
-                        <Label Text="Delivered:"/>
-                        <Label Text="{Binding ReservoirDelivered}" HorizontalOptions="End"/>
-                    </StackLayout>
-                    <ProgressBar ProgressColor="{Binding ReservoirColor}"
+                    <Frame>
+                        <StackLayout Orientation="Vertical">
+                            <Label HorizontalOptions="Center" FontSize="Large">Insulin Reservoir</Label>
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <Label Text="Remaining:"/>
+                                <Label Text="{Binding ReservoirRemaining}"/>
+                                <Label Text="Delivered:"/>
+                                <Label Text="{Binding ReservoirDelivered}" HorizontalOptions="End"/>
+                            </StackLayout>
+                            <ProgressBar ProgressColor="{Binding ReservoirColor}"
                                  Progress="{Binding ReservoirProgress}" 
                                  />
+                        </StackLayout>
+                    </Frame>
 
-
+                    <Frame>
+                        <StackLayout Orientation="Vertical">
+                            <Label Text="{Binding BasalStatus}" HorizontalOptions="Center" FontSize="Large"/>
+                            <Label Text="{Binding BasalText1}" HorizontalOptions="Center"/>
+                            <Label Text="{Binding BasalText2}" HorizontalOptions="Center"/>
+                        </StackLayout>
+                    </Frame>
                 </StackLayout>
             </ScrollView>
             <StackLayout Orientation="Vertical" VerticalOptions="End">

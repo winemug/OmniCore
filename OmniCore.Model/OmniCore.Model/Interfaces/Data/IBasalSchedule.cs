@@ -13,7 +13,5 @@ namespace OmniCore.Model.Interfaces.Data
         int UtcOffset { get; set; }
         decimal[] BasalSchedule { get; set; }
         DateTime PodDateTime { get; set; }
-
-        DateTime Updated { get; set; }
     }
 }

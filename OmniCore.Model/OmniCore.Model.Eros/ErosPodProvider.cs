@@ -40,11 +40,6 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private void RaisePodChanged()
-        {
-            
-        }
-
         public void Archive()
         {
             lock (this)

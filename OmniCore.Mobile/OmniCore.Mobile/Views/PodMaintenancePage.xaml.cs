@@ -133,7 +133,6 @@ namespace OmniCore.Mobile.Views
 
             if (podProvider.PodManager == null || podProvider.PodManager.Pod.LastStatus == null)
             {
-
                 actDlgResult = await DisplayAlert(
                             "Pod Activation",
                             "Fill a new pod with insulin. Make sure the pod has beeped two times during the filling process. When you are finished, press Activate to start the process.",
@@ -142,7 +141,8 @@ namespace OmniCore.Mobile.Views
                 if (!actDlgResult)
                     return;
 
-                podProvider.New();
+                if (podProvider.PodManager == null)
+                    podProvider.New();
             }
             else
             {
@@ -156,69 +156,71 @@ namespace OmniCore.Mobile.Views
             }
 
             var podManager = podProvider.PodManager;
+            IConversation conversation;
 
-            using (var conversation = await podManager.StartConversation())
+            if (podManager.Pod.LastStatus == null)
             {
-                if (podManager.Pod.LastStatus != null)
-                {
+                using (conversation = await podManager.StartConversation())
                     await Task.Run(async () => await podManager.UpdateStatus(conversation).ConfigureAwait(false));
-                }
+            }
 
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                {
+            if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+            {
+                using (conversation = await podManager.StartConversation())
                     await Task.Run(async () => await podManager.Pair(conversation, 60).ConfigureAwait(false));
-
-                    if (conversation.Failed)
-                    {
-                        await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
-                        return;
-                    }
+                if (conversation.Failed)
+                {
+                    await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
+                    return;
                 }
+            }
 
-                if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
+            if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
+            {
+                using (conversation = await podManager.StartConversation())
                 {
                     await Task.Run(async () => await podManager.Activate(conversation).ConfigureAwait(false));
-                    if (conversation.Failed)
-                    {
-                        await DisplayAlert("Pod Activation", "Failed to activate the pod.", "OK");
-                        return;
-                    }
-
-                    actDlgResult = await DisplayAlert(
-                        "Pod Activation",
-                        "Pod has been activated successfully. Apply the pod and press Start to inject the cannula and start the pod.",
-                        "Start", "Cancel");
-
-                    if (!actDlgResult)
-                        return;
+                }
+                if (conversation.Failed)
+                {
+                    await DisplayAlert("Pod Activation", "Failed to activate the pod.", "OK");
+                    return;
                 }
                 else
                 {
                     actDlgResult = await DisplayAlert(
                         "Pod Activation",
-                        "Apply the pod and press Start to inject the cannula and start the pod.",
+                        "Pod has been primed and activated successfully. Apply the pod and press Start to inject the cannula and start the pod.",
                         "Start", "Cancel");
-
-                    if (!actDlgResult)
-                        return;
                 }
-
-                var basalSchedule = new decimal[48];
-                for (int i = 0; i < 48; i++)
-                    basalSchedule[i] = 0.40m;
-
-                await Task.Run(async () => await podManager.InjectAndStart(conversation, basalSchedule, 60).ConfigureAwait(false));
-                if (conversation.Failed)
-                {
-                    await DisplayAlert("Pod Activation", "Failed to start the pod.", "OK");
-                    return;
-                }
-
-                await DisplayAlert("Pod Activation",
-                                    "Pod started.",
-                                    "OK");
             }
-        }
+            else
+            {
+                actDlgResult = await DisplayAlert(
+                    "Pod Activation",
+                    "Apply the pod and press Start to inject the cannula and start the pod.",
+                    "Start", "Cancel");
+            }
+            if (!actDlgResult)
+                return;
 
+
+            var basalSchedule = new decimal[48];
+            for (int i = 0; i < 48; i++)
+                basalSchedule[i] = 0.40m;
+            using (conversation = await podManager.StartConversation())
+            {
+                await Task.Run(async () => await podManager.InjectAndStart(conversation, basalSchedule, 60).ConfigureAwait(false));
+            }
+            if (conversation.Failed)
+            {
+                await DisplayAlert("Pod Activation", "Failed to start the pod.", "OK");
+                return;
+            }
+
+            await DisplayAlert("Pod Activation",
+                                "Pod started.",
+                                "OK");
+        }
     }
 }

@@ -30,9 +30,33 @@ namespace OmniCore.Mobile.Views
 
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
-            //var progress = new MessageExchangeProgress();
-            //MeView.SetProgress(progress);
-            //await Task.Run(async () => await App.PodProvider.Current.SetTempBasal(progress, 1.5m, 0.5m).ConfigureAwait(false));
+            var podManager = App.Instance.PodProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await Task.Run(async () => await podManager.SetTempBasal(conversation, 30m, 0.5m).ConfigureAwait(false));
+            }
+        }
+
+        private async void Button_Clicked_2(object sender, EventArgs e)
+        {
+            var podManager = App.Instance.PodProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await Task.Run(async () => await podManager.CancelTempBasal(conversation).ConfigureAwait(false));
+            }
+        }
+
+        private async void Button_Clicked_3(object sender, EventArgs e)
+        {
+            var podManager = App.Instance.PodProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                var schedule = new decimal[48];
+                for (int i = 0; i < 48; i++)
+                    schedule[i] = 8.85m;
+
+                await Task.Run(async () => await podManager.SetBasalSchedule(conversation, schedule, 60).ConfigureAwait(false));
+            }
         }
     }
 }

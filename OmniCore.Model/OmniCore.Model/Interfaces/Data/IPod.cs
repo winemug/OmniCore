@@ -24,6 +24,7 @@ namespace OmniCore.Model.Interfaces.Data
 
         bool Archived { get; set; }
 
+        IMessageExchangeResult LastTempBasalResult { get; set; }
         IAlertStates LastAlertStates { get; set; }
         IBasalSchedule LastBasalSchedule { get; set; }
         IFault LastFault { get; set; }
