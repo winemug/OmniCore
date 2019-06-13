@@ -33,6 +33,7 @@ namespace OmniCore.Model.Eros
 
         public RequestType RequestType { get; set; }
         public string Parameters { get; set; }
+
     }
 }
 

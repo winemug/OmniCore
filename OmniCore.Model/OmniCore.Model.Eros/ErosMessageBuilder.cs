@@ -349,7 +349,8 @@ namespace OmniCore.Model.Eros
         private ushort[] SubBytes(ushort[] source, int startIndex)
         {
             var ret = new ushort[source.Length - startIndex];
-            Buffer.BlockCopy(source, startIndex, ret, 0, ret.Length);
+            for (int i = 0; i < ret.Length; i++)
+                ret[i] = source[startIndex + i];
             return ret;
         }
 
@@ -512,6 +513,7 @@ namespace OmniCore.Model.Eros
             else
             {
                 seconds_past_hh = (ushort)((minute - 30) * 60 + second);
+                current_hh++;
             }
 
             var seconds_to_hh = (ushort)(1800 - seconds_past_hh);
@@ -551,10 +553,10 @@ namespace OmniCore.Model.Eros
                 if (ii >= 0)
                 {
                     command_body.Append((byte)i);
-                    var pulses_past_intervals = (ushort)((uint)ii * (uint)1800000000 / (uint)interval);
-                    var pulses_past_this_interval = (ushort)((uint)seconds_past_hh * (uint)1000000 / (uint)interval + 1);
+                    var pulses_past_intervals = (ushort)((ulong)ii * (ulong)1800000000 / (ulong)interval);
+                    var pulses_past_this_interval = (ushort)((ulong)seconds_past_hh * (ulong)1000000 / (ulong)interval + 1);
                     var remaining_pulses_this_interval = (ushort)(pulses10 - pulses_past_this_interval - pulses_past_intervals);
-                    var microseconds_to_next_interval = (uint)interval - (((uint)seconds_past_hh * (uint)1000000) % (uint)interval);
+                    var microseconds_to_next_interval = (uint)(interval - (((ulong)seconds_past_hh * (ulong)1000000) % (ulong)interval));
 
                     command_body.Append(remaining_pulses_this_interval);
                     command_body.Append(microseconds_to_next_interval);

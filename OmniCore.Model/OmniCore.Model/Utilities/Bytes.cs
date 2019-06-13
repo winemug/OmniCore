@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmniCore.Model.Utilities
 {
-    public class Bytes
+    public class Bytes : IComparable<Bytes>
     {
         private const int PAGE_SIZE = 256;
         public byte[] ByteBuffer = new byte[PAGE_SIZE];
@@ -176,6 +176,22 @@ namespace OmniCore.Model.Utilities
         public override string ToString()
         {
             return this.ToHex();
+        }
+
+        public int CompareTo(Bytes other)
+        {
+            if (this.Length > other.Length)
+                return 1;
+
+            if (this.Length < other.Length)
+                return -1;
+
+            for(int i=0; i<this.Length; i++)
+            {
+                if (this[i] != other[i])
+                    return this[i].CompareTo(other[i]);
+            }
+            return 0;
         }
     }
 }
