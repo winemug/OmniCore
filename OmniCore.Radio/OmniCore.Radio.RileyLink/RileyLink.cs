@@ -413,7 +413,7 @@ namespace OmniCore.Radio.RileyLink
             {
                 byte[] response;
                 if (WorkaroundRequired)
-                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN, 0 });
+                    response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { 0, (byte)RileyLinkRegister.PKTLEN });
                 else
                     response = await SendCommand(RileyLinkCommandType.ReadRegister, new byte[] { (byte)RileyLinkRegister.PKTLEN });
 

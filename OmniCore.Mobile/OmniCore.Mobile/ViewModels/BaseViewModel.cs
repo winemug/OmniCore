@@ -14,6 +14,14 @@ namespace OmniCore.Mobile.ViewModels
         private IPod pod;
         public IPod Pod { get => pod; set => SetProperty(ref pod, value) ; }
 
+        public bool IsPodAvailable
+        {
+            get
+            {
+                return (Pod != null && Pod.ActiveConversation == null);
+            }
+        }
+
         public BaseViewModel()
         {
             App.Instance.PodProvider.ManagerChanged += PodProvider_PodChanged;
@@ -46,6 +54,9 @@ namespace OmniCore.Mobile.ViewModels
 
         private void Pod_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(IPod.ActiveConversation))
+                OnPropertyChanged(nameof(IsPodAvailable));
+
             OnPodPropertyChanged(sender, e);
         }
 

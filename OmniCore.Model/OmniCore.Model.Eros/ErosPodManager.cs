@@ -54,7 +54,8 @@ namespace OmniCore.Model.Eros
                     return null;
             }
 
-            return new ErosConversation(ConversationMutex) { RequestSource = source };
+            Pod.ActiveConversation = new ErosConversation(ConversationMutex, Pod) { RequestSource = source };
+            return Pod.ActiveConversation;
         }
 
         private ErosMessageExchangeParameters GetStandardParameters()

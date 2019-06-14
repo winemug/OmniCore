@@ -38,6 +38,7 @@ namespace OmniCore.Model.Eros.Data
         private bool archived;
         private decimal? reservoirUsedForPriming;
         private IMessageExchangeResult lastTempBasalResult;
+        private IConversation activeConversation;
 
         [PrimaryKey, AutoIncrement]
         public Guid? Id { get; set; }
@@ -64,11 +65,13 @@ namespace OmniCore.Model.Eros.Data
         [Ignore]
         public IFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
         [Ignore]
-        public IStatus LastStatus{ get => status; set { SetProperty(ref status, value); } }
+        public IStatus LastStatus { get => status; set { SetProperty(ref status, value); } }
         [Ignore]
         public IUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
         [Ignore]
         public ErosPodRuntimeVariables RuntimeVariables { get => runtimeVariables; set { SetProperty(ref runtimeVariables, value); } }
+        [Ignore]
+        public IConversation ActiveConversation { get => activeConversation; set { SetProperty(ref activeConversation, value); } }
 
         public ErosPod()
         {

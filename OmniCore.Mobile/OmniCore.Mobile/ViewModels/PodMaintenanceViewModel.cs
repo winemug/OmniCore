@@ -15,7 +15,6 @@ namespace OmniCore.Mobile.ViewModels
         private bool resumeActivationButtonVisible;
         private bool resumeActivationButtonEnabled = true;
 
-
         public bool ButtonsEnabled
         {
             get => buttonsEnabled; set => SetProperty(ref buttonsEnabled, value);

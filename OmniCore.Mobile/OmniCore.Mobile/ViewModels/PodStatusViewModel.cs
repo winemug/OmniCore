@@ -38,16 +38,8 @@ namespace OmniCore.Mobile.ViewModels
             TimerShouldRun = false;
         }
 
-        private bool updateButtonEnabled = false;
-        public bool UpdateButtonEnabled
-        {
-            get { return updateButtonEnabled; }
-            set { SetProperty(ref updateButtonEnabled, value); }
-        }
-
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            UpdateButtonEnabled = (Pod != null);
             Pod?.LastStatus?.UpdateWithEstimates(Pod);
             OnPropertyChanged(string.Empty);
         }

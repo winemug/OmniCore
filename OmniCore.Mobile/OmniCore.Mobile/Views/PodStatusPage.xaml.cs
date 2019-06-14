@@ -29,20 +29,10 @@ namespace OmniCore.Mobile.Views
 
         private async void Update_Button_Clicked(object sender, EventArgs e)
         {
-            viewModel.UpdateButtonEnabled = false;
-            try
+            var podManager = App.Instance.PodProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
             {
-                var podManager = App.Instance.PodProvider.PodManager;
-                using (var conversation = await podManager.StartConversation())
-                {
-                    await podManager.UpdateStatus(conversation);
-                    await podManager.UpdateStatus(conversation, Model.Enums.StatusRequestType.FaultEventInformation);
-                    await podManager.UpdateStatus(conversation, Model.Enums.StatusRequestType.FaultInformationWithPodInitializationTime);
-                }
-            }
-            finally
-            {
-                viewModel.UpdateButtonEnabled = true;
+                await podManager.UpdateStatus(conversation);
             }
         }
 

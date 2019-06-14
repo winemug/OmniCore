@@ -1,6 +1,7 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,15 +44,17 @@ namespace OmniCore.Model.Eros
 
         public IMessageExchangeProgress CurrentExchange { get; private set; }
 
+        private IPod Pod;
         private Exception exception;
         private readonly SemaphoreSlim ConversationMutex;
         private readonly CancellationTokenSource CancellationTokenSource;
         private TaskCompletionSource<bool> CancellationCompletion;
 
-        public ErosConversation(SemaphoreSlim conversationMutex)
+        public ErosConversation(SemaphoreSlim conversationMutex, IPod pod)
         {
             ConversationMutex = conversationMutex;
             CancellationTokenSource = new CancellationTokenSource();
+            Pod = pod;
         }
 
         public async Task<bool> Cancel()
@@ -116,6 +119,7 @@ namespace OmniCore.Model.Eros
                 {
                     ConversationMutex.Release();
                     CancellationTokenSource.Dispose();
+                    Pod.ActiveConversation = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

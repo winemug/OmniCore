@@ -69,8 +69,18 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
+                var allOtherPods = conn.Table<ErosPod>().Where(x => x.Serial != 351453);
+                foreach(var pod in allOtherPods)
+                {
+                    pod.Archived = true;
+                    conn.Update(pod);
+                }
+
+
                 return WithRelations(conn.Table<ErosPod>()
-                    .FirstOrDefault(x => !x.Archived), conn);
+                    .Where(x => !x.Archived)
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault(), conn);
             }
         }
 

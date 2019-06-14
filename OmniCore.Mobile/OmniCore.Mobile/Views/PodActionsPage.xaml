@@ -5,10 +5,10 @@
              xmlns:vw="clr-namespace:OmniCore.Mobile.Views">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="Start Temp. Basal" Clicked="Button_Clicked_1"/>
-            <Button Text="Cancel Temp. Basal" Clicked="Button_Clicked_2"/>
-            <Button Text="Bolus" Clicked="Button_Clicked"/>
-            <Button Text="Set Basal schedule" Clicked="Button_Clicked_3"/>
+            <Button Text="Start Temp. Basal" Clicked="Button_Clicked_1" IsEnabled="{Binding IsPodAvailable}"/>
+            <Button Text="Cancel Temp. Basal" Clicked="Button_Clicked_2" IsEnabled="{Binding IsPodAvailable}"/>
+            <Button Text="Bolus" Clicked="Button_Clicked" IsEnabled="{Binding IsPodAvailable}"/>
+            <Button Text="Set Basal schedule" Clicked="Button_Clicked_3" IsEnabled="{Binding IsPodAvailable}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

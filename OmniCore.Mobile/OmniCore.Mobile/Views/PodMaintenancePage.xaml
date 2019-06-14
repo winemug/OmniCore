@@ -9,11 +9,11 @@
     <ContentPage.Content>
         <StackLayout>
             <Button Text="Resume Activation" Clicked="ResumeActivateClicked" IsVisible="{Binding ResumeActivationButtonVisible}"
-                    IsEnabled="{Binding ButtonsEnabled}"/>
+                    IsEnabled="{Binding IsPodAvailable}"/>
             <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsVisible="{Binding DeactivateButtonVisible}"
-                    IsEnabled="{Binding ButtonsEnabled}"/>
+                    IsEnabled="{Binding IsPodAvailable}"/>
             <Button Text="Activate New Pod" Clicked="ActivateClicked" IsVisible="{Binding ActivateNewButtonVisible}"
-                    IsEnabled="{Binding ButtonsEnabled}"/>
+                    IsEnabled="{Binding IsPodAvailable}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
