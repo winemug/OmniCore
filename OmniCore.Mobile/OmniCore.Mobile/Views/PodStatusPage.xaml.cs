@@ -39,10 +39,11 @@ namespace OmniCore.Mobile.Views
         private bool ensureCalled = false;
         private async void ContentPage_Appearing(object sender, EventArgs e)
         {
-            if (ensureCalled)
-                return;
-            ensureCalled = true;
-            await EnsurePermissions();
+            if (!ensureCalled)
+            {
+                ensureCalled = true;
+                await EnsurePermissions();
+            }
             viewModel.StartUpdateTimer();
         }
 
