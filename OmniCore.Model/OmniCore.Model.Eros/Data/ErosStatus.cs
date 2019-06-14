@@ -19,37 +19,26 @@ namespace OmniCore.Model.Eros.Data
         public Guid PodId { get; set; }
         public DateTime Created { get; set; }
 
-        public bool Faulted { get; set; }
+        public bool? Faulted { get; set; }
 
-        public decimal NotDeliveredInsulin { get; set; }
+        public decimal? NotDeliveredInsulin { get; set; }
 
-        public decimal DeliveredInsulin { get; set; }
-        public decimal Reservoir { get; set; }
+        public decimal? DeliveredInsulin { get; set; }
+        public decimal? Reservoir { get; set; }
 
-        public PodProgress Progress { get; set; }
-        public BasalState BasalState { get; set; }
-        public BolusState BolusState { get; set; }
+        public PodProgress? Progress { get; set; }
+        public BasalState? BasalState { get; set; }
+        public BolusState? BolusState { get; set; }
 
-        public uint ActiveMinutes { get; set; }
+        public uint? ActiveMinutes { get; set; }
 
-        public byte AlertMask { get; set; }
+        public byte? AlertMask { get; set; }
 
-        private int _message_seq = 0;
-        
-        public int MessageSequence
-        {
-            get => _message_seq;
-            set
-            {
-                _message_seq = value % 16;
-            }
-        }
-
-        public decimal DeliveredInsulinEstimate { get; set; }
-        public decimal ReservoirEstimate { get; set; }
-        public uint ActiveMinutesEstimate { get; set; }
-        public BasalState BasalStateEstimate { get; set; }
-        public BolusState BolusStateEstimate { get; set; }
+        public decimal? DeliveredInsulinEstimate { get; set; }
+        public decimal? ReservoirEstimate { get; set; }
+        public uint? ActiveMinutesEstimate { get; set; }
+        public BasalState? BasalStateEstimate { get; set; }
+        public BolusState? BolusStateEstimate { get; set; }
 
         public decimal? TemporaryBasalTotalHours { get; set; }
         public TimeSpan? TemporaryBasalRemaining { get; set; }
@@ -69,28 +58,31 @@ namespace OmniCore.Model.Eros.Data
 
             TimeSpan timePast = utcNow - Created;
 
-            if (!Faulted && BolusState == BolusState.Immediate)
+            if (Faulted.HasValue && !Faulted.Value
+                && BolusState.HasValue && BolusState.Value == Enums.BolusState.Immediate
+                && NotDeliveredInsulin.HasValue)
             {
                 var shouldHaveDelivered = (decimal)(timePast.TotalSeconds / 2) * 0.05m;
-                if (shouldHaveDelivered > NotDeliveredInsulin)
-                    shouldHaveDelivered = NotDeliveredInsulin;
+                if (shouldHaveDelivered > NotDeliveredInsulin.Value)
+                    shouldHaveDelivered = NotDeliveredInsulin.Value;
 
                 shouldHaveDelivered -= shouldHaveDelivered % 0.05m;
 
-                DeliveredInsulinEstimate += shouldHaveDelivered;
+                if (DeliveredInsulinEstimate.HasValue)
+                    DeliveredInsulinEstimate += shouldHaveDelivered;
 
                 if (ReservoirEstimate < 50.0m)
                     ReservoirEstimate -= shouldHaveDelivered;
 
                 if (shouldHaveDelivered == NotDeliveredInsulin)
                 {
-                    BolusStateEstimate = BolusState.Inactive;
+                    BolusStateEstimate = Enums.BolusState.Inactive;
                 }
             }
 
             var basalInsulinEstimate = 0m;
 
-            if (BasalState == BasalState.Temporary)
+            if (BasalState.HasValue && BasalState.Value == Enums.BasalState.Temporary)
             {
                 if (pod.LastTempBasalResult != null)
                 {
@@ -103,7 +95,7 @@ namespace OmniCore.Model.Eros.Data
                     {
                         basalInsulinEstimate += parameters.Duration * parameters.BasalRate;
                         basalInsulinEstimate += GetScheduledBasalTotals(tempBasalEnd, utcNow, pod);
-                        BasalStateEstimate = BasalState.Scheduled;
+                        BasalStateEstimate = Enums.BasalState.Scheduled;
                     }
                     else
                     {
@@ -111,7 +103,7 @@ namespace OmniCore.Model.Eros.Data
                         TemporaryBasalRate = parameters.BasalRate;
                         TemporaryBasalRemaining = tempBasalEnd - utcNow;
                         basalInsulinEstimate += (decimal)timePast.TotalHours * parameters.BasalRate;
-                        BasalStateEstimate = BasalState.Temporary;
+                        BasalStateEstimate = Enums.BasalState.Temporary;
                     }
                 }
             }
@@ -122,13 +114,15 @@ namespace OmniCore.Model.Eros.Data
 
             basalInsulinEstimate -= basalInsulinEstimate % 0.05m;
 
-            if (Reservoir < 50.0m)
+            if (Reservoir.HasValue && Reservoir < 50.0m)
             {
                 ReservoirEstimate -= basalInsulinEstimate;
             }
-            DeliveredInsulinEstimate += basalInsulinEstimate;
+            if (DeliveredInsulinEstimate.HasValue)
+                DeliveredInsulinEstimate += basalInsulinEstimate;
 
-            ActiveMinutesEstimate = ActiveMinutes + (uint)timePast.TotalMinutes;
+            if (ActiveMinutesEstimate.HasValue)
+                ActiveMinutesEstimate = ActiveMinutes + (uint)timePast.TotalMinutes;
 
             if (pod.LastBasalSchedule != null)
             {

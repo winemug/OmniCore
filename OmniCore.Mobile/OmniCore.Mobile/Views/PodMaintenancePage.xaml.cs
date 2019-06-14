@@ -27,7 +27,7 @@ namespace OmniCore.Mobile.Views
 
         private async void DeactivateClicked(object sender, EventArgs e)
         {
-            viewModel.DeactivateButtonEnabled = false;
+            viewModel.ButtonsEnabled = false;
             try
             {
                 var podProvider = App.Instance.PodProvider;
@@ -98,33 +98,33 @@ namespace OmniCore.Mobile.Views
             }
             finally
             {
-                viewModel.DeactivateButtonEnabled = true;
+                viewModel.ButtonsEnabled = true;
             }
         }
 
         private async void ActivateClicked(object sender, EventArgs e)
         {
-            viewModel.ActivateNewButtonEnabled = false;
+            viewModel.ButtonsEnabled = false;
             try
             {
                 await Activate();
             }
             finally
             {
-                viewModel.ActivateNewButtonEnabled = true;
+                viewModel.ButtonsEnabled = true;
             }
         }
 
         private async void ResumeActivateClicked(object sender, EventArgs e)
         {
-            viewModel.ResumeActivationButtonEnabled = false;
+            viewModel.ButtonsEnabled = false;
             try
             {
                 await Activate();
             }
             finally
             {
-                viewModel.ResumeActivationButtonEnabled = true;
+                viewModel.ButtonsEnabled = true;
             }
         }
 

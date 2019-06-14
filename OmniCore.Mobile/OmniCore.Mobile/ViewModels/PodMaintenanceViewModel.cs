@@ -7,12 +7,19 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class PodMaintenanceViewModel : BaseViewModel
     {
+        private bool buttonsEnabled = true;
         private bool deactivateButtonVisible;
         private bool deactivateButtonEnabled = true;
         private bool activateNewButtonVisible;
         private bool activateNewButtonEnabled = true;
         private bool resumeActivationButtonVisible;
         private bool resumeActivationButtonEnabled = true;
+
+
+        public bool ButtonsEnabled
+        {
+            get => buttonsEnabled; set => SetProperty(ref buttonsEnabled, value);
+        }
 
         public bool DeactivateButtonVisible
         {
@@ -50,17 +57,15 @@ namespace OmniCore.Mobile.ViewModels
             ActivateNewButtonVisible = false;
             ResumeActivationButtonVisible = false;
 
-            if (Pod != null)
-            {
+            if (Pod != null && Pod.LastStatus != null && Pod.LastStatus.Progress >= Model.Enums.PodProgress.PairingSuccess
+                && Pod.LastStatus.Progress < Model.Enums.PodProgress.Inactive)
                 DeactivateButtonVisible = true;
-                if (Pod.LastStatus != null && Pod.LastStatus.Progress < Model.Enums.PodProgress.Running)
-                    ResumeActivationButtonVisible = true;
-                   
-            }
-            else
-            {
+
+            if (Pod != null && Pod.LastStatus != null && Pod.LastStatus.Progress < Model.Enums.PodProgress.Running &&
+                Pod.LastStatus.Progress >= Model.Enums.PodProgress.PairingSuccess)
+                ResumeActivationButtonVisible = true;
+            else if (Pod == null || Pod.LastStatus == null || Pod.LastStatus.Progress < Model.Enums.PodProgress.PairingSuccess)
                 ActivateNewButtonVisible = true;
-            }
         }
     }
 }

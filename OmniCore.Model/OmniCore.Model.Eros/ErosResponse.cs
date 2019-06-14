@@ -108,11 +108,10 @@ namespace OmniCore.Model.Eros
                     var fault = new ErosFault();
 
                     status.Created = DateTime.UtcNow;
-                    status.Faulted = true;
                     status.Progress = (PodProgress)PartData.Byte(i++);
                     parse_delivery_state(status, PartData.Byte(i++));
                     status.NotDeliveredInsulin = PartData.Byte(i++) * 0.05m;
-                    status.MessageSequence = PartData.Byte(i++);
+                    pod.MessageSequence = PartData.Byte(i++);
                     status.DeliveredInsulin = PartData.Byte(i++) * 0.05m;
 
                     fault.FaultCode = PartData.Byte(i++);
@@ -180,7 +179,7 @@ namespace OmniCore.Model.Eros
             parse_delivery_state(status, (byte)(s0 >> 4));
             status.Progress = (PodProgress)(s0 & 0xF);
 
-            status.MessageSequence = (int)(s1 & 0x00007800) >> 11;
+            pod.MessageSequence = (int)(s1 & 0x00007800) >> 11;
             status.DeliveredInsulin = ((s1 & 0x0FFF8000) >> 15) * 0.05m;
             status.NotDeliveredInsulin = (s1 & 0x000007FF) * 0.05m;
             status.Faulted = ((s2 >> 31) != 0);

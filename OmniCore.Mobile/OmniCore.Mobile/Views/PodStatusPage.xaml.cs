@@ -36,6 +36,8 @@ namespace OmniCore.Mobile.Views
                 using (var conversation = await podManager.StartConversation())
                 {
                     await podManager.UpdateStatus(conversation);
+                    await podManager.UpdateStatus(conversation, Model.Enums.StatusRequestType.FaultEventInformation);
+                    await podManager.UpdateStatus(conversation, Model.Enums.StatusRequestType.FaultInformationWithPodInitializationTime);
                 }
             }
             finally

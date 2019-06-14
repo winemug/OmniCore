@@ -14,6 +14,7 @@ namespace OmniCore.Model.Interfaces.Data
         uint? Lot { get; set; }
         uint? Serial { get; set; }
         uint RadioAddress { get; set; }
+        int MessageSequence { get; set; }
 
         DateTime? ActivationDate { get; set; }
         DateTime? InsertionDate { get; set; }

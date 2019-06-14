@@ -48,40 +48,8 @@ namespace OmniCore.Mobile.ViewModels
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateButtonEnabled = (Pod != null);
-            Pod.LastStatus.UpdateWithEstimates(Pod);
+            Pod?.LastStatus?.UpdateWithEstimates(Pod);
             OnPropertyChanged(string.Empty);
-
-            //if (string.IsNullOrEmpty(e.PropertyName))
-            //    OnPropertyChanged(string.Empty);
-            //else
-            //{
-            //    if (e.PropertyName == nameof(IPod.Lot) || e.PropertyName == nameof(IPod.Serial)
-            //        || e.PropertyName == nameof(IPod.RadioAddress))
-            //        OnPropertyChanged(nameof(Id));
-
-            //    if (e.PropertyName == nameof(IPod.ReservoirUsedForPriming))
-            //    {
-            //        OnPropertyChanged(nameof(ReservoirColor));
-            //        OnPropertyChanged(nameof(ReservoirDelivered));
-            //        OnPropertyChanged(nameof(ReservoirRemaining));
-            //    }
-
-            //    if (e.PropertyName == nameof(IPod.LastStatus))
-            //    {
-            //        VerifyAndStartTimer();
-            //        OnPropertyChanged("");
-            //        //OnPropertyChanged(nameof(Updated));
-            //        //OnPropertyChanged(nameof(Status));
-            //        //OnPropertyChanged(nameof(LifetimeActive));
-            //        //OnPropertyChanged(nameof(LifetimeRemaining));
-            //        //OnPropertyChanged(nameof(LifetimeProgress));
-            //        //OnPropertyChanged(nameof(LifetimeColor));
-            //        //OnPropertyChanged(nameof(ReservoirDelivered));
-            //        //OnPropertyChanged(nameof(ReservoirRemaining));
-            //        //OnPropertyChanged(nameof(ReservoirProgress));
-            //        //OnPropertyChanged(nameof(ReservoirColor));
-            //    }
-            //}
         }
 
         public string Id
@@ -89,7 +57,7 @@ namespace OmniCore.Mobile.ViewModels
             get
             {
                 if (Pod == null)
-                    return $"No active pod";
+                    return string.Empty;
                 else if (!Pod.Lot.HasValue)
                     return $"R0x{Pod.RadioAddress:X8}";
                 else
@@ -142,8 +110,8 @@ namespace OmniCore.Mobile.ViewModels
             get
             {
                 if (Pod == null)
-                    return string.Empty;
-                else if (Pod.LastStatus != null)
+                    return "No active pod";
+                else if (Pod.LastStatus != null && Pod.LastStatus.Progress.HasValue)
                 {
                     switch(Pod.LastStatus.Progress)
                     {
@@ -185,9 +153,9 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.ActiveMinutesEstimate.HasValue)
                 {
-                    var ts = TimeSpan.FromMinutes(4800 - Pod.LastStatus.ActiveMinutesEstimate);
+                    var ts = TimeSpan.FromMinutes(4800 - Pod.LastStatus.ActiveMinutesEstimate.Value);
                     return $"{ts.Days}d {ts.Hours}h {ts.Minutes}m";
                 }
                 else
@@ -201,9 +169,9 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.ActiveMinutesEstimate.HasValue)
                 {
-                    var ts = TimeSpan.FromMinutes(Pod.LastStatus.ActiveMinutesEstimate);
+                    var ts = TimeSpan.FromMinutes(Pod.LastStatus.ActiveMinutesEstimate.Value);
                     return $"{ts.Days}d {ts.Hours}h {ts.Minutes}m";
                 }
                 else
@@ -240,11 +208,11 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return 0;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.ActiveMinutesEstimate.HasValue)
                 {
                     if (Pod.LastStatus.ActiveMinutes >= 4800)
                         return 0;
-                    return ((4800 - Pod.LastStatus.ActiveMinutesEstimate) / 4800.0);
+                    return ((4800 - Pod.LastStatus.ActiveMinutesEstimate.Value) / 4800.0);
                 }
                 else
                     return 0;
@@ -257,12 +225,12 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.ReservoirEstimate.HasValue)
                 {
                     if (Pod.LastStatus.Progress < PodProgress.RunningLow)
                         return "more than 50U";
 
-                    return $"{Pod.LastStatus.ReservoirEstimate:F2}U";
+                    return $"{Pod.LastStatus.ReservoirEstimate.Value:F2}U";
                 }
                 else
                     return "unknown";
@@ -275,12 +243,12 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.DeliveredInsulinEstimate.HasValue)
                 {
                     if (Pod.ReservoirUsedForPriming.HasValue)
-                        return $"{Pod.LastStatus.DeliveredInsulinEstimate - Pod.ReservoirUsedForPriming.Value:F2}U";
+                        return $"{Pod.LastStatus.DeliveredInsulinEstimate.Value - Pod.ReservoirUsedForPriming.Value:F2}U";
                     else
-                        return $"{Pod.LastStatus.DeliveredInsulinEstimate:F2}U";
+                        return $"{Pod.LastStatus.DeliveredInsulinEstimate.Value:F2}U";
                 }
                 else
                     return "unknown";
@@ -293,7 +261,8 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return Color.Beige;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.Progress.HasValue
+                    && Pod.LastStatus.ReservoirEstimate.HasValue)
                 {
                     if (Pod.LastStatus.Progress < PodProgress.RunningLow)
                         return Color.LightGreen;
@@ -314,11 +283,11 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return 0;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.ReservoirEstimate.HasValue)
                 {
-                    if (Pod.LastStatus.ReservoirEstimate >= 50m)
+                    if (Pod.LastStatus.ReservoirEstimate.Value >= 50m)
                         return 1;
-                    return (double)Pod.LastStatus.ReservoirEstimate / 50.0;
+                    return (double)Pod.LastStatus.ReservoirEstimate.Value / 50.0;
                 }
                 else
                     return 0;
@@ -331,7 +300,7 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null)
+                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate.HasValue)
                 {
                     if (Pod.LastStatus.BasalStateEstimate == BasalState.Scheduled)
                         return "Basal Active";
@@ -355,14 +324,16 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate == BasalState.Scheduled)
+                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate.HasValue
+                    && Pod.LastStatus.BasalStateEstimate == BasalState.Scheduled)
                 {
                     if (Pod.LastStatus.ScheduledBasalRate.HasValue)
                         return $"{Pod.LastStatus.ScheduledBasalRate:F2} U/h";
                     else
                         return $"Rate unknown";
                 }
-                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate == BasalState.Temporary)
+                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate.HasValue
+                    && Pod.LastStatus.BasalStateEstimate == BasalState.Temporary)
                 {
                     if (Pod.LastStatus.TemporaryBasalRate.HasValue)
                     {
@@ -386,12 +357,14 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (Pod == null)
                     return string.Empty;
-                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate == BasalState.Scheduled
+                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate.HasValue
+                    && Pod.LastStatus.BasalStateEstimate == BasalState.Scheduled
                     && Pod.LastStatus.ScheduledBasalAverage.HasValue)
                 {
                     return $"(Average basal rate {Pod.LastStatus.ScheduledBasalAverage:F2} U/h)";
                 }
-                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate == BasalState.Temporary
+                else if (Pod.LastStatus != null && Pod.LastStatus.BasalStateEstimate.HasValue
+                    && Pod.LastStatus.BasalStateEstimate == BasalState.Temporary
                     && Pod.LastStatus.TemporaryBasalRemaining.HasValue)
                 {
                     var remaining = Pod.LastStatus.TemporaryBasalRemaining.Value;

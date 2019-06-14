@@ -29,6 +29,7 @@ namespace OmniCore.Model.Eros.Data
         private uint? lot;
         private uint? serial;
         private uint radioAddress;
+        private int messageSequence;
         private DateTime? activationDate;
         private DateTime? insertionDate;
         private string versionPi;
@@ -45,6 +46,7 @@ namespace OmniCore.Model.Eros.Data
         public uint? Lot { get => lot; set { SetProperty(ref lot, value); } }
         public uint? Serial { get => serial; set { SetProperty(ref serial, value); } }
         public uint RadioAddress { get => radioAddress; set { SetProperty(ref radioAddress, value); } }
+        public int MessageSequence { get => messageSequence; set { SetProperty(ref messageSequence, value % 16); } }
         public DateTime? ActivationDate { get => activationDate; set { SetProperty(ref activationDate, value); } }
         public DateTime? InsertionDate { get => insertionDate; set { SetProperty(ref insertionDate, value); } }
         public string VersionPi { get => versionPi; set { SetProperty(ref versionPi, value); } }

@@ -18,7 +18,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Droid
 {
-    [Service(Exported = true, Enabled = true, Name = "net.balya.OmniCore.Mobile.Android.OmniCoreIntentService")]
+    [Service(Exported = true, Enabled = true, Name ="somethingsomething.OmniCoreIntentService")]
     public class OmniCoreIntentService : IntentService
     {
         public const string ACTION_START_SERVICE = "OmniCoreIntentService.START_SERVICE";

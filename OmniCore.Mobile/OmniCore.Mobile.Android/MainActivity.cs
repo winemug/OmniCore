@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using Xamarin.Forms;
 using OmniCore.Mobile.Interfaces;
+using System.IO;
+using Environment = System.Environment;
 
 namespace OmniCore.Mobile.Droid
 {
@@ -21,6 +23,13 @@ namespace OmniCore.Mobile.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            var logDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logs");
+            var diLogs = new DirectoryInfo(logDirPath);
+            if (!diLogs.Exists)
+            {
+                diLogs.Create();
+            }
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
@@ -28,9 +37,9 @@ namespace OmniCore.Mobile.Droid
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
 
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
-            CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
+            //CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
+            //CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
+            //CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
