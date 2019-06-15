@@ -12,11 +12,10 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Java.IO;
-using OmniCore.Mobile.Droid;
 using OmniCore.Mobile.Interfaces;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.Droid
+namespace OmniCore.Mobile.Android
 {
     [Service(Exported = true, Enabled = true, Name ="somethingsomething.OmniCoreIntentService")]
     public class OmniCoreIntentService : IntentService

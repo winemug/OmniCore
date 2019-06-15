@@ -10,10 +10,9 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Droid;
 using OmniCore.Mobile.Interfaces;
 
-namespace OmniCore.Mobile.Droid
+namespace OmniCore.Mobile.Android
 {
         public class OmniCoreApplication : IOmniCoreApplication
     {

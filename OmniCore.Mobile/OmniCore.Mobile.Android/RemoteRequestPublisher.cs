@@ -11,7 +11,7 @@ using Android.Views;
 using Android.Widget;
 using OmniCore.Mobile.Interfaces;
 
-namespace OmniCore.Mobile.Droid
+namespace OmniCore.Mobile.Android
 {
     public class RemoteRequestPublisher : IRemoteRequestPublisher
     {
