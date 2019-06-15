@@ -14,13 +14,15 @@ namespace OmniCore.Mobile.Services
 {
     public class RemoteRequestHandler : IRemoteRequestSubscriber
     {
+        private IOmniCoreLogger Logger;
         public RemoteRequestHandler()
         {
-
+            Logger = App.Instance.Logger;
         }
 
         public async Task<string> OnRequestReceived(string requestText)
         {
+            Logger.Debug($"Remote request received: {requestText}");
             var request = RemoteRequest.FromJson(requestText);
             var result = new RemoteResult();
 
@@ -37,7 +39,9 @@ namespace OmniCore.Mobile.Services
             {
                 result.ResultsToDate = GetResultsToDate(request.LastResultId.Value);
             }
-            return result.ToJson();
+            var ret = result.ToJson();
+            Logger.Debug($"Returning result: {ret}");
+            return ret;
         }
 
         private async Task Execute(RemoteRequest request, RemoteResult result)
@@ -61,21 +65,27 @@ namespace OmniCore.Mobile.Services
                 switch (request.Type.Value)
                 {
                     case RemoteRequestType.Bolus:
+                        Logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
                         await Bolus(request.ImmediateUnits.Value, result);
                         break;
                     case RemoteRequestType.CancelBolus:
+                        Logger.Debug($"Remote request for cancel bolus");
                         await CancelBolus(result);
                         break;
                     case RemoteRequestType.CancelTempBasal:
+                        Logger.Debug($"Remote request for cancel temp basal");
                         await CancelTempBasal(result);
                         break;
                     case RemoteRequestType.SetBasalSchedule:
+                        Logger.Debug($"Remote request for set basal schedule: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
                         await SetBasalSchedule(request.BasalSchedule, request.UtcOffsetMinutes.Value, result);
                         break;
                     case RemoteRequestType.SetTempBasal:
+                        Logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
                         await SetTempBasal(request.TemporaryRate.Value, request.DurationHours.Value, result);
                         break;
                     case RemoteRequestType.UpdateStatus:
+                        Logger.Debug($"Remote request for update status");
                         await UpdateStatus(request.StatusRequestType ?? 0, result);
                         break;
                     default:

@@ -43,6 +43,7 @@ namespace OmniCore.Mobile.Android
 
             DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
+            DependencyService.Register<IOmniCoreLogger, OmniCoreLogger>();
 
             var i = new Intent(this, typeof(OmniCoreIntentService));
             i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);

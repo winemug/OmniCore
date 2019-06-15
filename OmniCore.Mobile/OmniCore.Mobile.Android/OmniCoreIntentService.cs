@@ -14,6 +14,8 @@ using Android.Widget;
 using Java.IO;
 using OmniCore.Mobile.Interfaces;
 using Xamarin.Forms;
+using OmniCore.Model.Utilities;
+using Nito.AsyncEx.Synchronous;
 
 namespace OmniCore.Mobile.Android
 {
@@ -29,66 +31,91 @@ namespace OmniCore.Mobile.Android
         public const string NOTIFICATION_CHANNEL_DESCRIPTION = "OmniCore";
 
         private bool isStarted;
-        
+
+        private IOmniCoreLogger Logger;
+        public OmniCoreIntentService()
+        {
+            Logger = DependencyService.Get<IOmniCoreLogger>();
+        }
+
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
+            Logger.Debug($"Service command received: {intent.Action}");
             if (intent.Action == ACTION_START_SERVICE && !isStarted)
             {
+                Logger.Debug($"Starting foreground service");
                 RegisterForegroundService();
                 isStarted = true;
             }
             else if (intent.Action == ACTION_STOP_SERVICE && isStarted)
             {
+                Logger.Debug($"Stopping foreground service");
                 StopForeground(true);
                 StopSelf();
                 isStarted = false;
             }
             else if (intent.Action == ACTION_REQUEST_COMMAND)
             {
-                Task.Run( async () => await HandleRequest(intent));
+                Logger.Debug($"handling execute request");
+                HandleRequest(intent);
             }
 
             return StartCommandResult.Sticky;
         }
 
-        private async Task HandleRequest(Intent intent)
+        private void HandleRequest(Intent intent)
         {
-            var request = intent.GetStringExtra("request");
-            var messenger = intent.GetParcelableExtra("messenger") as Messenger;
-            var response = await DependencyService
-                .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
-                .GetResult(request);
-            var b = new Bundle();
-            b.PutString("response", response);
-            messenger.Send(new Message { Data = b });
+            try
+            {
+                var request = intent.GetStringExtra("request");
+                var messenger = intent.GetParcelableExtra("messenger") as Messenger;
+                var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
+                var result = publisher.GetResult(request).WaitAndUnwrapException();
+                var b = new Bundle();
+                b.PutString("response", result);
+                Logger.Verbose("Responding to request via message object");
+                messenger.Send(new Message { Data = b });
+                Logger.Verbose("Message send complete");
+            }
+            catch(Exception e)
+            {
+                Logger.Error("Error handling remote request", e);
+            }
         }
 
         private void RegisterForegroundService()
         {
-            var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            try
             {
-                var channel = new NotificationChannel(NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL_NAME, NotificationImportance.Default)
+                var notificationManager = (NotificationManager)GetSystemService(NotificationService);
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                 {
-                    Description = NOTIFICATION_CHANNEL_DESCRIPTION
-                };
+                    var channel = new NotificationChannel(NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL_NAME, NotificationImportance.Default)
+                    {
+                        Description = NOTIFICATION_CHANNEL_DESCRIPTION
+                    };
 
-                notificationManager.CreateNotificationChannel(channel);
+                    notificationManager.CreateNotificationChannel(channel);
+                }
+
+                var intent = new Intent(this, typeof(MainActivity));
+                var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+                    .SetContentIntent(pendingIntent)
+                    .SetContentTitle("OmniCore")
+                    .SetContentText("OmniCore is running")
+                    .SetSmallIcon(Resource.Drawable.ic_pod);
+
+                var notification = builder.Build();
+
+                StartForeground(10001, notification);
             }
-
-            var intent = new Intent(this, typeof(MainActivity));
-            var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-                .SetContentIntent(pendingIntent)
-                .SetContentTitle("OmniCore")
-                .SetContentText("OmniCore is running")
-                .SetSmallIcon(Resource.Drawable.ic_pod);
-
-            var notification = builder.Build();
-
-            StartForeground(10001, notification);
+            catch(Exception e)
+            {
+                Logger.Error("Error registering foreground service", e);
+            }
         }
 
         protected override void OnHandleIntent(Intent intent)
