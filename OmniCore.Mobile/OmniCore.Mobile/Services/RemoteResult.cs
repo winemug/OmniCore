@@ -9,7 +9,7 @@ namespace OmniCore.Mobile.Services
     {
         public bool Success { get; set; }
         public RemoteResultPodStatus Status { get; set; }
-        public RemoteRequest[] RequestsToDate { get; set; }
+        public HistoricalResult[] ResultsToDate { get; set; }
 
         public string ToJson()
         {

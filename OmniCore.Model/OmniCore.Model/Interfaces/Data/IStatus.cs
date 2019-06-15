@@ -11,12 +11,11 @@ namespace OmniCore.Model.Interfaces.Data
         Guid PodId { get; set; }
         DateTime Created { get; set; }
 
-        bool? Faulted { get; set; }
-
         decimal? NotDeliveredInsulin { get; set; }
         decimal? DeliveredInsulin { get; set; }
         decimal? Reservoir { get; set; }
 
+        bool? Faulted { get; set; }
         PodProgress? Progress { get; set; }
         BasalState? BasalState { get; set; }
         BolusState? BolusState { get; set; }

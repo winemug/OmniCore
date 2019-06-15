@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using OmniCore.Model.Utilities;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Mobile.Services
 {
@@ -21,16 +22,25 @@ namespace OmniCore.Mobile.Services
         public async Task<string> OnRequestReceived(string requestText)
         {
             var request = RemoteRequest.FromJson(requestText);
+            var result = new RemoteResult();
 
             if (request.Type.HasValue)
             {
-                var result = await Execute(request);
-                return result.ToJson();
+                await Execute(request, result);
             }
-            return null;
+            else
+            {
+                result.Status = CreateFromCurrentStatus();
+            }
+
+            if (request.LastResultId.HasValue)
+            {
+                result.ResultsToDate = GetResultsToDate(request.LastResultId.Value);
+            }
+            return result.ToJson();
         }
 
-        private async Task<RemoteResult> Execute(RemoteRequest request)
+        private async Task Execute(RemoteRequest request, RemoteResult result)
         {
             switch (request.Type.Value)
             {
@@ -48,35 +58,83 @@ namespace OmniCore.Mobile.Services
                 //case RemoteRequestType.SetTempBasal:
                 //    result.Success = false;
                 //    break;
-                //case RemoteRequestType.UpdateStatus:
-                //    return await UpdateStatus(request.StatusRequestType ?? 0);
+                case RemoteRequestType.UpdateStatus:
+                    await UpdateStatus(request.StatusRequestType ?? 0, result);
+                    break;
             }
-            return null;
         }
 
-        private async Task<RemoteResult> UpdateStatus(int reqType)
+        private async Task UpdateStatus(int reqType, RemoteResult result)
         {
             var podProvider = App.Instance.PodProvider;
             var podManager = podProvider.PodManager;
+            
 
-            var result = new RemoteResult();
-            using (var conversation = await podManager.StartConversation())
+            if (podManager == null || podManager.Pod.LastStatus == null ||
+                podManager.Pod.LastStatus.Progress < PodProgress.Running ||
+                podManager.Pod.LastStatus.Progress > PodProgress.RunningLow)
             {
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-                    await Task.Run(async () => await podManager.UpdateStatus(conversation).NoSync());
-
-                result.Status = CreateFromCurrentStatus();
-                result.Success = !conversation.Failed;
-                // result.RequestsToDate = GetRequestsToDate(int fromRequestId);
+                result.Status = new RemoteResultPodStatus()
+                {
+                    PodRunning = false,
+                    LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                };
+                result.Success = true;
             }
-            return result;
+            else
+            {
+                var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
+                if (ts.Minutes > 1)
+                {
+                    using (var conversation = await podManager.StartConversation())
+                    {
+                        await podManager.UpdateStatus(conversation).NoSync();
+                        result.Success = !conversation.Failed;
+                    }
+                }
+                else
+                {
+                    result.Status = CreateFromCurrentStatus();
+                    result.Success = true;
+                }
+            }
         }
 
-        private RemoteRequest[] GetRequestsToDate(int earliestRequestId)
+        private HistoricalResult[] GetResultsToDate(long lastResultId)
         {
             var rep = ErosRepository.Instance;
-            var unfiltered = rep.GetResults(earliestRequestId);
-            return null;
+            var unfiltered = rep.GetResults(lastResultId);
+
+            var list = new List<HistoricalResult>();
+            bool? LastFaulted = null;
+            PodProgress? LastProgress = null;
+            BasalState? LastBasalState = null;
+            BolusState? LastBolusState = null;
+
+            int startIndex = 0;
+            if (lastResultId > 0 && unfiltered.Count > 0 && unfiltered[0].Id == lastResultId)
+            {
+                startIndex++;
+                var lastResult = unfiltered[0];
+                if (lastResult.Status != null)
+                {
+                    LastFaulted = lastResult.Status.Faulted;
+                    LastProgress = lastResult.Status.Progress;
+                    LastBasalState = lastResult.Status.BasalState;
+                    LastBolusState = lastResult.Status.BolusState;
+                }
+                else if (lastResult.Fault != null)
+                {
+                    LastFaulted = lastResult.Fault.FaultCode != 9;
+                }
+            }
+
+            for(int i=startIndex; i < unfiltered.Count; i++)
+            {
+                var result = unfiltered[i];
+            }
+
+            return list.ToArray();
         }
 
         private RemoteResultPodStatus CreateFromCurrentStatus()

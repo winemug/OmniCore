@@ -180,7 +180,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public List<ErosMessageExchangeResult> GetResults(int startAfterId)
+        public List<ErosMessageExchangeResult> GetResults(long startAfterId)
         {
             using (var conn = GetConnection())
             {
