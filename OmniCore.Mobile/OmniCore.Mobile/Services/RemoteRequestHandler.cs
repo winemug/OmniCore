@@ -209,9 +209,9 @@ namespace OmniCore.Mobile.Services
                 var pod = podManager.Pod;
 
                 status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
-                if (pod.Lot.HasValue && pod.Id.HasValue)
+                if (pod.Lot.HasValue && pod.Serial.HasValue)
                 {
-                    status.PodId = $"L{pod.Lot}T{pod.Id}R{pod.RadioAddress}";
+                    status.PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}";
                 }
 
                 if (pod.LastBasalSchedule != null)

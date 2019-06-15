@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces.Data
 {
     public interface IPod : INotifyPropertyChanged
     {
-        Guid? Id { get; set; }
+        Guid Id { get; set; }
         DateTime Created { get; set; }
 
         uint? Lot { get; set; }

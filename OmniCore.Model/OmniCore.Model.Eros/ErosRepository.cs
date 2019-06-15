@@ -30,6 +30,7 @@ namespace OmniCore.Model.Eros
         private ErosRepository()
         {
             DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
+            File.Delete(DbPath);
             //DbConnectionString = $"Data Source={DbPath}";
             Initialize();
         }
@@ -69,17 +70,9 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                var allOtherPods = conn.Table<ErosPod>().Where(x => x.Serial != 351453);
-                foreach(var pod in allOtherPods)
-                {
-                    pod.Archived = true;
-                    conn.Update(pod);
-                }
-
-
                 return WithRelations(conn.Table<ErosPod>()
                     .Where(x => !x.Archived)
-                    .OrderByDescending(x => x.Id)
+                    .OrderByDescending(x => x.Created)
                     .FirstOrDefault(), conn);
             }
         }
@@ -113,7 +106,7 @@ namespace OmniCore.Model.Eros
                 {
                     if (result.Statistics != null)
                     {
-                        result.Statistics.PodId = pod.Id.Value;
+                        result.Statistics.PodId = pod.Id;
                         result.Statistics.Created = DateTime.UtcNow;
                         result.Statistics.Id = conn.InsertOrReplace(result.Statistics, typeof(ErosMessageExchangeStatistics));
                         result.StatisticsId = result.Statistics.Id;
@@ -121,7 +114,7 @@ namespace OmniCore.Model.Eros
 
                     if (result.ExchangeParameters != null)
                     {
-                        result.ExchangeParameters.PodId = pod.Id.Value;
+                        result.ExchangeParameters.PodId = pod.Id;
                         result.ExchangeParameters.Created = DateTime.UtcNow;
                         result.ExchangeParameters.Id = conn.InsertOrReplace(result.ExchangeParameters, typeof(ErosMessageExchangeParameters));
                         result.ParametersId = result.ExchangeParameters.Id;
@@ -129,7 +122,7 @@ namespace OmniCore.Model.Eros
 
                     if (result.Success && result.AlertStates != null)
                     {
-                        result.AlertStates.PodId = pod.Id.Value;
+                        result.AlertStates.PodId = pod.Id;
                         result.AlertStates.Created = DateTime.UtcNow;
                         result.AlertStates.Id = conn.InsertOrReplace(result.AlertStates, typeof(ErosAlertStates));
                         result.AlertStatesId = result.AlertStates.Id;
@@ -138,7 +131,7 @@ namespace OmniCore.Model.Eros
 
                     if (result.Success && result.BasalSchedule != null)
                     {
-                        result.BasalSchedule.PodId = pod.Id.Value;
+                        result.BasalSchedule.PodId = pod.Id;
                         result.BasalSchedule.Created = DateTime.UtcNow;
                         result.BasalSchedule.Id = conn.InsertOrReplace(result.BasalSchedule, typeof(ErosBasalSchedule));
                         result.BasalScheduleId = result.BasalSchedule.Id;
@@ -147,7 +140,7 @@ namespace OmniCore.Model.Eros
 
                     if (result.Success && result.Fault != null)
                     {
-                        result.Fault.PodId = pod.Id.Value;
+                        result.Fault.PodId = pod.Id;
                         result.Fault.Created = DateTime.UtcNow;
                         result.Fault.Id = conn.InsertOrReplace(result.Fault, typeof(ErosFault));
                         result.FaultId = result.Fault.Id;
@@ -156,7 +149,7 @@ namespace OmniCore.Model.Eros
 
                     if (result.Success && result.Status != null)
                     {
-                        result.Status.PodId = pod.Id.Value;
+                        result.Status.PodId = pod.Id;
                         result.Status.Created = DateTime.UtcNow;
                         result.Status.Id = conn.InsertOrReplace(result.Status, typeof(ErosStatus));
                         result.StatusId = result.Status.Id;
@@ -165,14 +158,14 @@ namespace OmniCore.Model.Eros
 
                     if (result.Success && result.UserSettings != null)
                     {
-                        result.UserSettings.PodId = pod.Id.Value;
+                        result.UserSettings.PodId = pod.Id;
                         result.UserSettings.Created = DateTime.UtcNow;
                         result.UserSettings.Id = conn.InsertOrReplace(result.UserSettings, typeof(ErosUserSettings));
                         result.UserSettingsId = result.UserSettings.Id;
                         pod.LastUserSettings = result.UserSettings;
                     }
 
-                    result.PodId = pod.Id.Value;
+                    result.PodId = pod.Id;
                     result.Id = conn.InsertOrReplace(result, typeof(ErosMessageExchangeResult));
                 }
 

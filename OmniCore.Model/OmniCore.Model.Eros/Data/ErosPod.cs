@@ -40,8 +40,9 @@ namespace OmniCore.Model.Eros.Data
         private IMessageExchangeResult lastTempBasalResult;
         private IConversation activeConversation;
 
-        [PrimaryKey, AutoIncrement]
-        public Guid? Id { get; set; }
+        [PrimaryKey]
+        public Guid Id { get; set; }
+
         public DateTime Created { get => created; set { SetProperty(ref created, value); } }
 
         public uint? Lot { get => lot; set { SetProperty(ref lot, value); } }
