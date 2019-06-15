@@ -17,8 +17,6 @@ namespace OmniCore.Mobile
 
         public IPodProvider PodProvider { get; private set; }
         public RemoteRequestHandler RequestHandler { get; private set; }
-        public IOmniCoreLogger Logger { get; private set; }
-
         public App()
         {
             InitializeComponent();
@@ -28,25 +26,28 @@ namespace OmniCore.Mobile
                 .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
                 .Subscribe(RequestHandler);
 
-            Logger = DependencyService.Get<IOmniCoreLogger>();
-            Logger.Information("OmniCore App initialized");
+            var logger = DependencyService.Get<IOmniCoreLogger>();
+            logger.Information("OmniCore App initialized");
 
             MainPage = new Views.OmniCoreMain();
         }
 
         protected override void OnStart()
         {
-            Logger.Debug("OmniCore App OnStart called");
+            var logger = DependencyService.Get<IOmniCoreLogger>();
+            logger.Debug("OmniCore App OnStart called");
         }
 
         protected override void OnSleep()
         {
-            Logger.Debug("OmniCore App OnSleep called");
+            var logger = DependencyService.Get<IOmniCoreLogger>();
+            logger.Debug("OmniCore App OnSleep called");
         }
 
         protected override void OnResume()
         {
-            Logger.Debug("OmniCore App OnResume called");
+            var logger = DependencyService.Get<IOmniCoreLogger>();
+            logger.Debug("OmniCore App OnResume called");
         }
     }
 }

@@ -9,88 +9,92 @@ using System.Threading.Tasks;
 using System.Linq;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Services
 {
     public class RemoteRequestHandler : IRemoteRequestSubscriber
     {
-        private IOmniCoreLogger Logger;
         public RemoteRequestHandler()
         {
-            Logger = App.Instance.Logger;
         }
 
         public async Task<string> OnRequestReceived(string requestText)
         {
-            Logger.Debug($"Remote request received: {requestText}");
+            var logger = DependencyService.Get<IOmniCoreLogger>();
+            logger.Debug($"Remote request received: {requestText}");
             var request = RemoteRequest.FromJson(requestText);
             var result = new RemoteResult();
 
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+
+            if (podManager == null || podManager.Pod.LastStatus == null ||
+                podManager.Pod.LastStatus.Progress < PodProgress.Running ||
+                podManager.Pod.LastStatus.Progress > PodProgress.RunningLow ||
+                (podManager.Pod.LastFault != null && podManager.Pod.LastFault.FaultCode != 9))
+            {
+                result.PodRunning = false;
+            }
+
             if (request.Type.HasValue)
             {
-                await Execute(request, result);
+                if (result.PodRunning)
+                    await Execute(request, result);
+                else
+                {
+                    result.Success = false;
+                    result.ResultId = 0;
+                }
             }
             else
             {
-                result.Status = CreateFromCurrentStatus();
+                result.Status = CreateFromCurrentStatus(result);
+                result.Success = true;
             }
 
             if (request.LastResultId.HasValue)
             {
                 result.ResultsToDate = GetResultsToDate(request.LastResultId.Value);
             }
+
             var ret = result.ToJson();
-            Logger.Debug($"Returning result: {ret}");
+            logger.Debug($"Returning result: {ret}");
             return ret;
         }
 
         private async Task Execute(RemoteRequest request, RemoteResult result)
         {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var logger = DependencyService.Get<IOmniCoreLogger>();
 
-            if (podManager == null || podManager.Pod.LastStatus == null ||
-                podManager.Pod.LastStatus.Progress < PodProgress.Running ||
-                podManager.Pod.LastStatus.Progress > PodProgress.RunningLow)
+            switch (request.Type.Value)
             {
-                result.Status = new RemoteResultPodStatus()
-                {
-                    PodRunning = false,
-                    LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                };
-                result.Success = false;
-            }
-            else
-            {
-                switch (request.Type.Value)
-                {
-                    case RemoteRequestType.Bolus:
-                        Logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
-                        await Bolus(request.ImmediateUnits.Value, result);
-                        break;
-                    case RemoteRequestType.CancelBolus:
-                        Logger.Debug($"Remote request for cancel bolus");
-                        await CancelBolus(result);
-                        break;
-                    case RemoteRequestType.CancelTempBasal:
-                        Logger.Debug($"Remote request for cancel temp basal");
-                        await CancelTempBasal(result);
-                        break;
-                    case RemoteRequestType.SetBasalSchedule:
-                        Logger.Debug($"Remote request for set basal schedule: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
-                        await SetBasalSchedule(request.BasalSchedule, request.UtcOffsetMinutes.Value, result);
-                        break;
-                    case RemoteRequestType.SetTempBasal:
-                        Logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
-                        await SetTempBasal(request.TemporaryRate.Value, request.DurationHours.Value, result);
-                        break;
-                    case RemoteRequestType.UpdateStatus:
-                        Logger.Debug($"Remote request for update status");
-                        await UpdateStatus(request.StatusRequestType ?? 0, result);
-                        break;
-                    default:
-                        break;
-                }
+                case RemoteRequestType.Bolus:
+                    logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
+                    await Bolus(request.ImmediateUnits.Value, result);
+                    break;
+                case RemoteRequestType.CancelBolus:
+                    logger.Debug($"Remote request for cancel bolus");
+                    await CancelBolus(result);
+                    break;
+                case RemoteRequestType.CancelTempBasal:
+                    logger.Debug($"Remote request for cancel temp basal");
+                    await CancelTempBasal(result);
+                    break;
+                case RemoteRequestType.SetBasalSchedule:
+                    logger.Debug($"Remote request for set basal schedule: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
+                    await SetBasalSchedule(request.BasalSchedule, request.UtcOffsetMinutes.Value, result);
+                    break;
+                case RemoteRequestType.SetTempBasal:
+                    logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
+                    await SetTempBasal(request.TemporaryRate.Value, request.DurationHours.Value, result);
+                    break;
+                case RemoteRequestType.UpdateStatus:
+                    logger.Debug($"Remote request for update status");
+                    await UpdateStatus(request.StatusRequestType ?? 0, result);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -101,6 +105,7 @@ namespace OmniCore.Mobile.Services
             using (var conversation = await podManager.StartConversation())
             {
                 await podManager.CancelBolus(conversation).NoSync();
+                result.ResultId = conversation.CurrentExchange.Result.Id;
                 result.Success = !conversation.Failed;
             }
         }
@@ -112,6 +117,7 @@ namespace OmniCore.Mobile.Services
             using (var conversation = await podManager.StartConversation())
             {
                 await podManager.Bolus(conversation, units, false).NoSync();
+                result.ResultId = conversation.CurrentExchange.Result.Id;
                 result.Success = !conversation.Failed;
             }
         }
@@ -123,6 +129,7 @@ namespace OmniCore.Mobile.Services
             using (var conversation = await podManager.StartConversation())
             {
                 await podManager.CancelTempBasal(conversation).NoSync();
+                result.ResultId = conversation.CurrentExchange.Result.Id;
                 result.Success = !conversation.Failed;
             }
         }
@@ -134,6 +141,7 @@ namespace OmniCore.Mobile.Services
             using (var conversation = await podManager.StartConversation())
             {
                 await podManager.SetTempBasal(conversation, rate, hours).NoSync();
+                result.ResultId = conversation.CurrentExchange.Result.Id;
                 result.Success = !conversation.Failed;
             }
         }
@@ -145,6 +153,7 @@ namespace OmniCore.Mobile.Services
             using (var conversation = await podManager.StartConversation())
             {
                 await podManager.SetBasalSchedule(conversation, basalSchedule, utcOffsetMinutes).NoSync();
+                result.ResultId = conversation.CurrentExchange.Result.Id;
                 result.Success = !conversation.Failed;
             }
         }
@@ -160,12 +169,13 @@ namespace OmniCore.Mobile.Services
                 using (var conversation = await podManager.StartConversation())
                 {
                     await podManager.UpdateStatus(conversation).NoSync();
+                    result.ResultId = conversation.CurrentExchange.Result.Id;
                     result.Success = !conversation.Failed;
                 }
             }
             else
             {
-                result.Status = CreateFromCurrentStatus();
+                result.Status = CreateFromCurrentStatus(result);
                 result.Success = true;
             }
         }
@@ -207,9 +217,9 @@ namespace OmniCore.Mobile.Services
             return list.ToArray();
         }
 
-        private RemoteResultPodStatus CreateFromCurrentStatus()
+        private RemoteResultPodStatus CreateFromCurrentStatus(RemoteResult result)
         {
-            var status = new RemoteResultPodStatus() { PodRunning = false,
+            var status = new RemoteResultPodStatus() { 
                 LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
 
@@ -221,7 +231,7 @@ namespace OmniCore.Mobile.Services
                 status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
                 if (pod.Lot.HasValue && pod.Serial.HasValue)
                 {
-                    status.PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}";
+                    result.PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}";
                 }
 
                 if (pod.LastBasalSchedule != null)
@@ -233,16 +243,9 @@ namespace OmniCore.Mobile.Services
                 if (pod.LastStatus != null)
                 {
                     status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
-                    status.ResultId = pod.LastStatus.Id ?? 0;
-                    status.PodRunning = pod.LastStatus.Progress >= PodProgress.Running && pod.LastStatus.Progress <= PodProgress.RunningLow
-                        && pod.LastFault == null;
+                    result.ResultId = pod.LastStatus.Id ?? 0;
                     status.ReservoirLevel = (double)pod.LastStatus.Reservoir;
                     status.InsulinCanceled = (double)pod.LastStatus.NotDeliveredInsulin;
-
-                    if (status.PodRunning)
-                        status.StatusText = $"Pod running";
-                    else
-                        status.StatusText = $"Pod inactive";
                 }
             }
             return status;
