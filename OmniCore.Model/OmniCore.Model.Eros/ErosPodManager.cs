@@ -201,7 +201,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task Bolus(IConversation conversation, decimal bolusAmount)
+        public async Task Bolus(IConversation conversation, decimal bolusAmount, bool waitForBolusToFinish = true)
         {
             try
             {
@@ -229,34 +229,37 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus.BolusState != BolusState.Immediate)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start bolusing");
 
-                while (Pod.LastStatus.BolusState == BolusState.Immediate)
+                if (waitForBolusToFinish)
                 {
-                    var tickCount = (int)(Pod.LastStatus.NotDeliveredInsulin / 0.05m);
-                    await Task.Delay(tickCount * 2000 + 500, conversation.Token).NoSync();
-
-                    if (conversation.Token.IsCancellationRequested)
+                    while (Pod.LastStatus.BolusState == BolusState.Immediate)
                     {
-                        var cancelRequest = new ErosMessageBuilder().WithCancelBolus().Build();
-                        var cancelResult = await PerformExchange(request, GetStandardParameters(), conversation).NoSync();
+                        var tickCount = (int)(Pod.LastStatus.NotDeliveredInsulin / 0.05m);
+                        await Task.Delay(tickCount * 2000 + 500, conversation.Token).NoSync();
 
-                        if (!cancelResult || Pod.LastStatus.BolusState == BolusState.Immediate)
+                        if (conversation.Token.IsCancellationRequested)
                         {
-                            conversation.CancelFailed();
+                            var cancelRequest = new ErosMessageBuilder().WithCancelBolus().Build();
+                            var cancelResult = await PerformExchange(request, GetStandardParameters(), conversation).NoSync();
+
+                            if (!cancelResult || Pod.LastStatus.BolusState == BolusState.Immediate)
+                            {
+                                conversation.CancelFailed();
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
-                        else
-                        {
-                            break;
-                        }
+                        if (!await UpdateStatusInternal(conversation).NoSync())
+                            return;
                     }
-                    if (!await UpdateStatusInternal(conversation).NoSync())
+
+                    if (conversation.Canceled || conversation.Failed)
                         return;
+
+                    if (Pod.LastStatus.NotDeliveredInsulin != 0)
+                        throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Not all insulin was delivered");
                 }
-
-                if (conversation.Canceled || conversation.Failed)
-                    return;
-
-                if (Pod.LastStatus.NotDeliveredInsulin != 0)
-                    throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Not all insulin was delivered");
             }
             catch (Exception e)
             {

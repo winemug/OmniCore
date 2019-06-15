@@ -42,33 +42,8 @@ namespace OmniCore.Mobile.Services
 
         private async Task Execute(RemoteRequest request, RemoteResult result)
         {
-            switch (request.Type.Value)
-            {
-                //case RemoteRequestType.Bolus:
-                //    break;
-                //case RemoteRequestType.CancelBolus:
-                //    result.Success = false;
-                //    break;
-                //case RemoteRequestType.CancelTempBasal:
-                //    result.Success = false;
-                //    break;
-                //case RemoteRequestType.SetBasalSchedule:
-                //    result.Success = false;
-                //    break;
-                //case RemoteRequestType.SetTempBasal:
-                //    result.Success = false;
-                //    break;
-                case RemoteRequestType.UpdateStatus:
-                    await UpdateStatus(request.StatusRequestType ?? 0, result);
-                    break;
-            }
-        }
-
-        private async Task UpdateStatus(int reqType, RemoteResult result)
-        {
             var podProvider = App.Instance.PodProvider;
             var podManager = podProvider.PodManager;
-            
 
             if (podManager == null || podManager.Pod.LastStatus == null ||
                 podManager.Pod.LastStatus.Progress < PodProgress.Running ||
@@ -79,24 +54,109 @@ namespace OmniCore.Mobile.Services
                     PodRunning = false,
                     LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                 };
-                result.Success = true;
+                result.Success = false;
             }
             else
             {
-                var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
-                if (ts.Minutes > 1)
+                switch (request.Type.Value)
                 {
-                    using (var conversation = await podManager.StartConversation())
-                    {
-                        await podManager.UpdateStatus(conversation).NoSync();
-                        result.Success = !conversation.Failed;
-                    }
+                    case RemoteRequestType.Bolus:
+                        await Bolus(request.ImmediateUnits.Value, result);
+                        break;
+                    case RemoteRequestType.CancelBolus:
+                        await CancelBolus(result);
+                        break;
+                    case RemoteRequestType.CancelTempBasal:
+                        await CancelTempBasal(result);
+                        break;
+                    case RemoteRequestType.SetBasalSchedule:
+                        await SetBasalSchedule(request.BasalSchedule, request.UtcOffsetMinutes.Value, result);
+                        break;
+                    case RemoteRequestType.SetTempBasal:
+                        await SetTempBasal(request.TemporaryRate.Value, request.DurationHours.Value, result);
+                        break;
+                    case RemoteRequestType.UpdateStatus:
+                        await UpdateStatus(request.StatusRequestType ?? 0, result);
+                        break;
+                    default:
+                        break;
                 }
-                else
+            }
+        }
+
+        private async Task CancelBolus(RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await podManager.CancelBolus(conversation).NoSync();
+                result.Success = !conversation.Failed;
+            }
+        }
+
+        private async Task Bolus(decimal units, RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await podManager.Bolus(conversation, units, false).NoSync();
+                result.Success = !conversation.Failed;
+            }
+        }
+
+        private async Task CancelTempBasal(RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await podManager.CancelTempBasal(conversation).NoSync();
+                result.Success = !conversation.Failed;
+            }
+        }
+
+        private async Task SetTempBasal(decimal rate, decimal hours, RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await podManager.SetTempBasal(conversation, rate, hours).NoSync();
+                result.Success = !conversation.Failed;
+            }
+        }
+
+        private async Task SetBasalSchedule(decimal[] basalSchedule, int utcOffsetMinutes, RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            using (var conversation = await podManager.StartConversation())
+            {
+                await podManager.SetBasalSchedule(conversation, basalSchedule, utcOffsetMinutes).NoSync();
+                result.Success = !conversation.Failed;
+            }
+        }
+
+        private async Task UpdateStatus(int reqType, RemoteResult result)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            
+            var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
+            if (ts.Minutes > 1)
+            {
+                using (var conversation = await podManager.StartConversation())
                 {
-                    result.Status = CreateFromCurrentStatus();
-                    result.Success = true;
+                    await podManager.UpdateStatus(conversation).NoSync();
+                    result.Success = !conversation.Failed;
                 }
+            }
+            else
+            {
+                result.Status = CreateFromCurrentStatus();
+                result.Success = true;
             }
         }
 

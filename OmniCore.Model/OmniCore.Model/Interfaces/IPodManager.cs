@@ -17,7 +17,7 @@ namespace OmniCore.Model.Interfaces
         Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
         Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
 
-        Task Bolus(IConversation conversation, decimal bolusAmount);
+        Task Bolus(IConversation conversation, decimal bolusAmount, bool waitForBolusToFinish = true);
         Task CancelBolus(IConversation conversation);
         Task SetTempBasal(IConversation conversation, decimal basalRate, decimal durationInHours);
         Task CancelTempBasal(IConversation conversation);
