@@ -256,7 +256,7 @@ namespace OmniCore.Mobile.Services
             try
             {
                 var rep = ErosRepository.Instance;
-                var unfilteredResults = rep.GetResults(request.LastResultId);
+                var unfilteredResults = rep.GetHistoricalResultsForRemoteApp(request.LastResultId);
 
                 var list = new List<HistoricalResult>();
 

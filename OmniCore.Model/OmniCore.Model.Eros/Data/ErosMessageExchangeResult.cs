@@ -32,32 +32,31 @@ namespace OmniCore.Model.Eros.Data
         public Exception Exception { get; set; }
 
         public long? StatisticsId { get; set; }
-        [OneToOne(nameof(StatisticsId))]
+        [Ignore]
         public IMessageExchangeStatistics Statistics { get; set; }
 
         public long? ParametersId { get; set; }
-        [OneToOne(nameof(ParametersId))]
+        [Ignore]
         public IMessageExchangeParameters ExchangeParameters { get; set; }
 
         public long? AlertStatesId { get; set; }
-        [OneToOne(nameof(AlertStatesId))]
+        [Ignore]
         public IAlertStates AlertStates { get; set; }
 
         public long? BasalScheduleId { get; set; }
-        [OneToOne(nameof(BasalScheduleId))]
+        [Ignore]
         public IBasalSchedule BasalSchedule { get; set; }
 
         public long? FaultId { get; set; }
-        [OneToOne(nameof(FaultId))]
+        [Ignore]
         public IFault Fault { get; set; }
 
         public long? StatusId { get; set; }
-        [OneToOne(nameof(StatusId))]
+        [Ignore]
         public IStatus Status { get; set; }
 
         public long? UserSettingsId { get; set; }
-        [OneToOne(nameof(UserSettingsId))]
+        [Ignore]
         public IUserSettings UserSettings { get; set; }
-
     }
 }

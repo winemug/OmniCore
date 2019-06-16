@@ -210,16 +210,36 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public List<ErosMessageExchangeResult> GetResults(long startAfterId)
+        public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long startAfterId)
         {
             using (var conn = GetConnection())
             {
-                return conn.GetAllWithChildren<ErosMessageExchangeResult>
-                    (x => x.Id > startAfterId && x.Success)
-                    .OrderBy(x => x.Id)
-                    .ToList();
+                return WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
+                    .Where(x => x.Id > startAfterId && x.Success)
+                    .OrderBy(x => x.Id), conn);
             }
         }
+
+        private List<ErosMessageExchangeResult> WithHistoricalRelations(TableQuery<ErosMessageExchangeResult> tableQuery,
+            SQLiteConnection conn)
+        {
+            var list = new List<ErosMessageExchangeResult>();
+            foreach(var result in tableQuery)
+            {
+                if (result.StatusId.HasValue)
+                    result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+
+                if (result.BasalScheduleId.HasValue)
+                    result.BasalSchedule = conn.Table<ErosBasalSchedule>().Single(x => x.Id == result.BasalScheduleId.Value);
+
+                if (result.FaultId.HasValue)
+                    result.Fault = conn.Table<ErosFault>().Single(x => x.Id == result.FaultId.Value);
+
+                list.Add(result);
+            }
+            return list;
+        }
+
 
         private ErosPod WithRelations(ErosPod pod, SQLiteConnection conn)
         {

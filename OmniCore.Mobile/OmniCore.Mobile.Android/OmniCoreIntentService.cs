@@ -66,22 +66,25 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
-            try
+            var request = intent.GetStringExtra("request");
+            var messenger = intent.GetParcelableExtra("messenger") as Messenger;
+            var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
+            Task.Run(async () =>
             {
-                var request = intent.GetStringExtra("request");
-                var messenger = intent.GetParcelableExtra("messenger") as Messenger;
-                var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
-                var result = publisher.GetResult(request).WaitAndUnwrapException();
-                var b = new Bundle();
-                b.PutString("response", result);
-                Logger.Verbose("Responding to request via message object");
-                messenger.Send(new Message { Data = b });
-                Logger.Verbose("Message send complete");
-            }
-            catch(Exception e)
-            {
-                Logger.Error("Error handling remote request", e);
-            }
+                try
+                {
+                    var result = await publisher.GetResult(request).Sync();
+                    var b = new Bundle();
+                    b.PutString("response", result);
+                    Logger.Verbose("Responding to request via message object");
+                    messenger.Send(new Message { Data = b });
+                    Logger.Verbose("Message send complete");
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Error handling remote request", e);
+                }
+            });
         }
 
         private void RegisterForegroundService()

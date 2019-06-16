@@ -9,8 +9,6 @@ namespace OmniCore.Mobile.Services
     {
         public RemoteRequestType Type { get; set; }
 
-        public int StatusRequestType { get; set; }
-
         public int UtcOffsetMinutes { get; set; }
         public decimal[] BasalSchedule { get; set; }
 
