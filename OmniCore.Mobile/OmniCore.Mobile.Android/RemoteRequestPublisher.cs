@@ -10,6 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Mobile.Interfaces;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Android
 {
@@ -21,9 +22,16 @@ namespace OmniCore.Mobile.Android
         {
             foreach(var subscriber in Subscribers)
             {
-                var result = await subscriber.OnRequestReceived(request);
-                if (!string.IsNullOrEmpty(result))
-                    return result;
+                try
+                {
+                    var result = await subscriber.OnRequestReceived(request);
+                    if (!string.IsNullOrEmpty(result))
+                        return result;
+                }
+                catch(Exception e)
+                {
+                    DependencyService.Get<IOmniCoreLogger>().Error("Error executing on request received", e);
+                }
             }
             return null;
         }

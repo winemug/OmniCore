@@ -20,47 +20,61 @@ namespace OmniCore.Mobile.Services
         public async Task<string> OnRequestReceived(string requestText)
         {
             var logger = DependencyService.Get<IOmniCoreLogger>();
-            logger.Debug($"Remote request received: {requestText}");
-            var request = RemoteRequest.FromJson(requestText);
-            var result = await Execute(request);
-            var ret = result.ToJson();
-            logger.Debug($"Returning result: {ret}");
-            return ret;
+            try
+            {
+                logger.Debug($"Remote request received: {requestText}");
+                var request = RemoteRequest.FromJson(requestText);
+                var result = await Execute(request);
+                var ret = result.ToJson();
+                logger.Debug($"Returning result: {ret}");
+                return ret;
+            }
+            catch(Exception e)
+            {
+                logger.Error($"Error executing request: {requestText}", e);
+                return null;
+            }
         }
 
         private async Task<RemoteResult> Execute(RemoteRequest request)
         {
             var logger = DependencyService.Get<IOmniCoreLogger>();
             RemoteResult result = null;
-            switch (request.Type)
+            try
             {
-                case RemoteRequestType.Bolus:
-                    logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
-                    result = await Bolus(request.ImmediateUnits);
-                    break;
-                case RemoteRequestType.CancelBolus:
-                    logger.Debug($"Remote request for cancel bolus");
-                    result = await CancelBolus();
-                    break;
-                case RemoteRequestType.CancelTempBasal:
-                    logger.Debug($"Remote request for cancel temp basal");
-                    result = await CancelTempBasal();
-                    break;
-                case RemoteRequestType.SetProfile:
-                    logger.Debug($"Remote request for set profile: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
-                    result = await SetProfile(request.BasalSchedule, request.UtcOffsetMinutes);
-                    break;
-                case RemoteRequestType.SetTempBasal:
-                    logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
-                    result = await SetTempBasal(request.TemporaryRate, request.DurationHours);
-                    break;
-                case RemoteRequestType.GetStatus:
-                    logger.Debug($"Remote request for get status");
-                    result = await GetStatus();
-                    break;
+                switch (request.Type)
+                {
+                    case RemoteRequestType.Bolus:
+                        logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
+                        result = await Bolus(request.ImmediateUnits);
+                        break;
+                    case RemoteRequestType.CancelBolus:
+                        logger.Debug($"Remote request for cancel bolus");
+                        result = await CancelBolus();
+                        break;
+                    case RemoteRequestType.CancelTempBasal:
+                        logger.Debug($"Remote request for cancel temp basal");
+                        result = await CancelTempBasal();
+                        break;
+                    case RemoteRequestType.SetProfile:
+                        logger.Debug($"Remote request for set profile: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
+                        result = await SetProfile(request.BasalSchedule, request.UtcOffsetMinutes);
+                        break;
+                    case RemoteRequestType.SetTempBasal:
+                        logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
+                        result = await SetTempBasal(request.TemporaryRate, request.DurationHours);
+                        break;
+                    case RemoteRequestType.GetStatus:
+                        logger.Debug($"Remote request for get status");
+                        result = await GetStatus();
+                        break;
+                }
+                FillResultsToDate(request, result);
             }
-            FillResultsToDate(request, result);
-                
+            catch(Exception e)
+            {
+                logger.Error($"Error executing request", e);
+            }
             return result;
         }
 
@@ -220,12 +234,12 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
-                if (ts.Minutes > 1)
+                var ts = DateTime.UtcNow - podManager.Pod.LastStatus?.Created;
+                if (ts == null || ts.Value.Minutes > 1)
                 {
                     using (var conversation = await podManager.StartConversation())
                     {
-                        await podManager.UpdateStatus(conversation).NoSync();
+                        await podManager.UpdateStatus(conversation).Sync();
                         return GetResult(pod, conversation);
                     }
                 }
@@ -239,56 +253,63 @@ namespace OmniCore.Mobile.Services
 
         private void FillResultsToDate(RemoteRequest request, RemoteResult result)
         {
-            var rep = ErosRepository.Instance;
-            var unfilteredResults = rep.GetResults(request.LastResultId);
-
-            var list = new List<HistoricalResult>();
-
-            bool? running = null;
-            bool nowRunning = false;
-            foreach(var oldResult in unfilteredResults)
+            try
             {
-                if (oldResult.Fault?.FaultCode != null)
-                {
-                    nowRunning = (oldResult.Fault.FaultCode == 9);
-                }
-                if (oldResult.Status?.Faulted != null)
-                {
-                    nowRunning = !oldResult.Status.Faulted.Value;
-                }
-                if (oldResult.Status?.Progress != null)
-                {
-                    nowRunning = (oldResult.Status.Progress == PodProgress.Running
-                        || oldResult.Status.Progress == PodProgress.RunningLow);
-                }
+                var rep = ErosRepository.Instance;
+                var unfilteredResults = rep.GetResults(request.LastResultId);
 
-                if (!running.HasValue || running.Value != nowRunning)
+                var list = new List<HistoricalResult>();
+
+                bool? running = null;
+                bool nowRunning = false;
+                foreach (var oldResult in unfilteredResults)
                 {
-                    list.Add(GetHistoricalResult(oldResult, nowRunning));
-                    running = nowRunning;
-                }
-                else
-                {
-                    switch (oldResult.Type)
+                    if (oldResult.Fault?.FaultCode != null)
                     {
-                        case RequestType.SetBasalSchedule:
-                        case RequestType.SetTempBasal:
-                        case RequestType.CancelTempBasal:
-                        case RequestType.Bolus:
-                        case RequestType.CancelBolus:
-                        case RequestType.StartExtendedBolus:
-                        case RequestType.StopExtendedBolus:
-                            list.Add(GetHistoricalResult(oldResult, nowRunning));
-                            break;
-                        default:
-                            break;
+                        nowRunning = (oldResult.Fault.FaultCode == 9);
+                    }
+                    if (oldResult.Status?.Faulted != null)
+                    {
+                        nowRunning = !oldResult.Status.Faulted.Value;
+                    }
+                    if (oldResult.Status?.Progress != null)
+                    {
+                        nowRunning = (oldResult.Status.Progress == PodProgress.Running
+                            || oldResult.Status.Progress == PodProgress.RunningLow);
+                    }
+
+                    if (!running.HasValue || running.Value != nowRunning)
+                    {
+                        list.Add(GetHistoricalResult(oldResult, nowRunning));
+                        running = nowRunning;
+                    }
+                    else
+                    {
+                        switch (oldResult.Type)
+                        {
+                            case RequestType.SetBasalSchedule:
+                            case RequestType.SetTempBasal:
+                            case RequestType.CancelTempBasal:
+                            case RequestType.Bolus:
+                            case RequestType.CancelBolus:
+                            case RequestType.StartExtendedBolus:
+                            case RequestType.StopExtendedBolus:
+                                list.Add(GetHistoricalResult(oldResult, nowRunning));
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
-            }
 
-            result.ResultsToDate = list.ToArray();
-            if (unfilteredResults.Count > 0)
-                result.LastResultId = unfilteredResults.Last().Id.Value;
+                result.ResultsToDate = list.ToArray();
+                if (unfilteredResults.Count > 0)
+                    result.LastResultId = unfilteredResults.Last().Id.Value;
+            }
+            catch(Exception e)
+            {
+                DependencyService.Get<IOmniCoreLogger>().Error($"Error getting results to date for LastResultId={request.LastResultId}", e);
+            }
         }
 
         private HistoricalResultType GetHistoricalType(RequestType type)
