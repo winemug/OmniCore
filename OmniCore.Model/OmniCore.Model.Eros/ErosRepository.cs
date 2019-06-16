@@ -51,10 +51,11 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosMessageExchangeResult>();
                     conn.CreateTable<ErosMessageExchangeStatistics>();
                     conn.CreateTable<ErosProfile>();
+                    conn.CreateTable<ErosRadioPreferences>();
 
                     if (conn.Table<ErosProfile>().Count() == 0)
                     {
-                        var profile = new ErosProfile()
+                        conn.Insert(new ErosProfile()
                         {
                             Created = DateTime.UtcNow,
                             BasalSchedule = new decimal[]
@@ -66,8 +67,26 @@ namespace OmniCore.Model.Eros
                                   0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m
                                 },
                             UtcOffset = 0
-                        };
-                        conn.Insert(profile);
+                        });
+                    }
+
+                    if (conn.Table<ErosRadioPreferences>().Count() == 0)
+                    {
+#if DEBUG
+                        conn.Insert(new ErosRadioPreferences()
+                        {
+                            ConnectToAny = false,
+                            PreferredRadios = new Guid[]
+                            {
+                                Guid.Parse("00000000-0000-0000-0000-886b0fec4d1a")
+                            }
+                        });
+#else
+                        conn.Insert(new ErosRadioPreferences()
+                        {
+                            ConnectToAny = true
+                        });
+#endif
                     }
 
                     conn.Commit();
@@ -105,7 +124,15 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public ErosPod GetLastActivated()
+        public ErosRadioPreferences GetRadioPreferences()
+        {
+            using (var conn = GetConnection())
+            {
+                return conn.Table<ErosRadioPreferences>().Single();
+            }
+        }
+
+            public ErosPod GetLastActivated()
         {
             using (var conn = GetConnection())
             {

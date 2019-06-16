@@ -182,10 +182,13 @@ namespace OmniCore.Radio.RileyLink
 
         internal void MobileDeviceRssiReported(int rssi)
         {
-            if (rssi != 0)
+            lock (this)
             {
-                mobileRssiCount++;
-                mobileRssiTotal += rssi;
+                if (rssi != 0)
+                {
+                    mobileRssiCount++;
+                    mobileRssiTotal += rssi;
+                }
             }
         }
 
