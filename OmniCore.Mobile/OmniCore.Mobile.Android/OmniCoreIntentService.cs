@@ -15,7 +15,6 @@ using Java.IO;
 using OmniCore.Mobile.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Utilities;
-using Nito.AsyncEx.Synchronous;
 
 namespace OmniCore.Mobile.Android
 {
