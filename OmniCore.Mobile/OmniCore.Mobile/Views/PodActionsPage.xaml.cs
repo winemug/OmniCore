@@ -45,18 +45,5 @@ namespace OmniCore.Mobile.Views
                 await podManager.CancelTempBasal(conversation);
             }
         }
-
-        private async void Button_Clicked_3(object sender, EventArgs e)
-        {
-            var podManager = App.Instance.PodProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
-            {
-                var schedule = new decimal[48];
-                for (int i = 0; i < 48; i++)
-                    schedule[i] = 8.85m;
-
-                await podManager.SetBasalSchedule(conversation, schedule, 60);
-            }
-        }
     }
 }

@@ -6,11 +6,11 @@ namespace OmniCore.Mobile.Services
 {
     public enum RemoteRequestType
     {
-        SetBasalSchedule,
+        SetProfile,
         Bolus,
         CancelBolus,
+        SetTempBasal,
         CancelTempBasal,
-        UpdateStatus,
-        SetTempBasal
+        GetStatus
     }
 }

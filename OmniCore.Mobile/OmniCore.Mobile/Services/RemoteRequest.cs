@@ -7,19 +7,19 @@ namespace OmniCore.Mobile.Services
 {
     public class RemoteRequest
     {
-        public RemoteRequestType? Type { get; set; }
+        public RemoteRequestType Type { get; set; }
 
-        public int? StatusRequestType { get; set; }
+        public int StatusRequestType { get; set; }
 
-        public int? UtcOffsetMinutes { get; set; }
+        public int UtcOffsetMinutes { get; set; }
         public decimal[] BasalSchedule { get; set; }
 
-        public decimal? ImmediateUnits { get; set; }
+        public decimal ImmediateUnits { get; set; }
 
-        public decimal? TemporaryRate { get; set; }
-        public decimal? DurationHours { get; set; }
+        public decimal TemporaryRate { get; set; }
+        public decimal DurationHours { get; set; }
 
-        public long? LastResultId { get; set; }
+        public long LastResultId { get; set; }
 
         public static RemoteRequest FromJson(string jsonString)
         {

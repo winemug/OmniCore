@@ -1,6 +1,7 @@
 ﻿using OmniCore.Mobile.ViewModels;
 using OmniCore.Model;
 using OmniCore.Model.Enums;
+using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -211,9 +212,10 @@ namespace OmniCore.Mobile.Views
             var basalSchedule = new decimal[48];
             for (int i = 0; i < 48; i++)
                 basalSchedule[i] = 0.40m;
+            var activeProfile = ErosRepository.Instance.GetProfile();
             using (conversation = await podManager.StartConversation())
             {
-                await podManager.InjectAndStart(conversation, basalSchedule, 60);
+                await podManager.InjectAndStart(conversation, activeProfile);
             }
             if (conversation.Failed)
             {

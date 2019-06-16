@@ -23,12 +23,12 @@ namespace OmniCore.Model.Interfaces
         Task CancelTempBasal(IConversation conversation);
         Task StartExtendedBolus(IConversation conversation, decimal bolusAmount, decimal durationInHours);
         Task CancelExtendedBolus(IConversation conversation);
-        Task SetBasalSchedule(IConversation conversation, decimal[] schedule, int utcOffsetInMinutes);
+        Task SetBasalSchedule(IConversation conversation, IProfile profile);
         Task SuspendBasal(IConversation conversation);
 
         Task Pair(IConversation conversation, int utcTimeOffsetMinutes);
         Task Activate(IConversation conversation);
-        Task InjectAndStart(IConversation conversation, decimal[] basalSchedule, int utcOffsetInMinutes);
+        Task InjectAndStart(IConversation conversation, IProfile profile);
 
         Task Deactivate(IConversation conversation);
     }

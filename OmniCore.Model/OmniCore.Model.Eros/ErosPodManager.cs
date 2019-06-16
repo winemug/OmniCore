@@ -413,7 +413,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task InjectAndStart(IConversation conversation, decimal[] basalSchedule, int utcOffsetInMinutes)
+        public async Task InjectAndStart(IConversation conversation, IProfile profile)
         {
             try
             {
@@ -429,23 +429,23 @@ namespace OmniCore.Model.Eros
 
                 if (Pod.LastStatus.Progress == PodProgress.ReadyForInjection)
                 {
-                    AssertBasalScheduleValid(basalSchedule);
+                    AssertBasalScheduleValid(profile.BasalSchedule);
 
-                    var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(utcOffsetInMinutes);
+                    var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
                     var parameters = GetStandardParameters();
                     parameters.RepeatFirstPacket = true;
                     parameters.CriticalWithFollowupRequired = true;
 
                     var request = new ErosMessageBuilder()
-                        .WithBasalSchedule(basalSchedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
+                        .WithBasalSchedule(profile.BasalSchedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
                         .Build();
 
                     var progress = conversation.NewExchange(request);
                     progress.Result.BasalSchedule = new ErosBasalSchedule()
                     {
-                        BasalSchedule = basalSchedule,
+                        BasalSchedule = profile.BasalSchedule,
                         PodDateTime = podDate,
-                        UtcOffset = utcOffsetInMinutes
+                        UtcOffset = profile.UtcOffset
                     };
 
                     if (!await PerformExchange(request, parameters, null, progress).NoSync())
@@ -580,7 +580,7 @@ namespace OmniCore.Model.Eros
             throw new NotImplementedException();
         }
 
-        public async Task SetBasalSchedule(IConversation conversation, decimal[] schedule, int utcOffsetInMinutes)
+        public async Task SetBasalSchedule(IConversation conversation, IProfile profile)
         {
             try
             {
@@ -600,23 +600,23 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus.BasalState == BasalState.Temporary)
                     throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not cancel the temp basal");
 
-                AssertBasalScheduleValid(schedule);
+                AssertBasalScheduleValid(profile.BasalSchedule);
 
-                var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(utcOffsetInMinutes);
+                var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
                 var parameters = GetStandardParameters();
                 //parameters.RepeatFirstPacket = true;
                 parameters.CriticalWithFollowupRequired = false;
 
                 var request = new ErosMessageBuilder()
-                    .WithBasalSchedule(schedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
+                    .WithBasalSchedule(profile.BasalSchedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
                     .Build();
 
                 var progress = conversation.NewExchange(request);
                 progress.Result.BasalSchedule = new ErosBasalSchedule()
                 {
-                    BasalSchedule = schedule,
+                    BasalSchedule = profile.BasalSchedule,
                     PodDateTime = podDate,
-                    UtcOffset = utcOffsetInMinutes
+                    UtcOffset = profile.UtcOffset
                 };
 
                 if (!await PerformExchange(request, parameters, null, progress).NoSync())

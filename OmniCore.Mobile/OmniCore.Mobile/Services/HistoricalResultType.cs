@@ -13,8 +13,6 @@ namespace OmniCore.Mobile.Services
         CancelTempBasal,
         StartExtendedBolus,
         StopExtendedBolus,
-        Fault,
-        Deactivate,
-        Activate
+        Status
     }
 }

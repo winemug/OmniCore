@@ -16,6 +16,8 @@
         Bolus,
         CancelBolus,
         CancelTempBasal,
-        DeactivatePod
+        DeactivatePod,
+        StartExtendedBolus,
+        StopExtendedBolus
     }
 }

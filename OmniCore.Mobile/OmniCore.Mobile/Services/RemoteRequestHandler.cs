@@ -10,245 +10,320 @@ using System.Linq;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
+using OmniCore.Model.Eros.Data;
+using OmniCore.Model.Interfaces.Data;
 
 namespace OmniCore.Mobile.Services
 {
     public class RemoteRequestHandler : IRemoteRequestSubscriber
     {
-        public RemoteRequestHandler()
-        {
-        }
-
         public async Task<string> OnRequestReceived(string requestText)
         {
             var logger = DependencyService.Get<IOmniCoreLogger>();
             logger.Debug($"Remote request received: {requestText}");
             var request = RemoteRequest.FromJson(requestText);
-            var result = new RemoteResult();
-
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-
-            if (podManager == null || podManager.Pod.LastStatus == null ||
-                podManager.Pod.LastStatus.Progress < PodProgress.Running ||
-                podManager.Pod.LastStatus.Progress > PodProgress.RunningLow ||
-                (podManager.Pod.LastFault != null && podManager.Pod.LastFault.FaultCode != 9))
-            {
-                result.PodRunning = false;
-            }
-
-            if (request.Type.HasValue)
-            {
-                if (result.PodRunning)
-                    await Execute(request, result);
-                else
-                {
-                    result.Success = false;
-                    result.ResultId = 0;
-                }
-            }
-            else
-            {
-                result.Status = CreateFromCurrentStatus(result);
-                result.Success = true;
-            }
-
-            if (request.LastResultId.HasValue)
-            {
-                result.ResultsToDate = GetResultsToDate(request.LastResultId.Value);
-            }
-
+            var result = await Execute(request);
             var ret = result.ToJson();
             logger.Debug($"Returning result: {ret}");
             return ret;
         }
 
-        private async Task Execute(RemoteRequest request, RemoteResult result)
+        private async Task<RemoteResult> Execute(RemoteRequest request)
         {
             var logger = DependencyService.Get<IOmniCoreLogger>();
-
-            switch (request.Type.Value)
+            RemoteResult result = null;
+            switch (request.Type)
             {
                 case RemoteRequestType.Bolus:
                     logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
-                    await Bolus(request.ImmediateUnits.Value, result);
+                    result = await Bolus(request.ImmediateUnits);
                     break;
                 case RemoteRequestType.CancelBolus:
                     logger.Debug($"Remote request for cancel bolus");
-                    await CancelBolus(result);
+                    result = await CancelBolus();
                     break;
                 case RemoteRequestType.CancelTempBasal:
                     logger.Debug($"Remote request for cancel temp basal");
-                    await CancelTempBasal(result);
+                    result = await CancelTempBasal();
                     break;
-                case RemoteRequestType.SetBasalSchedule:
-                    logger.Debug($"Remote request for set basal schedule: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
-                    await SetBasalSchedule(request.BasalSchedule, request.UtcOffsetMinutes.Value, result);
+                case RemoteRequestType.SetProfile:
+                    logger.Debug($"Remote request for set profile: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
+                    result = await SetProfile(request.BasalSchedule, request.UtcOffsetMinutes);
                     break;
                 case RemoteRequestType.SetTempBasal:
                     logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
-                    await SetTempBasal(request.TemporaryRate.Value, request.DurationHours.Value, result);
+                    result = await SetTempBasal(request.TemporaryRate, request.DurationHours);
                     break;
-                case RemoteRequestType.UpdateStatus:
-                    logger.Debug($"Remote request for update status");
-                    await UpdateStatus(request.StatusRequestType ?? 0, result);
-                    break;
-                default:
+                case RemoteRequestType.GetStatus:
+                    logger.Debug($"Remote request for get status");
+                    result = await GetStatus();
                     break;
             }
+            FillResultsToDate(request, result);
+                
+            return result;
         }
 
-        private async Task CancelBolus(RemoteResult result)
+        private bool IsAssigned(IPod pod)
         {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
+            return (pod != null && pod.Lot.HasValue && pod.Serial.HasValue);
+        }
+
+        private RemoteResult GetResult(IPod pod, IConversation conversation)
+        {
+            var profile = ErosRepository.Instance.GetProfile();
+
+            return new RemoteResult()
             {
-                await podManager.CancelBolus(conversation).NoSync();
-                result.ResultId = conversation.CurrentExchange.Result.Id;
-                result.Success = !conversation.Failed;
-            }
+                Success = !conversation.Failed,
+                PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
+                ResultDate = new DateTimeOffset(conversation.CurrentExchange.Result.ResultTime.Value).ToUnixTimeMilliseconds(),
+                InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
+                PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
+                            pod.LastStatus.Progress >= PodProgress.Running &&
+                            pod.LastStatus.Progress <= PodProgress.RunningLow &&
+                            (pod.LastFault == null || pod.LastFault.FaultCode == 9)),
+                ReservoirLevel = pod.LastStatus?.Reservoir ?? 0,
+                BasalSchedule = pod.LastBasalSchedule?.BasalSchedule ?? profile.BasalSchedule,
+                UtcOffset = pod.LastBasalSchedule?.UtcOffset ?? profile.UtcOffset
+            };
         }
 
-        private async Task Bolus(decimal units, RemoteResult result)
+        private RemoteResult GetResultEstimate(IPod pod)
         {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
+            pod.LastStatus?.UpdateWithEstimates(pod);
+            var profile = ErosRepository.Instance.GetProfile();
+
+            return new RemoteResult()
             {
-                await podManager.Bolus(conversation, units, false).NoSync();
-                result.ResultId = conversation.CurrentExchange.Result.Id;
-                result.Success = !conversation.Failed;
-            }
+                Success = true,
+                PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
+                ResultDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
+                ReservoirLevel = pod.LastStatus?.ReservoirEstimate ?? 0,
+                PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
+                            pod.LastStatus.Progress >= PodProgress.Running &&
+                            pod.LastStatus.Progress <= PodProgress.RunningLow &&
+                            (pod.LastFault == null || pod.LastFault.FaultCode == 9)),
+                BasalSchedule = pod.LastBasalSchedule?.BasalSchedule ?? profile.BasalSchedule,
+                UtcOffset = pod.LastBasalSchedule?.UtcOffset ?? profile.UtcOffset
+            };
         }
 
-        private async Task CancelTempBasal(RemoteResult result)
+        private RemoteResult ResultWithProfile()
         {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
+            var profile = ErosRepository.Instance.GetProfile();
+
+            return new RemoteResult()
             {
-                await podManager.CancelTempBasal(conversation).NoSync();
-                result.ResultId = conversation.CurrentExchange.Result.Id;
-                result.Success = !conversation.Failed;
-            }
+                ResultDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                BasalSchedule = profile.BasalSchedule,
+                UtcOffset = profile.UtcOffset
+            };
         }
 
-        private async Task SetTempBasal(decimal rate, decimal hours, RemoteResult result)
+        private async Task<RemoteResult> CancelBolus()
         {
             var podProvider = App.Instance.PodProvider;
             var podManager = podProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
-            {
-                await podManager.SetTempBasal(conversation, rate, hours).NoSync();
-                result.ResultId = conversation.CurrentExchange.Result.Id;
-                result.Success = !conversation.Failed;
-            }
-        }
-
-        private async Task SetBasalSchedule(decimal[] basalSchedule, int utcOffsetMinutes, RemoteResult result)
-        {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
-            {
-                await podManager.SetBasalSchedule(conversation, basalSchedule, utcOffsetMinutes).NoSync();
-                result.ResultId = conversation.CurrentExchange.Result.Id;
-                result.Success = !conversation.Failed;
-            }
-        }
-
-        private async Task UpdateStatus(int reqType, RemoteResult result)
-        {
-            var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
-            
-            var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
-            if (ts.Minutes > 1)
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
             {
                 using (var conversation = await podManager.StartConversation())
                 {
-                    await podManager.UpdateStatus(conversation).NoSync();
-                    result.ResultId = conversation.CurrentExchange.Result.Id;
-                    result.Success = !conversation.Failed;
+                    await podManager.CancelBolus(conversation).NoSync();
+                    return GetResult(pod, conversation);
+                }
+            }
+            return ResultWithProfile();
+        }
+
+        private async Task<RemoteResult> Bolus(decimal units)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
+            {
+                using (var conversation = await podManager.StartConversation())
+                {
+                    await podManager.Bolus(conversation, units, false).NoSync();
+                    return GetResult(pod, conversation);
+                }
+            }
+            return ResultWithProfile();
+        }
+
+        private async Task<RemoteResult> CancelTempBasal()
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
+            {
+                using (var conversation = await podManager.StartConversation())
+                {
+                    await podManager.CancelTempBasal(conversation).NoSync();
+                    return GetResult(pod, conversation);
+                }
+            }
+            return ResultWithProfile();
+        }
+
+        private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
+            {
+                using (var conversation = await podManager.StartConversation())
+                {
+                    await podManager.SetTempBasal(conversation, rate, hours).NoSync();
+                    return GetResult(pod, conversation);
+                }
+            }
+            return ResultWithProfile();
+        }
+
+        private async Task<RemoteResult> SetProfile(decimal[] basalSchedule, int utcOffsetMinutes)
+        {
+            var profile = new ErosProfile()
+            {
+                Created = DateTime.UtcNow,
+                BasalSchedule = basalSchedule,
+                UtcOffset = utcOffsetMinutes
+            };
+            ErosRepository.Instance.Save(profile);
+
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
+            {
+                using (var conversation = await podManager.StartConversation())
+                {
+                    await podManager.SetBasalSchedule(conversation, profile).NoSync();
+                    return GetResult(pod, conversation);
                 }
             }
             else
             {
-                result.Status = CreateFromCurrentStatus(result);
-                result.Success = true;
+                return ResultWithProfile().WithSuccess();
             }
         }
 
-        private HistoricalResult[] GetResultsToDate(long lastResultId)
+        private async Task<RemoteResult> GetStatus()
+        {
+            var podProvider = App.Instance.PodProvider;
+            var podManager = podProvider.PodManager;
+            var pod = podManager?.Pod;
+            if (IsAssigned(pod))
+            {
+                var ts = DateTime.UtcNow - podManager.Pod.LastStatus.Created;
+                if (ts.Minutes > 1)
+                {
+                    using (var conversation = await podManager.StartConversation())
+                    {
+                        await podManager.UpdateStatus(conversation).NoSync();
+                        return GetResult(pod, conversation);
+                    }
+                }
+                else
+                {
+                    return GetResultEstimate(pod);
+                }
+            }
+            return ResultWithProfile().WithSuccess();
+        }
+
+        private void FillResultsToDate(RemoteRequest request, RemoteResult result)
         {
             var rep = ErosRepository.Instance;
-            var unfiltered = rep.GetResults(lastResultId);
+            var unfilteredResults = rep.GetResults(request.LastResultId);
 
             var list = new List<HistoricalResult>();
-            bool? LastFaulted = null;
-            PodProgress? LastProgress = null;
-            BasalState? LastBasalState = null;
-            BolusState? LastBolusState = null;
 
-            int startIndex = 0;
-            if (lastResultId > 0 && unfiltered.Count > 0 && unfiltered[0].Id == lastResultId)
+            bool? running = null;
+            bool nowRunning = false;
+            foreach(var oldResult in unfilteredResults)
             {
-                startIndex++;
-                var lastResult = unfiltered[0];
-                if (lastResult.Status != null)
+                if (oldResult.Fault?.FaultCode != null)
                 {
-                    LastFaulted = lastResult.Status.Faulted;
-                    LastProgress = lastResult.Status.Progress;
-                    LastBasalState = lastResult.Status.BasalState;
-                    LastBolusState = lastResult.Status.BolusState;
+                    nowRunning = (oldResult.Fault.FaultCode == 9);
                 }
-                else if (lastResult.Fault != null)
+                if (oldResult.Status?.Faulted != null)
                 {
-                    LastFaulted = lastResult.Fault.FaultCode != 9;
+                    nowRunning = !oldResult.Status.Faulted.Value;
+                }
+                if (oldResult.Status?.Progress != null)
+                {
+                    nowRunning = (oldResult.Status.Progress == PodProgress.Running
+                        || oldResult.Status.Progress == PodProgress.RunningLow);
+                }
+
+                if (!running.HasValue || running.Value != nowRunning)
+                {
+                    list.Add(GetHistoricalResult(oldResult, nowRunning));
+                    running = nowRunning;
+                }
+                else
+                {
+                    switch (oldResult.Type)
+                    {
+                        case RequestType.SetBasalSchedule:
+                        case RequestType.SetTempBasal:
+                        case RequestType.CancelTempBasal:
+                        case RequestType.Bolus:
+                        case RequestType.CancelBolus:
+                        case RequestType.StartExtendedBolus:
+                        case RequestType.StopExtendedBolus:
+                            list.Add(GetHistoricalResult(oldResult, nowRunning));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
-            for(int i=startIndex; i < unfiltered.Count; i++)
-            {
-                var result = unfiltered[i];
-            }
-
-            return list.ToArray();
+            result.ResultsToDate = list.ToArray();
+            if (unfilteredResults.Count > 0)
+                result.LastResultId = unfilteredResults.Last().Id.Value;
         }
 
-        private RemoteResultPodStatus CreateFromCurrentStatus(RemoteResult result)
+        private HistoricalResultType GetHistoricalType(RequestType type)
         {
-            var status = new RemoteResultPodStatus() { 
-                LastUpdated = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-            };
-
-            var podManager = App.Instance.PodProvider.PodManager;
-            if (podManager != null)
+            switch (type)
             {
-                var pod = podManager.Pod;
-
-                status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
-                if (pod.Lot.HasValue && pod.Serial.HasValue)
-                {
-                    result.PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}";
-                }
-
-                if (pod.LastBasalSchedule != null)
-                {
-                    status.BasalSchedule = pod.LastBasalSchedule.BasalSchedule;
-                    status.UtcOffset = pod.LastBasalSchedule.UtcOffset;
-                }
-
-                if (pod.LastStatus != null)
-                {
-                    status.LastUpdated = new DateTimeOffset(pod.Created).ToUnixTimeMilliseconds();
-                    result.ResultId = pod.LastStatus.Id ?? 0;
-                    status.ReservoirLevel = (double)pod.LastStatus.Reservoir;
-                    status.InsulinCanceled = (double)pod.LastStatus.NotDeliveredInsulin;
-                }
+                case RequestType.SetBasalSchedule:
+                    return HistoricalResultType.SetBasalSchedule;
+                case RequestType.SetTempBasal:
+                    return HistoricalResultType.SetTempBasal;
+                case RequestType.CancelTempBasal:
+                    return HistoricalResultType.CancelTempBasal;
+                case RequestType.Bolus:
+                    return HistoricalResultType.Bolus;
+                case RequestType.CancelBolus:
+                    return HistoricalResultType.CancelBolus;
+                case RequestType.StartExtendedBolus:
+                    return HistoricalResultType.StartExtendedBolus;
+                case RequestType.StopExtendedBolus:
+                    return HistoricalResultType.StopExtendedBolus;
+                default:
+                    return HistoricalResultType.Status;
             }
-            return status;
+        }
+
+        private HistoricalResult GetHistoricalResult(IMessageExchangeResult oldResult, bool running)
+        {
+            return new HistoricalResult()
+            {
+                ResultDate = new DateTimeOffset(oldResult.ResultTime.Value).ToUnixTimeMilliseconds(),
+                ResultId = oldResult.Id.Value,
+                PodRunning = running,
+                Type = GetHistoricalType(oldResult.Type),
+                Parameters = oldResult.Parameters
+            };
         }
     }
 }

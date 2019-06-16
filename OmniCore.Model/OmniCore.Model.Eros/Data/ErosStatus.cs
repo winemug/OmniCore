@@ -48,88 +48,90 @@ namespace OmniCore.Model.Eros.Data
 
         public void UpdateWithEstimates(IPod pod)
         {
-            DeliveredInsulinEstimate = DeliveredInsulin;
-            ReservoirEstimate = Reservoir;
-            ActiveMinutesEstimate = ActiveMinutes;
-            BasalStateEstimate = BasalState;
-            BolusStateEstimate = BolusState;
-
-            var utcNow = DateTime.UtcNow;
-
-            TimeSpan timePast = utcNow - Created;
-
-            if (Faulted.HasValue && !Faulted.Value
-                && BolusState.HasValue && BolusState.Value == Enums.BolusState.Immediate
-                && NotDeliveredInsulin.HasValue)
+            lock (this)
             {
-                var shouldHaveDelivered = (decimal)(timePast.TotalSeconds / 2) * 0.05m;
-                if (shouldHaveDelivered > NotDeliveredInsulin.Value)
-                    shouldHaveDelivered = NotDeliveredInsulin.Value;
+                DeliveredInsulinEstimate = DeliveredInsulin;
+                ReservoirEstimate = Reservoir;
+                ActiveMinutesEstimate = ActiveMinutes;
+                BasalStateEstimate = BasalState;
+                BolusStateEstimate = BolusState;
 
-                shouldHaveDelivered -= shouldHaveDelivered % 0.05m;
+                var utcNow = DateTime.UtcNow;
 
+                TimeSpan timePast = utcNow - Created;
+
+                if (Faulted.HasValue && !Faulted.Value
+                    && BolusState.HasValue && BolusState.Value == Enums.BolusState.Immediate
+                    && NotDeliveredInsulin.HasValue)
+                {
+                    var shouldHaveDelivered = (decimal)(timePast.TotalSeconds / 2) * 0.05m;
+                    if (shouldHaveDelivered > NotDeliveredInsulin.Value)
+                        shouldHaveDelivered = NotDeliveredInsulin.Value;
+
+                    shouldHaveDelivered -= shouldHaveDelivered % 0.05m;
+
+                    if (DeliveredInsulinEstimate.HasValue)
+                        DeliveredInsulinEstimate += shouldHaveDelivered;
+
+                    if (ReservoirEstimate < 50.0m)
+                        ReservoirEstimate -= shouldHaveDelivered;
+
+                    if (shouldHaveDelivered == NotDeliveredInsulin)
+                    {
+                        BolusStateEstimate = Enums.BolusState.Inactive;
+                    }
+                }
+
+                var basalInsulinEstimate = 0m;
+
+                if (BasalState.HasValue && BasalState.Value == Enums.BasalState.Temporary)
+                {
+                    if (pod.LastTempBasalResult != null)
+                    {
+                        var anon = new { BasalRate = 0m, Duration = 0m };
+
+                        var parameters = JsonConvert.DeserializeAnonymousType(pod.LastTempBasalResult.Parameters, anon);
+
+                        var tempBasalEnd = pod.LastTempBasalResult.ResultTime.Value.AddHours((double)parameters.Duration);
+                        if (tempBasalEnd < utcNow)
+                        {
+                            basalInsulinEstimate += parameters.Duration * parameters.BasalRate;
+                            basalInsulinEstimate += GetScheduledBasalTotals(tempBasalEnd, utcNow, pod);
+                            BasalStateEstimate = Enums.BasalState.Scheduled;
+                        }
+                        else
+                        {
+                            TemporaryBasalTotalHours = parameters.Duration;
+                            TemporaryBasalRate = parameters.BasalRate;
+                            TemporaryBasalRemaining = tempBasalEnd - utcNow;
+                            basalInsulinEstimate += (decimal)timePast.TotalHours * parameters.BasalRate;
+                            BasalStateEstimate = Enums.BasalState.Temporary;
+                        }
+                    }
+                }
+                else
+                {
+                    basalInsulinEstimate += GetScheduledBasalTotals(Created, utcNow, pod);
+                }
+
+                basalInsulinEstimate -= basalInsulinEstimate % 0.05m;
+
+                if (Reservoir.HasValue && Reservoir < 50.0m)
+                {
+                    ReservoirEstimate -= basalInsulinEstimate;
+                }
                 if (DeliveredInsulinEstimate.HasValue)
-                    DeliveredInsulinEstimate += shouldHaveDelivered;
+                    DeliveredInsulinEstimate += basalInsulinEstimate;
 
-                if (ReservoirEstimate < 50.0m)
-                    ReservoirEstimate -= shouldHaveDelivered;
+                if (ActiveMinutesEstimate.HasValue)
+                    ActiveMinutesEstimate = ActiveMinutes + (uint)timePast.TotalMinutes;
 
-                if (shouldHaveDelivered == NotDeliveredInsulin)
+                if (pod.LastBasalSchedule != null)
                 {
-                    BolusStateEstimate = Enums.BolusState.Inactive;
+                    ScheduledBasalRate = pod.LastBasalSchedule.BasalSchedule[CurrentHalfHourIndex(utcNow)];
+                    ScheduledBasalAverage = pod.LastBasalSchedule.BasalSchedule.Average();
                 }
             }
-
-            var basalInsulinEstimate = 0m;
-
-            if (BasalState.HasValue && BasalState.Value == Enums.BasalState.Temporary)
-            {
-                if (pod.LastTempBasalResult != null)
-                {
-                    var anon = new { BasalRate = 0m, Duration = 0m };
-
-                    var parameters = JsonConvert.DeserializeAnonymousType(pod.LastTempBasalResult.Parameters, anon);
-
-                    var tempBasalEnd = pod.LastTempBasalResult.ResultTime.Value.AddHours((double)parameters.Duration);
-                    if (tempBasalEnd < utcNow)
-                    {
-                        basalInsulinEstimate += parameters.Duration * parameters.BasalRate;
-                        basalInsulinEstimate += GetScheduledBasalTotals(tempBasalEnd, utcNow, pod);
-                        BasalStateEstimate = Enums.BasalState.Scheduled;
-                    }
-                    else
-                    {
-                        TemporaryBasalTotalHours = parameters.Duration;
-                        TemporaryBasalRate = parameters.BasalRate;
-                        TemporaryBasalRemaining = tempBasalEnd - utcNow;
-                        basalInsulinEstimate += (decimal)timePast.TotalHours * parameters.BasalRate;
-                        BasalStateEstimate = Enums.BasalState.Temporary;
-                    }
-                }
-            }
-            else
-            {
-                basalInsulinEstimate += GetScheduledBasalTotals(Created, utcNow, pod);
-            }
-
-            basalInsulinEstimate -= basalInsulinEstimate % 0.05m;
-
-            if (Reservoir.HasValue && Reservoir < 50.0m)
-            {
-                ReservoirEstimate -= basalInsulinEstimate;
-            }
-            if (DeliveredInsulinEstimate.HasValue)
-                DeliveredInsulinEstimate += basalInsulinEstimate;
-
-            if (ActiveMinutesEstimate.HasValue)
-                ActiveMinutesEstimate = ActiveMinutes + (uint)timePast.TotalMinutes;
-
-            if (pod.LastBasalSchedule != null)
-            {
-                ScheduledBasalRate = pod.LastBasalSchedule.BasalSchedule[CurrentHalfHourIndex(utcNow)];
-                ScheduledBasalAverage = pod.LastBasalSchedule.BasalSchedule.Average();
-            }
-
         }
 
         private decimal GetScheduledBasalTotals(DateTime start, DateTime end, IPod pod)

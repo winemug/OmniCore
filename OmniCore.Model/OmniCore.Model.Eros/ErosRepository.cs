@@ -30,7 +30,6 @@ namespace OmniCore.Model.Eros
         private ErosRepository()
         {
             DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
-            File.Delete(DbPath);
             //DbConnectionString = $"Data Source={DbPath}";
             Initialize();
         }
@@ -51,6 +50,26 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosMessageExchangeParameters>();
                     conn.CreateTable<ErosMessageExchangeResult>();
                     conn.CreateTable<ErosMessageExchangeStatistics>();
+                    conn.CreateTable<ErosProfile>();
+
+                    if (conn.Table<ErosProfile>().Count() == 0)
+                    {
+                        var profile = new ErosProfile()
+                        {
+                            Created = DateTime.UtcNow,
+                            BasalSchedule = new decimal[]
+                                { 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m
+                                },
+                            UtcOffset = 0
+                        };
+                        conn.Insert(profile);
+                    }
+
                     conn.Commit();
                 }
             }
@@ -92,6 +111,24 @@ namespace OmniCore.Model.Eros
             {
                 return WithRelations(conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate)
                     .FirstOrDefault(), conn);
+            }
+        }
+
+        public IProfile GetProfile()
+        {
+            using (var conn = new SQLiteConnection(DbPath))
+            {
+                return conn.Table<ErosProfile>()
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault();
+            }
+        }
+
+        public void Save(IProfile profile)
+        {
+            using (var conn = new SQLiteConnection(DbPath))
+            {
+                profile.Id = conn.InsertOrReplace(profile, typeof(ErosProfile));
             }
         }
 
