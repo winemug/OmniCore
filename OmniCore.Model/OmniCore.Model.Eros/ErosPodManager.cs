@@ -552,11 +552,23 @@ namespace OmniCore.Model.Eros
                 AssertRunningStatus();
                 AssertImmediateBolusInactive();
 
+                var request = new ErosMessageBuilder().WithCancelTempBasal().Build();
                 if (Pod.LastStatus.BasalState == BasalState.Temporary)
                 {
-                    var request = new ErosMessageBuilder().WithCancelTempBasal().Build();
                     if (!await PerformExchange(request, GetStandardParameters(), conversation).NoSync())
                         return;
+                }
+                else
+                {
+                    var emp = GetStandardParameters();
+                    var progress = conversation.NewExchange(request);
+                    progress.Result.ResultTime = DateTime.UtcNow;
+                    progress.Result.Success = true;
+                    progress.Result.Status = Pod.LastStatus;
+                    progress.Running = false;
+                    progress.Finished = true;
+                    
+                    ErosRepository.Instance.Save(ErosPod, progress.Result);
                 }
 
                 if (Pod.LastStatus.BasalState != BasalState.Scheduled)
