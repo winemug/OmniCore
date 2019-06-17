@@ -252,18 +252,40 @@ namespace OmniCore.Model.Eros
             var list = new List<ErosMessageExchangeResult>();
             foreach(var result in tableQuery)
             {
-                if (result.StatusId.HasValue)
-                    result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+                if (result.Type == RequestType.CancelBolus)
+                {
+                    var bolusEntry = conn.Table<ErosMessageExchangeResult>()
+                        .Where(x => x.Type == RequestType.Bolus && x.Id < result.Id)
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault();
 
-                if (result.BasalScheduleId.HasValue)
-                    result.BasalSchedule = conn.Table<ErosBasalSchedule>().Single(x => x.Id == result.BasalScheduleId.Value);
-
-                if (result.FaultId.HasValue)
-                    result.Fault = conn.Table<ErosFault>().Single(x => x.Id == result.FaultId.Value);
-
-                list.Add(result);
+                    if (bolusEntry != null)
+                    {
+                        if (!list.Any(x => x.Id == bolusEntry.Id))
+                        {
+                            list.Add(WithRelations(bolusEntry, conn));
+                        }
+                        list.Add(WithRelations(result, conn));
+                    }
+                }
+                else
+                    list.Add(WithRelations(result, conn));
             }
-            return list;
+            return list.OrderBy(x => x.Id).ToList();
+        }
+
+        private ErosMessageExchangeResult WithRelations(ErosMessageExchangeResult result, SQLiteConnection conn)
+        {
+            if (result.StatusId.HasValue)
+                result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+
+            if (result.BasalScheduleId.HasValue)
+                result.BasalSchedule = conn.Table<ErosBasalSchedule>().Single(x => x.Id == result.BasalScheduleId.Value);
+
+            if (result.FaultId.HasValue)
+                result.Fault = conn.Table<ErosFault>().Single(x => x.Id == result.FaultId.Value);
+
+            return result;
         }
 
 
