@@ -305,6 +305,8 @@ namespace OmniCore.Mobile.Services
                 result.ResultsToDate = list.ToArray();
                 if (unfilteredResults.Count > 0)
                     result.LastResultId = unfilteredResults.Last().Id.Value;
+                else
+                    result.LastResultId = request.LastResultId;
             }
             catch(Exception e)
             {
