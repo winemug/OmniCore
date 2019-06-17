@@ -2,7 +2,6 @@
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;
-using SQLiteNetExtensions.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,7 +15,6 @@ namespace OmniCore.Model.Eros.Data
         public Guid PodId { get; set; }
         public DateTime Created { get; set; }
 
-        [ForeignKey(typeof(ErosMessageExchangeResult))]
         public long ResultId { get; set; }
 
         public uint AlertW278 { get; set; }

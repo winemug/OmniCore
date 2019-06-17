@@ -20,7 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
-    <PackageReference Include="SQLiteNetExtensions.Async" Version="2.1.0" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
   </ItemGroup>
 
   <!-- Include Nuget Package for Tizen Project building -->

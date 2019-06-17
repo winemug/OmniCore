@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using SQLiteNetExtensions.Extensions;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Eros.Data;
