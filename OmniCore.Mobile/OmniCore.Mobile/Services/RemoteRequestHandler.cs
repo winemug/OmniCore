@@ -12,6 +12,7 @@ using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Interfaces.Data;
+using Newtonsoft.Json;
 
 namespace OmniCore.Mobile.Services
 {
@@ -346,7 +347,7 @@ namespace OmniCore.Mobile.Services
 
         private HistoricalResult GetHistoricalResult(IMessageExchangeResult oldResult, bool running)
         {
-            return new HistoricalResult()
+            var hr = new HistoricalResult()
             {
                 ResultDate = GetUnixTime(oldResult.ResultTime.Value),
                 ResultId = oldResult.Id.Value,
@@ -354,6 +355,13 @@ namespace OmniCore.Mobile.Services
                 Type = GetHistoricalType(oldResult.Type),
                 Parameters = oldResult.Parameters
             };
+
+            if (hr.Type == HistoricalResultType.CancelBolus)
+            {
+                hr.Parameters = JsonConvert.SerializeObject(new { NotDeliveredInsulin = oldResult.Status.NotDeliveredInsulin.Value });
+            }
+
+            return hr;
         }
     }
 }
