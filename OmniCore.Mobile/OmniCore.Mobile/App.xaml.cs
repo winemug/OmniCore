@@ -28,7 +28,6 @@ namespace OmniCore.Mobile
 
             var logger = DependencyService.Get<IOmniCoreLogger>();
             logger.Information("OmniCore App initialized");
-
             MainPage = new Views.OmniCoreMain();
         }
 

@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using OmniCore.Model.Eros.Data;
+using System.Reactive.Threading.Tasks;
 
 namespace OmniCore.Radio.RileyLink
 {
@@ -58,38 +59,34 @@ namespace OmniCore.Radio.RileyLink
                 messageProgress.ActionText = "Searching for RileyLink";
             Debug.WriteLine("Searching RL");
 
-            var config = new ScanConfig()
-            {
-                ScanType = BleScanType.Balanced,
-                ServiceUuids = new List<Guid>() { RileyLinkServiceUUID }
-            };
-
             var scanResults = new List<IScanResult>();
-            int scanTimeout = 20000;
+            var config = new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } };
 
-            while(true)
+            var scanExtension = new TaskCompletionSource<int>();
+            CrossBleAdapter.Current.Scan(config).Subscribe((sr) =>
             {
-                try
+                if (!scanResults.Any(r => r.Device.Uuid == sr.Device.Uuid))
                 {
-                    var start = Environment.TickCount;
-                    var scanResult = await CrossBleAdapter.Current.ScanExtra(config, true).Timeout(TimeSpan.FromMilliseconds(scanTimeout));
-                    var scanDuration = Environment.TickCount - start;
-                    if (!scanResults.Any(r => r.Device.Uuid == scanResult.Device.Uuid))
+                    scanResults.Add(sr);
+                    if (Preferences.PreferredRadios.Contains(sr.Device.Uuid))
                     {
-                        scanResults.Add(scanResult);
-                        if (Preferences.PreferredRadios.Contains(scanResult.Device.Uuid))
-                            break;
-                        else if (Preferences.ConnectToAny)
-                            scanTimeout = 2500;
+                        scanExtension.TrySetResult(0);
                     }
-                    else
-                        scanTimeout -= scanDuration;
+                    else if (Preferences.ConnectToAny)
+                    {
+                        scanExtension.TrySetResult(2500);
+                    }
                 }
-                catch (TimeoutException)
-                {
-                    break;
-                }
+            });
+
+            var tr = await Task.WhenAny(scanExtension.Task, Task.Delay(20000));
+            if (tr == scanExtension.Task)
+            {
+                var additionalDelay = await scanExtension.Task;
+                if (additionalDelay > 0)
+                    await Task.Delay(additionalDelay);
             }
+
             CrossBleAdapter.Current.StopScan();
 
             foreach (var result in scanResults.OrderByDescending(x => x.Rssi))
@@ -105,13 +102,13 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task ConnectToDevice(IMessageExchangeProgress messageProgress)
         {
-            await Device.ConnectWait();
+            await Device.ConnectWait().ToTask();
             ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
 
-            DataCharacteristic = await Device.WhenKnownCharacteristicsDiscovered(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID);
-            ResponseCharacteristic = await Device.WhenKnownCharacteristicsDiscovered(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID);
+            DataCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID).ToTask();
+            ResponseCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID).ToTask();
 
-            await ResponseCharacteristic.EnableNotifications();
+            await ResponseCharacteristic.EnableNotifications().ToTask();
             await ConfigureDeviceSpecifics();
         }
 
@@ -127,8 +124,8 @@ namespace OmniCore.Radio.RileyLink
 
                     if (device == null)
                         throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Couldn't find RileyLink!");
-                    else
-                        Debug.WriteLine($"Found RL: {Device.Uuid}");
+
+                    Device = device;
                 }
 
                 if (!this.Device.IsConnected())
