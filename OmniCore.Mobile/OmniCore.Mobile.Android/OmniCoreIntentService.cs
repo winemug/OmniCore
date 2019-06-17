@@ -65,25 +65,39 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
-            var request = intent.GetStringExtra("request");
-            var messenger = intent.GetParcelableExtra("messenger") as Messenger;
-            var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
-            Task.Run(async () =>
+            lock (this)
             {
+                var request = intent.GetStringExtra("request");
+                var messenger = intent.GetParcelableExtra("messenger") as Messenger;
+                var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
                 try
                 {
-                    var result = await publisher.GetResult(request).Sync();
-                    var b = new Bundle();
-                    b.PutString("response", result);
-                    Logger.Verbose("Responding to request via message object");
-                    messenger.Send(new Message { Data = b });
-                    Logger.Verbose("Message send complete");
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var result = await publisher.GetResult(request).NoSync();
+                            var b = new Bundle();
+                            b.PutString("response", result);
+                            Logger.Verbose("Responding to request via message object");
+                            messenger.Send(new Message { Data = b });
+                            Logger.Verbose("Message send complete");
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error("Error handling remote request", e);
+                        }
+                    });
+                }
+                catch (AggregateException ae)
+                {
+                    Logger.Error("Error handling remote request", ae.Flatten());
                 }
                 catch (Exception e)
                 {
                     Logger.Error("Error handling remote request", e);
                 }
-            });
+            }
         }
 
         private void RegisterForegroundService()

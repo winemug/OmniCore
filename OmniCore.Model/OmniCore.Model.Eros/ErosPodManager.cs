@@ -39,7 +39,7 @@ namespace OmniCore.Model.Eros
         {
             ErosPod = pod;
             MessageExchangeProvider = messageExchangeProvider;
-            ConversationMutex = new SemaphoreSlim(1);
+            ConversationMutex = new SemaphoreSlim(1, 1);
         }
 
         public async Task<IConversation> StartConversation(int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
@@ -50,7 +50,7 @@ namespace OmniCore.Model.Eros
             }
             else
             {
-                if (!await ConversationMutex.WaitAsync(timeoutMilliseconds).NoSync())
+                if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
                     return null;
             }
 

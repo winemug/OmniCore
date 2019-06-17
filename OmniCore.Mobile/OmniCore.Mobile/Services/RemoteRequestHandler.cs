@@ -36,6 +36,13 @@ namespace OmniCore.Mobile.Services
             }
         }
 
+        private long GetUnixTime(DateTime utcDateTime)
+        {
+            var dutc = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute,
+                utcDateTime.Second, utcDateTime.Millisecond, DateTimeKind.Utc);
+            return new DateTimeOffset(dutc).ToUnixTimeMilliseconds();
+        }
+
         private async Task<RemoteResult> Execute(RemoteRequest request)
         {
             var logger = DependencyService.Get<IOmniCoreLogger>();
@@ -91,7 +98,7 @@ namespace OmniCore.Mobile.Services
             {
                 Success = !conversation.Failed,
                 PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
-                ResultDate = new DateTimeOffset(conversation.CurrentExchange.Result.ResultTime.Value).ToUnixTimeMilliseconds(),
+                ResultDate = GetUnixTime(conversation.CurrentExchange.Result.ResultTime.Value),
                 InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
                 PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
                             pod.LastStatus.Progress >= PodProgress.Running &&
@@ -112,7 +119,7 @@ namespace OmniCore.Mobile.Services
             {
                 Success = true,
                 PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
-                ResultDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                ResultDate = GetUnixTime(DateTime.UtcNow),
                 InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
                 ReservoirLevel = pod.LastStatus?.ReservoirEstimate ?? 0,
                 PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
@@ -130,7 +137,7 @@ namespace OmniCore.Mobile.Services
 
             return new RemoteResult()
             {
-                ResultDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                ResultDate = GetUnixTime(DateTime.UtcNow),
                 BasalSchedule = profile.BasalSchedule,
                 UtcOffset = profile.UtcOffset
             };
@@ -143,7 +150,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation())
+                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelBolus(conversation).NoSync();
                     return GetResult(pod, conversation);
@@ -159,7 +166,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation())
+                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
                     await podManager.Bolus(conversation, units, false).NoSync();
                     return GetResult(pod, conversation);
@@ -175,7 +182,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation())
+                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelTempBasal(conversation).NoSync();
                     return GetResult(pod, conversation);
@@ -191,7 +198,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation())
+                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetTempBasal(conversation, rate, hours).NoSync();
                     return GetResult(pod, conversation);
@@ -215,7 +222,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation())
+                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetBasalSchedule(conversation, profile).NoSync();
                     return GetResult(pod, conversation);
@@ -237,7 +244,7 @@ namespace OmniCore.Mobile.Services
                 var ts = DateTime.UtcNow - podManager.Pod.LastStatus?.Created;
                 if (ts == null || ts.Value.Minutes > 1)
                 {
-                    using (var conversation = await podManager.StartConversation())
+                    using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                     {
                         await podManager.UpdateStatus(conversation).Sync();
                         return GetResult(pod, conversation);
@@ -341,7 +348,7 @@ namespace OmniCore.Mobile.Services
         {
             return new HistoricalResult()
             {
-                ResultDate = new DateTimeOffset(oldResult.ResultTime.Value).ToUnixTimeMilliseconds(),
+                ResultDate = GetUnixTime(oldResult.ResultTime.Value),
                 ResultId = oldResult.Id.Value,
                 PodRunning = running,
                 Type = GetHistoricalType(oldResult.Type),
