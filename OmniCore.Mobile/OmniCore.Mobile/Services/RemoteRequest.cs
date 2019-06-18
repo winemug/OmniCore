@@ -17,7 +17,7 @@ namespace OmniCore.Mobile.Services
         public decimal TemporaryRate { get; set; }
         public decimal DurationHours { get; set; }
 
-        public long LastResultId { get; set; }
+        public long LastResultDateTime { get; set; }
 
         public static RemoteRequest FromJson(string jsonString)
         {

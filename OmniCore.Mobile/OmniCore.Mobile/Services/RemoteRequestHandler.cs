@@ -39,9 +39,7 @@ namespace OmniCore.Mobile.Services
 
         private long GetUnixTime(DateTime utcDateTime)
         {
-            var dutc = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute,
-                utcDateTime.Second, utcDateTime.Millisecond, DateTimeKind.Utc);
-            return new DateTimeOffset(dutc).ToUnixTimeMilliseconds();
+            return new DateTimeOffset(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
         }
 
         private async Task<RemoteResult> Execute(RemoteRequest request)
@@ -243,7 +241,7 @@ namespace OmniCore.Mobile.Services
             if (IsAssigned(pod))
             {
                 var ts = DateTime.UtcNow - podManager.Pod.LastStatus?.Created;
-                if (ts == null || ts.Value.Minutes > 1)
+                if (ts == null || ts.Value.Minutes > 20)
                 {
                     using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                     {
@@ -264,7 +262,7 @@ namespace OmniCore.Mobile.Services
             try
             {
                 var rep = ErosRepository.Instance;
-                var unfilteredResults = rep.GetHistoricalResultsForRemoteApp(request.LastResultId);
+                var unfilteredResults = rep.GetHistoricalResultsForRemoteApp(request.LastResultDateTime);
 
                 var list = new List<HistoricalResult>();
 
@@ -312,13 +310,13 @@ namespace OmniCore.Mobile.Services
 
                 result.ResultsToDate = list.ToArray();
                 if (unfilteredResults.Count > 0)
-                    result.LastResultId = unfilteredResults.Last().Id.Value;
+                    result.LastResultDateTime = GetUnixTime(unfilteredResults.Last().ResultTime.Value);
                 else
-                    result.LastResultId = request.LastResultId;
+                    result.LastResultDateTime = request.LastResultDateTime;
             }
             catch(Exception e)
             {
-                DependencyService.Get<IOmniCoreLogger>().Error($"Error getting results to date for LastResultId={request.LastResultId}", e);
+                DependencyService.Get<IOmniCoreLogger>().Error($"Error getting results to date for LastResultDate={request.LastResultDateTime}", e);
             }
         }
 

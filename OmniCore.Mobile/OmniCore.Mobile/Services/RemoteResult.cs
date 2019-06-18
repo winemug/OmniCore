@@ -21,7 +21,7 @@ namespace OmniCore.Mobile.Services
         public decimal ReservoirLevel { get; set; }
         public int BatteryLevel { get; set; }
 
-        public long LastResultId { get; set; }
+        public long LastResultDateTime { get; set; }
         public HistoricalResult[] ResultsToDate { get; set; }
 
         public string ToJson()

@@ -71,7 +71,6 @@ namespace OmniCore.Mobile.Views
             catch (Exception ex)
             {
                 await DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
-
             }
         }
     }

@@ -236,12 +236,24 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long startAfterId)
+        public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long lastResultDate)
         {
             using (var conn = GetConnection())
             {
+                long lastId = 0;
+                if (lastResultDate > 0)
+                {
+                    var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
+                    var correspondingResult = conn.Table<ErosMessageExchangeResult>()
+                        .Where(x => x.Success && x.ResultTime.Value <= dtLastResult)
+                        .FirstOrDefault();
+                    if (correspondingResult != null)
+                    {
+                        lastId = correspondingResult.Id.Value;
+                    }
+                }
                 return WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
-                    .Where(x => x.Id > startAfterId && x.Success)
+                    .Where(x => x.Success && x.Id > lastId)
                     .OrderBy(x => x.Id), conn);
             }
         }
