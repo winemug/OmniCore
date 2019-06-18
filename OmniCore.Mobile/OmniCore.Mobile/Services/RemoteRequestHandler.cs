@@ -37,9 +37,9 @@ namespace OmniCore.Mobile.Services
             }
         }
 
-        private long GetUnixTime(DateTime utcDateTime)
+        private long GetUnixTime(DateTimeOffset utcDateTime)
         {
-            return new DateTimeOffset(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+            return utcDateTime.ToUnixTimeMilliseconds();
         }
 
         private async Task<RemoteResult> Execute(RemoteRequest request)
@@ -118,7 +118,7 @@ namespace OmniCore.Mobile.Services
             {
                 Success = true,
                 PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
-                ResultDate = GetUnixTime(DateTime.UtcNow),
+                ResultDate = GetUnixTime(DateTimeOffset.UtcNow),
                 InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
                 ReservoirLevel = pod.LastStatus?.ReservoirEstimate ?? 0,
                 PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
@@ -136,7 +136,7 @@ namespace OmniCore.Mobile.Services
 
             return new RemoteResult()
             {
-                ResultDate = GetUnixTime(DateTime.UtcNow),
+                ResultDate = GetUnixTime(DateTimeOffset.UtcNow),
                 BasalSchedule = profile.BasalSchedule,
                 UtcOffset = profile.UtcOffset
             };
@@ -210,7 +210,7 @@ namespace OmniCore.Mobile.Services
         {
             var profile = new ErosProfile()
             {
-                Created = DateTime.UtcNow,
+                Created = DateTimeOffset.UtcNow,
                 BasalSchedule = basalSchedule,
                 UtcOffset = utcOffsetMinutes
             };
@@ -240,7 +240,7 @@ namespace OmniCore.Mobile.Services
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                var ts = DateTime.UtcNow - podManager.Pod.LastStatus?.Created;
+                var ts = DateTimeOffset.UtcNow - podManager.Pod.LastStatus?.Created;
                 if (ts == null || ts.Value.Minutes > 20)
                 {
                     using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))

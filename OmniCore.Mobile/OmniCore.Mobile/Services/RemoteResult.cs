@@ -11,7 +11,6 @@ namespace OmniCore.Mobile.Services
         public bool PodRunning { get; set; }
         public string PodId { get; set; }
 
-        public long ResultId { get; set; }
         public long ResultDate { get; set; }
 
         public decimal[] BasalSchedule { get; set; }
@@ -32,12 +31,6 @@ namespace OmniCore.Mobile.Services
         public RemoteResult WithSuccess()
         {
             Success = true;
-            return this;
-        }
-
-        public RemoteResult WithResultId(long id)
-        {
-            ResultId = id;
             return this;
         }
     }

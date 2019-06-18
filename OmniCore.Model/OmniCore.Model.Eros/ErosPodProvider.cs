@@ -65,7 +65,7 @@ namespace OmniCore.Model.Eros
                 };
 
                 pod.RadioAddress = GetRadioAddress();
-                pod.Created = DateTime.UtcNow;
+                pod.Created = DateTimeOffset.UtcNow;
                 ErosRepository.Instance.Save(pod);
                 PodManager = new ErosPodManager(pod, MessageExchangeProvider);
                 return PodManager;
@@ -79,7 +79,7 @@ namespace OmniCore.Model.Eros
                 Archive();
 
                 var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
-                pod.Created = DateTime.UtcNow;
+                pod.Created = DateTimeOffset.UtcNow;
                 ErosRepository.Instance.Save(pod);
                 PodManager = new ErosPodManager(pod, MessageExchangeProvider);
                 return PodManager;

@@ -8,10 +8,10 @@ namespace OmniCore.Model.Interfaces.Data
     {
         long? Id { get; set; }
         Guid PodId { get; set; }
-        DateTime Created { get; set; }
+        DateTimeOffset Created { get; set; }
 
         int UtcOffset { get; set; }
         decimal[] BasalSchedule { get; set; }
-        DateTime PodDateTime { get; set; }
+        DateTimeOffset PodDateTime { get; set; }
     }
 }

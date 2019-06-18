@@ -16,8 +16,9 @@ namespace OmniCore.Model.Eros.Data
 
         public Guid PodId { get; set; }
 
-        public DateTime? RequestTime { get; set; }
-        public DateTime? ResultTime { get; set; }
+        public DateTimeOffset? RequestTime { get; set; }
+        [Indexed]
+        public DateTimeOffset? ResultTime { get; set; }
 
         public RequestSource Source { get; set; }
         public RequestType Type { get; set; }

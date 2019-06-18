@@ -11,12 +11,12 @@ namespace OmniCore.Model.Interfaces.Data
         long? Id { get; set; }
         Guid PodId { get; set; }
 
-        DateTime? RequestTime { get; set; }
+        DateTimeOffset? RequestTime { get; set; }
         RequestSource Source { get; set; }
         RequestType Type { get; set; }
         string Parameters { get; set; }
 
-        DateTime? ResultTime { get; set; }
+        DateTimeOffset? ResultTime { get; set; }
 
         bool Success { get; set; }
         FailureType Failure { get; set;  }

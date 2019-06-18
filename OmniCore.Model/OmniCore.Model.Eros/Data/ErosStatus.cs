@@ -17,7 +17,7 @@ namespace OmniCore.Model.Eros.Data
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
         public Guid PodId { get; set; }
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         public bool? Faulted { get; set; }
 
@@ -56,7 +56,7 @@ namespace OmniCore.Model.Eros.Data
                 BasalStateEstimate = BasalState;
                 BolusStateEstimate = BolusState;
 
-                var utcNow = DateTime.UtcNow;
+                var utcNow = DateTimeOffset.UtcNow;
 
                 TimeSpan timePast = utcNow - Created;
 
@@ -134,7 +134,7 @@ namespace OmniCore.Model.Eros.Data
             }
         }
 
-        private decimal GetScheduledBasalTotals(DateTime start, DateTime end, IPod pod)
+        private decimal GetScheduledBasalTotals(DateTimeOffset start, DateTimeOffset end, IPod pod)
         {
             if (pod.LastBasalSchedule == null)
                 return 0m;
@@ -166,7 +166,7 @@ namespace OmniCore.Model.Eros.Data
             return scheduledEstimate;
         }
 
-        private int CurrentHalfHourIndex(DateTime current)
+        private int CurrentHalfHourIndex(DateTimeOffset current)
         {
             var hh = current.Hour * 2;
             if (current.Minute >= 30)
@@ -174,16 +174,16 @@ namespace OmniCore.Model.Eros.Data
             return hh;
         }
 
-        private DateTime NextHalfHour(DateTime current)
+        private DateTimeOffset NextHalfHour(DateTimeOffset current)
         {
             if (current.Minute < 30)
             {
-                return new DateTime(current.Year, current.Month, current.Day, current.Hour, 30, 0, DateTimeKind.Utc);
+                return new DateTimeOffset(current.Year, current.Month, current.Day, current.Hour, 30, 0, current.Offset);
             }
             else
             {
                 current = current.AddMinutes(30);
-                return new DateTime(current.Year, current.Month, current.Day, current.Hour, 0, 0, DateTimeKind.Utc);
+                return new DateTimeOffset(current.Year, current.Month, current.Day, current.Hour, 0, 0, current.Offset);
             }
         }
     }

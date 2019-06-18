@@ -71,7 +71,7 @@ namespace OmniCore.Model.Eros
                 progress = conversation.NewExchange(requestMessage);
             try
             {
-                progress.Result.RequestTime = DateTime.UtcNow;
+                progress.Result.RequestTime = DateTimeOffset.UtcNow;
                 progress.Running = true;
                 var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod).NoSync();
                 await messageExchange.InitializeExchange(progress).NoSync();
@@ -97,7 +97,7 @@ namespace OmniCore.Model.Eros
             }
             finally
             {
-                progress.Result.ResultTime = DateTime.UtcNow;
+                progress.Result.ResultTime = DateTimeOffset.UtcNow;
                 progress.Running = false;
                 progress.Finished = true;
                 ErosRepository.Instance.Save(ErosPod, progress.Result);
@@ -319,7 +319,7 @@ namespace OmniCore.Model.Eros
 
                 if (Pod.LastStatus != null && Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    Pod.ActivationDate = DateTime.UtcNow;
+                    Pod.ActivationDate = DateTimeOffset.UtcNow;
                     var podDate = Pod.ActivationDate.Value + TimeSpan.FromMinutes(utcOffsetMinutes);
                     var parameters = GetStandardParameters();
                     parameters.AddressOverride = 0xffffffff;
@@ -431,7 +431,7 @@ namespace OmniCore.Model.Eros
                 {
                     AssertBasalScheduleValid(profile.BasalSchedule);
 
-                    var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
+                    var podDate = DateTimeOffset.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
                     var parameters = GetStandardParameters();
                     parameters.RepeatFirstPacket = true;
                     parameters.CriticalWithFollowupRequired = true;
@@ -493,7 +493,7 @@ namespace OmniCore.Model.Eros
                     if (Pod.LastStatus.Progress != PodProgress.Priming)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Pod did not start priming the cannula for insertion");
 
-                    Pod.InsertionDate = DateTime.UtcNow;
+                    Pod.InsertionDate = DateTimeOffset.UtcNow;
                 }
 
                 while (Pod.LastStatus.Progress == PodProgress.Priming)
@@ -562,7 +562,7 @@ namespace OmniCore.Model.Eros
                 {
                     var emp = GetStandardParameters();
                     var progress = conversation.NewExchange(request);
-                    progress.Result.ResultTime = DateTime.UtcNow;
+                    progress.Result.ResultTime = DateTimeOffset.UtcNow;
                     progress.Result.Success = true;
                     progress.Result.Status = Pod.LastStatus;
                     progress.Running = false;
@@ -614,7 +614,7 @@ namespace OmniCore.Model.Eros
 
                 AssertBasalScheduleValid(profile.BasalSchedule);
 
-                var podDate = DateTime.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
+                var podDate = DateTimeOffset.UtcNow + TimeSpan.FromMinutes(profile.UtcOffset);
                 var parameters = GetStandardParameters();
                 //parameters.RepeatFirstPacket = true;
                 parameters.CriticalWithFollowupRequired = false;

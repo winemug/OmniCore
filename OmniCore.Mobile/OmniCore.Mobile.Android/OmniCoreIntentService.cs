@@ -65,19 +65,29 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
-            lock (this)
-            {
                 var request = intent.GetStringExtra("request");
                 var messenger = intent.GetParcelableExtra("messenger") as Messenger;
                 var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
                 try
                 {
-                    Task.Run(async () =>
+                    var t = Task.Run(async () =>
                     {
                         try
                         {
-                            var result = await publisher.GetResult(request).NoSync();
+                            var resultTask = publisher.GetResult(request);
+                            while (true)
+                            {
+                                var tr = await Task.WhenAny(resultTask, Task.Delay(5000)).NoSync();
+                                if (tr == resultTask)
+                                    break;
+                                var bb = new Bundle();
+                                Logger.Verbose("Sending busy / keep-alive");
+                                bb.PutBoolean("busy", true);
+                                messenger.Send(new Message { Data = bb });
+                            }
+                            var result = await resultTask.NoSync();
                             var b = new Bundle();
+                            b.PutBoolean("finished", true);
                             b.PutString("response", result);
                             Logger.Verbose("Responding to request via message object");
                             messenger.Send(new Message { Data = b });
@@ -97,7 +107,6 @@ namespace OmniCore.Mobile.Android
                 {
                     Logger.Error("Error handling remote request", e);
                 }
-            }
         }
 
         private void RegisterForegroundService()

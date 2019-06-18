@@ -7,7 +7,7 @@ namespace OmniCore.Model.Interfaces.Data
     public interface IProfile
     {
         long? Id { get; set; }
-        DateTime Created { get; set; }
+        DateTimeOffset Created { get; set; }
 
         decimal[] BasalSchedule { get; set; }
         int UtcOffset { get; set; }

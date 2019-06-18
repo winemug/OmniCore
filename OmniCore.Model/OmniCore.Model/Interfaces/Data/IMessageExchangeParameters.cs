@@ -9,7 +9,7 @@ namespace OmniCore.Model.Interfaces.Data
     {
         long? Id { get; set; }
         Guid PodId { get; set; }
-        DateTime Created { get; set; }
+        DateTimeOffset Created { get; set; }
 
         TxPower? TransmissionLevelOverride { get; }
         bool AllowAutoLevelAdjustment { get; }

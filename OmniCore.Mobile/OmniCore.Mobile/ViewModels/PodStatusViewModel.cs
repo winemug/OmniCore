@@ -65,7 +65,7 @@ namespace OmniCore.Mobile.ViewModels
                     return string.Empty;
                 else if (Pod.LastStatus != null)
                 {
-                    var updated = DateTime.UtcNow - Pod.LastStatus.Created;
+                    var updated = DateTimeOffset.UtcNow - Pod.LastStatus.Created;
                     if (updated.TotalSeconds < 15)
                         return $"Just now";
                     else if (updated.TotalMinutes < 1)
@@ -334,7 +334,7 @@ namespace OmniCore.Mobile.ViewModels
                         else if (Pod.LastStatus.TemporaryBasalTotalHours == 1m)
                             return $"{Pod.LastStatus.TemporaryBasalRate:F2} U/h for 1 hour";
                         else
-                            return $"{Pod.LastStatus.TemporaryBasalRate:F2} U/h for {Pod.LastStatus.TemporaryBasalTotalHours:.1} hours";
+                            return $"{Pod.LastStatus.TemporaryBasalRate:F2} U/h for {Pod.LastStatus.TemporaryBasalTotalHours:F1} hours";
                     }
                     return $"Rate and duration unknown";
                 }

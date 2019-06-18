@@ -11,7 +11,7 @@ namespace OmniCore.Model.Eros.Data
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         [Ignore]
         public decimal[] BasalSchedule { get; set; }

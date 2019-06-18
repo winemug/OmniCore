@@ -12,7 +12,7 @@ namespace OmniCore.Model.Eros.Data
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
         public Guid PodId { get; set; }
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         public decimal? ReservoirWarningAtLevel { get; set; }
         public int? ExpiryWarningAtMinute { get; set; }

@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces
     {
         long? Id { get; set; }
         Guid PodId { get; set; }
-        DateTime Created { get; set; }
+        DateTimeOffset Created { get; set; }
 
         uint AlertW278 { get; set; }
         uint[] AlertStates { get; set; }

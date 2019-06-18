@@ -25,14 +25,14 @@ namespace OmniCore.Model.Eros.Data
         private IStatus status;
         private IUserSettings userSettings;
         private ErosPodRuntimeVariables runtimeVariables;
-        private DateTime created;
+        private DateTimeOffset created;
 
         private uint? lot;
         private uint? serial;
         private uint radioAddress;
         private int messageSequence;
-        private DateTime? activationDate;
-        private DateTime? insertionDate;
+        private DateTimeOffset? activationDate;
+        private DateTimeOffset? insertionDate;
         private string versionPi;
         private string versionPm;
         private string versionUnknown;
@@ -44,14 +44,14 @@ namespace OmniCore.Model.Eros.Data
         [PrimaryKey]
         public Guid Id { get; set; }
 
-        public DateTime Created { get => created; set { SetProperty(ref created, value); } }
+        public DateTimeOffset Created { get => created; set { SetProperty(ref created, value); } }
 
         public uint? Lot { get => lot; set { SetProperty(ref lot, value); } }
         public uint? Serial { get => serial; set { SetProperty(ref serial, value); } }
         public uint RadioAddress { get => radioAddress; set { SetProperty(ref radioAddress, value); } }
         public int MessageSequence { get => messageSequence; set { SetProperty(ref messageSequence, value % 16); } }
-        public DateTime? ActivationDate { get => activationDate; set { SetProperty(ref activationDate, value); } }
-        public DateTime? InsertionDate { get => insertionDate; set { SetProperty(ref insertionDate, value); } }
+        public DateTimeOffset? ActivationDate { get => activationDate; set { SetProperty(ref activationDate, value); } }
+        public DateTimeOffset? InsertionDate { get => insertionDate; set { SetProperty(ref insertionDate, value); } }
         public string VersionPi { get => versionPi; set { SetProperty(ref versionPi, value); } }
         public string VersionPm { get => versionPm; set { SetProperty(ref versionPm, value); } }
         public string VersionUnknown { get => versionUnknown; set { SetProperty(ref versionUnknown, value); } }
