@@ -12,9 +12,10 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Java.IO;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Mobile.Base.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Utilities;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Mobile.Android
 {
@@ -31,32 +32,29 @@ namespace OmniCore.Mobile.Android
 
         private bool isStarted;
 
-        private IOmniCoreLogger Logger;
-        public OmniCoreIntentService()
-        {
-            Logger = DependencyService.Get<IOmniCoreLogger>();
-        }
-
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            Logger.Debug($"Service command received: {intent.Action}");
+            if (!Xamarin.Forms.Forms.IsInitialized)
+                return StartCommandResult.NotSticky;
+
+            OmniCoreServices.Logger.Debug($"Service command received: {intent.Action}");
             if (intent.Action == ACTION_START_SERVICE && !isStarted)
             {
-                Logger.Debug($"Starting foreground service");
+                OmniCoreServices.Logger.Debug($"Starting foreground service");
                 RegisterForegroundService();
                 isStarted = true;
             }
             else if (intent.Action == ACTION_STOP_SERVICE && isStarted)
             {
-                Logger.Debug($"Stopping foreground service");
+                OmniCoreServices.Logger.Debug($"Stopping foreground service");
                 StopForeground(true);
                 StopSelf();
                 isStarted = false;
             }
             else if (intent.Action == ACTION_REQUEST_COMMAND)
             {
-                Logger.Debug($"handling execute request");
+                OmniCoreServices.Logger.Debug($"handling execute request");
                 HandleRequest(intent);
             }
 
@@ -65,48 +63,50 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
+            lock (this)
+            {
                 var request = intent.GetStringExtra("request");
                 var messenger = intent.GetParcelableExtra("messenger") as Messenger;
-                var publisher = DependencyService.Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance);
                 try
                 {
                     var t = Task.Run(async () =>
                     {
                         try
                         {
-                            var resultTask = publisher.GetResult(request);
+                            var resultTask = OmniCoreServices.Publisher.GetResult(request);
                             while (true)
                             {
-                                var tr = await Task.WhenAny(resultTask, Task.Delay(5000)).NoSync();
+                                var tr = await Task.WhenAny(resultTask, Task.Delay(5000));
                                 if (tr == resultTask)
                                     break;
                                 var bb = new Bundle();
-                                Logger.Verbose("Sending busy / keep-alive");
+                                OmniCoreServices.Logger.Verbose("Sending busy / keep-alive");
                                 bb.PutBoolean("busy", true);
                                 messenger.Send(new Message { Data = bb });
                             }
-                            var result = await resultTask.NoSync();
+                            var result = await resultTask;
                             var b = new Bundle();
                             b.PutBoolean("finished", true);
                             b.PutString("response", result);
-                            Logger.Verbose("Responding to request via message object");
+                            OmniCoreServices.Logger.Verbose("Responding to request via message object");
                             messenger.Send(new Message { Data = b });
-                            Logger.Verbose("Message send complete");
+                            OmniCoreServices.Logger.Verbose("Message send complete");
                         }
                         catch (Exception e)
                         {
-                            Logger.Error("Error handling remote request", e);
+                            OmniCoreServices.Logger.Error("Error handling remote request", e);
                         }
                     });
                 }
                 catch (AggregateException ae)
                 {
-                    Logger.Error("Error handling remote request", ae.Flatten());
+                    OmniCoreServices.Logger.Error("Error handling remote request", ae.Flatten());
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("Error handling remote request", e);
+                    OmniCoreServices.Logger.Error("Error handling remote request", e);
                 }
+            }
         }
 
         private void RegisterForegroundService()
@@ -139,7 +139,7 @@ namespace OmniCore.Mobile.Android
             }
             catch(Exception e)
             {
-                Logger.Error("Error registering foreground service", e);
+                OmniCoreServices.Logger.Error("Error registering foreground service", e);
             }
         }
 

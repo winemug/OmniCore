@@ -1,3 +1,4 @@
+using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Eros.Interfaces;

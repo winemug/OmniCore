@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Model.Eros.Data
 {

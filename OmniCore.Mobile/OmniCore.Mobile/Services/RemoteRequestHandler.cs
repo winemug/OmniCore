@@ -1,4 +1,4 @@
-﻿using OmniCore.Mobile.Interfaces;
+﻿using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
 using System;
@@ -13,6 +13,7 @@ using Xamarin.Forms;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Interfaces.Data;
 using Newtonsoft.Json;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Mobile.Services
 {
@@ -20,19 +21,18 @@ namespace OmniCore.Mobile.Services
     {
         public async Task<string> OnRequestReceived(string requestText)
         {
-            var logger = DependencyService.Get<IOmniCoreLogger>();
             try
             {
-                logger.Debug($"Remote request received: {requestText}");
+                OmniCoreServices.Logger.Debug($"Remote request received: {requestText}");
                 var request = RemoteRequest.FromJson(requestText);
                 var result = await Execute(request);
                 var ret = result.ToJson();
-                logger.Debug($"Returning result: {ret}");
+                OmniCoreServices.Logger.Debug($"Returning result: {ret}");
                 return ret;
             }
             catch(Exception e)
             {
-                logger.Error($"Error executing request: {requestText}", e);
+                OmniCoreServices.Logger.Error($"Error executing request: {requestText}", e);
                 return null;
             }
         }
@@ -44,34 +44,33 @@ namespace OmniCore.Mobile.Services
 
         private async Task<RemoteResult> Execute(RemoteRequest request)
         {
-            var logger = DependencyService.Get<IOmniCoreLogger>();
             RemoteResult result = null;
             try
             {
                 switch (request.Type)
                 {
                     case RemoteRequestType.Bolus:
-                        logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
+                        OmniCoreServices.Logger.Debug($"Remote request for bolus: {request.ImmediateUnits} U");
                         result = await Bolus(request.ImmediateUnits);
                         break;
                     case RemoteRequestType.CancelBolus:
-                        logger.Debug($"Remote request for cancel bolus");
+                        OmniCoreServices.Logger.Debug($"Remote request for cancel bolus");
                         result = await CancelBolus();
                         break;
                     case RemoteRequestType.CancelTempBasal:
-                        logger.Debug($"Remote request for cancel temp basal");
+                        OmniCoreServices.Logger.Debug($"Remote request for cancel temp basal");
                         result = await CancelTempBasal();
                         break;
                     case RemoteRequestType.SetProfile:
-                        logger.Debug($"Remote request for set profile: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
+                        OmniCoreServices.Logger.Debug($"Remote request for set profile: schedule {request.BasalSchedule} utc offset: {request.UtcOffsetMinutes}");
                         result = await SetProfile(request.BasalSchedule, request.UtcOffsetMinutes);
                         break;
                     case RemoteRequestType.SetTempBasal:
-                        logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
+                        OmniCoreServices.Logger.Debug($"Remote request for set temp basal: {request.TemporaryRate} U/h, {request.DurationHours} h");
                         result = await SetTempBasal(request.TemporaryRate, request.DurationHours);
                         break;
                     case RemoteRequestType.GetStatus:
-                        logger.Debug($"Remote request for get status");
+                        OmniCoreServices.Logger.Debug($"Remote request for get status");
                         result = await GetStatus();
                         break;
                 }
@@ -79,7 +78,7 @@ namespace OmniCore.Mobile.Services
             }
             catch(Exception e)
             {
-                logger.Error($"Error executing request", e);
+                OmniCoreServices.Logger.Error($"Error executing request", e);
             }
             return result;
         }
@@ -151,7 +150,7 @@ namespace OmniCore.Mobile.Services
             {
                 using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
-                    await podManager.CancelBolus(conversation).NoSync();
+                    await podManager.CancelBolus(conversation);
                     return GetResult(pod, conversation);
                 }
             }
@@ -167,7 +166,7 @@ namespace OmniCore.Mobile.Services
             {
                 using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
-                    await podManager.Bolus(conversation, units, false).NoSync();
+                    await podManager.Bolus(conversation, units, false);
                     return GetResult(pod, conversation);
                 }
             }
@@ -183,7 +182,7 @@ namespace OmniCore.Mobile.Services
             {
                 using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
-                    await podManager.CancelTempBasal(conversation).NoSync();
+                    await podManager.CancelTempBasal(conversation);
                     return GetResult(pod, conversation);
                 }
             }
@@ -199,7 +198,7 @@ namespace OmniCore.Mobile.Services
             {
                 using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
-                    await podManager.SetTempBasal(conversation, rate, hours).NoSync();
+                    await podManager.SetTempBasal(conversation, rate, hours);
                     return GetResult(pod, conversation);
                 }
             }
@@ -223,7 +222,7 @@ namespace OmniCore.Mobile.Services
             {
                 using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                 {
-                    await podManager.SetBasalSchedule(conversation, profile).NoSync();
+                    await podManager.SetBasalSchedule(conversation, profile);
                     return GetResult(pod, conversation);
                 }
             }
@@ -245,7 +244,7 @@ namespace OmniCore.Mobile.Services
                 {
                     using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
                     {
-                        await podManager.UpdateStatus(conversation).Sync();
+                        await podManager.UpdateStatus(conversation);
                         return GetResult(pod, conversation);
                     }
                 }
@@ -316,7 +315,7 @@ namespace OmniCore.Mobile.Services
             }
             catch(Exception e)
             {
-                DependencyService.Get<IOmniCoreLogger>().Error($"Error getting results to date for LastResultDate={request.LastResultDateTime}", e);
+                OmniCoreServices.Logger.Error($"Error getting results to date for LastResultDate={request.LastResultDateTime}", e);
             }
         }
 

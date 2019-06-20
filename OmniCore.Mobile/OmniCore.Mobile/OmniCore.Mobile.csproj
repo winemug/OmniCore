@@ -10,10 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConfigureAwait.Fody" Version="3.1.0" />
+    <PackageReference Include="Fody" Version="5.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
     <PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
     <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
-    <PackageReference Include="Xamarin.Forms" Version="4.0.0.497661" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.496342-pre2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,50 +28,48 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\PodActionsPage.xaml.cs">
-      <DependentUpon>PodActionsPage.xaml</DependentUpon>
+    <Compile Update="Views\Pod\DebugPage.xaml.cs">
+      <DependentUpon>DebugPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\OmniCoreMain.xaml.cs">
-      <DependentUpon>OmniCoreMain.xaml</DependentUpon>
+    <Compile Update="Views\MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\OmniCoreSettingsPage.xaml.cs">
-      <DependentUpon>OmniCoreSettingsPage.xaml</DependentUpon>
+    <Compile Update="Views\Settings\GeneralSettingsPage.xaml.cs">
+      <DependentUpon>GeneralSettingsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\PodMaintenancePage.xaml.cs">
-      <DependentUpon>PodMaintenancePage.xaml</DependentUpon>
+    <Compile Update="Views\Pod\MaintenancePage.xaml.cs">
+      <DependentUpon>MaintenancePage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\PodStatusPage.xaml.cs">
-      <DependentUpon>PodStatusPage.xaml</DependentUpon>
+    <Compile Update="Views\Pod\OverviewPage.xaml.cs">
+      <DependentUpon>OverviewPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Views\AboutPage.xaml">
+    <EmbeddedResource Update="Views\Help\AboutPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\MessageExchangeView.xaml">
+    <EmbeddedResource Update="Views\MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\OmniCoreMain.xaml">
+    <EmbeddedResource Update="Views\Settings\GeneralSettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\OmniCoreSettingsPage.xaml">
+    <EmbeddedResource Update="Views\Pod\MaintenancePage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodMaintenancePage.xaml">
+    <EmbeddedResource Update="Views\Settings\PodSettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodSettingsPage.xaml">
+    <EmbeddedResource Update="Views\Pod\OverviewPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\RadioStatusPage.xaml">
+    <EmbeddedResource Update="Views\Pod\DebugPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodStatusPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodActionsPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\Settings\" />
   </ItemGroup>
 </Project>

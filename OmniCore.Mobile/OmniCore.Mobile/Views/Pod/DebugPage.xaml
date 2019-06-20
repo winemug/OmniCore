@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Mobile.Views.Pod.DebugPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Text="Start Temp. Basal" Clicked="Button_Clicked_1" IsEnabled="{Binding PodExistsAndNotBusy}"/>
+            <Button Text="Cancel Temp. Basal" Clicked="Button_Clicked_2" IsEnabled="{Binding PodExistsAndNotBusy}"/>
+            <Button Text="Bolus" Clicked="Button_Clicked" IsEnabled="{Binding PodExistsAndNotBusy}"/>
+            <StackLayout Orientation="Vertical" BindingContext="{Binding Pod.ActiveConversation.CurrentExchange}">
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Request Type:"/>
+                    <Label Text="{Binding Result.Type}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Started:"/>
+                    <Label Text="{Binding Result.RequestTime}"/>
+                    <Label Text="Finished:"/>
+                    <Label Text="{Binding Result.ResultTime}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Successful:"/>
+                    <Label Text="{Binding Result.Success}"/>
+                    <Label Text="Failure:"/>
+                    <Label Text="{Binding Result.Failure}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Pod Rssi:"/>
+                    <Label Text="{Binding Statistics.RadioRssiAverage}"/>
+                    <Label Text="RL Rssi:"/>
+                    <Label Text="{Binding Statistics.MobileDeviceRssiAverage}"/>
+                </StackLayout>
+            </StackLayout>
+
+            <!--<CollectionView ItemsSource="{Binding Results}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Orientation="Vertical">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Request Type:"/>
+                                <Label Text="{Binding Type}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Started:"/>
+                                <Label Text="{Binding RequestTime}"/>
+                                <Label Text="Finished:"/>
+                                <Label Text="{Binding ResultTime}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Successful:"/>
+                                <Label Text="{Binding Success}"/>
+                                <Label Text="Failure:"/>
+                                <Label Text="{Binding Failure}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Pod Rssi:"/>
+                                <Label Text="{Binding RadioRssiAverage}"/>
+                                <Label Text="RL Rssi:"/>
+                                <Label Text="{Binding MobileDeviceRssiAverage}"/>
+                            </StackLayout>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>-->
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

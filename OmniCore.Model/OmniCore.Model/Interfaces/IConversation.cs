@@ -21,7 +21,7 @@ namespace OmniCore.Model.Interfaces
 
         IMessageExchangeProgress NewExchange(IMessage requestMessage);
         RequestSource RequestSource { get; set; }
-        IMessageExchangeProgress CurrentExchange { get; }
+        IMessageExchangeProgress CurrentExchange { get; set; }
 
         CancellationToken Token { get; }
         Task<bool> Cancel();

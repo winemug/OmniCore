@@ -19,7 +19,14 @@
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="ConfigureAwait.Fody" Version="3.1.0" />
+    <PackageReference Include="Fody" Version="5.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
+    <PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
     <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
   </ItemGroup>
 

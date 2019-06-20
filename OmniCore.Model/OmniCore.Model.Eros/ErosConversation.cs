@@ -1,7 +1,9 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
-    public class ErosConversation : IConversation
+    public class ErosConversation : PropertyChangedImpl, IConversation
     {
         public bool CanCancel { get; set; }
 
@@ -40,9 +42,8 @@ namespace OmniCore.Model.Eros
         }
 
         public CancellationToken Token => CancellationTokenSource.Token;
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        public IMessageExchangeProgress CurrentExchange { get; private set; }
+        public IMessageExchangeProgress CurrentExchange { get; set; }
 
         private IPod Pod;
         private Exception exception;
@@ -106,6 +107,7 @@ namespace OmniCore.Model.Eros
                 }
             }
             CurrentExchange = new MessageExchangeProgress(this, requestMessage.RequestType, requestMessage.Parameters);
+            OnPropertyChanged(nameof(CurrentExchange));
             return CurrentExchange;
         }
 

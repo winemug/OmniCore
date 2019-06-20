@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using OmniCore.Model.Eros.Data;
 using System.Reactive.Threading.Tasks;
+using OmniCore.Mobile.Base.Interfaces;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Radio.RileyLink
 {
@@ -45,6 +47,14 @@ namespace OmniCore.Radio.RileyLink
         private TxPower TxAmplification;
         private ErosRadioPreferences Preferences;
 
+        private IOmniCoreApplication OmniCoreApplication
+        {
+            get
+            {
+                return Xamarin.Forms.DependencyService.Get<IOmniCoreApplication>();
+            }
+        }
+
         public RileyLink(ErosRadioPreferences erosRadioPreferences)
         {
             TxAmplification = TxPower.A4_Normal;
@@ -63,23 +73,36 @@ namespace OmniCore.Radio.RileyLink
             var config = new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } };
 
             var scanExtension = new TaskCompletionSource<int>();
-            CrossBleAdapter.Current.Scan(config).Subscribe((sr) =>
-            {
-                if (!scanResults.Any(r => r.Device.Uuid == sr.Device.Uuid))
-                {
-                    scanResults.Add(sr);
-                    if (Preferences.PreferredRadios.Contains(sr.Device.Uuid))
-                    {
-                        scanExtension.TrySetResult(0);
-                    }
-                    else if (Preferences.ConnectToAny)
-                    {
-                        scanExtension.TrySetResult(2500);
-                    }
-                }
-            });
 
-            var tr = await Task.WhenAny(scanExtension.Task, Task.Delay(20000));
+            // SynchronizationContext.SetSynchronizationContext(OmniCoreServices.UiSyncContext);
+
+            CrossBleAdapter.Current.Scan(config)
+                .Subscribe((sr) =>
+                {
+                    if (!scanResults.Any(r => r.Device.Uuid == sr.Device.Uuid))
+                    {
+                        scanResults.Add(sr);
+                        if (Preferences.PreferredRadios.Contains(sr.Device.Uuid))
+                        {
+                            scanExtension.TrySetResult(0);
+                        }
+                        else if (Preferences.ConnectToAny)
+                        {
+                            scanExtension.TrySetResult(2500);
+                        }
+                    }
+                });
+            //await OmniCoreServices.Application.RunOnMainThread(
+            //    () =>
+            //    {
+            //    });
+
+            //await OmniCoreApplication.RunOnMainThread(async () =>
+            //{
+
+            //});
+
+            var tr = await Task.WhenAny(scanExtension.Task, Task.Delay(20000)).ConfigureAwait(true);
             if (tr == scanExtension.Task)
             {
                 var additionalDelay = await scanExtension.Task;
@@ -87,7 +110,7 @@ namespace OmniCore.Radio.RileyLink
                     await Task.Delay(additionalDelay);
             }
 
-            CrossBleAdapter.Current.StopScan();
+            await OmniCoreApplication.RunOnMainThread(() => CrossBleAdapter.Current.StopScan());
 
             foreach (var result in scanResults.OrderByDescending(x => x.Rssi))
             {
@@ -120,7 +143,7 @@ namespace OmniCore.Radio.RileyLink
 
                 if (this.Device == null)
                 {
-                    var device = await ScanForDevice(messageProgress).Sync();
+                    var device = await ScanForDevice(messageProgress);
 
                     if (device == null)
                         throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Couldn't find RileyLink!");

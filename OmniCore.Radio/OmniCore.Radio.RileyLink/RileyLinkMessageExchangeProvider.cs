@@ -14,12 +14,6 @@ namespace OmniCore.Radio.RileyLink
     {
         private static RileyLink RileyLinkInstance;
         private static RileyLinkMessageExchange RileyLinkMessageExchange;
-        private readonly SynchronizationContext UiSyncContext;
-
-        public RileyLinkMessageExchangeProvider(SynchronizationContext uiSyncContext)
-        {
-            UiSyncContext = uiSyncContext;
-        }
 
         public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
         {
@@ -29,7 +23,7 @@ namespace OmniCore.Radio.RileyLink
             }
 
             if (RileyLinkMessageExchange == null)
-                RileyLinkMessageExchange = new RileyLinkMessageExchange(messageExchangeParameters, pod, RileyLinkInstance, UiSyncContext);
+                RileyLinkMessageExchange = new RileyLinkMessageExchange(messageExchangeParameters, pod, RileyLinkInstance);
             else
                 RileyLinkMessageExchange.SetParameters(messageExchangeParameters, pod, RileyLinkInstance);
 

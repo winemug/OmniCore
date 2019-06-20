@@ -9,8 +9,10 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Mobile.Base.Interfaces;
 using Xamarin.Forms;
+using OmniCore.Model.Utilities;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Mobile.Android
 {
@@ -30,7 +32,7 @@ namespace OmniCore.Mobile.Android
                 }
                 catch(Exception e)
                 {
-                    DependencyService.Get<IOmniCoreLogger>().Error("Error executing on request received", e);
+                    OmniCoreServices.Logger.Error("Error executing on request received", e);
                 }
             }
             return null;

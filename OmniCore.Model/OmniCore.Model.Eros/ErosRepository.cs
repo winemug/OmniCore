@@ -236,6 +236,30 @@ namespace OmniCore.Model.Eros
             }
         }
 
+        public List<ErosMessageExchangeResult> GetHistoricalResultsForDisplay(int maxCount)
+        {
+            using (var conn = GetConnection())
+            {
+                return WithStatistics(conn.Table<ErosMessageExchangeResult>()
+                    .Where(x => x.Success)
+                    .OrderByDescending(x => x.Id), conn);
+            }
+        }
+
+        private List<ErosMessageExchangeResult> WithStatistics(TableQuery<ErosMessageExchangeResult> tableQuery,
+            SQLiteConnection conn)
+        {
+            foreach (var result in tableQuery)
+            {
+                if (result.StatusId.HasValue)
+                    result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+
+                if (result.StatisticsId.HasValue)
+                    result.Statistics = conn.Table<ErosMessageExchangeStatistics>().Single(x => x.Id == result.StatisticsId.Value);
+            }
+            return tableQuery.ToList();
+        }
+
         public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long lastResultDate)
         {
             using (var conn = GetConnection())

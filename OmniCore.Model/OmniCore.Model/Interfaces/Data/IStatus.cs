@@ -1,11 +1,12 @@
 ﻿using OmniCore.Model.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace OmniCore.Model.Interfaces.Data
 {
-    public interface IStatus
+    public interface IStatus : INotifyPropertyChanged
     {
         long? Id { get; set; }
         Guid PodId { get; set; }

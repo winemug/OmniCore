@@ -36,7 +36,7 @@ namespace OmniCore.Model.Eros
             var pod = ErosRepository.Instance.LoadCurrent();
             if (pod != null)
             {
-                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
             }
         }
 
@@ -67,7 +67,7 @@ namespace OmniCore.Model.Eros
                 pod.RadioAddress = GetRadioAddress();
                 pod.Created = DateTimeOffset.UtcNow;
                 ErosRepository.Instance.Save(pod);
-                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
                 return PodManager;
             }
         }
@@ -81,7 +81,7 @@ namespace OmniCore.Model.Eros
                 var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
                 pod.Created = DateTimeOffset.UtcNow;
                 ErosRepository.Instance.Save(pod);
-                PodManager = new ErosPodManager(pod, MessageExchangeProvider);
+                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
                 return PodManager;
             }
         }

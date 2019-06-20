@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Interfaces;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Mobile.Services;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
@@ -14,39 +15,32 @@ namespace OmniCore.Mobile
     public partial class App : Application
     {
         public static App Instance => Application.Current as App;
-
         public IPodProvider PodProvider { get; private set; }
-        public RemoteRequestHandler RequestHandler { get; private set; }
+
         public App()
         {
-            InitializeComponent();
-            PodProvider =  new ErosPodProvider(new RileyLinkMessageExchangeProvider(SynchronizationContext.Current));
-            RequestHandler = new RemoteRequestHandler();
-            DependencyService
-                .Get<IRemoteRequestPublisher>(DependencyFetchTarget.GlobalInstance)
-                .Subscribe(RequestHandler);
+            OmniCoreServices.UiSyncContext = SynchronizationContext.Current;
+            PodProvider = new ErosPodProvider(new RileyLinkMessageExchangeProvider());
+            OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
 
-            var logger = DependencyService.Get<IOmniCoreLogger>();
-            logger.Information("OmniCore App initialized");
-            MainPage = new Views.OmniCoreMain();
+            InitializeComponent();
+            MainPage = new Views.MainPage();
+            OmniCoreServices.Logger.Information("OmniCore App initialized");
         }
 
         protected override void OnStart()
         {
-            var logger = DependencyService.Get<IOmniCoreLogger>();
-            logger.Debug("OmniCore App OnStart called");
+            OmniCoreServices.Logger.Debug("OmniCore App OnStart called");
         }
 
         protected override void OnSleep()
         {
-            var logger = DependencyService.Get<IOmniCoreLogger>();
-            logger.Debug("OmniCore App OnSleep called");
+            OmniCoreServices.Logger.Debug("OmniCore App OnSleep called");
         }
 
         protected override void OnResume()
         {
-            var logger = DependencyService.Get<IOmniCoreLogger>();
-            logger.Debug("OmniCore App OnResume called");
+            OmniCoreServices.Logger.Debug("OmniCore App OnResume called");
         }
     }
 }

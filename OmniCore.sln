@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model.Eros", "OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj", "{95B9264A-45B1-49AF-8495-12A5C63C12A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Model.Eros.Tests", "OmniCore.Model\OmniCore.Model.Eros.Tests\OmniCore.Model.Eros.Tests.csproj", "{9C1793C5-71C9-40E2-B603-7095D5B8D71B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model.Eros.Tests", "OmniCore.Model\OmniCore.Model.Eros.Tests\OmniCore.Model.Eros.Tests.csproj", "{9C1793C5-71C9-40E2-B603-7095D5B8D71B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Mobile.Base", "OmniCore.Mobile\OmniCore.Mobile.Base\OmniCore.Mobile.Base\OmniCore.Mobile.Base.csproj", "{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,12 @@ Global
 		{9C1793C5-71C9-40E2-B603-7095D5B8D71B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C1793C5-71C9-40E2-B603-7095D5B8D71B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C1793C5-71C9-40E2-B603-7095D5B8D71B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.badbg|Any CPU.ActiveCfg = Debug|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.badbg|Any CPU.Build.0 = Debug|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

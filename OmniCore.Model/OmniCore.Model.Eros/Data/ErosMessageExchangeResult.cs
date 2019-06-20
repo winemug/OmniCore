@@ -6,34 +6,45 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Utilities;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Model.Eros.Data
 {
-    public class ErosMessageExchangeResult : IMessageExchangeResult
+    public class ErosMessageExchangeResult : PropertyChangedImpl, IMessageExchangeResult
     {
+        private DateTimeOffset? requestTime;
+        private DateTimeOffset? resultTime;
+        private RequestSource source;
+        private RequestType type;
+        private bool success;
+        private FailureType failure;
+        private IMessageExchangeStatistics statistics;
+        private IStatus status;
+
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
 
         public Guid PodId { get; set; }
 
-        public DateTimeOffset? RequestTime { get; set; }
+        public DateTimeOffset? RequestTime { get => requestTime; set => SetProperty(ref requestTime, value); }
         [Indexed]
-        public DateTimeOffset? ResultTime { get; set; }
+        public DateTimeOffset? ResultTime { get => resultTime; set => SetProperty(ref resultTime,  value); }
 
-        public RequestSource Source { get; set; }
-        public RequestType Type { get; set; }
+        public RequestSource Source { get => source; set => SetProperty(ref source, value); }
+        public RequestType Type { get => type; set => SetProperty(ref type, value); }
         public string Parameters { get; set; }
 
-        public bool Success { get; set; }
+        public bool Success { get => success; set => SetProperty(ref success, value); }
 
-        public FailureType Failure { get; set; }
+        public FailureType Failure { get => failure; set => SetProperty(ref failure, value); }
 
         [Ignore]
         public Exception Exception { get; set; }
 
         public long? StatisticsId { get; set; }
         [Ignore]
-        public IMessageExchangeStatistics Statistics { get; set; }
+        public IMessageExchangeStatistics Statistics { get => statistics; set => SetProperty(ref statistics, value); }
 
         public long? ParametersId { get; set; }
         [Ignore]
@@ -53,7 +64,7 @@ namespace OmniCore.Model.Eros.Data
 
         public long? StatusId { get; set; }
         [Ignore]
-        public IStatus Status { get; set; }
+        public IStatus Status { get => status; set => SetProperty(ref status, value); }
 
         public long? UserSettingsId { get; set; }
         [Ignore]

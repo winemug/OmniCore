@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vwPod="clr-namespace:OmniCore.Mobile.Views.Pod"
+             xmlns:vwSettings="clr-namespace:OmniCore.Mobile.Views.Settings"
+             xmlns:vwHelp="clr-namespace:OmniCore.Mobile.Views.Help"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.MainPage">
+    <FlyoutItem Title="Pod">
+        <Tab Title="Overview">
+            <ShellContent>
+                <vwPod:OverviewPage/>
+            </ShellContent>
+        </Tab>
+        <Tab Title="Maintenance">
+            <ShellContent>
+                <vwPod:MaintenancePage/>
+            </ShellContent>
+        </Tab>
+        <Tab Title="Debug">
+            <ShellContent>
+                <vwPod:DebugPage/>
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+    <FlyoutItem Title="Settings">
+        <Tab Title="General">
+            <ShellContent>
+                <vwSettings:GeneralSettingsPage/>
+            </ShellContent>
+        </Tab>
+        <Tab Title="Pod">
+            <ShellContent>
+                <vwSettings:PodSettingsPage/>
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+    <FlyoutItem Title="Help">
+        <Tab>
+            <ShellContent>
+                <vwHelp:AboutPage/>
+            </ShellContent>
+        </Tab>
+    </FlyoutItem>
+</Shell>
