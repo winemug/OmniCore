@@ -242,14 +242,16 @@ namespace OmniCore.Model.Eros
             {
                 return WithStatistics(conn.Table<ErosMessageExchangeResult>()
                     .Where(x => x.Success)
-                    .OrderByDescending(x => x.Id), conn);
+                    .OrderByDescending(x => x.Id)
+                    .Take(maxCount)
+                    .ToList(), conn);
             }
         }
 
-        private List<ErosMessageExchangeResult> WithStatistics(TableQuery<ErosMessageExchangeResult> tableQuery,
+        private List<ErosMessageExchangeResult> WithStatistics(List<ErosMessageExchangeResult> list,
             SQLiteConnection conn)
         {
-            foreach (var result in tableQuery)
+            foreach (var result in list)
             {
                 if (result.StatusId.HasValue)
                     result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
@@ -257,7 +259,7 @@ namespace OmniCore.Model.Eros
                 if (result.StatisticsId.HasValue)
                     result.Statistics = conn.Table<ErosMessageExchangeStatistics>().Single(x => x.Id == result.StatisticsId.Value);
             }
-            return tableQuery.ToList();
+            return list;
         }
 
         public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long lastResultDate)
