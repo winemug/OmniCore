@@ -7,6 +7,7 @@ using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -69,8 +70,26 @@ namespace OmniCore.Mobile.Views.Pod
                         OmniCoreServices.Application.Exit();
                     }
                 }
+
+                status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+                if (status != PermissionStatus.Granted)
+                {
+                    await DisplayAlert("Missing Permissions", "You have to grant the storage permission to this application in order to be able to save and backup configuration data.", "OK");
+                    var request = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
+                    if (request[Permission.Storage] != PermissionStatus.Granted)
+                    {
+                        await DisplayAlert("Missing Permissions", "This application cannot run without the necessary permissions.", "OK");
+                        OmniCoreServices.Application.Exit();
+                    }
+                }
+
+                var storagePath = OmniCoreServices.Application.GetPublicDataPath();
+                if (!Directory.Exists(storagePath))
+                {
+                    Directory.CreateDirectory(storagePath);
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
             }

@@ -1,5 +1,6 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
+using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
@@ -18,6 +19,7 @@ namespace OmniCore.Model.Eros
         public DateTimeOffset Started { get => started; set => SetProperty(ref started, value); }
         public DateTimeOffset? Ended { get => ended; set => SetProperty(ref ended, value); }
         public string Intent { get => intent; set => SetProperty(ref intent, value); }
+        public IMessageExchangeStatistics CombinedStatistics { get => combinedStatistics; set => SetProperty(ref combinedStatistics, value); }
 
         public bool CanCancel { get => canCancel; set => SetProperty(ref canCancel, value); }
 
@@ -47,6 +49,7 @@ namespace OmniCore.Model.Eros
         }
 
         public IMessageExchangeProgress CurrentExchange { get => currentExchange; set => SetProperty(ref currentExchange, value); }
+
         public CancellationToken Token => CancellationTokenSource.Token;
 
         private IPod Pod;
@@ -61,6 +64,7 @@ namespace OmniCore.Model.Eros
             ConversationMutex = conversationMutex;
             CancellationTokenSource = new CancellationTokenSource();
             Pod = pod;
+            CombinedStatistics = new ErosMessageExchangeStatistics();
         }
 
         public async Task<bool> Cancel()
@@ -129,6 +133,7 @@ namespace OmniCore.Model.Eros
         private DateTimeOffset started;
         private DateTimeOffset? ended;
         private string intent;
+        private IMessageExchangeStatistics combinedStatistics;
 
         protected virtual void Dispose(bool disposing)
         {

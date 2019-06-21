@@ -14,9 +14,9 @@
                 <vwPod:OverviewPage/>
             </ShellContent>
         </Tab>
-        <Tab Title="Conversation">
+        <Tab Title="Conversations">
             <ShellContent>
-                <vwPod:ConversationPage/>
+                <vwPod:ConversationsPage/>
             </ShellContent>
         </Tab>
         <Tab Title="Maintenance">

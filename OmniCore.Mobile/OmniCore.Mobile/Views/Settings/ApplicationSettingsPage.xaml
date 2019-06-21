@@ -8,8 +8,8 @@
     <ContentPage.Content>
       <StackLayout Orientation="Horizontal"
                    VerticalOptions="Start">
-            <Label Text="Accept AndroidAPS commands" FontSize="Large" VerticalOptions="Center"/>
-            <Switch IsToggled="True" Scale="0.8" IsEnabled="False"/>
+            <Label Text="Accept AndroidAPS commands" VerticalOptions="Center"/>
+            <Switch IsToggled="{Binding AcceptAAPSCommands}"/>
         </StackLayout>
   </ContentPage.Content>
 </ContentPage>

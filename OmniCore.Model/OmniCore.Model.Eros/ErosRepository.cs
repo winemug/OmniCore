@@ -171,6 +171,7 @@ namespace OmniCore.Model.Eros
                     {
                         result.Statistics.PodId = pod.Id;
                         result.Statistics.Created = DateTimeOffset.UtcNow;
+                        result.Statistics.BeforeSave();
                         conn.InsertOrReplace(result.Statistics, typeof(ErosMessageExchangeStatistics));
                         result.StatisticsId = result.Statistics.Id;
                     }

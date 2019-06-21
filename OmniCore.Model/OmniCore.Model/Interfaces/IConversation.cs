@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Enums;
+using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,7 @@ namespace OmniCore.Model.Interfaces
         DateTimeOffset Started { get; set; }
         DateTimeOffset? Ended { get; set; }
         string Intent { get; set; }
+        IMessageExchangeStatistics CombinedStatistics { get; set; }
 
         bool CanCancel { get; set; }
         bool IsRunning { get; set; }

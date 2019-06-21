@@ -15,6 +15,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
     {
         public OverviewViewModel()
         {
+            OnPodChanged();
         }
 
         private bool TimerShouldRun = false;
@@ -38,10 +39,28 @@ namespace OmniCore.Mobile.ViewModels.Pod
             TimerShouldRun = false;
         }
 
-        protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected override void OnPodChanged()
         {
             Pod?.LastStatus?.UpdateWithEstimates(Pod);
-            OnPropertyChanged(string.Empty);
+            OnPropertyChanged(nameof(Id));
+            OnPropertyChanged(nameof(Updated));
+            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged(nameof(LifetimeRemaining));
+            OnPropertyChanged(nameof(LifetimeActive));
+            OnPropertyChanged(nameof(LifetimeColor));
+            OnPropertyChanged(nameof(LifetimeProgress));
+            OnPropertyChanged(nameof(ReservoirRemaining));
+            OnPropertyChanged(nameof(ReservoirDelivered));
+            OnPropertyChanged(nameof(ReservoirColor));
+            OnPropertyChanged(nameof(ReservoirProgress));
+            OnPropertyChanged(nameof(BasalStatus));
+            OnPropertyChanged(nameof(BasalText1));
+            OnPropertyChanged(nameof(BasalText2));
+        }
+
+        protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPodChanged();
         }
 
         public string Id

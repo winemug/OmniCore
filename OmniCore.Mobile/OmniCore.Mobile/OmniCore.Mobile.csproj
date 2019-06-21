@@ -28,17 +28,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\Pod\ConversationPage.xaml.cs">
-      <DependentUpon>ConversationPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pod\DebugPage.xaml.cs">
-      <DependentUpon>DebugPage.xaml</DependentUpon>
+    <Compile Update="Views\Pod\ConversationsPage.xaml.cs">
+      <DependentUpon>ConversationsPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Settings\GeneralSettingsPage.xaml.cs">
-      <DependentUpon>GeneralSettingsPage.xaml</DependentUpon>
+    <Compile Update="Views\Settings\ApplicationSettingsPage.xaml.cs">
+      <DependentUpon>ApplicationSettingsPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pod\MaintenancePage.xaml.cs">
       <DependentUpon>MaintenancePage.xaml</DependentUpon>
@@ -55,10 +52,13 @@
     <EmbeddedResource Update="Views\MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Pod\ConversationPage.xaml">
+    <EmbeddedResource Update="Views\Pod\ConversationDetailsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Settings\GeneralSettingsPage.xaml">
+    <EmbeddedResource Update="Views\Pod\ConversationsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Settings\ApplicationSettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Pod\MaintenancePage.xaml">
@@ -70,12 +70,5 @@
     <EmbeddedResource Update="Views\Pod\OverviewPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Pod\DebugPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ViewModels\Settings\" />
   </ItemGroup>
 </Project>

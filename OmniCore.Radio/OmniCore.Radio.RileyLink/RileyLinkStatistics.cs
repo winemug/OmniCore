@@ -26,12 +26,6 @@ namespace OmniCore.Radio.RileyLink
         public int ReceiveTimeout { get; set; }
 
         public int RadioErrors { get; set; }
-
-        public int AverageRssi { get => RssiTotal / RssiCount; }
-
-        public int RssiTotal { get; set; }
-
-        public int RssiCount { get; set; }
     }
 
     public class RileyLinkStatistics : ErosMessageExchangeStatistics
@@ -60,13 +54,15 @@ namespace OmniCore.Radio.RileyLink
         {
             endedME = Environment.TickCount;
             QueueWaitDuration = startedME - started;
-            ExchangeDuration = endedME - startedME;
 
-            if (radioRssiCount > 0)
-                RadioRssiAverage = radioRssiTotal / radioRssiCount;
-            if (mobileRssiCount > 0)
-                MobileDeviceRssiAverage = mobileRssiTotal / mobileRssiCount;
+            if (!AllPeStats.Contains(currentPeStats))
+                AllPeStats.Add(currentPeStats);
 
+            PacketExchangeCount = AllPeStats.Count;
+            PacketExchangeDurationAverage = (int)AllPeStats.Select(x => (double)x.ExchangeDuration).Average();
+            foreach (var peStat in AllPeStats)
+            {
+            }
         }
 
         internal void StartMessageExchange()
@@ -113,11 +109,10 @@ namespace OmniCore.Radio.RileyLink
 
         void GetRssi(RadioPacket p)
         {
-            if (p.Rssi != 0)
-            {
-                radioRssiCount++;
-                radioRssiTotal += p.Rssi;
-            }
+            radioRssiCount++;
+            var rssi = (p.Rssi >> 1) - 74; // http://www.ti.com/lit/an/swra114d/swra114d.pdf
+            radioRssiTotal += rssi;
+            RadioRssiAverage = radioRssiTotal / radioRssiCount;
         }
 
         internal void RepeatPacketReceived(RadioPacket p)
@@ -188,6 +183,7 @@ namespace OmniCore.Radio.RileyLink
                 {
                     mobileRssiCount++;
                     mobileRssiTotal += rssi;
+                    MobileDeviceRssiAverage = mobileRssiTotal / mobileRssiCount;
                 }
             }
         }

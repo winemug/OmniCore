@@ -151,13 +151,14 @@ namespace OmniCore.Radio.RileyLink
                         throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Cannot connect to Rileylink");
                 }
 
-                //this.Device.WhenReadRssiContinuously(TimeSpan.FromSeconds(10)).Subscribe(
-                //(rssiRead) =>
-                //{
-                //    if (rssiRead != 0)
-                //        ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.MobileDeviceRssiReported(rssiRead);
-                //});
-              
+                if (messageProgress != null)
+                {
+                    this.Device.ReadRssi()
+                        .Subscribe((rssiRead) =>
+                        {
+                            ((RileyLinkStatistics)messageProgress.Result.Statistics).MobileDeviceRssiReported(rssiRead);
+                        });
+                }
             }
             catch (OmniCoreException) { throw; }
             catch (Exception e)

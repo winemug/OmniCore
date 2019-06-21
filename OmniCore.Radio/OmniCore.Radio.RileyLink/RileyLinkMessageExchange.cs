@@ -436,12 +436,11 @@ namespace OmniCore.Radio.RileyLink
         {
             if (data != null && data.Length > 1)
             {
-                byte rssi = data[0];
                 try
                 {
                     var rp = RadioPacket.Parse(data.Sub(2));
                     if (rp != null)
-                        rp.Rssi = rssi;
+                        rp.Rssi = (sbyte)data[0];
                     return rp;
                 }
                 catch

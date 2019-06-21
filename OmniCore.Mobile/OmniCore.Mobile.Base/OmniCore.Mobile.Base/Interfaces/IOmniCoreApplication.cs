@@ -13,6 +13,7 @@ namespace OmniCore.Mobile.Base.Interfaces
         Task RunOnMainThread(Action action);
         Task<T> RunOnMainThread<T>(Func<T> func);
         Task<SynchronizationContext> GetMainSyncContext();
+        string GetPublicDataPath();
         void Exit();
     }
 }

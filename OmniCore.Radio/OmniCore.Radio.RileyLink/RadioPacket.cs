@@ -10,7 +10,7 @@ namespace OmniCore.Radio.RileyLink
         public PacketType Type;
         public int Sequence;
         public Bytes Body;
-        public byte Rssi;
+        public sbyte Rssi;
 
         public Bytes PartialData
         {

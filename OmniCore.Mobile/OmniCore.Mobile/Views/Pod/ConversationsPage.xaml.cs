@@ -11,13 +11,13 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Mobile.Views.Pod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ConversationPage : ContentPage
+    public partial class ConversationsPage : ContentPage
     {
-        private ConversationViewModel viewModel;
-        public ConversationPage()
+        private ConversationsViewModel viewModel;
+        public ConversationsPage()
         {
             InitializeComponent();
-            BindingContext = viewModel = new ConversationViewModel();
+            BindingContext = viewModel = new ConversationsViewModel();
         }
     }
 }

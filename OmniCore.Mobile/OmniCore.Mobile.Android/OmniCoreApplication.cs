@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,6 +13,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Mobile.Base.Interfaces;
+using Environment = Android.OS.Environment;
 
 namespace OmniCore.Mobile.Android
 {
@@ -52,6 +54,12 @@ namespace OmniCore.Mobile.Android
         public async Task<SynchronizationContext> GetMainSyncContext()
         {
             return await Xamarin.Forms.Device.GetMainThreadSynchronizationContextAsync();
+        }
+
+        public string GetPublicDataPath()
+        {
+            var storagePath = Environment.ExternalStorageDirectory.Path;
+            return Path.Combine(storagePath, "omnicore");
         }
 
         //public async Task RunOnUi(Func<Task> action)

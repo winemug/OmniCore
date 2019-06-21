@@ -66,7 +66,7 @@ namespace OmniCore.Radio.RileyLink
         {
             var encoded = new Bytes();
             int noiseIndex = Rnd.Next(0, 256);
-            for (int i = 0; i < 42; i++)
+            for (int i = 0; i < 40; i++)
             {
                 if (i < toEncode.Length)
                 {
