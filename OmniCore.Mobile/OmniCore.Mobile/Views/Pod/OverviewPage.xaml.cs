@@ -32,7 +32,7 @@ namespace OmniCore.Mobile.Views.Pod
         private async void Update_Button_Clicked(object sender, EventArgs e)
         {
             var podManager = App.Instance.PodProvider.PodManager;
-            using (var conversation = await podManager.StartConversation())
+            using (var conversation = await podManager.StartConversation("Update Status"))
             {
                 await podManager.UpdateStatus(conversation);
             }

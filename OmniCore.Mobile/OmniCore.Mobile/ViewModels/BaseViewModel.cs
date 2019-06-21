@@ -13,7 +13,7 @@ namespace OmniCore.Mobile.ViewModels
     public class BaseViewModel : PropertyChangedImpl, IDisposable
     {
         private IPod pod;
-        public IPod Pod { get => pod; set => SetProperty(ref pod, value) ; }
+        public IPod Pod { get => pod; set => SetProperty(ref pod, value); }
 
         public bool PodExistsAndNotBusy
         {
@@ -27,38 +27,31 @@ namespace OmniCore.Mobile.ViewModels
         {
             get
             {
-                return (Pod == null || Pod.ActiveConversation == null);
+                return (Pod?.ActiveConversation == null);
             }
         }
 
         public BaseViewModel()
         {
+            Pod = App.Instance.PodProvider.PodManager?.Pod;
             App.Instance.PodProvider.ManagerChanged += PodProvider_PodChanged;
-            AttachToCurrentPod();
+            if (Pod != null)
+                Pod.PropertyChanged += Pod_PropertyChanged;
         }
 
         private void PodProvider_PodChanged(object sender, EventArgs e)
         {
-            AttachToCurrentPod();
-        }
-
-        private void AttachToCurrentPod()
-        {
             if (Pod != null)
-            {
                 Pod.PropertyChanged -= Pod_PropertyChanged;
-            }
 
             if (App.Instance.PodProvider.PodManager != null)
             {
-                Pod = App.Instance.PodProvider.PodManager.Pod;
+                Pod = App.Instance.PodProvider.PodManager?.Pod;
                 Pod.PropertyChanged += Pod_PropertyChanged;
             }
-            else
-            {
-                Pod = null;
-            }
-            OnPodPropertyChanged(this, new PropertyChangedEventArgs(string.Empty));
+            OnPodChanged();
+            OnPropertyChanged(nameof(PodExistsAndNotBusy));
+            OnPropertyChanged(nameof(PodNotBusy));
         }
 
         private void Pod_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -68,8 +61,11 @@ namespace OmniCore.Mobile.ViewModels
                 OnPropertyChanged(nameof(PodNotBusy));
                 OnPropertyChanged(nameof(PodExistsAndNotBusy));
             }
-
             OnPodPropertyChanged(sender, e);
+        }
+
+        protected virtual void OnPodChanged()
+        {
         }
 
         protected virtual void OnPodPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -102,6 +98,7 @@ namespace OmniCore.Mobile.ViewModels
                     {
                         Pod.PropertyChanged -= Pod_PropertyChanged;
                     }
+                    OnDisposeManagedResources();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -109,6 +106,10 @@ namespace OmniCore.Mobile.ViewModels
 
                 disposedValue = true;
             }
+        }
+
+        protected virtual void OnDisposeManagedResources()
+        {
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.

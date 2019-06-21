@@ -7,6 +7,7 @@ using System.Text;
 using System.Linq;
 using System.ComponentModel;
 using OmniCore.Model.Eros.Data;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
@@ -15,14 +16,50 @@ namespace OmniCore.Mobile.ViewModels.Pod
         private List<ErosMessageExchangeResult> results;
         public List<ErosMessageExchangeResult> Results { get => results; set => SetProperty(ref results, value); }
 
-        private const int MAX_RESULTS = 10;
-        public DebugViewModel()
+        public IMessageExchangeResult ActiveExchangeResult
         {
-            InitializeResults();
+            get
+            {
+                return Pod?.ActiveConversation?.CurrentExchange?.Result;
+            }
         }
+
+        private IConversation conversation;
 
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == string.Empty || e.PropertyName == nameof(IPod.ActiveConversation))
+            {
+                if (conversation != null)
+                    conversation.PropertyChanged -= Conversation_PropertyChanged;
+                conversation = Pod?.ActiveConversation;
+                if (conversation != null)
+                    conversation.PropertyChanged += Conversation_PropertyChanged;
+                OnPropertyChanged(nameof(ActiveExchangeResult));
+            }
+        }
+
+        private void Conversation_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == string.Empty || e.PropertyName == nameof(IConversation.CurrentExchange))
+            {
+                OnPropertyChanged(nameof(ActiveExchangeResult));
+            }
+        }
+
+        protected override void OnDisposeManagedResources()
+        {
+            if (conversation != null)
+                conversation.PropertyChanged -= Conversation_PropertyChanged;
+        }
+
+        private const int MAX_RESULTS = 10;
+        public DebugViewModel()
+        {
+            conversation = Pod?.ActiveConversation;
+            if (conversation != null)
+                conversation.PropertyChanged += Conversation_PropertyChanged;
+            InitializeResults();
         }
 
         private void InitializeResults()

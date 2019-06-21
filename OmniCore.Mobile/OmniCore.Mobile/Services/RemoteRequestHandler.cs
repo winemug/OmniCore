@@ -144,11 +144,11 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelBolus()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                using (var conversation = await podManager.StartConversation("Cancel Bolus", source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelBolus(conversation);
                     return GetResult(pod, conversation);
@@ -160,11 +160,11 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> Bolus(decimal units)
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                using (var conversation = await podManager.StartConversation($"Bolus {units:F2}U", source: RequestSource.AndroidAPS))
                 {
                     await podManager.Bolus(conversation, units, false);
                     return GetResult(pod, conversation);
@@ -176,11 +176,11 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelTempBasal()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                using (var conversation = await podManager.StartConversation("Cancel Temp Basal", source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelTempBasal(conversation);
                     return GetResult(pod, conversation);
@@ -192,11 +192,12 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                using (var conversation = await podManager.StartConversation($"Set Temp Basal {rate:F2}U/hr for {hours:F1}h",
+                    source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetTempBasal(conversation, rate, hours);
                     return GetResult(pod, conversation);
@@ -216,11 +217,11 @@ namespace OmniCore.Mobile.Services
             ErosRepository.Instance.Save(profile);
 
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                using (var conversation = await podManager.StartConversation($"Set Basal Schedule", source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetBasalSchedule(conversation, profile);
                     return GetResult(pod, conversation);
@@ -235,14 +236,14 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> GetStatus()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager;
+            var podManager = podProvider.PodManager?.Direct;
             var pod = podManager?.Pod;
             if (IsAssigned(pod))
             {
                 var ts = DateTimeOffset.UtcNow - podManager.Pod.LastStatus?.Created;
                 if (ts == null || ts.Value.Minutes > 20)
                 {
-                    using (var conversation = await podManager.StartConversation(source: RequestSource.AndroidAPS))
+                    using (var conversation = await podManager.StartConversation("Update Status", source: RequestSource.AndroidAPS))
                     {
                         await podManager.UpdateStatus(conversation);
                         return GetResult(pod, conversation);

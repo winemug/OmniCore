@@ -21,6 +21,8 @@ namespace OmniCore.Model.Eros
         readonly IMessageExchangeProvider MessageExchangeProvider;
         readonly SemaphoreSlim ConversationMutex;
 
+        public IPodManager Direct { get => this; }
+
         private Nonce nonce;
         public Nonce Nonce
         {
@@ -42,7 +44,7 @@ namespace OmniCore.Model.Eros
             ConversationMutex = new SemaphoreSlim(1, 1);
         }
 
-        public async Task<IConversation> StartConversation(int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
+        public async Task<IConversation> StartConversation(string intent, int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
         {
             if (timeoutMilliseconds == 0)
             {
@@ -54,7 +56,7 @@ namespace OmniCore.Model.Eros
                     return null;
             }
 
-            Pod.ActiveConversation = new ErosConversation(ConversationMutex, Pod) { RequestSource = source };
+            Pod.ActiveConversation = new ErosConversation(ConversationMutex, Pod) { RequestSource = source, Intent = intent };
             return Pod.ActiveConversation;
         }
 
@@ -71,6 +73,7 @@ namespace OmniCore.Model.Eros
                 progress = conversation.NewExchange(requestMessage);
             try
             {
+                progress.ActionText = "Started new message exchange";
                 progress.Result.RequestTime = DateTimeOffset.UtcNow;
                 progress.Running = true;
                 var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);

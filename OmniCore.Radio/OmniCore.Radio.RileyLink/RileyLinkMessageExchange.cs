@@ -42,7 +42,8 @@ namespace OmniCore.Radio.RileyLink
             messageProgress.Result.ExchangeParameters = MessageExchangeParameters;
             if (FinalAckTask != null)
             {
-                messageProgress.ActionText = "Waiting for previous radio operation to complete";
+                if (messageProgress != null)
+                    messageProgress.ActionText = "Waiting for previous radio operation to complete";
                 await FinalAckTask;
             }
 
@@ -78,6 +79,7 @@ namespace OmniCore.Radio.RileyLink
                         {
                             var packetToSend = packets[packetIndex];
                             ((RileyLinkStatistics)messageProgress.Result.Statistics).StartPacketExchange();
+                            messageProgress.ActionText = $"Sending radio packet {packetIndex + 1} of {packetCount}";
                             if (packetIndex == 0)
                                 received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 15000);
                             else
@@ -121,8 +123,11 @@ namespace OmniCore.Radio.RileyLink
                 var messageAddress = MessageExchangeParameters.AddressOverride ?? Pod.RadioAddress;
                 var ackAddress = MessageExchangeParameters.AckAddressOverride ?? Pod.RadioAddress;
 
+                int podResponsePacketCount = 1;
                 while (!responseBuilder.WithRadioPacket(received))
                 {
+                    podResponsePacketCount++;
+                    messageProgress.ActionText = $"Waiting further response from pod (part #{podResponsePacketCount})";
                     ((RileyLinkStatistics)messageProgress.Result.Statistics).StartPacketExchange();
                     var ackPacket = CreateAckPacket(messageAddress, ackAddress, (received.Sequence + 1) % 32);
                     received = await ExchangePacketWithRetries(messageProgress, ackPacket, PacketType.CON, 30000);
@@ -136,6 +141,7 @@ namespace OmniCore.Radio.RileyLink
                 Debug.WriteLine("Send and receive completed.");
                 Pod.RuntimeVariables.PacketSequence = (received.Sequence + 1) % 32;
 
+                messageProgress.ActionText = $"Ending conversation";
                 RadioPacket finalAckPacket;
                 if (messageAddress == ackAddress)
                     finalAckPacket = CreateAckPacket(messageAddress, 0, Pod.RuntimeVariables.PacketSequence);
@@ -203,7 +209,10 @@ namespace OmniCore.Radio.RileyLink
         private async Task HandleTimeoutException(OmniCoreTimeoutException ote, IMessageExchangeProgress messageProgress, int timeoutCount)
         {
             ((RileyLinkStatistics)messageProgress.Result.Statistics).NoPacketReceived();
-            Debug.WriteLine("RECV PKT None");
+            if (timeoutCount == 0)
+                messageProgress.ActionText = $"Timed out waiting for pod response";
+            else
+                messageProgress.ActionText = $"Timed out waiting for pod response (retry: #{timeoutCount})";
 
             if (timeoutCount %3 == 0)
                 await RileyLink.TxLevelUp(messageProgress);
@@ -226,6 +235,11 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task HandleRadioException(OmniCoreRadioException pre, IMessageExchangeProgress messageProgress, int radioErrorCount)
         {
+            if (radioErrorCount == 0)
+                messageProgress.ActionText = $"Error communicating with RileyLink";
+            else
+                messageProgress.ActionText = $"Error communicating with RileyLink (retry: #{radioErrorCount})";
+
             if (radioErrorCount % 2 == 1)
                 await RileyLink.Reset(messageProgress);
 

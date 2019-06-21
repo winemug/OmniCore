@@ -10,8 +10,9 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodManager
     {
+        IPodManager Direct { get; }
         IPod Pod { get; }
-        Task<IConversation> StartConversation(int timeout=0, RequestSource source = RequestSource.OmniCoreUser);
+        Task<IConversation> StartConversation(string intent, int timeout=0, RequestSource source = RequestSource.OmniCoreUser);
 
         Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard);
         Task AcknowledgeAlerts(IConversation conversation, byte alertMask);

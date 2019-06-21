@@ -10,6 +10,10 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IConversation : INotifyPropertyChanged, IDisposable
     {
+        DateTimeOffset Started { get; set; }
+        DateTimeOffset? Ended { get; set; }
+        string Intent { get; set; }
+
         bool CanCancel { get; set; }
         bool IsRunning { get; set; }
         bool IsFinished { get; set; }

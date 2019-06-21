@@ -15,16 +15,20 @@ namespace OmniCore.Model.Eros
 {
     public class ErosConversation : PropertyChangedImpl, IConversation
     {
-        public bool CanCancel { get; set; }
+        public DateTimeOffset Started { get => started; set => SetProperty(ref started, value); }
+        public DateTimeOffset? Ended { get => ended; set => SetProperty(ref ended, value); }
+        public string Intent { get => intent; set => SetProperty(ref intent, value); }
 
-        public bool IsRunning { get; set; }
-        public bool IsFinished { get; set; }
+        public bool CanCancel { get => canCancel; set => SetProperty(ref canCancel, value); }
 
-        public bool Failed { get; set; }
-        public bool Canceled { get; set; }
+        public bool IsRunning { get => isRunning; set => SetProperty(ref isRunning, value); }
+        public bool IsFinished { get => isFinished; set => SetProperty(ref isFinished, value); }
 
-        public FailureType FailureType { get; set; }
-        public RequestSource RequestSource { get; set; }
+        public bool Failed { get => failed; set => SetProperty(ref failed, value); }
+        public bool Canceled { get => canceled; set => SetProperty(ref canceled, value); }
+
+        public FailureType FailureType { get => failureType; set => SetProperty(ref failureType, value); }
+        public RequestSource RequestSource { get => requestSource; set => SetProperty(ref requestSource, value); }
 
         public Exception Exception
         {
@@ -38,12 +42,12 @@ namespace OmniCore.Model.Eros
                 var oe = value as OmniCoreException;
                 FailureType = oe?.FailureType ?? FailureType.Unknown;
                 exception = value;
+                OnPropertyChanged(nameof(this.Exception));
             }
         }
 
+        public IMessageExchangeProgress CurrentExchange { get => currentExchange; set => SetProperty(ref currentExchange, value); }
         public CancellationToken Token => CancellationTokenSource.Token;
-
-        public IMessageExchangeProgress CurrentExchange { get; set; }
 
         private IPod Pod;
         private Exception exception;
@@ -53,6 +57,7 @@ namespace OmniCore.Model.Eros
 
         public ErosConversation(SemaphoreSlim conversationMutex, IPod pod)
         {
+            Started = DateTimeOffset.UtcNow;
             ConversationMutex = conversationMutex;
             CancellationTokenSource = new CancellationTokenSource();
             Pod = pod;
@@ -113,12 +118,25 @@ namespace OmniCore.Model.Eros
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
+        private bool canCancel;
+        private bool isRunning;
+        private bool isFinished;
+        private bool failed;
+        private bool canceled;
+        private FailureType failureType;
+        private RequestSource requestSource;
+        private IMessageExchangeProgress currentExchange;
+        private DateTimeOffset started;
+        private DateTimeOffset? ended;
+        private string intent;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
+                    Ended = DateTimeOffset.UtcNow;
                     ConversationMutex.Release();
                     CancellationTokenSource.Dispose();
                     Pod.ActiveConversation = null;

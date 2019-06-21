@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.Pod.ConversationPage">
+    <ContentPage.Content>
+        <StackLayout HorizontalOptions="FillAndExpand">
+            <Label Text="{Binding ConversationTitle}" HorizontalOptions="Center"/>
+            <Label Text="{Binding ConversationIntent}" FontSize="Medium" HorizontalOptions="Center"/>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Started:"/>
+                <Label Text="{Binding Started}"/>
+                <Label Text="Ended:"/>
+                <Label Text="{Binding Ended}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Origin:"/>
+                <Label Text="{Binding StartedBy}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Request Type:"/>
+                <Label Text="{Binding RequestType}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Phase:"/>
+                <Label Text="{Binding RequestPhase}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Status:"/>
+                <Label Text="{Binding ExchangeActionResult}"/>
+            </StackLayout>
+            <!--<StackLayout Orientation="Horizontal">
+                <Label Text="Successful:"/>
+                <Label Text="{Binding Success}"/>
+                <Label Text="Failure:"/>
+                <Label Text="{Binding Failure}"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Pod Rssi:"/>
+                <Label Text="{Binding Statistics.RadioRssiAverage}"/>
+                <Label Text="RL Rssi:"/>
+                <Label Text="{Binding Statistics.MobileDeviceRssiAverage}"/>
+            </StackLayout>-->
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -69,5 +69,6 @@ namespace OmniCore.Model.Eros.Data
         public long? UserSettingsId { get; set; }
         [Ignore]
         public IUserSettings UserSettings { get; set; }
+
     }
 }

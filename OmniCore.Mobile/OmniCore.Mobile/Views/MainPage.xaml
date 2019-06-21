@@ -14,14 +14,14 @@
                 <vwPod:OverviewPage/>
             </ShellContent>
         </Tab>
+        <Tab Title="Conversation">
+            <ShellContent>
+                <vwPod:ConversationPage/>
+            </ShellContent>
+        </Tab>
         <Tab Title="Maintenance">
             <ShellContent>
                 <vwPod:MaintenancePage/>
-            </ShellContent>
-        </Tab>
-        <Tab Title="Debug">
-            <ShellContent>
-                <vwPod:DebugPage/>
             </ShellContent>
         </Tab>
     </FlyoutItem>

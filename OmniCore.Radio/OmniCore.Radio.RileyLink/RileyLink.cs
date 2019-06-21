@@ -67,8 +67,6 @@ namespace OmniCore.Radio.RileyLink
 
             if (messageProgress != null)
                 messageProgress.ActionText = "Searching for RileyLink";
-            Debug.WriteLine("Searching RL");
-
             var scanResults = new List<IScanResult>();
             var config = new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } };
 
@@ -92,15 +90,6 @@ namespace OmniCore.Radio.RileyLink
                         }
                     }
                 });
-            //await OmniCoreServices.Application.RunOnMainThread(
-            //    () =>
-            //    {
-            //    });
-
-            //await OmniCoreApplication.RunOnMainThread(async () =>
-            //{
-
-            //});
 
             var tr = await Task.WhenAny(scanExtension.Task, Task.Delay(20000)).ConfigureAwait(true);
             if (tr == scanExtension.Task)
@@ -110,7 +99,7 @@ namespace OmniCore.Radio.RileyLink
                     await Task.Delay(additionalDelay);
             }
 
-            await OmniCoreApplication.RunOnMainThread(() => CrossBleAdapter.Current.StopScan());
+            CrossBleAdapter.Current.StopScan();
 
             foreach (var result in scanResults.OrderByDescending(x => x.Rssi))
             {
@@ -125,9 +114,13 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task ConnectToDevice(IMessageExchangeProgress messageProgress)
         {
+            if (messageProgress != null)
+                messageProgress.ActionText = "Connecting to RileyLink";
             await Device.ConnectWait().ToTask();
             ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
 
+            if (messageProgress != null)
+                messageProgress.ActionText = "Configuring RileyLink";
             DataCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID).ToTask();
             ResponseCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID).ToTask();
 
@@ -201,6 +194,8 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task Reset(IMessageExchangeProgress messageProgress)
         {
+            if (messageProgress != null)
+                messageProgress.ActionText = "Resetting RileyLink device";
             try
             {
                 if (Device.IsConnected())
@@ -487,7 +482,6 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task VerifyVersion()
         {
-            Debug.WriteLine("Verifying RL version");
             try
             {
                 var result = await SendCommand(RileyLinkCommandType.GetState);

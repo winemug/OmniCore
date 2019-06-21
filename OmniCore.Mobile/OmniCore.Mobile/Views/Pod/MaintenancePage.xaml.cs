@@ -40,7 +40,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                 if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    using (conversation = await podManager.StartConversation())
+                    using (conversation = await podManager.StartConversation("Update Status"))
                     {
                         await podManager.UpdateStatus(conversation);
                     }
@@ -81,7 +81,7 @@ namespace OmniCore.Mobile.Views.Pod
                         return;
                 }
 
-                using (conversation = await podManager.StartConversation())
+                using (conversation = await podManager.StartConversation("Deactivate Pod"))
                     await podManager.Deactivate(conversation);
 
                 if (!conversation.Failed)
@@ -169,13 +169,13 @@ namespace OmniCore.Mobile.Views.Pod
 
             if (podManager.Pod.LastStatus == null)
             {
-                using (conversation = await podManager.StartConversation())
+                using (conversation = await podManager.StartConversation("Update Status"))
                     await podManager.UpdateStatus(conversation);
             }
 
             if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
             {
-                using (conversation = await podManager.StartConversation())
+                using (conversation = await podManager.StartConversation("Pair Pod"))
                     await podManager.Pair(conversation, 60);
                 if (conversation.Failed)
                 {
@@ -186,7 +186,7 @@ namespace OmniCore.Mobile.Views.Pod
 
             if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
             {
-                using (conversation = await podManager.StartConversation())
+                using (conversation = await podManager.StartConversation("Activate Pod"))
                 {
                     await podManager.Activate(conversation);
                 }
@@ -218,7 +218,7 @@ namespace OmniCore.Mobile.Views.Pod
             for (int i = 0; i < 48; i++)
                 basalSchedule[i] = 0.40m;
             var activeProfile = ErosRepository.Instance.GetProfile();
-            using (conversation = await podManager.StartConversation())
+            using (conversation = await podManager.StartConversation("Start Pod"))
             {
                 await podManager.InjectAndStart(conversation, activeProfile);
             }
