@@ -15,7 +15,7 @@ namespace OmniCore.Model.Eros.Data
         {
             get
             {
-                return JsonConvert.SerializeObject(PreferredRadios);
+                return JsonConvert.SerializeObject(PreferredRadios ?? new Guid[0]);
             }
             set
             {

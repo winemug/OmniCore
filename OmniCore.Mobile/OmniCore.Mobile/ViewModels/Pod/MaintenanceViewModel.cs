@@ -50,7 +50,22 @@ namespace OmniCore.Mobile.ViewModels.Pod
             get => resumeActivationButtonEnabled; set => SetProperty(ref resumeActivationButtonEnabled, value);
         }
 
+        public MaintenanceViewModel()
+        {
+            SetProps();
+        }
+
         protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            SetProps();
+        }
+
+        protected override void OnPodChanged()
+        {
+            SetProps();
+        }
+
+        private void SetProps()
         {
             DeactivateButtonVisible = false;
             ActivateNewButtonVisible = false;

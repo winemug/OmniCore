@@ -135,7 +135,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (MessageExchangeResult.Statistics.MobileDeviceRssiAverage.HasValue)
+                if (MessageExchangeResult.Statistics?.MobileDeviceRssiAverage != null)
                     return MessageExchangeResult.Statistics.MobileDeviceRssiAverage.Value.ToString();
                 else
                     return "";
@@ -146,7 +146,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (MessageExchangeResult.Statistics.RadioRssiAverage.HasValue)
+                if (MessageExchangeResult.Statistics?.RadioRssiAverage != null)
                     return MessageExchangeResult.Statistics.RadioRssiAverage.Value.ToString();
                 else
                     return "";
