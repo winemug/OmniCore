@@ -214,9 +214,6 @@ namespace OmniCore.Mobile.Views.Pod
                 return;
 
 
-            var basalSchedule = new decimal[48];
-            for (int i = 0; i < 48; i++)
-                basalSchedule[i] = 0.40m;
             var activeProfile = ErosRepository.Instance.GetProfile();
             using (conversation = await podManager.StartConversation("Start Pod"))
             {
