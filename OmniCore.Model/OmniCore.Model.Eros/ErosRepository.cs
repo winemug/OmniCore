@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Enums;
+using OmniCore.Mobile.Base;
 
 namespace OmniCore.Model.Eros
 {
@@ -37,6 +38,9 @@ namespace OmniCore.Model.Eros
         {
             try
             {
+                //var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "omnicode.back.db3");
+                //File.Copy(DbPath, backupPath);
+
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();
@@ -69,16 +73,20 @@ namespace OmniCore.Model.Eros
                         });
                     }
 
+#if DEBUG
+                    conn.Table<ErosRadioPreferences>().Delete(x => true);
+#endif
+
                     if (conn.Table<ErosRadioPreferences>().Count() == 0)
                     {
 #if DEBUG
                         conn.Insert(new ErosRadioPreferences()
                         {
-                            ConnectToAny = false,
-                            PreferredRadios = new Guid[]
-                            {
-                                Guid.Parse("00000000-0000-0000-0000-886b0fec4d1a")
-                            }
+                            ConnectToAny = true,
+                            //PreferredRadios = new Guid[]
+                            //{
+                            //    Guid.Parse("00000000-0000-0000-0000-886b0fec4d1a")
+                            //}
                         });
 #else
                         conn.Insert(new ErosRadioPreferences()
@@ -268,21 +276,19 @@ namespace OmniCore.Model.Eros
             using (var conn = GetConnection())
             {
                 long lastId = 0;
-                if (lastResultDate > 0)
+                var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
+                var dtNow = DateTimeOffset.UtcNow;
+                if ((dtNow - dtLastResult).TotalDays > 1)
+                    dtLastResult = dtNow.AddDays(-1);
+                var correspondingResult = conn.Query<ErosMessageExchangeResult>(
+                    "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks)
+                    .FirstOrDefault();
+
+                if (correspondingResult != null)
                 {
-                    var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
-                    var correspondingResult = conn.Query<ErosMessageExchangeResult>(
-                        "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks)
-                        .FirstOrDefault();
-                    //var correspondingResult = conn.Table<ErosMessageExchangeResult>()
-                    //    .Where(x => x.Success && x.ResultTime.Value.Ticks <= dtLastResult.Ticks)
-                    //    .OrderByDescending(x => x.Id)
-                    //    .FirstOrDefault();
-                    if (correspondingResult != null)
-                    {
-                        lastId = correspondingResult.Id.Value;
-                    }
+                    lastId = correspondingResult.Id.Value;
                 }
+
                 return WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
                     .Where(x => x.Success && x.Id > lastId)
                     .OrderBy(x => x.Id), conn);
