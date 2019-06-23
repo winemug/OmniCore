@@ -250,7 +250,6 @@ namespace OmniCore.Model.Eros
             using (var conn = GetConnection())
             {
                 return WithStatistics(conn.Table<ErosMessageExchangeResult>()
-                    .Where(x => x.Success)
                     .OrderByDescending(x => x.Id)
                     .Take(maxCount)
                     .ToList(), conn);
