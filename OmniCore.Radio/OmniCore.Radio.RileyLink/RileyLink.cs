@@ -72,8 +72,6 @@ namespace OmniCore.Radio.RileyLink
 
             var scanExtension = new TaskCompletionSource<int>();
 
-            // SynchronizationContext.SetSynchronizationContext(OmniCoreServices.UiSyncContext);
-
             CrossBleAdapter.Current.Scan(config)
                 .Subscribe((sr) =>
                 {
@@ -112,20 +110,59 @@ namespace OmniCore.Radio.RileyLink
             return found;
         }
 
+        private async Task<IDevice> CheckIfAlreadyConnected()
+        {
+            var devices = await CrossBleAdapter.Current.GetConnectedDevices(RileyLinkServiceUUID);
+            foreach (var device in devices)
+            {
+                if (Preferences.ConnectToAny || Preferences.PreferredRadios.Contains(device.Uuid))
+                {
+                    return device;
+                }
+            }
+            return null;
+        }
+
         private async Task ConnectToDevice(IMessageExchangeProgress messageProgress)
         {
             if (messageProgress != null)
                 messageProgress.ActionText = "Connecting to RileyLink";
-            await Device.ConnectWait().ToTask();
-            ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
 
-            if (messageProgress != null)
-                messageProgress.ActionText = "Configuring RileyLink";
-            DataCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID).ToTask();
-            ResponseCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID).ToTask();
+            Device.Connect(new ConnectionConfig() { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
 
-            await ResponseCharacteristic.EnableNotifications().ToTask();
-            await ConfigureDeviceSpecifics();
+            var t1 = Device.WhenConnected().FirstAsync().ToTask();
+            var t2 = Device.WhenConnectionFailed().FirstAsync().ToTask();
+            var t3 = Task.Delay(20000, messageProgress.Token);
+            var finishedTask = await Task.WhenAny(t1, t2, t3);
+            if (finishedTask == t1)
+            {
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
+
+                if (messageProgress != null)
+                    messageProgress.ActionText = "Configuring RileyLink";
+                DataCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkDataCharacteristicUUID).ToTask();
+                ResponseCharacteristic = await Device.GetKnownCharacteristics(RileyLinkServiceUUID, RileyLinkResponseCharacteristicUUID).ToTask();
+
+                await ResponseCharacteristic.EnableNotifications().ToTask();
+                await ConfigureDeviceSpecifics();
+            }
+            else if (finishedTask == t2)
+            {
+                this.Device = null;
+                var err = await t2;
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioErrorOccured(err);
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioDisconnected();
+                OmniCoreServices.Logger.Warning("connection failed", err);
+                throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Failed to connect to RL", err);
+            }
+            else
+            {
+                Device.CancelConnection();
+                this.Device = null;
+                OmniCoreServices.Logger.Warning("connection timed out");
+                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioDisconnected();
+                throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Timed out connecting to RL");
+            }
         }
 
         public async Task EnsureDevice(IMessageExchangeProgress messageProgress)
@@ -134,21 +171,15 @@ namespace OmniCore.Radio.RileyLink
             {
                 ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadStart();
 
-                if (this.Device == null)
+                if (this.Device == null || !this.Device.IsConnected())
                 {
-                    var device = await ScanForDevice(messageProgress);
+                    Device = await CheckIfAlreadyConnected() ?? await ScanForDevice(messageProgress) ??
+                            throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Couldn't find RileyLink!");
 
-                    if (device == null)
-                        throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Couldn't find RileyLink!");
-
-                    Device = device;
-                }
-
-                if (!this.Device.IsConnected())
-                {
                     await ConnectToDevice(messageProgress);
                     if (!this.Device.IsConnected())
                         throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Cannot connect to Rileylink");
+                    
                 }
 
                 if (messageProgress != null)
@@ -170,28 +201,6 @@ namespace OmniCore.Radio.RileyLink
                 ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadEnd();
             }
         }
-
-        //private async Task Disconnect()
-        //{
-        //    try
-        //    {
-        //        //if (this.Device == null)
-        //        //    return;
-
-        //        //if (this.Device.IsDisconnected())
-        //        //    return;
-
-        //        //Debug.WriteLine("Disconnecting from RL");
-        //        //await this.ResponseCharacteristic.DisableNotifications();
-        //        //this.Device.CancelConnection();
-        //        //// await this.Device.WhenDisconnected();
-        //        //Debug.WriteLine("Disconnect requested");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Debug.WriteLine("Ignoring exception while disconnecting", e);
-        //    }
-        //}
 
         public async Task Reset(IMessageExchangeProgress messageProgress)
         {

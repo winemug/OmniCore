@@ -19,7 +19,8 @@ namespace OmniCore.Mobile.ViewModels
         {
             get
             {
-                return (Pod != null && Pod.ActiveConversation == null);
+                return Pod != null
+                    && (Pod.ActiveConversation == null || Pod.ActiveConversation.IsFinished);
             }
         }
 
@@ -27,7 +28,7 @@ namespace OmniCore.Mobile.ViewModels
         {
             get
             {
-                return (Pod?.ActiveConversation == null);
+                return (Pod?.ActiveConversation == null || Pod.ActiveConversation.IsFinished);
             }
         }
 
@@ -49,19 +50,41 @@ namespace OmniCore.Mobile.ViewModels
                 Pod = App.Instance.PodProvider.PodManager?.Pod;
                 Pod.PropertyChanged += Pod_PropertyChanged;
             }
+            else
+            {
+                Pod = null;
+            }
+
             OnPodChanged();
             OnPropertyChanged(nameof(PodExistsAndNotBusy));
             OnPropertyChanged(nameof(PodNotBusy));
         }
 
+        private IConversation activeConversation;
         private void Pod_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(IPod.ActiveConversation))
+            if (e.PropertyName == nameof(IPod.ActiveConversation))
             {
+                if (activeConversation != null)
+                    activeConversation.PropertyChanged -= ActiveConversation_PropertyChanged;
+
+                activeConversation = Pod.ActiveConversation;
+                if (activeConversation != null)
+                    activeConversation.PropertyChanged += ActiveConversation_PropertyChanged;
+
                 OnPropertyChanged(nameof(PodNotBusy));
                 OnPropertyChanged(nameof(PodExistsAndNotBusy));
             }
             OnPodPropertyChanged(sender, e);
+        }
+
+        private void ActiveConversation_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IConversation.IsFinished))
+            {
+                OnPropertyChanged(nameof(PodNotBusy));
+                OnPropertyChanged(nameof(PodExistsAndNotBusy));
+            }
         }
 
         protected virtual void OnPodChanged()
@@ -95,9 +118,9 @@ namespace OmniCore.Mobile.ViewModels
                 {
                     App.Instance.PodProvider.ManagerChanged -= PodProvider_PodChanged;
                     if (Pod != null)
-                    {
                         Pod.PropertyChanged -= Pod_PropertyChanged;
-                    }
+                    if (activeConversation != null)
+                        activeConversation.PropertyChanged -= ActiveConversation_PropertyChanged;
                     OnDisposeManagedResources();
                 }
 

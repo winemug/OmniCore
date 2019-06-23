@@ -53,7 +53,7 @@ namespace OmniCore.Model.Eros
             else
             {
                 if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
-                    return null;
+                    throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
             }
 
             Pod.ActiveConversation = new ErosConversation(ConversationMutex, Pod) { RequestSource = source, Intent = intent };

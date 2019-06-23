@@ -6,13 +6,25 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.Help.AboutPage">
     <ContentPage.Content>
-      <StackLayout>
-            <Label Text="Abooootttt"
-                 HorizontalTextAlignment="Center"
-                 FontSize="Default"
-                 Margin="5"
-                 Scale="3">
-            </Label>
+        <StackLayout VerticalOptions="FillAndExpand">
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Start"
+                         BackgroundColor="White">
+                <Image Source="ic_android_phone.xml" 
+                        HeightRequest="40"
+                       />
+                <Image Source="signal_wifi_3_bar.xml" 
+                        HeightRequest="40"
+                       />
+                <Image Source="ic_rl433.xml" 
+                        HeightRequest="32"
+                       />
+                <Image Source="signal_wifi_3_bar.xml" 
+                        HeightRequest="40"
+                       />
+                <Image Source="ic_pod.xml" 
+                        HeightRequest="40"
+                       />
+            </StackLayout>
         </StackLayout>
   </ContentPage.Content>
 </ContentPage>

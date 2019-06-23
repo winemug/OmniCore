@@ -141,10 +141,11 @@ namespace OmniCore.Model.Eros
             {
                 if (disposing)
                 {
+                    IsFinished = true;
                     Ended = DateTimeOffset.UtcNow;
                     ConversationMutex.Release();
                     CancellationTokenSource.Dispose();
-                    Pod.ActiveConversation = null;
+                    //Pod.ActiveConversation = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
