@@ -26,14 +26,13 @@ namespace OmniCore.Mobile.Android
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
-            Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
-
-            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
-
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
+
+            Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
+            Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();

@@ -15,7 +15,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class ConversationsViewModel : BaseViewModel
     {
-        private const int MAX_RECORDS = 10;
+        private const int MAX_RECORDS = 50;
         private ObservableCollection<ResultViewModel> results;
 
         public ObservableCollection<ResultViewModel> Results { get => results; set => SetProperty(ref results, value); }

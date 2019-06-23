@@ -10,23 +10,29 @@
             <CollectionView ItemsSource="{Binding Results}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame BorderColor="LightGray" BackgroundColor="White" Padding="10">
-                            <StackLayout Orientation="Vertical">
-                                <StackLayout Orientation="Horizontal" Padding="0,5,0,5">
-                                    <Label Text="{Binding RequestDate}"/>
-                                    <Label Text="{Binding Type}" TextColor="{Binding RequestTypeColor}"/>
+                        <Frame BorderColor="LightGray" BackgroundColor="White" Padding="10" HorizontalOptions="FillAndExpand">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Label Text="{Binding RequestDate}" TextColor="Gray" Grid.Row="0" Grid.Column="0"/>
+                                <Label Text="{Binding ResultDate}" TextColor="Black" Grid.Row="1" Grid.Column="0"/>
+                                <Label Text="{Binding RequestText}" TextColor="{Binding RequestTextColor}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"/>
+                                <Label Text="{Binding ResultStatus}" TextColor="{Binding ResultStatusColor}" Grid.Row="1" Grid.Column="1"/>
+                                <StackLayout Orientation="Horizontal" Grid.Row="1" Grid.Column="2" HeightRequest="20">
+                                    <Image Source="ic_android_phone.xml" HeightRequest="20"/>
+                                    <Label Text="{Binding RileyLinkRssi}" VerticalOptions="Center"/>
+                                    <Image Source="ic_rl433.xml"  HeightRequest="16"/>
+                                    <Label Text="{Binding PodRssi}" VerticalOptions="Center"/>
+                                    <Image Source="ic_pod.xml" HeightRequest="20"/>
                                 </StackLayout>
-                                <StackLayout Orientation="Horizontal" Padding="0,5,0,5">
-                                    <Label Text="{Binding ResultDate}"/>
-                                    <Label Text="{Binding ResultStatus}" TextColor="{Binding ResultStatusColor}"/>
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal" Padding="0,5,0,5">
-                                    <Label Text="RileyLink Rssi"/>
-                                    <Label Text="{Binding RileyLinkRssi}"/>
-                                    <Label Text="Pod Rssi"/>
-                                    <Label Text="{Binding PodRssi}"/>
-                                </StackLayout>
-                            </StackLayout>
+                            </Grid>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
