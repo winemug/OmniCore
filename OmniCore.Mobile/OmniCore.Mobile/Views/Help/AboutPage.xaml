@@ -6,25 +6,9 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.Help.AboutPage">
     <ContentPage.Content>
-        <StackLayout VerticalOptions="FillAndExpand">
-            <StackLayout Orientation="Horizontal" HorizontalOptions="Start"
-                         BackgroundColor="White">
-                <Image Source="ic_android_phone.xml" 
-                        HeightRequest="40"
-                       />
-                <Image Source="signal_wifi_3_bar.xml" 
-                        HeightRequest="40"
-                       />
-                <Image Source="ic_rl433.xml" 
-                        HeightRequest="32"
-                       />
-                <Image Source="signal_wifi_3_bar.xml" 
-                        HeightRequest="40"
-                       />
-                <Image Source="ic_pod.xml" 
-                        HeightRequest="40"
-                       />
-            </StackLayout>
+        <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" Padding="16">
+            <Label HorizontalOptions="Center" Text="OmniCore" FontSize="Large"/>
+            <Label HorizontalOptions="Center" Text="{Binding Version}" FontSize="Medium"/>
         </StackLayout>
   </ContentPage.Content>
 </ContentPage>

@@ -8,6 +8,7 @@ namespace OmniCore.Mobile.Base.Interfaces
 {
     public interface IOmniCoreApplication
     {
+        string Version { get; }
         Task RunOnMainThread(Func<Task> funcTask);
         Task<T> RunOnMainThread<T>(Func<Task<T>> funcTask);
         Task RunOnMainThread(Action action);

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -28,6 +29,17 @@ namespace OmniCore.Mobile.Android
             else
             {
                 Process.KillProcess(Process.MyPid());
+            }
+        }
+
+        public string Version
+        {
+            get
+            {
+                Context context = global::Android.App.Application.Context;
+                PackageManager manager = context.PackageManager;
+                PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
+                return info.VersionName;
             }
         }
 

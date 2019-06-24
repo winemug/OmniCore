@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Mobile.Base;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,11 +7,11 @@ namespace OmniCore.Mobile.ViewModels.Help
 {
     public class AboutViewModel : BaseViewModel
     {
-        public string AboutText
+        public string Version
         {
             get
             {
-                return $"OmniCore v1.0.0.0";
+                return OmniCoreServices.Application.Version;
             }
         }
     }
