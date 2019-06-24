@@ -25,7 +25,7 @@
             </ShellContent>
         </Tab>
     </FlyoutItem>
-    <FlyoutItem Title="Settings">
+    <!--<FlyoutItem Title="Settings">
         <Tab Title="General">
             <ShellContent>
                 <vwSettings:GeneralSettingsPage/>
@@ -36,7 +36,7 @@
                 <vwSettings:PodSettingsPage/>
             </ShellContent>
         </Tab>
-    </FlyoutItem>
+    </FlyoutItem>-->
     <FlyoutItem Title="Help">
         <Tab>
             <ShellContent>
