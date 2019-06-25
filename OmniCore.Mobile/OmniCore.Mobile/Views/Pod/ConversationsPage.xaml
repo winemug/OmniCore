@@ -6,8 +6,26 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.Pod.ConversationsPage">
     <ContentPage.Content>
-        <StackLayout HorizontalOptions="FillAndExpand">
-            <CollectionView ItemsSource="{Binding Results}">
+        <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" BackgroundColor="#FFFFF1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Label HorizontalOptions="Center" Text="{Binding ConversationIntent}" Grid.Row="0" Grid.ColumnSpan="3"/>
+            <Label Text="{Binding StartedBy}" Grid.Row="1" Grid.Column="0"/>
+            <Label Text="{Binding Started}" Grid.Row="1" Grid.Column="1"/>
+            <Label Text="{Binding Ended}" Grid.Row="1" Grid.Column="2"/>
+            <Label Text="{Binding RequestPhase}" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"/>
+            <Label Text="{Binding ExchangeActionResult}" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"/>
+            <CollectionView ItemsSource="{Binding Results}" Grid.Row="4" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame BorderColor="LightGray" BackgroundColor="White" Padding="10" HorizontalOptions="FillAndExpand">
@@ -40,46 +58,6 @@
                     <Label Text="Requests history is empty"/>
                 </CollectionView.EmptyView>
             </CollectionView>
-            <!--<Label Text="{Binding ConversationTitle}" HorizontalOptions="Center"/>
-            <Label Text="{Binding ConversationIntent}" FontSize="Medium" HorizontalOptions="Center"/>
-            <StackLayout Orientation="Vertical" BackgroundColor="Aquamarine">
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Started:"/>
-                    <Label Text="{Binding Started}"/>
-                    <Label Text="Ended:"/>
-                    <Label Text="{Binding Ended}"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Origin:"/>
-                    <Label Text="{Binding StartedBy}"/>
-                </StackLayout>
-            </StackLayout>
-            <StackLayout Orientation="Vertical" BackgroundColor="LightGray">
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Request Type:"/>
-                    <Label Text="{Binding RequestType}"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Phase:"/>
-                    <Label Text="{Binding RequestPhase}"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Status:"/>
-                    <Label Text="{Binding ExchangeActionResult}"/>
-                </StackLayout>
-            </StackLayout>-->
-            <!--<StackLayout Orientation="Horizontal">
-                <Label Text="Successful:"/>
-                <Label Text="{Binding Success}"/>
-                <Label Text="Failure:"/>
-                <Label Text="{Binding Failure}"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="Pod Rssi:"/>
-                <Label Text="{Binding Statistics.RadioRssiAverage}"/>
-                <Label Text="RL Rssi:"/>
-                <Label Text="{Binding Statistics.MobileDeviceRssiAverage}"/>
-            </StackLayout>-->
-        </StackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

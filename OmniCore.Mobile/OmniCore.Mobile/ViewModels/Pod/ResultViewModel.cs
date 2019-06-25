@@ -13,6 +13,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
         public ResultViewModel(IMessageExchangeResult result)
         {
             MessageExchangeResult = result;
+            if (result.ExchangeProgress != null)
+                result.ExchangeProgress.PropertyChanged += ExchangeProgress_PropertyChanged;
         }
 
         private IMessageExchangeResult messageExchangeResult;
@@ -33,6 +35,25 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
                     OnPropertyChanged(nameof(MessageExchangeResult));
                 }
+            }
+        }
+
+        public RowDefinitionCollection Rows
+        {
+            get
+            {
+                if (IsLive)
+                    return new RowDefinitionCollection() { new RowDefinition(), new RowDefinition(), new RowDefinition() };
+                else
+                    return new RowDefinitionCollection() { new RowDefinition(), new RowDefinition() };
+            }
+        }
+
+        public bool IsLive
+        {
+            get
+            {
+                return MessageExchangeResult.ExchangeProgress != null && !MessageExchangeResult.ExchangeProgress.Finished;
             }
         }
 
@@ -166,8 +187,30 @@ namespace OmniCore.Mobile.ViewModels.Pod
                     else
                         return MessageExchangeResult.Failure.ToString();
                 }
+                else if (MessageExchangeResult.ExchangeProgress != null)
+                {
+                    if (MessageExchangeResult.ExchangeProgress.Waiting)
+                        return "Waiting";
+                    else if (MessageExchangeResult.ExchangeProgress.Running)
+                        return "Running";
+                    else
+                        return "Finished";
+                }
                 else
-                    return "(Running)";
+                    return "???";
+            }
+        }
+
+        public string ResultActivity
+        {
+            get
+            {
+                if (MessageExchangeResult.ExchangeProgress != null)
+                {
+                    return MessageExchangeResult.ExchangeProgress.ActionText;
+                }
+                else
+                    return string.Empty;
             }
         }
 
@@ -193,8 +236,22 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+
+        private void ExchangeProgress_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            RaiseAllPropertiesChanged();
+        }
+
         private void MessageExchangeResult_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            RaiseAllPropertiesChanged();
+        }
+
+        private void RaiseAllPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(Rows));
+            OnPropertyChanged(nameof(IsLive));
+            OnPropertyChanged(nameof(ResultActivity));
             OnPropertyChanged(nameof(RequestText));
             OnPropertyChanged(nameof(RequestTextColor));
             OnPropertyChanged(nameof(RequestDate));
@@ -207,6 +264,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
         protected override void OnDisposeManagedResources()
         {
+            if (MessageExchangeResult.ExchangeProgress != null)
+                MessageExchangeResult.ExchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
             MessageExchangeResult = null;
         }
     }

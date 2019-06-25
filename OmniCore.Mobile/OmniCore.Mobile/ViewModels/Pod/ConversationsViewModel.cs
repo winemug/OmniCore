@@ -26,12 +26,15 @@ namespace OmniCore.Mobile.ViewModels.Pod
             var history = ErosRepository.Instance.GetHistoricalResultsForDisplay(MAX_RECORDS);
             foreach (var result in history)
                 Results.Add(new ResultViewModel(result));
+            OnPodChanged();
         }
+
 
         protected override void OnDisposeManagedResources()
         {
             if (exchangeProgress != null)
                 exchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
+
             if (conversation == null)
                 conversation.PropertyChanged -= Conversation_PropertyChanged;
 
@@ -42,6 +45,13 @@ namespace OmniCore.Mobile.ViewModels.Pod
         protected override async void OnPodChanged()
         {
             await UpdateRunningResult(exchangeProgress?.Result);
+            OnPropertyChanged(nameof(ConversationTitle));
+            OnPropertyChanged(nameof(ConversationIntent));
+            OnPropertyChanged(nameof(Started));
+            OnPropertyChanged(nameof(Ended));
+            OnPropertyChanged(nameof(StartedBy));
+            OnPropertyChanged(nameof(this.RequestPhase));
+            OnPropertyChanged(nameof(this.ExchangeActionResult));
         }
 
         private IConversation conversation;
@@ -59,6 +69,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
                     conversation.PropertyChanged += Conversation_PropertyChanged;
                     await UpdateRunningResult(conversation.CurrentExchange?.Result);
                 }
+
+                OnPodChanged();
             }
         }
 
@@ -75,6 +87,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
                     exchangeProgress.PropertyChanged += ExchangeProgress_PropertyChanged;
                     await UpdateRunningResult(exchangeProgress?.Result);
                 }
+                OnPodChanged();
             }
         }
 
@@ -82,6 +95,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             if (e.PropertyName == nameof(IMessageExchangeProgress.Result))
                 await UpdateRunningResult(exchangeProgress?.Result);
+            OnPodChanged();
         }
 
         private IMessageExchangeResult activeResult = null;
@@ -109,282 +123,118 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        //public string ConversationTitle
-        //{
-        //    get
-        //    {
-        //        if (CurrentConversation == null)
-        //            return "No active conversation";
-        //        else if (CurrentConversation.IsFinished)
-        //            return "Last Conversation";
-        //        else
-        //            return "Active Conversation";
-        //    }
-        //}
+        public string ConversationTitle
+        {
+            get
+            {
+                if (conversation == null)
+                    return "No active conversation";
+                else if (conversation.IsFinished)
+                    return "Last Conversation";
+                else
+                    return "Active Conversation";
+            }
+        }
 
-        //public string ConversationIntent
-        //{
-        //    get
-        //    {
-        //        if (CurrentConversation == null)
-        //            return "";
-        //        else return CurrentConversation.Intent;
-        //    }
-        //}
+        public string ConversationIntent
+        {
+            get
+            {
+                if (conversation == null)
+                    return "";
+                else return conversation.Intent;
+            }
+        }
 
-        //public string Started
-        //{
-        //    get
-        //    {
-        //        if (CurrentConversation != null)
-        //            return CurrentConversation.Started.ToLocalTime().ToString("hh:MM:ss");
-        //        return "";
-        //    }
-        //}
+        public string Started
+        {
+            get
+            {
+                if (conversation != null)
+                    return conversation.Started.ToLocalTime().ToString("hh:mm:ss");
+                return "";
+            }
+        }
 
-        //public string Ended
-        //{
-        //    get
-        //    {
-        //        if (CurrentConversation != null && CurrentConversation.Ended.HasValue)
-        //            return CurrentConversation.Ended.Value.ToLocalTime().ToString("hh:MM:ss");
-        //        return "";
-        //    }
-        //}
+        public string Ended
+        {
+            get
+            {
+                if (conversation != null && conversation.Ended.HasValue)
+                    return conversation.Ended.Value.ToLocalTime().ToString("hh:mm:ss");
+                return "";
+            }
+        }
 
-        //public string StartedBy
-        //{
-        //    get
-        //    {
-        //        if (CurrentConversation == null)
-        //            return "";
-        //        else
-        //            switch(CurrentConversation.RequestSource)
-        //            {
-        //                case RequestSource.AndroidAPS:
-        //                    return "Android APS";
-        //                case RequestSource.OmniCoreUser:
-        //                    return "OmniCore User";
-        //                case RequestSource.OmniCoreRemoteUser:
-        //                case RequestSource.OmniCoreAID:
-        //                default:
-        //                    return "";
-        //            }
-        //    }
-        //}
+        public string StartedBy
+        {
+            get
+            {
+                if (conversation == null)
+                    return "";
+                else
+                    switch (conversation.RequestSource)
+                    {
+                        case RequestSource.AndroidAPS:
+                            return "Android APS";
+                        case RequestSource.OmniCoreUser:
+                            return "OmniCore User";
+                        case RequestSource.OmniCoreRemoteUser:
+                        case RequestSource.OmniCoreAID:
+                        default:
+                            return "";
+                    }
+            }
+        }
 
-        //public string RequestType
-        //{
-        //    get
-        //    {
-        //        return CurrentExchange?.Result?.Type.ToString();
-        //    }
-        //}
+        public string RequestPhase
+        {
+            get
+            {
+                if (exchangeProgress == null)
+                    return string.Empty;
+                else
+                {
+                    if (exchangeProgress.Waiting)
+                        return "Waiting to be run";
+                    if (exchangeProgress.Finished)
+                        return "Finished";
+                    if (exchangeProgress.Running)
+                    {
+                        if (exchangeProgress.Result.RequestTime.HasValue)
+                        {
+                            var diff = DateTimeOffset.UtcNow - exchangeProgress.Result.RequestTime.Value;
+                            if (diff.TotalSeconds < 4)
+                                return $"Running";
+                            else
+                                return $"Running for {diff.TotalSeconds:F0} seconds";
+                        }
+                        else
+                            return $"Running";
+                    }
+                    return "Unknown";
+                }
+            }
+        }
 
-        //public string RequestPhase
-        //{
-        //    get
-        //    {
-        //        if (CurrentExchange == null)
-        //            return string.Empty;
-        //        else
-        //        {
-        //            if (CurrentExchange.Waiting)
-        //                return "Waiting to be run";
-        //            if (CurrentExchange.Finished)
-        //                return "Finished";
-        //            if (CurrentExchange.Running)
-        //            {
-        //                if (CurrentExchange.Result.RequestTime.HasValue)
-        //                {
-        //                    var diff = DateTimeOffset.UtcNow - CurrentExchange.Result.RequestTime.Value;
-        //                    if (diff.TotalSeconds < 4)
-        //                        return $"Running";
-        //                    else
-        //                        return $"Running for {diff.TotalSeconds} seconds";
-        //                }
-        //                else
-        //                    return $"Running";
-        //            }
-        //            return "Unknown";
-        //        }
-        //    }
-        //}
-
-        //public string ExchangeActionResult
-        //{
-        //    get
-        //    {
-        //        if (CurrentExchange == null)
-        //            return string.Empty;
-        //        else if (CurrentExchange.Finished)
-        //        {
-        //            if (CurrentExchange.Result.Success)
-        //                return "Result received";
-        //            else
-        //                return $"Messsage exchange failed: {CurrentExchange.Result.Failure}";
-        //        }
-        //        else
-        //        {
-        //            return currentExchange.ActionText;
-        //        }
-        //    }
-        //}
-
-        //private IConversation conversation;
-        //public IConversation CurrentConversation
-        //{
-        //    get => conversation;
-        //    set
-        //    {
-        //        if (value != null && conversation != value)
-        //        {
-        //            if (conversation != null)
-        //                conversation.PropertyChanged -= Conversation_PropertyChanged;
-        //            conversation = value;
-        //            if (conversation != null)
-        //                conversation.PropertyChanged += Conversation_PropertyChanged;
-
-        //            CurrentExchange = conversation?.CurrentExchange;
-        //            OnPropertyChanged("");
-        //        }
-        //    }
-        //}
-
-        //private IMessageExchangeProgress currentExchange;
-        //public IMessageExchangeProgress CurrentExchange
-        //{
-        //    get => currentExchange;
-        //    set
-        //    {
-        //        if (currentExchange != value)
-        //        {
-        //            if (currentExchange != null)
-        //            {
-        //                currentExchange.PropertyChanged -= Exchange_PropertyChanged;
-        //                currentExchange.Result.PropertyChanged -= Result_PropertyChanged;
-        //            }
-        //            currentExchange = value;
-        //            if (currentExchange != null)
-        //            {
-        //                currentExchange.PropertyChanged += Exchange_PropertyChanged;
-        //                currentExchange.Result.PropertyChanged += Result_PropertyChanged;
-        //            }
-
-        //            OnPropertyChanged(nameof(CurrentExchange));
-        //            OnPropertyChanged("");
-        //        }
-        //    }
-        //}
-
-        //public ConversationsViewModel()
-        //{
-        //    OnPodChanged();
-        //}
-
-        //protected override void OnPodChanged()
-        //{
-        //    CurrentConversation = Pod?.ActiveConversation;
-        //    CurrentExchange = Pod?.ActiveConversation?.CurrentExchange;
-        //    OnPropertyChanged(nameof(ConversationTitle));
-        //    OnPropertyChanged(nameof(ConversationIntent));
-        //    OnPropertyChanged(nameof(Started));
-        //    OnPropertyChanged(nameof(Ended));
-        //    OnPropertyChanged(nameof(StartedBy));
-        //    OnPropertyChanged(nameof(this.RequestType));
-        //    OnPropertyChanged(nameof(this.RequestPhase));
-        //    OnPropertyChanged(nameof(this.ExchangeActionResult));
-
-        //}
-
-        //protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs args)
-        //{
-        //    if (args.PropertyName == string.Empty || args.PropertyName == nameof(IPod.ActiveConversation))
-        //        OnPodChanged();
-        //}
-
-
-        //private void Conversation_PropertyChanged(object sender, PropertyChangedEventArgs args)
-        //{
-        //    if (args.PropertyName == string.Empty || args.PropertyName == nameof(IConversation.CurrentExchange))
-        //    {
-        //        CurrentExchange = CurrentConversation?.CurrentExchange;
-        //        OnPodChanged();
-        //    }
-
-        //    if (args.PropertyName == nameof(IConversation.RequestSource))
-        //        OnPropertyChanged(nameof(StartedBy));
-
-        //    if (args.PropertyName == nameof(IConversation.Started))
-        //    {
-        //        OnPropertyChanged(nameof(Started));
-        //        OnPropertyChanged(nameof(ConversationTitle));
-        //    }
-
-        //    if (args.PropertyName == nameof(IConversation.Ended))
-        //    {
-        //        OnPropertyChanged(nameof(Ended));
-        //        OnPropertyChanged(nameof(ConversationTitle));
-        //    }
-
-        //    if (args.PropertyName == nameof(IConversation.Intent))
-        //        OnPropertyChanged(nameof(ConversationIntent));
-        //}
-
-        //private void Exchange_PropertyChanged(object sender, PropertyChangedEventArgs args)
-        //{
-        //    switch (args.PropertyName)
-        //    {
-        //        case "":
-        //            OnPodChanged();
-        //            break;
-        //        case nameof(IMessageExchangeProgress.Waiting):
-        //            OnPropertyChanged(nameof(this.RequestPhase));
-        //            break;
-        //        case nameof(IMessageExchangeProgress.Running):
-        //            OnPropertyChanged(nameof(this.RequestPhase));
-        //            break;
-        //        case nameof(IMessageExchangeProgress.Finished):
-        //            OnPropertyChanged(this.RequestPhase);
-        //            OnPropertyChanged(nameof(this.ExchangeActionResult));
-        //            break;
-        //        case nameof(IMessageExchangeProgress.ActionText):
-        //            OnPropertyChanged(nameof(this.ExchangeActionResult));
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //}
-
-        //private void Result_PropertyChanged(object sender, PropertyChangedEventArgs args)
-        //{
-        //    switch (args.PropertyName)
-        //    {
-        //        case "":
-        //            OnPodChanged();
-        //            break;
-        //        case nameof(IMessageExchangeResult.Type):
-        //            OnPropertyChanged(nameof(this.RequestType));
-        //            break;
-        //        case nameof(IMessageExchangeResult.RequestTime):
-        //            OnPropertyChanged(nameof(this.RequestPhase));
-        //            break;
-        //        case nameof(IMessageExchangeResult.Success):
-        //            OnPropertyChanged(nameof(this.ExchangeActionResult));
-        //            break;
-        //        case nameof(IMessageExchangeResult.Failure):
-        //            OnPropertyChanged(nameof(this.ExchangeActionResult));
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //}
-
-
-        //protected override void OnDisposeManagedResources()
-        //{
-        //    CurrentExchange = null;
-        //    CurrentConversation = null;
-        //}
+        public string ExchangeActionResult
+        {
+            get
+            {
+                if (exchangeProgress == null)
+                    return string.Empty;
+                else if (exchangeProgress.Finished)
+                {
+                    if (exchangeProgress.Result.Success)
+                        return "Result received";
+                    else
+                        return $"Messsage exchange failed: {exchangeProgress.Result.Failure}";
+                }
+                else
+                {
+                    return exchangeProgress.ActionText;
+                }
+            }
+        }
     }
 }
