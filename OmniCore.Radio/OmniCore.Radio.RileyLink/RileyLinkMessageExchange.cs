@@ -89,29 +89,6 @@ namespace OmniCore.Radio.RileyLink
                             this.Pod.RuntimeVariables.PacketSequence = (received.Sequence + 1) % 32;
                         }
                     }
-                    catch(OmniCoreProtocolException ocp)
-                    {
-                        //if (ocp.FailureType == FailureType.AlreadyExecuted)
-                        //{
-                        //    Pod.RuntimeVariables.PacketSequence--;
-                        //    Pod.RuntimeVariables.PacketSequence--;
-
-                        //    if (MessageExchangeParameters.MessageSequenceOverride.HasValue)
-                        //    {
-                        //        MessageExchangeParameters.MessageSequenceOverride -= 1;
-                        //    }
-                        //    else
-                        //    {
-                        //        if (Pod.Status == null)
-                        //            MessageExchangeParameters.MessageSequenceOverride = 0xF;
-                        //        else
-                        //            Pod.Status.MessageSequence -= 1;
-                        //    }
-                        //    sendMessage = true;
-                        //}
-                        //else
-                            throw;
-                    }
                     catch(Exception)
                     {
                         throw;
@@ -221,7 +198,7 @@ namespace OmniCore.Radio.RileyLink
                 await Task.Delay(2000);
 
             if (timeoutCount == 15)
-                await RileyLink.Reset(messageProgress);
+                await Task.Delay(2000);
 
             if (timeoutCount == 25)
                 await Task.Delay(2000);
@@ -241,7 +218,7 @@ namespace OmniCore.Radio.RileyLink
                 messageProgress.ActionText = $"Error communicating with RileyLink (retry: #{radioErrorCount})";
 
             if (radioErrorCount % 2 == 1)
-                await RileyLink.Reset(messageProgress);
+                await Task.Delay(2000);
 
             if (radioErrorCount == 6)
                 Pod.RuntimeVariables.PacketSequence = 0;
@@ -252,16 +229,7 @@ namespace OmniCore.Radio.RileyLink
 
         private async Task HandleProtocolException(OmniCoreErosException pe, IMessageExchangeProgress messageProgress, int protocolErrorCount)
         {
-            //if (protocolErrorCount < 5 && pe.ReceivedPacket != null && pe.ExpectedType.HasValue)
-            //{
-            //    if (pe.ReceivedPacket.Type == PacketType.ACK)
-            //    {
-            //        //await FindOutWhat(messageProgress);
-            //        //Pod.Status.MessageSequence--;
-            //        throw new OmniCoreProtocolException(FailureType.AlreadyExecuted);
-            //    }
-            //}
-            throw pe;
+            throw new OmniCoreProtocolException(FailureType.PodResponseUnexpected);
         }
 
         //private async Task FindOutWhat(IMessageExchangeProgress progress)
@@ -424,7 +392,7 @@ namespace OmniCore.Radio.RileyLink
                 catch (OmniCoreRadioException pre)
                 {
                     Debug.WriteLine($"Radio error during send, retrying {pre}");
-                    await RileyLink.Reset(messageProgress);
+                    await Task.Delay(2000);
                     start_time = Environment.TickCount;
                 }
                 catch (Exception) { throw; }

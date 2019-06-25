@@ -67,6 +67,35 @@ namespace OmniCore.Model.Eros
         }
 
         private async Task<bool> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
+            IConversation conversation = null, IMessageExchangeProgress progress = null)
+        {
+            int retries = 0;
+            while(retries < 2)
+            {
+                try
+                {
+                    var ret = await PerformExchangeInternal(requestMessage, messageExchangeParameters, conversation, progress);
+                    if (!ret && progress.Result.Exception is OmniCoreProtocolException)
+                    {
+                        retries++;
+                        if (requestMessage.RequestType != RequestType.Status)
+                        {
+                            var statusRequest = new ErosMessageBuilder().WithStatus(0).Build();
+                            await PerformExchangeInternal(statusRequest, messageExchangeParameters, conversation, progress);
+                        }
+                    }
+                    else
+                        return ret;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            return false;
+        }
+
+        private async Task<bool> PerformExchangeInternal(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
                     IConversation conversation = null, IMessageExchangeProgress progress = null)
         {
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
@@ -80,6 +109,7 @@ namespace OmniCore.Model.Eros
                 var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
                 await messageExchange.InitializeExchange(progress);
                 var response = await messageExchange.GetResponse(requestMessage, progress);
+
                 messageExchange.ParseResponse(response, Pod, progress);
 
                 if (ErosPod.RuntimeVariables.NonceSync.HasValue)

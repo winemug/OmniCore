@@ -202,26 +202,6 @@ namespace OmniCore.Radio.RileyLink
             }
         }
 
-        public async Task Reset(IMessageExchangeProgress messageProgress)
-        {
-            if (messageProgress != null)
-                messageProgress.ActionText = "Resetting RileyLink device";
-            try
-            {
-                if (Device.IsConnected())
-                {
-                    Device.CancelConnection();
-                }
-                Device = null;
-                await EnsureDevice(messageProgress);
-            }
-            catch (OmniCoreException) { throw; }
-            catch (Exception e)
-            {
-                throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "Error while resetting rileylink", e);
-            }
-        }
-
         public async Task<Bytes> GetPacket(IMessageExchangeProgress messageProgress, uint timeout = 5000)
         {
             try
