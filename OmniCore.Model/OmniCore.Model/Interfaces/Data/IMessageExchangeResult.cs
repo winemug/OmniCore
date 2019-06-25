@@ -31,6 +31,7 @@ namespace OmniCore.Model.Interfaces.Data
         IFault Fault { get; set; }
         IStatus Status { get; set; }
         IUserSettings UserSettings { get; set; }
+        IMessageExchangeProgress ExchangeProgress { get; set; }
 
         long? StatisticsId { get; set; }
         long? ParametersId { get; set; }

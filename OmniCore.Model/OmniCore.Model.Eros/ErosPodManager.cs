@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;

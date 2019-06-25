@@ -46,7 +46,7 @@ namespace OmniCore.Model.Eros
         public MessageExchangeProgress(IConversation conversation, RequestType type, string parameters = null)
         {
             Conversation = conversation;
-            Result = new ErosMessageExchangeResult() {
+            Result = new ErosMessageExchangeResult(this) {
                 Source = Conversation.RequestSource,
                 Type = type,
                 Parameters = parameters};

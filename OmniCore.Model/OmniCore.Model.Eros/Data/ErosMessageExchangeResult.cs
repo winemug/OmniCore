@@ -22,6 +22,15 @@ namespace OmniCore.Model.Eros.Data
         private IMessageExchangeStatistics statistics;
         private IStatus status;
 
+        public ErosMessageExchangeResult()
+        {
+        }
+
+        public ErosMessageExchangeResult(IMessageExchangeProgress exchangeProgress)
+        {
+            ExchangeProgress = exchangeProgress;
+        }
+
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
 
@@ -29,7 +38,7 @@ namespace OmniCore.Model.Eros.Data
 
         public DateTimeOffset? RequestTime { get => requestTime; set => SetProperty(ref requestTime, value); }
         [Indexed]
-        public DateTimeOffset? ResultTime { get => resultTime; set => SetProperty(ref resultTime,  value); }
+        public DateTimeOffset? ResultTime { get => resultTime; set => SetProperty(ref resultTime, value); }
 
         public RequestSource Source { get => source; set => SetProperty(ref source, value); }
         public RequestType Type { get => type; set => SetProperty(ref type, value); }
@@ -70,5 +79,7 @@ namespace OmniCore.Model.Eros.Data
         [Ignore]
         public IUserSettings UserSettings { get; set; }
 
+        [Ignore]
+        public IMessageExchangeProgress ExchangeProgress { get; set; }
     }
 }

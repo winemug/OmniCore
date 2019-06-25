@@ -35,8 +35,13 @@ namespace OmniCore.Mobile.Android
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            if (!Xamarin.Forms.Forms.IsInitialized)
-                return StartCommandResult.NotSticky;
+            if (intent == null)
+            {
+                OmniCoreServices.Logger.Debug($"Received null intent");
+                RegisterForegroundService();
+                isStarted = true;
+                return StartCommandResult.Sticky;
+            }
 
             OmniCoreServices.Logger.Debug($"Service command received: {intent.Action}");
             if (intent.Action == ACTION_START_SERVICE && !isStarted)
@@ -63,6 +68,7 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
+
             lock (this)
             {
                 var request = intent.GetStringExtra("request");

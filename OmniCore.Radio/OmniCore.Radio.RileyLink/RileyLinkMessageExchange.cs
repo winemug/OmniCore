@@ -81,9 +81,9 @@ namespace OmniCore.Radio.RileyLink
                             ((RileyLinkStatistics)messageProgress.Result.Statistics).StartPacketExchange();
                             messageProgress.ActionText = $"Sending radio packet {packetIndex + 1} of {packetCount}";
                             if (packetIndex == 0)
-                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 15000);
-                            else
                                 received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 30000);
+                            else
+                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 60000);
 
                             ((RileyLinkStatistics)messageProgress.Result.Statistics).EndPacketExchange();
                             this.Pod.RuntimeVariables.PacketSequence = (received.Sequence + 1) % 32;
@@ -303,8 +303,8 @@ namespace OmniCore.Radio.RileyLink
         {
             Bytes receivedData = null;
             Debug.WriteLine($"SEND PKT {packet_to_send}");
-            if (this.LastPacketSent == 0 || (Environment.TickCount - this.LastPacketSent) > 2000)
-                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 300, 1, 300);
+            if (this.LastPacketSent == 0 || (Environment.TickCount - this.LastPacketSent) > 4000)
+                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 1, 50, 300, 1, 300);
             else
                 receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 120, 0, 40);
 

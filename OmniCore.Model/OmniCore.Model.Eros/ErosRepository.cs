@@ -249,11 +249,10 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return WithStatistics(conn.Table<ErosMessageExchangeResult>()
-                    .OrderByDescending(x => x.Id)
-                    .Take(maxCount)
+                return WithStatistics(conn.Query<ErosMessageExchangeResult>(
+                    "SELECT * FROM ErosMessageExchangeResult ORDER BY Id DESC LIMIT ?", maxCount)
                     .ToList(), conn);
-            }
+            };
         }
 
         private List<ErosMessageExchangeResult> WithStatistics(List<ErosMessageExchangeResult> list,

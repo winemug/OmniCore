@@ -16,5 +16,7 @@ namespace OmniCore.Mobile.Base.Interfaces
         Task<SynchronizationContext> GetMainSyncContext();
         string GetPublicDataPath();
         void Exit();
+        void AcquireWakeLock();
+        void ReleaseWakeLock();
     }
 }

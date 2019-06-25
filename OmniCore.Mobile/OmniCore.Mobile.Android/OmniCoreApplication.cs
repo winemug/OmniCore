@@ -74,6 +74,27 @@ namespace OmniCore.Mobile.Android
             return Path.Combine(storagePath, "omnicore");
         }
 
+        private PowerManager.WakeLock wakeLock;
+
+        public void AcquireWakeLock()
+        {
+            if (this.wakeLock != null)
+            {
+                PowerManager pm = (PowerManager)Application.Context.GetSystemService(Context.PowerService);
+                this.wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.LocationModeNoChange, "OmniCorePodOperation");
+                this.wakeLock.Acquire();
+            }
+        }
+
+        public void ReleaseWakeLock()
+        {
+            if (this.wakeLock != null)
+            {
+                this.wakeLock.Release();
+                this.wakeLock = null;
+            }
+        }
+
         //public async Task RunOnUi(Func<Task> action)
         //{
         //    Xamarin.Forms.Device.InvokeOnMainThreadAsync()

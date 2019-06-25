@@ -60,6 +60,8 @@ namespace OmniCore.Model.Eros
 
         public ErosConversation(SemaphoreSlim conversationMutex, IPod pod)
         {
+            OmniCoreServices.Application.AcquireWakeLock();
+
             Started = DateTimeOffset.UtcNow;
             ConversationMutex = conversationMutex;
             CancellationTokenSource = new CancellationTokenSource();
@@ -146,6 +148,7 @@ namespace OmniCore.Model.Eros
                     ConversationMutex.Release();
                     CancellationTokenSource.Dispose();
                     //Pod.ActiveConversation = null;
+                    OmniCoreServices.Application.ReleaseWakeLock();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
