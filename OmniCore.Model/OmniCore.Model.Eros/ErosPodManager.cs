@@ -67,21 +67,21 @@ namespace OmniCore.Model.Eros
         }
 
         private async Task<bool> PerformExchange(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
-            IConversation conversation = null, IMessageExchangeProgress progress = null)
+            IConversation conversation)
         {
             int retries = 0;
             while(retries < 2)
             {
                 try
                 {
-                    var ret = await PerformExchangeInternal(requestMessage, messageExchangeParameters, conversation, progress);
-                    if (!ret && progress.Result.Exception is OmniCoreProtocolException)
+                    var ret = await PerformExchangeInternal(requestMessage, messageExchangeParameters, conversation);
+                    if (!ret && conversation.Exception != null && conversation.Exception is OmniCoreProtocolException)
                     {
                         retries++;
                         if (requestMessage.RequestType != RequestType.Status)
                         {
                             var statusRequest = new ErosMessageBuilder().WithStatus(0).Build();
-                            await PerformExchangeInternal(statusRequest, messageExchangeParameters, conversation, progress);
+                            await PerformExchangeInternal(statusRequest, messageExchangeParameters, conversation);
                         }
                     }
                     else
@@ -96,11 +96,10 @@ namespace OmniCore.Model.Eros
         }
 
         private async Task<bool> PerformExchangeInternal(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
-                    IConversation conversation = null, IMessageExchangeProgress progress = null)
+                    IConversation conversation)
         {
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
-            if (conversation != null && progress == null)
-                progress = conversation.NewExchange(requestMessage);
+            var progress = conversation.NewExchange(requestMessage);
             try
             {
                 progress.ActionText = "Started new message exchange";
@@ -474,15 +473,7 @@ namespace OmniCore.Model.Eros
                         .WithBasalSchedule(profile.BasalSchedule, (ushort)podDate.Hour, (ushort)podDate.Minute, (ushort)podDate.Second)
                         .Build();
 
-                    var progress = conversation.NewExchange(request);
-                    progress.Result.BasalSchedule = new ErosBasalSchedule()
-                    {
-                        BasalSchedule = profile.BasalSchedule,
-                        PodDateTime = podDate,
-                        UtcOffset = profile.UtcOffset
-                    };
-
-                    if (!await PerformExchange(request, parameters, null, progress))
+                    if (!await PerformExchange(request, parameters, conversation))
                         return;
 
                     if (Pod.LastStatus.Progress != PodProgress.BasalScheduleSet)
@@ -665,8 +656,7 @@ namespace OmniCore.Model.Eros
                     UtcOffset = profile.UtcOffset
                 };
 
-                if (!await PerformExchange(request, parameters, null, progress))
-                    return;
+                await PerformExchange(request, parameters, conversation);
 
             }
             catch (Exception e)
