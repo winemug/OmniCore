@@ -25,18 +25,18 @@
             </ShellContent>
         </Tab>
     </FlyoutItem>
-    <!--<FlyoutItem Title="Settings">
+    <FlyoutItem Title="Settings">
         <Tab Title="General">
             <ShellContent>
                 <vwSettings:GeneralSettingsPage/>
             </ShellContent>
         </Tab>
-        <Tab Title="Pod">
+        <!--<Tab Title="Pod">
             <ShellContent>
                 <vwSettings:PodSettingsPage/>
             </ShellContent>
-        </Tab>
-    </FlyoutItem>-->
+        </Tab>-->
+    </FlyoutItem>
     <FlyoutItem Title="Help">
         <Tab>
             <ShellContent>

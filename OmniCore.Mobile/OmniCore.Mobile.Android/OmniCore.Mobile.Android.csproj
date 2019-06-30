@@ -33,7 +33,7 @@
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <BundleAssemblies>false</BundleAssemblies>
-    <AndroidSupportedAbis>armeabi-v7a;arm64-v8a</AndroidSupportedAbis>
+    <AndroidSupportedAbis>arm64-v8a</AndroidSupportedAbis>
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
     <MonoDroidExtraArgs>
     </MonoDroidExtraArgs>
@@ -43,7 +43,7 @@
     <AndroidUseAapt2>false</AndroidUseAapt2>
     <AndroidDexTool>dx</AndroidDexTool>
     <AndroidEnableMultiDex>false</AndroidEnableMultiDex>
-    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
     <MandroidI18n />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -58,7 +58,7 @@
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <BundleAssemblies>false</BundleAssemblies>
-    <AndroidSupportedAbis />
+    <AndroidSupportedAbis>armeabi-v7a;arm64-v8a</AndroidSupportedAbis>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
     <AndroidLinkMode>None</AndroidLinkMode>
@@ -131,6 +131,10 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\launcher_foreground.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj">
+      <Project>{95B9264A-45B1-49AF-8495-12A5C63C12A7}</Project>
+      <Name>OmniCore.Model.Eros</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj">
       <Project>{22ac504d-6b45-4fe9-97a6-e7404c15ce19}</Project>
       <Name>OmniCore.Model</Name>

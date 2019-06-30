@@ -10,6 +10,7 @@ using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Enums;
 using OmniCore.Mobile.Base;
+using OmniCore.Model.Data;
 
 namespace OmniCore.Model.Eros
 {
@@ -24,7 +25,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private readonly string DbPath;
+        public readonly string DbPath;
         //private string DbConnectionString;
 
         private ErosRepository()
@@ -38,9 +39,6 @@ namespace OmniCore.Model.Eros
         {
             try
             {
-                //var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "omnicode.back.db3");
-                //File.Copy(DbPath, backupPath);
-
                 using (var conn = new SQLiteConnection(DbPath))
                 {
                     conn.BeginTransaction();
@@ -55,6 +53,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosMessageExchangeStatistics>();
                     conn.CreateTable<ErosProfile>();
                     conn.CreateTable<ErosRadioPreferences>();
+                    conn.CreateTable<OmniCoreSettings>();
 
                     if (conn.Table<ErosProfile>().Count() == 0)
                     {
@@ -73,29 +72,21 @@ namespace OmniCore.Model.Eros
                         });
                     }
 
-#if DEBUG
-                    conn.Table<ErosRadioPreferences>().Delete(x => true);
-#endif
-
                     if (conn.Table<ErosRadioPreferences>().Count() == 0)
                     {
-#if DEBUG
-                        conn.Insert(new ErosRadioPreferences()
-                        {
-                            ConnectToAny = true,
-                            //PreferredRadios = new Guid[]
-                            //{
-                            //    Guid.Parse("00000000-0000-0000-0000-886b0fec4d1a")
-                            //}
-                        });
-#else
                         conn.Insert(new ErosRadioPreferences()
                         {
                             ConnectToAny = true
                         });
-#endif
                     }
 
+                    if (conn.Table<OmniCoreSettings>().Count() == 0)
+                    {
+                        conn.Insert(new OmniCoreSettings()
+                        {
+                            AcceptCommandsFromAAPS = true
+                        });
+                    }
                     conn.Commit();
                 }
             }
@@ -135,11 +126,27 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return conn.Table<ErosRadioPreferences>().Single();
+                return conn.Table<ErosRadioPreferences>().FirstOrDefault();
             }
         }
 
-            public ErosPod GetLastActivated()
+        public OmniCoreSettings GetOmniCoreSettings()
+        {
+            using (var conn = GetConnection())
+            {
+                return conn.Table<OmniCoreSettings>().FirstOrDefault();
+            }
+        }
+
+        public void SaveOmniCoreSettings(OmniCoreSettings settings)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Update(settings);
+            }
+        }
+
+        public ErosPod GetLastActivated()
         {
             using (var conn = GetConnection())
             {
@@ -261,10 +268,10 @@ namespace OmniCore.Model.Eros
             foreach (var result in list)
             {
                 if (result.StatusId.HasValue)
-                    result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+                    result.Status = conn.Table<ErosStatus>().FirstOrDefault(x => x.Id == result.StatusId.Value);
 
                 if (result.StatisticsId.HasValue)
-                    result.Statistics = conn.Table<ErosMessageExchangeStatistics>().Single(x => x.Id == result.StatisticsId.Value);
+                    result.Statistics = conn.Table<ErosMessageExchangeStatistics>().FirstOrDefault(x => x.Id == result.StatisticsId.Value);
             }
             return list;
         }
@@ -319,13 +326,13 @@ namespace OmniCore.Model.Eros
         private ErosMessageExchangeResult WithRelations(ErosMessageExchangeResult result, SQLiteConnection conn)
         {
             if (result.StatusId.HasValue)
-                result.Status = conn.Table<ErosStatus>().Single(x => x.Id == result.StatusId.Value);
+                result.Status = conn.Table<ErosStatus>().FirstOrDefault(x => x.Id == result.StatusId.Value);
 
             if (result.BasalScheduleId.HasValue)
-                result.BasalSchedule = conn.Table<ErosBasalSchedule>().Single(x => x.Id == result.BasalScheduleId.Value);
+                result.BasalSchedule = conn.Table<ErosBasalSchedule>().FirstOrDefault(x => x.Id == result.BasalScheduleId.Value);
 
             if (result.FaultId.HasValue)
-                result.Fault = conn.Table<ErosFault>().Single(x => x.Id == result.FaultId.Value);
+                result.Fault = conn.Table<ErosFault>().FirstOrDefault(x => x.Id == result.FaultId.Value);
 
             return result;
         }

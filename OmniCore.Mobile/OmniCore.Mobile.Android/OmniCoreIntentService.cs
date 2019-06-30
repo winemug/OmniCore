@@ -16,6 +16,7 @@ using OmniCore.Mobile.Base.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Utilities;
 using OmniCore.Mobile.Base;
+using OmniCore.Model.Eros;
 
 namespace OmniCore.Mobile.Android
 {
@@ -29,6 +30,7 @@ namespace OmniCore.Mobile.Android
         public const string NOTIFICATION_CHANNEL = "OmniCore";
         public const string NOTIFICATION_CHANNEL_NAME = "OmniCore";
         public const string NOTIFICATION_CHANNEL_DESCRIPTION = "OmniCore";
+        public const int NOTIFICATION_ID = 10001;
 
         private bool isStarted;
 
@@ -66,6 +68,11 @@ namespace OmniCore.Mobile.Android
             return StartCommandResult.Sticky;
         }
 
+        protected override void OnHandleIntent(Intent intent)
+        {
+            throw new NotImplementedException();
+        }
+
         private void HandleRequest(Intent intent)
         {
 
@@ -79,24 +86,37 @@ namespace OmniCore.Mobile.Android
                     {
                         try
                         {
-                            var resultTask = OmniCoreServices.Publisher.GetResult(request);
-                            while (true)
+                            if (ErosRepository.Instance.GetOmniCoreSettings().AcceptCommandsFromAAPS)
                             {
-                                var tr = await Task.WhenAny(resultTask, Task.Delay(5000));
-                                if (tr == resultTask)
-                                    break;
-                                var bb = new Bundle();
-                                OmniCoreServices.Logger.Verbose("Sending busy / keep-alive");
-                                bb.PutBoolean("busy", true);
-                                messenger.Send(new Message { Data = bb });
+                                var resultTask = OmniCoreServices.Publisher.GetResult(request);
+                                while (true)
+                                {
+                                    var tr = await Task.WhenAny(resultTask, Task.Delay(5000));
+                                    if (tr == resultTask)
+                                        break;
+                                    var bb = new Bundle();
+                                    OmniCoreServices.Logger.Verbose("Sending busy / keep-alive");
+                                    bb.PutBoolean("busy", true);
+                                    messenger.Send(new Message { Data = bb });
+                                }
+                                var result = await resultTask;
+                                var b = new Bundle();
+                                b.PutBoolean("finished", true);
+                                b.PutString("response", result);
+                                OmniCoreServices.Logger.Verbose("Responding to request via message object");
+                                messenger.Send(new Message { Data = b });
+                                OmniCoreServices.Logger.Verbose("Message send complete");
                             }
-                            var result = await resultTask;
-                            var b = new Bundle();
-                            b.PutBoolean("finished", true);
-                            b.PutString("response", result);
-                            OmniCoreServices.Logger.Verbose("Responding to request via message object");
-                            messenger.Send(new Message { Data = b });
-                            OmniCoreServices.Logger.Verbose("Message send complete");
+                            else
+                            {
+                                OmniCoreServices.Logger.Verbose("Ignoring AAPS command");
+                                await Task.Delay(30000);
+                                var b = new Bundle();
+                                b.PutBoolean("finished", true);
+                                b.PutString("response", null);
+                                messenger.Send(new Message { Data = b });
+                                OmniCoreServices.Logger.Verbose("Message send complete");
+                            }
                         }
                         catch (Exception e)
                         {
@@ -130,27 +150,23 @@ namespace OmniCore.Mobile.Android
                     notificationManager.CreateNotificationChannel(channel);
                 }
 
-                var intent = new Intent(this, typeof(MainActivity));
-                var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
+                //var intent = new Intent(this, typeof(MainActivity));
+                //var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-                    .SetContentIntent(pendingIntent)
+                    //.SetContentIntent(pendingIntent)
                     .SetContentTitle("OmniCore")
                     .SetContentText("OmniCore is running")
                     .SetSmallIcon(Resource.Drawable.ic_pod);
 
                 var notification = builder.Build();
 
-                StartForeground(10001, notification);
+                StartForeground(NOTIFICATION_ID, notification);
             }
             catch(Exception e)
             {
                 OmniCoreServices.Logger.Error("Error registering foreground service", e);
             }
-        }
-
-        protected override void OnHandleIntent(Intent intent)
-        {
         }
     }
 }

@@ -6,10 +6,16 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.Settings.GeneralSettingsPage">
     <ContentPage.Content>
-      <StackLayout Orientation="Horizontal"
-                   VerticalOptions="Start">
-            <Label Text="Accept AndroidAPS commands" VerticalOptions="Center"/>
-            <Switch IsToggled="{Binding AcceptAAPSCommands}"/>
-        </StackLayout>
-  </ContentPage.Content>
+        <ScrollView>
+            <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal"
+                        VerticalOptions="Start">
+                    <Label Text="Accept AndroidAPS commands" VerticalOptions="Center"/>
+                    <Switch IsToggled="{Binding AcceptAAPSCommands}"/>
+                </StackLayout>
+                <Button Text="Backup Database" Clicked="Backup_Clicked"/>
+                <Button Text="Restore Database" Clicked="Restore_Clicked"/>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
 </ContentPage>
