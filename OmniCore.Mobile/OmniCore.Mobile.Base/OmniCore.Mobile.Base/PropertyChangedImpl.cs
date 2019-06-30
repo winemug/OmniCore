@@ -18,22 +18,27 @@ namespace OmniCore.Mobile.Base
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        public void OnPropertyChanged(object sender, PropertyChangedEventArgs eventArgs)
         {
             if (PropertyChanged != null)
             {
                 if (SynchronizationContext.Current == OmniCoreServices.UiSyncContext)
                 {
-                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                    PropertyChanged.Invoke(sender, eventArgs);
                 }
                 else
                 {
                     Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
-                        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                        PropertyChanged.Invoke(sender, eventArgs);
                     });
                 }
             }
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            OnPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
         protected bool SetProperty<T>(ref T backingStore, T value,

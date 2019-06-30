@@ -15,6 +15,7 @@
                 </StackLayout>
                 <Button Text="Backup Database" Clicked="Backup_Clicked"/>
                 <Button Text="Restore Database" Clicked="Restore_Clicked"/>
+                <Button Text="Erase Database" Clicked="Erase_Clicked"/>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

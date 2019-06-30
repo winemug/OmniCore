@@ -1,20 +1,21 @@
 ﻿using Newtonsoft.Json;
+using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class ResultViewModel : BaseViewModel
     {
-        public ResultViewModel(IMessageExchangeResult result)
+        public ResultViewModel(Page page, IMessageExchangeResult result) : base(page)
         {
             MessageExchangeResult = result;
-            if (result.ExchangeProgress != null)
-                result.ExchangeProgress.PropertyChanged += ExchangeProgress_PropertyChanged;
         }
 
         private IMessageExchangeResult messageExchangeResult;
@@ -25,38 +26,14 @@ namespace OmniCore.Mobile.ViewModels.Pod
             {
                 if (messageExchangeResult != value)
                 {
-                    if (messageExchangeResult != null)
-                        messageExchangeResult.PropertyChanged -= MessageExchangeResult_PropertyChanged;
-
                     messageExchangeResult = value;
-
-                    if (messageExchangeResult != null)
-                        messageExchangeResult.PropertyChanged += MessageExchangeResult_PropertyChanged;
-
                     OnPropertyChanged(nameof(MessageExchangeResult));
                 }
             }
         }
 
-        public RowDefinitionCollection Rows
-        {
-            get
-            {
-                if (IsLive)
-                    return new RowDefinitionCollection() { new RowDefinition(), new RowDefinition(), new RowDefinition() };
-                else
-                    return new RowDefinitionCollection() { new RowDefinition(), new RowDefinition() };
-            }
-        }
-
-        public bool IsLive
-        {
-            get
-            {
-                return MessageExchangeResult.ExchangeProgress != null && !MessageExchangeResult.ExchangeProgress.Finished;
-            }
-        }
-
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Parameters))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Type))]
         public string RequestText
         {
             get
@@ -104,6 +81,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Type))]
         public Color RequestTextColor
         {
             get
@@ -138,6 +116,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.RequestTime))]
         public string RequestDate
         {
             get
@@ -149,6 +128,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
         public string ResultDate
         {
             get
@@ -160,6 +140,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Success))]
         public Color ResultStatusColor
         {
             get
@@ -176,6 +158,11 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Success))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Failure))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.Waiting))]
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.Running))]
         public string ResultStatus
         {
             get
@@ -201,6 +188,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.ActionText))]
         public string ResultActivity
         {
             get
@@ -214,6 +202,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Statistics), nameof(IMessageExchangeStatistics.MobileDeviceRssiAverage))]
         public string RileyLinkRssi
         {
             get
@@ -225,6 +214,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Statistics), nameof(IMessageExchangeStatistics.RadioRssiAverage))]
         public string PodRssi
         {
             get
@@ -237,36 +227,13 @@ namespace OmniCore.Mobile.ViewModels.Pod
         }
 
 
-        private void ExchangeProgress_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            RaiseAllPropertiesChanged();
-        }
-
-        private void MessageExchangeResult_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            RaiseAllPropertiesChanged();
-        }
-
-        private void RaiseAllPropertiesChanged()
-        {
-            OnPropertyChanged(nameof(Rows));
-            OnPropertyChanged(nameof(IsLive));
-            OnPropertyChanged(nameof(ResultActivity));
-            OnPropertyChanged(nameof(RequestText));
-            OnPropertyChanged(nameof(RequestTextColor));
-            OnPropertyChanged(nameof(RequestDate));
-            OnPropertyChanged(nameof(ResultDate));
-            OnPropertyChanged(nameof(ResultStatusColor));
-            OnPropertyChanged(nameof(ResultStatus));
-            OnPropertyChanged(nameof(RileyLinkRssi));
-            OnPropertyChanged(nameof(PodRssi));
-        }
-
         protected override void OnDisposeManagedResources()
         {
-            if (MessageExchangeResult.ExchangeProgress != null)
-                MessageExchangeResult.ExchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
-            MessageExchangeResult = null;
+        }
+
+        protected async override Task<object> BindData()
+        {
+            return this;
         }
     }
 }

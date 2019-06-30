@@ -3,31 +3,41 @@ using OmniCore.Model.Eros;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Settings
 {
-    public class ApplicationSettingsViewModel
+    public class ApplicationSettingsViewModel : BaseViewModel
     {
-        public bool AcceptAAPSCommands
-        {
-            get
-            {
-                return Settings.AcceptCommandsFromAAPS;
-            }
-            set
-            {
-                if (value != Settings.AcceptCommandsFromAAPS)
-                {
-                    Settings.AcceptCommandsFromAAPS = value;
-                    ErosRepository.Instance.SaveOmniCoreSettings(Settings);
-                }
-            }
-        }
+        private bool acceptAAPSCommands;
+        public bool AcceptAAPSCommands { get => acceptAAPSCommands; set => SetProperty(ref acceptAAPSCommands, value); }
 
         private OmniCoreSettings Settings;
-        public ApplicationSettingsViewModel()
+
+        public ApplicationSettingsViewModel(Page page): base(page)
+        {
+        }
+
+        protected async override Task OnAppearing()
+        {
+        }
+
+        protected async override Task OnDisappearing()
+        {
+            Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
+            ErosRepository.Instance.SaveOmniCoreSettings(Settings);
+        }
+
+        protected async override Task<object> BindData()
         {
             Settings = ErosRepository.Instance.GetOmniCoreSettings();
+            this.AcceptAAPSCommands = Settings.AcceptCommandsFromAAPS;
+            return this;
+        }
+
+        protected override void OnDisposeManagedResources()
+        {
         }
     }
 }

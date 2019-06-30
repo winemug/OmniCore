@@ -27,7 +27,7 @@ namespace OmniCore.Mobile.Views.Pod
         public OverviewPage()
         {
             InitializeComponent();
-            BindingContext = viewModel = new OverviewViewModel();
+            BindingContext = viewModel = new OverviewViewModel(this);
         }
 
         private async void Update_Button_Clicked(object sender, EventArgs e)
@@ -47,12 +47,12 @@ namespace OmniCore.Mobile.Views.Pod
                 ensureCalled = true;
                 await EnsurePermissions();
             }
-            viewModel.StartUpdateTimer();
+            //viewModel.StartUpdateTimer();
         }
 
         private void ContentPage_Disappearing(object sender, EventArgs e)
         {
-            viewModel.StopUpdateTimer();
+            //viewModel.StopUpdateTimer();
         }
 
         private async Task EnsurePermissions()
@@ -69,24 +69,6 @@ namespace OmniCore.Mobile.Views.Pod
                         await DisplayAlert("Missing Permissions", "This application cannot run without the necessary permissions.", "OK");
                         OmniCoreServices.Application.Exit();
                     }
-                }
-
-                status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
-                if (status != PermissionStatus.Granted)
-                {
-                    await DisplayAlert("Missing Permissions", "You have to grant the storage permission to this application in order to be able to save and backup configuration data.", "OK");
-                    var request = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
-                    if (request[Permission.Storage] != PermissionStatus.Granted)
-                    {
-                        await DisplayAlert("Missing Permissions", "This application cannot run without the necessary permissions.", "OK");
-                        OmniCoreServices.Application.Exit();
-                    }
-                }
-
-                var storagePath = OmniCoreServices.Application.GetPublicDataPath();
-                if (!Directory.Exists(storagePath))
-                {
-                    Directory.CreateDirectory(storagePath);
                 }
             }
             catch (Exception)

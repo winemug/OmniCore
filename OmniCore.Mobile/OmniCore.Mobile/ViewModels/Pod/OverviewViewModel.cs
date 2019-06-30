@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using System;
@@ -7,62 +8,47 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class OverviewViewModel : BaseViewModel
     {
-        public OverviewViewModel()
+        public OverviewViewModel(Page page) : base(page)
         {
-            OnPodChanged();
         }
 
         private bool TimerShouldRun = false;
-        public void StartUpdateTimer()
+        protected async override Task OnAppearing()
         {
-            if (TimerShouldRun)
-                return;
-
             TimerShouldRun = true;
 
             Device.StartTimer(TimeSpan.FromSeconds(10), () =>
             {
                 Pod?.LastStatus?.UpdateWithEstimates(Pod);
-                OnPropertyChanged(string.Empty);
                 return TimerShouldRun;
             });
         }
 
-        public void StopUpdateTimer()
+        protected async override Task OnDisappearing()
         {
             TimerShouldRun = false;
         }
 
-        protected override void OnPodChanged()
+        protected async override Task<object> BindData()
         {
             Pod?.LastStatus?.UpdateWithEstimates(Pod);
-            OnPropertyChanged(nameof(Id));
-            OnPropertyChanged(nameof(Updated));
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(LifetimeRemaining));
-            OnPropertyChanged(nameof(LifetimeActive));
-            OnPropertyChanged(nameof(LifetimeColor));
-            OnPropertyChanged(nameof(LifetimeProgress));
-            OnPropertyChanged(nameof(ReservoirRemaining));
-            OnPropertyChanged(nameof(ReservoirDelivered));
-            OnPropertyChanged(nameof(ReservoirColor));
-            OnPropertyChanged(nameof(ReservoirProgress));
-            OnPropertyChanged(nameof(BasalStatus));
-            OnPropertyChanged(nameof(BasalText1));
-            OnPropertyChanged(nameof(BasalText2));
+            return this;
         }
 
-        protected override void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected override void OnDisposeManagedResources()
         {
-            OnPodChanged();
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.Lot))]
+        [DependencyPath(nameof(Pod), nameof(IPod.RadioAddress))]
+        [DependencyPath(nameof(Pod), nameof(IPod.Serial))]
         public string Id
         {
             get
@@ -76,6 +62,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Created))]
         public string Updated
         {
             get
@@ -116,6 +103,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public string Status
         {
             get
@@ -158,6 +146,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public string LifetimeRemaining
         {
             get
@@ -174,6 +163,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public string LifetimeActive
         {
             get
@@ -190,6 +180,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public Color LifetimeColor
         {
             get
@@ -213,6 +204,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public double LifetimeProgress
         {
             get
@@ -230,6 +222,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public string ReservoirRemaining
         {
             get
@@ -248,6 +242,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.DeliveredInsulinEstimate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ReservoirUsedForPriming))]
         public string ReservoirDelivered
         {
             get
@@ -266,6 +262,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
         public Color ReservoirColor
         {
             get
@@ -288,6 +285,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
         public double ReservoirProgress
         {
             get
@@ -305,6 +303,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRate))]
         public string BasalStatus
         {
             get
@@ -329,6 +329,10 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ScheduledBasalRate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalTotalHours))]
         public string BasalText1
         {
             get
@@ -362,6 +366,9 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ScheduledBasalAverage))]
+        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRemaining))]
         public string BasalText2
         {
             get

@@ -1,6 +1,8 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Settings;
 using OmniCore.Model.Eros;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,11 +22,13 @@ namespace OmniCore.Mobile.Views.Settings
         public GeneralSettingsPage()
         {
             InitializeComponent();
-            BindingContext = new ApplicationSettingsViewModel();
+            BindingContext = new ApplicationSettingsViewModel(this);
         }
 
         private async void Backup_Clicked(object sender, EventArgs e)
         {
+            if (!await CheckPermissions())
+                return;
             var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "OmniCore_backup.db3");
             if (File.Exists(backupPath))
             {
@@ -41,6 +45,8 @@ namespace OmniCore.Mobile.Views.Settings
 
         private async void Restore_Clicked(object sender, EventArgs e)
         {
+            if (!await CheckPermissions())
+                return;
             var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "OmniCore_backup.db3");
             if (!File.Exists(backupPath))
             {
@@ -58,6 +64,37 @@ namespace OmniCore.Mobile.Views.Settings
                     await DisplayAlert("Database restore", "Restore completed", "OK");
                 }
             }
+        }
+
+        private async void Erase_Clicked(object sender, EventArgs e)
+        {
+            if (!await DisplayAlert("Erase Database", "WARNING: You will lose all data stored in OmniCore.", "Erase ALL", "Cancel"))
+                return;
+
+            File.Delete(ErosRepository.Instance.DbPath);
+            OmniCoreServices.Application.Exit();
+        }
+
+        private async Task<bool> CheckPermissions()
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+            if (status != PermissionStatus.Granted)
+            {
+                await DisplayAlert("Missing Permissions", "You have to grant the storage permission to this application in order to be able to restore and backup the database.", "OK");
+                var request = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
+                if (request[Permission.Storage] != PermissionStatus.Granted)
+                {
+                    await DisplayAlert("Missing Permissions", "This operation cannot be done without the necessary permissions.", "OK");
+                    return false;
+                }
+            }
+
+            var storagePath = OmniCoreServices.Application.GetPublicDataPath();
+            if (!Directory.Exists(storagePath))
+            {
+                Directory.CreateDirectory(storagePath);
+            }
+            return true;
         }
     }
 }

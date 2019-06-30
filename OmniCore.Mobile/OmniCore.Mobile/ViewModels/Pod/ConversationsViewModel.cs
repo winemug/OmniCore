@@ -10,92 +10,34 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class ConversationsViewModel : BaseViewModel
     {
-        private const int MAX_RECORDS = 50;
-        private ObservableCollection<ResultViewModel> results;
+        private const int MAX_RECORDS = 10;
 
+        private ObservableCollection<ResultViewModel> results;
         public ObservableCollection<ResultViewModel> Results { get => results; set => SetProperty(ref results, value); }
 
-        public ConversationsViewModel()
+        public ConversationsViewModel(Page page):base(page)
+        {
+        }
+
+        protected override async Task<object> BindData()
         {
             Results = new ObservableCollection<ResultViewModel>();
             var history = ErosRepository.Instance.GetHistoricalResultsForDisplay(MAX_RECORDS);
             foreach (var result in history)
-                Results.Add(new ResultViewModel(result));
-            OnPodChanged();
+                Results.Add(new ResultViewModel(base.AssociatedPage, result));
+            return this;
         }
-
 
         protected override void OnDisposeManagedResources()
         {
-            if (exchangeProgress != null)
-                exchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
-
-            if (conversation == null)
-                conversation.PropertyChanged -= Conversation_PropertyChanged;
-
             foreach (var result in Results)
                 result.Dispose();
-        }
-
-        protected override async void OnPodChanged()
-        {
-            await UpdateRunningResult(exchangeProgress?.Result);
-            OnPropertyChanged(nameof(ConversationTitle));
-            OnPropertyChanged(nameof(ConversationIntent));
-            OnPropertyChanged(nameof(Started));
-            OnPropertyChanged(nameof(Ended));
-            OnPropertyChanged(nameof(StartedBy));
-            OnPropertyChanged(nameof(this.RequestPhase));
-            OnPropertyChanged(nameof(this.ExchangeActionResult));
-        }
-
-        private IConversation conversation;
-        protected override async void OnPodPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IPod.ActiveConversation))
-            {
-                if (conversation != null)
-                    conversation.PropertyChanged -= Conversation_PropertyChanged;
-
-                conversation = Pod.ActiveConversation;
-
-                if (conversation != null)
-                {
-                    conversation.PropertyChanged += Conversation_PropertyChanged;
-                    await UpdateRunningResult(conversation.CurrentExchange?.Result);
-                }
-
-                OnPodChanged();
-            }
-        }
-
-        private IMessageExchangeProgress exchangeProgress;
-        private async void Conversation_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IConversation.CurrentExchange))
-            {
-                if (exchangeProgress != null)
-                    exchangeProgress.PropertyChanged -= ExchangeProgress_PropertyChanged;
-                exchangeProgress = conversation.CurrentExchange;
-                if (exchangeProgress != null)
-                {
-                    exchangeProgress.PropertyChanged += ExchangeProgress_PropertyChanged;
-                    await UpdateRunningResult(exchangeProgress?.Result);
-                }
-                OnPodChanged();
-            }
-        }
-
-        private async void ExchangeProgress_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IMessageExchangeProgress.Result))
-                await UpdateRunningResult(exchangeProgress?.Result);
-            OnPodChanged();
         }
 
         private IMessageExchangeResult activeResult = null;
@@ -111,9 +53,9 @@ namespace OmniCore.Mobile.ViewModels.Pod
                         {
                             activeResult = newResult;
                             if (results.Count > 0)
-                                results.Insert(0, new ResultViewModel(newResult));
+                                results.Insert(0, new ResultViewModel(base.AssociatedPage, newResult));
                             else
-                                results.Add(new ResultViewModel(newResult));
+                                results.Add(new ResultViewModel(base.AssociatedPage, newResult));
 
                             if (results.Count > MAX_RECORDS)
                                 results.RemoveAt(results.Count - 1);
@@ -123,57 +65,62 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public string ConversationTitle
         {
             get
             {
-                if (conversation == null)
+                if (Pod?.ActiveConversation == null)
                     return "No active conversation";
-                else if (conversation.IsFinished)
+                else if (Pod.ActiveConversation.IsFinished)
                     return "Last Conversation";
                 else
                     return "Active Conversation";
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Intent))]
         public string ConversationIntent
         {
             get
             {
-                if (conversation == null)
+                if (Pod?.ActiveConversation == null)
                     return "";
-                else return conversation.Intent;
+                else return Pod.ActiveConversation.Intent;
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Started))]
         public string Started
         {
             get
             {
-                if (conversation != null)
-                    return conversation.Started.ToLocalTime().ToString("hh:mm:ss");
+                if (Pod?.ActiveConversation != null)
+                    return Pod.ActiveConversation.Started.ToLocalTime().ToString("hh:mm:ss");
                 return "";
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Ended))]
         public string Ended
         {
             get
             {
-                if (conversation != null && conversation.Ended.HasValue)
-                    return conversation.Ended.Value.ToLocalTime().ToString("hh:mm:ss");
+                if (Pod?.ActiveConversation?.Ended != null)
+                    return Pod.ActiveConversation.Ended.Value.ToLocalTime().ToString("hh:mm:ss");
                 return "";
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.RequestSource))]
         public string StartedBy
         {
             get
             {
-                if (conversation == null)
+                if (Pod?.ActiveConversation == null)
                     return "";
                 else
-                    switch (conversation.RequestSource)
+                    switch (Pod.ActiveConversation.RequestSource)
                     {
                         case RequestSource.AndroidAPS:
                             return "Android APS";
@@ -187,10 +134,15 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Waiting))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Finished))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Running))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.RequestTime))]
         public string RequestPhase
         {
             get
             {
+                var exchangeProgress = Pod?.ActiveConversation?.CurrentExchange;
                 if (exchangeProgress == null)
                     return string.Empty;
                 else
@@ -217,10 +169,14 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Finished))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.Success))]
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.Failure))]
         public string ExchangeActionResult
         {
             get
             {
+                var exchangeProgress = Pod?.ActiveConversation?.CurrentExchange;
                 if (exchangeProgress == null)
                     return string.Empty;
                 else if (exchangeProgress.Finished)

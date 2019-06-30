@@ -60,6 +60,11 @@ namespace OmniCore.Model.Eros.Data
                 var utcNow = DateTimeOffset.UtcNow;
 
                 TimeSpan timePast = utcNow - Created;
+                if (timePast.TotalHours > 80)
+                {
+                    timePast = TimeSpan.FromHours(80);
+                    utcNow = Created + timePast;
+                }
 
                 if (Faulted.HasValue && !Faulted.Value
                     && BolusState.HasValue && BolusState.Value == Enums.BolusState.Immediate

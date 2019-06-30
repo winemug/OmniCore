@@ -7,12 +7,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class BaseViewModel : PropertyChangedImpl, IDisposable
+    [Fody.ConfigureAwait(true)]
+    public abstract class BaseViewModel : PropertyChangedImpl, IDisposable
     {
         private IPod pod;
+
+        protected Page AssociatedPage;
+        protected PropertyChangedDependencyHandler DependencyHandler;
+
         public IPod Pod { get => pod; set => SetProperty(ref pod, value); }
 
         public bool PodExistsAndNotBusy
@@ -32,95 +39,72 @@ namespace OmniCore.Mobile.ViewModels
             }
         }
 
-        public BaseViewModel()
+        public BaseViewModel(Page page)
+        {
+            AssociatedPage = page;
+            page.Appearing += Page_Appearing;
+            page.Disappearing += Page_Disappearing;
+            App.Instance.PodProvider.ManagerChanged += PodProvider_PodChanged;
+        }
+
+        //private bool IsViewModelInitialized = false;
+        private async void Page_Appearing(object sender, EventArgs e)
         {
             Pod = App.Instance.PodProvider.PodManager?.Pod;
-            App.Instance.PodProvider.ManagerChanged += PodProvider_PodChanged;
-            if (Pod != null)
-                Pod.PropertyChanged += Pod_PropertyChanged;
+            var data = await BindData();
+            DependencyHandler = new PropertyChangedDependencyHandler(this);
+            await OnAppearing();
+        }
+
+        private async void Page_Disappearing(object sender, EventArgs e)
+        {
+            await OnDisappearing();
+            App.Instance.PodProvider.ManagerChanged -= PodProvider_PodChanged;
+            DependencyHandler?.Dispose();
+        }
+
+        protected abstract Task<object> BindData();
+
+        protected abstract void OnDisposeManagedResources();
+
+        protected async virtual Task OnAppearing()
+        {
+        }
+
+        protected async virtual Task OnDisappearing()
+        {
         }
 
         private void PodProvider_PodChanged(object sender, EventArgs e)
         {
-            if (Pod != null)
-                Pod.PropertyChanged -= Pod_PropertyChanged;
-
             if (App.Instance.PodProvider.PodManager != null)
             {
                 Pod = App.Instance.PodProvider.PodManager?.Pod;
-                Pod.PropertyChanged += Pod_PropertyChanged;
             }
             else
             {
                 Pod = null;
             }
-
-            OnPodChanged();
             OnPropertyChanged(nameof(PodExistsAndNotBusy));
             OnPropertyChanged(nameof(PodNotBusy));
         }
 
-        private IConversation activeConversation;
-        private void Pod_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IPod.ActiveConversation))
-            {
-                if (activeConversation != null)
-                    activeConversation.PropertyChanged -= ActiveConversation_PropertyChanged;
-
-                activeConversation = Pod.ActiveConversation;
-                if (activeConversation != null)
-                    activeConversation.PropertyChanged += ActiveConversation_PropertyChanged;
-
-                OnPropertyChanged(nameof(PodNotBusy));
-                OnPropertyChanged(nameof(PodExistsAndNotBusy));
-            }
-            OnPodPropertyChanged(sender, e);
-        }
-
-        private void ActiveConversation_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IConversation.IsFinished))
-            {
-                OnPropertyChanged(nameof(PodNotBusy));
-                OnPropertyChanged(nameof(PodExistsAndNotBusy));
-            }
-        }
-
-        protected virtual void OnPodChanged()
-        {
-        }
-
-        protected virtual void OnPodPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-        }
-
-        bool isBusy = false;
-        public bool IsBusy
-        {
-            get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
-        }
-
-        string title = string.Empty;
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
-
         private bool disposedValue = false; // To detect redundant calls
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
+                    DependencyHandler?.Dispose();
+
+                    if (AssociatedPage != null)
+                    {
+                        AssociatedPage.Appearing -= Page_Appearing;
+                        AssociatedPage.Disappearing -= Page_Disappearing;
+                    }
+
                     App.Instance.PodProvider.ManagerChanged -= PodProvider_PodChanged;
-                    if (Pod != null)
-                        Pod.PropertyChanged -= Pod_PropertyChanged;
-                    if (activeConversation != null)
-                        activeConversation.PropertyChanged -= ActiveConversation_PropertyChanged;
                     OnDisposeManagedResources();
                 }
 
@@ -129,10 +113,6 @@ namespace OmniCore.Mobile.ViewModels
 
                 disposedValue = true;
             }
-        }
-
-        protected virtual void OnDisposeManagedResources()
-        {
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.

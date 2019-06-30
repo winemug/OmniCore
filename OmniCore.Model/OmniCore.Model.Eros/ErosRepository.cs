@@ -106,9 +106,12 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
+                var t = conn.Table<ErosPod>().ToList();
+
                 return WithRelations(conn.Table<ErosPod>()
                     .Where(x => !x.Archived)
-                    .OrderByDescending(x => x.Created)
+                    .ToList()
+                    .OrderByDescending(x => x.Created.Ticks)
                     .FirstOrDefault(), conn);
             }
         }
@@ -150,7 +153,7 @@ namespace OmniCore.Model.Eros
         {
             using (var conn = GetConnection())
             {
-                return WithRelations(conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate)
+                return WithRelations(conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate.Value.Ticks)
                     .FirstOrDefault(), conn);
             }
         }

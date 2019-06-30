@@ -25,12 +25,11 @@ namespace OmniCore.Mobile.Views.Pod
         public MaintenancePage()
         {
             InitializeComponent();
-            BindingContext = viewModel = new MaintenanceViewModel();
+            BindingContext = viewModel = new MaintenanceViewModel(this);
         }
 
         private async void DeactivateClicked(object sender, EventArgs e)
         {
-            viewModel.ButtonsEnabled = false;
             try
             {
                 var podProvider = App.Instance.PodProvider;
@@ -104,33 +103,28 @@ namespace OmniCore.Mobile.Views.Pod
             }
             finally
             {
-                viewModel.ButtonsEnabled = true;
             }
         }
 
         private async void ActivateClicked(object sender, EventArgs e)
         {
-            viewModel.ButtonsEnabled = false;
             try
             {
                 await Activate();
             }
             finally
             {
-                viewModel.ButtonsEnabled = true;
             }
         }
 
         private async void ResumeActivateClicked(object sender, EventArgs e)
         {
-            viewModel.ButtonsEnabled = false;
             try
             {
                 await Activate();
             }
             finally
             {
-                viewModel.ButtonsEnabled = true;
             }
         }
 

@@ -16,7 +16,7 @@ namespace OmniCore.Mobile.Views.Help
         public AboutPage()
         {
             InitializeComponent();
-            BindingContext = new AboutViewModel();
+            BindingContext = new AboutViewModel(this);
         }
     }
 }
