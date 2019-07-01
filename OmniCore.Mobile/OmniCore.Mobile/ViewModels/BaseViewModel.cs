@@ -22,6 +22,7 @@ namespace OmniCore.Mobile.ViewModels
 
         public IPod Pod { get => pod; set => SetProperty(ref pod, value); }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public bool PodExistsAndNotBusy
         {
             get
@@ -31,6 +32,7 @@ namespace OmniCore.Mobile.ViewModels
             }
         }
 
+        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public bool PodNotBusy
         {
             get
@@ -50,9 +52,9 @@ namespace OmniCore.Mobile.ViewModels
         //private bool IsViewModelInitialized = false;
         private async void Page_Appearing(object sender, EventArgs e)
         {
+            DependencyHandler = new PropertyChangedDependencyHandler(this);
             Pod = App.Instance.PodProvider.PodManager?.Pod;
             var data = await BindData();
-            DependencyHandler = new PropertyChangedDependencyHandler(this);
             await OnAppearing();
         }
 
