@@ -78,7 +78,7 @@ namespace OmniCore.Radio.RileyLink
                     if (!scanResults.Any(r => r.Device.Uuid == sr.Device.Uuid))
                     {
                         scanResults.Add(sr);
-                        if (Preferences.PreferredRadios.Contains(sr.Device.Uuid))
+                        if (Preferences.PreferredRadios != null && Preferences.PreferredRadios.Contains(sr.Device.Uuid))
                         {
                             scanExtension.TrySetResult(0);
                         }
@@ -132,7 +132,12 @@ namespace OmniCore.Radio.RileyLink
 
             var t1 = Device.WhenConnected().FirstAsync().ToTask();
             var t2 = Device.WhenConnectionFailed().FirstAsync().ToTask();
-            var t3 = Task.Delay(20000, messageProgress.Token);
+            Task t3;
+            if (messageProgress == null)
+                t3 = Task.Delay(20000);
+            else
+                t3 = Task.Delay(20000, messageProgress.Token);
+
             var finishedTask = await Task.WhenAny(t1, t2, t3);
             if (finishedTask == t1)
             {

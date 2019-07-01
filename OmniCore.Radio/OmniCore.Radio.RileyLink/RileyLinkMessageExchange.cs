@@ -24,7 +24,7 @@ namespace OmniCore.Radio.RileyLink
         private ErosMessageExchangeParameters MessageExchangeParameters;
         private Task FinalAckTask = null;
 
-        internal RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
+        public RileyLinkMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, RileyLink rileyLinkInstance)
         {
             SetParameters(messageExchangeParameters, pod, rileyLinkInstance);
         }
