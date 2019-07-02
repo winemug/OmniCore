@@ -23,6 +23,12 @@ namespace OmniCore.Model.Eros.Data
         public bool RepeatFirstPacket { get; set;  }
         public bool CriticalWithFollowupRequired { get; set; }
 
+        public ushort? FirstPacketPreambleLength { get; set; }
+        public ushort? SubsequentPacketPreambleLength { get; set; }
+
+        public uint? FirstPacketTimeout { get; set; }
+        public uint? SubsequentPacketTimeout { get; set; }
+
         [Ignore]
         public Nonce Nonce { get; set; }
     }

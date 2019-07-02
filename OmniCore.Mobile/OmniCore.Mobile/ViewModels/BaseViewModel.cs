@@ -15,12 +15,10 @@ namespace OmniCore.Mobile.ViewModels
     [Fody.ConfigureAwait(true)]
     public abstract class BaseViewModel : PropertyChangedImpl, IDisposable
     {
-        private IPod pod;
-
         protected Page AssociatedPage;
         protected PropertyChangedDependencyHandler DependencyHandler;
 
-        public IPod Pod { get => pod; set => SetProperty(ref pod, value); }
+        public IPod Pod { get; set; }
 
         [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public bool PodExistsAndNotBusy

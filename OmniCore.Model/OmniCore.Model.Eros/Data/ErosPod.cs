@@ -20,61 +20,41 @@ namespace OmniCore.Model.Eros.Data
 {
     public class ErosPod : PropertyChangedImpl, IPod
     {
-        private IAlertStates alertStates;
-        private IBasalSchedule basalSchedule;
-        private IFault fault;
-        private IStatus status;
-        private IUserSettings userSettings;
-        private ErosPodRuntimeVariables runtimeVariables;
-        private DateTimeOffset created;
-
-        private uint? lot;
-        private uint? serial;
-        private uint radioAddress;
         private int messageSequence;
-        private DateTimeOffset? activationDate;
-        private DateTimeOffset? insertionDate;
-        private string versionPi;
-        private string versionPm;
-        private string versionUnknown;
-        private bool archived;
-        private decimal? reservoirUsedForPriming;
-        private IMessageExchangeResult lastTempBasalResult;
-        private IConversation activeConversation;
 
         [PrimaryKey]
         public Guid Id { get; set; }
 
-        public DateTimeOffset Created { get => created; set { SetProperty(ref created, value); } }
+        public DateTimeOffset Created { get; set; }
 
-        public uint? Lot { get => lot; set { SetProperty(ref lot, value); } }
-        public uint? Serial { get => serial; set { SetProperty(ref serial, value); } }
-        public uint RadioAddress { get => radioAddress; set { SetProperty(ref radioAddress, value); } }
-        public int MessageSequence { get => messageSequence; set { SetProperty(ref messageSequence, value % 16); } }
-        public DateTimeOffset? ActivationDate { get => activationDate; set { SetProperty(ref activationDate, value); } }
-        public DateTimeOffset? InsertionDate { get => insertionDate; set { SetProperty(ref insertionDate, value); } }
-        public string VersionPi { get => versionPi; set { SetProperty(ref versionPi, value); } }
-        public string VersionPm { get => versionPm; set { SetProperty(ref versionPm, value); } }
-        public string VersionUnknown { get => versionUnknown; set { SetProperty(ref versionUnknown, value); } }
-        public bool Archived { get => archived; set { SetProperty(ref archived, value); } }
-        public decimal? ReservoirUsedForPriming { get => reservoirUsedForPriming; set { SetProperty(ref reservoirUsedForPriming, value); } }
+        public uint? Lot { get; set; }
+        public uint? Serial { get; set; }
+        public uint RadioAddress { get; set; }
+        public int MessageSequence { get => messageSequence; set { messageSequence = value % 16; } }
+        public DateTimeOffset? ActivationDate { get; set; }
+        public DateTimeOffset? InsertionDate { get; set; }
+        public string VersionPi { get; set; }
+        public string VersionPm { get; set; }
+        public string VersionUnknown { get; set; }
+        public bool Archived { get; set; }
+        public decimal? ReservoirUsedForPriming { get; set; }
 
         [Ignore]
-        public IMessageExchangeResult LastTempBasalResult { get => lastTempBasalResult; set => SetProperty(ref lastTempBasalResult, value); }
+        public IMessageExchangeResult LastTempBasalResult { get; set; }
         [Ignore]
-        public IAlertStates LastAlertStates { get => alertStates; set { SetProperty(ref alertStates, value); } }
+        public IAlertStates LastAlertStates { get; set; }
         [Ignore]
-        public IBasalSchedule LastBasalSchedule { get => basalSchedule; set { SetProperty(ref basalSchedule, value); } }
+        public IBasalSchedule LastBasalSchedule { get; set; }
         [Ignore]
-        public IFault LastFault { get => fault; set { SetProperty(ref fault, value); } }
+        public IFault LastFault { get; set; }
         [Ignore]
-        public IStatus LastStatus { get => status; set { SetProperty(ref status, value); } }
+        public IStatus LastStatus { get; set; }
         [Ignore]
-        public IUserSettings LastUserSettings { get => userSettings; set { SetProperty(ref userSettings, value); } }
+        public IUserSettings LastUserSettings { get; set; }
         [Ignore]
-        public ErosPodRuntimeVariables RuntimeVariables { get => runtimeVariables; set { SetProperty(ref runtimeVariables, value); } }
+        public ErosPodRuntimeVariables RuntimeVariables { get; set; }
         [Ignore]
-        public IConversation ActiveConversation { get => activeConversation; set { SetProperty(ref activeConversation, value); } }
+        public IConversation ActiveConversation { get; set; }
 
         public ErosPod()
         {

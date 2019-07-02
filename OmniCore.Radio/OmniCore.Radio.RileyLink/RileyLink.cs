@@ -144,6 +144,8 @@ namespace OmniCore.Radio.RileyLink
                 ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
 
                 Debug.WriteLine($"MTU Size: {Device.MtuSize}");
+                var response = await Device.RequestMtu(185);
+                Debug.WriteLine($"MTU req response: {response}");
 
                 if (messageProgress != null)
                     messageProgress.ActionText = "Configuring RileyLink";

@@ -172,7 +172,6 @@ namespace OmniCore.Mobile.Base
 
         private void Instance_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Debug.WriteLine($"PPPPPPPPPPPPPPPPPPPPPPPPPPP: {sender} {e.PropertyName}");
             if (Children != null)
             {
                 foreach (var child in Children.Where(c => c.PInfo.Name == e.PropertyName))
@@ -188,7 +187,6 @@ namespace OmniCore.Mobile.Base
             {
                 foreach (var targetPropertyName in TargetPropertyNames)
                 {
-                    Debug.WriteLine($"PPPPPPPPPPPPPPPPPPPPPPPPPPP Raising: {targetPropertyName}");
                     TargetInstance.OnPropertyChanged(this, new PropertyChangedEventArgs(targetPropertyName));
                 }
             }

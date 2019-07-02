@@ -271,10 +271,16 @@ namespace OmniCore.Radio.RileyLink
         {
             Bytes receivedData = null;
             Debug.WriteLine($"SEND PKT {packet_to_send}");
-            if (this.LastPacketSent == 0 || (Environment.TickCount - this.LastPacketSent) > 4000)
-                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 1, 50, 300, 1, 300);
+
+            uint firstTimeout = MessageExchangeParameters.FirstPacketTimeout ?? 300;
+            uint subsequentTimeout = MessageExchangeParameters.SubsequentPacketTimeout ?? 120;
+            ushort firstSeed = MessageExchangeParameters.FirstPacketPreambleLength ?? 300;
+            ushort subsequentSeed = MessageExchangeParameters.SubsequentPacketPreambleLength ?? 40;
+
+            if (this.LastPacketSent == 0 || (Environment.TickCount - this.LastPacketSent) > 500)
+                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, firstTimeout, 0, firstSeed);
             else
-                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, 120, 0, 40);
+                receivedData = await RileyLink.SendAndGetPacket(messageProgress, packet_to_send.GetPacketData(), 0, 0, subsequentTimeout, 0, subsequentSeed);
 
             var receivedPacket = this.GetPacket(receivedData);
             if (receivedPacket == null)

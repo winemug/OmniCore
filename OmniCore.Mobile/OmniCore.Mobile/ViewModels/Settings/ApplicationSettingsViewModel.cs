@@ -10,8 +10,7 @@ namespace OmniCore.Mobile.ViewModels.Settings
 {
     public class ApplicationSettingsViewModel : BaseViewModel
     {
-        private bool acceptAAPSCommands;
-        public bool AcceptAAPSCommands { get => acceptAAPSCommands; set => SetProperty(ref acceptAAPSCommands, value); }
+        public bool AcceptAAPSCommands { get; set; }
 
         private OmniCoreSettings Settings;
 

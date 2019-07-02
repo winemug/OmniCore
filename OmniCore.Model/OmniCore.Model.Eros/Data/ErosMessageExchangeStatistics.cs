@@ -12,37 +12,26 @@ namespace OmniCore.Model.Eros.Data
 {
     public class ErosMessageExchangeStatistics : PropertyChangedImpl, IMessageExchangeStatistics
     {
-        private DateTimeOffset created;
-        private int queueWaitDuration;
-        private int exchangeDuration;
-        private int totalRadioOverhead;
-        private int packetExchangeCount;
-        private int packetExchangeDurationAverage;
-        private int? radioRssiAverage;
-        private int? mobileDeviceRssiAverage;
-        private int? podRssi;
-        private int? podLowGain;
-
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
         public Guid PodId { get; set; }
-        public DateTimeOffset Created { get => created; set => SetProperty(ref created, value); }
+        public DateTimeOffset Created { get; set; }
 
-        public int QueueWaitDuration { get => queueWaitDuration; set => SetProperty(ref queueWaitDuration, value); }
+        public int QueueWaitDuration { get; set; }
 
-        public int ExchangeDuration { get => exchangeDuration; set => SetProperty(ref exchangeDuration, value); }
+        public int ExchangeDuration { get; set; }
 
-        public int TotalRadioOverhead { get => totalRadioOverhead; set => SetProperty(ref totalRadioOverhead, value); }
+        public int TotalRadioOverhead { get; set; }
 
-        public int PacketExchangeCount { get => packetExchangeCount; set => SetProperty(ref packetExchangeCount, value); }
+        public int PacketExchangeCount { get; set; }
 
-        public int PacketExchangeDurationAverage { get => packetExchangeDurationAverage; set => SetProperty(ref packetExchangeDurationAverage, value); }
+        public int PacketExchangeDurationAverage { get; set; }
 
-        public int? RadioRssiAverage { get => radioRssiAverage; set => SetProperty(ref radioRssiAverage, value); }
-        public int? MobileDeviceRssiAverage { get => mobileDeviceRssiAverage; set => SetProperty(ref mobileDeviceRssiAverage, value); }
+        public int? RadioRssiAverage { get; set; }
+        public int? MobileDeviceRssiAverage { get; set; }
 
-        public int? PodRssi { get => podRssi; set => SetProperty(ref podRssi, value); }
-        public int? PodLowGain { get => podLowGain; set => SetProperty(ref podLowGain, value); }
+        public int? PodRssi { get; set; }
+        public int? PodLowGain { get; set; }
         public int PowerAdjustmentCount { get; set; }
 
         public virtual void BeforeSave()

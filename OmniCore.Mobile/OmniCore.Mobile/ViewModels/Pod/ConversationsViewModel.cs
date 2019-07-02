@@ -18,8 +18,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
     {
         private const int MAX_RECORDS = 10;
 
-        private ObservableCollection<ResultViewModel> results;
-        public ObservableCollection<ResultViewModel> Results { get => results; set => SetProperty(ref results, value); }
+        public ObservableCollection<ResultViewModel> Results { get; set; }
 
         public ConversationsViewModel(Page page):base(page)
         {
@@ -52,13 +51,13 @@ namespace OmniCore.Mobile.ViewModels.Pod
                         if (activeResult != newResult)
                         {
                             activeResult = newResult;
-                            if (results.Count > 0)
-                                results.Insert(0, new ResultViewModel(base.AssociatedPage, newResult));
+                            if (Results.Count > 0)
+                                Results.Insert(0, new ResultViewModel(base.AssociatedPage, newResult));
                             else
-                                results.Add(new ResultViewModel(base.AssociatedPage, newResult));
+                                Results.Add(new ResultViewModel(base.AssociatedPage, newResult));
 
-                            if (results.Count > MAX_RECORDS)
-                                results.RemoveAt(results.Count - 1);
+                            if (Results.Count > MAX_RECORDS)
+                                Results.RemoveAt(Results.Count - 1);
                         }
                     }
                 });
