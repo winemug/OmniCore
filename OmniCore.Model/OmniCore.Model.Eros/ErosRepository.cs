@@ -255,87 +255,95 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public List<ErosMessageExchangeResult> GetHistoricalResultsForDisplay(int maxCount)
+        public async Task<List<ErosMessageExchangeResult>> GetHistoricalResultsForDisplay(int maxCount)
         {
-            using (var conn = GetConnection())
+            var conn = new SQLiteAsyncConnection(DbPath);
+            try
             {
-                return WithStatistics(conn.Query<ErosMessageExchangeResult>(
-                    "SELECT * FROM ErosMessageExchangeResult ORDER BY Id DESC LIMIT ?", maxCount)
-                    .ToList(), conn);
-            };
+                return await WithStatistics(
+                    await conn.QueryAsync<ErosMessageExchangeResult>("SELECT * FROM ErosMessageExchangeResult ORDER BY Id DESC LIMIT ?", maxCount)
+                    , conn);
+            }
+            finally
+            {
+                await conn?.CloseAsync();
+            }
         }
 
-        private List<ErosMessageExchangeResult> WithStatistics(List<ErosMessageExchangeResult> list,
-            SQLiteConnection conn)
+        private async Task<List<ErosMessageExchangeResult>> WithStatistics(List<ErosMessageExchangeResult> list,
+            SQLiteAsyncConnection conn)
         {
             foreach (var result in list)
             {
                 if (result.StatusId.HasValue)
-                    result.Status = conn.Table<ErosStatus>().FirstOrDefault(x => x.Id == result.StatusId.Value);
+                    result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
 
                 if (result.StatisticsId.HasValue)
-                    result.Statistics = conn.Table<ErosMessageExchangeStatistics>().FirstOrDefault(x => x.Id == result.StatisticsId.Value);
+                    result.Statistics = await conn.Table<ErosMessageExchangeStatistics>().FirstOrDefaultAsync(x => x.Id == result.StatisticsId.Value);
             }
             return list;
         }
 
-        public List<ErosMessageExchangeResult> GetHistoricalResultsForRemoteApp(long lastResultDate)
+        public async Task<List<ErosMessageExchangeResult>> GetHistoricalResultsForRemoteApp(long lastResultDate)
         {
-            using (var conn = GetConnection())
+            var conn = new SQLiteAsyncConnection(DbPath);
+            try
             {
                 long lastId = 0;
                 var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
                 var dtNow = DateTimeOffset.UtcNow;
                 if ((dtNow - dtLastResult).TotalDays > 1)
                     dtLastResult = dtNow.AddDays(-1);
-                var correspondingResult = conn.Query<ErosMessageExchangeResult>(
-                    "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks)
-                    .FirstOrDefault();
+                var correspondingResults = await conn.QueryAsync<ErosMessageExchangeResult>(
+                    "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks);
 
-                if (correspondingResult != null)
+                if (correspondingResults != null && correspondingResults.Count > 0)
                 {
-                    lastId = correspondingResult.Id.Value;
+                    lastId = correspondingResults[0].Id.Value;
                 }
 
-                return WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
+                return await WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
                     .Where(x => x.Success && x.Id > lastId)
                     .OrderBy(x => x.Id), conn);
             }
+            finally
+            {
+                await conn?.CloseAsync();
+            }
         }
 
-        private List<ErosMessageExchangeResult> WithHistoricalRelations(TableQuery<ErosMessageExchangeResult> tableQuery,
-            SQLiteConnection conn)
+        private async Task<List<ErosMessageExchangeResult>> WithHistoricalRelations(AsyncTableQuery<ErosMessageExchangeResult> tableQuery,
+            SQLiteAsyncConnection conn)
         {
             var list = new List<ErosMessageExchangeResult>();
-            foreach(var result in tableQuery)
+            foreach(var result in await tableQuery.ToListAsync())
             {
                 if (result.Type == RequestType.CancelBolus)
                 {
-                    var bolusEntry = conn.Table<ErosMessageExchangeResult>()
+                    var bolusEntry = await conn.Table<ErosMessageExchangeResult>()
                         .Where(x => x.Success && x.Type == RequestType.Bolus && x.Id < result.Id)
-                        .OrderByDescending(x => x.Id)
-                        .FirstOrDefault();
+                        .OrderByDescending(x => x.Id).FirstOrDefaultAsync();
 
                     if (bolusEntry != null)
                     {
-                        list.Add(WithRelations(bolusEntry, conn));
+                        list.Add(await WithRelations(bolusEntry, conn));
                     }
                 }
-                list.Add(WithRelations(result, conn));
+                list.Add(await WithRelations(result, conn));
             }
             return list.OrderBy(x => x.Id).ToList();
         }
 
-        private ErosMessageExchangeResult WithRelations(ErosMessageExchangeResult result, SQLiteConnection conn)
+        private async Task<ErosMessageExchangeResult> WithRelations(ErosMessageExchangeResult result, SQLiteAsyncConnection conn)
         {
             if (result.StatusId.HasValue)
-                result.Status = conn.Table<ErosStatus>().FirstOrDefault(x => x.Id == result.StatusId.Value);
+                result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
 
             if (result.BasalScheduleId.HasValue)
-                result.BasalSchedule = conn.Table<ErosBasalSchedule>().FirstOrDefault(x => x.Id == result.BasalScheduleId.Value);
+                result.BasalSchedule = await conn.Table<ErosBasalSchedule>().FirstOrDefaultAsync(x => x.Id == result.BasalScheduleId.Value);
 
             if (result.FaultId.HasValue)
-                result.Fault = conn.Table<ErosFault>().FirstOrDefault(x => x.Id == result.FaultId.Value);
+                result.Fault = await conn.Table<ErosFault>().FirstOrDefaultAsync(x => x.Id == result.FaultId.Value);
 
             return result;
         }

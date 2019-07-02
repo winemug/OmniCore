@@ -74,7 +74,7 @@ namespace OmniCore.Mobile.Services
                         result = await GetStatus();
                         break;
                 }
-                FillResultsToDate(request, result);
+                await FillResultsToDate(request, result);
             }
             catch(Exception e)
             {
@@ -257,12 +257,12 @@ namespace OmniCore.Mobile.Services
             return ResultWithProfile().WithSuccess();
         }
 
-        private void FillResultsToDate(RemoteRequest request, RemoteResult result)
+        private async Task FillResultsToDate(RemoteRequest request, RemoteResult result)
         {
             try
             {
                 var rep = ErosRepository.Instance;
-                var unfilteredResults = rep.GetHistoricalResultsForRemoteApp(request.LastResultDateTime);
+                var unfilteredResults = await rep.GetHistoricalResultsForRemoteApp(request.LastResultDateTime);
 
                 var list = new List<HistoricalResult>();
 
