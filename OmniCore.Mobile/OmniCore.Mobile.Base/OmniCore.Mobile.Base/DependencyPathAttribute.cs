@@ -9,12 +9,10 @@ namespace OmniCore.Mobile.Base
     public class DependencyPathAttribute : Attribute
     {
         public string[] PropertiesInPath { get; private set; }
-        public PropertyInfo[] PropertyInfos { get; set; }
 
         public DependencyPathAttribute(params string[] propertiesInPath)
         {
             PropertiesInPath = propertiesInPath;
-            PropertyInfos = new PropertyInfo[propertiesInPath.Length];
         }
     }
 }

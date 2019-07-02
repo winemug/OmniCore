@@ -6,6 +6,7 @@
              xmlns:vwPod="clr-namespace:OmniCore.Mobile.Views.Pod"
              xmlns:vwSettings="clr-namespace:OmniCore.Mobile.Views.Settings"
              xmlns:vwHelp="clr-namespace:OmniCore.Mobile.Views.Help"
+             xmlns:vwTest="clr-namespace:OmniCore.Mobile.Views.Test"
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.MainPage">
     <FlyoutItem Title="Pod">
@@ -36,6 +37,13 @@
                 <vwSettings:PodSettingsPage/>
             </ShellContent>
         </Tab>-->
+    </FlyoutItem>
+    <FlyoutItem Title="Test">
+        <Tab Title="Debug">
+            <ShellContent>
+                <vwTest:DebugPage/>
+            </ShellContent>
+        </Tab>
     </FlyoutItem>
     <FlyoutItem Title="Help">
         <Tab>

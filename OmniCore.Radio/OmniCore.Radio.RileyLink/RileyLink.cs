@@ -128,7 +128,7 @@ namespace OmniCore.Radio.RileyLink
             if (messageProgress != null)
                 messageProgress.ActionText = "Connecting to RileyLink";
 
-            Device.Connect(new ConnectionConfig() { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
+            Device.Connect(new ConnectionConfig() { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = true });
 
             var t1 = Device.WhenConnected().FirstAsync().ToTask();
             var t2 = Device.WhenConnectionFailed().FirstAsync().ToTask();
@@ -142,6 +142,8 @@ namespace OmniCore.Radio.RileyLink
             if (finishedTask == t1)
             {
                 ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioConnnected();
+
+                Debug.WriteLine($"MTU Size: {Device.MtuSize}");
 
                 if (messageProgress != null)
                     messageProgress.ActionText = "Configuring RileyLink";
@@ -211,7 +213,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await EnsureDevice(messageProgress);
+                // await EnsureDevice(messageProgress);
                 var cmdParams = new Bytes((byte)0);
                 cmdParams.Append(timeout);
 
@@ -235,7 +237,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await EnsureDevice(messageProgress);
+                // await EnsureDevice(messageProgress);
                 Debug.WriteLine($"SEND radio packet: {packet}");
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes((byte)0).Append(repeat_count);
@@ -256,7 +258,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                await EnsureDevice(messageProgress);
+                // await EnsureDevice(messageProgress);
                 var data = ManchesterEncoding.Encode(packet);
                 var cmdParams = new Bytes()
                     .Append((byte)0)

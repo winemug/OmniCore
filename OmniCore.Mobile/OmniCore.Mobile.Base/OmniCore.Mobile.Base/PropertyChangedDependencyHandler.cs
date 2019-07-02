@@ -4,123 +4,37 @@ using System.ComponentModel;
 using System.Text;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace OmniCore.Mobile.Base
 {
     public class PropertyChangedDependencyHandler : IDisposable
     {
-        private Dictionary<INotifyPropertyChanged, Dictionary<string,IList<Tuple<string, PropertyChangedEventArgs>>>> NotifyLookup;
-        private Dictionary<string, INotifyPropertyChanged> PathLookup;
-        private Dictionary<PropertyInfo, DependencyPathAttribute[]> DependencyAttributes;
+        private DependencyNode Root;
 
-        private PropertyChangedImpl TargetInstance;
         public PropertyChangedDependencyHandler(PropertyChangedImpl instance)
         {
-            TargetInstance = instance;
-            InitializeDependencies();
-            CreateDependencies();
+            InitializeDependencies(instance);
         }
 
-        private void InitializeDependencies()
+        private void InitializeDependencies(PropertyChangedImpl targetInstance)
         {
-            DependencyAttributes = new Dictionary<PropertyInfo, DependencyPathAttribute[]>();
-            var allProperties = TargetInstance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            foreach (var property in allProperties)
+            var allProperties = targetInstance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+            Root = new DependencyNode(targetInstance);
+
+            foreach (var targetProperty in allProperties)
             {
-                var attributes = (DependencyPathAttribute[])property.GetCustomAttributes(typeof(DependencyPathAttribute), true);
+                var attributes = (DependencyPathAttribute[])targetProperty.GetCustomAttributes(typeof(DependencyPathAttribute), true);
                 if (attributes != null && attributes.Length > 0)
                 {
-                    DependencyAttributes.Add(property, attributes);
-                    foreach(var attribute in attributes)
+                    foreach (var attribute in attributes)
                     {
-                        var sourceType = TargetInstance.GetType();
-                        for(int i=0; i< attribute.PropertiesInPath.Length; i++)
-                        {
-                            var pi = sourceType.GetProperty(attribute.PropertiesInPath[i], BindingFlags.Public | BindingFlags.Instance);
-                            attribute.PropertyInfos[i] = pi;
-                            sourceType = pi.PropertyType;
-                        }
+                        var currentNode = Root;
+                        foreach (var pathPropertyName in attribute.PropertiesInPath)
+                            currentNode = currentNode.AddChild(pathPropertyName);
+                        currentNode.AddTargetPropertyName(targetProperty.Name, targetInstance);
                     }
-                }
-            }
-        }
-
-        private void CreateDependencies()
-        {
-            NotifyLookup = new Dictionary<INotifyPropertyChanged, Dictionary<string, IList<Tuple<string, PropertyChangedEventArgs>>>>();
-            PathLookup = new Dictionary<string, INotifyPropertyChanged>();
-
-            foreach (var targetProperty in DependencyAttributes.Keys)
-            {
-                foreach(var attrib in DependencyAttributes[targetProperty])
-                {
-                    UpdateDependencyChain(TargetInstance, attrib.PropertyInfos, targetProperty.Name);
-                }
-            }
-        }
-
-        private void UpdateDependencyChain(INotifyPropertyChanged instance, PropertyInfo[] sourcePropertyInfos, string targetPropertyName)
-        {
-            string sourcePath = "";
-            foreach (var sourcePropertyInfo in sourcePropertyInfos)
-            {
-                sourcePath += "." + sourcePropertyInfo.Name;
-                if (instance != null)
-                {
-                    CreateUpdateDependency(instance, sourcePropertyInfo.Name, sourcePath, targetPropertyName);
-                    instance = sourcePropertyInfo.GetValue(instance) as INotifyPropertyChanged;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        public void CreateUpdateDependency(INotifyPropertyChanged source, string sourcePropertyName, string sourcePath, string targetPropertyName)
-        {
-            if (PathLookup.ContainsKey(sourcePath))
-            {
-                var oldSource = PathLookup[sourcePath];
-                if (oldSource != source)
-                {
-                    oldSource.PropertyChanged -= PropertyChangedHandler;
-                    NotifyLookup.Remove(oldSource);
-                }
-            }
-            else
-            {
-                PathLookup.Add(sourcePath, source);
-                source.PropertyChanged += PropertyChangedHandler;
-            }
-
-            if (!NotifyLookup.ContainsKey(source))
-            {
-                NotifyLookup.Add(source, new Dictionary<string, IList<Tuple<string, PropertyChangedEventArgs>>>());
-            }
-            if (!NotifyLookup[source].ContainsKey(sourcePropertyName))
-            {
-                NotifyLookup[source].Add(sourcePropertyName, new List<Tuple<string, PropertyChangedEventArgs>>());
-            }
-
-            NotifyLookup[source][sourcePropertyName].Add(new Tuple<string, PropertyChangedEventArgs>(sourcePath, new PropertyChangedEventArgs(targetPropertyName)));
-        }
-
-        private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
-        {
-            var sourceInstance = (INotifyPropertyChanged)sender;
-            var source = NotifyLookup[sourceInstance];
-            if (string.IsNullOrEmpty(e.PropertyName) || source.ContainsKey(e.PropertyName))
-            {
-                var list = source[e.PropertyName].ToList();
-                foreach (var t in list)
-                {
-                    TargetInstance.OnPropertyChanged(TargetInstance, t.Item2);
-                }
-
-                foreach (var t in list)
-                {
-                    CreateUpdateDependency(sourceInstance, e.PropertyName, t.Item1, t.Item2.PropertyName);
                 }
             }
         }
@@ -135,10 +49,8 @@ namespace OmniCore.Mobile.Base
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    foreach(var handler in NotifyLookup.Keys)
-                    {
-                        handler.PropertyChanged -= PropertyChangedHandler;
-                    }
+                    Root.DisposeChildren();
+                    Root.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -164,5 +76,171 @@ namespace OmniCore.Mobile.Base
             // GC.SuppressFinalize(this);
         }
         #endregion
+    }
+    class DependencyNode : IDisposable
+    {
+        string PropertyName;
+        DependencyNode Parent;
+        List<DependencyNode> Children;
+
+        private INotifyPropertyChanged privateInstance;
+        INotifyPropertyChanged Instance
+        {
+            get
+            {
+                return privateInstance;
+            }
+            set
+            {
+                if (value != privateInstance)
+                {
+                    if (privateInstance != null)
+                        privateInstance.PropertyChanged -= Instance_PropertyChanged;
+                    privateInstance = value;
+                    if (privateInstance != null)
+                        privateInstance.PropertyChanged += Instance_PropertyChanged;
+                }
+            }
+        }
+        PropertyChangedImpl TargetInstance;
+        HashSet<string> TargetPropertyNames;
+        PropertyInfo PInfo;
+
+        private DependencyNode() { }
+
+        public DependencyNode(INotifyPropertyChanged rootInstance)
+        {
+            Instance = rootInstance;
+        }
+
+        public void DisposeChildren()
+        {
+            if (Children != null)
+            {
+                foreach(var child in Children)
+                {
+                    child.DisposeChildren();
+                    child.Dispose();
+                }
+            }
+        }
+
+        public DependencyNode AddChild(string propertyName)
+        {
+            DependencyNode child = null;
+
+            if (Children != null)
+            {
+                child = Children.Where(c => c.PropertyName == propertyName).FirstOrDefault();
+            }
+            else
+            {
+                Children = new List<DependencyNode>();
+                if (Parent != null)
+                    EvaluateInstance();
+            }
+
+            if (child == null)
+            {
+                Type instanceType = this.Instance?.GetType() ?? this.PInfo.PropertyType;
+                child = new DependencyNode()
+                {
+                    Parent = this,
+                    PropertyName = propertyName,
+                    PInfo = instanceType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance),
+                };
+                Children.Add(child);
+            }
+            return child;
+        }
+
+        private void EvaluateInstance()
+        {
+            if (Children != null)
+            {
+                if (Parent.Instance == null)
+                    Instance = null;
+                else
+                    Instance = PInfo.GetValue(Parent.Instance) as INotifyPropertyChanged;
+
+                foreach (var child in Children)
+                    child.EvaluateInstance();
+            }
+
+            RaiseTargets(null);
+        }
+
+        private void Instance_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Debug.WriteLine($"PPPPPPPPPPPPPPPPPPPPPPPPPPP: {sender} {e.PropertyName}");
+            if (Children != null)
+            {
+                foreach (var child in Children.Where(c => c.PInfo.Name == e.PropertyName))
+                    child.EvaluateInstance();
+            }
+
+            RaiseTargets(e.PropertyName);
+        }
+
+        private void RaiseTargets(string propertyName)
+        {
+            if (TargetPropertyNames != null && PInfo != null && (propertyName == null || PInfo.Name == propertyName))
+            {
+                foreach (var targetPropertyName in TargetPropertyNames)
+                {
+                    Debug.WriteLine($"PPPPPPPPPPPPPPPPPPPPPPPPPPP Raising: {targetPropertyName}");
+                    TargetInstance.OnPropertyChanged(this, new PropertyChangedEventArgs(targetPropertyName));
+                }
+            }
+        }
+
+        public void AddTargetPropertyName(string propertyName, PropertyChangedImpl targetInstance)
+        {
+            if (TargetPropertyNames == null)
+            {
+                TargetPropertyNames = new HashSet<string>();
+            }
+            TargetPropertyNames.Add(propertyName);
+            TargetInstance = targetInstance;
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    if (Instance != null)
+                        Instance.PropertyChanged -= Instance_PropertyChanged;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~DependencyNode()
+        // {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
     }
 }
