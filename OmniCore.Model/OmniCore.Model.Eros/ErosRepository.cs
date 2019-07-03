@@ -273,13 +273,16 @@ namespace OmniCore.Model.Eros
         private async Task<List<ErosMessageExchangeResult>> WithStatistics(List<ErosMessageExchangeResult> list,
             SQLiteAsyncConnection conn)
         {
-            foreach (var result in list)
+            if (list != null)
             {
-                if (result.StatusId.HasValue)
-                    result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
+                foreach (var result in list)
+                {
+                    if (result.StatusId.HasValue)
+                        result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
 
-                if (result.StatisticsId.HasValue)
-                    result.Statistics = await conn.Table<ErosMessageExchangeStatistics>().FirstOrDefaultAsync(x => x.Id == result.StatisticsId.Value);
+                    if (result.StatisticsId.HasValue)
+                        result.Statistics = await conn.Table<ErosMessageExchangeStatistics>().FirstOrDefaultAsync(x => x.Id == result.StatisticsId.Value);
+                }
             }
             return list;
         }
@@ -302,9 +305,9 @@ namespace OmniCore.Model.Eros
                     lastId = correspondingResults[0].Id.Value;
                 }
 
-                return await WithHistoricalRelations(conn.Table<ErosMessageExchangeResult>()
+                return await WithHistoricalRelations(await conn.Table<ErosMessageExchangeResult>()
                     .Where(x => x.Success && x.Id > lastId)
-                    .OrderBy(x => x.Id), conn);
+                    .OrderBy(x => x.Id).ToListAsync(), conn);
             }
             finally
             {
@@ -312,11 +315,14 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private async Task<List<ErosMessageExchangeResult>> WithHistoricalRelations(AsyncTableQuery<ErosMessageExchangeResult> tableQuery,
+        private async Task<List<ErosMessageExchangeResult>> WithHistoricalRelations(List<ErosMessageExchangeResult> listResults,
             SQLiteAsyncConnection conn)
         {
+            if (listResults == null)
+                return null;
+
             var list = new List<ErosMessageExchangeResult>();
-            foreach(var result in await tableQuery.ToListAsync())
+            foreach(var result in listResults)
             {
                 if (result.Type == RequestType.CancelBolus)
                 {

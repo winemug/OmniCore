@@ -28,7 +28,7 @@
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.3" />
     <PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.0.1" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.6.258-beta" />
   </ItemGroup>
 
   <!-- Include Nuget Package for Tizen Project building -->
