@@ -75,7 +75,6 @@ namespace OmniCore.Mobile.Android
 
         private void HandleRequest(Intent intent)
         {
-
             lock (this)
             {
                 var request = intent.GetStringExtra("request");
@@ -84,8 +83,19 @@ namespace OmniCore.Mobile.Android
                 {
                     var t = Task.Run(async () =>
                     {
+                        IWakeLock wakeLock = null;
                         try
                         {
+                            wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("OmniCoreServiceHandler");
+                            if (!await wakeLock.Acquire(5000))
+                            {
+                                OmniCoreServices.Logger.Verbose("Wakelock acquisition failed, sending null response");
+                                var b = new Bundle();
+                                b.PutBoolean("finished", true);
+                                b.PutString("response", null);
+                                messenger.Send(new Message { Data = b });
+                                OmniCoreServices.Logger.Verbose("Message send complete");
+                            }
                             if (ErosRepository.Instance.GetOmniCoreSettings().AcceptCommandsFromAAPS)
                             {
                                 var resultTask = OmniCoreServices.Publisher.GetResult(request);
@@ -122,6 +132,10 @@ namespace OmniCore.Mobile.Android
                         {
                             OmniCoreServices.Logger.Error("Error handling remote request", e);
                         }
+                        finally
+                        {
+                            wakeLock?.Dispose();
+                        }
                     });
                 }
                 catch (AggregateException ae)
@@ -150,11 +164,11 @@ namespace OmniCore.Mobile.Android
                     notificationManager.CreateNotificationChannel(channel);
                 }
 
-                //var intent = new Intent(this, typeof(MainActivity));
-                //var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.UpdateCurrent);
+                var intent = new Intent(this, typeof(MainActivity));
+                var pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Immutable);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-                    //.SetContentIntent(pendingIntent)
+                    .SetContentIntent(pendingIntent)
                     .SetContentTitle("OmniCore")
                     .SetContentText("OmniCore is running")
                     .SetSmallIcon(Resource.Drawable.ic_pod);
