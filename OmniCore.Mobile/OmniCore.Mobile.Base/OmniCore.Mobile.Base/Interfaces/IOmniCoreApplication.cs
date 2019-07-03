@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Android.OS;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -16,7 +17,6 @@ namespace OmniCore.Mobile.Base.Interfaces
         Task<SynchronizationContext> GetMainSyncContext();
         string GetPublicDataPath();
         void Exit();
-        void AcquireWakeLock();
-        void ReleaseWakeLock();
+        IWakeLock NewBluetoothWakeLock(string name);
     }
 }

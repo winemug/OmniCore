@@ -1,4 +1,5 @@
 ﻿using OmniCore.Mobile.Base;
+using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
@@ -47,18 +48,41 @@ namespace OmniCore.Model.Eros
 
         public async Task<IConversation> StartConversation(string intent, int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
         {
-            if (timeoutMilliseconds == 0)
+            IWakeLock wakeLock = null;
+            try
             {
-                await ConversationMutex.WaitAsync();
-            }
-            else
-            {
-                if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
-                    throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
-            }
+                wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock(
+                    Guid.NewGuid().ToString()
+                    .Replace('-', '_')
+                    .Replace('{', '_')
+                    .Replace('}', '_')
+                    );
 
-            Pod.ActiveConversation = new ErosConversation(ConversationMutex, Pod) { RequestSource = source, Intent = intent };
-            return Pod.ActiveConversation;
+                var ret = await wakeLock.Acquire(10000);
+                if (!ret)
+                {
+                    wakeLock.Release();
+                    throw new OmniCoreException(FailureType.WakeLockNotAcquired);
+                }
+
+                if (timeoutMilliseconds == 0)
+                {
+                    await ConversationMutex.WaitAsync();
+                }
+                else
+                {
+                    if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
+                        throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
+                }
+
+                Pod.ActiveConversation = new ErosConversation(ConversationMutex, wakeLock, Pod) { RequestSource = source, Intent = intent };
+                return Pod.ActiveConversation;
+            }
+            catch
+            {
+                wakeLock?.Dispose();
+                throw;
+            }
         }
 
         private ErosMessageExchangeParameters GetStandardParameters()

@@ -105,6 +105,7 @@
     <Compile Include="OmniCoreApplication.cs" />
     <Compile Include="OmniCoreIntentService.cs" />
     <Compile Include="OmniCoreLogger.cs" />
+    <Compile Include="OmniCoreWakeLock.cs" />
     <Compile Include="RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

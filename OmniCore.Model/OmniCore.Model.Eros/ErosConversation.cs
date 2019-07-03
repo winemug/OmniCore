@@ -1,4 +1,5 @@
 ﻿using OmniCore.Mobile.Base;
+using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
@@ -55,13 +56,12 @@ namespace OmniCore.Model.Eros
         private IPod Pod;
         private Exception exception;
         private readonly SemaphoreSlim ConversationMutex;
+        private readonly IWakeLock WakeLock;
         private readonly CancellationTokenSource CancellationTokenSource;
         private TaskCompletionSource<bool> CancellationCompletion;
 
-        public ErosConversation(SemaphoreSlim conversationMutex, IPod pod)
+        public ErosConversation(SemaphoreSlim conversationMutex, IWakeLock wakeLock, IPod pod)
         {
-            OmniCoreServices.Application.AcquireWakeLock();
-
             Started = DateTimeOffset.UtcNow;
             ConversationMutex = conversationMutex;
             CancellationTokenSource = new CancellationTokenSource();
@@ -134,9 +134,9 @@ namespace OmniCore.Model.Eros
                     IsFinished = true;
                     Ended = DateTimeOffset.UtcNow;
                     ConversationMutex.Release();
+                    WakeLock.Release();
                     CancellationTokenSource.Dispose();
                     //Pod.ActiveConversation = null;
-                    OmniCoreServices.Application.ReleaseWakeLock();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

@@ -14,6 +14,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Mobile.Base.Interfaces;
+using OmniCore.Model.Exceptions;
 using Environment = Android.OS.Environment;
 
 namespace OmniCore.Mobile.Android
@@ -74,25 +75,11 @@ namespace OmniCore.Mobile.Android
             return Path.Combine(storagePath, "omnicore");
         }
 
-        private PowerManager.WakeLock wakeLock;
-
-        public void AcquireWakeLock()
+        public IWakeLock NewBluetoothWakeLock(string name)
         {
-            if (this.wakeLock != null)
-            {
-                PowerManager pm = (PowerManager)Application.Context.GetSystemService(Context.PowerService);
-                this.wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.LocationModeNoChange, "OmniCorePodOperation");
-                this.wakeLock.Acquire();
-            }
-        }
-
-        public void ReleaseWakeLock()
-        {
-            if (this.wakeLock != null)
-            {
-                this.wakeLock.Release();
-                this.wakeLock = null;
-            }
+            PowerManager pm = (PowerManager)Application.Context.GetSystemService(Context.PowerService);
+            var wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.LocationModeNoChange, name);
+            return new OmniCoreWakeLock(wakeLock);
         }
 
         //public async Task RunOnUi(Func<Task> action)

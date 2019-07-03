@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.ViewModels.Test;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Mobile.ViewModels.Test;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
@@ -93,7 +94,11 @@ namespace OmniCore.Mobile.Views.Test
             var pod = App.Instance.PodProvider.PodManager.Pod;
             var rme = new RileyLinkMessageExchange(parameters, pod, rl);
             var mutex = new SemaphoreSlim(1, 1);
-            var conv = new ErosConversation(mutex, pod);
+            var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("radio_test");
+            if (!await wakeLock.Acquire(10000))
+                return;
+
+            var conv = new ErosConversation(mutex, wakeLock, pod);
             var progress = new MessageExchangeProgress(conv, msg.RequestType);
             progress.Result.Statistics = stats;
             try

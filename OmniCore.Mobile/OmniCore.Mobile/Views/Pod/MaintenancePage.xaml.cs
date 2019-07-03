@@ -39,7 +39,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                 if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    using (conversation = await podManager.StartConversation("Update Status"))
+                    using (conversation = await podManager.StartConversation("Checking Activation Status"))
                     {
                         await podManager.UpdateStatus(conversation);
                     }
