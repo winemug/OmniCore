@@ -13,7 +13,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class ResultViewModel : BaseViewModel
     {
-        public ResultViewModel(Page page, IMessageExchangeResult result) : base(page)
+        public ResultViewModel(IMessageExchangeResult result)
         {
             MessageExchangeResult = result;
         }
@@ -231,7 +231,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
         }
 
-        protected async override Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             return this;
         }

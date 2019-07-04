@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Help
 {
-    public class AboutViewModel : BaseViewModel
+    public class AboutViewModel : PageViewModel
     {
         public AboutViewModel(Page page) : base(page)
         {
@@ -21,7 +21,7 @@ namespace OmniCore.Mobile.ViewModels.Help
             }
         }
 
-        protected override async Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             return this;
         }

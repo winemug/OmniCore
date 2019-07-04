@@ -22,7 +22,7 @@ namespace OmniCore.Mobile.Views.Settings
         public GeneralSettingsPage()
         {
             InitializeComponent();
-            BindingContext = new ApplicationSettingsViewModel(this);
+            new ApplicationSettingsViewModel(this);
         }
 
         private async void Backup_Clicked(object sender, EventArgs e)

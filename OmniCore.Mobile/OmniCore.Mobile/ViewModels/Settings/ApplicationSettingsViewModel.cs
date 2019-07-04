@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Settings
 {
-    public class ApplicationSettingsViewModel : BaseViewModel
+    public class ApplicationSettingsViewModel : PageViewModel
     {
         public bool AcceptAAPSCommands { get; set; }
 
@@ -28,7 +28,7 @@ namespace OmniCore.Mobile.ViewModels.Settings
             ErosRepository.Instance.SaveOmniCoreSettings(Settings);
         }
 
-        protected async override Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             Settings = ErosRepository.Instance.GetOmniCoreSettings();
             this.AcceptAAPSCommands = Settings.AcceptCommandsFromAAPS;

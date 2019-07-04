@@ -14,7 +14,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
-    public class ConversationsViewModel : BaseViewModel
+    public class ConversationsViewModel : PageViewModel
     {
         private const int MAX_RECORDS = 10;
 
@@ -24,12 +24,14 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
         }
 
-        protected override async Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             Results = new ObservableCollection<ResultViewModel>();
             var history = await ErosRepository.Instance.GetHistoricalResultsForDisplay(MAX_RECORDS).ConfigureAwait(true);
             foreach (var result in history)
-                Results.Add(new ResultViewModel(base.AssociatedPage, result));
+            {
+                Results.Add((ResultViewModel)await new ResultViewModel(result).DataBind());
+            }
             return this;
         }
 
@@ -39,39 +41,15 @@ namespace OmniCore.Mobile.ViewModels.Pod
                 result.Dispose();
         }
 
-        private IMessageExchangeResult activeResult = null;
-        private async Task UpdateRunningResult(IMessageExchangeResult newResult)
-        {
-            if (newResult != null)
-            {
-                await OmniCoreServices.Application.RunOnMainThread(() =>
-                {
-                    lock (this)
-                    {
-                        if (activeResult != newResult)
-                        {
-                            activeResult = newResult;
-                            if (Results.Count > 0)
-                                Results.Insert(0, new ResultViewModel(base.AssociatedPage, newResult));
-                            else
-                                Results.Add(new ResultViewModel(base.AssociatedPage, newResult));
-
-                            if (Results.Count > MAX_RECORDS)
-                                Results.RemoveAt(Results.Count - 1);
-                        }
-                    }
-                });
-            }
-        }
-
         [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public string ConversationTitle
         {
             get
             {
-                if (Pod?.ActiveConversation == null)
+                var b = Pod?.ActiveConversation?.IsFinished;
+                if (!b.HasValue)
                     return "No active conversation";
-                else if (Pod.ActiveConversation.IsFinished)
+                else if (b.Value)
                     return "Last Conversation";
                 else
                     return "Active Conversation";
@@ -83,9 +61,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (Pod?.ActiveConversation == null)
-                    return "";
-                else return Pod.ActiveConversation.Intent;
+                return Pod?.ActiveConversation?.Intent;
             }
         }
 
@@ -94,9 +70,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (Pod?.ActiveConversation != null)
-                    return Pod.ActiveConversation.Started.ToLocalTime().ToString("hh:mm:ss");
-                return "";
+                return Pod?.ActiveConversation?.Started.ToLocalTime().ToString("hh:mm:ss");
             }
         }
 
@@ -105,9 +79,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (Pod?.ActiveConversation?.Ended != null)
-                    return Pod.ActiveConversation.Ended.Value.ToLocalTime().ToString("hh:mm:ss");
-                return "";
+                return Pod?.ActiveConversation?.Ended?.ToLocalTime().ToString("hh:mm:ss");
             }
         }
 
@@ -116,20 +88,17 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (Pod?.ActiveConversation == null)
-                    return "";
-                else
-                    switch (Pod.ActiveConversation.RequestSource)
-                    {
-                        case RequestSource.AndroidAPS:
-                            return "Android APS";
-                        case RequestSource.OmniCoreUser:
-                            return "OmniCore User";
-                        case RequestSource.OmniCoreRemoteUser:
-                        case RequestSource.OmniCoreAID:
-                        default:
-                            return "";
-                    }
+                switch (Pod?.ActiveConversation?.RequestSource)
+                {
+                    case RequestSource.AndroidAPS:
+                        return "Android APS";
+                    case RequestSource.OmniCoreUser:
+                        return "OmniCore User";
+                    case RequestSource.OmniCoreRemoteUser:
+                    case RequestSource.OmniCoreAID:
+                    default:
+                        return "";
+                }
             }
         }
 
@@ -152,9 +121,10 @@ namespace OmniCore.Mobile.ViewModels.Pod
                         return "Finished";
                     if (exchangeProgress.Running)
                     {
-                        if (exchangeProgress.Result.RequestTime.HasValue)
+                        var t = exchangeProgress.Result.RequestTime;
+                        if (t.HasValue)
                         {
-                            var diff = DateTimeOffset.UtcNow - exchangeProgress.Result.RequestTime.Value;
+                            var diff = DateTimeOffset.UtcNow - t.Value;
                             if (diff.TotalSeconds < 4)
                                 return $"Running";
                             else

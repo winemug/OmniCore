@@ -11,21 +11,21 @@
             <ScrollView>
                 <StackLayout Orientation="Vertical">
                     <StackLayout Orientation="Vertical">
-                            <Label Text="{Binding Status}" HorizontalOptions="Center" FontSize="Large"/>
-                        <Label Text="{Binding Id}" HorizontalOptions="Center" FontSize="Micro"/>
+                        <Label Text="{Binding Status, TargetNullValue=''}" HorizontalOptions="Center" FontSize="Large"/>
+                        <Label Text="{Binding Id, TargetNullValue=''}" HorizontalOptions="Center" FontSize="Micro"/>
                     </StackLayout>
                     <Frame BackgroundColor="#20FFE999">
                         <StackLayout Orientation="Vertical">
                             <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
                                 <Label FontSize="Large">Pod active for</Label>
-                                <Label FontSize="Large" Text="{Binding LifetimeActive}"/>
+                                <Label FontSize="Large" Text="{Binding LifetimeActive, TargetNullValue=''}"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
                                 <Label Text="Remaining"/>
-                                <Label Text="{Binding LifetimeRemaining}"/>
+                                <Label Text="{Binding LifetimeRemaining, TargetNullValue=''}"/>
                             </StackLayout>
-                            <ProgressBar ProgressColor="{Binding LifetimeColor}"
-                                    Progress="{Binding LifetimeProgress}" 
+                            <ProgressBar ProgressColor="{Binding LifetimeColor, TargetNullValue=#FFFFFF}"
+                                    Progress="{Binding LifetimeProgress, TargetNullValue=0}" 
                                     />
                         </StackLayout>
                     </Frame>
@@ -33,22 +33,22 @@
                         <StackLayout Orientation="Vertical">
                             <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
                                 <Label FontSize="Large">Insulin delivered</Label>
-                                <Label FontSize="Large" Text="{Binding ReservoirDelivered}"/>
+                                <Label FontSize="Large" Text="{Binding ReservoirDelivered, TargetNullValue=''}"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
                                 <Label Text="Remaining"/>
-                                <Label Text="{Binding ReservoirRemaining}"/>
+                                <Label Text="{Binding ReservoirRemaining, TargetNullValue=''}"/>
                             </StackLayout>
-                            <ProgressBar ProgressColor="{Binding ReservoirColor}"
-                                 Progress="{Binding ReservoirProgress}" 
+                            <ProgressBar ProgressColor="{Binding ReservoirColor, TargetNullValue=#FFFFFF}"
+                                 Progress="{Binding ReservoirProgress, TargetNullValue=0}" 
                                  />
                         </StackLayout>
                     </Frame>
                     <Frame BackgroundColor="#2099FFE9">
                         <StackLayout Orientation="Vertical" HorizontalOptions="Fill">
-                            <Label Text="{Binding BasalStatus}" FontSize="Large"/>
-                            <Label Text="{Binding BasalText1}" />
-                            <Label Text="{Binding BasalText2}" />
+                            <Label Text="{Binding BasalStatus, TargetNullValue=''}" FontSize="Large"/>
+                            <Label Text="{Binding BasalText1, TargetNullValue=''}" />
+                            <Label Text="{Binding BasalText2, TargetNullValue=''}" />
                         </StackLayout>
                     </Frame>
                 </StackLayout>
@@ -56,7 +56,7 @@
             <StackLayout Orientation="Vertical" VerticalOptions="End">
                 <StackLayout Orientation="Horizontal" HorizontalOptions="End">
                     <Label VerticalOptions="Center">Updated</Label>
-                    <Label VerticalOptions="Center" Text="{Binding Updated}"/>
+                    <Label VerticalOptions="Center" Text="{Binding Updated, TargetNullValue=''}"/>
                     <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding PodExistsAndNotBusy}"/>
                 </StackLayout>
             </StackLayout>

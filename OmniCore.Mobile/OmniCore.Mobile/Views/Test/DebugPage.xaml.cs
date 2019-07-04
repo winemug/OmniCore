@@ -25,7 +25,7 @@ namespace OmniCore.Mobile.Views.Test
         public DebugPage()
         {
             InitializeComponent();
-            BindingContext = new DebugViewModel(this);
+            new DebugViewModel(this);
             var rp = new ErosRadioPreferences() { ConnectToAny = true };
             rl = new RileyLink(rp);
         }

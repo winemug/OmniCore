@@ -20,12 +20,10 @@ namespace OmniCore.Mobile.Views.Pod
     [Fody.ConfigureAwait(true)]
     public partial class MaintenancePage : ContentPage
     {
-        private MaintenanceViewModel viewModel;
-
         public MaintenancePage()
         {
             InitializeComponent();
-            BindingContext = viewModel = new MaintenanceViewModel(this);
+            new MaintenanceViewModel(this);
         }
 
         private async void DeactivateClicked(object sender, EventArgs e)

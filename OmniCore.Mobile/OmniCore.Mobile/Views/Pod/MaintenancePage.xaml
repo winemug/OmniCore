@@ -6,13 +6,15 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.Pod.MaintenancePage">
     <ContentPage.Content>
-        <StackLayout>
-            <Button Text="Resume Activation" Clicked="ResumeActivateClicked" IsVisible="{Binding ResumeActivationButtonVisible}"
-                    IsEnabled="{Binding PodNotBusy}"/>
-            <Button Text="Deactivate Pod" Clicked="DeactivateClicked" IsVisible="{Binding DeactivateButtonVisible}"
-                    IsEnabled="{Binding PodNotBusy}"/>
-            <Button Text="Activate New Pod" Clicked="ActivateClicked" IsVisible="{Binding ActivateNewButtonVisible}"
-                    IsEnabled="{Binding PodNotBusy}"/>
-        </StackLayout>
+        <Grid HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button Text="{Binding ActivationText}" Clicked="ActivateClicked"
+                    IsEnabled="{Binding ActivateEnabled}" Grid.Row="0"/>
+            <Button Text="Deactivate Pod" Clicked="DeactivateClicked"
+                    IsEnabled="{Binding DeactivateEnabled}" Grid.Row="1"/>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

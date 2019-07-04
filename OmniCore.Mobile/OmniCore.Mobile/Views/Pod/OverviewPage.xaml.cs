@@ -22,12 +22,10 @@ namespace OmniCore.Mobile.Views.Pod
     [Fody.ConfigureAwait(true)]
     public partial class OverviewPage : ContentPage
     {
-        OverviewViewModel viewModel;
-
         public OverviewPage()
         {
             InitializeComponent();
-            BindingContext = viewModel = new OverviewViewModel(this);
+            new OverviewViewModel(this);
         }
 
         private async void Update_Button_Clicked(object sender, EventArgs e)

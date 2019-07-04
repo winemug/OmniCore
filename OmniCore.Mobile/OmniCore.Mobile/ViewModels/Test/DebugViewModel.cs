@@ -6,13 +6,13 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Test
 {
-    public class DebugViewModel : BaseViewModel
+    public class DebugViewModel : PageViewModel
     {
         public DebugViewModel(Page page) : base(page)
         {
         }
 
-        protected async override Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             return this;
         }

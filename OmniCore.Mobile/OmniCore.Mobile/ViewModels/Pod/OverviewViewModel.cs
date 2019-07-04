@@ -13,7 +13,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
 {
-    public class OverviewViewModel : BaseViewModel
+    public class OverviewViewModel : PageViewModel
     {
         public OverviewViewModel(Page page) : base(page)
         {
@@ -36,7 +36,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             TimerShouldRun = false;
         }
 
-        protected async override Task<object> BindData()
+        protected async override Task<BaseViewModel> BindData()
         {
             Pod?.LastStatus?.UpdateWithEstimates(Pod);
             return this;
