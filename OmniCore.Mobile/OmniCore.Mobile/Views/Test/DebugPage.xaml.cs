@@ -112,5 +112,10 @@ namespace OmniCore.Mobile.Views.Test
                 Debug.WriteLine($"Error: {ex}");
             }
         }
+
+        private void ExitApp_Clicked(object sender, EventArgs e)
+        {
+            OmniCoreServices.Application.Exit();
+        }
     }
 }

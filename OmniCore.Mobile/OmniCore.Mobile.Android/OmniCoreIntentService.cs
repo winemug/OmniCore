@@ -20,7 +20,7 @@ using OmniCore.Model.Eros;
 
 namespace OmniCore.Mobile.Android
 {
-    [Service(Exported = true, Enabled = true, Name ="somethingsomething.OmniCoreIntentService")]
+    [Service(Exported = true, Enabled = true, Name ="OmniCore.IntentService")]
     public class OmniCoreIntentService : IntentService
     {
         public const string ACTION_START_SERVICE = "OmniCoreIntentService.START_SERVICE";
@@ -39,30 +39,45 @@ namespace OmniCore.Mobile.Android
         {
             if (intent == null)
             {
-                OmniCoreServices.Logger.Debug($"Received null intent");
                 RegisterForegroundService();
                 isStarted = true;
                 return StartCommandResult.Sticky;
             }
 
-            OmniCoreServices.Logger.Debug($"Service command received: {intent.Action}");
             if (intent.Action == ACTION_START_SERVICE && !isStarted)
             {
-                OmniCoreServices.Logger.Debug($"Starting foreground service");
                 RegisterForegroundService();
                 isStarted = true;
             }
             else if (intent.Action == ACTION_STOP_SERVICE && isStarted)
             {
-                OmniCoreServices.Logger.Debug($"Stopping foreground service");
                 StopForeground(true);
                 StopSelf();
                 isStarted = false;
             }
             else if (intent.Action == ACTION_REQUEST_COMMAND)
             {
-                OmniCoreServices.Logger.Debug($"handling execute request");
-                HandleRequest(intent);
+                if (!MainActivity.IsCreated)
+                {
+                    try
+                    {
+                        var messenger = intent.GetParcelableExtra("messenger") as Messenger;
+                        var b = new Bundle();
+                        b.PutBoolean("initialized", false);
+                        b.PutBoolean("finished", false);
+                        b.PutString("response", null);
+                        messenger.Send(new Message { Data = b });
+                    }
+                    catch
+                    {
+                    }
+                    return StartCommandResult.NotSticky;
+                }
+                else
+                {
+                    OmniCoreServices.Logger.Debug($"handling execute request");
+                    HandleRequest(intent);
+                }
             }
 
             return StartCommandResult.Sticky;
@@ -70,7 +85,6 @@ namespace OmniCore.Mobile.Android
 
         protected override void OnHandleIntent(Intent intent)
         {
-            throw new NotImplementedException();
         }
 
         private void HandleRequest(Intent intent)
@@ -91,7 +105,8 @@ namespace OmniCore.Mobile.Android
                             {
                                 OmniCoreServices.Logger.Verbose("Wakelock acquisition failed, sending null response");
                                 var b = new Bundle();
-                                b.PutBoolean("finished", true);
+                                b.PutBoolean("initialized", true);
+                                b.PutBoolean("finished", false);
                                 b.PutString("response", null);
                                 messenger.Send(new Message { Data = b });
                                 OmniCoreServices.Logger.Verbose("Message send complete");
@@ -111,6 +126,7 @@ namespace OmniCore.Mobile.Android
                                 }
                                 var result = await resultTask;
                                 var b = new Bundle();
+                                b.PutBoolean("initialized", true);
                                 b.PutBoolean("finished", true);
                                 b.PutString("response", result);
                                 OmniCoreServices.Logger.Verbose("Responding to request via message object");

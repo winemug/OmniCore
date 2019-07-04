@@ -62,10 +62,11 @@ namespace OmniCore.Model.Eros
 
         public ErosConversation(SemaphoreSlim conversationMutex, IWakeLock wakeLock, IPod pod)
         {
-            Started = DateTimeOffset.UtcNow;
+            WakeLock = wakeLock;
             ConversationMutex = conversationMutex;
-            CancellationTokenSource = new CancellationTokenSource();
             Pod = pod;
+            Started = DateTimeOffset.UtcNow;
+            CancellationTokenSource = new CancellationTokenSource();
             CombinedStatistics = new ErosMessageExchangeStatistics();
         }
 

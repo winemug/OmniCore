@@ -28,6 +28,11 @@ namespace OmniCore.Mobile
             OmniCoreServices.Logger.Information("OmniCore App initialized");
         }
 
+        public void GoBack()
+        {
+            MainPage.SendBackButtonPressed();
+        }
+
         protected override void OnStart()
         {
             OmniCoreServices.Logger.Debug("OmniCore App OnStart called");
