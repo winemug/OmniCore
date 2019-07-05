@@ -99,61 +99,59 @@ namespace OmniCore.Mobile.Android
                 {
                     var t = Task.Run(async () =>
                     {
-                        IWakeLock wakeLock = null;
                         try
                         {
-                            wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("OmniCoreServiceHandler");
-                            if (!await wakeLock.Acquire(5000))
+                            using (var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("OmniCoreServiceHandler"))
                             {
-                                OmniCoreServices.Logger.Verbose("Wakelock acquisition failed, sending null response");
-                                var b = new Bundle();
-                                b.PutBoolean("initialized", true);
-                                b.PutBoolean("finished", false);
-                                b.PutString("response", null);
-                                messenger.Send(new Message { Data = b });
-                                OmniCoreServices.Logger.Verbose("Message send complete");
-                            }
-                            if (ErosRepository.Instance.GetOmniCoreSettings().AcceptCommandsFromAAPS)
-                            {
-                                var resultTask = OmniCoreServices.Publisher.GetResult(request);
-                                while (true)
+                                if (!await wakeLock.Acquire(5000))
                                 {
-                                    var tr = await Task.WhenAny(resultTask, Task.Delay(5000));
-                                    if (tr == resultTask)
-                                        break;
-                                    var bb = new Bundle();
-                                    OmniCoreServices.Logger.Verbose("Sending busy / keep-alive");
-                                    bb.PutBoolean("busy", true);
-                                    messenger.Send(new Message { Data = bb });
+                                    OmniCoreServices.Logger.Verbose("Wakelock acquisition failed, sending null response");
+                                    var b = new Bundle();
+                                    b.PutBoolean("initialized", true);
+                                    b.PutBoolean("finished", false);
+                                    b.PutString("response", null);
+                                    messenger.Send(new Message { Data = b });
+                                    OmniCoreServices.Logger.Verbose("Message send complete");
+                                    return;
                                 }
-                                var result = await resultTask;
-                                var b = new Bundle();
-                                b.PutBoolean("initialized", true);
-                                b.PutBoolean("finished", true);
-                                b.PutString("response", result);
-                                OmniCoreServices.Logger.Verbose("Responding to request via message object");
-                                messenger.Send(new Message { Data = b });
-                                OmniCoreServices.Logger.Verbose("Message send complete");
-                            }
-                            else
-                            {
-                                OmniCoreServices.Logger.Verbose("Ignoring AAPS command");
-                                await Task.Delay(30000);
-                                var b = new Bundle();
-                                b.PutBoolean("finished", true);
-                                b.PutString("response", null);
-                                messenger.Send(new Message { Data = b });
-                                OmniCoreServices.Logger.Verbose("Message send complete");
+                                if (ErosRepository.Instance.GetOmniCoreSettings().AcceptCommandsFromAAPS)
+                                {
+                                    var resultTask = OmniCoreServices.Publisher.GetResult(request);
+                                    while (true)
+                                    {
+                                        var tr = await Task.WhenAny(resultTask, Task.Delay(5000));
+                                        if (tr == resultTask)
+                                            break;
+                                        var bb = new Bundle();
+                                        OmniCoreServices.Logger.Verbose("Sending busy / keep-alive");
+                                        bb.PutBoolean("busy", true);
+                                        messenger.Send(new Message { Data = bb });
+                                    }
+                                    var result = await resultTask;
+                                    var b = new Bundle();
+                                    b.PutBoolean("initialized", true);
+                                    b.PutBoolean("finished", true);
+                                    b.PutString("response", result);
+                                    OmniCoreServices.Logger.Verbose("Responding to request via message object");
+                                    messenger.Send(new Message { Data = b });
+                                    OmniCoreServices.Logger.Verbose("Message send complete");
+                                }
+                                else
+                                {
+                                    OmniCoreServices.Logger.Verbose("Ignoring AAPS command");
+                                    await Task.Delay(30000);
+                                    var b = new Bundle();
+                                    b.PutBoolean("finished", true);
+                                    b.PutString("response", null);
+                                    messenger.Send(new Message { Data = b });
+                                    OmniCoreServices.Logger.Verbose("Message send complete");
+                                }
                             }
                         }
                         catch (Exception e)
                         {
                             OmniCoreServices.Logger.Error("Error handling remote request", e);
                             Crashes.TrackError(e);
-                        }
-                        finally
-                        {
-                            wakeLock?.Dispose();
                         }
                     });
                 }

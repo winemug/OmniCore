@@ -254,16 +254,17 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                Debug.WriteLine("Sending final ack");
-                await SendPacket(null, ackPacket);
-                Debug.WriteLine("Message exchange finalized");
+                using (var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("OmniCore_FinalAck"))
+                {
+                    await wakeLock.Acquire(5000);
+                    await SendPacket(null, ackPacket);
+                }
             }
             catch(Exception)
             {
                 Debug.WriteLine("Final ack failed, ignoring.");
             }
         }
-
 
         private async Task<RadioPacket> ExchangePackets(IMessageExchangeProgress messageProgress,  
             RadioPacket packet_to_send, PacketType expected_type)
