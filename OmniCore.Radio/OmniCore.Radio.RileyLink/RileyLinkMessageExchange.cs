@@ -69,6 +69,9 @@ namespace OmniCore.Radio.RileyLink
 
                 RadioPacket received = null;
                 bool sendMessage = true;
+
+                var exchangeTimeout1 = MessageExchangeParameters.FirstExchangeTimeout ?? 90000;
+                var exchangeTimeout2 = MessageExchangeParameters.SubsequentExchangeTimeout ?? 180000;
                 while (sendMessage)
                 {
                     sendMessage = false;
@@ -83,9 +86,9 @@ namespace OmniCore.Radio.RileyLink
                             ((RileyLinkStatistics)messageProgress.Result.Statistics).StartPacketExchange();
                             messageProgress.ActionText = $"Sending radio packet {packetIndex + 1} of {packetCount}";
                             if (packetIndex == 0)
-                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 30000);
+                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, exchangeTimeout1);
                             else
-                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, 60000);
+                                received = await ExchangePacketWithRetries(messageProgress, packetToSend, packetIndex == packetCount - 1 ? PacketType.POD : PacketType.ACK, exchangeTimeout2);
 
                             ((RileyLinkStatistics)messageProgress.Result.Statistics).EndPacketExchange();
                             this.Pod.RuntimeVariables.PacketSequence = (received.Sequence + 1) % 32;
@@ -233,25 +236,6 @@ namespace OmniCore.Radio.RileyLink
         {
             throw new OmniCoreProtocolException(FailureType.PodResponseUnexpected);
         }
-
-        //private async Task FindOutWhat(IMessageExchangeProgress progress)
-        //{
-        //    var messageAddress = MessageExchangeParameters.AddressOverride ?? Pod.RadioAddress;
-        //    var ackAddress = MessageExchangeParameters.AckAddressOverride ?? Pod.RadioAddress;
-        //    var ackPacket = CreateAckPacket(messageAddress, ackAddress, this.Pod.RuntimeVariables.PacketSequence);
-        //    try
-        //    {
-        //        var received = await ExchangePacketWithRetries(progress, ackPacket, PacketType.POD, 10000);
-        //        Debug.WriteLine("YADA!!");
-        //    }
-        //    catch (OmniCoreTimeoutException)
-        //    {
-        //        this.Pod.RuntimeVariables.PacketSequence++;
-        //        return;
-        //        this.Pod.RuntimeVariables.PacketSequence++;
-        //        await FindOutWhat(progress);
-        //    }
-        //}
 
         private async Task AcknowledgeEndOfMessage(RadioPacket ackPacket)
         {

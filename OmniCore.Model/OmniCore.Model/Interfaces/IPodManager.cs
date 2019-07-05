@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces
         IPod Pod { get; }
         Task<IConversation> StartConversation(string intent, int timeout=0, RequestSource source = RequestSource.OmniCoreUser);
 
-        Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard);
+        Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard, int? timeout = null);
         Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
         Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
 
@@ -27,7 +27,7 @@ namespace OmniCore.Model.Interfaces
         Task SetBasalSchedule(IConversation conversation, IProfile profile);
         Task SuspendBasal(IConversation conversation);
 
-        Task Pair(IConversation conversation, int utcTimeOffsetMinutes);
+        Task Pair(IConversation conversation, IProfile profile);
         Task Activate(IConversation conversation);
         Task InjectAndStart(IConversation conversation, IProfile profile);
 

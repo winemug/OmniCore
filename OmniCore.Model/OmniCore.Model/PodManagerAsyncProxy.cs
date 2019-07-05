@@ -65,9 +65,9 @@ namespace OmniCore.Model
             await Direct.InjectAndStart(conversation, profile);
         }
 
-        public async Task Pair(IConversation conversation, int utcTimeOffsetMinutes)
+        public async Task Pair(IConversation conversation, IProfile profile)
         {
-            await Direct.Pair(conversation, utcTimeOffsetMinutes);
+            await Direct.Pair(conversation, profile);
         }
 
         public async Task SetBasalSchedule(IConversation conversation, IProfile profile)
@@ -95,9 +95,9 @@ namespace OmniCore.Model
             await Direct.SuspendBasal(conversation);
         }
 
-        public async Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard)
+        public async Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard, int? timeout = null)
         {
-            await Direct.UpdateStatus(conversation, requestType);
+            await Direct.UpdateStatus(conversation, requestType, timeout);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.ViewModels.Pod;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Mobile.ViewModels.Pod;
 using OmniCore.Model;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
@@ -39,7 +40,7 @@ namespace OmniCore.Mobile.Views.Pod
                 {
                     using (conversation = await podManager.StartConversation("Checking Activation Status"))
                     {
-                        await podManager.UpdateStatus(conversation);
+                        await podManager.UpdateStatus(conversation, timeout: 30000);
                     }
                 }
 
@@ -99,8 +100,9 @@ namespace OmniCore.Mobile.Views.Pod
                     }
                 }
             }
-            finally
+            catch (Exception ex)
             {
+                OmniCoreServices.Logger.Error("Error during deactivation", ex);
             }
         }
 
@@ -108,118 +110,104 @@ namespace OmniCore.Mobile.Views.Pod
         {
             try
             {
-                await Activate();
-            }
-            finally
-            {
-            }
-        }
+                var podProvider = App.Instance.PodProvider;
+                bool actDlgResult;
 
-        private async void ResumeActivateClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                await Activate();
-            }
-            finally
-            {
-            }
-        }
-
-
-        private async Task Activate()
-        {
-            var podProvider = App.Instance.PodProvider;
-            bool actDlgResult;
-
-            if (podProvider.PodManager == null || podProvider.PodManager.Pod.LastStatus == null)
-            {
-                actDlgResult = await DisplayAlert(
-                            "Pod Activation",
-                            "Fill a new pod with insulin. Make sure the pod has beeped two times during the filling process. When you are finished, press Activate to start the process.",
-                            "Activate", "Cancel");
-
-                if (!actDlgResult)
-                    return;
-
-                if (podProvider.PodManager == null)
-                    podProvider.New();
-            }
-            else
-            {
-                actDlgResult = await DisplayAlert(
-                            "Pod Activation",
-                            "Press Resume to continue activating the current pod.",
-                            "Resume", "Cancel");
-
-                if (!actDlgResult)
-                    return;
-            }
-
-            var podManager = podProvider.PodManager;
-            IConversation conversation;
-
-            if (podManager.Pod.LastStatus == null)
-            {
-                using (conversation = await podManager.StartConversation("Update Status"))
-                    await podManager.UpdateStatus(conversation);
-            }
-
-            if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
-            {
-                using (conversation = await podManager.StartConversation("Pair Pod"))
-                    await podManager.Pair(conversation, 60);
-                if (conversation.Failed)
+                if (podProvider.PodManager == null || podProvider.PodManager.Pod.LastStatus == null)
                 {
-                    await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
-                    return;
+                    actDlgResult = await DisplayAlert(
+                                "Pod Activation",
+                                "Fill a new pod with insulin. Make sure the pod has beeped two times during the filling process. When you are finished, press Activate to start the process.",
+                                "Activate", "Cancel");
+
+                    if (!actDlgResult)
+                        return;
+
+                    if (podProvider.PodManager == null)
+                        podProvider.New();
                 }
-            }
+                else
+                {
+                    actDlgResult = await DisplayAlert(
+                                "Pod Activation",
+                                "Press Resume to continue activating the current pod.",
+                                "Resume", "Cancel");
 
-            if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
-            {
-                using (conversation = await podManager.StartConversation("Activate Pod"))
-                {
-                    await podManager.Activate(conversation);
+                    if (!actDlgResult)
+                        return;
                 }
-                if (conversation.Failed)
+
+                var podManager = podProvider.PodManager;
+                IConversation conversation;
+
+                if (podManager.Pod.LastStatus == null)
                 {
-                    await DisplayAlert("Pod Activation", "Failed to activate the pod.", "OK");
-                    return;
+                    using (conversation = await podManager.StartConversation("Update Status"))
+                        await podManager.UpdateStatus(conversation, timeout: 30000);
+                }
+
+                var activeProfile = ErosRepository.Instance.GetProfile();
+
+                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                {
+                    using (conversation = await podManager.StartConversation("Pair Pod"))
+                        await podManager.Pair(conversation, activeProfile);
+                    if (conversation.Failed)
+                    {
+                        await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
+                        return;
+                    }
+                }
+
+                if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
+                {
+                    using (conversation = await podManager.StartConversation("Activate Pod"))
+                    {
+                        await podManager.Activate(conversation);
+                    }
+                    if (conversation.Failed)
+                    {
+                        await DisplayAlert("Pod Activation", "Failed to activate the pod.", "OK");
+                        return;
+                    }
+                    else
+                    {
+                        actDlgResult = await DisplayAlert(
+                            "Pod Activation",
+                            "Pod has been primed and activated successfully. Apply the pod and press Start to inject the cannula and start the pod.",
+                            "Start", "Cancel");
+                    }
                 }
                 else
                 {
                     actDlgResult = await DisplayAlert(
                         "Pod Activation",
-                        "Pod has been primed and activated successfully. Apply the pod and press Start to inject the cannula and start the pod.",
+                        "Apply the pod and press Start to inject the cannula and start the pod.",
                         "Start", "Cancel");
                 }
-            }
-            else
-            {
-                actDlgResult = await DisplayAlert(
-                    "Pod Activation",
-                    "Apply the pod and press Start to inject the cannula and start the pod.",
-                    "Start", "Cancel");
-            }
-            if (!actDlgResult)
-                return;
+                if (!actDlgResult)
+                    return;
 
 
-            var activeProfile = ErosRepository.Instance.GetProfile();
-            using (conversation = await podManager.StartConversation("Start Pod"))
-            {
-                await podManager.InjectAndStart(conversation, activeProfile);
-            }
-            if (conversation.Failed)
-            {
-                await DisplayAlert("Pod Activation", "Failed to start the pod.", "OK");
-                return;
-            }
+                using (conversation = await podManager.StartConversation("Start Pod"))
+                {
+                    await podManager.InjectAndStart(conversation, activeProfile);
+                }
+                if (conversation.Failed)
+                {
+                    await DisplayAlert("Pod Activation", "Failed to start the pod.", "OK");
+                    return;
+                }
 
-            await DisplayAlert("Pod Activation",
-                                "Pod started.",
-                                "OK");
+                await DisplayAlert("Pod Activation",
+                                    "Pod started.",
+                                    "OK");
+
+            }
+            catch(Exception ex)
+            {
+                OmniCoreServices.Logger.Error("Error during activation", ex);
+            }
         }
     }
 }

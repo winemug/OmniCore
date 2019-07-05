@@ -181,18 +181,21 @@ namespace OmniCore.Model.Eros
 
         private async Task<bool> UpdateStatusInternal(IConversation conversation,
             StatusRequestType updateType = StatusRequestType.Standard,
-            Action<IMessageExchangeResult> resultModifier = null)
+            int? timeout = null)
         {
             var request = new ErosMessageBuilder().WithStatus(updateType).Build();
-            return await PerformExchange(request, GetStandardParameters(), conversation);
+            var parameters = GetStandardParameters();
+            parameters.FirstExchangeTimeout = timeout;
+            return await PerformExchange(request, parameters, conversation);
         }
 
         public async Task UpdateStatus(IConversation conversation, 
-            StatusRequestType updateType = StatusRequestType.Standard)
+            StatusRequestType updateType = StatusRequestType.Standard,
+            int? timeout = null)
         {
             try
             {
-                if (!await this.UpdateStatusInternal(conversation, updateType))
+                if (!await this.UpdateStatusInternal(conversation, updateType, timeout))
                     return;
             }
             catch (Exception e)
@@ -364,7 +367,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public async Task Pair(IConversation conversation, int utcOffsetMinutes)
+        public async Task Pair(IConversation conversation, IProfile profile)
         {
             try
             {
@@ -394,7 +397,7 @@ namespace OmniCore.Model.Eros
                 if (Pod.LastStatus != null && Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
                     Pod.ActivationDate = DateTimeOffset.UtcNow;
-                    var podDate = Pod.ActivationDate.Value + TimeSpan.FromMinutes(utcOffsetMinutes);
+                    var podDate = Pod.ActivationDate.Value + TimeSpan.FromMinutes(profile.UtcOffset);
                     var parameters = GetStandardParameters();
                     parameters.AddressOverride = 0xffffffff;
                     parameters.AckAddressOverride = Pod.RadioAddress;
