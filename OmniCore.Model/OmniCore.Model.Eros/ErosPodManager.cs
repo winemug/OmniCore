@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Base;
+﻿using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
 using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros.Data;
@@ -78,8 +79,9 @@ namespace OmniCore.Model.Eros
                 Pod.ActiveConversation = new ErosConversation(ConversationMutex, wakeLock, Pod) { RequestSource = source, Intent = intent };
                 return Pod.ActiveConversation;
             }
-            catch
+            catch(Exception e)
             {
+                Crashes.TrackError(e);
                 wakeLock?.Dispose();
                 throw;
             }
@@ -112,8 +114,9 @@ namespace OmniCore.Model.Eros
                     else
                         break;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Crashes.TrackError(e);
                     throw;
                 }
             }

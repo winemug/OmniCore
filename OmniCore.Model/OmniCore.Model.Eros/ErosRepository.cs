@@ -12,6 +12,7 @@ using OmniCore.Model.Enums;
 using OmniCore.Mobile.Base;
 using OmniCore.Model.Data;
 using Xamarin.Forms;
+using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Model.Eros
 {
@@ -93,7 +94,7 @@ namespace OmniCore.Model.Eros
             }
             catch (SQLiteException sle)
             {
-                Console.WriteLine($"Error: {sle}");
+                Crashes.TrackError(sle);
                 throw sle;
             }
         }

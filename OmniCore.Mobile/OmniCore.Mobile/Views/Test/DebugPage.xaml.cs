@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Base;
+﻿using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Test;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Eros.Data;
@@ -118,7 +119,7 @@ namespace OmniCore.Mobile.Views.Test
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error: {ex}");
+                Crashes.TrackError(ex);
             }
             conv.Dispose();
         }

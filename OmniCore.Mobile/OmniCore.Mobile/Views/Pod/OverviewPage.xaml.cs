@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Base;
+﻿using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
 using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Mobile.ViewModels.Pod;
 using OmniCore.Model;
@@ -69,9 +70,10 @@ namespace OmniCore.Mobile.Views.Pod
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 await DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
+                Crashes.TrackError(e);
             }
         }
     }

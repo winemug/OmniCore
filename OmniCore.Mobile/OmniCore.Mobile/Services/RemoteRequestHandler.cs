@@ -14,6 +14,7 @@ using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Interfaces.Data;
 using Newtonsoft.Json;
 using OmniCore.Mobile.Base;
+using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Mobile.Services
 {
@@ -33,6 +34,7 @@ namespace OmniCore.Mobile.Services
             catch(Exception e)
             {
                 OmniCoreServices.Logger.Error($"Error executing request: {requestText}", e);
+                Crashes.TrackError(e);
                 return null;
             }
         }
@@ -79,6 +81,7 @@ namespace OmniCore.Mobile.Services
             catch(Exception e)
             {
                 OmniCoreServices.Logger.Error($"Error executing request", e);
+                Crashes.TrackError(e);
             }
             return result;
         }
@@ -317,6 +320,7 @@ namespace OmniCore.Mobile.Services
             catch(Exception e)
             {
                 OmniCoreServices.Logger.Error($"Error getting results to date for LastResultDate={request.LastResultDateTime}", e);
+                Crashes.TrackError(e);
             }
         }
 

@@ -81,49 +81,5 @@ namespace OmniCore.Mobile.Android
             var wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.LocationModeNoChange, name);
             return new OmniCoreWakeLock(wakeLock);
         }
-
-        //public async Task RunOnUi(Func<Task> action)
-        //{
-        //    Xamarin.Forms.Device.InvokeOnMainThreadAsync()
-        //}
-
-        //public void RunOnUiThread(Action action)
-        //{
-        //    Xamarin.Forms.Device.BeginInvokeOnMainThread(action);
-        //}
-
-        //public async Task RunOnUiThreadAndSync(Action<TaskCompletionSource<bool>> syncedAction)
-        //{
-        //    var tcs = new TaskCompletionSource<bool>();
-        //    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-        //    {
-        //       try
-        //       {
-        //           syncedAction(tcs);
-        //       }
-        //       catch(Exception e)
-        //       {
-        //           tcs.TrySetException(e);
-        //       }
-        //    });
-        //    await tcs.Task;
-        //}
-
-        //public async Task<T> RunOnUiThread<T>(Func<T> function)
-        //{
-        //   Xamarin.Forms.Device.BeginInvokeOnMainThread
-        //   return await Xamarin.Forms.Device.InvokeOnMainThreadAsync<T>( () =>
-        //   {
-        //       return function.Invoke();
-        //   });
-        //}
-
-        //public async Task RunOnUiThread(Action action)
-        //{
-        //    await Xamarin.Forms.Device.InvokeOnMainThreadAsync(() =>
-        //    {
-        //        action.Invoke();
-        //    });
-        //}
     }
 }

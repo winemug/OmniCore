@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Base;
+﻿using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
 using OmniCore.Model;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
@@ -193,6 +194,7 @@ namespace OmniCore.Radio.RileyLink
                 catch (Exception e)
                 {
                     ((RileyLinkStatistics)messageProgress.Result.Statistics).UnknownErrorOccured(e);
+                    Crashes.TrackError(e);
                     throw;
                 }
             }

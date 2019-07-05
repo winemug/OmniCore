@@ -13,6 +13,7 @@ using OmniCore.Mobile.Base.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Utilities;
 using OmniCore.Mobile.Base;
+using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Mobile.Android
 {
@@ -33,6 +34,7 @@ namespace OmniCore.Mobile.Android
                 catch(Exception e)
                 {
                     OmniCoreServices.Logger.Error("Error executing on request received", e);
+                    Crashes.TrackError(e);
                 }
             }
             return null;

@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Base;
+﻿using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Pod;
 using OmniCore.Model;
 using OmniCore.Model.Enums;
@@ -103,6 +104,7 @@ namespace OmniCore.Mobile.Views.Pod
             catch (Exception ex)
             {
                 OmniCoreServices.Logger.Error("Error during deactivation", ex);
+                Crashes.TrackError(ex);
             }
         }
 
@@ -207,6 +209,8 @@ namespace OmniCore.Mobile.Views.Pod
             catch(Exception ex)
             {
                 OmniCoreServices.Logger.Error("Error during activation", ex);
+                Crashes.TrackError(ex);
+
             }
         }
     }

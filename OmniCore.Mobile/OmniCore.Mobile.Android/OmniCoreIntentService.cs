@@ -17,6 +17,7 @@ using Xamarin.Forms;
 using OmniCore.Model.Utilities;
 using OmniCore.Mobile.Base;
 using OmniCore.Model.Eros;
+using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Mobile.Android
 {
@@ -68,8 +69,9 @@ namespace OmniCore.Mobile.Android
                         b.PutString("response", null);
                         messenger.Send(new Message { Data = b });
                     }
-                    catch
+                    catch(Exception e)
                     {
+                        Crashes.TrackError(e);
                     }
                     return StartCommandResult.NotSticky;
                 }
@@ -147,6 +149,7 @@ namespace OmniCore.Mobile.Android
                         catch (Exception e)
                         {
                             OmniCoreServices.Logger.Error("Error handling remote request", e);
+                            Crashes.TrackError(e);
                         }
                         finally
                         {
@@ -157,10 +160,12 @@ namespace OmniCore.Mobile.Android
                 catch (AggregateException ae)
                 {
                     OmniCoreServices.Logger.Error("Error handling remote request", ae.Flatten());
+                    Crashes.TrackError(ae);
                 }
                 catch (Exception e)
                 {
                     OmniCoreServices.Logger.Error("Error handling remote request", e);
+                    Crashes.TrackError(e);
                 }
             }
         }
@@ -196,6 +201,7 @@ namespace OmniCore.Mobile.Android
             catch(Exception e)
             {
                 OmniCoreServices.Logger.Error("Error registering foreground service", e);
+                Crashes.TrackError(e);
             }
         }
     }
