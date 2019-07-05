@@ -119,7 +119,6 @@ namespace OmniCore.Model.Eros
                 }
             }
             CurrentExchange = new MessageExchangeProgress(this, requestMessage.RequestType, requestMessage.Parameters);
-            OnPropertyChanged(nameof(CurrentExchange));
             return CurrentExchange;
         }
 
