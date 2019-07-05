@@ -1,14 +1,13 @@
 ﻿using OmniCore.Mobile.Base;
-using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Mobile.Services;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
 using OmniCore.Radio.RileyLink;
-using Plugin.Permissions;
-using System;
 using System.Threading;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Mobile
 {
@@ -35,6 +34,7 @@ namespace OmniCore.Mobile
 
         protected override void OnStart()
         {
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
             OmniCoreServices.Logger.Debug("OmniCore App OnStart called");
         }
 
