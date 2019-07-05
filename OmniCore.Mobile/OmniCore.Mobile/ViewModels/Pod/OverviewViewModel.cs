@@ -39,11 +39,16 @@ namespace OmniCore.Mobile.ViewModels.Pod
         protected async override Task<BaseViewModel> BindData()
         {
             Pod?.LastStatus?.UpdateWithEstimates(Pod);
+            MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>
+            {
+                newStatus.UpdateWithEstimates(Pod);
+            });
             return this;
         }
 
         protected override void OnDisposeManagedResources()
         {
+            MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
         }
 
         [DependencyPath(nameof(Pod), nameof(IPod.Lot))]

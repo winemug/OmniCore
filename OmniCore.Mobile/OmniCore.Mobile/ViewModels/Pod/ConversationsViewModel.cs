@@ -32,13 +32,35 @@ namespace OmniCore.Mobile.ViewModels.Pod
             {
                 Results.Add((ResultViewModel)await new ResultViewModel(result).DataBind());
             }
+
+            MessagingCenter.Subscribe<IMessageExchangeResult>(this, MessagingConstants.NewResultReceived,
+                async (newResult) =>
+                {
+                    await AddNewResult(newResult);
+                });
+
             return this;
         }
 
         protected override void OnDisposeManagedResources()
         {
+            MessagingCenter.Unsubscribe<IMessageExchangeResult>(this, MessagingConstants.NewResultReceived);
             foreach (var result in Results)
                 result.Dispose();
+        }
+
+        private async Task AddNewResult(IMessageExchangeResult newResult)
+        {
+            await OmniCoreServices.Application.RunOnMainThread(() =>
+            {
+                if (Results.Count > 0)
+                    Results.Insert(0, new ResultViewModel(newResult));
+                else
+                    Results.Add(new ResultViewModel(newResult));
+
+                if (Results.Count > MAX_RECORDS)
+                    Results.RemoveAt(Results.Count - 1);
+            });
         }
 
         [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]

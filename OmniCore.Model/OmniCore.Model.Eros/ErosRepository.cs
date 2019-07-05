@@ -11,6 +11,7 @@ using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Enums;
 using OmniCore.Mobile.Base;
 using OmniCore.Model.Data;
+using Xamarin.Forms;
 
 namespace OmniCore.Model.Eros
 {
@@ -236,6 +237,7 @@ namespace OmniCore.Model.Eros
                         conn.InsertOrReplace(result.Status, typeof(ErosStatus));
                         result.StatusId = result.Status.Id;
                         pod.LastStatus = result.Status;
+                        MessagingCenter.Send(result.Status, MessagingConstants.PodStatusUpdated);
                     }
 
                     if (result.Success && result.UserSettings != null)
@@ -248,7 +250,10 @@ namespace OmniCore.Model.Eros
                     }
 
                     result.PodId = pod.Id;
+                    var newResult = !result.Id.HasValue;
                     conn.InsertOrReplace(result, typeof(ErosMessageExchangeResult));
+                    if (newResult)
+                        MessagingCenter.Send(result, MessagingConstants.NewResultReceived);
                 }
 
                 conn.Commit();

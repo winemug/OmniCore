@@ -227,13 +227,14 @@ namespace OmniCore.Mobile.ViewModels.Pod
         }
 
 
-        protected override void OnDisposeManagedResources()
-        {
-        }
-
         protected async override Task<BaseViewModel> BindData()
         {
             return this;
         }
+
+        protected override void OnDisposeManagedResources()
+        {
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using OmniCore.Model;
+﻿using OmniCore.Mobile.Base;
+using OmniCore.Model;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Eros.Data;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Radio.RileyLink
 {
