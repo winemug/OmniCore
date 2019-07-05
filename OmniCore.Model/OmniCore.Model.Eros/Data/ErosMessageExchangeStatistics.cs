@@ -34,6 +34,8 @@ namespace OmniCore.Model.Eros.Data
         public int? PodLowGain { get; set; }
         public int PowerAdjustmentCount { get; set; }
 
+        public int? PacketErrors { get; set; }
+
         public virtual void BeforeSave()
         {
         }

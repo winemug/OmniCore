@@ -178,7 +178,7 @@ namespace OmniCore.Radio.RileyLink
         {
             try
             {
-                ((RileyLinkStatistics)messageProgress?.Result.Statistics)?.RadioOverheadStart();
+                ((RileyLinkStatistics)messageProgress?.Result?.Statistics)?.RadioOverheadStart();
 
                 if (this.Device == null || !this.Device.IsConnected())
                 {
@@ -196,7 +196,7 @@ namespace OmniCore.Radio.RileyLink
                     this.Device.ReadRssi()
                         .Subscribe((rssiRead) =>
                         {
-                            ((RileyLinkStatistics)messageProgress.Result.Statistics).MobileDeviceRssiReported(rssiRead);
+                            ((RileyLinkStatistics)messageProgress?.Result?.Statistics)?.MobileDeviceRssiReported(rssiRead);
                         });
                 }
             }

@@ -60,9 +60,16 @@ namespace OmniCore.Radio.RileyLink
 
             PacketExchangeCount = AllPeStats.Count;
             PacketExchangeDurationAverage = (int)AllPeStats.Select(x => (double)x.ExchangeDuration).Average();
+
+            var errs = 0;
             foreach (var peStat in AllPeStats)
             {
+                errs += peStat.BadPackets;
+                errs += peStat.ReceiveTimeout;
+                errs += peStat.RadioErrors;
             }
+
+            PacketErrors = errs;
         }
 
         internal void StartMessageExchange()

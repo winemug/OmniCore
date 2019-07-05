@@ -40,16 +40,27 @@ namespace OmniCore.Radio.RileyLink
 
         public async Task InitializeExchange(IMessageExchangeProgress messageProgress)
         {
-            messageProgress.Result.Statistics = new RileyLinkStatistics();
+            if (messageProgress.Result.Statistics == null)
+                messageProgress.Result.Statistics = new RileyLinkStatistics();
             messageProgress.Result.ExchangeParameters = MessageExchangeParameters;
             if (FinalAckTask != null)
             {
                 if (messageProgress != null)
                     messageProgress.ActionText = "Waiting for previous radio operation to complete";
                 await FinalAckTask;
+                FinalAckTask = null;
             }
 
             await RileyLink.EnsureDevice(messageProgress);
+        }
+
+        public async Task FinalizeExchange()
+        {
+            if (FinalAckTask != null)
+            {
+                await FinalAckTask;
+                FinalAckTask = null;
+            }
         }
 
         public async Task<IMessage> GetResponse(IMessage requestMessage, IMessageExchangeProgress messageExchangeProgress)

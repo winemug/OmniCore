@@ -31,21 +31,23 @@ namespace OmniCore.Mobile.Views.Test
         }
 
         private RileyLink rl;
-
+        private Nonce nonce;
         private async void RadioConnectionTest_Clicked(object sender, EventArgs e)
         {
             await PrepareForTest();
 
-            for (uint t0 = 40; t0 < 100; t0 += 10)
+            for (uint t0 = 100; t0 < 200; t0 += 10)
             {
-                for(uint t1 = 30; t1 < 100; t1 += 10)
+                for(uint t1 = 50; t1 < 100; t1 += 10)
                 {
-                    for(ushort s0 = 100; s0 < 350; s0 += 25)
+                    for(ushort s0 = 200; s0 < 500; s0 += 25)
                     {
-                        for (ushort s1 = 10; s1 < 100; s1 += 10)
+                        for (ushort s1 = 30; s1 < 100; s1 += 5)
                         {
                             Debug.WriteLine($"################ CONNECTIVITY TEST: Running with {t0} {t1} {s0} {s1}");
                             var stats = await RunConnectivityTest(t0, t1, s0, s1);
+                            stats.BeforeSave();
+                            OmniCoreServices.Logger.Information($"################ CONNECTIVITY RESULTS: {t0} {t1} {s0} {s1} - {stats.ExchangeDuration}\t{stats.PacketErrors}");
                         }
                     }
                 }
@@ -54,14 +56,14 @@ namespace OmniCore.Mobile.Views.Test
 
         private async Task PrepareForTest()
         {
-            App.Instance.PodProvider.Register(42692, 461465, 883805270);
+            var pod = App.Instance.PodProvider.PodManager.Pod;
+            nonce = new Nonce((ErosPod)pod);
 
             var stats = new RileyLinkStatistics();
             var mep = new ErosMessageExchangeParameters()
             {
+                Nonce = nonce
             };
-
-            var pod = App.Instance.PodProvider.PodManager.Pod;
             await ExecuteCommand(stats, mep, new ErosMessageBuilder().WithStatus().Build());
             if (pod.LastStatus.BasalState == Model.Enums.BasalState.Temporary)
             {
@@ -79,13 +81,18 @@ namespace OmniCore.Mobile.Views.Test
                 FirstPacketTimeout = timeout0,
                 SubsequentPacketTimeout = timeout1,
                 FirstPacketPreambleLength = seed0,
-                SubsequentPacketPreambleLength = seed1
+                SubsequentPacketPreambleLength = seed1,
+                Nonce = nonce
             };
+
+            var a0 = Environment.TickCount;
 
             await ExecuteCommand(stats, mep, new ErosMessageBuilder().WithStatus().Build());
             await ExecuteCommand(stats, mep, new ErosMessageBuilder().WithTempBasal(0, 12).Build());
             await ExecuteCommand(stats, mep, new ErosMessageBuilder().WithCancelTempBasal().Build());
             await ExecuteCommand(stats, mep, new ErosMessageBuilder().WithStatus().Build());
+            var a1 = Environment.TickCount;
+            stats.ExchangeDuration = a1 - a0;
             return stats;
         }
 
@@ -93,7 +100,7 @@ namespace OmniCore.Mobile.Views.Test
         {
             var pod = App.Instance.PodProvider.PodManager.Pod;
             var rme = new RileyLinkMessageExchange(parameters, pod, rl);
-            var mutex = new SemaphoreSlim(1, 1);
+            var mutex = new SemaphoreSlim(0, 1);
             var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("radio_test");
             if (!await wakeLock.Acquire(10000))
                 return;
@@ -103,14 +110,17 @@ namespace OmniCore.Mobile.Views.Test
             progress.Result.Statistics = stats;
             try
             {
+                await rl.EnsureDevice(progress);
                 await rme.InitializeExchange(progress);
                 var response = await rme.GetResponse(msg, progress);
+                await rme.FinalizeExchange();
                 rme.ParseResponse(response, pod, progress);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error: {ex}");
             }
+            conv.Dispose();
         }
 
         private void ExitApp_Clicked(object sender, EventArgs e)

@@ -10,6 +10,7 @@ namespace OmniCore.Model.Interfaces
     public interface IMessageExchange
     {
         Task InitializeExchange(IMessageExchangeProgress messageProgress);
+        Task FinalizeExchange();
         Task<IMessage> GetResponse(IMessage request, IMessageExchangeProgress messageProgress);
         void ParseResponse(IMessage response, IPod pod, IMessageExchangeProgress messageProgress);
     }
