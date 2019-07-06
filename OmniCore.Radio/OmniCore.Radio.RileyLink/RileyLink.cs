@@ -52,14 +52,6 @@ namespace OmniCore.Radio.RileyLink
             return ((RileyLinkStatistics)messageProgress?.Result?.Statistics);
         }
 
-        private IOmniCoreApplication OmniCoreApplication
-        {
-            get
-            {
-                return Xamarin.Forms.DependencyService.Get<IOmniCoreApplication>();
-            }
-        }
-
         public RileyLink(ErosRadioPreferences erosRadioPreferences)
         {
             TxAmplification = TxPower.A4_Normal;

@@ -11,6 +11,7 @@ using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -249,6 +250,7 @@ namespace OmniCore.Radio.RileyLink
                 throw pre;
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         private async Task HandleProtocolException(OmniCoreErosException pe, IMessageExchangeProgress messageProgress, int protocolErrorCount)
         {
             throw new OmniCoreProtocolException(FailureType.PodResponseUnexpected);

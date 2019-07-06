@@ -5,6 +5,7 @@ using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,10 +39,12 @@ namespace OmniCore.Mobile.ViewModels
             Dispose();
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Virtual function")]
         protected async virtual Task OnAppearing()
         {
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Virtual function")]
         protected async virtual Task OnDisappearing()
         {
         }

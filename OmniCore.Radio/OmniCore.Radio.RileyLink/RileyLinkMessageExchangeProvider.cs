@@ -4,6 +4,7 @@ using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace OmniCore.Radio.RileyLink
         private static RileyLink RileyLinkInstance;
         private static RileyLinkMessageExchange RileyLinkMessageExchange;
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
         {
             if (RileyLinkInstance == null)

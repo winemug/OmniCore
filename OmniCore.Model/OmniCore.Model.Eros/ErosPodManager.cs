@@ -10,6 +10,7 @@ using OmniCore.Model.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -580,6 +581,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not implemented")]
         public async Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations)
         {
             throw new NotImplementedException();

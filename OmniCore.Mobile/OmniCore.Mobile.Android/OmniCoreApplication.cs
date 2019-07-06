@@ -24,8 +24,7 @@ namespace OmniCore.Mobile.Android
     {
         public void Exit()
         {
-            var activity = Application.Context as Activity;
-            if (activity != null)
+            if (Application.Context is Activity activity)
                 activity.FinishAffinity();
             else
             {

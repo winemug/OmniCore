@@ -2,6 +2,7 @@
 using OmniCore.Model.Eros;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -18,16 +19,19 @@ namespace OmniCore.Mobile.ViewModels.Settings
         {
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task OnAppearing()
         {
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task OnDisappearing()
         {
             Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
             ErosRepository.Instance.SaveOmniCoreSettings(Settings);
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task<BaseViewModel> BindData()
         {
             Settings = ErosRepository.Instance.GetOmniCoreSettings();
