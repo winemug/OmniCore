@@ -393,11 +393,15 @@ namespace OmniCore.Radio.RileyLink
                     await DataCharacteristic.Write(dataToWrite);
                     await tc.Task;
                     var readResult = await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(timeout));
+                    if (readResult == null)
+                    {
+                        throw new OmniCoreRadioException(FailureType.RadioRecvTimeout);
+                    }
                     return readResult.Data;
                 }
                 catch(TimeoutException)
                 {
-                    throw new OmniCoreRadioException(FailureType.RadioNotReachable);
+                    throw new OmniCoreRadioException(FailureType.RadioRecvTimeout);
                 }
             }
             catch (OmniCoreException) { throw; }
