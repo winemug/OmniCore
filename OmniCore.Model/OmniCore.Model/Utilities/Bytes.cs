@@ -93,17 +93,23 @@ namespace OmniCore.Model.Utilities
 
         public Bytes Append(byte[] buffer)
         {
-            EnsureBufferSpace(buffer.Length);
-            Buffer.BlockCopy(buffer, 0, this.ByteBuffer, this.Length, buffer.Length);
-            this.Length += buffer.Length;
+            if (buffer != null)
+            {
+                EnsureBufferSpace(buffer.Length);
+                Buffer.BlockCopy(buffer, 0, this.ByteBuffer, this.Length, buffer.Length);
+                this.Length += buffer.Length;
+            }
             return this;
         }
 
         public Bytes Append(Bytes otherBytes)
         {
-            EnsureBufferSpace(otherBytes.Length);
-            Buffer.BlockCopy(otherBytes.ByteBuffer, 0, this.ByteBuffer, this.Length, otherBytes.Length);
-            this.Length += otherBytes.Length;
+            if (otherBytes != null)
+            {
+                EnsureBufferSpace(otherBytes.Length);
+                Buffer.BlockCopy(otherBytes.ByteBuffer, 0, this.ByteBuffer, this.Length, otherBytes.Length);
+                this.Length += otherBytes.Length;
+            }
             return this;
         }
 
