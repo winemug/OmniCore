@@ -9,7 +9,7 @@
              xmlns:vwTest="clr-namespace:OmniCore.Mobile.Views.Test"
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.MainPage" x:Name="MainShell"
-             Items="{Binding ShellItems}"
+             <!--Items="{Binding ShellItems}"-->
              >
     <!--<ShellItem Title="Pod">
         <ShellSection Title="Overview">
@@ -22,7 +22,7 @@
                 <vwPod:ConversationsPage/>
             </ShellContent>
         </ShellSection>
-    </ShellItem>-->
+    </ShellItem>--><!--
     <Shell.ItemTemplate>
         <DataTemplate>
             <FlyoutItem Title="{Binding Title}" >
@@ -33,9 +33,9 @@
                 </Shell.MenuItemTemplate>
             </FlyoutItem>
         </DataTemplate>
-    </Shell.ItemTemplate>
+    </Shell.ItemTemplate>-->
     
-    <!--<FlyoutItem Title="Pod">
+    <FlyoutItem Title="Pod">
         <Tab Title="Overview">
             <ShellContent>
                 <vwPod:OverviewPage/>
@@ -58,11 +58,11 @@
                 <vwSettings:GeneralSettingsPage/>
             </ShellContent>
         </Tab>
-        --><!--<Tab Title="Pod">
+        <Tab Title="Pod">
             <ShellContent>
                 <vwSettings:PodSettingsPage/>
             </ShellContent>
-        </Tab>--><!--
+        </Tab>
     </FlyoutItem>
     <FlyoutItem Title="Test">
         <Tab Title="Debug">
@@ -77,5 +77,5 @@
                 <vwHelp:AboutPage/>
             </ShellContent>
         </Tab>
-    </FlyoutItem>-->
+    </FlyoutItem>
 </Shell>
