@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ namespace OmniCore.Mobile.ViewModels
 
         public ObservableCollection<TabViewModel> Tabs { get; set; }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected override async Task<BaseViewModel> BindData()
         {
             return this;
