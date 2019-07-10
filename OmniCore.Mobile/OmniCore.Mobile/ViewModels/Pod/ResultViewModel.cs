@@ -19,6 +19,16 @@ namespace OmniCore.Mobile.ViewModels.Pod
             MessageExchangeResult = result;
         }
 
+        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
+        protected async override Task<BaseViewModel> BindData()
+        {
+            return this;
+        }
+
+        protected override void OnDisposeManagedResources()
+        {
+        }
+
         private IMessageExchangeResult messageExchangeResult;
         public IMessageExchangeResult MessageExchangeResult
         {
@@ -226,17 +236,5 @@ namespace OmniCore.Mobile.ViewModels.Pod
                     return "";
             }
         }
-
-
-        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
-        protected async override Task<BaseViewModel> BindData()
-        {
-            return this;
-        }
-
-        protected override void OnDisposeManagedResources()
-        {
-        }
-
     }
 }

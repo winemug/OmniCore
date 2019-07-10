@@ -62,8 +62,8 @@ namespace OmniCore.Mobile.ViewModels
             OnPropertyChanged(nameof(PodNotBusy));
         }
 
-        private bool disposedValue = false; // To detect redundant calls
-        protected void Dispose(bool disposing)
+        protected bool disposedValue = false; // To detect redundant calls
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

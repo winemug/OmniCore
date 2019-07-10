@@ -49,13 +49,17 @@ namespace OmniCore.Mobile.ViewModels
         {
         }
 
-        protected override void OnDisposeManagedResources()
+        protected override void Dispose(bool disposing)
         {
-            if (AssociatedPage != null)
+            if (disposing && !base.disposedValue)
             {
-                AssociatedPage.Appearing -= Page_Appearing;
-                AssociatedPage.Disappearing -= Page_Disappearing;
+                if (AssociatedPage != null)
+                {
+                    AssociatedPage.Appearing -= Page_Appearing;
+                    AssociatedPage.Disappearing -= Page_Disappearing;
+                }
             }
+            base.Dispose(disposing);
         }
     }
 }
