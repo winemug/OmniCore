@@ -8,9 +8,8 @@
              xmlns:vwHelp="clr-namespace:OmniCore.Mobile.Views.Help"
              xmlns:vwTest="clr-namespace:OmniCore.Mobile.Views.Test"
              mc:Ignorable="d"
-             x:Class="OmniCore.Mobile.Views.MainPage" x:Name="MainShell"
-             <!--Items="{Binding ShellItems}"-->
-             >
+             x:Class="OmniCore.Mobile.Views.MainPage" x:Name="MainShell">
+    <!--Items="{Binding ShellItems}"-->
     <!--<ShellItem Title="Pod">
         <ShellSection Title="Overview">
             <ShellContent>
