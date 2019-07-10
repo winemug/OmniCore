@@ -39,7 +39,7 @@ namespace OmniCore.Mobile.Android
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
-            Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
+            //Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
