@@ -15,6 +15,7 @@ namespace OmniCore.Mobile.Views
         public MainPage()
         {
             InitializeComponent();
+            //MainShell.Items
         }
     }
 }
