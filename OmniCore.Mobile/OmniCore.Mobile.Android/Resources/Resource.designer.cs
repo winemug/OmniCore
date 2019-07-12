@@ -4184,44 +4184,44 @@ namespace OmniCore.Mobile.Android
 		public partial class Color
 		{
 			
-			// aapt resource value: 0x7f0b005e
-			public const int abc_background_cache_hint_selector_material_dark = 2131427422;
-			
 			// aapt resource value: 0x7f0b005f
-			public const int abc_background_cache_hint_selector_material_light = 2131427423;
+			public const int abc_background_cache_hint_selector_material_dark = 2131427423;
 			
 			// aapt resource value: 0x7f0b0060
-			public const int abc_btn_colored_borderless_text_material = 2131427424;
+			public const int abc_background_cache_hint_selector_material_light = 2131427424;
 			
 			// aapt resource value: 0x7f0b0061
-			public const int abc_btn_colored_text_material = 2131427425;
+			public const int abc_btn_colored_borderless_text_material = 2131427425;
 			
 			// aapt resource value: 0x7f0b0062
-			public const int abc_color_highlight_material = 2131427426;
+			public const int abc_btn_colored_text_material = 2131427426;
 			
 			// aapt resource value: 0x7f0b0063
-			public const int abc_hint_foreground_material_dark = 2131427427;
+			public const int abc_color_highlight_material = 2131427427;
 			
 			// aapt resource value: 0x7f0b0064
-			public const int abc_hint_foreground_material_light = 2131427428;
+			public const int abc_hint_foreground_material_dark = 2131427428;
+			
+			// aapt resource value: 0x7f0b0065
+			public const int abc_hint_foreground_material_light = 2131427429;
 			
 			// aapt resource value: 0x7f0b0004
 			public const int abc_input_method_navigation_guard = 2131427332;
 			
-			// aapt resource value: 0x7f0b0065
-			public const int abc_primary_text_disable_only_material_dark = 2131427429;
-			
 			// aapt resource value: 0x7f0b0066
-			public const int abc_primary_text_disable_only_material_light = 2131427430;
+			public const int abc_primary_text_disable_only_material_dark = 2131427430;
 			
 			// aapt resource value: 0x7f0b0067
-			public const int abc_primary_text_material_dark = 2131427431;
+			public const int abc_primary_text_disable_only_material_light = 2131427431;
 			
 			// aapt resource value: 0x7f0b0068
-			public const int abc_primary_text_material_light = 2131427432;
+			public const int abc_primary_text_material_dark = 2131427432;
 			
 			// aapt resource value: 0x7f0b0069
-			public const int abc_search_url_text = 2131427433;
+			public const int abc_primary_text_material_light = 2131427433;
+			
+			// aapt resource value: 0x7f0b006a
+			public const int abc_search_url_text = 2131427434;
 			
 			// aapt resource value: 0x7f0b0005
 			public const int abc_search_url_text_normal = 2131427333;
@@ -4232,29 +4232,29 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f0b0007
 			public const int abc_search_url_text_selected = 2131427335;
 			
-			// aapt resource value: 0x7f0b006a
-			public const int abc_secondary_text_material_dark = 2131427434;
-			
 			// aapt resource value: 0x7f0b006b
-			public const int abc_secondary_text_material_light = 2131427435;
+			public const int abc_secondary_text_material_dark = 2131427435;
 			
 			// aapt resource value: 0x7f0b006c
-			public const int abc_tint_btn_checkable = 2131427436;
+			public const int abc_secondary_text_material_light = 2131427436;
 			
 			// aapt resource value: 0x7f0b006d
-			public const int abc_tint_default = 2131427437;
+			public const int abc_tint_btn_checkable = 2131427437;
 			
 			// aapt resource value: 0x7f0b006e
-			public const int abc_tint_edittext = 2131427438;
+			public const int abc_tint_default = 2131427438;
 			
 			// aapt resource value: 0x7f0b006f
-			public const int abc_tint_seek_thumb = 2131427439;
+			public const int abc_tint_edittext = 2131427439;
 			
 			// aapt resource value: 0x7f0b0070
-			public const int abc_tint_spinner = 2131427440;
+			public const int abc_tint_seek_thumb = 2131427440;
 			
 			// aapt resource value: 0x7f0b0071
-			public const int abc_tint_switch_track = 2131427441;
+			public const int abc_tint_spinner = 2131427441;
+			
+			// aapt resource value: 0x7f0b0072
+			public const int abc_tint_switch_track = 2131427442;
 			
 			// aapt resource value: 0x7f0b0008
 			public const int accent_material_dark = 2131427336;
@@ -4340,8 +4340,8 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f0b0043
 			public const int design_default_color_primary_dark = 2131427395;
 			
-			// aapt resource value: 0x7f0b0072
-			public const int design_error = 2131427442;
+			// aapt resource value: 0x7f0b0073
+			public const int design_error = 2131427443;
 			
 			// aapt resource value: 0x7f0b0044
 			public const int design_fab_shadow_end_color = 2131427396;
@@ -4367,8 +4367,8 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f0b004b
 			public const int design_snackbar_background_color = 2131427403;
 			
-			// aapt resource value: 0x7f0b0073
-			public const int design_tint_password_toggle = 2131427443;
+			// aapt resource value: 0x7f0b0074
+			public const int design_tint_password_toggle = 2131427444;
 			
 			// aapt resource value: 0x7f0b0016
 			public const int dim_foreground_disabled_material_dark = 2131427350;
@@ -4399,6 +4399,9 @@ namespace OmniCore.Mobile.Android
 			
 			// aapt resource value: 0x7f0b001f
 			public const int highlighted_text_material_light = 2131427359;
+			
+			// aapt resource value: 0x7f0b005e
+			public const int ic_omnicore_background = 2131427422;
 			
 			// aapt resource value: 0x7f0b005a
 			public const int launcher_background = 2131427418;
@@ -4439,71 +4442,71 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f0b002b
 			public const int material_grey_900 = 2131427371;
 			
-			// aapt resource value: 0x7f0b0074
-			public const int mtrl_bottom_nav_colored_item_tint = 2131427444;
-			
 			// aapt resource value: 0x7f0b0075
-			public const int mtrl_bottom_nav_item_tint = 2131427445;
+			public const int mtrl_bottom_nav_colored_item_tint = 2131427445;
+			
+			// aapt resource value: 0x7f0b0076
+			public const int mtrl_bottom_nav_item_tint = 2131427446;
 			
 			// aapt resource value: 0x7f0b004c
 			public const int mtrl_btn_bg_color_disabled = 2131427404;
 			
-			// aapt resource value: 0x7f0b0076
-			public const int mtrl_btn_bg_color_selector = 2131427446;
-			
 			// aapt resource value: 0x7f0b0077
-			public const int mtrl_btn_ripple_color = 2131427447;
+			public const int mtrl_btn_bg_color_selector = 2131427447;
 			
 			// aapt resource value: 0x7f0b0078
-			public const int mtrl_btn_stroke_color_selector = 2131427448;
+			public const int mtrl_btn_ripple_color = 2131427448;
 			
 			// aapt resource value: 0x7f0b0079
-			public const int mtrl_btn_text_btn_ripple_color = 2131427449;
+			public const int mtrl_btn_stroke_color_selector = 2131427449;
+			
+			// aapt resource value: 0x7f0b007a
+			public const int mtrl_btn_text_btn_ripple_color = 2131427450;
 			
 			// aapt resource value: 0x7f0b004d
 			public const int mtrl_btn_text_color_disabled = 2131427405;
 			
-			// aapt resource value: 0x7f0b007a
-			public const int mtrl_btn_text_color_selector = 2131427450;
+			// aapt resource value: 0x7f0b007b
+			public const int mtrl_btn_text_color_selector = 2131427451;
 			
 			// aapt resource value: 0x7f0b004e
 			public const int mtrl_btn_transparent_bg_color = 2131427406;
 			
-			// aapt resource value: 0x7f0b007b
-			public const int mtrl_chip_background_color = 2131427451;
-			
 			// aapt resource value: 0x7f0b007c
-			public const int mtrl_chip_close_icon_tint = 2131427452;
+			public const int mtrl_chip_background_color = 2131427452;
 			
 			// aapt resource value: 0x7f0b007d
-			public const int mtrl_chip_ripple_color = 2131427453;
+			public const int mtrl_chip_close_icon_tint = 2131427453;
 			
 			// aapt resource value: 0x7f0b007e
-			public const int mtrl_chip_text_color = 2131427454;
+			public const int mtrl_chip_ripple_color = 2131427454;
 			
 			// aapt resource value: 0x7f0b007f
-			public const int mtrl_fab_ripple_color = 2131427455;
+			public const int mtrl_chip_text_color = 2131427455;
+			
+			// aapt resource value: 0x7f0b0080
+			public const int mtrl_fab_ripple_color = 2131427456;
 			
 			// aapt resource value: 0x7f0b004f
 			public const int mtrl_scrim_color = 2131427407;
 			
-			// aapt resource value: 0x7f0b0080
-			public const int mtrl_tabs_colored_ripple_color = 2131427456;
-			
 			// aapt resource value: 0x7f0b0081
-			public const int mtrl_tabs_icon_color_selector = 2131427457;
+			public const int mtrl_tabs_colored_ripple_color = 2131427457;
 			
 			// aapt resource value: 0x7f0b0082
-			public const int mtrl_tabs_icon_color_selector_colored = 2131427458;
+			public const int mtrl_tabs_icon_color_selector = 2131427458;
 			
 			// aapt resource value: 0x7f0b0083
-			public const int mtrl_tabs_legacy_text_color_selector = 2131427459;
+			public const int mtrl_tabs_icon_color_selector_colored = 2131427459;
 			
 			// aapt resource value: 0x7f0b0084
-			public const int mtrl_tabs_ripple_color = 2131427460;
+			public const int mtrl_tabs_legacy_text_color_selector = 2131427460;
 			
 			// aapt resource value: 0x7f0b0085
-			public const int mtrl_text_btn_text_color_selector = 2131427461;
+			public const int mtrl_tabs_ripple_color = 2131427461;
+			
+			// aapt resource value: 0x7f0b0086
+			public const int mtrl_text_btn_text_color_selector = 2131427462;
 			
 			// aapt resource value: 0x7f0b0050
 			public const int mtrl_textinput_default_box_stroke_color = 2131427408;
@@ -4574,11 +4577,11 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f0b003b
 			public const int switch_thumb_disabled_material_light = 2131427387;
 			
-			// aapt resource value: 0x7f0b0086
-			public const int switch_thumb_material_dark = 2131427462;
-			
 			// aapt resource value: 0x7f0b0087
-			public const int switch_thumb_material_light = 2131427463;
+			public const int switch_thumb_material_dark = 2131427463;
+			
+			// aapt resource value: 0x7f0b0088
+			public const int switch_thumb_material_light = 2131427464;
 			
 			// aapt resource value: 0x7f0b003c
 			public const int switch_thumb_normal_material_dark = 2131427388;
@@ -5536,26 +5539,26 @@ namespace OmniCore.Mobile.Android
 			// aapt resource value: 0x7f020054
 			public const int avd_hide_password = 2130837588;
 			
+			// aapt resource value: 0x7f020079
+			public const int avd_hide_password_1 = 2130837625;
+			
 			// aapt resource value: 0x7f02007a
-			public const int avd_hide_password_1 = 2130837626;
+			public const int avd_hide_password_2 = 2130837626;
 			
 			// aapt resource value: 0x7f02007b
-			public const int avd_hide_password_2 = 2130837627;
-			
-			// aapt resource value: 0x7f02007c
-			public const int avd_hide_password_3 = 2130837628;
+			public const int avd_hide_password_3 = 2130837627;
 			
 			// aapt resource value: 0x7f020055
 			public const int avd_show_password = 2130837589;
 			
+			// aapt resource value: 0x7f02007c
+			public const int avd_show_password_1 = 2130837628;
+			
 			// aapt resource value: 0x7f02007d
-			public const int avd_show_password_1 = 2130837629;
+			public const int avd_show_password_2 = 2130837629;
 			
 			// aapt resource value: 0x7f02007e
-			public const int avd_show_password_2 = 2130837630;
-			
-			// aapt resource value: 0x7f02007f
-			public const int avd_show_password_3 = 2130837631;
+			public const int avd_show_password_3 = 2130837630;
 			
 			// aapt resource value: 0x7f020056
 			public const int design_bottom_navigation_item_background = 2130837590;
@@ -5588,82 +5591,79 @@ namespace OmniCore.Mobile.Android
 			public const int ic_mtrl_chip_close_circle = 2130837599;
 			
 			// aapt resource value: 0x7f020060
-			public const int ic_omnicore_icon = 2130837600;
+			public const int ic_pod = 2130837600;
 			
 			// aapt resource value: 0x7f020061
-			public const int ic_pod = 2130837601;
+			public const int ic_refresh = 2130837601;
 			
 			// aapt resource value: 0x7f020062
-			public const int ic_refresh = 2130837602;
+			public const int ic_rl433 = 2130837602;
 			
 			// aapt resource value: 0x7f020063
-			public const int ic_rl433 = 2130837603;
+			public const int mtrl_snackbar_background = 2130837603;
 			
 			// aapt resource value: 0x7f020064
-			public const int mtrl_snackbar_background = 2130837604;
+			public const int mtrl_tabs_default_indicator = 2130837604;
 			
 			// aapt resource value: 0x7f020065
-			public const int mtrl_tabs_default_indicator = 2130837605;
+			public const int navigation_empty_icon = 2130837605;
 			
 			// aapt resource value: 0x7f020066
-			public const int navigation_empty_icon = 2130837606;
+			public const int notification_action_background = 2130837606;
 			
 			// aapt resource value: 0x7f020067
-			public const int notification_action_background = 2130837607;
+			public const int notification_bg = 2130837607;
 			
 			// aapt resource value: 0x7f020068
-			public const int notification_bg = 2130837608;
+			public const int notification_bg_low = 2130837608;
 			
 			// aapt resource value: 0x7f020069
-			public const int notification_bg_low = 2130837609;
+			public const int notification_bg_low_normal = 2130837609;
 			
 			// aapt resource value: 0x7f02006a
-			public const int notification_bg_low_normal = 2130837610;
+			public const int notification_bg_low_pressed = 2130837610;
 			
 			// aapt resource value: 0x7f02006b
-			public const int notification_bg_low_pressed = 2130837611;
+			public const int notification_bg_normal = 2130837611;
 			
 			// aapt resource value: 0x7f02006c
-			public const int notification_bg_normal = 2130837612;
+			public const int notification_bg_normal_pressed = 2130837612;
 			
 			// aapt resource value: 0x7f02006d
-			public const int notification_bg_normal_pressed = 2130837613;
-			
-			// aapt resource value: 0x7f02006e
-			public const int notification_icon_background = 2130837614;
-			
-			// aapt resource value: 0x7f020078
-			public const int notification_template_icon_bg = 2130837624;
-			
-			// aapt resource value: 0x7f020079
-			public const int notification_template_icon_low_bg = 2130837625;
-			
-			// aapt resource value: 0x7f02006f
-			public const int notification_tile_bg = 2130837615;
-			
-			// aapt resource value: 0x7f020070
-			public const int notify_panel_notification_icon_bg = 2130837616;
-			
-			// aapt resource value: 0x7f020071
-			public const int signal_wifi_0_bar = 2130837617;
-			
-			// aapt resource value: 0x7f020072
-			public const int signal_wifi_1_bar = 2130837618;
-			
-			// aapt resource value: 0x7f020073
-			public const int signal_wifi_2_bar = 2130837619;
-			
-			// aapt resource value: 0x7f020074
-			public const int signal_wifi_3_bar = 2130837620;
-			
-			// aapt resource value: 0x7f020075
-			public const int signal_wifi_4_bar = 2130837621;
-			
-			// aapt resource value: 0x7f020076
-			public const int tooltip_frame_dark = 2130837622;
+			public const int notification_icon_background = 2130837613;
 			
 			// aapt resource value: 0x7f020077
-			public const int tooltip_frame_light = 2130837623;
+			public const int notification_template_icon_bg = 2130837623;
+			
+			// aapt resource value: 0x7f020078
+			public const int notification_template_icon_low_bg = 2130837624;
+			
+			// aapt resource value: 0x7f02006e
+			public const int notification_tile_bg = 2130837614;
+			
+			// aapt resource value: 0x7f02006f
+			public const int notify_panel_notification_icon_bg = 2130837615;
+			
+			// aapt resource value: 0x7f020070
+			public const int signal_wifi_0_bar = 2130837616;
+			
+			// aapt resource value: 0x7f020071
+			public const int signal_wifi_1_bar = 2130837617;
+			
+			// aapt resource value: 0x7f020072
+			public const int signal_wifi_2_bar = 2130837618;
+			
+			// aapt resource value: 0x7f020073
+			public const int signal_wifi_3_bar = 2130837619;
+			
+			// aapt resource value: 0x7f020074
+			public const int signal_wifi_4_bar = 2130837620;
+			
+			// aapt resource value: 0x7f020075
+			public const int tooltip_frame_dark = 2130837621;
+			
+			// aapt resource value: 0x7f020076
+			public const int tooltip_frame_light = 2130837622;
 			
 			static Drawable()
 			{
@@ -6625,13 +6625,13 @@ namespace OmniCore.Mobile.Android
 		{
 			
 			// aapt resource value: 0x7f030000
-			public const int icon = 2130903040;
+			public const int ic_omnicore = 2130903040;
 			
 			// aapt resource value: 0x7f030001
-			public const int icon_round = 2130903041;
+			public const int ic_omnicore_foreground = 2130903041;
 			
 			// aapt resource value: 0x7f030002
-			public const int launcher_foreground = 2130903042;
+			public const int ic_omnicore_round = 2130903042;
 			
 			static Mipmap()
 			{

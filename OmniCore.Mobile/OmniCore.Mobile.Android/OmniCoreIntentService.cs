@@ -190,7 +190,7 @@ namespace OmniCore.Mobile.Android
                     .SetContentIntent(pendingIntent)
                     .SetContentTitle("OmniCore")
                     .SetContentText("OmniCore is running")
-                    .SetSmallIcon(Resource.Drawable.ic_pod);
+                    .SetSmallIcon(Resource.Mipmap.ic_omnicore);
 
                 var notification = builder.Build();
 

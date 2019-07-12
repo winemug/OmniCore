@@ -19,9 +19,9 @@ using OmniCore.Mobile.Base;
 
 namespace OmniCore.Mobile.Android
 {
-    [Activity(Label = "OmniCore", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true,
+    [Activity(Label = "OmniCore", Icon = "@mipmap/ic_omnicore", Theme = "@style/MainTheme", MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
-        LaunchMode = LaunchMode.SingleTask, Exported = true,
+        LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = true,
         Name = "OmniCore.MainActivity")]
     [IntentFilter(new[] { MainActivity.IntentEnsureServiceRunning })]
 
