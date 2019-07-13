@@ -16,6 +16,7 @@ using OmniCore.Mobile.Base.Interfaces;
 using System.IO;
 using Environment = System.Environment;
 using OmniCore.Mobile.Base;
+using OmniCore.Model.Eros;
 
 namespace OmniCore.Mobile.Android
 {
@@ -29,7 +30,7 @@ namespace OmniCore.Mobile.Android
     {
         public static bool IsCreated { get; private set; }
         public const string IntentEnsureServiceRunning = "EnsureServiceRunning";
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -46,6 +47,7 @@ namespace OmniCore.Mobile.Android
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
             DependencyService.Register<IOmniCoreLogger, OmniCoreLogger>();
 
+            await ErosRepository.Instance.Initialize().ConfigureAwait(true);
             LoadApplication(new App());
             var i = new Intent(this, typeof(OmniCoreIntentService));
             i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);

@@ -127,7 +127,9 @@ namespace OmniCore.Mobile.Android
                                     OmniCoreServices.Logger.Verbose("Message send complete");
                                     return;
                                 }
-                                if (ErosRepository.Instance.GetOmniCoreSettings().AcceptCommandsFromAAPS)
+
+                                var ocs = await ErosRepository.Instance.GetOmniCoreSettings();
+                                if (ocs.AcceptCommandsFromAAPS)
                                 {
                                     var resultTask = OmniCoreServices.Publisher.GetResult(request);
                                     while (true)

@@ -54,7 +54,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                     if (dlgResult)
                     {
-                        podProvider.Archive();
+                        await podProvider.Archive();
                     }
                     return;
                 }
@@ -85,7 +85,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                 if (!conversation.Failed)
                 {
-                    podProvider.Archive();
+                    await podProvider.Archive();
                     await DisplayAlert("Pod Deactivation", "Pod has been deactivated successfully.", "OK");
                 }
                 else
@@ -96,7 +96,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                     if (dlgResult)
                     {
-                        podProvider.Archive();
+                        await podProvider.Archive();
                         await DisplayAlert("Pod Deactivation", "Pod has been removed.", "OK");
                     }
                 }
@@ -126,7 +126,7 @@ namespace OmniCore.Mobile.Views.Pod
                         return;
 
                     if (podProvider.PodManager == null)
-                        podProvider.New();
+                        await podProvider.New();
                 }
                 else
                 {
@@ -148,7 +148,7 @@ namespace OmniCore.Mobile.Views.Pod
                         await podManager.UpdateStatus(conversation, timeout: 30000);
                 }
 
-                var activeProfile = ErosRepository.Instance.GetProfile();
+                var activeProfile = await ErosRepository.Instance.GetProfile();
 
                 if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {

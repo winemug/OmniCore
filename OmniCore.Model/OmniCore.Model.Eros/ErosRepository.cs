@@ -16,34 +16,42 @@ using Microsoft.AppCenter.Crashes;
 
 namespace OmniCore.Model.Eros
 {
-    public class ErosRepository
+    public class ErosRepository : IDisposable
     {
-        private static readonly ErosRepository instance = new ErosRepository();
+        private static ErosRepository instance = null;
         public static ErosRepository Instance
         {
             get
             {
+                if (instance == null)
+                {
+                    instance = new ErosRepository();
+                }
                 return instance;
             }
         }
 
         public readonly string DbPath;
-        //private string DbConnectionString;
+
+        private SQLiteAsyncConnection Connection;
 
         private ErosRepository()
         {
             DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
-            //DbConnectionString = $"Data Source={DbPath}";
-            Initialize();
         }
 
-        public void Initialize()
+        private bool IsInitialized = false;
+        public async Task Initialize()
         {
+            if (IsInitialized)
+                return;
+
+            Connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite
+                | SQLiteOpenFlags.FullMutex);
             try
             {
-                using (var conn = new SQLiteConnection(DbPath))
+                await Connection.RunInTransactionAsync( (conn) =>
                 {
-                    conn.BeginTransaction();
                     conn.CreateTable<ErosPod>();
                     conn.CreateTable<ErosAlertStates>();
                     conn.CreateTable<ErosBasalSchedule>();
@@ -64,11 +72,11 @@ namespace OmniCore.Model.Eros
                             Created = DateTimeOffset.UtcNow,
                             BasalSchedule = new decimal[]
                                 { 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
-                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
-                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
-                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
-                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
-                                  0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m
+                                0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
+                                0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m
                                 },
                             UtcOffset = 0
                         });
@@ -89,8 +97,10 @@ namespace OmniCore.Model.Eros
                             AcceptCommandsFromAAPS = true
                         });
                     }
-                    conn.Commit();
-                }
+
+                });
+
+                IsInitialized = true;
             }
             catch (SQLiteException sle)
             {
@@ -99,90 +109,57 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public SQLiteConnection GetConnection()
+        public async Task<ErosPod> LoadCurrent()
         {
-            return new SQLiteConnection(DbPath);
+            return await WithRelations(await Connection.Table<ErosPod>()
+                .Where(x => !x.Archived)
+                .OrderByDescending(x => x.Created.Ticks)
+                .FirstOrDefaultAsync());
         }
 
-        public ErosPod LoadCurrent()
+        public async Task<ErosPod> Load(uint lot, uint tid)
         {
-            using (var conn = GetConnection())
-            {
-                var t = conn.Table<ErosPod>().ToList();
-
-                return WithRelations(conn.Table<ErosPod>()
-                    .Where(x => !x.Archived)
-                    .ToList()
-                    .OrderByDescending(x => x.Created.Ticks)
-                    .FirstOrDefault(), conn);
-            }
+            return await WithRelations(await Connection.Table<ErosPod>()
+                .FirstOrDefaultAsync(x => x.Lot == lot && x.Serial == tid));
         }
 
-        public ErosPod Load(uint lot, uint tid)
+        public async Task<ErosRadioPreferences> GetRadioPreferences()
         {
-            using (var conn = GetConnection())
-            {
-                return WithRelations(conn.Table<ErosPod>()
-                    .FirstOrDefault(x => x.Lot == lot && x.Serial == tid), conn);
-            }
+            return await Connection.Table<ErosRadioPreferences>().FirstOrDefaultAsync();
         }
 
-        public ErosRadioPreferences GetRadioPreferences()
+        public async Task<OmniCoreSettings> GetOmniCoreSettings()
         {
-            using (var conn = GetConnection())
-            {
-                return conn.Table<ErosRadioPreferences>().FirstOrDefault();
-            }
+            return await Connection.Table<OmniCoreSettings>().FirstOrDefaultAsync();
         }
 
-        public OmniCoreSettings GetOmniCoreSettings()
+        public async Task SaveOmniCoreSettings(OmniCoreSettings settings)
         {
-            using (var conn = GetConnection())
-            {
-                return conn.Table<OmniCoreSettings>().FirstOrDefault();
-            }
+            await Connection.UpdateAsync(settings);
         }
 
-        public void SaveOmniCoreSettings(OmniCoreSettings settings)
+        public async Task<ErosPod> GetLastActivated()
         {
-            using (var conn = GetConnection())
-            {
-                conn.Update(settings);
-            }
+            return await WithRelations(await Connection.Table<ErosPod>().OrderByDescending(x => x.ActivationDate.Value.Ticks)
+                .FirstOrDefaultAsync());
         }
 
-        public ErosPod GetLastActivated()
+        public async Task<IProfile> GetProfile()
         {
-            using (var conn = GetConnection())
-            {
-                return WithRelations(conn.Table<ErosPod>().OrderByDescending(x => x.ActivationDate.Value.Ticks)
-                    .FirstOrDefault(), conn);
-            }
+            return await Connection.Table<ErosProfile>()
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
         }
 
-        public IProfile GetProfile()
+        public async Task Save(IProfile profile)
         {
-            using (var conn = new SQLiteConnection(DbPath))
-            {
-                return conn.Table<ErosProfile>()
-                    .OrderByDescending(x => x.Id)
-                    .FirstOrDefault();
-            }
+            await Connection.InsertOrReplaceAsync(profile, typeof(ErosProfile));
         }
 
-        public void Save(IProfile profile)
+        public async Task Save(IPod pod, IMessageExchangeResult result = null)
         {
-            using (var conn = new SQLiteConnection(DbPath))
+            await Connection.RunInTransactionAsync((conn) =>
             {
-                conn.InsertOrReplace(profile, typeof(ErosProfile));
-            }
-        }
-
-        public void Save(IPod pod, IMessageExchangeResult result = null)
-        {
-            using (var conn = new SQLiteConnection(DbPath))
-            {
-                conn.BeginTransaction();
                 conn.InsertOrReplace(pod);
 
                 if (result != null)
@@ -256,38 +233,26 @@ namespace OmniCore.Model.Eros
                     if (newResult)
                         MessagingCenter.Send(result, MessagingConstants.NewResultReceived);
                 }
-
-                conn.Commit();
-            }
+            });
         }
 
         public async Task<List<ErosMessageExchangeResult>> GetHistoricalResultsForDisplay(int maxCount)
         {
-            var conn = new SQLiteAsyncConnection(DbPath);
-            try
-            {
-                return await WithStatistics(
-                    await conn.QueryAsync<ErosMessageExchangeResult>("SELECT * FROM ErosMessageExchangeResult ORDER BY Id DESC LIMIT ?", maxCount)
-                    , conn);
-            }
-            finally
-            {
-                await conn?.CloseAsync();
-            }
+            return await WithStatistics(
+                await Connection.QueryAsync<ErosMessageExchangeResult>("SELECT * FROM ErosMessageExchangeResult ORDER BY Id DESC LIMIT ?", maxCount));
         }
 
-        private async Task<List<ErosMessageExchangeResult>> WithStatistics(List<ErosMessageExchangeResult> list,
-            SQLiteAsyncConnection conn)
+        private async Task<List<ErosMessageExchangeResult>> WithStatistics(List<ErosMessageExchangeResult> list)
         {
             if (list != null)
             {
                 foreach (var result in list)
                 {
                     if (result.StatusId.HasValue)
-                        result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
+                        result.Status = await Connection.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
 
                     if (result.StatisticsId.HasValue)
-                        result.Statistics = await conn.Table<ErosMessageExchangeStatistics>().FirstOrDefaultAsync(x => x.Id == result.StatisticsId.Value);
+                        result.Statistics = await Connection.Table<ErosMessageExchangeStatistics>().FirstOrDefaultAsync(x => x.Id == result.StatisticsId.Value);
                 }
             }
             return list;
@@ -295,34 +260,25 @@ namespace OmniCore.Model.Eros
 
         public async Task<List<ErosMessageExchangeResult>> GetHistoricalResultsForRemoteApp(long lastResultDate)
         {
-            var conn = new SQLiteAsyncConnection(DbPath);
-            try
-            {
-                long lastId = 0;
-                var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
-                var dtNow = DateTimeOffset.UtcNow;
-                if ((dtNow - dtLastResult).TotalDays > 1)
-                    dtLastResult = dtNow.AddDays(-1);
-                var correspondingResults = await conn.QueryAsync<ErosMessageExchangeResult>(
-                    "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks);
+            long lastId = 0;
+            var dtLastResult = DateTimeOffset.FromUnixTimeMilliseconds(lastResultDate);
+            var dtNow = DateTimeOffset.UtcNow;
+            if ((dtNow - dtLastResult).TotalDays > 1)
+                dtLastResult = dtNow.AddDays(-1);
+            var correspondingResults = await Connection.QueryAsync<ErosMessageExchangeResult>(
+                "SELECT * FROM ErosMessageExchangeResult WHERE Success <> 0 AND ResultTime <= ? ORDER BY ResultTime DESC LIMIT 1", dtLastResult.Ticks);
 
-                if (correspondingResults != null && correspondingResults.Count > 0)
-                {
-                    lastId = correspondingResults[0].Id.Value;
-                }
-
-                return await WithHistoricalRelations(await conn.Table<ErosMessageExchangeResult>()
-                    .Where(x => x.Success && x.Id > lastId)
-                    .OrderBy(x => x.Id).ToListAsync(), conn);
-            }
-            finally
+            if (correspondingResults != null && correspondingResults.Count > 0)
             {
-                await conn?.CloseAsync();
+                lastId = correspondingResults[0].Id.Value;
             }
+
+            return await WithHistoricalRelations(await Connection.Table<ErosMessageExchangeResult>()
+                .Where(x => x.Success && x.Id > lastId)
+                .OrderBy(x => x.Id).ToListAsync());
         }
 
-        private async Task<List<ErosMessageExchangeResult>> WithHistoricalRelations(List<ErosMessageExchangeResult> listResults,
-            SQLiteAsyncConnection conn)
+        private async Task<List<ErosMessageExchangeResult>> WithHistoricalRelations(List<ErosMessageExchangeResult> listResults)
         {
             if (listResults == null)
                 return null;
@@ -332,49 +288,49 @@ namespace OmniCore.Model.Eros
             {
                 if (result.Type == RequestType.CancelBolus)
                 {
-                    var bolusEntry = await conn.Table<ErosMessageExchangeResult>()
+                    var bolusEntry = await Connection.Table<ErosMessageExchangeResult>()
                         .Where(x => x.Success && x.Type == RequestType.Bolus && x.Id < result.Id)
                         .OrderByDescending(x => x.Id).FirstOrDefaultAsync();
 
                     if (bolusEntry != null)
                     {
-                        list.Add(await WithRelations(bolusEntry, conn));
+                        list.Add(await WithRelations(bolusEntry));
                     }
                 }
-                list.Add(await WithRelations(result, conn));
+                list.Add(await WithRelations(result));
             }
             return list.OrderBy(x => x.Id).ToList();
         }
 
-        private async Task<ErosMessageExchangeResult> WithRelations(ErosMessageExchangeResult result, SQLiteAsyncConnection conn)
+        private async Task<ErosMessageExchangeResult> WithRelations(ErosMessageExchangeResult result)
         {
             if (result.StatusId.HasValue)
-                result.Status = await conn.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
+                result.Status = await Connection.Table<ErosStatus>().FirstOrDefaultAsync(x => x.Id == result.StatusId.Value);
 
             if (result.BasalScheduleId.HasValue)
-                result.BasalSchedule = await conn.Table<ErosBasalSchedule>().FirstOrDefaultAsync(x => x.Id == result.BasalScheduleId.Value);
+                result.BasalSchedule = await Connection.Table<ErosBasalSchedule>().FirstOrDefaultAsync(x => x.Id == result.BasalScheduleId.Value);
 
             if (result.FaultId.HasValue)
-                result.Fault = await conn.Table<ErosFault>().FirstOrDefaultAsync(x => x.Id == result.FaultId.Value);
+                result.Fault = await Connection.Table<ErosFault>().FirstOrDefaultAsync(x => x.Id == result.FaultId.Value);
 
             return result;
         }
 
 
-        private ErosPod WithRelations(ErosPod pod, SQLiteConnection conn)
+        private async Task<ErosPod> WithRelations(ErosPod pod)
         {
             if (pod == null)
                 return null;
 
-            var tempBasal = conn.Table<ErosMessageExchangeResult>()
+            var tempBasal = await Connection.Table<ErosMessageExchangeResult>()
                 .Where(x => x.PodId == pod.Id && x.Success && x.Type == RequestType.SetTempBasal)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            var tempBasalCancel = conn.Table<ErosMessageExchangeResult>()
+            var tempBasalCancel = await Connection.Table<ErosMessageExchangeResult>()
                 .Where(x => x.PodId == pod.Id && x.Success && x.Type == RequestType.CancelTempBasal)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             pod.LastTempBasalResult = null;
             if (tempBasal != null &&
@@ -383,27 +339,69 @@ namespace OmniCore.Model.Eros
                 pod.LastTempBasalResult = tempBasal;
             }
 
-            pod.LastAlertStates = conn.Table<ErosAlertStates>().Where(x => x.PodId == pod.Id)
+            pod.LastAlertStates = await Connection.Table<ErosAlertStates>().Where(x => x.PodId == pod.Id)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            pod.LastBasalSchedule = conn.Table<ErosBasalSchedule>().Where(x => x.PodId == pod.Id)
+            pod.LastBasalSchedule = await Connection.Table<ErosBasalSchedule>().Where(x => x.PodId == pod.Id)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            pod.LastFault = conn.Table<ErosFault>().Where(x => x.PodId == pod.Id)
+            pod.LastFault = await Connection.Table<ErosFault>().Where(x => x.PodId == pod.Id)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            pod.LastStatus = conn.Table<ErosStatus>().Where(x => x.PodId == pod.Id)
+            pod.LastStatus = await Connection.Table<ErosStatus>().Where(x => x.PodId == pod.Id)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            pod.LastUserSettings = conn.Table<ErosUserSettings>().Where(x => x.PodId == pod.Id)
+            pod.LastUserSettings = await Connection.Table<ErosUserSettings>().Where(x => x.PodId == pod.Id)
                 .OrderByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return pod;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected async virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    if (Connection != null)
+                    {
+                        await Connection.CloseAsync();
+                        Connection = null;
+                        instance = null;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ErosRepository()
+        // {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

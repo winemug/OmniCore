@@ -24,17 +24,15 @@ namespace OmniCore.Mobile.ViewModels.Settings
         {
         }
 
-        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task OnDisappearing()
         {
             Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
-            ErosRepository.Instance.SaveOmniCoreSettings(Settings);
+            await ErosRepository.Instance.SaveOmniCoreSettings(Settings);
         }
 
-        [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task<BaseViewModel> BindData()
         {
-            Settings = ErosRepository.Instance.GetOmniCoreSettings();
+            Settings = await ErosRepository.Instance.GetOmniCoreSettings();
             this.AcceptAAPSCommands = Settings.AcceptCommandsFromAAPS;
             return this;
         }

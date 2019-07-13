@@ -91,9 +91,9 @@ namespace OmniCore.Mobile.Services
             return (pod != null && pod.Lot.HasValue && pod.Serial.HasValue);
         }
 
-        private RemoteResult GetResult(IPod pod, IConversation conversation)
+        private async Task<RemoteResult> GetResult(IPod pod, IConversation conversation)
         {
-            var profile = ErosRepository.Instance.GetProfile();
+            var profile = await ErosRepository.Instance.GetProfile();
 
             return new RemoteResult()
             {
@@ -111,10 +111,10 @@ namespace OmniCore.Mobile.Services
             };
         }
 
-        private RemoteResult GetResultEstimate(IPod pod)
+        private async Task<RemoteResult> GetResultEstimate(IPod pod)
         {
             pod.LastStatus?.UpdateWithEstimates(pod);
-            var profile = ErosRepository.Instance.GetProfile();
+            var profile = await ErosRepository.Instance.GetProfile();
 
             return new RemoteResult()
             {
@@ -132,9 +132,9 @@ namespace OmniCore.Mobile.Services
             };
         }
 
-        private RemoteResult ResultWithProfile()
+        private async Task<RemoteResult> ResultWithProfile()
         {
-            var profile = ErosRepository.Instance.GetProfile();
+            var profile = await ErosRepository.Instance.GetProfile();
 
             return new RemoteResult()
             {
@@ -154,10 +154,10 @@ namespace OmniCore.Mobile.Services
                 using (var conversation = await podManager.StartConversation("Cancel Bolus", source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelBolus(conversation);
-                    return GetResult(pod, conversation);
+                    return await GetResult(pod, conversation);
                 }
             }
-            return ResultWithProfile();
+            return await ResultWithProfile();
         }
 
         private async Task<RemoteResult> Bolus(decimal units)
@@ -170,10 +170,10 @@ namespace OmniCore.Mobile.Services
                 using (var conversation = await podManager.StartConversation($"Bolus {units:F2}U", source: RequestSource.AndroidAPS))
                 {
                     await podManager.Bolus(conversation, units, false);
-                    return GetResult(pod, conversation);
+                    return await GetResult(pod, conversation);
                 }
             }
-            return ResultWithProfile();
+            return await ResultWithProfile();
         }
 
         private async Task<RemoteResult> CancelTempBasal()
@@ -186,10 +186,10 @@ namespace OmniCore.Mobile.Services
                 using (var conversation = await podManager.StartConversation("Cancel Temp Basal", source: RequestSource.AndroidAPS))
                 {
                     await podManager.CancelTempBasal(conversation);
-                    return GetResult(pod, conversation);
+                    return await GetResult(pod, conversation);
                 }
             }
-            return ResultWithProfile();
+            return await ResultWithProfile();
         }
 
         private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
@@ -203,10 +203,10 @@ namespace OmniCore.Mobile.Services
                     source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetTempBasal(conversation, rate, hours);
-                    return GetResult(pod, conversation);
+                    return await GetResult(pod, conversation);
                 }
             }
-            return ResultWithProfile();
+            return await ResultWithProfile();
         }
 
         private async Task<RemoteResult> SetProfile(decimal[] basalSchedule, int utcOffsetMinutes)
@@ -217,7 +217,7 @@ namespace OmniCore.Mobile.Services
                 BasalSchedule = basalSchedule,
                 UtcOffset = utcOffsetMinutes
             };
-            ErosRepository.Instance.Save(profile);
+            await ErosRepository.Instance.Save(profile);
 
             var podProvider = App.Instance.PodProvider;
             var podManager = podProvider.PodManager?.Direct;
@@ -227,12 +227,12 @@ namespace OmniCore.Mobile.Services
                 using (var conversation = await podManager.StartConversation($"Set Basal Schedule", source: RequestSource.AndroidAPS))
                 {
                     await podManager.SetBasalSchedule(conversation, profile);
-                    return GetResult(pod, conversation);
+                    return await GetResult(pod, conversation);
                 }
             }
             else
             {
-                return ResultWithProfile().WithSuccess();
+                return (await ResultWithProfile()).WithSuccess();
             }
         }
 
@@ -249,15 +249,15 @@ namespace OmniCore.Mobile.Services
                     using (var conversation = await podManager.StartConversation("Update Status", source: RequestSource.AndroidAPS))
                     {
                         await podManager.UpdateStatus(conversation);
-                        return GetResult(pod, conversation);
+                        return await GetResult(pod, conversation);
                     }
                 }
                 else
                 {
-                    return GetResultEstimate(pod);
+                    return await GetResultEstimate(pod);
                 }
             }
-            return ResultWithProfile().WithSuccess();
+            return (await ResultWithProfile()).WithSuccess();
         }
 
         private async Task FillResultsToDate(RemoteRequest request, RemoteResult result)

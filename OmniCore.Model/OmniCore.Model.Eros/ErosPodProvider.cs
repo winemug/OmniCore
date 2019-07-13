@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
@@ -11,18 +12,18 @@ namespace OmniCore.Model.Eros
     {
         readonly IMessageExchangeProvider MessageExchangeProvider;
 
-        private IPodManager _PodManager;
+        private IPodManager _podManager;
         public IPodManager PodManager
         {
             get
             {
-                return _PodManager;
+                return _podManager;
             }
             private set
             {
-                if (_PodManager != value)
+                if (_podManager != value)
                 {
-                    _PodManager = value;
+                    _podManager = value;
                     ManagerChanged?.Invoke(this, new EventArgs());
                 }
             }
@@ -33,57 +34,52 @@ namespace OmniCore.Model.Eros
         public ErosPodProvider(IMessageExchangeProvider messageExchangeProvider)
         {
             MessageExchangeProvider = messageExchangeProvider;
-            var pod = ErosRepository.Instance.LoadCurrent();
+        }
+
+        public async Task Initialize()
+        {
+            var pod = await ErosRepository.Instance.LoadCurrent();
             if (pod != null)
             {
                 PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
             }
         }
 
-        public void Archive()
+        public async Task Archive()
         {
-            lock (this)
+            if (PodManager != null)
             {
-                if (PodManager != null)
-                {
-                    PodManager.Pod.Archived = true;
-                    ErosRepository.Instance.Save(PodManager.Pod as ErosPod);
-                    PodManager = null;
-                }
+                PodManager.Pod.Archived = true;
+                await ErosRepository.Instance.Save(PodManager.Pod as ErosPod);
+                PodManager = null;
             }
         }
 
-        public IPodManager New()
+        public async Task<IPodManager> New()
         {
-            lock (this)
+            await Archive();
+
+            var pod = new ErosPod
             {
-                Archive();
+                Id = Guid.NewGuid()
+            };
 
-                var pod = new ErosPod
-                {
-                    Id = Guid.NewGuid()
-                };
-
-                pod.RadioAddress = GetRadioAddress();
-                pod.Created = DateTimeOffset.UtcNow;
-                ErosRepository.Instance.Save(pod);
-                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
-                return PodManager;
-            }
+            pod.RadioAddress = GetRadioAddress();
+            pod.Created = DateTimeOffset.UtcNow;
+            await ErosRepository.Instance.Save(pod);
+            PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
+            return PodManager;
         }
 
-        public IPodManager Register(uint lot, uint serial, uint radioAddress)
+        public async Task<IPodManager> Register(uint lot, uint serial, uint radioAddress)
         {
-            lock (this)
-            {
-                Archive();
+            await Archive();
 
-                var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
-                pod.Created = DateTimeOffset.UtcNow;
-                ErosRepository.Instance.Save(pod);
-                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
-                return PodManager;
-            }
+            var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
+            pod.Created = DateTimeOffset.UtcNow;
+            await ErosRepository.Instance.Save(pod);
+            PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
+            return PodManager;
         }
 
         private uint GetRadioAddress()
