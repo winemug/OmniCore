@@ -7,7 +7,7 @@
              x:Class="OmniCore.Mobile.Views.Test.DebugPage">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="Radio Connection Test" Clicked="RadioConnectionTest_Clicked"/>
+            <!--<Button Text="Radio Connection Test" Clicked="RadioConnectionTest_Clicked"/>-->
             <Button Text="Exit Application" Clicked="ExitApp_Clicked"/>
         </StackLayout>
     </ContentPage.Content>
