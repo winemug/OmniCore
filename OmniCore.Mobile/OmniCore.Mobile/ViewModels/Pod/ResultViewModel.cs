@@ -29,19 +29,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
         }
 
-        private IMessageExchangeResult messageExchangeResult;
-        public IMessageExchangeResult MessageExchangeResult
-        {
-            get => messageExchangeResult;
-            set
-            {
-                if (messageExchangeResult != value)
-                {
-                    messageExchangeResult = value;
-                    OnPropertyChanged(nameof(MessageExchangeResult));
-                }
-            }
-        }
+        public IMessageExchangeResult MessageExchangeResult { get; set; }
 
         [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Parameters))]
         [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Type))]
