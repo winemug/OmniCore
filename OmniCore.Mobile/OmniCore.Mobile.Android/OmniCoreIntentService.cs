@@ -35,13 +35,26 @@ namespace OmniCore.Mobile.Android
 
         private bool isStarted;
 
+        public override void OnCreate()
+        {
+            if (!isStarted)
+            {
+                RegisterForegroundService();
+                isStarted = true;
+            }
+            base.OnCreate();
+        }
+
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
             if (intent == null)
             {
-                RegisterForegroundService();
-                isStarted = true;
+                if (!isStarted)
+                {
+                    RegisterForegroundService();
+                    isStarted = true;
+                }
                 return StartCommandResult.Sticky;
             }
 
