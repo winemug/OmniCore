@@ -49,9 +49,6 @@ namespace OmniCore.Mobile.Android
 
             await ErosRepository.Instance.Initialize().ConfigureAwait(true);
             LoadApplication(new App());
-            var i = new Intent(this, typeof(OmniCoreIntentService));
-            i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);
-            StartService(i);
             IsCreated = true;
         }
 

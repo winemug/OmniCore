@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
     <Compile Include="OmniCoreApplication.cs" />
-    <Compile Include="OmniCoreIntentService.cs" />
+    <Compile Include="OmniCoreCommandService.cs" />
     <Compile Include="OmniCoreLogger.cs" />
     <Compile Include="OmniCoreWakeLock.cs" />
     <Compile Include="RemoteRequestPublisher.cs" />
