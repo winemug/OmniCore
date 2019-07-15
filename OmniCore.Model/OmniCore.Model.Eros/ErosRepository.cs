@@ -111,7 +111,7 @@ namespace OmniCore.Model.Eros
         {
             return await WithRelations(await Connection.Table<ErosPod>()
                 .Where(x => !x.Archived)
-                .OrderByDescending(x => x.Created.Ticks)
+                .OrderByDescending(x => x.Created)
                 .FirstOrDefaultAsync());
         }
 

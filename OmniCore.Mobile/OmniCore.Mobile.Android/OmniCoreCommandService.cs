@@ -16,7 +16,7 @@ using OmniCore.Model.Eros;
 
 namespace OmniCore.Mobile.Android
 {
-    [Service(Name = "OmniCore.CommandService", Enabled = true, Exported = true)]
+    [Service(Name = "OmniCore.CommandService", Enabled = true, Exported = true, Process="net.balya.OmniCore.Mobile.Android")]
     public class OmniCoreCommandService : Service
     {
         public const string NOTIFICATION_CHANNEL = "OmniCoreCommandService";
@@ -25,6 +25,8 @@ namespace OmniCore.Mobile.Android
         public const int NOTIFICATION_ID = 10001;
 
         private Messenger ServiceMessenger;
+
+        private OmniCoreLogger Logger = new OmniCoreLogger();
 
         public override IBinder OnBind(Intent intent)
         {

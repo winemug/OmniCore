@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using OmniCore.Model.Utilities;
 
 namespace OmniCore.Mobile
 {
@@ -20,6 +21,8 @@ namespace OmniCore.Mobile
         {
             OmniCoreServices.UiSyncContext = SynchronizationContext.Current;
             PodProvider = new ErosPodProvider(new RileyLinkMessageExchangeProvider());
+            PodProvider.Initialize().ExecuteSynchronously();
+            OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             InitializeComponent();
             MainPage = new Views.MainPage();
             OmniCoreServices.Logger.Information("OmniCore App initialized");
@@ -30,25 +33,24 @@ namespace OmniCore.Mobile
             MainPage.SendBackButtonPressed();
         }
 
-        protected override async void OnStart()
+        protected override void OnStart()
         {
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
             OmniCoreServices.Logger.Debug("OmniCore App OnStart called");
-            await PodProvider.Initialize();
-            OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
+
         }
 
-        protected override async void OnSleep()
+        protected override void OnSleep()
         {
-            var repo = await ErosRepository.GetInstance();
+            var repo = ErosRepository.GetInstance().ExecuteSynchronously();
             repo.Dispose();
             OmniCoreServices.Logger.Debug("OmniCore App OnSleep called");
         }
 
-        protected override async void OnResume()
+        protected override void OnResume()
         {
-            var repo = await ErosRepository.GetInstance();
-            await repo.Initialize();
+            var repo = ErosRepository.GetInstance().ExecuteSynchronously();
+            repo.Initialize().ExecuteSynchronously();
             OmniCoreServices.Logger.Debug("OmniCore App OnResume called");
         }
     }

@@ -10,6 +10,25 @@ namespace OmniCore.Model.Utilities
     // await(?!(.+\.(No)?Sync\())(.+)
     public static class TaskExtensions
     {
+        public static T ExecuteSynchronously<T>(this Task<T> t)
+        {
+            if (t.Status == TaskStatus.Created)
+                t.Start(TaskScheduler.FromCurrentSynchronizationContext());
+            t.Wait();
+            if (t.Exception != null)
+                throw t.Exception;
+            return t.Result;
+        }
+
+        public static void ExecuteSynchronously(this Task t)
+        {
+            if (t.Status == TaskStatus.Created)
+                t.Start(TaskScheduler.FromCurrentSynchronizationContext());
+            t.Wait();
+            if (t.Exception != null)
+                throw t.Exception;
+        }
+
         //public async static Task<T> AwaitSync<T>(this Task<T> t)
         //{
         //    return await t.ConfigureAwait(true);

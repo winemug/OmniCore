@@ -47,7 +47,7 @@ namespace OmniCore.Mobile.Android
             DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
             DependencyService.Register<IOmniCoreLogger, OmniCoreLogger>();
 
-            await ErosRepository.GetInstance();
+            await ErosRepository.GetInstance().ConfigureAwait(true);
             LoadApplication(new App());
             IsCreated = true;
         }
