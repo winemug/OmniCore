@@ -93,7 +93,8 @@ namespace OmniCore.Mobile.Services
 
         private async Task<RemoteResult> GetResult(IPod pod, IConversation conversation)
         {
-            var profile = await ErosRepository.Instance.GetProfile();
+            var repo = await ErosRepository.GetInstance();
+            var profile = await repo.GetProfile();
 
             return new RemoteResult()
             {
@@ -113,8 +114,9 @@ namespace OmniCore.Mobile.Services
 
         private async Task<RemoteResult> GetResultEstimate(IPod pod)
         {
+            var repo = await ErosRepository.GetInstance();
             pod.LastStatus?.UpdateWithEstimates(pod);
-            var profile = await ErosRepository.Instance.GetProfile();
+            var profile = await repo.GetProfile();
 
             return new RemoteResult()
             {
@@ -134,7 +136,8 @@ namespace OmniCore.Mobile.Services
 
         private async Task<RemoteResult> ResultWithProfile()
         {
-            var profile = await ErosRepository.Instance.GetProfile();
+            var repo = await ErosRepository.GetInstance();
+            var profile = await repo.GetProfile();
 
             return new RemoteResult()
             {
@@ -217,7 +220,8 @@ namespace OmniCore.Mobile.Services
                 BasalSchedule = basalSchedule,
                 UtcOffset = utcOffsetMinutes
             };
-            await ErosRepository.Instance.Save(profile);
+            var repo = await ErosRepository.GetInstance();
+            await repo.Save(profile);
 
             var podProvider = App.Instance.PodProvider;
             var podManager = podProvider.PodManager?.Direct;
@@ -264,8 +268,8 @@ namespace OmniCore.Mobile.Services
         {
             try
             {
-                var rep = ErosRepository.Instance;
-                var unfilteredResults = await rep.GetHistoricalResultsForRemoteApp(request.LastResultDateTime);
+                var repo = await ErosRepository.GetInstance();
+                var unfilteredResults = await repo.GetHistoricalResultsForRemoteApp(request.LastResultDateTime);
 
                 var list = new List<HistoricalResult>();
 

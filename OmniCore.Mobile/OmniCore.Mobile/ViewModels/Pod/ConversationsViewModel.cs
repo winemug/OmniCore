@@ -27,7 +27,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
         protected async override Task<BaseViewModel> BindData()
         {
             Results = new ObservableCollection<ResultViewModel>();
-            var history = await ErosRepository.Instance.GetHistoricalResultsForDisplay(MAX_RECORDS).ConfigureAwait(true);
+            var repo = await ErosRepository.GetInstance();
+            var history = await repo.GetHistoricalResultsForDisplay(MAX_RECORDS).ConfigureAwait(true);
             foreach (var result in history)
             {
                 Results.Add((ResultViewModel)await new ResultViewModel(result).DataBind());

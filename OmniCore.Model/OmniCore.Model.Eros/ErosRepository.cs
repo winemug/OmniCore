@@ -19,16 +19,14 @@ namespace OmniCore.Model.Eros
     public class ErosRepository : IDisposable
     {
         private static ErosRepository instance = null;
-        public static ErosRepository Instance
+        public static async Task<ErosRepository> GetInstance()
         {
-            get
+            if (instance == null)
             {
-                if (instance == null)
-                {
-                    instance = new ErosRepository();
-                }
-                return instance;
+                instance = new ErosRepository();
+                await instance.Initialize();
             }
+            return instance;
         }
 
         public readonly string DbPath;

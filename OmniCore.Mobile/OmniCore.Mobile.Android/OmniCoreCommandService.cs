@@ -144,7 +144,8 @@ namespace OmniCore.Mobile.Android
                         return;
                     }
 
-                    var ocs = await ErosRepository.Instance.GetOmniCoreSettings();
+                    var repo = await ErosRepository.GetInstance();
+                    var ocs = await repo.GetOmniCoreSettings();
                     if (ocs.AcceptCommandsFromAAPS)
                     {
                         var resultTask = OmniCoreServices.Publisher.GetResult(request);

@@ -38,15 +38,17 @@ namespace OmniCore.Mobile
             OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
         }
 
-        protected override void OnSleep()
+        protected override async void OnSleep()
         {
-            ErosRepository.Instance.Dispose();
+            var repo = await ErosRepository.GetInstance();
+            repo.Dispose();
             OmniCoreServices.Logger.Debug("OmniCore App OnSleep called");
         }
 
         protected override async void OnResume()
         {
-            await ErosRepository.Instance.Initialize();
+            var repo = await ErosRepository.GetInstance();
+            await repo.Initialize();
             OmniCoreServices.Logger.Debug("OmniCore App OnResume called");
         }
     }

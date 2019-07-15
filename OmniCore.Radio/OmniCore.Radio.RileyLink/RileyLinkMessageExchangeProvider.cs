@@ -21,7 +21,8 @@ namespace OmniCore.Radio.RileyLink
         {
             if (RileyLinkInstance == null)
             {
-                RileyLinkInstance = new RileyLink(await ErosRepository.Instance.GetRadioPreferences());
+                var repo = await ErosRepository.GetInstance();
+                RileyLinkInstance = new RileyLink(await repo.GetRadioPreferences());
             }
 
             if (RileyLinkMessageExchange == null)

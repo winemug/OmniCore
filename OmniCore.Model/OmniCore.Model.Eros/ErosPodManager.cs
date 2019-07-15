@@ -177,7 +177,8 @@ namespace OmniCore.Model.Eros
                 progress.Result.ResultTime = DateTimeOffset.UtcNow;
                 progress.Running = false;
                 progress.Finished = true;
-                ErosRepository.Instance.Save(ErosPod, progress.Result);
+                var repo = await ErosRepository.GetInstance();
+                await repo.Save(ErosPod, progress.Result);
             }
 
             return progress;

@@ -148,7 +148,8 @@ namespace OmniCore.Mobile.Views.Pod
                         await podManager.UpdateStatus(conversation, timeout: 30000);
                 }
 
-                var activeProfile = await ErosRepository.Instance.GetProfile();
+                var repo = await ErosRepository.GetInstance();
+                var activeProfile = await repo.GetProfile();
 
                 if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {

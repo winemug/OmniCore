@@ -39,7 +39,8 @@ namespace OmniCore.Mobile.Views.Settings
                 if (!accepted)
                     return;
             }
-            File.Copy(ErosRepository.Instance.DbPath, backupPath, true);
+            var repo = await ErosRepository.GetInstance();
+            File.Copy(repo.DbPath, backupPath, true);
             await DisplayAlert("Database backup", "Backup completed", "OK");
         }
 
@@ -60,7 +61,8 @@ namespace OmniCore.Mobile.Views.Settings
 
                 if (accepted)
                 {
-                    File.Copy(backupPath, ErosRepository.Instance.DbPath, true);
+                    var repo = await ErosRepository.GetInstance();
+                    File.Copy(backupPath, repo.DbPath, true);
                     await DisplayAlert("Database restore", "Restore completed", "OK");
                 }
             }
@@ -71,7 +73,8 @@ namespace OmniCore.Mobile.Views.Settings
             if (!await DisplayAlert("Erase Database", "WARNING: You will lose all data stored in OmniCore.", "Erase ALL", "Cancel"))
                 return;
 
-            File.Delete(ErosRepository.Instance.DbPath);
+            var repo = await ErosRepository.GetInstance();
+            File.Delete(repo.DbPath);
             OmniCoreServices.Application.Exit();
         }
 
