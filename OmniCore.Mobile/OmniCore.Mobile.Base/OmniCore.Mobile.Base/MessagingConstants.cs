@@ -8,5 +8,7 @@ namespace OmniCore.Mobile.Base
     {
         public const string PodStatusUpdated = "PodResponseReceived";
         public const string NewResultReceived = "PodResponseReceived";
+        public const string AppResuming = "AppResuming";
+        public const string AppSleeping = "AppSleeping";
     }
 }

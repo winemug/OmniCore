@@ -55,15 +55,13 @@ namespace OmniCore.Model.Eros
 
         private IPod Pod;
         private Exception exception;
-        private readonly SemaphoreSlim ConversationMutex;
         private readonly IWakeLock WakeLock;
         private readonly CancellationTokenSource CancellationTokenSource;
         private TaskCompletionSource<bool> CancellationCompletion;
 
-        public ErosConversation(SemaphoreSlim conversationMutex, IWakeLock wakeLock, IPod pod)
+        public ErosConversation(IWakeLock wakeLock, IPod pod)
         {
             WakeLock = wakeLock;
-            ConversationMutex = conversationMutex;
             Pod = pod;
             Started = DateTimeOffset.UtcNow;
             CancellationTokenSource = new CancellationTokenSource();
@@ -133,8 +131,8 @@ namespace OmniCore.Model.Eros
                 {
                     IsFinished = true;
                     Ended = DateTimeOffset.UtcNow;
-                    ConversationMutex.Release();
                     WakeLock.Release();
+                    OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
                     CancellationTokenSource.Dispose();
                     //Pod.ActiveConversation = null;
                 }

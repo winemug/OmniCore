@@ -107,6 +107,7 @@
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.581479" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OmniCoreAppState.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="OmniCoreApplication.cs" />
     <Compile Include="OmniCoreCommandService.cs" />

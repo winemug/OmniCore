@@ -12,6 +12,7 @@ namespace OmniCore.Mobile.Base
         private static IOmniCoreLogger logger;
         private static IOmniCoreApplication application;
         private static IRemoteRequestPublisher publisher;
+        private static IAppState appState;
 
         public static IOmniCoreLogger Logger
         {
@@ -46,6 +47,18 @@ namespace OmniCore.Mobile.Base
                     publisher = DependencyService.Get<IRemoteRequestPublisher>();
                 }
                 return publisher;
+            }
+        }
+
+        public static IAppState AppState
+        {
+            get
+            {
+                if (appState == null)
+                {
+                    appState = DependencyService.Get<IAppState>();
+                }
+                return appState;
             }
         }
 

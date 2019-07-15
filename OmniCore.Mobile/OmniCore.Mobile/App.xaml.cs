@@ -42,6 +42,7 @@ namespace OmniCore.Mobile
 
         protected override void OnSleep()
         {
+            MessagingCenter.Send(this, MessagingConstants.AppSleeping);
             var repo = ErosRepository.GetInstance().ExecuteSynchronously();
             repo.Dispose();
             OmniCoreServices.Logger.Debug("OmniCore App OnSleep called");
@@ -51,7 +52,9 @@ namespace OmniCore.Mobile
         {
             var repo = ErosRepository.GetInstance().ExecuteSynchronously();
             repo.Initialize().ExecuteSynchronously();
+            OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
             OmniCoreServices.Logger.Debug("OmniCore App OnResume called");
+            MessagingCenter.Send(this, MessagingConstants.AppResuming);
         }
     }
 }

@@ -23,7 +23,6 @@ namespace OmniCore.Model.Eros
         public IPod Pod { get => ErosPod; }
 
         readonly IMessageExchangeProvider MessageExchangeProvider;
-        readonly SemaphoreSlim ConversationMutex;
 
         public IPodManager Direct { get => this; }
 
@@ -45,11 +44,18 @@ namespace OmniCore.Model.Eros
         {
             ErosPod = pod;
             MessageExchangeProvider = messageExchangeProvider;
-            ConversationMutex = new SemaphoreSlim(1, 1);
         }
 
         public async Task<IConversation> StartConversation(string intent, int timeoutMilliseconds = 0, RequestSource source = RequestSource.OmniCoreUser)
         {
+            int started = Environment.TickCount;
+            while (!OmniCoreServices.AppState.TrySet(AppStateConstants.ActiveConversation, intent))
+            {
+                if (timeoutMilliseconds > 0 && Environment.TickCount - started > timeoutMilliseconds)
+                    throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
+                await Task.Delay(250);
+            }
+
             IWakeLock wakeLock = null;
             try
             {
@@ -67,23 +73,14 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreException(FailureType.WakeLockNotAcquired);
                 }
 
-                if (timeoutMilliseconds == 0)
-                {
-                    await ConversationMutex.WaitAsync();
-                }
-                else
-                {
-                    if (!await ConversationMutex.WaitAsync(timeoutMilliseconds))
-                        throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
-                }
-
-                Pod.ActiveConversation = new ErosConversation(ConversationMutex, wakeLock, Pod) { RequestSource = source, Intent = intent };
+                Pod.ActiveConversation = new ErosConversation(wakeLock, Pod) { RequestSource = source, Intent = intent };
                 return Pod.ActiveConversation;
             }
             catch(Exception e)
             {
                 Crashes.TrackError(e);
                 wakeLock?.Dispose();
+                OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
                 throw;
             }
         }
