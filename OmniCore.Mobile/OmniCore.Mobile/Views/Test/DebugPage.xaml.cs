@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using OmniCore.Mobile.ViewModels.Pod;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -109,6 +109,7 @@ namespace OmniCore.Mobile.Views.Test
             var conv = new ErosConversation(wakeLock, pod);
             var progress = new MessageExchangeProgress(conv, msg.RequestType);
             progress.Result.Statistics = stats;
+            MessagingCenter.Send<IConversation>(conv, MessagingConstants.ConversationStarted);
             try
             {
                 await rl.EnsureDevice(progress);
@@ -122,6 +123,7 @@ namespace OmniCore.Mobile.Views.Test
                 Crashes.TrackError(ex);
             }
             conv.Dispose();
+            MessagingCenter.Send<IConversation>(conv, MessagingConstants.ConversationEnded);
         }
 
         private void ExitApp_Clicked(object sender, EventArgs e)

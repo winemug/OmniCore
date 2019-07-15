@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels.Pod
@@ -17,73 +18,66 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (Pod?.LastStatus == null)
+                if (Pod?.LastStatus?.Progress == null)
                     return "Activate New Pod";
-                else if (Pod?.LastStatus?.Progress < PodProgress.Running)
+                else if (Pod.LastStatus.Progress.Value < PodProgress.Running)
                     return "Resume Activation";
                 else
                     return "Pod Active";
             }
         }
 
-        public bool ActivateEnabled
-        {
-            get
-            {
-                return PodNotBusy &&
-                    (Pod?.LastStatus == null || Pod?.LastStatus?.Progress < PodProgress.Running);
-            }
-        }
+        public bool ActivateEnabled =>
+            !IsInConversation &&
+            (Pod?.LastStatus == null || Pod?.LastStatus?.Progress < PodProgress.Running);
 
-        public bool DeactivateEnabled
-        {
-            get
-            {
-                return PodExistsAndNotBusy && Pod?.LastStatus?.Progress >= PodProgress.PairingSuccess
-                    && Pod?.LastStatus?.Progress <= PodProgress.Inactive;
-            }
-        }
-
-        public bool DeactivateButtonVisible
-        {
-            get
-            {
-                return (Pod != null &&
-                    (Pod.LastStatus == null ||
-                    (Pod.LastStatus.Progress >= Model.Enums.PodProgress.PairingSuccess
-                    && Pod.LastStatus.Progress < Model.Enums.PodProgress.Inactive)));
-            }
-        }
-
-        public bool ActivateNewButtonVisible
-        {
-            get
-            {
-                return (Pod == null || Pod.LastStatus == null || Pod.LastStatus.Progress < Model.Enums.PodProgress.PairingSuccess);
-            }
-        }
-
-        public bool ResumeActivationButtonVisible
-        {
-            get
-            {
-                return (Pod?.LastStatus != null && Pod.LastStatus.Progress < Model.Enums.PodProgress.Running &&
-                    Pod.LastStatus.Progress >= Model.Enums.PodProgress.PairingSuccess);
-            }
-        }
+        public bool DeactivateEnabled =>
+            !IsInConversation && Pod?.LastStatus?.Progress != null && Pod.LastStatus.Progress.Value >= PodProgress.PairingSuccess
+            && Pod.LastStatus.Progress.Value <= PodProgress.Inactive;
 
         public MaintenanceViewModel(Page page):base(page)
         {
+            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
+            {
+                OnPropertyChanged(nameof(ActivateEnabled));
+                OnPropertyChanged(nameof(DeactivateEnabled));
+            });
+
+            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationStarted, (conversation)
+                =>
+            {
+                OnPropertyChanged(nameof(ActivateEnabled));
+                OnPropertyChanged(nameof(DeactivateEnabled));
+            });
+
+            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationEnded, (conversation)
+                =>
+            {
+                OnPropertyChanged(nameof(ActivateEnabled));
+                OnPropertyChanged(nameof(DeactivateEnabled));
+            });
+
+            MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>
+            {
+                OnPropertyChanged(nameof(ActivateEnabled));
+                OnPropertyChanged(nameof(DeactivateEnabled));
+            });
         }
 
         [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task<BaseViewModel> BindData()
         {
+            OnPropertyChanged(nameof(ActivateEnabled));
+            OnPropertyChanged(nameof(DeactivateEnabled));
             return this;
         }
 
         protected override void OnDisposeManagedResources()
         {
+            MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
+            MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
+            MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
+            MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
         }
     }
 }

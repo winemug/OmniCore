@@ -57,7 +57,7 @@
                 <StackLayout Orientation="Horizontal" HorizontalOptions="End">
                     <Label VerticalOptions="Center">Updated</Label>
                     <Label VerticalOptions="Center" Text="{Binding Updated, TargetNullValue=''}"/>
-                    <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding PodExistsAndNotBusy}"/>
+                    <Button Text="Update" Clicked="Update_Button_Clicked" IsEnabled="{Binding CanRunCommand}"/>
                 </StackLayout>
             </StackLayout>
         </Grid>

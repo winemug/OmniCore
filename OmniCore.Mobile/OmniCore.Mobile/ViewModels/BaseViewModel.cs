@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Enums;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
@@ -13,28 +14,41 @@ namespace OmniCore.Mobile.ViewModels
     {
         public IPod Pod { get; set; }
 
-        public bool PodExistsAndNotBusy
-        {
-            get
-            {
-                return Pod != null
-                    && (Pod.ActiveConversation == null || Pod.ActiveConversation.IsFinished);
-            }
-        }
+        public IConversation ActiveConversation { get; set; }
 
-        public bool PodNotBusy
-        {
-            get
-            {
-                return (Pod?.ActiveConversation == null || Pod.ActiveConversation.IsFinished);
-            }
-        }
+        public bool IsPodRunning { get; set; }
+
+        public bool IsInConversation { get; set; }
+
+        public bool CanRunCommand => IsPodRunning & !IsInConversation;
 
         public BaseViewModel()
         {
             MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
             {
                 this.Pod = pp.PodManager?.Pod;
+                var podState = this.Pod?.LastStatus?.Progress;
+                IsPodRunning = podState != null && podState.Value >= PodProgress.Running &&
+                             podState.Value <= PodProgress.RunningLow;
+                IsInConversation = false;
+                ActiveConversation = null;
+                OnPropertyChanged(nameof(CanRunCommand));
+            });
+
+            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationStarted, (conversation)
+                =>
+            {
+                IsInConversation = true;
+                ActiveConversation = conversation;
+                OnPropertyChanged(nameof(CanRunCommand));
+            });
+
+            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationEnded, (conversation)
+                =>
+            {
+                IsInConversation = false;
+                ActiveConversation = null;
+                OnPropertyChanged(nameof(CanRunCommand));
             });
         }
 
@@ -69,6 +83,8 @@ namespace OmniCore.Mobile.ViewModels
                 if (disposing)
                 {
                     MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
+                    MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
+                    MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
                     OnDisposeManagedResources();
                 }
 

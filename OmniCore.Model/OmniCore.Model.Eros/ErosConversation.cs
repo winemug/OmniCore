@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Model.Eros
 {
@@ -133,6 +134,7 @@ namespace OmniCore.Model.Eros
                     WakeLock.Release();
                     OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
                     CancellationTokenSource.Dispose();
+                    MessagingCenter.Send<IConversation>(this, MessagingConstants.ConversationEnded);
                     //Pod.ActiveConversation = null;
                 }
 

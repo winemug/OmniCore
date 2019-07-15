@@ -14,6 +14,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Model.Eros
 {
@@ -74,6 +75,7 @@ namespace OmniCore.Model.Eros
                 }
 
                 Pod.ActiveConversation = new ErosConversation(wakeLock, Pod) { RequestSource = source, Intent = intent };
+                MessagingCenter.Send<IConversation>(Pod.ActiveConversation, MessagingConstants.ConversationStarted);
                 return Pod.ActiveConversation;
             }
             catch(Exception e)
@@ -81,6 +83,7 @@ namespace OmniCore.Model.Eros
                 Crashes.TrackError(e);
                 wakeLock?.Dispose();
                 OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
+                Pod.ActiveConversation?.Dispose();
                 throw;
             }
         }

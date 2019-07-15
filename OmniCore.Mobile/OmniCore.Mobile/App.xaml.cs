@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using OmniCore.Model.Exceptions;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Mobile
@@ -36,8 +37,8 @@ namespace OmniCore.Mobile
         protected override void OnStart()
         {
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
             OmniCoreServices.Logger.Debug("OmniCore App OnStart called");
-
         }
 
         protected override void OnSleep()
