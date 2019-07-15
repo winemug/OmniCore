@@ -5,15 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
     public abstract class BaseViewModel : PropertyChangedImpl, IDisposable
     {
-        protected PropertyChangedDependencyHandler DependencyHandler;
         public IPod Pod { get; set; }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public bool PodExistsAndNotBusy
         {
             get
@@ -23,7 +22,6 @@ namespace OmniCore.Mobile.ViewModels
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public bool PodNotBusy
         {
             get
@@ -34,6 +32,10 @@ namespace OmniCore.Mobile.ViewModels
 
         public BaseViewModel()
         {
+            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
+            {
+                this.Pod = pp.PodManager?.Pod;
+            });
         }
 
         protected abstract void OnDisposeManagedResources();
@@ -42,7 +44,6 @@ namespace OmniCore.Mobile.ViewModels
 
         public async Task<BaseViewModel> DataBind()
         {
-            DependencyHandler = new PropertyChangedDependencyHandler(this);
             Pod = App.Instance.PodProvider.PodManager?.Pod;
             await BindData();
             return this;
@@ -67,8 +68,7 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (disposing)
                 {
-                    DependencyHandler?.Dispose();
-                    App.Instance.PodProvider.ManagerChanged -= PodProvider_PodChanged;
+                    MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
                     OnDisposeManagedResources();
                 }
 

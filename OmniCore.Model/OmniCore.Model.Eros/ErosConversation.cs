@@ -45,7 +45,6 @@ namespace OmniCore.Model.Eros
                 var oe = value as OmniCoreException;
                 FailureType = oe?.FailureType ?? FailureType.Unknown;
                 exception = value;
-                OnPropertyChanged(nameof(this.Exception));
             }
         }
 

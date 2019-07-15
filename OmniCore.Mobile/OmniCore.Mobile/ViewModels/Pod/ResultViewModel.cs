@@ -31,8 +31,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
         public IMessageExchangeResult MessageExchangeResult { get; set; }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Parameters))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Type))]
         public string RequestText
         {
             get
@@ -80,7 +78,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Type))]
         public Color RequestTextColor
         {
             get
@@ -115,7 +112,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.RequestTime))]
         public string RequestDate
         {
             get
@@ -127,7 +123,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
         public string ResultDate
         {
             get
@@ -139,8 +134,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Success))]
         public Color ResultStatusColor
         {
             get
@@ -157,11 +150,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ResultTime))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Success))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Failure))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.Waiting))]
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.Running))]
         public string ResultStatus
         {
             get
@@ -187,7 +175,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.ExchangeProgress), nameof(IMessageExchangeProgress.ActionText))]
         public string ResultActivity
         {
             get
@@ -201,7 +188,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Statistics), nameof(IMessageExchangeStatistics.MobileDeviceRssiAverage))]
         public string RileyLinkRssi
         {
             get
@@ -213,7 +199,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(MessageExchangeResult), nameof(IMessageExchangeResult.Statistics), nameof(IMessageExchangeStatistics.RadioRssiAverage))]
         public string PodRssi
         {
             get

@@ -13,7 +13,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class MaintenanceViewModel : PageViewModel
     {
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public string ActivationText
         {
             get
@@ -27,7 +26,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public bool ActivateEnabled
         {
             get
@@ -37,8 +35,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
-        [DependencyPath(nameof(PodExistsAndNotBusy))]
         public bool DeactivateEnabled
         {
             get
@@ -48,7 +44,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public bool DeactivateButtonVisible
         {
             get
@@ -60,7 +55,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public bool ActivateNewButtonVisible
         {
             get
@@ -69,7 +63,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public bool ResumeActivationButtonVisible
         {
             get

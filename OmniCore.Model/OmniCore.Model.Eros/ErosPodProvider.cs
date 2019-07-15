@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Mobile.Base;
+using Xamarin.Forms;
 
 namespace OmniCore.Model.Eros
 {
@@ -23,13 +25,11 @@ namespace OmniCore.Model.Eros
             {
                 if (_podManager != value)
                 {
+                    MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodChanged);
                     _podManager = value;
-                    ManagerChanged?.Invoke(this, new EventArgs());
                 }
             }
         }
-
-        public event EventHandler ManagerChanged;
 
         public ErosPodProvider(IMessageExchangeProvider messageExchangeProvider)
         {

@@ -56,9 +56,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.Lot))]
-        [DependencyPath(nameof(Pod), nameof(IPod.RadioAddress))]
-        [DependencyPath(nameof(Pod), nameof(IPod.Serial))]
         public string Id
         {
             get
@@ -72,7 +69,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Created))]
         public string Updated
         {
             get
@@ -113,7 +109,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public string Status
         {
             get
@@ -156,7 +151,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public string LifetimeRemaining
         {
             get
@@ -173,7 +167,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public string LifetimeActive
         {
             get
@@ -190,7 +183,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public Color LifetimeColor
         {
             get
@@ -214,7 +206,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ActiveMinutesEstimate))]
         public double LifetimeProgress
         {
             get
@@ -232,8 +223,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.Progress))]
         public string ReservoirRemaining
         {
             get
@@ -252,8 +241,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.DeliveredInsulinEstimate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ReservoirUsedForPriming))]
         public string ReservoirDelivered
         {
             get
@@ -272,7 +259,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
         public Color ReservoirColor
         {
             get
@@ -295,7 +281,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ReservoirEstimate))]
         public double ReservoirProgress
         {
             get
@@ -313,8 +298,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRate))]
         public string BasalStatus
         {
             get
@@ -339,10 +322,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ScheduledBasalRate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalTotalHours))]
         public string BasalText1
         {
             get
@@ -376,9 +355,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.BasalStateEstimate))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.ScheduledBasalAverage))]
-        [DependencyPath(nameof(Pod), nameof(IPod.LastStatus), nameof(IStatus.TemporaryBasalRemaining))]
         public string BasalText2
         {
             get

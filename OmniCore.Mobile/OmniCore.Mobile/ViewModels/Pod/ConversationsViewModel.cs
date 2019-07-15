@@ -64,7 +64,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             });
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.IsFinished))]
         public string ConversationTitle
         {
             get
@@ -79,7 +78,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Intent))]
         public string ConversationIntent
         {
             get
@@ -88,7 +86,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Started))]
         public string Started
         {
             get
@@ -97,7 +94,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.Ended))]
         public string Ended
         {
             get
@@ -106,7 +102,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.RequestSource))]
         public string StartedBy
         {
             get
@@ -125,10 +120,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Waiting))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Finished))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Running))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.RequestTime))]
         public string RequestPhase
         {
             get
@@ -161,9 +152,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
             }
         }
 
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Finished))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.Success))]
-        [DependencyPath(nameof(Pod), nameof(IPod.ActiveConversation), nameof(IConversation.CurrentExchange), nameof(IMessageExchangeProgress.Result), nameof(IMessageExchangeResult.Failure))]
         public string ExchangeActionResult
         {
             get
