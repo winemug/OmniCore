@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
-    public class ErosConversation : PropertyChangedImpl, IConversation
+    public class ErosConversation : IConversation
     {
         public DateTimeOffset Started { get; set; }
         public DateTimeOffset? Ended { get; set; }

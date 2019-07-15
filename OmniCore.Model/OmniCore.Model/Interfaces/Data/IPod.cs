@@ -6,7 +6,7 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces.Data
 {
-    public interface IPod : INotifyPropertyChanged
+    public interface IPod
     {
         Guid Id { get; set; }
         DateTimeOffset Created { get; set; }

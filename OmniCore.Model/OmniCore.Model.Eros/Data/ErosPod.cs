@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros.Data
 {
-    public class ErosPod : PropertyChangedImpl, IPod
+    public class ErosPod : IPod
     {
         private int messageSequence;
 

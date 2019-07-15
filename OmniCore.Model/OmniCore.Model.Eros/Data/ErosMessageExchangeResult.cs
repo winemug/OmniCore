@@ -11,7 +11,7 @@ using OmniCore.Mobile.Base;
 
 namespace OmniCore.Model.Eros.Data
 {
-    public class ErosMessageExchangeResult : PropertyChangedImpl, IMessageExchangeResult
+    public class ErosMessageExchangeResult : IMessageExchangeResult
     {
         public ErosMessageExchangeResult()
         {

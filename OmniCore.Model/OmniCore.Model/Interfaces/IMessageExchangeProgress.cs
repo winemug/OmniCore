@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IMessageExchangeProgress : INotifyPropertyChanged
+    public interface IMessageExchangeProgress
     {
         IConversation Conversation { get; }
 

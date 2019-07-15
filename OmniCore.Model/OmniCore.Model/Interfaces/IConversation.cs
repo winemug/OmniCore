@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IConversation : INotifyPropertyChanged, IDisposable
+    public interface IConversation : IDisposable
     {
         DateTimeOffset Started { get; set; }
         DateTimeOffset? Ended { get; set; }

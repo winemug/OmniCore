@@ -7,7 +7,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Data
 {
-    public interface IMessageExchangeResult : INotifyPropertyChanged
+    public interface IMessageExchangeResult
     {
         long? Id { get; set; }
         Guid PodId { get; set; }

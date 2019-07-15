@@ -13,7 +13,7 @@ using OmniCore.Mobile.Base;
 namespace OmniCore.Model.Eros.Data
 {
     [Table("Status")]
-    public class ErosStatus : PropertyChangedImpl, IStatus
+    public class ErosStatus : IStatus
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }

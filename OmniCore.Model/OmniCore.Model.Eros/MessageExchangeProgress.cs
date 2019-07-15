@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Eros
 {
-    public class MessageExchangeProgress : PropertyChangedImpl, IMessageExchangeProgress
+    public class MessageExchangeProgress : IMessageExchangeProgress
     {
         public bool CanBeCanceled { get; set; }
         public bool Waiting { get; set; }

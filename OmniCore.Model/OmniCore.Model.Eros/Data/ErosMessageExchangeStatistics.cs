@@ -10,7 +10,7 @@ using System.Text;
 
 namespace OmniCore.Model.Eros.Data
 {
-    public class ErosMessageExchangeStatistics : PropertyChangedImpl, IMessageExchangeStatistics
+    public class ErosMessageExchangeStatistics : IMessageExchangeStatistics
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
