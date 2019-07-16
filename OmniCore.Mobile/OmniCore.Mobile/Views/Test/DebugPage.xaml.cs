@@ -105,7 +105,7 @@ namespace OmniCore.Mobile.Views.Test
             if (!await wakeLock.Acquire(10000))
                 return;
 
-            var conv = new ErosConversation(wakeLock, pod);
+            var conv = new ErosConversation(wakeLock);
             var progress = new MessageExchangeProgress(conv, msg.RequestType);
             progress.Result.Statistics = stats;
             MessagingCenter.Send<IConversation>(conv, MessagingConstants.ConversationStarted);

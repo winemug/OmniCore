@@ -20,23 +20,23 @@ namespace OmniCore.Model.Eros
             switch (PartType)
             {
                 case PartType.ResponseVersionInfo:
-                    parse_version_response(pod, result);
+                    ParseVersionResponse(pod, result);
                     break;
                 case PartType.ResponseDetailInfoResponse:
-                    parse_information_response(pod, result);
+                    ParseInformationResponse(pod, result);
                     break;
                 case PartType.ResponseResyncResponse:
-                    parse_resync_response(pod as ErosPod, result);
+                    ParseResyncResponse(pod as ErosPod);
                     break;
                 case PartType.ResponseStatus:
-                    parse_status_response(pod, result);
+                    ParseStatusResponse(pod, result);
                     break;
                 default:
                     throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown response type {PartType}");
             }
         }
 
-        private void parse_version_response(IPod pod, IMessageExchangeResult result)
+        private void ParseVersionResponse(IPod pod, IMessageExchangeResult result)
         {
             bool lengthyResponse = false;
             pod.Created = DateTimeOffset.UtcNow;
@@ -78,7 +78,7 @@ namespace OmniCore.Model.Eros
             result.Status = status;
         }
 
-        private void parse_information_response(IPod pod, IMessageExchangeResult result)
+        private void ParseInformationResponse(IPod pod, IMessageExchangeResult result)
         {
             int i = 0;
             var rt = PartData.Byte(i++);
@@ -108,7 +108,7 @@ namespace OmniCore.Model.Eros
 
                     status.Created = DateTimeOffset.UtcNow;
                     status.Progress = (PodProgress)PartData.Byte(i++);
-                    parse_delivery_state(status, PartData.Byte(i++));
+                    ParseDeliveryState(status, PartData.Byte(i++));
                     status.NotDeliveredInsulin = PartData.Byte(i++) * 0.05m;
                     pod.MessageSequence = PartData.Byte(i++);
                     status.DeliveredInsulin = PartData.Byte(i++) * 0.05m;
@@ -142,7 +142,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        private void parse_delivery_state(IStatus podStatus, byte delivery_state)
+        private void ParseDeliveryState(IStatus podStatus, byte delivery_state)
         {
             if ((delivery_state & 8) > 0)
                 podStatus.BolusState = BolusState.Extended;
@@ -159,7 +159,7 @@ namespace OmniCore.Model.Eros
                 podStatus.BasalState = BasalState.Suspended;
         }
 
-        private void parse_resync_response(ErosPod pod, IMessageExchangeResult result)
+        private void ParseResyncResponse(ErosPod pod)
         {
             if (PartData[0] == 0x14)
                 pod.RuntimeVariables.NonceSync = PartData.Word(1);
@@ -167,7 +167,7 @@ namespace OmniCore.Model.Eros
                 throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Unknown resync request {PartData} from pod");
         }
 
-        private void parse_status_response(IPod pod, IMessageExchangeResult result)
+        private void ParseStatusResponse(IPod pod, IMessageExchangeResult result)
         {
             var status = new ErosStatus();
             status.Created = DateTimeOffset.UtcNow;
@@ -175,7 +175,7 @@ namespace OmniCore.Model.Eros
             uint s1 = PartData.DWord(1);
             uint s2 = PartData.DWord(5);
 
-            parse_delivery_state(status, (byte)(s0 >> 4));
+            ParseDeliveryState(status, (byte)(s0 >> 4));
             status.Progress = (PodProgress)(s0 & 0xF);
 
             pod.MessageSequence = (int)(s1 & 0x00007800) >> 11;

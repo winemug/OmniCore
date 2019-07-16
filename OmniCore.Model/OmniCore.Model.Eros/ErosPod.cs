@@ -71,7 +71,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreException(FailureType.WakeLockNotAcquired);
                 }
 
-                conversation = new ErosConversation(wakeLock, this) { RequestSource = source, Intent = intent };
+                conversation = new ErosConversation(wakeLock) { RequestSource = source, Intent = intent };
                 MessagingCenter.Send<IConversation>(conversation, MessagingConstants.ConversationStarted);
                 return conversation;
             }

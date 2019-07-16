@@ -62,7 +62,7 @@ namespace OmniCore.Model.Eros
                     conn.CreateTable<ErosRadioPreferences>();
                     conn.CreateTable<OmniCoreSettings>();
 
-                    if (conn.Table<ErosProfile>().Count() == 0)
+                    if (!conn.Table<ErosProfile>().Any())
                     {
                         conn.Insert(new ErosProfile()
                         {
@@ -79,7 +79,7 @@ namespace OmniCore.Model.Eros
                         });
                     }
 
-                    if (conn.Table<ErosRadioPreferences>().Count() == 0)
+                    if (!conn.Table<ErosRadioPreferences>().Any())
                     {
                         conn.Insert(new ErosRadioPreferences()
                         {
@@ -87,7 +87,7 @@ namespace OmniCore.Model.Eros
                         });
                     }
 
-                    if (conn.Table<OmniCoreSettings>().Count() == 0)
+                    if (!conn.Table<OmniCoreSettings>().Any())
                     {
                         conn.Insert(new OmniCoreSettings()
                         {

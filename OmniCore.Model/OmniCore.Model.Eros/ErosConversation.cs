@@ -52,16 +52,14 @@ namespace OmniCore.Model.Eros
 
         public CancellationToken Token => CancellationTokenSource.Token;
 
-        private IPod Pod;
         private Exception exception;
         private readonly IWakeLock WakeLock;
         private readonly CancellationTokenSource CancellationTokenSource;
         private TaskCompletionSource<bool> CancellationCompletion;
 
-        public ErosConversation(IWakeLock wakeLock, IPod pod)
+        public ErosConversation(IWakeLock wakeLock)
         {
             WakeLock = wakeLock;
-            Pod = pod;
             Started = DateTimeOffset.UtcNow;
             CancellationTokenSource = new CancellationTokenSource();
         }
