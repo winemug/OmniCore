@@ -56,7 +56,7 @@ namespace OmniCore.Mobile.Views.Test
 
         private async Task PrepareForTest()
         {
-            var pod = App.Instance.PodProvider.PodManager.Pod;
+            var pod = App.Instance.PodProvider.SinglePod;
             nonce = new Nonce((ErosPod)pod);
 
             var stats = new RileyLinkStatistics();
@@ -98,7 +98,7 @@ namespace OmniCore.Mobile.Views.Test
 
         private async Task ExecuteCommand(RileyLinkStatistics stats, ErosMessageExchangeParameters parameters, IMessage msg)
         {
-            var pod = App.Instance.PodProvider.PodManager.Pod;
+            var pod = App.Instance.PodProvider.SinglePod;
             var rme = new RileyLinkMessageExchange(parameters, pod, rl);
             var mutex = new SemaphoreSlim(0, 1);
             var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("radio_test");

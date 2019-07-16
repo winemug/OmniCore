@@ -149,13 +149,12 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelBolus()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation("Cancel Bolus", source: RequestSource.AndroidAPS))
+                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, "Cancel Bolus", source: RequestSource.AndroidAPS))
                 {
-                    await podManager.CancelBolus(conversation);
+                    await pod.CancelBolus(conversation);
                     return await GetResult(pod, conversation);
                 }
             }
@@ -165,13 +164,13 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> Bolus(decimal units)
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation($"Bolus {units:F2}U", source: RequestSource.AndroidAPS))
+                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider,
+                    $"Bolus {units:F2}U", source: RequestSource.AndroidAPS))
                 {
-                    await podManager.Bolus(conversation, units, false);
+                    await pod.Bolus(conversation, units, false);
                     return await GetResult(pod, conversation);
                 }
             }
@@ -181,13 +180,13 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelTempBasal()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation("Cancel Temp Basal", source: RequestSource.AndroidAPS))
+                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                    "Cancel Temp Basal", source: RequestSource.AndroidAPS))
                 {
-                    await podManager.CancelTempBasal(conversation);
+                    await pod.CancelTempBasal(conversation);
                     return await GetResult(pod, conversation);
                 }
             }
@@ -197,14 +196,14 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation($"Set Temp Basal {rate:F2}U/hr for {hours:F1}h",
+                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                    $"Set Temp Basal {rate:F2}U/hr for {hours:F1}h",
                     source: RequestSource.AndroidAPS))
                 {
-                    await podManager.SetTempBasal(conversation, rate, hours);
+                    await pod.SetTempBasal(conversation, rate, hours);
                     return await GetResult(pod, conversation);
                 }
             }
@@ -223,13 +222,13 @@ namespace OmniCore.Mobile.Services
             await repo.Save(profile);
 
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                using (var conversation = await podManager.StartConversation($"Set Basal Schedule", source: RequestSource.AndroidAPS))
+                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                    $"Set Basal Schedule", source: RequestSource.AndroidAPS))
                 {
-                    await podManager.SetBasalSchedule(conversation, profile);
+                    await pod.SetBasalSchedule(conversation, profile);
                     return await GetResult(pod, conversation);
                 }
             }
@@ -242,16 +241,16 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> GetStatus()
         {
             var podProvider = App.Instance.PodProvider;
-            var podManager = podProvider.PodManager?.Direct;
-            var pod = podManager?.Pod;
+            var pod = podProvider.SinglePod;
             if (IsAssigned(pod))
             {
-                var ts = DateTimeOffset.UtcNow - podManager.Pod.LastStatus?.Created;
+                var ts = DateTimeOffset.UtcNow - pod.LastStatus?.Created;
                 if (ts == null || ts.Value.Minutes > 20)
                 {
-                    using (var conversation = await podManager.StartConversation("Update Status", source: RequestSource.AndroidAPS))
+                    using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                        "Update Status", source: RequestSource.AndroidAPS))
                     {
-                        await podManager.UpdateStatus(conversation);
+                        await pod.UpdateStatus(conversation);
                         return await GetResult(pod, conversation);
                     }
                 }
@@ -350,7 +349,7 @@ namespace OmniCore.Mobile.Services
             }
         }
 
-        private HistoricalResult GetHistoricalResult(IMessageExchangeResult oldResult, bool running)
+        private HistoricalResult GetHistoricalResult(ErosMessageExchangeResult oldResult, bool running)
         {
             var hr = new HistoricalResult()
             {

@@ -25,9 +25,9 @@ namespace OmniCore.Mobile.ViewModels
 
         public BaseViewModel()
         {
-            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
+            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodsChanged, (pp) =>
             {
-                this.Pod = pp.PodManager?.Pod;
+                this.Pod = pp.SinglePod;
                 var podState = this.Pod?.LastStatus?.Progress;
                 IsPodRunning = podState != null && podState.Value >= PodProgress.Running &&
                              podState.Value <= PodProgress.RunningLow;
@@ -59,21 +59,9 @@ namespace OmniCore.Mobile.ViewModels
 
         public async Task<BaseViewModel> DataBind()
         {
-            Pod = App.Instance.PodProvider.PodManager?.Pod;
+            Pod = App.Instance.PodProvider.SinglePod;
             await BindData();
             return this;
-        }
-
-        private void PodProvider_PodChanged(object sender, EventArgs e)
-        {
-            if (App.Instance.PodProvider.PodManager != null)
-            {
-                Pod = App.Instance.PodProvider.PodManager?.Pod;
-            }
-            else
-            {
-                Pod = null;
-            }
         }
 
         protected bool disposedValue = false; // To detect redundant calls
@@ -83,7 +71,7 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (disposing)
                 {
-                    MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
+                    MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodsChanged);
                     MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
                     MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
                     foreach(var disposable in Disposables)

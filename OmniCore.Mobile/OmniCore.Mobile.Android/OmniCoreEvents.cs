@@ -18,7 +18,7 @@ namespace OmniCore.Mobile.Android
     public class OmniCoreEvents : IAppEventSubscriber, IAppEventPublisher
     {
 
-        public const string PodChanged = "PodChanged";
+        public const string PodChanged = "PodsChanged";
         public const string PodStatusUpdated = "PodStatusUpdated";
         public const string NewResultReceived = "NewResultReceived";
         public const string AppResuming = "AppResuming";

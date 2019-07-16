@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
@@ -27,5 +29,26 @@ namespace OmniCore.Model.Interfaces
         IFault LastFault { get; set; }
         IStatus LastStatus { get; set; }
         IUserSettings LastUserSettings { get; set; }
+
+        Task<IConversation> StartConversation(IMessageExchangeProvider messageExchangeProvider,
+            string intent,
+            int timeout = 0,
+            RequestSource source = RequestSource.OmniCoreUser);
+
+        Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard, int? timeout = null);
+        Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
+        Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
+        Task Bolus(IConversation conversation, decimal bolusAmount, bool waitForBolusToFinish = true);
+        Task CancelBolus(IConversation conversation);
+        Task SetTempBasal(IConversation conversation, decimal basalRate, decimal durationInHours);
+        Task CancelTempBasal(IConversation conversation);
+        Task StartExtendedBolus(IConversation conversation, decimal bolusAmount, decimal durationInHours);
+        Task CancelExtendedBolus(IConversation conversation);
+        Task SetBasalSchedule(IConversation conversation, IProfile profile);
+        Task SuspendBasal(IConversation conversation);
+        Task Pair(IConversation conversation, IProfile profile);
+        Task Activate(IConversation conversation);
+        Task InjectAndStart(IConversation conversation, IProfile profile);
+        Task Deactivate(IConversation conversation);
     }
 }

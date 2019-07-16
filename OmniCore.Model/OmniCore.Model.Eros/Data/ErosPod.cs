@@ -15,9 +15,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
-    public class ErosPod : IPod
+    public partial class ErosPod : IPod
     {
         private int messageSequence;
 

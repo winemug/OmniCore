@@ -17,12 +17,14 @@ namespace OmniCore.Mobile
     {
         public static App Instance => Application.Current as App;
         public IPodProvider PodProvider { get; private set; }
+        public IMessageExchangeProvider ExchangeProvider { get; private set; }
 
         public App()
         {
             OmniCoreServices.UiSyncContext = SynchronizationContext.Current;
-            PodProvider = new ErosPodProvider(new RileyLinkMessageExchangeProvider());
+            PodProvider = new ErosPodProvider();
             PodProvider.Initialize().ExecuteSynchronously();
+            ExchangeProvider = new RileyLinkMessageExchangeProvider();
             OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             InitializeComponent();
             MainPage = new Views.MainPage();

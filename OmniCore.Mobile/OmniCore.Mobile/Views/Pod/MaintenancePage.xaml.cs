@@ -33,19 +33,20 @@ namespace OmniCore.Mobile.Views.Pod
             try
             {
                 var podProvider = App.Instance.PodProvider;
-                var podManager = podProvider.PodManager;
+                var pod = podProvider.SinglePod;
 
                 IConversation conversation;
 
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                if (pod.LastStatus == null || pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    using (conversation = await podManager.StartConversation("Checking Activation Status"))
+                    using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                        "Checking Activation Status"))
                     {
-                        await podManager.UpdateStatus(conversation, timeout: 30000);
+                        await pod.UpdateStatus(conversation, timeout: 30000);
                     }
                 }
 
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                if (pod.LastStatus == null || pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
                     var dlgResult = await DisplayAlert("Pod Deactivation",
                         @"This pod has not been paired yet and cannot be deactivated. Would you like to remove the pod from the system? " +
@@ -54,12 +55,12 @@ namespace OmniCore.Mobile.Views.Pod
 
                     if (dlgResult)
                     {
-                        await podProvider.Archive();
+                        await podProvider.Archive(pod);
                     }
                     return;
                 }
 
-                if (podManager.Pod.LastStatus.Progress < PodProgress.Running)
+                if (pod.LastStatus.Progress < PodProgress.Running)
                 {
                     var dlgResult = await DisplayAlert("Pod Deactivation",
                         @"This pod has not been started yet. Are you sure you want to deactivate it without starting? " +
@@ -69,7 +70,7 @@ namespace OmniCore.Mobile.Views.Pod
                     if (!dlgResult)
                         return;
                 }
-                else if (podManager.Pod.LastStatus.Progress <= PodProgress.RunningLow)
+                else if (pod.LastStatus.Progress <= PodProgress.RunningLow)
                 {
                     var dlgResult = await DisplayAlert("Pod Deactivation",
                         @"This pod is currently active and running. Are you sure you want to deactivate it? " +
@@ -80,12 +81,13 @@ namespace OmniCore.Mobile.Views.Pod
                         return;
                 }
 
-                using (conversation = await podManager.StartConversation("Deactivate Pod"))
-                    await podManager.Deactivate(conversation);
+                using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                    "Deactivate Pod"))
+                    await pod.Deactivate(conversation);
 
                 if (!conversation.Failed)
                 {
-                    await podProvider.Archive();
+                    await podProvider.Archive(pod);
                     await DisplayAlert("Pod Deactivation", "Pod has been deactivated successfully.", "OK");
                 }
                 else
@@ -96,7 +98,7 @@ namespace OmniCore.Mobile.Views.Pod
 
                     if (dlgResult)
                     {
-                        await podProvider.Archive();
+                        await podProvider.Archive(pod);
                         await DisplayAlert("Pod Deactivation", "Pod has been removed.", "OK");
                     }
                 }
@@ -113,9 +115,10 @@ namespace OmniCore.Mobile.Views.Pod
             try
             {
                 var podProvider = App.Instance.PodProvider;
+                var pod = podProvider.SinglePod;
                 bool actDlgResult;
 
-                if (podProvider.PodManager == null || podProvider.PodManager.Pod.LastStatus == null)
+                if (pod?.LastStatus == null)
                 {
                     actDlgResult = await DisplayAlert(
                                 "Pod Activation",
@@ -125,7 +128,7 @@ namespace OmniCore.Mobile.Views.Pod
                     if (!actDlgResult)
                         return;
 
-                    if (podProvider.PodManager == null)
+                    if (pod == null)
                         await podProvider.New();
                 }
                 else
@@ -139,22 +142,24 @@ namespace OmniCore.Mobile.Views.Pod
                         return;
                 }
 
-                var podManager = podProvider.PodManager;
+                pod = podProvider.SinglePod;
                 IConversation conversation;
 
-                if (podManager.Pod.LastStatus == null)
+                if (pod.LastStatus == null)
                 {
-                    using (conversation = await podManager.StartConversation("Update Status"))
-                        await podManager.UpdateStatus(conversation, timeout: 30000);
+                    using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                        "Update Status"))
+                        await pod.UpdateStatus(conversation, timeout: 30000);
                 }
 
                 var repo = await ErosRepository.GetInstance();
                 var activeProfile = await repo.GetProfile();
 
-                if (podManager.Pod.LastStatus == null || podManager.Pod.LastStatus.Progress < PodProgress.PairingSuccess)
+                if (pod.LastStatus == null || pod.LastStatus.Progress < PodProgress.PairingSuccess)
                 {
-                    using (conversation = await podManager.StartConversation("Pair Pod"))
-                        await podManager.Pair(conversation, activeProfile);
+                    using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                        "Pair Pod"))
+                        await pod.Pair(conversation, activeProfile);
                     if (conversation.Failed)
                     {
                         await DisplayAlert("Pod Activation", "Failed to pair the pod.", "OK");
@@ -162,11 +167,12 @@ namespace OmniCore.Mobile.Views.Pod
                     }
                 }
 
-                if (podManager.Pod.LastStatus.Progress < PodProgress.ReadyForInjection)
+                if (pod.LastStatus.Progress < PodProgress.ReadyForInjection)
                 {
-                    using (conversation = await podManager.StartConversation("Activate Pod"))
+                    using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                        "Activate Pod"))
                     {
-                        await podManager.Activate(conversation);
+                        await pod.Activate(conversation);
                     }
                     if (conversation.Failed)
                     {
@@ -192,9 +198,10 @@ namespace OmniCore.Mobile.Views.Pod
                     return;
 
 
-                using (conversation = await podManager.StartConversation("Start Pod"))
+                using (conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+                    "Start Pod"))
                 {
-                    await podManager.InjectAndStart(conversation, activeProfile);
+                    await pod.InjectAndStart(conversation, activeProfile);
                 }
                 if (conversation.Failed)
                 {

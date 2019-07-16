@@ -2,6 +2,7 @@
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,55 +13,33 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodProvider : IPodProvider
     {
-        readonly IMessageExchangeProvider MessageExchangeProvider;
+        public IEnumerable<IPod> Pods { get; set; }
 
-        private IPodManager _podManager;
-        public IPodManager PodManager
-        {
-            get
-            {
-                return _podManager;
-            }
-            private set
-            {
-                if (_podManager != value)
-                {
-                    MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodChanged);
-                    _podManager = value;
-                }
-            }
-        }
+        public IPod SinglePod => Pods?.FirstOrDefault();
 
-        public ErosPodProvider(IMessageExchangeProvider messageExchangeProvider)
+        public ErosPodProvider()
         {
-            MessageExchangeProvider = messageExchangeProvider;
+            Pods = new List<ErosPod>();
         }
 
         public async Task Initialize()
         {
             var repo = await ErosRepository.GetInstance();
-            var pod = await repo.LoadCurrent();
-            if (pod != null)
-            {
-                PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
-            }
+            Pods = await repo.GetActivePods();
+            MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
         }
 
-        public async Task Archive()
+        public async Task Archive(IPod pod)
         {
-            if (PodManager != null)
-            {
-                PodManager.Pod.Archived = true;
-                var repo = await ErosRepository.GetInstance();
-                await repo.Save(PodManager.Pod as ErosPod);
-                PodManager = null;
-            }
+            pod.Archived = true;
+            var repo = await ErosRepository.GetInstance();
+            await repo.Save(pod as ErosPod);
+            Pods = await repo.GetActivePods();
+            MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
         }
 
-        public async Task<IPodManager> New()
+        public async Task<IPod> New()
         {
-            await Archive();
-
             var pod = new ErosPod
             {
                 Id = Guid.NewGuid()
@@ -70,20 +49,20 @@ namespace OmniCore.Model.Eros
             pod.Created = DateTimeOffset.UtcNow;
             var repo = await ErosRepository.GetInstance();
             await repo.Save(pod);
-            PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
-            return PodManager;
+            Pods = await repo.GetActivePods();
+            MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
+            return pod;
         }
 
-        public async Task<IPodManager> Register(uint lot, uint serial, uint radioAddress)
+        public async Task<IPod> Register(uint lot, uint serial, uint radioAddress)
         {
-            await Archive();
-
             var pod = new ErosPod() { Id = Guid.NewGuid(), Lot = lot, Serial = serial, RadioAddress = radioAddress };
             pod.Created = DateTimeOffset.UtcNow;
             var repo = await ErosRepository.GetInstance();
             await repo.Save(pod);
-            PodManager = new PodManagerAsyncProxy(new ErosPodManager(pod, MessageExchangeProvider));
-            return PodManager;
+            Pods = await repo.GetActivePods();
+            MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
+            return pod;
         }
 
         private uint GetRadioAddress()
