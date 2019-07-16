@@ -1,6 +1,5 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -4,7 +4,6 @@ using OmniCore.Model.Eros;
 using OmniCore.Model.Eros.Interfaces;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using SQLite;
 using System;
@@ -30,7 +29,8 @@ namespace OmniCore.Model.Eros.Data
         public uint? Lot { get; set; }
         public uint? Serial { get; set; }
         public uint RadioAddress { get; set; }
-        public int MessageSequence { get => messageSequence; set { messageSequence = value % 16; } }
+        public int MessageSequence { get => messageSequence; set => messageSequence = value % 16;
+        }
         public DateTimeOffset? ActivationDate { get; set; }
         public DateTimeOffset? InsertionDate { get; set; }
         public string VersionPi { get; set; }

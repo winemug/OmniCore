@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Model.Eros.Data
 {

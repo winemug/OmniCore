@@ -1,11 +1,7 @@
-﻿using OmniCore.Model.Enums;
-using SQLite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System;
+using OmniCore.Model.Enums;
 
-namespace OmniCore.Model.Interfaces.Data
+namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchangeResult
     {

@@ -5,7 +5,6 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using OmniCore.Mobile.Base;
 

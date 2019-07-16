@@ -1,7 +1,6 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using SQLite;
 using System;

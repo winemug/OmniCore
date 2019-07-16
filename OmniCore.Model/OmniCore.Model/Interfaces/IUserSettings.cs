@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OmniCore.Model.Interfaces.Data
+namespace OmniCore.Model.Interfaces
 {
     public interface IUserSettings
     {

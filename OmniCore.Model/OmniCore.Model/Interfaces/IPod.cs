@@ -1,10 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Threading;
-using System.Threading.Tasks;
-using OmniCore.Model.Enums;
 
-namespace OmniCore.Model.Interfaces.Data
+namespace OmniCore.Model.Interfaces
 {
     public interface IPod
     {

@@ -1,6 +1,5 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
 using SQLite;
 using System;
 using System.Collections.Generic;

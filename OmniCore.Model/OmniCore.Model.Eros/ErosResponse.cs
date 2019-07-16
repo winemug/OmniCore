@@ -2,7 +2,6 @@
 using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Utilities;
 using System;
 using System.Diagnostics;

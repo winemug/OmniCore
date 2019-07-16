@@ -11,7 +11,6 @@ using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Eros.Data;
-using OmniCore.Model.Interfaces.Data;
 using Newtonsoft.Json;
 using OmniCore.Mobile.Base;
 using Microsoft.AppCenter.Crashes;

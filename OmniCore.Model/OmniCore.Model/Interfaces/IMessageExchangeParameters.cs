@@ -1,9 +1,7 @@
-﻿using OmniCore.Model.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using OmniCore.Model.Enums;
 
-namespace OmniCore.Model.Interfaces.Data
+namespace OmniCore.Model.Interfaces
 {
     public interface IMessageExchangeParameters
     {
