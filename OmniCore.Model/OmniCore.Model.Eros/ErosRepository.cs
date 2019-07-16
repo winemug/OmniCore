@@ -67,6 +67,7 @@ namespace OmniCore.Model.Eros
                         conn.Insert(new ErosProfile()
                         {
                             Created = DateTimeOffset.UtcNow,
+                            Name = "Default",
                             BasalSchedule = new decimal[]
                                 { 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,
                                 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m, 0.05m,

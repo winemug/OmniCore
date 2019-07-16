@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Mobile.Views.PodsPage">
+    <ContentPage.Content>
+        <CollectionView ItemsSource="{Binding Pods}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="LightGray" BackgroundColor="White" Padding="10" HorizontalOptions="FillAndExpand">
+                        <Grid>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label Text="Requests history is empty"/>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </ContentPage.Content>
+</ContentPage>

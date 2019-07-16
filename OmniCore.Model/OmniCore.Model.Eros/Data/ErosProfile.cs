@@ -13,6 +13,8 @@ namespace OmniCore.Model.Eros.Data
         public long? Id { get; set; }
         public DateTimeOffset Created { get; set; }
 
+        public string Name { get; set; }
+
         [Ignore]
         public decimal[] BasalSchedule { get; set; }
 
