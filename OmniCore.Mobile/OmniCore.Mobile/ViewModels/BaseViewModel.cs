@@ -22,6 +22,8 @@ namespace OmniCore.Mobile.ViewModels
 
         public bool CanRunCommand => IsPodRunning & !IsInConversation;
 
+        protected List<IDisposable> Disposables = new List<IDisposable>();
+
         public BaseViewModel()
         {
             MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
@@ -85,6 +87,11 @@ namespace OmniCore.Mobile.ViewModels
                     MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
                     MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
                     MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
+                    foreach(var disposable in Disposables)
+                    {
+                        disposable.Dispose();
+                    }
+                    Disposables.Clear();
                     OnDisposeManagedResources();
                 }
 

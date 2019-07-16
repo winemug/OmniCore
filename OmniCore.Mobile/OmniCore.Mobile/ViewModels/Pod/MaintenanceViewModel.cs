@@ -37,25 +37,11 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
         public MaintenanceViewModel(Page page):base(page)
         {
-            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodChanged, (pp) =>
+            Disposables.Add(this.OnPropertyChanges().Subscribe((args) =>
             {
                 OnPropertyChanged(nameof(ActivateEnabled));
                 OnPropertyChanged(nameof(DeactivateEnabled));
-            });
-
-            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationStarted, (conversation)
-                =>
-            {
-                OnPropertyChanged(nameof(ActivateEnabled));
-                OnPropertyChanged(nameof(DeactivateEnabled));
-            });
-
-            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationEnded, (conversation)
-                =>
-            {
-                OnPropertyChanged(nameof(ActivateEnabled));
-                OnPropertyChanged(nameof(DeactivateEnabled));
-            });
+            }));
 
             MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>
             {
@@ -74,9 +60,6 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
         protected override void OnDisposeManagedResources()
         {
-            MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodChanged);
-            MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
-            MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
             MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
         }
     }

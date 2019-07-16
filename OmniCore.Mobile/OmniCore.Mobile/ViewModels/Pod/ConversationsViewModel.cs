@@ -68,7 +68,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                var b = Pod?.ActiveConversation?.IsFinished;
+                var b = ActiveConversation?.IsFinished;
                 if (!b.HasValue)
                     return "No active conversation";
                 else if (b.Value)
@@ -82,7 +82,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                return Pod?.ActiveConversation?.Intent;
+                return ActiveConversation?.Intent;
             }
         }
 
@@ -90,7 +90,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                return Pod?.ActiveConversation?.Started.ToLocalTime().ToString("hh:mm:ss");
+                return ActiveConversation?.Started.ToLocalTime().ToString("hh:mm:ss");
             }
         }
 
@@ -98,7 +98,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                return Pod?.ActiveConversation?.Ended?.ToLocalTime().ToString("hh:mm:ss");
+                return ActiveConversation?.Ended?.ToLocalTime().ToString("hh:mm:ss");
             }
         }
 
@@ -106,7 +106,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                switch (Pod?.ActiveConversation?.RequestSource)
+                switch (ActiveConversation?.RequestSource)
                 {
                     case RequestSource.AndroidAPS:
                         return "Android APS";
@@ -124,7 +124,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                var exchangeProgress = Pod?.ActiveConversation?.CurrentExchange;
+                var exchangeProgress = ActiveConversation?.CurrentExchange;
                 if (exchangeProgress == null)
                     return string.Empty;
                 else
@@ -156,7 +156,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                var exchangeProgress = Pod?.ActiveConversation?.CurrentExchange;
+                var exchangeProgress = ActiveConversation?.CurrentExchange;
                 if (exchangeProgress == null)
                     return string.Empty;
                 else if (exchangeProgress.Finished)

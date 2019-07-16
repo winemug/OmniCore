@@ -104,6 +104,9 @@
     <PackageReference Include="sqlite-net-pcl">
       <Version>1.6.258-beta</Version>
     </PackageReference>
+    <PackageReference Include="System.Reactive">
+      <Version>4.1.5</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.581479" />
   </ItemGroup>
   <ItemGroup>

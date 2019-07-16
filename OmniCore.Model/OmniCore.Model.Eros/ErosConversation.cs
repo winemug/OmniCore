@@ -65,7 +65,6 @@ namespace OmniCore.Model.Eros
             Pod = pod;
             Started = DateTimeOffset.UtcNow;
             CancellationTokenSource = new CancellationTokenSource();
-            CombinedStatistics = new ErosMessageExchangeStatistics();
         }
 
         public async Task<bool> Cancel()

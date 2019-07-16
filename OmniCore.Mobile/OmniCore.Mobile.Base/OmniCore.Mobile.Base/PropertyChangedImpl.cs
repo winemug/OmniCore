@@ -9,10 +9,6 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Base
 {
-    /*
-     set => (.+) = value;
-     set => SetProperty(ref $1, value); 
-    */
     [Fody.ConfigureAwait(true)]
     public class PropertyChangedImpl : INotifyPropertyChanged
     {

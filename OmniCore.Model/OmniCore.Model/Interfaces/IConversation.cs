@@ -14,7 +14,6 @@ namespace OmniCore.Model.Interfaces
         DateTimeOffset Started { get; set; }
         DateTimeOffset? Ended { get; set; }
         string Intent { get; set; }
-        IMessageExchangeStatistics CombinedStatistics { get; set; }
 
         bool CanCancel { get; set; }
         bool IsRunning { get; set; }

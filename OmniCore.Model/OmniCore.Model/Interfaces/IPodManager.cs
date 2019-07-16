@@ -17,7 +17,6 @@ namespace OmniCore.Model.Interfaces
         Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard, int? timeout = null);
         Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
         Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
-
         Task Bolus(IConversation conversation, decimal bolusAmount, bool waitForBolusToFinish = true);
         Task CancelBolus(IConversation conversation);
         Task SetTempBasal(IConversation conversation, decimal basalRate, decimal durationInHours);
@@ -26,11 +25,9 @@ namespace OmniCore.Model.Interfaces
         Task CancelExtendedBolus(IConversation conversation);
         Task SetBasalSchedule(IConversation conversation, IProfile profile);
         Task SuspendBasal(IConversation conversation);
-
         Task Pair(IConversation conversation, IProfile profile);
         Task Activate(IConversation conversation);
         Task InjectAndStart(IConversation conversation, IProfile profile);
-
         Task Deactivate(IConversation conversation);
     }
 }

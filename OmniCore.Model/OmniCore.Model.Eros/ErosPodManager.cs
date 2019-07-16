@@ -57,6 +57,7 @@ namespace OmniCore.Model.Eros
                 await Task.Delay(250);
             }
 
+            IConversation conversation = null;
             IWakeLock wakeLock = null;
             try
             {
@@ -74,16 +75,16 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreException(FailureType.WakeLockNotAcquired);
                 }
 
-                Pod.ActiveConversation = new ErosConversation(wakeLock, Pod) { RequestSource = source, Intent = intent };
-                MessagingCenter.Send<IConversation>(Pod.ActiveConversation, MessagingConstants.ConversationStarted);
-                return Pod.ActiveConversation;
+                conversation = new ErosConversation(wakeLock, Pod) { RequestSource = source, Intent = intent };
+                MessagingCenter.Send<IConversation>(conversation, MessagingConstants.ConversationStarted);
+                return conversation;
             }
             catch(Exception e)
             {
                 Crashes.TrackError(e);
                 wakeLock?.Dispose();
                 OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
-                Pod.ActiveConversation?.Dispose();
+                conversation?.Dispose();
                 throw;
             }
         }
