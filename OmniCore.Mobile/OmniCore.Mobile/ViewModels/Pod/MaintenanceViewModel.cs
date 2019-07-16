@@ -36,10 +36,13 @@ namespace OmniCore.Mobile.ViewModels.Pod
 
         public MaintenanceViewModel(Page page):base(page)
         {
-            Disposables.Add(this.OnPropertyChanges().Subscribe((args) =>
+            Disposables.Add(this.OnPropertyChanges().Subscribe((propertyName) =>
             {
-                OnPropertyChanged(nameof(ActivateEnabled));
-                OnPropertyChanged(nameof(DeactivateEnabled));
+                if (propertyName == nameof(Pod) || propertyName == nameof(ActiveConversation))
+                {
+                    OnPropertyChanged(nameof(ActivateEnabled));
+                    OnPropertyChanged(nameof(DeactivateEnabled));
+                }
             }));
 
             MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>

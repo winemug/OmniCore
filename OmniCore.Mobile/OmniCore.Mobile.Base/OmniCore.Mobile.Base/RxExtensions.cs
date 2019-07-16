@@ -9,12 +9,12 @@ namespace OmniCore.Mobile.Base
 {
     public static class RxExtensions
     {
-        public static IObservable<PropertyChangedEventArgs> OnPropertyChanges<T>(this T source)
+        public static IObservable<string> OnPropertyChanges<T>(this T source)
             where T : INotifyPropertyChanged
         {
-            return Observable.Create<PropertyChangedEventArgs>(observer =>
+            return Observable.Create<string>(observer =>
             {
-                PropertyChangedEventHandler handler = (s, e) => observer.OnNext(e);
+                PropertyChangedEventHandler handler = (s, e) => observer.OnNext(e.PropertyName);
                 source.PropertyChanged += handler;
                 return Disposable.Create(() => source.PropertyChanged -= handler);
             });
