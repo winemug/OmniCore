@@ -23,13 +23,15 @@ namespace OmniCore.Model.Interfaces
         bool Failed { get; set; }
         bool Canceled { get; set; }
 
-        IMessageExchangeProgress NewExchange(IMessage requestMessage);
+        IMessageExchangeProvider ExchangeProvider { get; }
         RequestSource RequestSource { get; set; }
-        IMessageExchangeProgress CurrentExchange { get; set; }
 
         CancellationToken Token { get; }
         Task<bool> Cancel();
         void CancelComplete();
         void CancelFailed();
+        Task<IMessageExchange> NewExchange(IMessageExchangeParameters parameters);
+        IMessageExchange CurrentExchange { get; set; }
+        IPod Pod { get; }
     }
 }

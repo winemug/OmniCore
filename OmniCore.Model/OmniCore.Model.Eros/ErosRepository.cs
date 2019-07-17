@@ -162,29 +162,31 @@ namespace OmniCore.Model.Eros
             await Connection.InsertOrReplaceAsync(profile, typeof(ErosProfile));
         }
 
-        public async Task Save(IPod pod, IMessageExchangeResult result = null)
+        public async Task Save(IPod pod, IMessageExchange exchange = null)
         {
             await Connection.RunInTransactionAsync((conn) =>
             {
                 conn.InsertOrReplace(pod);
 
-                if (result != null)
+                if (exchange != null)
                 {
-                    if (result.Statistics != null)
+                    var result = exchange.Result;
+
+                    if (exchange.Statistics != null)
                     {
-                        result.Statistics.PodId = pod.Id;
-                        result.Statistics.Created = DateTimeOffset.UtcNow;
-                        result.Statistics.BeforeSave();
-                        conn.InsertOrReplace(result.Statistics, typeof(ErosMessageExchangeStatistics));
-                        result.StatisticsId = result.Statistics.Id;
+                        exchange.Statistics.PodId = pod.Id;
+                        exchange.Statistics.Created = DateTimeOffset.UtcNow;
+                        exchange.Statistics.BeforeSave();
+                        conn.InsertOrReplace(exchange.Statistics, typeof(ErosMessageExchangeStatistics));
+                        result.StatisticsId = exchange.Statistics.Id;
                     }
 
-                    if (result.ExchangeParameters != null)
+                    if (exchange.Parameters != null)
                     {
-                        result.ExchangeParameters.PodId = pod.Id;
-                        result.ExchangeParameters.Created = DateTimeOffset.UtcNow;
-                        conn.InsertOrReplace(result.ExchangeParameters, typeof(ErosMessageExchangeParameters));
-                        result.ParametersId = result.ExchangeParameters.Id;
+                        exchange.Parameters.PodId = pod.Id;
+                        exchange.Parameters.Created = DateTimeOffset.UtcNow;
+                        conn.InsertOrReplace(exchange.Parameters, typeof(ErosMessageExchangeParameters));
+                        result.ParametersId = exchange.Parameters.Id;
                     }
 
                     if (result.Success && result.AlertStates != null)

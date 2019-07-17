@@ -16,11 +16,6 @@ namespace OmniCore.Model.Eros.Data
         {
         }
 
-        public ErosMessageExchangeResult(IMessageExchangeProgress exchangeProgress)
-        {
-            ExchangeProgress = exchangeProgress;
-        }
-
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
 
@@ -68,8 +63,5 @@ namespace OmniCore.Model.Eros.Data
         public long? UserSettingsId { get; set; }
         [Ignore]
         public IUserSettings UserSettings { get; set; }
-
-        [Ignore]
-        public IMessageExchangeProgress ExchangeProgress { get; set; }
     }
 }

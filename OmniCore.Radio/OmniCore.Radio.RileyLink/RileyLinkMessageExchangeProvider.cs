@@ -7,29 +7,33 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Eros.Data;
 
 namespace OmniCore.Radio.RileyLink
 {
     public class RileyLinkMessageExchangeProvider : IMessageExchangeProvider
     {
-        private static RileyLink RileyLinkInstance;
-        private static RileyLinkMessageExchange RileyLinkMessageExchange;
+        private Dictionary<Guid, RileyLinkMessageExchange> LastExchanges;
+
+        public RileyLinkMessageExchangeProvider()
+        {
+            LastExchanges = new Dictionary<Guid, RileyLinkMessageExchange>();
+        }
 
         [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
-        public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
+        public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, CancellationToken token, IPod pod)
         {
-            if (RileyLinkInstance == null)
+
+            var exchange = new RileyLinkMessageExchange(messageExchangeParameters, token, pod);
+            if (LastExchanges.ContainsKey(pod.Id))
             {
-                var repo = await ErosRepository.GetInstance();
-                RileyLinkInstance = new RileyLink(await repo.GetRadioPreferences());
+                var lastExchange = LastExchanges[pod.Id];
+                await lastExchange.FinalizeExchange();
+                exchange.RileyLink = new RileyLink(lastExchange.RileyLink, exchange);
             }
-
-            if (RileyLinkMessageExchange == null)
-                RileyLinkMessageExchange = new RileyLinkMessageExchange(messageExchangeParameters, pod, RileyLinkInstance);
-            else
-                RileyLinkMessageExchange.SetParameters(messageExchangeParameters, pod, RileyLinkInstance);
-
-            return RileyLinkMessageExchange;
+            await exchange.InitializeExchange();
+            LastExchanges[pod.Id] = exchange;
+            return exchange;
         }
 
     }

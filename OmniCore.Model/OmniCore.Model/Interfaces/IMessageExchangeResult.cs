@@ -17,17 +17,13 @@ namespace OmniCore.Model.Interfaces
 
         bool Success { get; set; }
         FailureType Failure { get; set;  }
-
         Exception Exception { get; set;  }
 
-        IMessageExchangeStatistics Statistics { get; set; }
-        IMessageExchangeParameters ExchangeParameters { get; set; }
         IAlertStates AlertStates { get; set; }
         IBasalSchedule BasalSchedule { get; set; }
         IFault Fault { get; set; }
         IStatus Status { get; set; }
         IUserSettings UserSettings { get; set; }
-        IMessageExchangeProgress ExchangeProgress { get; set; }
 
         long? StatisticsId { get; set; }
         long? ParametersId { get; set; }

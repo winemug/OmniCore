@@ -39,7 +39,7 @@
             <ShellContent ContentTemplate="{DataTemplate vwPod:OverviewPage}"/>
         </Tab>
         <Tab Title="Conversations">
-            <ShellContent ContentTemplate="{DataTemplate vwPod:ConversationsPage}"/>
+            <ShellContent ContentTemplate="{DataTemplate vwPod:ActivityPage}"/>
         </Tab>
         <Tab Title="Maintenance">
             <ShellContent ContentTemplate="{DataTemplate vwPod:MaintenancePage}"/>

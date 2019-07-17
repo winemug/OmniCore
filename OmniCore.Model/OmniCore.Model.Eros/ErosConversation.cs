@@ -48,17 +48,22 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public IMessageExchangeProgress CurrentExchange { get; set; }
+        public IMessageExchange CurrentExchange { get; set; }
+        public IPod Pod { get; private set; }
 
         public CancellationToken Token => CancellationTokenSource.Token;
+
+        public IMessageExchangeProvider ExchangeProvider { get; private set; }
 
         private Exception exception;
         private readonly IWakeLock WakeLock;
         private readonly CancellationTokenSource CancellationTokenSource;
         private TaskCompletionSource<bool> CancellationCompletion;
 
-        public ErosConversation(IWakeLock wakeLock)
+        public ErosConversation(IWakeLock wakeLock, IMessageExchangeProvider exchangeProvider, IPod pod)
         {
+            Pod = pod;
+            ExchangeProvider = exchangeProvider;
             WakeLock = wakeLock;
             Started = DateTimeOffset.UtcNow;
             CancellationTokenSource = new CancellationTokenSource();
@@ -103,7 +108,7 @@ namespace OmniCore.Model.Eros
             }
         }
 
-        public IMessageExchangeProgress NewExchange(IMessage requestMessage)
+        public async Task<IMessageExchange> NewExchange(IMessageExchangeParameters exchangeParameters)
         {
             if (CurrentExchange != null)
             {
@@ -112,8 +117,8 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreWorkflowException(FailureType.WorkflowError, "Cannot start a new exchange while one is already running");
                 }
             }
-            CurrentExchange = new MessageExchangeProgress(this, requestMessage.RequestType, requestMessage.Parameters);
-            return CurrentExchange;
+
+            return await ExchangeProvider.GetMessageExchange(exchangeParameters, Token, Pod);
         }
 
         #region IDisposable Support
@@ -131,7 +136,6 @@ namespace OmniCore.Model.Eros
                     OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
                     CancellationTokenSource.Dispose();
                     MessagingCenter.Send<IConversation>(this, MessagingConstants.ConversationEnded);
-                    //Pod.ActiveConversation = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

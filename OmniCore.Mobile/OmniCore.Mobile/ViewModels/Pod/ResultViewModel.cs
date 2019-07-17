@@ -153,59 +153,10 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                if (MessageExchangeResult.ResultTime.HasValue)
-                {
-                    if (MessageExchangeResult.Success)
-                        return "OK";
-                    else
-                        return MessageExchangeResult.Failure.ToString();
-                }
-                else if (MessageExchangeResult.ExchangeProgress != null)
-                {
-                    if (MessageExchangeResult.ExchangeProgress.Waiting)
-                        return "Waiting";
-                    else if (MessageExchangeResult.ExchangeProgress.Running)
-                        return "Running";
-                    else
-                        return "Finished";
-                }
+                if (MessageExchangeResult.Success)
+                    return "OK";
                 else
-                    return "???";
-            }
-        }
-
-        public string ResultActivity
-        {
-            get
-            {
-                if (MessageExchangeResult.ExchangeProgress != null)
-                {
-                    return MessageExchangeResult.ExchangeProgress.ActionText;
-                }
-                else
-                    return string.Empty;
-            }
-        }
-
-        public string RileyLinkRssi
-        {
-            get
-            {
-                if (MessageExchangeResult.Statistics?.MobileDeviceRssiAverage != null)
-                    return MessageExchangeResult.Statistics.MobileDeviceRssiAverage.Value.ToString();
-                else
-                    return "";
-            }
-        }
-
-        public string PodRssi
-        {
-            get
-            {
-                if (MessageExchangeResult.Statistics?.RadioRssiAverage != null)
-                    return MessageExchangeResult.Statistics.RadioRssiAverage.Value.ToString();
-                else
-                    return "";
+                    return MessageExchangeResult.Failure.ToString();
             }
         }
     }

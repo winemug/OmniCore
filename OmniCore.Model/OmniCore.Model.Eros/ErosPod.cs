@@ -71,7 +71,7 @@ namespace OmniCore.Model.Eros
                     throw new OmniCoreException(FailureType.WakeLockNotAcquired);
                 }
 
-                conversation = new ErosConversation(wakeLock) { RequestSource = source, Intent = intent };
+                conversation = new ErosConversation(wakeLock, messageExchangeProvider, this) { RequestSource = source, Intent = intent };
                 MessagingCenter.Send<IConversation>(conversation, MessagingConstants.ConversationStarted);
                 return conversation;
             }
@@ -94,19 +94,19 @@ namespace OmniCore.Model.Eros
             IConversation conversation, Action<IMessageExchangeResult> resultModifier = null)
         {
             int retries = 0;
-            IMessageExchangeProgress progress = null;
+            IMessageExchange exchange = null;
             while(retries < 2)
             {
                 try
                 {
-                    progress = await PerformExchangeInternal(requestMessage, messageExchangeParameters, conversation, resultModifier);
-                    if (!progress.Result.Success && conversation.Exception != null && conversation.Exception is OmniCoreProtocolException)
+                    exchange = await PerformExchangeInternal(requestMessage, messageExchangeParameters, conversation, resultModifier);
+                    if (!exchange.Result.Success && conversation.Exception != null && conversation.Exception is OmniCoreProtocolException)
                     {
                         retries++;
                         if (requestMessage.RequestType != RequestType.Status)
                         {
                             var statusRequest = new ErosMessageBuilder().WithStatus(0).Build();
-                            progress = await PerformExchangeInternal(statusRequest, messageExchangeParameters, conversation);
+                            exchange = await PerformExchangeInternal(statusRequest, messageExchangeParameters, conversation);
                         }
                     }
                     else
@@ -118,41 +118,35 @@ namespace OmniCore.Model.Eros
                     throw;
                 }
             }
-            return progress.Result.Success;
+            return exchange.Result.Success;
         }
 
-        private async Task<IMessageExchangeProgress> PerformExchangeInternal(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
+        private async Task<IMessageExchange> PerformExchangeInternal(IMessage requestMessage, IMessageExchangeParameters messageExchangeParameters,
                     IConversation conversation, Action<IMessageExchangeResult> resultModifier = null)
         {
             var emp = messageExchangeParameters as ErosMessageExchangeParameters;
-            var progress = conversation.NewExchange(requestMessage);
+            var exchange = await conversation.NewExchange(messageExchangeParameters);
             try
             {
-                progress.ActionText = "Started new message exchange";
-                progress.Result.RequestTime = DateTimeOffset.UtcNow;
-                progress.Running = true;
-                var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, this);
-                await messageExchange.InitializeExchange(progress);
-                var response = await messageExchange.GetResponse(requestMessage, progress);
-
-                messageExchange.ParseResponse(response, this, progress);
+                exchange.ActionText = "Started new message exchange";
+                exchange.Result.RequestTime = DateTimeOffset.UtcNow;
+                exchange.Running = true;
+                var response = await exchange.GetResponse(requestMessage);
 
                 if (RuntimeVariables.NonceSync.HasValue)
                 {
                     var responseMessage = response as ErosMessage;
                     emp.MessageSequenceOverride = (responseMessage.sequence + 15) % 16;
-                    messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, this);
-                    await messageExchange.InitializeExchange(progress);
-                    response = await messageExchange.GetResponse(requestMessage, progress);
-                    messageExchange.ParseResponse(response, this, progress);
+                    exchange = await conversation.NewExchange(messageExchangeParameters);
+                    response = await exchange.GetResponse(requestMessage);
                     if (RuntimeVariables.NonceSync.HasValue)
                         throw new OmniCoreWorkflowException(FailureType.PodResponseUnexpected, "Nonce re-negotiation failed");
                 }
-                progress.Result.Success = true;
+                exchange.Result.Success = true;
             }
             catch (Exception e)
             {
-                progress.SetException(e);
+                exchange.SetException(e);
             }
             finally
             {
@@ -160,25 +154,25 @@ namespace OmniCore.Model.Eros
                 {
                     try
                     {
-                        await Task.Run(() => resultModifier(progress.Result));
+                        await Task.Run(() => resultModifier(exchange.Result));
                     }
                     catch(AggregateException ae)
                     {
-                        progress.SetException(ae);
+                        exchange.SetException(ae);
                     }
                     catch(Exception e)
                     {
-                        progress.SetException(e);
+                        exchange.SetException(e);
                     }
                 }
-                progress.Result.ResultTime = DateTimeOffset.UtcNow;
-                progress.Running = false;
-                progress.Finished = true;
+                exchange.Result.ResultTime = DateTimeOffset.UtcNow;
+                exchange.Running = false;
+                exchange.Finished = true;
                 var repo = await ErosRepository.GetInstance();
-                await repo.Save(this, progress.Result);
+                await repo.Save(this, exchange);
             }
 
-            return progress;
+            return exchange;
         }
 
         private async Task<bool> UpdateStatusInternal(IConversation conversation,
