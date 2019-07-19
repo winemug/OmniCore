@@ -201,15 +201,19 @@ namespace OmniCore.Radio.RileyLink
         {
             Boolean result = false;
 
-            if (this.Device != null && this.Device.IsConnected())
+            if (this.Device != null)
             {
-                try
+                if (this.Device.IsConnected())
                 {
-                    await EnsureDevice(messageProgress);
-                    result = true; 
-                }
-                catch (OmniCoreRadioException) {
-                    // Ignored, just return false
+                    try
+                    {
+                        await EnsureDevice(messageProgress);
+                        result = true;
+                    }
+                    catch (OmniCoreRadioException)
+                    {
+                        // Ignored, just return false
+                    }
                 }
             }
 

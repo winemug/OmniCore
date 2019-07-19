@@ -24,9 +24,6 @@ namespace OmniCore.Radio.RileyLink
                 // Make sure this instance is still valid
                 if (!await RileyLinkInstance.DeviceIsValid(messageProgress))
                 {
-                    if (messageProgress != null)
-                        messageProgress.ActionText = "Reconnecting to RileyLink";
-
                     // Dispose() and create new RileyLinkInstance
                     RileyLinkInstance = null;
                     // Dispose() and create new RileyLinkMessageExchange
