@@ -54,7 +54,7 @@ namespace OmniCore.Radio.RileyLink
 
         public RileyLink(ErosRadioPreferences erosRadioPreferences)
         {
-            TxAmplification = TxPower.A4_Normal;
+            TxAmplification = TxPower.A5_High; // On initialisation, start with some extra TxPower (it will auto adjust)
             Preferences = erosRadioPreferences;
         }
 
