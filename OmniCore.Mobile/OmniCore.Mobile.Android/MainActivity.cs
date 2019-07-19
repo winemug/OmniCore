@@ -31,6 +31,8 @@ namespace OmniCore.Mobile.Android
         public const string IntentEnsureServiceRunning = "EnsureServiceRunning";
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            ToggleAdapter();
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
@@ -51,6 +53,27 @@ namespace OmniCore.Mobile.Android
             i.SetAction(OmniCoreIntentService.ACTION_START_SERVICE);
             StartService(i);
             IsCreated = true;
+        }
+
+        private void ToggleAdapter()
+        {
+            try
+            {
+                if (CrossBleAdapter.Current.CanControlAdapterState())
+                {
+                    // Switch adapter on if off (testing)
+                    if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff)
+                    {
+                        CrossBleAdapter.Current.SetAdapterState(true);
+                        Wait(5000);
+                    }
+                }
+            }
+            catch
+            {
+                // TODO: We'll handle this later...
+                // Try continuing
+            }
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
