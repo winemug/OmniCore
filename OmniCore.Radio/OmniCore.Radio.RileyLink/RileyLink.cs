@@ -504,7 +504,7 @@ namespace OmniCore.Radio.RileyLink
             try
             {
                 var result = await SendCommand(RileyLinkCommandType.GetState);
-                if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
+                if (result == null || result.Length != 2 || result[0] != 'O' || result[1] != 'K')
                     throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
 
                 var versionData = await SendCommand(RileyLinkCommandType.GetVersion);
