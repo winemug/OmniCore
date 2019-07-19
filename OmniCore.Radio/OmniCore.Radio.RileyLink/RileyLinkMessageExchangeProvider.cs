@@ -17,8 +17,23 @@ namespace OmniCore.Radio.RileyLink
         private static RileyLinkMessageExchange RileyLinkMessageExchange;
 
         [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
-        public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod)
+        public async Task<IMessageExchange> GetMessageExchange(IMessageExchangeParameters messageExchangeParameters, IPod pod, IMessageExchangeProgress messageProgress)
         {
+            if (RileyLinkInstance != null)
+            {
+                // Make sure this instance is still valid
+                if (!await RileyLinkInstance.DeviceIsValid(messageProgress))
+                {
+                    if (messageProgress != null)
+                        messageProgress.ActionText = "Reconnecting to RileyLink";
+
+                    // Dispose() and create new RileyLinkInstance
+                    RileyLinkInstance = null;
+                    // Dispose() and create new RileyLinkMessageExchange
+                    RileyLinkMessageExchange = null;
+                }
+            }
+
             if (RileyLinkInstance == null)
             {
                 RileyLinkInstance = new RileyLink(ErosRepository.Instance.GetRadioPreferences());

@@ -134,7 +134,7 @@ namespace OmniCore.Model.Eros
                 progress.ActionText = "Started new message exchange";
                 progress.Result.RequestTime = DateTimeOffset.UtcNow;
                 progress.Running = true;
-                var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
+                var messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod, progress);
                 await messageExchange.InitializeExchange(progress);
                 var response = await messageExchange.GetResponse(requestMessage, progress);
 
@@ -144,7 +144,7 @@ namespace OmniCore.Model.Eros
                 {
                     var responseMessage = response as ErosMessage;
                     emp.MessageSequenceOverride = (responseMessage.sequence + 15) % 16;
-                    messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod);
+                    messageExchange = await MessageExchangeProvider.GetMessageExchange(messageExchangeParameters, Pod, progress);
                     await messageExchange.InitializeExchange(progress);
                     response = await messageExchange.GetResponse(requestMessage, progress);
                     messageExchange.ParseResponse(response, Pod, progress);

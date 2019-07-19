@@ -94,14 +94,14 @@ namespace OmniCore.Radio.RileyLink
                     await Task.Delay(additionalDelay);
             }
 
-            CrossBleAdapter.Current.StopScan();
+			CrossBleAdapter.Current.StopScan(); // StopScan is considered an emergency break, use Dispose()
 
-            foreach (var result in scanResults.OrderByDescending(x => x.Rssi))
+			foreach (var result in scanResults.OrderByDescending(x => x.Rssi))
             {
                 if (Preferences.ConnectToAny || Preferences.PreferredRadios.Contains(result.Device.Uuid))
                 {
                     found = result.Device;
-                    break;
+					break;
                 }
             }
             return found;
@@ -174,6 +174,46 @@ namespace OmniCore.Radio.RileyLink
                 GetStatistics(messageProgress)?.RadioDisconnected();
                 throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Timed out connecting to RL");
             }
+        }
+
+        /// <summary>
+        /// Disconnect/Cancel active connection
+        /// </summary>
+        /// <param name="messageProgress">Messageprogress object</param>
+        public void DisconnectDevice(IMessageExchangeProgress messageProgress)
+        {
+            if (this.Device != null)
+            {
+                if (this.Device.IsConnected())
+                {
+                    this.Device.CancelConnection();
+                }
+                this.Device = null;
+            }
+        }
+
+        /// <summary>
+        /// DeviceIsValid, Check if we have an valid connected device
+        /// </summary>
+        /// <param name="messageProgress">Messageprogress object</param>
+        /// <returns>True, False if not connectyion not valid </returns>
+        public async Task<bool> DeviceIsValid(IMessageExchangeProgress messageProgress)
+        {
+            Boolean result = false;
+
+            if (this.Device != null && this.Device.IsConnected())
+            {
+                try
+                {
+                    await EnsureDevice(messageProgress);
+                    result = true; 
+                }
+                catch (OmniCoreRadioException) {
+                    // Ignored, just return false
+                }
+            }
+
+            return result;
         }
 
         public async Task EnsureDevice(IMessageExchangeProgress messageProgress)
