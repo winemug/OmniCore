@@ -139,8 +139,7 @@ namespace OmniCore.Radio.RileyLink
 
             var t1 = Device.WhenConnected().FirstAsync().ToTask();
             var t2 = Device.WhenConnectionFailed().FirstAsync().ToTask();
-            Task t3;
-            t3 = Task.Delay(20000, Exchange.Token);
+            var t3 = Task.Delay(20000, Exchange.Token);
 
             var finishedTask = await Task.WhenAny(t1, t2, t3);
             if (finishedTask == t1)
