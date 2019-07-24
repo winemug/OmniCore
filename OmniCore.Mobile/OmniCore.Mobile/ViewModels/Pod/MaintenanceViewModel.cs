@@ -19,7 +19,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
             {
                 if (Pod?.LastStatus?.Progress == null)
                     return "Activate New Pod";
-                else if (Pod.LastStatus.Progress.Value < PodProgress.Running)
+                else if (Pod.LastStatus.Progress < PodProgress.Running)
                     return "Resume Activation";
                 else
                     return "Pod Active";
@@ -31,8 +31,8 @@ namespace OmniCore.Mobile.ViewModels.Pod
             (Pod?.LastStatus == null || Pod?.LastStatus?.Progress < PodProgress.Running);
 
         public bool DeactivateEnabled =>
-            !IsInConversation && Pod?.LastStatus?.Progress != null && Pod.LastStatus.Progress.Value >= PodProgress.PairingSuccess
-            && Pod.LastStatus.Progress.Value <= PodProgress.Inactive;
+            !IsInConversation && Pod?.LastStatus != null && Pod.LastStatus.Progress >= PodProgress.PairingSuccess
+            && Pod.LastStatus.Progress <= PodProgress.Inactive;
 
         public MaintenanceViewModel(Page page):base(page)
         {

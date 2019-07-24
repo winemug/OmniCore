@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces
         decimal? Reservoir { get; set; }
 
         bool? Faulted { get; set; }
-        PodProgress? Progress { get; set; }
+        PodProgress Progress { get; set; }
         BasalState? BasalState { get; set; }
         BolusState? BolusState { get; set; }
 

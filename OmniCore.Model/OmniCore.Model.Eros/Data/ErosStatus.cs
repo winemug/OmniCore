@@ -26,7 +26,7 @@ namespace OmniCore.Model.Eros.Data
         public decimal? DeliveredInsulin { get; set; }
         public decimal? Reservoir { get; set; }
 
-        public PodProgress? Progress { get; set; }
+        public PodProgress Progress { get; set; }
         public BasalState? BasalState { get; set; }
         public BolusState? BolusState { get; set; }
 

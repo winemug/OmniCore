@@ -101,7 +101,7 @@ namespace OmniCore.Mobile.Services
                 PodId = $"L{pod.Lot}T{pod.Serial}R{pod.RadioAddress}",
                 ResultDate = GetUnixTime(conversation.CurrentExchange.Result.ResultTime.Value),
                 InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
-                PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
+                PodRunning = (pod.LastStatus != null &&
                             pod.LastStatus.Progress >= PodProgress.Running &&
                             pod.LastStatus.Progress <= PodProgress.RunningLow &&
                             (pod.LastFault == null || pod.LastFault.FaultCode == 9)),
@@ -124,7 +124,7 @@ namespace OmniCore.Mobile.Services
                 ResultDate = GetUnixTime(DateTimeOffset.UtcNow),
                 InsulinCanceled = pod.LastStatus?.NotDeliveredInsulin ?? 0,
                 ReservoirLevel = pod.LastStatus?.ReservoirEstimate ?? 0,
-                PodRunning = (pod.LastStatus != null && pod.LastStatus.Progress.HasValue &&
+                PodRunning = (pod.LastStatus != null &&
                             pod.LastStatus.Progress >= PodProgress.Running &&
                             pod.LastStatus.Progress <= PodProgress.RunningLow &&
                             (pod.LastFault == null || pod.LastFault.FaultCode == 9)),
