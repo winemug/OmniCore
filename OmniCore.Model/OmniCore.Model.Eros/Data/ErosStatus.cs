@@ -34,16 +34,25 @@ namespace OmniCore.Model.Eros.Data
 
         public byte? AlertMask { get; set; }
 
+        [Ignore]
         public decimal? DeliveredInsulinEstimate { get; set; }
+        [Ignore]
         public decimal? ReservoirEstimate { get; set; }
+        [Ignore]
         public uint? ActiveMinutesEstimate { get; set; }
+        [Ignore]
         public BasalState? BasalStateEstimate { get; set; }
+        [Ignore]
         public BolusState? BolusStateEstimate { get; set; }
-
+        [Ignore]
         public decimal? TemporaryBasalTotalHours { get; set; }
+        [Ignore]
         public TimeSpan? TemporaryBasalRemaining { get; set; }
+        [Ignore]
         public decimal? TemporaryBasalRate { get; set; }
+        [Ignore]
         public decimal? ScheduledBasalRate { get; set; }
+        [Ignore]
         public decimal? ScheduledBasalAverage { get; set; }
 
         public void UpdateWithEstimates(IPod pod)
