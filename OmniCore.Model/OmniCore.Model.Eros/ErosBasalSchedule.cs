@@ -1,19 +1,18 @@
-﻿using Newtonsoft.Json;
-using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using Newtonsoft.Json;
 using OmniCore.Model.Interfaces;
+using SQLite;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
-    public class ErosProfile : IProfile
+    public class ErosBasalSchedule : IBasalSchedule
     {
         [PrimaryKey, AutoIncrement]
         public long? Id { get; set; }
+        public Guid PodId { get; set; }
         public DateTimeOffset Created { get; set; }
 
-        public string Name { get; set; }
+        public int UtcOffset { get; set; }
 
         [Ignore]
         public decimal[] BasalSchedule { get; set; }
@@ -30,6 +29,6 @@ namespace OmniCore.Model.Eros.Data
             }
         }
 
-        public int UtcOffset { get; set; }
+        public DateTimeOffset PodDateTime { get; set; }
     }
 }

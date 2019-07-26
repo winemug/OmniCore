@@ -1,15 +1,11 @@
-﻿using OmniCore.Model.Enums;
-using OmniCore.Model.Eros;
-using OmniCore.Model.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Eros.Data;
+using OmniCore.Model.Interfaces;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public class RileyLinkMessageExchangeProvider : IMessageExchangeProvider
     {

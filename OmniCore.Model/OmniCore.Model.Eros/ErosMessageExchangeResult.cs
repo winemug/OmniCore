@@ -1,14 +1,9 @@
-﻿using OmniCore.Model.Enums;
-using OmniCore.Model.Exceptions;
+﻿using System;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using OmniCore.Model.Utilities;
-using OmniCore.Mobile.Base;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
     public class ErosMessageExchangeResult : IMessageExchangeResult
     {

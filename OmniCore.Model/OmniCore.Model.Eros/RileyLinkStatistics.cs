@@ -1,17 +1,10 @@
-﻿using OmniCore.Model;
-using OmniCore.Model.Enums;
-using OmniCore.Model.Interfaces;
-using OmniCore.Model.Utilities;
-using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.Linq;
-using OmniCore.Model.Eros;
-using OmniCore.Model.Eros.Data;
+using OmniCore.Model.Enums;
+using OmniCore.Model.Utilities;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public struct RileyLinkPeStats
     {

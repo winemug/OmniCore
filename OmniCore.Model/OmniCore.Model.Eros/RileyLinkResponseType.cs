@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Radio.RileyLink
+﻿namespace OmniCore.Model.Eros
 {
     public enum RileyLinkResponseType
     {

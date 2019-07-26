@@ -1,15 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Linq;
+using Newtonsoft.Json;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Utilities;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using OmniCore.Mobile.Base;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
     [Table("Status")]
     public class ErosStatus : IStatus

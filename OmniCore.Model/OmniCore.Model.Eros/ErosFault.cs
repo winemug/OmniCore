@@ -1,11 +1,9 @@
-﻿using OmniCore.Model.Enums;
+﻿using System;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
     public class ErosFault : IFault
     {

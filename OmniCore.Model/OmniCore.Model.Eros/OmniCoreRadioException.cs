@@ -1,8 +1,8 @@
-﻿using OmniCore.Model.Enums;
+﻿using System;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
-using System;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public class OmniCoreRadioException : OmniCoreException
     {

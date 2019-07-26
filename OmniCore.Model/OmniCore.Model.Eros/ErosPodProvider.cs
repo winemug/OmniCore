@@ -1,5 +1,4 @@
-﻿using OmniCore.Model.Eros.Data;
-using OmniCore.Model.Interfaces;
+﻿using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +12,14 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodProvider : IPodProvider
     {
+        private List<IRadioProvider> RadioProviders;
+
         public ErosPodProvider()
         {
+            RadioProviders = new List<IRadioProvider>()
+            {
+                new RileyLinkRadioProvider()
+            };
         }
 
         public async Task<IPod> GetActivePod()

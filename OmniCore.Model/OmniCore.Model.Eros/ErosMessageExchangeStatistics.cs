@@ -1,13 +1,8 @@
-﻿using OmniCore.Mobile.Base;
-using OmniCore.Model.Enums;
+﻿using System;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Utilities;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OmniCore.Model.Eros.Data
+namespace OmniCore.Model.Eros
 {
     public class ErosMessageExchangeStatistics : IMessageExchangeStatistics
     {

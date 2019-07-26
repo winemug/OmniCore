@@ -1,21 +1,17 @@
-﻿using Microsoft.AppCenter.Crashes;
-using OmniCore.Mobile.Base;
-using OmniCore.Model;
-using OmniCore.Model.Enums;
-using OmniCore.Model.Eros;
-using OmniCore.Model.Eros.Data;
-using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces;
-using OmniCore.Model.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
-using Xamarin.Forms;
+using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Base;
+using OmniCore.Model.Enums;
+using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
+using OmniCore.Model.Utilities;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public class RileyLinkMessageExchange : IMessageExchange
     {

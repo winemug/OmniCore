@@ -1,9 +1,8 @@
-﻿using OmniCore.Model.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using OmniCore.Model.Utilities;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public static class ManchesterEncoding
     {

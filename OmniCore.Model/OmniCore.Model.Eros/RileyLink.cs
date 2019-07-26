@@ -1,24 +1,19 @@
-﻿using OmniCore.Model.Enums;
-using OmniCore.Model.Eros;
-using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces;
-using OmniCore.Model.Utilities;
-using Plugin.BluetoothLE;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using OmniCore.Model.Eros.Data;
-using System.Reactive.Threading.Tasks;
-using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Mobile.Base;
+using OmniCore.Model.Enums;
+using OmniCore.Model.Exceptions;
+using OmniCore.Model.Utilities;
+using Plugin.BluetoothLE;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Model.Eros
 {
     public class RileyLink
     {

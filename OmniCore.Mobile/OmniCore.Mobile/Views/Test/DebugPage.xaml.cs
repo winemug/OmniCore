@@ -2,10 +2,8 @@
 using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Test;
 using OmniCore.Model.Eros;
-using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Radio.RileyLink;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

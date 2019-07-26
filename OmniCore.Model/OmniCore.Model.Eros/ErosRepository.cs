@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Enums;
 using OmniCore.Mobile.Base;
 using OmniCore.Model.Data;

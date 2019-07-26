@@ -2,7 +2,6 @@
 using OmniCore.Mobile.Services;
 using OmniCore.Model.Eros;
 using OmniCore.Model.Interfaces;
-using OmniCore.Radio.RileyLink;
 using System.Threading;
 using Xamarin.Forms;
 using Microsoft.AppCenter;

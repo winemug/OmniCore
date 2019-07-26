@@ -1,7 +1,6 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
-using OmniCore.Model.Eros.Data;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
