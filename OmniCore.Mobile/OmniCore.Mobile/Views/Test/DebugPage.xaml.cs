@@ -129,5 +129,10 @@ namespace OmniCore.Mobile.Views.Test
         {
             OmniCoreServices.Application.Exit();
         }
+
+        private void ExistingClicked(object sender, EventArgs e)
+        {
+            App.Instance.PodProvider.Register(44650, 710420, 0x343ca6a1);
+        }
     }
 }

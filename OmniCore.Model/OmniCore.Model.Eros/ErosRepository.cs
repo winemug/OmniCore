@@ -115,6 +115,14 @@ namespace OmniCore.Model.Eros
                 .ToListAsync();
         }
 
+        public async Task<ErosPod> GetActivePod()
+        {
+            return await Connection.Table<ErosPod>()
+                .Where(x => !x.Archived)
+                .OrderByDescending(x => x.Created)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<ErosPod> LoadCurrent()
         {
             return await WithRelations(await Connection.Table<ErosPod>()

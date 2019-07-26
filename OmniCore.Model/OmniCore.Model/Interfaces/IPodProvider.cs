@@ -7,11 +7,12 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodProvider
     {
-        Task Initialize();
-        IEnumerable<IPod> Pods { get; }
+        Task<IPod> GetActivePod();
+        Task<IEnumerable<IPod>> GetActivePods();
         Task Archive(IPod pod);
         Task<IPod> New();
         Task<IPod> Register(uint lot, uint serial, uint radioAddress);
-        IPod SinglePod { get; }
+        Task<IConversation> StartConversation(IPod pod);
+        Task CancelConversations(IPod pod);
     }
 }

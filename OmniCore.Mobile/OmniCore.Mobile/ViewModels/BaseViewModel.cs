@@ -25,9 +25,9 @@ namespace OmniCore.Mobile.ViewModels
 
         public BaseViewModel()
         {
-            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodsChanged, (pp) =>
+            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodsChanged, async (podProvider) =>
             {
-                this.Pod = pp.SinglePod;
+                this.Pod = await podProvider.GetActivePod();
                 var podState = this.Pod?.LastStatus?.Progress;
                 IsPodRunning = podState != null && podState.Value >= PodProgress.Running &&
                              podState.Value <= PodProgress.RunningLow;
@@ -59,7 +59,7 @@ namespace OmniCore.Mobile.ViewModels
 
         public async Task<BaseViewModel> DataBind()
         {
-            Pod = App.Instance.PodProvider.SinglePod;
+            Pod = await App.Instance.PodProvider.GetActivePod();
             await BindData();
             return this;
         }

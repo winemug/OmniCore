@@ -13,20 +13,20 @@ namespace OmniCore.Model.Eros
 {
     public class ErosPodProvider : IPodProvider
     {
-        public IEnumerable<IPod> Pods { get; set; }
-
-        public IPod SinglePod => Pods?.FirstOrDefault();
-
         public ErosPodProvider()
         {
-            Pods = new List<ErosPod>();
         }
 
-        public async Task Initialize()
+        public async Task<IPod> GetActivePod()
         {
             var repo = await ErosRepository.GetInstance();
-            Pods = await repo.GetActivePods();
-            MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
+            return await repo.GetActivePod();
+        }
+
+        public async Task<IEnumerable<IPod>> GetActivePods()
+        {
+            var repo = await ErosRepository.GetInstance();
+            return await repo.GetActivePods();
         }
 
         public async Task Archive(IPod pod)
@@ -34,7 +34,6 @@ namespace OmniCore.Model.Eros
             pod.Archived = true;
             var repo = await ErosRepository.GetInstance();
             await repo.Save(pod as ErosPod);
-            Pods = await repo.GetActivePods();
             MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
         }
 
@@ -49,7 +48,6 @@ namespace OmniCore.Model.Eros
             pod.Created = DateTimeOffset.UtcNow;
             var repo = await ErosRepository.GetInstance();
             await repo.Save(pod);
-            Pods = await repo.GetActivePods();
             MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
             return pod;
         }
@@ -60,9 +58,18 @@ namespace OmniCore.Model.Eros
             pod.Created = DateTimeOffset.UtcNow;
             var repo = await ErosRepository.GetInstance();
             await repo.Save(pod);
-            Pods = await repo.GetActivePods();
             MessagingCenter.Send<IPodProvider>(this, MessagingConstants.PodsChanged);
             return pod;
+        }
+
+        public Task<IConversation> StartConversation(IPod pod)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CancelConversations(IPod pod)
+        {
+            throw new NotImplementedException();
         }
 
         private uint GetRadioAddress()

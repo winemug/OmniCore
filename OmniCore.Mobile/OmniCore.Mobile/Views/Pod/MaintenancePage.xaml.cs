@@ -33,7 +33,7 @@ namespace OmniCore.Mobile.Views.Pod
             try
             {
                 var podProvider = App.Instance.PodProvider;
-                var pod = podProvider.SinglePod;
+                var pod = await podProvider.GetActivePod();
 
                 IConversation conversation;
 
@@ -115,7 +115,7 @@ namespace OmniCore.Mobile.Views.Pod
             try
             {
                 var podProvider = App.Instance.PodProvider;
-                var pod = podProvider.SinglePod;
+                var pod = await podProvider.GetActivePod();
                 bool actDlgResult;
 
                 if (pod?.LastStatus == null)
@@ -142,7 +142,7 @@ namespace OmniCore.Mobile.Views.Pod
                         return;
                 }
 
-                pod = podProvider.SinglePod;
+                pod = await podProvider.GetActivePod();
                 IConversation conversation;
 
                 if (pod.LastStatus == null)

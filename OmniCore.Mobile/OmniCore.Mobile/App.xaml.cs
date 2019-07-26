@@ -23,7 +23,6 @@ namespace OmniCore.Mobile
         {
             OmniCoreServices.UiSyncContext = SynchronizationContext.Current;
             PodProvider = new ErosPodProvider();
-            PodProvider.Initialize().ExecuteSynchronously();
             ExchangeProvider = new RileyLinkMessageExchangeProvider();
             OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             InitializeComponent();

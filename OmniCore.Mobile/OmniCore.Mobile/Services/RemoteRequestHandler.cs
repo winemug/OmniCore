@@ -149,7 +149,7 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelBolus()
         {
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, "Cancel Bolus", source: RequestSource.AndroidAPS))
@@ -164,7 +164,7 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> Bolus(decimal units)
         {
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider,
@@ -180,7 +180,7 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> CancelTempBasal()
         {
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
@@ -196,7 +196,7 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
         {
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
@@ -222,7 +222,7 @@ namespace OmniCore.Mobile.Services
             await repo.Save(profile);
 
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
@@ -241,7 +241,7 @@ namespace OmniCore.Mobile.Services
         private async Task<RemoteResult> GetStatus()
         {
             var podProvider = App.Instance.PodProvider;
-            var pod = podProvider.SinglePod;
+            var pod = await podProvider.GetActivePod();
             if (IsAssigned(pod))
             {
                 var ts = DateTimeOffset.UtcNow - pod.LastStatus?.Created;
