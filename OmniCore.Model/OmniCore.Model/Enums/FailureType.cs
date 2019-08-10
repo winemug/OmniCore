@@ -6,7 +6,6 @@ namespace OmniCore.Model.Enums
 {
     public enum FailureType
     {
-        None,
         RadioNotReachable,
         RadioDisconnectPrematurely,
         RadioRecvTimeout,
@@ -14,15 +13,14 @@ namespace OmniCore.Model.Enums
         PodStateInvalidForCommand,
         PodResponseUnexpected,
         PodFaulted,
-        Canceled,
         PodResponseUnrecognized,
-        Unknown,
         InvalidParameter,
         RadioUnknownError,
         RadioStateError,
         InvalidDataReceived,
         WorkflowError,
         OperationInProgress,
-        WakeLockNotAcquired
+        WakeLockNotAcquired,
+        Unknown,
     }
 }

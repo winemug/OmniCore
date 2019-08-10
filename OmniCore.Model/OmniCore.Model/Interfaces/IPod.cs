@@ -8,47 +8,60 @@ namespace OmniCore.Model.Interfaces
     {
         Guid Id { get; set; }
         DateTimeOffset Created { get; set; }
+        DateTimeOffset Updated { get; set; }
+        bool Archived { get; set; }
+        string[] ProviderSpecificRadioIds { get; set; }
 
         uint? Lot { get; set; }
         uint? Serial { get; set; }
         uint RadioAddress { get; set; }
         int MessageSequence { get; set; }
 
-        DateTimeOffset? ActivationDate { get; set; }
-        DateTimeOffset? InsertionDate { get; set; }
         string VersionPi { get; set; }
         string VersionPm { get; set; }
         string VersionUnknown { get; set; }
+
+        bool Faulted { get; set; }
+        PodFault FaultCode { get; set; }
+        DateTimeOffset? FaultDate { get; set; }
+
+        DateTimeOffset? ActivationDate { get; set; }
+        DateTimeOffset? InsertionDate { get; set; }
         decimal? ReservoirUsedForPriming { get; set; }
 
-        bool Archived { get; set; }
+        decimal DeliveredInsulin { get; set; }
+        decimal Reservoir { get; set; }
+        uint ActiveMinutes { get; set; }
 
-        IMessageExchangeResult LastTempBasalResult { get; set; }
-        IAlertStates LastAlertStates { get; set; }
-        IBasalSchedule LastBasalSchedule { get; set; }
-        IFault LastFault { get; set; }
-        IStatus LastStatus { get; set; }
-        IUserSettings LastUserSettings { get; set; }
+        PodProgress Progress { get; set; }
 
-        Task<IConversation> StartConversation(IMessageExchangeProvider messageExchangeProvider,
-            string intent,
-            int timeout = 0,
-            RequestSource source = RequestSource.OmniCoreUser);
+        BasalState BasalState { get; set; }
 
-        Task UpdateStatus(IConversation conversation, StatusRequestType requestType = StatusRequestType.Standard, int? timeout = null);
-        Task AcknowledgeAlerts(IConversation conversation, byte alertMask);
-        Task ConfigureAlerts(IConversation conversation, AlertConfiguration[] alertConfigurations);
-        Task Bolus(IConversation conversation, decimal bolusAmount, bool waitForBolusToFinish = true);
-        Task CancelBolus(IConversation conversation);
-        Task SetTempBasal(IConversation conversation, decimal basalRate, decimal durationInHours);
-        Task CancelTempBasal(IConversation conversation);
-        Task StartExtendedBolus(IConversation conversation, decimal bolusAmount, decimal durationInHours);
-        Task CancelExtendedBolus(IConversation conversation);
-        Task SetBasalSchedule(IConversation conversation, IProfile profile);
-        Task SuspendBasal(IConversation conversation);
-        Task Pair(IConversation conversation, IProfile profile);
-        Task Activate(IConversation conversation);
-        Task InjectAndStart(IConversation conversation, IProfile profile);
-        Task Deactivate(IConversation conversation);
+        DateTimeOffset? TempBasalStart { get; set; }
+        DateTimeOffset? TempBasalEnd { get; set; }
+        decimal? TempBasalRate { get; set; }
+
+        DateTimeOffset? SuspendBasalStart { get; set; }
+        DateTimeOffset? SuspendBasalEnd { get; set; }
+
+        BolusState BolusState { get; set; }
+
+        DateTimeOffset? BolusStart { get; set; }
+        DateTimeOffset? BolusEnd { get; set; }
+        decimal? BolusAmount { get; set; }
+        decimal? BolusDelivered { get; set; }
+        decimal? BolusRemaining { get; set; }
+
+        DateTimeOffset? ExtendedBolusStart { get; set; }
+        DateTimeOffset? ExtendedBolusEnd { get; set; }
+        decimal? ExtendedBolusAmount { get; set; }
+        decimal? ExtendedBolusDelivered { get; set; }
+        decimal? ExtendedBolusRemaining { get; set; }
+
+        IBasalSchedule BasalSchedule { get; set; }
+        IReminderConfiguration[] Reminders { get; set; }
+
+        Task<IPodResult> Request(IPodRequest podRequest);
+        Task<IPodResult> Cancel(IPodRequest podRequest);
     }
 }

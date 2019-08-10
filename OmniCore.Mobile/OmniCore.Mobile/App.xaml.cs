@@ -1,6 +1,6 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Mobile.Services;
-using OmniCore.Model.Eros;
+using OmniCore.Impl.Eros;
 using OmniCore.Model.Interfaces;
 using System.Threading;
 using Xamarin.Forms;
@@ -21,8 +21,7 @@ namespace OmniCore.Mobile
         public App()
         {
             OmniCoreServices.UiSyncContext = SynchronizationContext.Current;
-            PodProvider = new ErosPodProvider();
-            ExchangeProvider = new RileyLinkMessageExchangeProvider();
+            PodProvider = new ErosPodProvider(CrossBleRadioAdapter.Instance);
             OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             InitializeComponent();
             MainPage = new Views.MainPage();
@@ -44,15 +43,12 @@ namespace OmniCore.Mobile
         protected override void OnSleep()
         {
             MessagingCenter.Send(this, MessagingConstants.AppSleeping);
-            var repo = ErosRepository.GetInstance().ExecuteSynchronously();
-            repo.Dispose();
+            Repository.Instance.Dispose();
             OmniCoreServices.Logger.Debug("OmniCore App OnSleep called");
         }
 
         protected override void OnResume()
         {
-            var repo = ErosRepository.GetInstance().ExecuteSynchronously();
-            repo.Initialize().ExecuteSynchronously();
             OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
             OmniCoreServices.Logger.Debug("OmniCore App OnResume called");
             MessagingCenter.Send(this, MessagingConstants.AppResuming);

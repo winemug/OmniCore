@@ -28,8 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj" />
+    <ProjectReference Include="..\..\OmniCore.Impl\OmniCore.Impl.Eros\OmniCore.Impl.Eros.csproj" />
     <ProjectReference Include="..\..\OmniCore.Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj" />
+    <ProjectReference Include="..\OmniCore.Mobile.Base\OmniCore.Mobile.Base\OmniCore.Mobile.Base.csproj" />
   </ItemGroup>
 
   <ItemGroup>

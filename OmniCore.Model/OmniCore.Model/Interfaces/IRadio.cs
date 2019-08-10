@@ -7,9 +7,13 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IRadio
     {
+        string DeviceId { get; }
+        string DeviceName { get; }
+        string DeviceType { get; }
+        string ProviderSpecificId { get; }
         Task Connect();
         Task Disconnect();
-        Task<int> GetRssi();
+        int Rssi { get; }
         Task<IMessage> ExchangeMessages(IMessage messageToSend);
     }
 }

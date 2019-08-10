@@ -10,19 +10,40 @@ using System.Threading.Tasks;
 using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using Plugin.BluetoothLE;
 
 namespace OmniCore.Model.Eros
 {
-    public class RileyLink
+    public class RileyLink : IRadio
     {
+
+        public Task Connect()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Disconnect()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetRssi()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMessage> ExchangeMessages(IMessage messageToSend)
+        {
+            throw new NotImplementedException();
+        }
 
         // [0x0E, 0x1D, 0x34, 0x2C, 0x60, 0x84, 0xC8]
 
         private Dictionary<TxPower, byte> PaDictionary = new Dictionary<TxPower, byte>()
             {
-                { TxPower.A0_Lowest, 0x0E },   
+                { TxPower.A0_Lowest, 0x0E },
                 { TxPower.A1_VeryLow, 0x1D },
                 { TxPower.A2_Low, 0x34 },
                 { TxPower.A3_BelowNormal, 0x2c },
@@ -66,7 +87,7 @@ namespace OmniCore.Model.Eros
         private async Task<IDevice> ScanForDevice()
         {
             IDevice found = null;
-            
+
             Exchange.ActionText = "Searching for RileyLink";
             var scanResults = new List<IScanResult>();
             var config = new ScanConfig() { ScanType = BleScanType.Balanced, ServiceUuids = new List<Guid>() { RileyLinkServiceUUID } };
@@ -202,11 +223,11 @@ namespace OmniCore.Model.Eros
 
                 if (!Exchange.RileyLinkStatistics.MobileDeviceRssiAverage.HasValue)
                 {
-                        this.Device.ReadRssi()
-                            .Subscribe((rssiRead) =>
-                            {
-                                Exchange.RileyLinkStatistics.MobileDeviceRssiReported(rssiRead);
-                            });
+                    this.Device.ReadRssi()
+                        .Subscribe((rssiRead) =>
+                        {
+                            Exchange.RileyLinkStatistics.MobileDeviceRssiReported(rssiRead);
+                        });
                 }
             }
             catch (OmniCoreException) { throw; }
@@ -397,7 +418,7 @@ namespace OmniCore.Model.Eros
                     }
                     return readResult.Data;
                 }
-                catch(TimeoutException)
+                catch (TimeoutException)
                 {
                     throw new OmniCoreRadioException(FailureType.RadioRecvTimeout);
                 }
@@ -472,23 +493,23 @@ namespace OmniCore.Model.Eros
         {
             //if (!ConfiguredDevices.Contains(Device.Uuid))
             //{
-                await DataCharacteristic.Write(new byte[] { 0 });
-                while (true)
+            await DataCharacteristic.Write(new byte[] { 0 });
+            while (true)
+            {
+                try
                 {
-                    try
-                    {
-                        await ResponseCharacteristic.WhenNotificationReceived().Timeout(TimeSpan.FromMilliseconds(150));
-                        await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
-                        await ResponseCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
-                    }
-                    catch (TimeoutException)
-                    {
-                        break;
-                    }
+                    await ResponseCharacteristic.WhenNotificationReceived().Timeout(TimeSpan.FromMilliseconds(150));
+                    await DataCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
+                    await ResponseCharacteristic.Read().Timeout(TimeSpan.FromMilliseconds(200));
                 }
+                catch (TimeoutException)
+                {
+                    break;
+                }
+            }
 
-                await VerifyVersion();
-                await InitializeRadio();
+            await VerifyVersion();
+            await InitializeRadio();
             //    ConfiguredDevices.Add(Device.Uuid);
             //}
         }

@@ -31,7 +31,5 @@ namespace OmniCore.Model.Interfaces
         decimal? TemporaryBasalRate { get; set; }
         decimal? ScheduledBasalRate { get; set; }
         decimal? ScheduledBasalAverage { get; set; }
-
-        void UpdateWithEstimates(IPod pod);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using OmniCore.Mobile.Base.Interfaces;
 using OmniCore.Model.Enums;
-using OmniCore.Model.Eros;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

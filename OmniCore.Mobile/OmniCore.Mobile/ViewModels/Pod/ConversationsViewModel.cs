@@ -105,7 +105,7 @@ namespace OmniCore.Mobile.ViewModels.Pod
         {
             get
             {
-                switch (ActiveConversation?.RequestSource)
+                switch (ActiveConversation?.Requestor)
                 {
                     case RequestSource.AndroidAPS:
                         return "Android APS";

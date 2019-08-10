@@ -29,7 +29,7 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <BundleAssemblies>false</BundleAssemblies>
@@ -134,10 +134,6 @@
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj">
-      <Project>{95B9264A-45B1-49AF-8495-12A5C63C12A7}</Project>
-      <Name>OmniCore.Model.Eros</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj">
       <Project>{22ac504d-6b45-4fe9-97a6-e7404c15ce19}</Project>
       <Name>OmniCore.Model</Name>

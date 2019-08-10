@@ -5,7 +5,11 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AppCenter.Crashes;
 using OmniCore.Mobile.Base;
+using OmniCore.Mobile.Base.Interfaces;
+using OmniCore.Model.Enums;
+using OmniCore.Model.Exceptions;
 using Xamarin.Forms;
 
 namespace OmniCore.Model.Eros
@@ -67,9 +71,54 @@ namespace OmniCore.Model.Eros
             return pod;
         }
 
-        public Task<IConversation> StartConversation(IPod pod)
+        private async Task<IRadioProvider> GetRadioProvider(IPod pod)
         {
-            throw new NotImplementedException();
+            return RadioProviders[0];
+        }
+
+        public async Task<IConversation> StartConversation(IPod pod,
+            string intent,
+            int timeout = 0,
+            RequestSource source = RequestSource.OmniCoreUser)
+        {
+            int started = Environment.TickCount;
+            while (!OmniCoreServices.AppState.TrySet(AppStateConstants.ActiveConversation, intent))
+            {
+                if (timeout > 0 && Environment.TickCount - started > timeout)
+                    throw new OmniCoreTimeoutException(FailureType.OperationInProgress, "Timed out waiting for existing operation to complete");
+                await Task.Delay(250);
+            }
+
+            IConversation conversation = null;
+            IWakeLock wakeLock = null;
+            try
+            {
+                wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock(
+                    Guid.NewGuid().ToString()
+                        .Replace('-', '_')
+                        .Replace('{', '_')
+                        .Replace('}', '_')
+                );
+
+                var ret = await wakeLock.Acquire(10000);
+                if (!ret)
+                {
+                    wakeLock.Release();
+                    throw new OmniCoreException(FailureType.WakeLockNotAcquired);
+                }
+
+                conversation = new ErosConversation(wakeLock, GetRadioProvider(pod), pod) { RequestSource = source, Intent = intent };
+                MessagingCenter.Send<IConversation>(conversation, MessagingConstants.ConversationStarted);
+                return conversation;
+            }
+            catch(Exception e)
+            {
+                Crashes.TrackError(e);
+                wakeLock?.Dispose();
+                OmniCoreServices.AppState.TryRemove(AppStateConstants.ActiveConversation);
+                conversation?.Dispose();
+                throw;
+            }
         }
 
         public Task CancelConversations(IPod pod)

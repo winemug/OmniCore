@@ -12,7 +12,6 @@ using Android.Views;
 using Android.Widget;
 using Microsoft.AppCenter.Crashes;
 using OmniCore.Mobile.Base;
-using OmniCore.Model.Eros;
 
 namespace OmniCore.Mobile.Android
 {
@@ -146,10 +145,10 @@ namespace OmniCore.Mobile.Android
                         return;
                     }
 
-                    var repo = await ErosRepository.GetInstance();
-                    var ocs = await repo.GetOmniCoreSettings();
-                    if (ocs.AcceptCommandsFromAAPS)
-                    {
+                    //var repo = await ErosRepository.GetInstance();
+                    //var ocs = await repo.GetOmniCoreSettings();
+                    //if (ocs.AcceptCommandsFromAAPS)
+                    //{
                         var resultTask = OmniCoreServices.Publisher.GetResult(request);
                         while (true)
                         {
@@ -162,24 +161,24 @@ namespace OmniCore.Mobile.Android
                             messenger.Send(new Message { Data = bb });
                         }
                         var result = await resultTask;
-                        var b = new Bundle();
-                        b.PutBoolean("initialized", true);
-                        b.PutBoolean("finished", true);
-                        b.PutString("response", result);
+                        var b1 = new Bundle();
+                        b1.PutBoolean("initialized", true);
+                        b1.PutBoolean("finished", true);
+                        b1.PutString("response", result);
                         OmniCoreServices.Logger.Verbose("Responding to request via message object");
-                        messenger.Send(new Message { Data = b });
+                        messenger.Send(new Message { Data = b1 });
                         OmniCoreServices.Logger.Verbose("Message send complete");
-                    }
-                    else
-                    {
-                        OmniCoreServices.Logger.Verbose("Ignoring AAPS command");
-                        await Task.Delay(30000);
-                        var b = new Bundle();
-                        b.PutBoolean("finished", true);
-                        b.PutString("response", null);
-                        messenger.Send(new Message { Data = b });
-                        OmniCoreServices.Logger.Verbose("Message send complete");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    OmniCoreServices.Logger.Verbose("Ignoring AAPS command");
+                    //    await Task.Delay(30000);
+                    //    var b = new Bundle();
+                    //    b.PutBoolean("finished", true);
+                    //    b.PutString("response", null);
+                    //    messenger.Send(new Message { Data = b });
+                    //    OmniCoreServices.Logger.Verbose("Message send complete");
+                    //}
                 }
             }
             catch (Exception e)

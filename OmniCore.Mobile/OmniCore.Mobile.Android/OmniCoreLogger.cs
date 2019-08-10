@@ -60,7 +60,7 @@ namespace OmniCore.Mobile.Android
             while (true)
             {
                 errMessage.AppendLine($"Message: {e.Message}");
-                errMessage.AppendLine($"Source: {e.Source}");
+                errMessage.AppendLine($"Requestor: {e.Source}");
                 errMessage.AppendLine($"Trace: {e.StackTrace}");
                 e = e.InnerException;
                 if (e != null)

@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj" />
     <ProjectReference Include="..\..\OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj" />
   </ItemGroup>
 
