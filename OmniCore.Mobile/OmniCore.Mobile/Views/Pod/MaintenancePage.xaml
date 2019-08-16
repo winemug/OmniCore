@@ -11,10 +11,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Text="{Binding ActivationText}" Clicked="ActivateClicked"
+            <!--<Button Text="{Binding ActivationText}" Clicked="ActivateClicked"
                     IsEnabled="{Binding ActivateEnabled}" Grid.Row="0"/>
             <Button Text="Deactivate Pod" Clicked="DeactivateClicked"
-                    IsEnabled="{Binding DeactivateEnabled}" Grid.Row="1"/>
+                    IsEnabled="{Binding DeactivateEnabled}" Grid.Row="1"/>-->
         </Grid>
     </ContentPage.Content>
 </ContentPage>

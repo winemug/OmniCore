@@ -1,6 +1,5 @@
 ﻿using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Settings;
-using OmniCore.Model.Eros;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
@@ -29,43 +28,43 @@ namespace OmniCore.Mobile.Views.Settings
         {
             if (!await CheckPermissions())
                 return;
-            var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "OmniCore_backup.db3");
-            if (File.Exists(backupPath))
-            {
-                var accepted = await DisplayAlert("Database backup",
-                        @"This will overwrite the existing backup on your internal storage, are you sure you want to continue?",
-                        "Backup", "Cancel");
+            //var backupPath = Path.Combine(App.Instance.OmniCoreApplication.GetPublicDataPath(), "OmniCore_backup.db3");
+            //if (File.Exists(backupPath))
+            //{
+            //    var accepted = await DisplayAlert("Database backup",
+            //            @"This will overwrite the existing backup on your internal storage, are you sure you want to continue?",
+            //            "Backup", "Cancel");
 
-                if (!accepted)
-                    return;
-            }
-            var repo = await ErosRepository.GetInstance();
-            File.Copy(repo.DbPath, backupPath, true);
-            await DisplayAlert("Database backup", "Backup completed", "OK");
+            //    if (!accepted)
+            //        return;
+            //}
+            //var repo = await App.Instance.OmniCoreApplication.GetDatabasePath();
+            //File.Copy(repo.DbPath, backupPath, true);
+            //await DisplayAlert("Database backup", "Backup completed", "OK");
         }
 
         private async void Restore_Clicked(object sender, EventArgs e)
         {
             if (!await CheckPermissions())
                 return;
-            var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "OmniCore_backup.db3");
-            if (!File.Exists(backupPath))
-            {
-                await DisplayAlert("Database restore", "Backup file could not be found", "OK");
-            }
-            else
-            {
-                var accepted = await DisplayAlert("Database restore",
-                        @"Restoring from this backup will overwrite your existing configuration and you will lose all information that is stored with this app. Are you sure?",
-                        "Restore", "Cancel");
+            //var backupPath = Path.Combine(OmniCoreServices.Application.GetPublicDataPath(), "OmniCore_backup.db3");
+            //if (!File.Exists(backupPath))
+            //{
+            //    await DisplayAlert("Database restore", "Backup file could not be found", "OK");
+            //}
+            //else
+            //{
+            //    var accepted = await DisplayAlert("Database restore",
+            //            @"Restoring from this backup will overwrite your existing configuration and you will lose all information that is stored with this app. Are you sure?",
+            //            "Restore", "Cancel");
 
-                if (accepted)
-                {
-                    var repo = await ErosRepository.GetInstance();
-                    File.Copy(backupPath, repo.DbPath, true);
-                    await DisplayAlert("Database restore", "Restore completed", "OK");
-                }
-            }
+            //    if (accepted)
+            //    {
+            //        var repo = await ErosRepository.GetInstance();
+            //        File.Copy(backupPath, repo.DbPath, true);
+            //        await DisplayAlert("Database restore", "Restore completed", "OK");
+            //    }
+            //}
         }
 
         private async void Erase_Clicked(object sender, EventArgs e)
@@ -73,9 +72,9 @@ namespace OmniCore.Mobile.Views.Settings
             if (!await DisplayAlert("Erase Database", "WARNING: You will lose all data stored in OmniCore.", "Erase ALL", "Cancel"))
                 return;
 
-            var repo = await ErosRepository.GetInstance();
-            File.Delete(repo.DbPath);
-            OmniCoreServices.Application.Exit();
+            //var repo = await ErosRepository.GetInstance();
+            //File.Delete(repo.DbPath);
+            //OmniCoreServices.Application.Exit();
         }
 
         private async Task<bool> CheckPermissions()
@@ -92,7 +91,7 @@ namespace OmniCore.Mobile.Views.Settings
                 }
             }
 
-            var storagePath = OmniCoreServices.Application.GetPublicDataPath();
+            var storagePath = App.Instance.OmniCoreApplication.GetPublicDataPath();
             if (!Directory.Exists(storagePath))
             {
                 Directory.CreateDirectory(storagePath);

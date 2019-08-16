@@ -10,6 +10,6 @@ namespace OmniCore.Model.Interfaces
         Task<bool> TryEnable();
         Task<bool> TryDisable();
         IObservable<IRadioPeripheral> ScanPeripherals(Guid serviceId);
-        Task<IRadio> GetPeripheral(Guid id);
+        Task<IRadioPeripheral> GetPeripheral(Guid id);
     }
 }

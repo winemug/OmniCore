@@ -1,7 +1,6 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using OmniCore.Mobile.Base;
 using OmniCore.Mobile.ViewModels.Test;
-using OmniCore.Model.Eros;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using System;
@@ -125,12 +124,11 @@ namespace OmniCore.Mobile.Views.Test
 
         private void ExitApp_Clicked(object sender, EventArgs e)
         {
-            OmniCoreServices.Application.Exit();
+            App.Instance.OmniCoreApplication.Exit();
         }
 
         private void ExistingClicked(object sender, EventArgs e)
         {
-            App.Instance.PodProvider.Register(44650, 710420, 0x343ca6a1);
         }
     }
 }

@@ -1,21 +1,25 @@
-﻿using System;
+﻿using OmniCore.Impl.Eros;
+using OmniCore.Mobile.Interfaces;
+using OmniCore.Mobile.Services;
+using OmniCore.Model.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Model.Eros;
-using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class PodsViewModel : PageViewModel
+    public class PodsViewModel : PageViewModel, IViewModel
     {
+        public IPodRepository PodRepository { get; }
+
         public PodsViewModel(Page page) : base(page)
         {
         }
 
-        public List<ErosPod> Pods { get; set; }
+        public IList<ErosPod> Pods { get; set; }
 
         protected override void OnDisposeManagedResources()
         {
@@ -23,8 +27,7 @@ namespace OmniCore.Mobile.ViewModels
 
         protected override async Task<BaseViewModel> BindData()
         {
-            var repo = await ErosRepository.GetInstance();
-            Pods = await repo.GetActivePods();
+            Pods = await PodRepository.GetActivePods<ErosPod>();
             return this;
         }
     }

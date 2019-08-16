@@ -23,7 +23,7 @@ namespace OmniCore.Impl.Eros.Tests
             throw new NotImplementedException();
         }
 
-        public Task<IRadio> GetPeripheral(Guid id)
+        public Task<IRadioPeripheral> GetPeripheral(Guid id)
         {
             throw new NotImplementedException();
         }

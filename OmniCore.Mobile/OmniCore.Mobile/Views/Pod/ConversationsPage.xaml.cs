@@ -16,7 +16,7 @@ namespace OmniCore.Mobile.Views.Pod
         public ConversationsPage()
         {
             InitializeComponent();
-            new ConversationsViewModel(this);
+            //new ConversationsViewModel(this);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace OmniCore.Mobile.ViewModels
             page.Disappearing += Page_Disappearing;
             MessagingCenter.Subscribe<App>(this, MessagingConstants.AppResuming, async (_) =>
             {
-                var typeStr = OmniCoreServices.AppState.GetString(AppStateConstants.ActivePage, null);
+                var typeStr = App.Instance.OmniCoreApplication.State.GetString(AppStateConstants.ActivePage, null);
                 if (typeStr == this.GetType().FullName)
                 {
                     HasAppeared = true;

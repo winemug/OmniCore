@@ -1,5 +1,4 @@
 ﻿using OmniCore.Model.Data;
-using OmniCore.Model.Eros;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -15,7 +14,7 @@ namespace OmniCore.Mobile.ViewModels.Settings
 
         private OmniCoreSettings Settings;
 
-        public ApplicationSettingsViewModel(Page page): base(page)
+        public ApplicationSettingsViewModel(Page page) : base(page)
         {
         }
 
@@ -26,16 +25,16 @@ namespace OmniCore.Mobile.ViewModels.Settings
 
         protected async override Task OnDisappearing()
         {
-            Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
-            var repo = await ErosRepository.GetInstance();
-            await repo.SaveOmniCoreSettings(Settings);
+            //Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
+            //var repo = App.Instance.AppRepository;
+            //await repo.SaveOmniCoreSettings(Settings);
         }
 
         protected async override Task<BaseViewModel> BindData()
         {
-            var repo = await ErosRepository.GetInstance();
-            Settings = await repo.GetOmniCoreSettings();
-            this.AcceptAAPSCommands = Settings.AcceptCommandsFromAAPS;
+            //var repo = await ErosRepository.GetInstance();
+            //Settings = await repo.GetOmniCoreSettings();
+            //this.AcceptAAPSCommands = Settings.AcceptCommandsFromAAPS;
             return this;
         }
 

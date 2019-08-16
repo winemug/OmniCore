@@ -29,7 +29,7 @@ namespace OmniCore.Impl.Eros
         public string VersionPm { get; set; }
         public string VersionUnknown { get; set; }
         public decimal? ReservoirUsedForPriming { get; set; }
-        public decimal DeliveredInsulin { get; set; }
+        public decimal TotalDelivered { get; set; }
         public decimal Reservoir { get; set; }
         public uint ActiveMinutes { get; set; }
         public PodProgress Progress { get; set; }
@@ -57,6 +57,7 @@ namespace OmniCore.Impl.Eros
 
         public IBasalSchedule BasalSchedule { get; set; }
         public IReminderConfiguration[] Reminders { get; set; }
+        public decimal? TempBasalDurationInHours { get; set; }
 
         public Task<IPodResult> Request(IPodRequest podRequest)
         {

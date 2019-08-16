@@ -18,6 +18,7 @@
     <PackageReference Include="PropertyChanged.Fody" Version="3.0.1" />
     <PackageReference Include="sqlite-net-pcl" Version="1.6.258-beta" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="Unity" Version="5.11.1" />
   </ItemGroup>
 
   <ItemGroup>

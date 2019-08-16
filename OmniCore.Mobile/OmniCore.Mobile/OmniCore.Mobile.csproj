@@ -24,6 +24,7 @@
     <PackageReference Include="PropertyChanged.Fody" Version="3.0.1" />
     <PackageReference Include="sqlite-net-pcl" Version="1.6.258-beta" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="Unity" Version="5.11.1" />
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.673156" />
   </ItemGroup>
 
@@ -31,6 +32,7 @@
     <ProjectReference Include="..\..\OmniCore.Impl\OmniCore.Impl.Eros\OmniCore.Impl.Eros.csproj" />
     <ProjectReference Include="..\..\OmniCore.Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj" />
     <ProjectReference Include="..\OmniCore.Mobile.Base\OmniCore.Mobile.Base\OmniCore.Mobile.Base.csproj" />
+    <ProjectReference Include="..\OmniCore.Mobile.Interfaces\OmniCore.Mobile.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>

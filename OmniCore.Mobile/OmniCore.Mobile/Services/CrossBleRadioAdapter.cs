@@ -14,10 +14,9 @@ namespace OmniCore.Mobile.Services
 {
     public class CrossBleRadioAdapter : IRadioAdapter
     {
-        private CrossBleRadioAdapter()
+        public CrossBleRadioAdapter()
         {
         }
-        public static CrossBleRadioAdapter Instance { get; } = new CrossBleRadioAdapter();
 
         public async Task<bool> TryEnable()
         {
@@ -69,9 +68,10 @@ namespace OmniCore.Mobile.Services
             );
         }
 
-        public async Task<IRadio> GetPeripheral(Guid id)
+        public async Task<IRadioPeripheral> GetPeripheral(Guid id)
         {
             IDevice device = null;
+            int rssi = 0;
             try
             {
                 device = await CrossBleAdapter.Current.GetKnownDevice(id);
@@ -93,11 +93,13 @@ namespace OmniCore.Mobile.Services
                 var scan = CrossBleAdapter.Current
                     .ScanUntilDeviceFound(id).Subscribe((found) =>
                     {
-
                     });
 
             }
-
+            if (device == null)
+                return null;
+            else
+                return new CrossBleRadioPeripheral(device, rssi);
         }
     }
 }

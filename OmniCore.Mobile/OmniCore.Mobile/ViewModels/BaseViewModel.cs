@@ -11,46 +11,10 @@ namespace OmniCore.Mobile.ViewModels
 {
     public abstract class BaseViewModel : PropertyChangedImpl, IDisposable
     {
-        public IPod Pod { get; set; }
-
-        public IConversation ActiveConversation { get; set; }
-
-        public bool IsPodRunning { get; set; }
-
-        public bool IsInConversation { get; set; }
-
-        public bool CanRunCommand => IsPodRunning & !IsInConversation;
-
         protected List<IDisposable> Disposables = new List<IDisposable>();
 
         public BaseViewModel()
         {
-            MessagingCenter.Subscribe<IPodProvider>(this, MessagingConstants.PodsChanged, async (podProvider) =>
-            {
-                this.Pod = await podProvider.GetActivePod();
-                var podState = this.Pod?.LastStatus?.Progress;
-                IsPodRunning = podState != null && podState.Value >= PodProgress.Running &&
-                             podState.Value <= PodProgress.RunningLow;
-                IsInConversation = false;
-                ActiveConversation = null;
-                OnPropertyChanged(nameof(CanRunCommand));
-            });
-
-            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationStarted, (conversation)
-                =>
-            {
-                IsInConversation = true;
-                ActiveConversation = conversation;
-                OnPropertyChanged(nameof(CanRunCommand));
-            });
-
-            MessagingCenter.Subscribe<IConversation>(this, MessagingConstants.ConversationEnded, (conversation)
-                =>
-            {
-                IsInConversation = false;
-                ActiveConversation = null;
-                OnPropertyChanged(nameof(CanRunCommand));
-            });
         }
 
         protected abstract void OnDisposeManagedResources();
@@ -59,7 +23,6 @@ namespace OmniCore.Mobile.ViewModels
 
         public async Task<BaseViewModel> DataBind()
         {
-            Pod = await App.Instance.PodProvider.GetActivePod();
             await BindData();
             return this;
         }
@@ -71,9 +34,6 @@ namespace OmniCore.Mobile.ViewModels
             {
                 if (disposing)
                 {
-                    MessagingCenter.Unsubscribe<IPodProvider>(this, MessagingConstants.PodsChanged);
-                    MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationStarted);
-                    MessagingCenter.Unsubscribe<IConversation>(this, MessagingConstants.ConversationEnded);
                     foreach(var disposable in Disposables)
                     {
                         disposable.Dispose();

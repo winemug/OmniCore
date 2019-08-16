@@ -14,12 +14,17 @@ using Xamarin.Forms;
 using OmniCore.Model.Utilities;
 using OmniCore.Mobile.Base;
 using Microsoft.AppCenter.Crashes;
+using OmniCore.Mobile.Interfaces;
+using Unity;
 
 namespace OmniCore.Mobile.Android
 {
     public class RemoteRequestPublisher : IRemoteRequestPublisher
     {
         private static List<IRemoteRequestSubscriber> Subscribers = new List<IRemoteRequestSubscriber>();
+
+        [Unity.Dependency]
+        public IOmniCoreLogger Logger { get; set; }
 
         public async Task<string> GetResult(string request)
         {
@@ -33,7 +38,7 @@ namespace OmniCore.Mobile.Android
                 }
                 catch(Exception e)
                 {
-                    OmniCoreServices.Logger.Error("Error executing on request received", e);
+                    Logger.Error("Error executing on request received", e);
                     Crashes.TrackError(e);
                 }
             }

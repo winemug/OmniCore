@@ -11,15 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model", "OmniCore.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", "OmniCore.Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj", "{94025655-119D-44BF-ADB8-A786354F72B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model.Eros", "OmniCore.Model\OmniCore.Model.Eros\OmniCore.Model.Eros.csproj", "{95B9264A-45B1-49AF-8495-12A5C63C12A7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model.Eros.Tests", "OmniCore.Model\OmniCore.Model.Eros.Tests\OmniCore.Model.Eros.Tests.csproj", "{9C1793C5-71C9-40E2-B603-7095D5B8D71B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Mobile.Base", "OmniCore.Mobile\OmniCore.Mobile.Base\OmniCore.Mobile.Base\OmniCore.Mobile.Base.csproj", "{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Impl.Eros", "OmniCore.Impl\OmniCore.Impl.Eros\OmniCore.Impl.Eros.csproj", "{03541393-3330-40E0-A9BF-CCF82716E71F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Impl.Eros.Tests", "OmniCore.Impl\OmniCore.Impl.Eros.Tests\OmniCore.Impl.Eros.Tests.csproj", "{F2388E62-E0B3-41F1-8763-2B14DB541C80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Mobile.Interfaces", "OmniCore.Mobile\OmniCore.Mobile.Interfaces\OmniCore.Mobile.Interfaces.csproj", "{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,11 +43,6 @@ Global
 		{94025655-119D-44BF-ADB8-A786354F72B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94025655-119D-44BF-ADB8-A786354F72B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94025655-119D-44BF-ADB8-A786354F72B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95B9264A-45B1-49AF-8495-12A5C63C12A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95B9264A-45B1-49AF-8495-12A5C63C12A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95B9264A-45B1-49AF-8495-12A5C63C12A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C1793C5-71C9-40E2-B603-7095D5B8D71B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C1793C5-71C9-40E2-B603-7095D5B8D71B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03BD40C5-FAB7-41E9-AEF9-0D2CBDA97E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -62,6 +55,10 @@ Global
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

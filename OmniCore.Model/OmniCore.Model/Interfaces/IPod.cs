@@ -29,7 +29,7 @@ namespace OmniCore.Model.Interfaces
         DateTimeOffset? InsertionDate { get; set; }
         decimal? ReservoirUsedForPriming { get; set; }
 
-        decimal DeliveredInsulin { get; set; }
+        decimal TotalDelivered { get; set; }
         decimal Reservoir { get; set; }
         uint ActiveMinutes { get; set; }
 
@@ -39,6 +39,7 @@ namespace OmniCore.Model.Interfaces
 
         DateTimeOffset? TempBasalStart { get; set; }
         DateTimeOffset? TempBasalEnd { get; set; }
+        decimal? TempBasalDurationInHours { get; set; }
         decimal? TempBasalRate { get; set; }
 
         DateTimeOffset? SuspendBasalStart { get; set; }

@@ -18,7 +18,7 @@ namespace OmniCore.Mobile.ViewModels.Help
         {
             get
             {
-                return OmniCoreServices.Application.Version;
+                return App.Instance.OmniCoreApplication.Version;
             }
         }
 

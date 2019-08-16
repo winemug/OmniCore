@@ -32,11 +32,11 @@ namespace OmniCore.Mobile.Views.Pod
         private async void Update_Button_Clicked(object sender, EventArgs e)
         {
             var pod = await App.Instance.PodProvider.GetActivePod();
-            using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
-                "Update Status"))
-            {
-                await pod.UpdateStatus(conversation);
-            }
+            //using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+            //    "Update Status"))
+            //{
+            //    await pod.UpdateStatus(conversation);
+            //}
         }
 
         private bool ensureCalled = false;
@@ -67,7 +67,7 @@ namespace OmniCore.Mobile.Views.Pod
                     if (request[Permission.LocationAlways] != PermissionStatus.Granted)
                     {
                         await DisplayAlert("Missing Permissions", "This application cannot run without the necessary permissions.", "OK");
-                        OmniCoreServices.Application.Exit();
+                        App.Instance.OmniCoreApplication.Exit();
                     }
                 }
             }

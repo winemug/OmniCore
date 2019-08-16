@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Mobile.Base.Interfaces
+namespace OmniCore.Mobile.Interfaces
 {
     public interface IOmniCoreLogger
     {

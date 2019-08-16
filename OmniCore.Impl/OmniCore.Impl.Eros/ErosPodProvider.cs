@@ -13,17 +13,17 @@ namespace OmniCore.Impl.Eros
 {
     public class ErosPodProvider : IPodProvider
     {
-        private List<IRadioProvider> _radioProviders;
-        private IRepository _repository;
+        private IRadioProvider[] _radioProviders;
+        private IPodRepository _podRepository;
+        private IRadioAdapter _radioAdapter;
 
-        public ErosPodProvider(IRadioAdapter radioAdapter, IRepository repository)
+        public ErosPodProvider(IRadioAdapter radioAdapter,
+            IRadioProvider[] radioProviders, 
+            IPodRepository podRepository)
         {
-            _radioProviders = new List<IRadioProvider>
-            {
-                new RileyLinkRadioProvider(radioAdapter),
-                //new RfpRadioProvider(radioAdapter)
-            };
-            _repository = repository;
+            _radioProviders = radioProviders;
+            _radioAdapter = radioAdapter;
+            _podRepository = podRepository;
         }
 
         public Task<IPod> GetActivePod()
@@ -49,7 +49,7 @@ namespace OmniCore.Impl.Eros
                 ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
                 RadioAddress = GenerateRadioAddress()
             };
-            await _repository.SavePod<ErosPod>(pod);
+            await _podRepository.SavePod<ErosPod>(pod);
             return pod;
         }
 

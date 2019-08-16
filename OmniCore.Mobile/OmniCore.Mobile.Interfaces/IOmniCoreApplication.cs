@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Mobile.Base.Interfaces
+namespace OmniCore.Mobile.Interfaces
 {
     public interface IOmniCoreApplication
     {
@@ -15,5 +15,6 @@ namespace OmniCore.Mobile.Base.Interfaces
         string GetPublicDataPath();
         void Exit();
         IWakeLock NewBluetoothWakeLock(string name);
+        IAppState State { get; }
     }
 }

@@ -9,6 +9,7 @@ namespace OmniCore.Mobile.Services
     public class CrossBleRadioPeripheral : IRadioPeripheral
     {
         private IDevice _bleDevice;
+
         public CrossBleRadioPeripheral(IDevice bleDevice, int rssi)
         {
             _bleDevice = bleDevice;

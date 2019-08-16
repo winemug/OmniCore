@@ -32,7 +32,7 @@ namespace OmniCore.Radio.RileyLink
             });
         }
 
-        public async Task<IRadio> GetByProviderSpecificId(string id)
+        public async Task<IRadioPeripheral> GetByProviderSpecificId(string id)
         {
             if (!id.StartsWith("RLL"))
                 return null;

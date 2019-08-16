@@ -14,6 +14,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Mobile.Base.Interfaces;
+using OmniCore.Mobile.Interfaces;
 using OmniCore.Model.Exceptions;
 using Environment = Android.OS.Environment;
 
@@ -42,6 +43,8 @@ namespace OmniCore.Mobile.Android
                 return info.VersionName;
             }
         }
+
+        public IAppState State => new OmniCoreAppState();
 
         public async Task RunOnMainThread(Func<Task> asyncFunction)
         {

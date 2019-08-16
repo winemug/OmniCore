@@ -9,6 +9,6 @@ namespace OmniCore.Model.Interfaces
     public interface IRadioProvider
     {
         IObservable<IRadio> ListRadios();
-        Task<IRadio> GetByProviderSpecificId(string id);
+        Task<IRadioPeripheral> GetByProviderSpecificId(string id);
     }
 }

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.Base
+namespace OmniCore.Mobile.ViewModels
 {
     [Fody.ConfigureAwait(true)]
     public class PropertyChangedImpl : INotifyPropertyChanged
@@ -18,7 +18,7 @@ namespace OmniCore.Mobile.Base
         {
             if (PropertyChanged != null)
             {
-                if (SynchronizationContext.Current == OmniCoreServices.UiSyncContext)
+                if (SynchronizationContext.Current == App.Instance.UiSyncContext)
                 {
                     PropertyChanged.Invoke(sender, eventArgs);
                 }

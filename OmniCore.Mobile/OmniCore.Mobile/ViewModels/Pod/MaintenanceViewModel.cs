@@ -13,56 +13,56 @@ namespace OmniCore.Mobile.ViewModels.Pod
 {
     public class MaintenanceViewModel : PageViewModel
     {
-        public string ActivationText
-        {
-            get
-            {
-                if (Pod?.LastStatus?.Progress == null)
-                    return "Activate New Pod";
-                else if (Pod.LastStatus.Progress < PodProgress.Running)
-                    return "Resume Activation";
-                else
-                    return "Pod Active";
-            }
-        }
+        //public string ActivationText
+        //{
+        //    get
+        //    {
+        //        if (Pod?.LastStatus?.Progress == null)
+        //            return "Activate New Pod";
+        //        else if (Pod.LastStatus.Progress < PodProgress.Running)
+        //            return "Resume Activation";
+        //        else
+        //            return "Pod Active";
+        //    }
+        //}
 
-        public bool ActivateEnabled =>
-            !IsInConversation &&
-            (Pod?.LastStatus == null || Pod?.LastStatus?.Progress < PodProgress.Running);
+        //public bool ActivateEnabled =>
+        //    !IsInConversation &&
+        //    (Pod?.LastStatus == null || Pod?.LastStatus?.Progress < PodProgress.Running);
 
-        public bool DeactivateEnabled =>
-            !IsInConversation && Pod?.LastStatus != null && Pod.LastStatus.Progress >= PodProgress.PairingSuccess
-            && Pod.LastStatus.Progress <= PodProgress.Inactive;
+        //public bool DeactivateEnabled =>
+        //    !IsInConversation && Pod?.LastStatus != null && Pod.LastStatus.Progress >= PodProgress.PairingSuccess
+        //    && Pod.LastStatus.Progress <= PodProgress.Inactive;
 
         public MaintenanceViewModel(Page page):base(page)
         {
-            Disposables.Add(this.OnPropertyChanges().Subscribe((propertyName) =>
-            {
-                if (propertyName == nameof(Pod) || propertyName == nameof(ActiveConversation))
-                {
-                    OnPropertyChanged(nameof(ActivateEnabled));
-                    OnPropertyChanged(nameof(DeactivateEnabled));
-                }
-            }));
+            //Disposables.Add(this.OnPropertyChanges().Subscribe((propertyName) =>
+            //{
+            //    if (propertyName == nameof(Pod) || propertyName == nameof(ActiveConversation))
+            //    {
+            //        OnPropertyChanged(nameof(ActivateEnabled));
+            //        OnPropertyChanged(nameof(DeactivateEnabled));
+            //    }
+            //}));
 
-            MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>
-            {
-                OnPropertyChanged(nameof(ActivateEnabled));
-                OnPropertyChanged(nameof(DeactivateEnabled));
-            });
+            //MessagingCenter.Subscribe<IStatus>(this, MessagingConstants.PodStatusUpdated, (newStatus) =>
+            //{
+            //    OnPropertyChanged(nameof(ActivateEnabled));
+            //    OnPropertyChanged(nameof(DeactivateEnabled));
+            //});
         }
 
         [method: SuppressMessage("", "CS1998", Justification = "Not applicable")]
         protected async override Task<BaseViewModel> BindData()
         {
-            OnPropertyChanged(nameof(ActivateEnabled));
-            OnPropertyChanged(nameof(DeactivateEnabled));
+            //OnPropertyChanged(nameof(ActivateEnabled));
+            //OnPropertyChanged(nameof(DeactivateEnabled));
             return this;
         }
 
         protected override void OnDisposeManagedResources()
         {
-            MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
+            //MessagingCenter.Unsubscribe<IStatus>(this, MessagingConstants.PodStatusUpdated);
         }
     }
 }

@@ -16,6 +16,7 @@ using OmniCore.Mobile.Base.Interfaces;
 using System.IO;
 using Environment = System.Environment;
 using OmniCore.Mobile.Base;
+using Unity;
 
 namespace OmniCore.Mobile.Android
 {
@@ -39,15 +40,13 @@ namespace OmniCore.Mobile.Android
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
+            var container = new UnityContainer();
+            Initializer.RegisterTypes(container);
+
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            DependencyService.Register<IRemoteRequestPublisher, RemoteRequestPublisher>();
-            DependencyService.Register<IOmniCoreApplication, OmniCoreApplication>();
-            DependencyService.Register<IOmniCoreLogger, OmniCoreLogger>();
-            DependencyService.Register<IAppState, OmniCoreAppState>();
-
-            LoadApplication(new App());
+            LoadApplication(new App(container));
             IsCreated = true;
         }
 
@@ -55,15 +54,6 @@ namespace OmniCore.Mobile.Android
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
-        protected override void OnNewIntent(Intent intent)
-        {
-            OmniCoreServices.Logger.Debug("MainActivity: new intent received");
-            if (intent.Action == IntentEnsureServiceRunning)
-            {
-                OmniCoreServices.Logger.Debug("MainActivity: EnsureServiceRunning");
-            }
         }
     }
 }
