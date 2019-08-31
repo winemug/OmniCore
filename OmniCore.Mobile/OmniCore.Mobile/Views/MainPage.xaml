@@ -10,6 +10,58 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Mobile.Views.MainPage" x:Name="MainShell">
     <!--Items="{Binding ShellItems}"-->
+
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.2*" />
+                    <ColumnDefinition Width="0.8*" />
+                </Grid.ColumnDefinitions>
+                <Image Source="{Binding Icon}"
+                       Margin="5"
+                       HeightRequest="45" />
+                <Label Grid.Column="1"
+                       Text="{Binding Title}"
+                       FontAttributes="Italic"
+                       VerticalTextAlignment="Center" /> 
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <Shell.MenuItemTemplate>
+        <DataTemplate>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.2*" />
+                    <ColumnDefinition Width="0.8*" />
+                </Grid.ColumnDefinitions>
+                <Image Source="{Binding Icon}"
+                       Margin="5"
+                       HeightRequest="45" />
+                <Label Grid.Column="1"
+                       Text="{Binding Text}"
+                       FontAttributes="Italic"
+                       VerticalTextAlignment="Center" /> 
+            </Grid>
+        </DataTemplate>
+    </Shell.MenuItemTemplate>
+
+    <FlyoutItem Title="Pods" FlyoutDisplayOptions="AsSingleItem">
+        <BindableLayout.ItemTemplate>
+            <DataTemplate>
+                <Tab Title="PodX">
+                    <ShellContent Title="X">
+                        <vwTest:TestPage/>
+                    </ShellContent>
+                    <ShellContent Title="Y">
+                        <vwTest:TestPage/>
+                    </ShellContent>
+                </Tab>
+            </DataTemplate>
+        </BindableLayout.ItemTemplate>
+    </FlyoutItem>
+
     <!--<ShellItem Title="Pod">
         <ShellSection Title="Overview">
             <ShellContent>
@@ -34,7 +86,7 @@
         </DataTemplate>
     </Shell.ItemTemplate>-->
     
-    <FlyoutItem Title="Pod">
+    <!--<FlyoutItem Title="Pod">
         <Tab Title="Overview">
             <ShellContent ContentTemplate="{DataTemplate vwPod:OverviewPage}"/>
         </Tab>
@@ -62,5 +114,5 @@
         <Tab>
             <ShellContent ContentTemplate="{DataTemplate vwHelp:AboutPage}"/>
         </Tab>
-    </FlyoutItem>
+    </FlyoutItem>-->
 </Shell>

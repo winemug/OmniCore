@@ -2,22 +2,20 @@
 {
     public enum RequestType
     {
-        AssignAddress,
-        SetupPod,
-        SetDeliveryFlags,
-        PrimeCannula,
-        InsertCannula,
+        Pair,
+        Prime,
+        Insert,
         Status,
-        AcknowledgeAlerts,
         ConfigureAlerts,
+        AcknowledgeAlerts,
         SetBasalSchedule,
         CancelBasal,
         SetTempBasal,
+        CancelTempBasal,
         Bolus,
         CancelBolus,
-        CancelTempBasal,
-        DeactivatePod,
         StartExtendedBolus,
-        StopExtendedBolus
+        CancelExtendedBolus,
+        Deactivate,
     }
 }

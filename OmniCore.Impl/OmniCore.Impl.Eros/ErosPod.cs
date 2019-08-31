@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Impl.Eros.Requests;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 
@@ -59,14 +60,25 @@ namespace OmniCore.Impl.Eros
         public IReminderConfiguration[] Reminders { get; set; }
         public decimal? TempBasalDurationInHours { get; set; }
 
-        public Task<IPodResult> Request(IPodRequest podRequest)
+        public async Task<IPodRequestPair> CreatePairRequest(uint radioAddress)
         {
-            throw new NotImplementedException();
+            return new ErosRequestPair() { PodId = this.Id, RadioAddress = radioAddress };
         }
 
-        public Task<IPodResult> Cancel(IPodRequest podRequest)
+        public async Task<IPodResult> QueueRequest(IPodRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return new ErosPodResult(ResultType.OK);
+            }
+            catch(OperationCanceledException oce)
+            {
+                return new ErosPodResult(ResultType.Canceled, oce);
+            }
+            catch (Exception e)
+            {
+                return new ErosPodResult(ResultType.Error, e);
+            }
         }
     }
 }

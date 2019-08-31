@@ -1,5 +1,4 @@
-﻿using OmniCore.Mobile.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,17 +7,16 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views
+namespace OmniCore.Mobile.Views.Test
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MainPage : Shell, IView
+    public partial class TestPage : ContentPage
     {
-        public MainPage()
+        public TestPage()
         {
             InitializeComponent();
             BindingContext = this;
         }
 
-        public object[] Pods = new object[10];
     }
 }

@@ -26,19 +26,23 @@ namespace OmniCore.Impl.Eros
             _podRepository = podRepository;
         }
 
-        public Task<IPod> GetActivePod()
+        public async Task<IPod> GetActivePod()
         {
-            throw new NotImplementedException();
+            var pods = await _podRepository.GetActivePods<ErosPod>();
+            return pods.OrderByDescending(p => p.Created).FirstOrDefault();
         }
 
-        public Task<IEnumerable<IPod>> GetActivePods()
+        public async Task<IEnumerable<IPod>> GetActivePods()
         {
-            throw new NotImplementedException();
+            return (await _podRepository.GetActivePods<ErosPod>())
+                .OrderBy(p => p.Created);
         }
 
-        public Task Archive(IPod pod)
+        public async Task Archive(IPod pod)
         {
-            throw new NotImplementedException();
+            var erosPod = pod as ErosPod;
+            erosPod.Archived = true;
+            await _podRepository.SavePod<ErosPod>(erosPod);
         }
 
         public async Task<IPod> New(IEnumerable<IRadio> radios)
@@ -53,9 +57,18 @@ namespace OmniCore.Impl.Eros
             return pod;
         }
 
-        public Task<IPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios)
+        public async Task<IPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios)
         {
-            throw new NotImplementedException();
+            var pod = new ErosPod
+            {
+                Id = Guid.NewGuid(),
+                Lot = lot,
+                Serial = serial,
+                RadioAddress = radioAddress,
+                ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
+            };
+            await _podRepository.SavePod<ErosPod>(pod);
+            return pod;
         }
 
         public Task CancelConversations(IPod pod)

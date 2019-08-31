@@ -29,7 +29,7 @@ namespace OmniCore.Mobile
         {
             Initializer.RegisterTypes(container);
 
-            PodProvider = container.Resolve<IPodProvider>();
+            PodProvider = container.Resolve<IPodProvider>(nameof(ErosPodProvider));
             PodRepository = container.Resolve<IPodRepository>();
             Logger = container.Resolve<IOmniCoreLogger>();
             OmniCoreApplication = container.Resolve<IOmniCoreApplication>();

@@ -27,7 +27,6 @@ namespace OmniCore.Radio.RileyLink
                     {
                         observer.OnNext(new RileyLinkRadio(peripheral));
                     });
-
                 return Disposable.Create(() => { disposable.Dispose(); });
             });
         }

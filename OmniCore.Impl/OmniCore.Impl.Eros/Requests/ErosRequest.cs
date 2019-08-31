@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
@@ -14,6 +16,13 @@ namespace OmniCore.Impl.Eros.Requests
         private readonly CancellationTokenSource _cancellationSource;
         private bool _executing = false;
         private readonly TaskCompletionSource<IPodResult> _resultSource;
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public abstract RequestType PodRequestType { get; }
+
+        public Guid PodId { get; set; }
+
+        public Guid RequestId { get; set; }
 
         protected ErosRequest()
         {
@@ -87,6 +96,11 @@ namespace OmniCore.Impl.Eros.Requests
         public void Dispose()
         {
             _cancellationSource?.Dispose();
+        }
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
         }
     }
 }
