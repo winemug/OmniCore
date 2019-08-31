@@ -6,14 +6,16 @@ It implements the full functionality of the PDM (Personal Diabetes Manager). It 
 
 The app is currently NOT released.
 
-~~Beta testing will begin on Wednesday, May 29th 2019~~
+OmniCore currently does NOT support Omnipod Dash and can be used for Omnipod Eros only. See [roadmap](https://github.com/winemug/OmniCore/wiki/Roadmap).
 
-Due to personal time constraints and a couple of Android related hiccups I had to delay the beta release about a week.
+OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
 
-The first functional beta is currently planned for release on **Monday, June 3rd.** and will be announced here. First major version and the stable release will be created earliest a week after the first beta release, depending on the results of beta testing.
+# Project Status Update - August 31st, 2019
+
+A limited functionality alpha release is in testing for two months now and although the results are technically positive and the issues are mostly trivial, I have identified some architectural weaknesses which need to be fixed before a first release. As I've just returned to work on this, expect more frequent updates, that is until life interferes again.
+
+Next step is a beta release to be announced here, as I believe the alpha testing has met its objective. Still if you'd like to experiment, old alpha builds are located in [Microsoft AppCenter](https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing)
 
 You can follow the progress more closely [here](https://github.com/winemug/OmniCore/projects/1).
 
-Note: OmniCore currently does NOT support Omnipod Dash and can be used for Omnipod Eros only. See [roadmap](https://github.com/winemug/OmniCore/wiki/Roadmap).
-
-OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
+And if you have nothing better to do, [here](https://balya.net)'s where I'll be ranting about life, omnicore and everything.
