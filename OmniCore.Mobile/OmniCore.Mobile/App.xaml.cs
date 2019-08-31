@@ -18,8 +18,8 @@ namespace OmniCore.Mobile
     public partial class App : Application
     {
         public static App Instance => Application.Current as App;
-        public IPodProvider PodProvider { get; }
-        public IPodRepository PodRepository { get; }
+        public IPodProvider<ErosPod> PodProvider { get; }
+        public IPodRepository<ErosPod> PodRepository { get; }
         public IOmniCoreLogger Logger { get; }
         public IOmniCoreApplication OmniCoreApplication { get; }
 
@@ -29,8 +29,8 @@ namespace OmniCore.Mobile
         {
             Initializer.RegisterTypes(container);
 
-            PodProvider = container.Resolve<IPodProvider>(nameof(ErosPodProvider));
-            PodRepository = container.Resolve<IPodRepository>();
+            PodProvider = container.Resolve<IPodProvider<ErosPod>>();
+            PodRepository = container.Resolve<IPodRepository<ErosPod>>();
             Logger = container.Resolve<IOmniCoreLogger>();
             OmniCoreApplication = container.Resolve<IOmniCoreApplication>();
 

@@ -6,14 +6,14 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodProvider
+    public interface IPodProvider<T>
     {
-        Task<IPod> GetActivePod();
-        Task<IEnumerable<IPod>> GetActivePods();
-        Task Archive(IPod pod);
-        Task<IPod> New(IEnumerable<IRadio> radios);
-        Task<IPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios);
-        Task CancelConversations(IPod pod);
+        Task<T> GetActivePod();
+        Task<IEnumerable<T>> GetActivePods();
+        Task Archive(T pod);
+        Task<T> New(IEnumerable<IRadio> radios);
+        Task<T> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios);
+        Task CancelConversations(T pod);
         IObservable<IRadio> ListAllRadios();
     }
 }

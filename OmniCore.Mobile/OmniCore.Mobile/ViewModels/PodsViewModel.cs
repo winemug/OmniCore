@@ -13,7 +13,7 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class PodsViewModel : PageViewModel, IViewModel
     {
-        public IPodRepository PodRepository { get; }
+        public IPodRepository<ErosPod> PodRepository { get; }
 
         public PodsViewModel(Page page) : base(page)
         {
@@ -27,7 +27,7 @@ namespace OmniCore.Mobile.ViewModels
 
         protected override async Task<BaseViewModel> BindData()
         {
-            Pods = await PodRepository.GetActivePods<ErosPod>();
+            Pods = await PodRepository.GetActivePods();
             return this;
         }
     }

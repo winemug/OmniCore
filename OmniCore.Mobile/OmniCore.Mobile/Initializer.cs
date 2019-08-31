@@ -1,4 +1,5 @@
-﻿using OmniCore.Mobile.Interfaces;
+﻿using OmniCore.Impl.Eros;
+using OmniCore.Mobile.Interfaces;
 using OmniCore.Mobile.Services;
 using OmniCore.Mobile.ViewModels;
 using OmniCore.Mobile.Views;
@@ -14,7 +15,7 @@ namespace OmniCore.Mobile
     {
         public static void RegisterTypes(IUnityContainer container)
         {
-            container.RegisterSingleton<IPodRepository, PodRepository>();
+            container.RegisterSingleton<IPodRepository<ErosPod>, ErosPodRepository>();
             container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
 
             OmniCore.Impl.Eros.Initializer.RegisterTypes(container);

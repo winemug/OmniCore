@@ -22,7 +22,7 @@ namespace OmniCore.Impl.Eros.Tests
         [TestMethod]
         public async Task PairRequest()
         {
-            var provider = Container.Resolve<IPodProvider>();
+            var provider = Container.Resolve<IPodProvider<ErosPod>>();
             var pod = await provider.GetActivePod();
         }
     }

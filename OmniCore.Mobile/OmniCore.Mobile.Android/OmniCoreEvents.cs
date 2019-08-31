@@ -26,19 +26,19 @@ namespace OmniCore.Mobile.Android
         public const string ConversationStarted = "ConversationStarted";
         public const string ConversationEnded = "ConversationEnded";
 
-        public void RaisePodChanged(IPodProvider source)
+        public void RaisePodChanged<T>(IPodProvider<T> source)
         {
             MessagingCenter.Send(source, PodChanged);
         }
 
-        public void OnPodChanged(object subscriber, Action<IPodProvider> callback)
+        public void OnPodChanged<T>(object subscriber, Action<IPodProvider<T>> callback)
         {
-            MessagingCenter.Subscribe<IPodProvider>(subscriber, PodChanged, callback);
+            MessagingCenter.Subscribe<IPodProvider<T>>(subscriber, PodChanged, callback);
         }
 
-        public void OnPodChanged(object subscriber)
+        public void OnPodChanged<T>(object subscriber)
         {
-            MessagingCenter.Unsubscribe<IPodProvider>(subscriber, PodChanged);
+            MessagingCenter.Unsubscribe<IPodProvider<T>>(subscriber, PodChanged);
         }
     }
 }

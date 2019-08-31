@@ -11,41 +11,40 @@ using OmniCore.Radio.RileyLink;
 
 namespace OmniCore.Impl.Eros
 {
-    public class ErosPodProvider : IPodProvider
+    public class ErosPodProvider : IPodProvider<ErosPod>
     {
         private IRadioProvider[] _radioProviders;
-        private IPodRepository _podRepository;
+        private IPodRepository<ErosPod> _podRepository;
         private IRadioAdapter _radioAdapter;
 
         public ErosPodProvider(IRadioAdapter radioAdapter,
             IRadioProvider[] radioProviders, 
-            IPodRepository podRepository)
+            IPodRepository<ErosPod> podRepository)
         {
             _radioProviders = radioProviders;
             _radioAdapter = radioAdapter;
             _podRepository = podRepository;
         }
 
-        public async Task<IPod> GetActivePod()
+        public async Task<ErosPod> GetActivePod()
         {
-            var pods = await _podRepository.GetActivePods<ErosPod>();
+            var pods = await _podRepository.GetActivePods();
             return pods.OrderByDescending(p => p.Created).FirstOrDefault();
         }
 
-        public async Task<IEnumerable<IPod>> GetActivePods()
+        public async Task<IEnumerable<ErosPod>> GetActivePods()
         {
-            return (await _podRepository.GetActivePods<ErosPod>())
+            return (await _podRepository.GetActivePods())
                 .OrderBy(p => p.Created);
         }
 
-        public async Task Archive(IPod pod)
+        public async Task Archive(ErosPod pod)
         {
-            var erosPod = pod as ErosPod;
-            erosPod.Archived = true;
-            await _podRepository.SavePod<ErosPod>(erosPod);
+            pod.Archived = true;
+            await _podRepository.SavePod(pod);
         }
 
-        public async Task<IPod> New(IEnumerable<IRadio> radios)
+        public async Task<ErosPod> New(IEnumerable<IRadio> radios)
         {
             var pod = new ErosPod
             {
@@ -53,11 +52,11 @@ namespace OmniCore.Impl.Eros
                 ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
                 RadioAddress = GenerateRadioAddress()
             };
-            await _podRepository.SavePod<ErosPod>(pod);
+            await _podRepository.SavePod(pod);
             return pod;
         }
 
-        public async Task<IPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios)
+        public async Task<ErosPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios)
         {
             var pod = new ErosPod
             {
@@ -67,11 +66,11 @@ namespace OmniCore.Impl.Eros
                 RadioAddress = radioAddress,
                 ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
             };
-            await _podRepository.SavePod<ErosPod>(pod);
+            await _podRepository.SavePod(pod);
             return pod;
         }
 
-        public Task CancelConversations(IPod pod)
+        public Task CancelConversations(ErosPod pod)
         {
             throw new NotImplementedException();
         }

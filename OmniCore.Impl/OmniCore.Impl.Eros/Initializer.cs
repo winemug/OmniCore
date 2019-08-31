@@ -12,7 +12,7 @@ namespace OmniCore.Impl.Eros
         public static void RegisterTypes(IUnityContainer container)
         {
             container.RegisterType<IRadioProvider, RileyLinkRadioProvider>(nameof(RileyLinkRadioProvider));
-            container.RegisterType<IPodProvider, ErosPodProvider>(nameof(ErosPodProvider));
+            container.RegisterType<IPodProvider<ErosPod>, ErosPodProvider>();
         }
     }
 }

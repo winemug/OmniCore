@@ -22,12 +22,12 @@ namespace OmniCore.Impl.Eros.Tests
                 new ErosPod() { Id = PodId1, Archived = false }
             };
 
-            var mock = new Mock<IPodRepository>();
-            mock.Setup(x => x.GetActivePods<ErosPod>())
+            var mock = new Mock<IPodRepository<ErosPod>>();
+            mock.Setup(x => x.GetActivePods())
                 .ReturnsAsync(pods);
-            mock.Setup(x => x.SavePod<ErosPod>(It.IsAny<ErosPod>()));
+            mock.Setup(x => x.SavePod(It.IsAny<ErosPod>()));
 
-            container.RegisterInstance<IPodRepository>(mock.Object) ;
+            container.RegisterInstance<IPodRepository<ErosPod>>(mock.Object) ;
         }
 
         public static void SetupRadioProvider(IUnityContainer container)
