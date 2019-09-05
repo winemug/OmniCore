@@ -20,12 +20,21 @@ namespace OmniCore.Impl.Eros
 
         [JsonConverter(typeof(StringEnumConverter))]
         public RequestType RequestType { get; set; }
+
         [PrimaryKey]
         public Guid Id { get; set; }
         public Guid PodId { get; set; }
         public DateTimeOffset Created { get; set; }
+        [Ignore]
+        public IPodRequestParameters Parameters { get; set; }
 
-        public string Parameters { get; set; }
+        public string ParametersJson
+        {
+            get
+            {
+                return Parameters.ToJson();
+            }
+        }
 
         public ErosRequest()
         {
@@ -35,33 +44,28 @@ namespace OmniCore.Impl.Eros
 
         public async Task<IPodResult> Execute(IPod pod, IRadio radio)
         {
+            Parameters = ErosRequestParameters.FromJson(RequestType, ParametersJson);
             var execute = true;
-            lock (this)
-            {
-                if (_cancellationSource.IsCancellationRequested)
-                    return new ErosPodResult(ResultType.Canceled);
+            if (_cancellationSource.IsCancellationRequested)
+                return new ErosPodResult(ResultType.Canceled);
 
-                if (_executing)
-                    execute = false;
-                else
-                    _executing = true;
-            }
+            if (_executing)
+                execute = false;
+            else
+                _executing = true;
             return await GetResult(pod, radio, execute);
         }
 
         public async Task<IPodResult> Cancel()
         {
-            lock (this)
+            if (!_executing)
             {
-                if (!_executing)
-                {
-                    _cancellationSource.Cancel();
-                    return new ErosPodResult(ResultType.Canceled);
-                }
-
-                if (!_cancellationSource.IsCancellationRequested)
-                    _cancellationSource.Cancel();
+                _cancellationSource.Cancel();
+                return new ErosPodResult(ResultType.Canceled);
             }
+
+            if (!_cancellationSource.IsCancellationRequested)
+                _cancellationSource.Cancel();
             return await GetResult(null, null, false);
         }
 

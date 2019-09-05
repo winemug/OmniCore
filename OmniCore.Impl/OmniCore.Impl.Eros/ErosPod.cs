@@ -67,6 +67,7 @@ namespace OmniCore.Impl.Eros
             return new ErosRequest()
             {
                 PodId = this.Id,
+                Parameters = new ErosRequestParametersPair() { RadioAddress = radioAddress }
             };
         }
 

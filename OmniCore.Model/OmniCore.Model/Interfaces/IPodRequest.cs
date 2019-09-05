@@ -9,12 +9,10 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IPodRequest
     {
-        // Task<IPodResult> Execute(IPod pod, IRadio radio);
-        // IList<IPodRequest> Enlist(IList<IPodRequest> pendingRequests);
         Guid Id { get; }
         Guid PodId { get; }
         DateTimeOffset Created { get; }
         RequestType RequestType { get; }
-        string Parameters { get; }
+        IPodRequestParameters Parameters { get; }
     }
 }
