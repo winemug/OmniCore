@@ -6,7 +6,7 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodProvider<T>
+    public interface IPodProvider<T> where T : IPod, new()
     {
         Task<T> GetActivePod();
         Task<IEnumerable<T>> GetActivePods();

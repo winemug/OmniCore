@@ -62,6 +62,6 @@ namespace OmniCore.Model.Interfaces
         IBasalSchedule BasalSchedule { get; set; }
         IReminderConfiguration[] Reminders { get; set; }
 
-        Task<IPodRequestPair> CreatePairRequest(uint radioAddress);
+        Task<IPodRequest> CreatePairRequest(uint radioAddress);
     }
 }

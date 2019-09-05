@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Interfaces;
+﻿using OmniCore.Impl.Eros;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;
 using System;
@@ -7,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Mobile.Services
+namespace OmniCore.Mobile.Repositories
 {
     public class SqliteRepository : IRepository
     {
@@ -44,7 +45,12 @@ namespace OmniCore.Mobile.Services
             {
                 _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite
                                                                                       | SQLiteOpenFlags.FullMutex);
+                await MigrateRepository(_connection);
             }
+        }
+
+        protected virtual async Task MigrateRepository(SQLiteAsyncConnection connection)
+        {
         }
     }
 }

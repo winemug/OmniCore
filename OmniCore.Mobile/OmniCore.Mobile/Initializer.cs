@@ -1,5 +1,6 @@
 ﻿using OmniCore.Impl.Eros;
 using OmniCore.Mobile.Interfaces;
+using OmniCore.Mobile.Repositories;
 using OmniCore.Mobile.Services;
 using OmniCore.Mobile.ViewModels;
 using OmniCore.Mobile.Views;

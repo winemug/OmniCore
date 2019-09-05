@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OmniCore.Impl.Eros.Requests;
 using OmniCore.Model;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;

@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Impl.Eros.Requests;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using SQLite;
 
 namespace OmniCore.Impl.Eros
 {
     public class ErosPod : IPod
     {
+        [PrimaryKey]
         public Guid Id { get; set; }
+
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset Updated { get; set; }
         public string[] ProviderSpecificRadioIds { get; set; }
@@ -60,9 +62,12 @@ namespace OmniCore.Impl.Eros
         public IReminderConfiguration[] Reminders { get; set; }
         public decimal? TempBasalDurationInHours { get; set; }
 
-        public async Task<IPodRequestPair> CreatePairRequest(uint radioAddress)
+        public async Task<IPodRequest> CreatePairRequest(uint radioAddress)
         {
-            return new ErosRequestPair() { PodId = this.Id, RadioAddress = radioAddress };
+            return new ErosRequest()
+            {
+                PodId = this.Id,
+            };
         }
 
         public async Task<IPodResult> QueueRequest(IPodRequest request)

@@ -8,23 +8,26 @@ using Newtonsoft.Json.Converters;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
+using SQLite;
 
-namespace OmniCore.Impl.Eros.Requests
+namespace OmniCore.Impl.Eros
 {
-    public abstract class ErosRequest : IPodRequest, IDisposable
+    public class ErosRequest : IPodRequest, IDisposable
     {
         private readonly CancellationTokenSource _cancellationSource;
         private bool _executing = false;
         private readonly TaskCompletionSource<IPodResult> _resultSource;
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public abstract RequestType PodRequestType { get; }
-
+        public RequestType RequestType { get; set; }
+        [PrimaryKey]
+        public Guid Id { get; set; }
         public Guid PodId { get; set; }
+        public DateTimeOffset Created { get; set; }
 
-        public Guid RequestId { get; set; }
+        public string Parameters { get; set; }
 
-        protected ErosRequest()
+        public ErosRequest()
         {
             _cancellationSource = new CancellationTokenSource();
             _resultSource = new TaskCompletionSource<IPodResult>();
@@ -45,8 +48,6 @@ namespace OmniCore.Impl.Eros.Requests
             }
             return await GetResult(pod, radio, execute);
         }
-
-        protected abstract Task<IPodResult> OnExecute(IPod pod, IRadio radio, CancellationToken cancellationToken);
 
         public async Task<IPodResult> Cancel()
         {
@@ -91,16 +92,14 @@ namespace OmniCore.Impl.Eros.Requests
             }
         }
 
-        public abstract IList<IPodRequest> Enlist(IList<IPodRequest> pendingRequests);
+        private async Task<IPodResult> OnExecute(IPod pod, IRadio radio, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {
             _cancellationSource?.Dispose();
-        }
-
-        public string ToJson()
-        {
-            return JsonConvert.SerializeObject(this);
         }
     }
 }
