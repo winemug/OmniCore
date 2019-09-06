@@ -7,11 +7,9 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodRequest
+    public interface IPodRequest<T> : IEntity where T : IPod, new()
     {
-        Guid Id { get; }
-        Guid PodId { get; }
-        DateTimeOffset Created { get; }
+        T Pod { get; }
         RequestType RequestType { get; }
         IPodRequestParameters Parameters { get; }
     }

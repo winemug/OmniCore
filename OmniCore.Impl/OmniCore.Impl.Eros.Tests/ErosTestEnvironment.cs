@@ -25,7 +25,7 @@ namespace OmniCore.Impl.Eros.Tests
             var mock = new Mock<IPodRepository<ErosPod>>();
             mock.Setup(x => x.GetActivePods())
                 .ReturnsAsync(pods);
-            mock.Setup(x => x.SavePod(It.IsAny<ErosPod>()));
+            mock.Setup(x => x.CreateOrUpdate(It.IsAny<ErosPod>()));
 
             container.RegisterInstance<IPodRepository<ErosPod>>(mock.Object) ;
         }

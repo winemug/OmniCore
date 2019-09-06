@@ -9,7 +9,7 @@ using SQLite;
 
 namespace OmniCore.Mobile.Repositories
 {
-    public class ErosPodRepository : SqliteRepository, IPodRepository<ErosPod>
+    public class ErosPodRepository : SqliteRepository<ErosPod>, IPodRepository<ErosPod>
     {
         public async Task<IList<ErosPod>> GetActivePods()
         {
@@ -18,29 +18,6 @@ namespace OmniCore.Mobile.Repositories
                 .Where(x => !x.Archived)
                 .OrderByDescending(x => x.Created)
                 .ToListAsync();
-        }
-
-        public async Task SavePod(ErosPod pod)
-        {
-            var c = await GetConnection();
-            if (pod.Id == Guid.Empty)
-            {
-                pod.Id = Guid.NewGuid();
-                pod.Created = DateTimeOffset.UtcNow;
-                pod.Updated = pod.Created;
-            }
-            else
-            {
-                pod.Updated = DateTimeOffset.UtcNow;
-            }
-            await c.InsertOrReplaceAsync(pod);
-        }
-
-        protected override async Task MigrateRepository(SQLiteAsyncConnection connection)
-        {
-            await connection.CreateTableAsync<ErosPod>();
-
-            await base.MigrateRepository(connection);
         }
     }
 }

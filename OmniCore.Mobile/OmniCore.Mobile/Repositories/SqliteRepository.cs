@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Mobile.Repositories
 {
-    public class SqliteRepository : IRepository
+    public class SqliteRepository<T> : IRepository<T> where T : IEntity, new()
     {
         private SQLiteAsyncConnection _connection;
 
@@ -51,6 +51,33 @@ namespace OmniCore.Mobile.Repositories
 
         protected virtual async Task MigrateRepository(SQLiteAsyncConnection connection)
         {
+            await connection.CreateTableAsync<T>();
+        }
+
+        public async Task<T> CreateOrUpdate(T entity)
+        {
+            await Initialize();
+            var dt = DateTimeOffset.UtcNow;
+            if (entity.Id == Guid.Empty)
+            {
+                entity.Id = Guid.NewGuid();
+                entity.Created = dt;
+            }
+            entity.Updated = dt;
+            await _connection.InsertOrReplaceAsync(entity);
+            return entity;
+        }
+
+        public async Task<T> Read(Guid entityId)
+        {
+            await Initialize();
+            return await _connection.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
+        }
+
+        public async Task Delete(Guid entityId)
+        {
+            await Initialize();
+            await _connection.DeleteAsync<T>(entityId);
         }
     }
 }

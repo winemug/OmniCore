@@ -61,30 +61,5 @@ namespace OmniCore.Impl.Eros
         public IBasalSchedule BasalSchedule { get; set; }
         public IReminderConfiguration[] Reminders { get; set; }
         public decimal? TempBasalDurationInHours { get; set; }
-
-        public async Task<IPodRequest> CreatePairRequest(uint radioAddress)
-        {
-            return new ErosRequest()
-            {
-                PodId = this.Id,
-                Parameters = new ErosRequestParametersPair() { RadioAddress = radioAddress }
-            };
-        }
-
-        public async Task<IPodResult> QueueRequest(IPodRequest request)
-        {
-            try
-            {
-                return new ErosPodResult(ResultType.OK);
-            }
-            catch(OperationCanceledException oce)
-            {
-                return new ErosPodResult(ResultType.Canceled, oce);
-            }
-            catch (Exception e)
-            {
-                return new ErosPodResult(ResultType.Error, e);
-            }
-        }
     }
 }

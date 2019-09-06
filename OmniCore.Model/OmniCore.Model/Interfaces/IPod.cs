@@ -4,11 +4,8 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPod
+    public interface IPod : IEntity
     {
-        Guid Id { get; set; }
-        DateTimeOffset Created { get; set; }
-        DateTimeOffset Updated { get; set; }
         bool Archived { get; set; }
         string[] ProviderSpecificRadioIds { get; set; }
 
@@ -61,7 +58,5 @@ namespace OmniCore.Model.Interfaces
 
         IBasalSchedule BasalSchedule { get; set; }
         IReminderConfiguration[] Reminders { get; set; }
-
-        Task<IPodRequest> CreatePairRequest(uint radioAddress);
     }
 }

@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodRequestRepository<T> : IRepository where T : IPodRequest
+    public interface IPodRequestRepository<T> : IRepository<T> where T : IEntity, new()
     {
-        Task SaveRequest(T request);
-        Task DeleteRequest(T request);
         Task<IList<T>> GetRequests(Guid podId);
     }
 }

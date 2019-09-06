@@ -7,9 +7,8 @@ using Plugin.BluetoothLE;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodRepository<T> : IRepository where T : IPod, new()
+    public interface IPodRepository<T> : IRepository<T> where T : IPod, new()
     {
         Task<IList<T>> GetActivePods();
-        Task SavePod(T pod);
     }
 }

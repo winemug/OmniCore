@@ -6,9 +6,9 @@ using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Impl.Eros
 {
-    public class ErosPodResult : IPodResult
+    public class ErosResult : IPodResult<ErosPod>
     {
-        public ErosPodResult(ResultType resultType, Exception exception = null)
+        public ErosResult(ResultType resultType, Exception exception = null)
         {
             ResultType = resultType;
             Exception = exception;

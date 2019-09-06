@@ -15,30 +15,30 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Android
 {
-    public class OmniCoreEvents : IAppEventSubscriber, IAppEventPublisher
-    {
+    //public class OmniCoreEvents : IAppEventSubscriber, IAppEventPublisher
+    //{
 
-        public const string PodChanged = "PodsChanged";
-        public const string PodStatusUpdated = "PodStatusUpdated";
-        public const string NewResultReceived = "NewResultReceived";
-        public const string AppResuming = "AppResuming";
-        public const string AppSleeping = "AppSleeping";
-        public const string ConversationStarted = "ConversationStarted";
-        public const string ConversationEnded = "ConversationEnded";
+    //    public const string PodChanged = "PodsChanged";
+    //    public const string PodStatusUpdated = "PodStatusUpdated";
+    //    public const string NewResultReceived = "NewResultReceived";
+    //    public const string AppResuming = "AppResuming";
+    //    public const string AppSleeping = "AppSleeping";
+    //    public const string ConversationStarted = "ConversationStarted";
+    //    public const string ConversationEnded = "ConversationEnded";
 
-        public void RaisePodChanged<T>(IPodProvider<T> source) where T : IPod, new()
-        {
-            MessagingCenter.Send(source, PodChanged);
-        }
+    //    public void RaisePodChanged<T>(IPodProvider<T,U,V> source) where T : IPod, new()
+    //    {
+    //        MessagingCenter.Send(source, PodChanged);
+    //    }
 
-        public void OnPodChanged<T>(object subscriber, Action<IPodProvider<T>> callback) where T : IPod, new()
-        {
-            MessagingCenter.Subscribe<IPodProvider<T>>(subscriber, PodChanged, callback);
-        }
+    //    public void OnPodChanged<T>(object subscriber, Action<IPodProvider<T>> callback) where T : IPod, new()
+    //    {
+    //        MessagingCenter.Subscribe<IPodProvider<T>>(subscriber, PodChanged, callback);
+    //    }
 
-        public void OnPodChanged<T>(object subscriber) where T : IPod, new()
-        {
-            MessagingCenter.Unsubscribe<IPodProvider<T>>(subscriber, PodChanged);
-        }
-    }
+    //    public void OnPodChanged<T>(object subscriber) where T : IPod, new()
+    //    {
+    //        MessagingCenter.Unsubscribe<IPodProvider<T>>(subscriber, PodChanged);
+    //    }
+    //}
 }
