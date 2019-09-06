@@ -56,7 +56,7 @@ namespace OmniCore.Mobile.Repositories
 
         public async Task<T> CreateOrUpdate(T entity)
         {
-            await Initialize();
+            var c = await GetConnection();
             var dt = DateTimeOffset.UtcNow;
             if (entity.Id == Guid.Empty)
             {
@@ -64,20 +64,20 @@ namespace OmniCore.Mobile.Repositories
                 entity.Created = dt;
             }
             entity.Updated = dt;
-            await _connection.InsertOrReplaceAsync(entity);
+            await c.InsertOrReplaceAsync(entity);
             return entity;
         }
 
         public async Task<T> Read(Guid entityId)
         {
-            await Initialize();
-            return await _connection.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
+            var c = await GetConnection();
+            return await c.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
         }
 
         public async Task Delete(Guid entityId)
         {
-            await Initialize();
-            await _connection.DeleteAsync<T>(entityId);
+            var c = await GetConnection();
+            await c.DeleteAsync<T>(entityId);
         }
     }
 }
