@@ -66,18 +66,10 @@ namespace OmniCore.Impl.Eros
             return pod;
         }
 
-        public async Task<ErosPod> Register(uint lot, uint serial, uint radioAddress, IEnumerable<IRadio> radios)
+        public async Task<ErosPod> Register(ErosPod pod, IEnumerable<IRadio> radios)
         {
-            var pod = new ErosPod
-            {
-                Id = Guid.NewGuid(),
-                Lot = lot,
-                Serial = serial,
-                RadioAddress = radioAddress,
-                ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
-            };
-            await _podRepository.CreateOrUpdate(pod);
-            return pod;
+            pod.ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray();
+            return await _podRepository.CreateOrUpdate(pod);
         }
 
         public IObservable<IRadio> ListAllRadios()
@@ -115,19 +107,38 @@ namespace OmniCore.Impl.Eros
             return address;
         }
 
-        public async Task QueueRequest(ErosRequest request)
+        private ErosRequestProcessor GetProcessor(ErosPod pod)
         {
-            try
+            lock(_requestProcessors)
             {
-                lock(_requestProcessors)
+                if (!_requestProcessors.ContainsKey(pod.Id))
                 {
-                    if (!_requestProcessors.ContainsKey(request.Pod.Id))
-                    {
-                        _requestProcessors.Add(request.Pod.Id, new ErosRequestProcessor(request.Pod.Id));
-                    }
+                    _requestProcessors.Add(pod.Id, new ErosRequestProcessor(pod, _requestRepository));
                 }
-                await _requestRepository.CreateOrUpdate(request);
-                await TriggerProcessing(request.Pod.Id);
+                return _requestProcessors[pod.Id];
+            }
+        }
+
+        public async Task QueueRequest(IPodRequest<ErosPod> request)
+        {
+            try
+            {
+                await GetProcessor(request.Pod).QueueRequest((ErosRequest)request);
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<IPodResult<ErosPod>> ExecuteRequest(IPodRequest<ErosPod> request)
+        {
+            try
+            {
+                var processor = GetProcessor(request.Pod);
+                await processor.QueueRequest((ErosRequest)request);
+                return await processor.GetResult((ErosRequest)request, 0);
             }
             catch (Exception e)
             {
@@ -135,82 +146,38 @@ namespace OmniCore.Impl.Eros
             }
         }
 
-        public async Task<ErosResult> ExecuteRequest(ErosRequest request)
+        public async Task<IPodResult<ErosPod>> GetResult(IPodRequest<ErosPod> request, int timeout)
         {
-            await QueueRequest(request);
-            return await GetResult(request, 0);
+                var processor = GetProcessor(request.Pod);
+                return await processor.GetResult((ErosRequest)request, 0);
         }
 
-        public async Task<ErosResult> GetResult(ErosRequest request, int timeout)
+        public async Task<bool> CancelRequest(IPodRequest<ErosPod> request)
         {
-            try
+                var processor = GetProcessor(request.Pod);
+                return await processor.CancelRequest((ErosRequest)request);
+        }
+
+        public async Task<IList<IPodRequest<ErosPod>>> GetPendingRequests(ErosPod pod)
+        {
+                var processor = GetProcessor(pod);
+                return (IList<IPodRequest<ErosPod>>)await processor.GetPendingRequests();
+        }
+
+        public async Task<IList<IPodRequest<ErosPod>>> GetPendingRequests()
+        {
+            var processors = new List<ErosRequestProcessor>();
+            var list = new List<IPodRequest<ErosPod>>();
+            lock(_requestProcessors)
             {
-                return new ErosResult(ResultType.OK);
+                foreach(var processor in _requestProcessors.Values)
+                    processors.Add(processor);
             }
-            catch (OperationCanceledException oce)
-            {
-                return new ErosResult(ResultType.Canceled, oce);
-            }
-            catch (Exception e)
-            {
-                return new ErosResult(ResultType.Error, e);
-            }
-        }
 
-        public async Task<ErosResult> CancelRequest(ErosRequest request)
-        {
-            throw new NotImplementedException();
-        }
+            foreach(var processor in processors)
+                list.AddRange((IList<IPodRequest<ErosPod>>)await processor.GetPendingRequests());
 
-        public async Task CancelRequests(ErosPod pod)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task CancelAllRequests()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task TriggerProcessing(Guid podId)
-        {
-        }
-
-        private void ProcessPodQueue(Guid podId)
-        {
-            try
-            {
-
-            }
-            catch(Exception e)
-            {
-                throw;
-            }
-        }
-
-        public Task<ErosPod> Register(ErosPod pod, IEnumerable<IRadio> radios)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task QueueRequest(IPodRequest<ErosPod> request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodResult<ErosPod>> ExecuteRequest(IPodRequest<ErosPod> request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodResult<ErosPod>> GetResult(IPodRequest<ErosPod> request, int timeout)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodResult<ErosPod>> CancelRequest(IPodRequest<ErosPod> request)
-        {
-            throw new NotImplementedException();
+            return list;
         }
     }
 }

@@ -16,9 +16,9 @@ namespace OmniCore.Model.Interfaces
         Task QueueRequest(IPodRequest<T> request);
         Task<IPodResult<T>> ExecuteRequest(IPodRequest<T> request);
         Task<IPodResult<T>> GetResult(IPodRequest<T> request, int timeout);
-        Task<IPodResult<T>> CancelRequest(IPodRequest<T> request);
-        Task CancelRequests(T pod);
-        Task CancelAllRequests();
+        Task<bool> CancelRequest(IPodRequest<T> request);
+        Task<IList<IPodRequest<T>>> GetPendingRequests(T pod);
+        Task<IList<IPodRequest<T>>> GetPendingRequests();
         IObservable<IRadio> ListAllRadios();
     }
 }
