@@ -5,7 +5,7 @@ using OmniCore.Model.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodResult<T> where T : IPod, new()
+    public interface IPodResult<T> : IEntity where T : IPod, new()
     {
         ResultType ResultType { get; }
         Exception Exception { get; }

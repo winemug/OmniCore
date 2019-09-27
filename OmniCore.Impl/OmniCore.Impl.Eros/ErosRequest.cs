@@ -20,6 +20,8 @@ namespace OmniCore.Impl.Eros
         [PrimaryKey]
         public Guid Id { get; set; }
 
+        public Guid? ResultId { get; set;}
+
         public ErosPod Pod { get; set; }
         public DateTimeOffset Updated { get; set; }
         public DateTimeOffset Created { get; set; }
@@ -34,6 +36,12 @@ namespace OmniCore.Impl.Eros
                 return Parameters?.ToJson();
             }
         }
+
+        public DateTimeOffset? StartEarliest { get; set; }
+        public DateTimeOffset? StartLatest { get; set; }
+
+        public CancellationTokenSource CancellationTokenSource { get; }
+        public TaskCompletionSource<ErosResult> ResultSource { get; }
 
         //public async Task<IPodResult> Execute(IPod pod, IRadio radio)
         //{

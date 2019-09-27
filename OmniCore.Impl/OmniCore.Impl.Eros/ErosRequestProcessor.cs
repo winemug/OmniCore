@@ -1,50 +1,60 @@
 ﻿using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace OmniCore.Impl.Eros
 {
     public class ErosRequestProcessor
     {
-        private List<ErosRequest> Request { get; }
-        public Dictionary<Guid,CancellationTokenSource> CancellationSources { get; }
-        public Dictionary<Guid, TaskCompletionSource<ErosResult>> ResultSources { get; }
+        private IPodRequestRepository<ErosRequest> RequestRepository { get; set;}
+        private IPodResultRepository<ErosResult> ResultRepository { get; set;}
+        private ErosPod Pod { get; set; }
 
-        private IPodRequestRepository<ErosRequest> RequestRepository;
-        private ErosPod Pod;
+        private ConcurrentQueue<ErosRequest> RequestQueue {get; set;}
 
-        public ErosRequestProcessor(ErosPod pod, IPodRequestRepository<ErosRequest> requestRepository)
+        private Task RequestTask {get; set;}
+
+        public async Task Initialize(ErosPod pod, IPodRequestRepository<ErosRequest> requestRepository,
+            IPodResultRepository<ErosResult> resultRepository)
         {
             RequestRepository = requestRepository;
+            ResultRepository = resultRepository;
             Pod = pod;
-            CancellationSources = new Dictionary<Guid, CancellationTokenSource>();
-            ResultSources = new Dictionary<Guid, TaskCompletionSource<ErosResult>>();
+
+            var pendingRequests = await GetPendingRequests();
+            foreach(var pendingRequest in pendingRequests)
+            {
+                await QueueRequest(pendingRequest);
+            }
         }
+
 
         public async Task QueueRequest(ErosRequest request)
         {
             request = await RequestRepository.CreateOrUpdate(request);
-            CancellationSources.Add(request.Id, new CancellationTokenSource());
-            ResultSources.Add(request.Id, new TaskCompletionSource<ErosResult>());
+            RequestQueue.Enqueue(request);
+            ExecuteNext();
         }
 
         public async Task<ErosResult> GetResult(ErosRequest request, int timeout)
         {
             try
             {
-                return new ErosResult(ResultType.OK);
+                return new ErosResult() { ResultType = ResultType.OK };
             }
             catch (OperationCanceledException oce)
             {
-                return new ErosResult(ResultType.Canceled, oce);
+                return new ErosResult() { ResultType = ResultType.Canceled, Exception = oce };
             }
             catch (Exception e)
             {
-                return new ErosResult(ResultType.Error, e);
+                return new ErosResult() { ResultType = ResultType.Error, Exception = e };
             }
         }
 
@@ -55,7 +65,33 @@ namespace OmniCore.Impl.Eros
 
         public async Task<List<ErosRequest>> GetPendingRequests()
         {
-            throw new NotImplementedException();
+            return (await RequestRepository.GetPendingRequests(Pod.Id))
+                .OrderBy(r => r.StartEarliest ?? r.Created).ToList();
         }
+
+        private void ExecuteNext()
+        {
+            if (RequestTask == null)
+            {
+
+            }
+        }
+
+        private async Task ProcessRequest(ErosRequest request)
+        {
+            try
+            {
+                return new ErosResult() { ResultType = ResultType.OK };
+            }
+            catch (OperationCanceledException oce)
+            {
+                return new ErosResult() { ResultType = ResultType.Canceled, Exception = oce };
+            }
+            catch (Exception e)
+            {
+                return new ErosResult() { ResultType = ResultType.Error, Exception = e };
+            }
+        }
+
     }
 }

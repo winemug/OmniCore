@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
+using SQLite;
 
 namespace OmniCore.Impl.Eros
 {
     public class ErosResult : IPodResult<ErosPod>
     {
-        public ErosResult(ResultType resultType, Exception exception = null)
-        {
-            ResultType = resultType;
-            Exception = exception;
-        }
+        public Guid Id { get; set; }
+        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset Updated { get; set; }
 
-        public ResultType ResultType { get; }
-        public Exception Exception { get; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ResultType ResultType { get; set; }
+
+        [Ignore]
+        public Exception Exception { get; set; }
+
     }
 }

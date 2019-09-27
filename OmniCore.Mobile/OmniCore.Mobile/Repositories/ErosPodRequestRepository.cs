@@ -9,9 +9,13 @@ namespace OmniCore.Mobile.Repositories
 {
     public class ErosPodRequestRepository : SqliteRepository<ErosRequest>, IPodRequestRepository<ErosRequest>
     {
-        public async Task<IList<ErosRequest>> GetRequests(Guid podId)
+        public async Task<IList<ErosRequest>> GetPendingRequests(Guid podId)
         {
-            throw new NotImplementedException();
+            var c = await GetConnection();
+            return await c.Table<ErosRequest>()
+                .Where(r => !r.ResultId.HasValue)
+                .OrderBy(r => r.Created)
+                .ToListAsync();            
         }
     }
 }
