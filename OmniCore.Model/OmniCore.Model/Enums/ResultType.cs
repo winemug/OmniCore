@@ -8,6 +8,7 @@ namespace OmniCore.Model.Enums
     {
         OK,
         Canceled,
+        Expired,
         Error
     }
 }

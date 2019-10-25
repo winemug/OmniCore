@@ -17,6 +17,9 @@ namespace OmniCore.Impl.Eros
         [JsonConverter(typeof(StringEnumConverter))]
         public RequestType RequestType { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public RequestState RequestStatus { get; set; }
+
         [PrimaryKey]
         public Guid Id { get; set; }
 
@@ -42,6 +45,7 @@ namespace OmniCore.Impl.Eros
 
         public CancellationTokenSource CancellationTokenSource { get; }
         public TaskCompletionSource<ErosResult> ResultSource { get; }
+        public Task RequestTask {get; set;}
 
         //public async Task<IPodResult> Execute(IPod pod, IRadio radio)
         //{

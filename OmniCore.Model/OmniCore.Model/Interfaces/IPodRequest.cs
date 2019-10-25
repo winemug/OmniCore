@@ -11,6 +11,8 @@ namespace OmniCore.Model.Interfaces
     {
         T Pod { get; }
         RequestType RequestType { get; }
+
+        RequestState RequestStatus { get; }
         IPodRequestParameters Parameters { get; }
         DateTimeOffset? StartEarliest { get; set; }
         DateTimeOffset? StartLatest { get; set; }

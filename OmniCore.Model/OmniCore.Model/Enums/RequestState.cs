@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,9 +7,15 @@ namespace OmniCore.Model.Enums
     public enum RequestState
     {
         Queued,
-        Running,
+        Scheduled,
+
+        Initializing,
+        Executing,
+        Cancelling,
+
+        Expired,
+        Executed,
         Canceled,
-        Failed,
-        Succeeded
+        Failed
     }
 }

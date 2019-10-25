@@ -1,4 +1,5 @@
 ﻿using OmniCore.Impl.Eros;
+using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace OmniCore.Mobile.Repositories
         {
             var c = await GetConnection();
             return await c.Table<ErosRequest>()
-                .Where(r => !r.ResultId.HasValue)
+                .Where(r => r.RequestStatus == RequestState.Scheduled || r.RequestStatus == RequestState.Queued)
                 .OrderBy(r => r.Created)
                 .ToListAsync();            
         }

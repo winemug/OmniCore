@@ -20,17 +20,20 @@ namespace OmniCore.Impl.Eros
         private IPodRepository<ErosPod> _podRepository;
         private IRadioAdapter _radioAdapter;
         private IPodRequestRepository<ErosRequest> _requestRepository;
+        private IPodResultRepository<ErosResult> _resultRepository;
         private Dictionary<Guid, ErosRequestProcessor> _requestProcessors;
 
         public ErosPodProvider(IRadioAdapter radioAdapter,
             IRadioProvider[] radioProviders, 
             IPodRepository<ErosPod> podRepository,
-            IPodRequestRepository<ErosRequest> requestRepository)
+            IPodRequestRepository<ErosRequest> requestRepository,
+            IPodResultRepository<ErosResult> resultRepository)
         {
             _radioProviders = radioProviders;
             _radioAdapter = radioAdapter;
             _podRepository = podRepository;
             _requestRepository = requestRepository;
+            _resultRepository = resultRepository;
 
             _requestProcessors = new Dictionary<Guid, ErosRequestProcessor>();
         }
@@ -111,7 +114,7 @@ namespace OmniCore.Impl.Eros
             if (!_requestProcessors.ContainsKey(pod.Id))
             {
                 var erp = new ErosRequestProcessor();
-                await erp.Initialize(pod, _requestRepository);
+                await erp.Initialize(pod, _requestRepository, _resultRepository);
                 _requestProcessors.Add(pod.Id, erp);
             }
             return _requestProcessors[pod.Id];
