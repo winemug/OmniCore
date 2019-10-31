@@ -30,14 +30,14 @@ namespace OmniCore.Impl.Eros
             ActiveRequest = null;
 
             var pendingRequests = await GetPendingRequests();
-            foreach(var pendingRequest in pendingRequests)
+            foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
             {
                 await QueueRequest(pendingRequest);
             }
         }
 
 
-        public async Task QueueRequest(ErosRequest newRequest = null)
+        public async Task QueueRequest(ErosRequest newRequest)
         {
             await queueSemaphore.WaitAsync();
             try
@@ -121,11 +121,6 @@ namespace OmniCore.Impl.Eros
         public async Task<List<ErosRequest>> GetPendingRequests()
         {
             return (await RequestRepository.GetPendingRequests(Pod.Id)).ToList();
-        }
-
-        private async Task AddToQueue(ErosRequest request)
-        {
-
         }
 
         private async Task<ErosRequest> GetNextRequest()
