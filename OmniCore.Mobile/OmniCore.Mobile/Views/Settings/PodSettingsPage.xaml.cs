@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Settings
+namespace OmniCore.Client.Views.Settings
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class PodSettingsPage : ContentPage

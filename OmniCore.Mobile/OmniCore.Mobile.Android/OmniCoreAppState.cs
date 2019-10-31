@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text;
-using OmniCore.Mobile.Base.Interfaces;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Android

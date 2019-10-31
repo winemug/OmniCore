@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;
 
-namespace OmniCore.Mobile.Repositories
+namespace OmniCore.Client.Repositories
 {
     public class ErosPodRepository : SqliteRepository<ErosPod>, IPodRepository<ErosPod>
     {

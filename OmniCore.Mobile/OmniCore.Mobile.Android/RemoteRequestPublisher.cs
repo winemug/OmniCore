@@ -9,13 +9,12 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Base.Interfaces;
 using Xamarin.Forms;
 using OmniCore.Model.Utilities;
-using OmniCore.Mobile.Base;
 using Microsoft.AppCenter.Crashes;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Client.Interfaces;
 using Unity;
+using OmniCore.Client.Interfaces;
 
 namespace OmniCore.Mobile.Android
 {

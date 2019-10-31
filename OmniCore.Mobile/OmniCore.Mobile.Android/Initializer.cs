@@ -8,8 +8,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Base.Interfaces;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Client.Interfaces;
 using Unity;
 
 namespace OmniCore.Mobile.Android
@@ -23,7 +22,7 @@ namespace OmniCore.Mobile.Android
             container.RegisterSingleton<IOmniCoreLogger, OmniCoreLogger>();
             container.RegisterSingleton<IAppState, OmniCoreAppState>();
 
-            OmniCore.Mobile.Initializer.RegisterTypes(container);
+            OmniCore.Client.Initializer.RegisterTypes(container);
         }
     }
 }

@@ -7,10 +7,11 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Mobile.Services;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 
-namespace OmniCore.Mobile.Services
+namespace OmniCore.Client.Services
 {
     public class CrossBleRadioAdapter : IRadioAdapter
     {

@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     public class FlyoutViewModel : BaseViewModel
     {

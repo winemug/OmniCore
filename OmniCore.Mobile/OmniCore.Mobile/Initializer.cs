@@ -1,9 +1,9 @@
 ﻿using OmniCore.Impl.Eros;
-using OmniCore.Mobile.Interfaces;
-using OmniCore.Mobile.Repositories;
-using OmniCore.Mobile.Services;
-using OmniCore.Mobile.ViewModels;
-using OmniCore.Mobile.Views;
+using OmniCore.Client.Interfaces;
+using OmniCore.Client.Repositories;
+using OmniCore.Client.Services;
+using OmniCore.Client.ViewModels;
+using OmniCore.Client.Views;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity;
 
-namespace OmniCore.Mobile
+namespace OmniCore.Client
 {
     public static class Initializer
     {

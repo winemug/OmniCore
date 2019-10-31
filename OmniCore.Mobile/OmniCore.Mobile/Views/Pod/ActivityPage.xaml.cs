@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Mobile.ViewModels.Pod;
+using OmniCore.Client.ViewModels.Pod;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Pod
+namespace OmniCore.Client.Views.Pod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ActivityPage : ContentPage

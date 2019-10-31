@@ -1,4 +1,4 @@
-﻿//using OmniCore.Mobile.Base.Interfaces;
+﻿//using OmniCore.Client.Base.Interfaces;
 //using OmniCore.Model.Enums;
 //using System;
 //using System.Collections.Generic;
@@ -10,10 +10,10 @@
 //using OmniCore.Model.Interfaces;
 //using Xamarin.Forms;
 //using Newtonsoft.Json;
-//using OmniCore.Mobile.Base;
+//using OmniCore.Client.Base;
 //using Microsoft.AppCenter.Crashes;
 
-//namespace OmniCore.Mobile.Services
+//namespace OmniCore.Client.Services
 //{
 //    public class RemoteRequestHandler : IRemoteRequestSubscriber
 //    {

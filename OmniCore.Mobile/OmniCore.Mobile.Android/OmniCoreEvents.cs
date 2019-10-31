@@ -9,8 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Base.Interfaces;
-using OmniCore.Model.Interfaces;
+using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Android

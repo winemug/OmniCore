@@ -1,7 +1,5 @@
 ﻿using Microsoft.AppCenter.Crashes;
-using OmniCore.Mobile.Base;
-using OmniCore.Mobile.Base.Interfaces;
-using OmniCore.Mobile.ViewModels.Pod;
+using OmniCore.Client.ViewModels.Pod;
 using OmniCore.Model;
 using OmniCore.Model.Interfaces;
 using Plugin.Permissions;
@@ -17,7 +15,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Pod
+namespace OmniCore.Client.Views.Pod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     [Fody.ConfigureAwait(true)]

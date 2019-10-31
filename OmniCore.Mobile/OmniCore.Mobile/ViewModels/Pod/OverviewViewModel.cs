@@ -1,4 +1,4 @@
-﻿using OmniCore.Mobile.Base;
+﻿using OmniCore.Client.Constants;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using System;
@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Pod
+namespace OmniCore.Client.ViewModels.Pod
 {
     public class OverviewViewModel : PageViewModel
     {

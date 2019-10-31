@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Mobile.Services
+namespace OmniCore.Client.Services
 {
     public enum HistoricalResultType
     {

@@ -12,10 +12,10 @@ using Plugin.BluetoothLE;
 using System.Runtime.InteropServices;
 using System.Security;
 using Xamarin.Forms;
-using OmniCore.Mobile.Base.Interfaces;
+using OmniCore.Client;
+using OmniCore.Client.Interfaces;
 using System.IO;
 using Environment = System.Environment;
-using OmniCore.Mobile.Base;
 using Unity;
 
 namespace OmniCore.Mobile.Android

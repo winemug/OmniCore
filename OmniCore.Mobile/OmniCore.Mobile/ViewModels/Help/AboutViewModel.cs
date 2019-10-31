@@ -1,12 +1,11 @@
-﻿using OmniCore.Mobile.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Help
+namespace OmniCore.Client.ViewModels.Help
 {
     public class AboutViewModel : PageViewModel
     {

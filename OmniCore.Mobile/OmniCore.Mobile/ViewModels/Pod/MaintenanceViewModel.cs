@@ -1,5 +1,4 @@
-﻿using OmniCore.Mobile.Base;
-using OmniCore.Model.Enums;
+﻿using OmniCore.Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Pod
+namespace OmniCore.Client.ViewModels.Pod
 {
     public class MaintenanceViewModel : PageViewModel
     {

@@ -4,7 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="OmniCore.Mobile.Views.Help.AboutPage">
+             x:Class="OmniCore.Client.Views.Help.AboutPage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" Padding="16">
             <Label HorizontalOptions="Center" Text="OmniCore" FontSize="Large"/>

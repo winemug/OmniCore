@@ -1,4 +1,4 @@
-﻿using OmniCore.Mobile.Base;
+﻿using OmniCore.Client.Constants;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     [Fody.ConfigureAwait(true)]
     public abstract class PageViewModel : BaseViewModel

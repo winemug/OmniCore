@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Mobile.Views.Pod;
+using OmniCore.Client.Views.Pod;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     public class TabViewModel : BaseViewModel
     {

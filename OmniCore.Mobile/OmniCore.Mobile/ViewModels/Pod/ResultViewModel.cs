@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using OmniCore.Mobile.Base;
 using OmniCore.Model.Enums;
 using OmniCore.Model.Interfaces;
 using System;
@@ -9,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Pod
+namespace OmniCore.Client.ViewModels.Pod
 {
     public class ResultViewModel : BaseViewModel
     {

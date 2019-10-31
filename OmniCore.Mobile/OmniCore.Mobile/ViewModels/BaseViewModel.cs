@@ -1,5 +1,4 @@
-﻿using OmniCore.Mobile.Base;
-using OmniCore.Model.Interfaces;
+﻿using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enums;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     public abstract class BaseViewModel : PropertyChangedImpl, IDisposable
     {

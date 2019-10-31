@@ -1,5 +1,4 @@
-﻿using OmniCore.Mobile.Base;
-using OmniCore.Mobile.ViewModels.Settings;
+﻿using OmniCore.Client.ViewModels.Settings;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Settings
+namespace OmniCore.Client.Views.Settings
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     [Fody.ConfigureAwait(true)]

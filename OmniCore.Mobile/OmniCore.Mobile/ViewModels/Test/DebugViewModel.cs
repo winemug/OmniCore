@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Test
+namespace OmniCore.Client.ViewModels.Test
 {
     public class DebugViewModel : PageViewModel
     {

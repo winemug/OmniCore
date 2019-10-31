@@ -1,6 +1,5 @@
 ﻿using Microsoft.AppCenter.Crashes;
-using OmniCore.Mobile.Base;
-using OmniCore.Mobile.ViewModels.Test;
+using OmniCore.Client.ViewModels.Test;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using System;
@@ -10,11 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Mobile.ViewModels.Pod;
+using OmniCore.Client.ViewModels.Pod;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Test
+namespace OmniCore.Client.Views.Test
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DebugPage : ContentPage

@@ -1,10 +1,10 @@
-﻿using OmniCore.Mobile.Interfaces;
+﻿using OmniCore.Client.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity;
 
-namespace OmniCore.Mobile
+namespace OmniCore.Client
 {
     public class ViewViewModel<V, VM> : IViewViewModel
                                         where V : IView where VM : IViewModel

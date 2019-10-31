@@ -1,5 +1,4 @@
-﻿using OmniCore.Mobile.Base;
-using OmniCore.Mobile.Services;
+﻿using OmniCore.Client.Services;
 using OmniCore.Impl.Eros;
 using OmniCore.Model.Interfaces;
 using System.Threading;
@@ -10,10 +9,11 @@ using Microsoft.AppCenter.Crashes;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Utilities;
 using Unity;
-using OmniCore.Mobile.Interfaces;
-using OmniCore.Mobile.Views;
+using OmniCore.Client.Interfaces;
+using OmniCore.Client.Views;
+using OmniCore.Client.Constants;
 
-namespace OmniCore.Mobile
+namespace OmniCore.Client
 {
     public partial class App : Application
     {

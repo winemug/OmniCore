@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Mobile.Repositories
+namespace OmniCore.Client.Repositories
 {
     class ErosPodResultRepository : SqliteRepository<ErosResult>, IPodResultRepository<ErosResult>
     {

@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Mobile.Repositories
+namespace OmniCore.Client.Repositories
 {
     public class SqliteRepository<T> : IRepository<T> where T : IEntity, new()
     {

@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Pod
+namespace OmniCore.Client.ViewModels.Pod
 {
     public class ActivityViewModel : PageViewModel
     {

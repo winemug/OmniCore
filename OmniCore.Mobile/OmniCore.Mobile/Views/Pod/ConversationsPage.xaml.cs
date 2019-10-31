@@ -1,4 +1,4 @@
-﻿using OmniCore.Mobile.ViewModels.Pod;
+﻿using OmniCore.Client.ViewModels.Pod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Pod
+namespace OmniCore.Client.Views.Pod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ConversationsPage : ContentPage

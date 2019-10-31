@@ -1,4 +1,4 @@
-﻿using OmniCore.Mobile.ViewModels.Help;
+﻿using OmniCore.Client.ViewModels.Help;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Mobile.Views.Help
+namespace OmniCore.Client.Views.Help
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AboutPage : ContentPage

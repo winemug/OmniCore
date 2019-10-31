@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels.Settings
+namespace OmniCore.Client.ViewModels.Settings
 {
     public class ApplicationSettingsViewModel : PageViewModel
     {

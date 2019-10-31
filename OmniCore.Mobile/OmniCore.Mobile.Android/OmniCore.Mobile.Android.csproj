@@ -142,17 +142,9 @@
       <Project>{22ac504d-6b45-4fe9-97a6-e7404c15ce19}</Project>
       <Name>OmniCore.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OmniCore.Mobile.Base\OmniCore.Mobile.Base\OmniCore.Mobile.Base.csproj">
-      <Project>{03bd40c5-fab7-41e9-aef9-0d2cbda97e5b}</Project>
-      <Name>OmniCore.Mobile.Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OmniCore.Mobile.Interfaces\OmniCore.Mobile.Interfaces.csproj">
-      <Project>{17A62E4A-6396-4B4F-8FB5-EA281B34DDBD}</Project>
-      <Name>OmniCore.Mobile.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OmniCore.Mobile\OmniCore.Mobile.csproj">
-      <Project>{D7C8E79A-279A-45C9-ADE0-10F12441FB62}</Project>
-      <Name>OmniCore.Mobile</Name>
+    <ProjectReference Include="..\OmniCore.Mobile\OmniCore.Client.csproj">
+      <Project>{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}</Project>
+      <Name>OmniCore.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

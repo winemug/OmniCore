@@ -13,8 +13,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Mobile.Base.Interfaces;
-using OmniCore.Mobile.Interfaces;
+using OmniCore.Client.Interfaces;
 using OmniCore.Model.Exceptions;
 using Environment = Android.OS.Environment;
 

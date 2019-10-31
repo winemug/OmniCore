@@ -1,6 +1,6 @@
 ﻿using OmniCore.Impl.Eros;
-using OmniCore.Mobile.Interfaces;
-using OmniCore.Mobile.Services;
+using OmniCore.Client.Interfaces;
+using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     public class PodsViewModel : PageViewModel, IViewModel
     {

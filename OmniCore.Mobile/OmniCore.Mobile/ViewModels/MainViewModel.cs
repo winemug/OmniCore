@@ -1,7 +1,7 @@
-﻿using OmniCore.Mobile.Views.Help;
-using OmniCore.Mobile.Views.Pod;
-using OmniCore.Mobile.Views.Settings;
-using OmniCore.Mobile.Views.Test;
+﻿using OmniCore.Client.Views.Help;
+using OmniCore.Client.Views.Pod;
+using OmniCore.Client.Views.Settings;
+using OmniCore.Client.Views.Test;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.ViewModels
+namespace OmniCore.Client.ViewModels
 {
     public class MainViewModel : PageViewModel
     {
