@@ -44,8 +44,14 @@ namespace OmniCore.Eros
         public DateTimeOffset? StartLatest { get; set; }
 
         public CancellationTokenSource CancellationTokenSource { get; }
-        public TaskCompletionSource<ErosResult> ResultSource { get; }
+        public TaskCompletionSource<bool> ResultSource { get; }
         public Task RequestTask {get; set;}
+        public DateTimeOffset? Started { get; set; }
+        public DateTimeOffset? ResultReceived { get; set; }
+
+        public FailureType? FailureType { get; set; }
+
+        public string ExceptionText => throw new NotImplementedException();
 
         //public async Task<IPodResult> Execute(IPod pod, IRadio radio)
         //{

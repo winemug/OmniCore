@@ -11,7 +11,7 @@ namespace OmniCore.Model.Enums
 
         Initializing,
         Executing,
-        TryCancel,
+        TryCancelling,
 
         Expired,
         Executed,

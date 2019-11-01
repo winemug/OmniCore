@@ -20,20 +20,17 @@ namespace OmniCore.Eros
         private IPodRepository<ErosPod> _podRepository;
         private IRadioAdapter _radioAdapter;
         private IPodRequestRepository<ErosRequest> _requestRepository;
-        private IPodResultRepository<ErosResult> _resultRepository;
         private Dictionary<Guid, ErosRequestProcessor> _requestProcessors;
 
         public ErosPodProvider(IRadioAdapter radioAdapter,
             IRadioProvider[] radioProviders, 
             IPodRepository<ErosPod> podRepository,
-            IPodRequestRepository<ErosRequest> requestRepository,
-            IPodResultRepository<ErosResult> resultRepository)
+            IPodRequestRepository<ErosRequest> requestRepository)
         {
             _radioProviders = radioProviders;
             _radioAdapter = radioAdapter;
             _podRepository = podRepository;
             _requestRepository = requestRepository;
-            _resultRepository = resultRepository;
 
             _requestProcessors = new Dictionary<Guid, ErosRequestProcessor>();
         }
@@ -114,7 +111,7 @@ namespace OmniCore.Eros
             if (!_requestProcessors.ContainsKey(pod.Id))
             {
                 var erp = new ErosRequestProcessor();
-                await erp.Initialize(pod, _requestRepository, _resultRepository);
+                await erp.Initialize(pod, _requestRepository);
                 _requestProcessors.Add(pod.Id, erp);
             }
             return _requestProcessors[pod.Id];
@@ -134,24 +131,10 @@ namespace OmniCore.Eros
 
         }
 
-        public async Task<IPodResult<ErosPod>> ExecuteRequest(IPodRequest<ErosPod> request)
-        {
-            try
-            {
-                var processor = await GetProcessor(request.Pod);
-                await processor.QueueRequest((ErosRequest)request);
-                return await processor.GetResult((ErosRequest)request, 0);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-        }
-
-        public async Task<IPodResult<ErosPod>> GetResult(IPodRequest<ErosPod> request, int timeout)
+        public async Task<bool> WaitForResult(IPodRequest<ErosPod> request, int timeout)
         {
                 var processor = await GetProcessor(request.Pod);
-                return await processor.GetResult((ErosRequest)request, 0);
+                return await processor.WaitForResult((ErosRequest)request, 0);
         }
 
         public async Task<bool> CancelRequest(IPodRequest<ErosPod> request)
@@ -160,13 +143,13 @@ namespace OmniCore.Eros
                 return await processor.CancelRequest((ErosRequest)request);
         }
 
-        public async Task<IList<IPodRequest<ErosPod>>> GetPendingRequests(ErosPod pod)
+        public async Task<IList<IPodRequest<ErosPod>>> GetActiveRequests(ErosPod pod)
         {
                 var processor = await GetProcessor(pod);
-                return (IList<IPodRequest<ErosPod>>)await processor.GetPendingRequests();
+                return (IList<IPodRequest<ErosPod>>)await processor.GetActiveRequests();
         }
 
-        public async Task<IList<IPodRequest<ErosPod>>> GetPendingRequests()
+        public async Task<IList<IPodRequest<ErosPod>>> GetActiveRequests()
         {
             var processors = new List<ErosRequestProcessor>();
             var list = new List<IPodRequest<ErosPod>>();
@@ -177,7 +160,7 @@ namespace OmniCore.Eros
             }
 
             foreach(var processor in processors)
-                list.AddRange((IList<IPodRequest<ErosPod>>)await processor.GetPendingRequests());
+                list.AddRange((IList<IPodRequest<ErosPod>>)await processor.GetActiveRequests());
 
             return list;
         }

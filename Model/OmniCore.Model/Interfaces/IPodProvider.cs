@@ -14,11 +14,10 @@ namespace OmniCore.Model.Interfaces
         Task<T> New(IEnumerable<IRadio> radios);
         Task<T> Register(T pod, IEnumerable<IRadio> radios);
         Task QueueRequest(IPodRequest<T> request);
-        Task<IPodResult<T>> ExecuteRequest(IPodRequest<T> request);
-        Task<IPodResult<T>> GetResult(IPodRequest<T> request, int timeout);
+        Task<bool> WaitForResult(IPodRequest<T> request, int timeout);
         Task<bool> CancelRequest(IPodRequest<T> request);
-        Task<IList<IPodRequest<T>>> GetPendingRequests(T pod);
-        Task<IList<IPodRequest<T>>> GetPendingRequests();
+        Task<IList<IPodRequest<T>>> GetActiveRequests(T pod);
+        Task<IList<IPodRequest<T>>> GetActiveRequests();
         IObservable<IRadio> ListAllRadios();
     }
 }

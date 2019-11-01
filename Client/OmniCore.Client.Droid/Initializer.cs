@@ -9,6 +9,8 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Client.Interfaces;
+using OmniCore.Mobile.Droid;
+using OmniCore.Model.Interfaces;
 using Unity;
 
 namespace OmniCore.Client.Droid
@@ -21,6 +23,7 @@ namespace OmniCore.Client.Droid
             container.RegisterSingleton<IOmniCoreApplication, OmniCoreApplication>();
             container.RegisterSingleton<IOmniCoreLogger, OmniCoreLogger>();
             container.RegisterSingleton<IAppState, OmniCoreAppState>();
+            container.RegisterType<IBackgroundTask, BackgroundTask>();
 
             OmniCore.Client.Initializer.RegisterTypes(container);
         }

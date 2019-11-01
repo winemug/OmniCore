@@ -124,6 +124,7 @@
     <Compile Include="RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BackgroundTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidEnvironment Include="env.conf" />

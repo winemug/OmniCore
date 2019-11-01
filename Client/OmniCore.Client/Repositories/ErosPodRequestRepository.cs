@@ -18,7 +18,7 @@ namespace OmniCore.Client.Repositories
                 || r.RequestStatus == RequestState.Queued
                 || r.RequestStatus == RequestState.Initializing
                 || r.RequestStatus == RequestState.Executing
-                || r.RequestStatus == RequestState.TryCancel)
+                || r.RequestStatus == RequestState.TryCancelling)
                 .OrderBy(r => r.Created)
                 .ToListAsync();            
         }

@@ -28,7 +28,6 @@ namespace OmniCore.Client
         {
             container.RegisterSingleton<IPodRepository<ErosPod>, ErosPodRepository>();
             container.RegisterSingleton<IPodRequestRepository<ErosRequest>, ErosPodRequestRepository>();
-            container.RegisterSingleton<IPodResultRepository<ErosResult>, ErosPodResultRepository>();
         }
     }
 }
