@@ -14,7 +14,11 @@ namespace OmniCore.Client.Repositories
         {
             var c = await GetConnection();
             return await c.Table<ErosRequest>()
-                .Where(r => r.RequestStatus == RequestState.Scheduled || r.RequestStatus == RequestState.Queued)
+                .Where(r => r.RequestStatus == RequestState.Scheduled
+                || r.RequestStatus == RequestState.Queued
+                || r.RequestStatus == RequestState.Initializing
+                || r.RequestStatus == RequestState.Executing
+                || r.RequestStatus == RequestState.TryCancel)
                 .OrderBy(r => r.Created)
                 .ToListAsync();            
         }

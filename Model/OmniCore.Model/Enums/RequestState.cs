@@ -11,11 +11,14 @@ namespace OmniCore.Model.Enums
 
         Initializing,
         Executing,
-        Cancelling,
+        TryCancel,
 
         Expired,
         Executed,
         Canceled,
-        Failed
+        Failed,
+        
+        Aborted,
+        AbortedWhileExecuting
     }
 }

@@ -19,7 +19,6 @@ namespace OmniCore.Eros
         private List<ErosRequest> RequestList {get; set;}
         private SemaphoreSlim queueSemaphore = new SemaphoreSlim(1,1);
         private ErosRequest ActiveRequest { get; set; }
-        
 
         public async Task Initialize(ErosPod pod, IPodRequestRepository<ErosRequest> requestRepository,
             IPodResultRepository<ErosResult> resultRepository)
@@ -28,11 +27,27 @@ namespace OmniCore.Eros
             ResultRepository = resultRepository;
             Pod = pod;
             ActiveRequest = null;
+            RequestList = new List<ErosRequest>();
 
             var pendingRequests = await GetPendingRequests();
             foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
             {
-                await QueueRequest(pendingRequest);
+                switch (pendingRequest.RequestStatus)
+                {
+                    case RequestState.Initializing:
+                        pendingRequest.RequestStatus = RequestState.Aborted;
+                        await RequestRepository.CreateOrUpdate(pendingRequest);
+                        break;
+                    case RequestState.Executing:
+                    case RequestState.TryCancel:
+                        pendingRequest.RequestStatus = RequestState.AbortedWhileExecuting;
+                        await RequestRepository.CreateOrUpdate(pendingRequest);
+                        break;
+                    default:
+                        await QueueRequest(pendingRequest);
+                        break;
+                }
+                
             }
         }
 
@@ -42,53 +57,57 @@ namespace OmniCore.Eros
             await queueSemaphore.WaitAsync();
             try
             {
-                if (newRequest != null)
+                newRequest.RequestStatus = RequestState.Queued;
+                if (!newRequest.StartLatest.HasValue)
                 {
-                    newRequest.RequestStatus = RequestState.Queued;
-                    RequestList.Add(newRequest);
+                    newRequest.StartLatest = DateTimeOffset.UtcNow.AddMinutes(30);
                 }
-
-                var dtNow = DateTimeOffset.UtcNow;
-                var filteredList = RequestList
-                    .Where(r => r.RequestStatus == RequestState.Queued || r.RequestStatus == RequestState.Scheduled)
-                    .OrderBy(r => r.StartEarliest ?? r.Created).ToList();
-
-                for (int i = 0; i < filteredList.Count; i++)
-                {
-                    var request = RequestList[i];
-                    if (request.StartEarliest.HasValue)
-                    {
-                        if (dtNow < request.StartEarliest)
-                            request.RequestStatus = RequestState.Scheduled;
-                        else
-                            request.RequestStatus = RequestState.Queued;
-                    }
-
-                    if (request.StartLatest.HasValue && dtNow > request.StartLatest)
-                    {
-                        request.RequestStatus = RequestState.Expired;
-                    }
-
-                    RequestList[i] = await RequestRepository.CreateOrUpdate(request);
-                }
-
-                filteredList = filteredList.Where(r => r.RequestStatus != RequestState.Expired).ToList();
-
-                var queuedList = filteredList
-                    .Where(r => r.RequestStatus == RequestState.Queued)
-                    .OrderBy(r => r.Created)
-                    .ToList();
-
-                var scheduledList = filteredList.Where(r => r.RequestStatus == RequestState.Scheduled)
-                    .Where(r => r.RequestStatus == RequestState.Scheduled)
-                    .OrderBy(r => r.StartEarliest)
-                    .ToList();
-
+                RequestList.Add(await RequestRepository.CreateOrUpdate(newRequest));
+                await ProcessQueue();
             }
             finally
             {
                 queueSemaphore.Release();
             }
+        }
+
+        private async Task ProcessQueue()
+        {
+            var dtNow = DateTimeOffset.UtcNow;
+            var filteredList = RequestList
+                .Where(r => r.RequestStatus == RequestState.Queued || r.RequestStatus == RequestState.Scheduled);
+
+            foreach(var request in filteredList)
+            {
+                var stateBefore = request.RequestStatus;
+                if (request.StartEarliest.HasValue)
+                {
+                    if (dtNow < request.StartEarliest)
+                        request.RequestStatus = RequestState.Scheduled;
+                    else
+                        request.RequestStatus = RequestState.Queued;
+                }
+
+                if (request.StartLatest.HasValue && dtNow > request.StartLatest)
+                {
+                    request.RequestStatus = RequestState.Expired;
+                }
+
+                if (stateBefore != request.RequestStatus)
+                    await RequestRepository.CreateOrUpdate(request);
+            }
+
+            filteredList = filteredList.Where(r => r.RequestStatus != RequestState.Expired).ToList();
+
+            var queuedList = filteredList
+                .Where(r => r.RequestStatus == RequestState.Queued)
+                .OrderBy(r => r.Created)
+                .ToList();
+
+            var scheduledList = filteredList.Where(r => r.RequestStatus == RequestState.Scheduled)
+                .Where(r => r.RequestStatus == RequestState.Scheduled)
+                .OrderBy(r => r.StartEarliest)
+                .ToList();
         }
 
         private List<ErosRequest> EliminateRedundantRequests(List<ErosRequest> requests, RequestType type)
