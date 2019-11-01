@@ -14,9 +14,9 @@
 //using OmniCore.Mobile.Base;
 //using OmniCore.Mobile.Interfaces;
 
-//namespace OmniCore.Mobile.Android
+//namespace OmniCore.Client.Droid
 //{
-//    [Service(Name = "OmniCore.CommandService", Enabled = true, Exported = true, Process="net.balya.OmniCore.Mobile.Android")]
+//    [Service(Name = "OmniCore.CommandService", Enabled = true, Exported = true, Process="net.balya.OmniCore.Client.Droid")]
 //    public class OmniCoreCommandService : Service, IPodService
 //    {
 //        public const string NOTIFICATION_CHANNEL = "OmniCoreCommandService";

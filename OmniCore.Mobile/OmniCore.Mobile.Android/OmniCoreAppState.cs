@@ -5,7 +5,7 @@ using System.Text;
 using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     public class OmniCoreAppState : IAppState
     {

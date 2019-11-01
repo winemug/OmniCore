@@ -16,7 +16,7 @@ using OmniCore.Client.Interfaces;
 using Unity;
 using OmniCore.Client.Interfaces;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     public class RemoteRequestPublisher : IRemoteRequestPublisher
     {

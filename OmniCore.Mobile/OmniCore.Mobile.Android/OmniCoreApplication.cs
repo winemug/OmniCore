@@ -17,7 +17,7 @@ using OmniCore.Client.Interfaces;
 using OmniCore.Model.Exceptions;
 using Environment = Android.OS.Environment;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     [Fody.ConfigureAwait(false)]
     public class OmniCoreApplication : IOmniCoreApplication

@@ -11,7 +11,7 @@ using Android.Widget;
 using OmniCore.Client.Interfaces;
 using Unity;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     public static class Initializer
     {

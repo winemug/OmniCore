@@ -12,7 +12,7 @@ using Android.Widget;
 using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     //public class OmniCoreEvents : IAppEventSubscriber, IAppEventPublisher
     //{

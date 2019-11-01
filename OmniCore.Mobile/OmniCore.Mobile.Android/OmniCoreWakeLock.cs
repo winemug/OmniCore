@@ -11,7 +11,7 @@ using Android.Views;
 using Android.Widget;
 using OmniCore.Client.Interfaces;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     public class OmniCoreWakeLock : IWakeLock
     {

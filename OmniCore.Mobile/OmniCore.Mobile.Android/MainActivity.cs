@@ -15,10 +15,10 @@ using Xamarin.Forms;
 using OmniCore.Client;
 using OmniCore.Client.Interfaces;
 using System.IO;
-using Environment = System.Environment;
 using Unity;
+using OmniCore.Mobile.Droid;
 
-namespace OmniCore.Mobile.Android
+namespace OmniCore.Client.Droid
 {
     [Activity(Label = "OmniCore", Icon = "@mipmap/ic_omnicore", Theme = "@style/MainTheme", MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
