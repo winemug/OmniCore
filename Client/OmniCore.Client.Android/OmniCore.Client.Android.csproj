@@ -142,8 +142,8 @@
       <Project>{22ac504d-6b45-4fe9-97a6-e7404c15ce19}</Project>
       <Name>OmniCore.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OmniCore.Mobile\OmniCore.Client.csproj">
-      <Project>{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}</Project>
+    <ProjectReference Include="..\OmniCore.Client\OmniCore.Client.csproj">
+      <Project>{81322b39-1039-4f15-abe2-8289367d40eb}</Project>
       <Name>OmniCore.Client</Name>
     </ProjectReference>
   </ItemGroup>

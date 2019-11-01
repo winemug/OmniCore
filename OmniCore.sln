@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Mobile.Android", "OmniCore.Mobile\OmniCore.Mobile.Android\OmniCore.Mobile.Android.csproj", "{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client", "OmniCore.Mobile\OmniCore.Mobile\OmniCore.Client.csproj", "{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Model", "OmniCore.Model\OmniCore.Model\OmniCore.Model.csproj", "{22AC504D-6B45-4FE9-97A6-E7404C15CE19}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radio.RileyLink", "OmniCore.Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj", "{94025655-119D-44BF-ADB8-A786354F72B2}"
@@ -15,22 +11,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Impl.Eros", "OmniC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Impl.Eros.Tests", "OmniCore.Impl\OmniCore.Impl.Eros.Tests\OmniCore.Impl.Eros.Tests.csproj", "{F2388E62-E0B3-41F1-8763-2B14DB541C80}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client", "Client\OmniCore.Client\OmniCore.Client.csproj", "{81322B39-1039-4F15-ABE2-8289367D40EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Client.Android", "Client\OmniCore.Client.Android\OmniCore.Client.Android.csproj", "{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12B73331-A9DB-4BED-B2D4-AEDF9EFAD0DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22AC504D-6B45-4FE9-97A6-E7404C15CE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,6 +37,16 @@ Global
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2388E62-E0B3-41F1-8763-2B14DB541C80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81322B39-1039-4F15-ABE2-8289367D40EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81322B39-1039-4F15-ABE2-8289367D40EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81322B39-1039-4F15-ABE2-8289367D40EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81322B39-1039-4F15-ABE2-8289367D40EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB2EDA9-36AC-4931-A32E-B4482663F5B4}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
