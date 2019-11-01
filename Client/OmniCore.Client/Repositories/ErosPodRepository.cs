@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using OmniCore.Impl.Eros;
+using OmniCore.Eros;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;

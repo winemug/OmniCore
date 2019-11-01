@@ -1,5 +1,5 @@
 ﻿using OmniCore.Client.Services;
-using OmniCore.Impl.Eros;
+using OmniCore.Eros;
 using OmniCore.Model.Interfaces;
 using System.Threading;
 using Xamarin.Forms;

@@ -1,4 +1,4 @@
-﻿using OmniCore.Impl.Eros;
+﻿using OmniCore.Eros;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Repositories;
 using OmniCore.Client.Services;
@@ -21,7 +21,7 @@ namespace OmniCore.Client
             RegisterRepositories(container);
             container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
 
-            OmniCore.Impl.Eros.Initializer.RegisterTypes(container);
+            OmniCore.Eros.Initializer.RegisterTypes(container);
         }
 
         private static void RegisterRepositories(IUnityContainer container)

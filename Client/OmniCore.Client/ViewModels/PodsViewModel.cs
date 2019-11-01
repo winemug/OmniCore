@@ -1,4 +1,4 @@
-﻿using OmniCore.Impl.Eros;
+﻿using OmniCore.Eros;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;

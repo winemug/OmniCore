@@ -1,4 +1,4 @@
-﻿using OmniCore.Impl.Eros;
+﻿using OmniCore.Eros;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using SQLite;
