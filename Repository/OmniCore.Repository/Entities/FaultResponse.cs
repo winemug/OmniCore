@@ -10,7 +10,7 @@ namespace OmniCore.Repository.Entities
         public int FaultRelativeTime { get; set; }
         public bool FaultedWhileImmediateBolus { get; set; }
         public uint FaultInformation2LastWord { get; set; }
-        public int InsulinStateTableCorruption { get; set; }
+        public int StateTableCorruption { get; set; }
         public int InternalFaultVariables { get; set; }
         public PodProgress ProgressBeforeFault { get; set; }
         public PodProgress ProgressBeforeFault2 { get; set; }

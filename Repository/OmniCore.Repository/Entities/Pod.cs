@@ -46,8 +46,8 @@ namespace OmniCore.Repository.Entities
         public DateTimeOffset? InsertionDate { get; set; }
         public decimal? ReservoirUsedForPriming { get; set; }
 
-        public decimal TotalDelivered { get; set; }
-        public decimal Reservoir { get; set; }
+        public decimal TotalDeliveredUnits { get; set; }
+        public decimal ReservoirUnits { get; set; }
         public uint ActiveMinutes { get; set; }
 
         public PodProgress Progress { get; set; }

@@ -18,7 +18,7 @@ namespace OmniCore.Repository.Enums
         RequestTempBasalSchedule = 0x16,
         RequestBolusSchedule = 0x17,
         RequestConfigureAlerts = 0x19,
-        RequestInsulinSchedule = 0x1a,
+        RequestSchedule = 0x1a,
         RequestDeactivatePod = 0x1c,
         ResponseStatus = 0x1d,
         RequestCancelDelivery = 0x1f

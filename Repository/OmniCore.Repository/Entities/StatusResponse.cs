@@ -7,9 +7,9 @@ namespace OmniCore.Repository.Entities
     {
         public long RequestId {get; set;}
         public bool Faulted { get; set; }
-        public int NotDelivered { get; set; }
-        public int Delivered { get; set; }
-        public int Reservoir { get; set; }
+        public decimal NotDeliveredUnits { get; set; }
+        public decimal DeliveredUnits { get; set; }
+        public decimal ReservoirUnits { get; set; }
         public PodProgress Progress { get; set; }
         public BasalState BasalState { get; set; }
         public BolusState BolusState { get; set; }
