@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Model.Enums;
+using OmniCore.Repository.Entities;
+using OmniCore.Repository.Enums;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPodProvider<T> where T : IPod, new()
+    public interface IPodProvider
     {
-        Task<T> GetActivePod();
-        Task<IEnumerable<T>> GetActivePods();
-        Task Archive(T pod);
-        Task<T> New(IEnumerable<IRadio> radios);
-        Task<T> Register(T pod, IEnumerable<IRadio> radios);
-        Task QueueRequest(IPodRequest<T> request);
-        Task<bool> WaitForResult(IPodRequest<T> request, int timeout);
-        Task<bool> CancelRequest(IPodRequest<T> request);
-        Task<IList<IPodRequest<T>>> GetActiveRequests(T pod);
-        Task<IList<IPodRequest<T>>> GetActiveRequests();
+        Task<Pod> GetActivePod();
+        Task<List<Pod>> GetActivePods();
+        Task Archive(Pod pod);
+        Task<Pod> New(List<IRadio> radios);
+        Task<Pod> Register(Pod pod, List<IRadio> radios);
+        Task QueueRequest(PodRequest request);
+        Task<bool> WaitForResult(PodRequest request, int timeout);
+        Task<bool> CancelRequest(PodRequest request);
+        Task<List<PodRequest>> GetActiveRequests(Pod pod);
+        Task<List<PodRequest>> GetActiveRequests();
         IObservable<IRadio> ListAllRadios();
     }
 }

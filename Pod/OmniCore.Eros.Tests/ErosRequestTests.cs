@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OmniCore.Model;
-using OmniCore.Model.Enums;
+using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
 using OmniCore.Eros;
 using System;
@@ -22,7 +22,7 @@ namespace OmniCore.Eros.Tests
         [TestMethod]
         public async Task PairRequest()
         {
-            var provider = Container.Resolve<IPodProvider<ErosPod>>();
+            var provider = Container.Resolve<IPodProvider>();
             var pod = await provider.GetActivePod();
         }
     }

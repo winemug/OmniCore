@@ -1,4 +1,4 @@
-﻿using OmniCore.Client.ViewModels.Pod;
+﻿using OmniCore.Client.ViewModels.Pods;
 using System;
 using System.Collections.Generic;
 using System.Linq;

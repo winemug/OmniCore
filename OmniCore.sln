@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Eros", "Pod\OmniCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Eros.Tests", "Pod\OmniCore.Eros.Tests\OmniCore.Eros.Tests.csproj", "{8364B785-FE43-4765-86F6-1DE3DAC7E26C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Repository", "Repository\OmniCore.Repository\OmniCore.Repository.csproj", "{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		badbg|Any CPU = badbg|Any CPU
@@ -61,6 +63,12 @@ Global
 		{8364B785-FE43-4765-86F6-1DE3DAC7E26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8364B785-FE43-4765-86F6-1DE3DAC7E26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8364B785-FE43-4765-86F6-1DE3DAC7E26C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.badbg|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.badbg|Any CPU.Build.0 = Debug|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

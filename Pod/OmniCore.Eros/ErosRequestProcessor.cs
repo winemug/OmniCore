@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Linq;
@@ -7,40 +7,41 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using OmniCore.Repository.Entities;
+using OmniCore.Repository;
 
 namespace OmniCore.Eros
 {
     public class ErosRequestProcessor
     {
-        private IPodRequestRepository<ErosRequest> RequestRepository { get; set;}
-        private ErosPod Pod { get; set; }
+        private Pod Pod { get; set; }
 
-        private ConcurrentBag<ErosRequest> RequestList;
+        private ConcurrentBag<PodRequest> RequestList;
         private SemaphoreSlim RequestSemaphore = new SemaphoreSlim(1,1);
         private IBackgroundTask RequestTask = null;
         private IBackgroundTask SchedulerTask = null;
 
-        public async Task Initialize(ErosPod pod, IPodRequestRepository<ErosRequest> requestRepository)
+        public async Task Initialize(Pod pod)
         {
-            RequestRepository = requestRepository;
             Pod = pod;
             RequestTask = null;
             SchedulerTask = null;
-            RequestList = new ConcurrentBag<ErosRequest>();
+            RequestList = new ConcurrentBag<PodRequest>();
 
-            var pendingRequests = await RequestRepository.GetPendingRequests(Pod.Id);
+            using var pr = new PodRequestRepository();
+            var pendingRequests = await pr.GetPendingRequests(Pod.Id.Value);
             foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
             {
                 switch (pendingRequest.RequestStatus)
                 {
                     case RequestState.Initializing:
                         pendingRequest.RequestStatus = RequestState.Aborted;
-                        await RequestRepository.CreateOrUpdate(pendingRequest);
+                        await pr.CreateOrUpdate(pendingRequest);
                         break;
                     case RequestState.Executing:
                     case RequestState.TryCancelling:
                         pendingRequest.RequestStatus = RequestState.AbortedWhileExecuting;
-                        await RequestRepository.CreateOrUpdate(pendingRequest);
+                        await pr.CreateOrUpdate(pendingRequest);
                         break;
                     default:
                         await QueueRequest(pendingRequest);
@@ -50,12 +51,12 @@ namespace OmniCore.Eros
             }
         }
 
-        public async Task<List<ErosRequest>> GetActiveRequests()
+        public async Task<List<PodRequest>> GetActiveRequests()
         {
             return RequestList.ToList();
         }
 
-        public async Task QueueRequest(ErosRequest newRequest)
+        public async Task QueueRequest(PodRequest newRequest)
         {
             var utcNow = DateTimeOffset.UtcNow;
             newRequest.RequestStatus = RequestState.Queued;
@@ -71,7 +72,8 @@ namespace OmniCore.Eros
 
             newRequest.Created = utcNow;
 
-            RequestList.Add(await RequestRepository.CreateOrUpdate(newRequest));
+            using var pr = new PodRequestRepository();
+            RequestList.Add(await pr.CreateOrUpdate(newRequest));
             await ProcessQueue();
         }
 
@@ -99,7 +101,10 @@ namespace OmniCore.Eros
                 }
 
                 if (stateBefore != request.RequestStatus)
-                    await RequestRepository.CreateOrUpdate(request);
+                {
+                    using var pr = new PodRequestRepository();
+                    await pr.CreateOrUpdate(request);
+                }
             }
 
             await RequestSemaphore.WaitAsync();
@@ -131,18 +136,18 @@ namespace OmniCore.Eros
             }
         }
 
-        private List<ErosRequest> EliminateRedundantRequests(List<ErosRequest> requests, RequestType type)
+        private List<PodRequest> EliminateRedundantRequests(List<PodRequest> requests, RequestType type)
         {
             //TODO:
             return requests;
         }
 
-        public async Task<bool> WaitForResult(ErosRequest request, int timeout)
+        public async Task<bool> WaitForResult(PodRequest request, int timeout)
         {
             return false;
         }
 
-        public async Task<bool> CancelRequest(ErosRequest request)
+        public async Task<bool> CancelRequest(PodRequest request)
         {
             return false;
         }

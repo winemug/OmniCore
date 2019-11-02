@@ -1,5 +1,6 @@
 ﻿using OmniCore.Client.Interfaces;
 using OmniCore.Model.Interfaces;
+using OmniCore.Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,9 +11,9 @@ namespace OmniCore.Client.ViewModels
 {
     public class PodViewModel : PageViewModel, IViewModel
     {
-        public IPod Pod { get; set; }
+        public Pod Pod { get; set; }
 
-        public PodViewModel(IPod pod, Page page) : base(page)
+        public PodViewModel(Pod pod, Page page) : base(page)
         {
             this.Pod = pod;
         }

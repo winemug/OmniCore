@@ -1,4 +1,4 @@
-﻿using OmniCore.Eros;
+﻿using OmniCore.Repository.Entities;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;
@@ -13,13 +13,11 @@ namespace OmniCore.Client.ViewModels
 {
     public class PodsViewModel : PageViewModel, IViewModel
     {
-        public IPodRepository<ErosPod> PodRepository { get; }
-
         public PodsViewModel(Page page) : base(page)
         {
         }
 
-        public IList<ErosPod> Pods { get; set; }
+        public List<Pod> Pods { get; set; }
 
         protected override void OnDisposeManagedResources()
         {
@@ -27,7 +25,7 @@ namespace OmniCore.Client.ViewModels
 
         protected override async Task<BaseViewModel> BindData()
         {
-            Pods = await PodRepository.GetActivePods();
+            Pods = await App.Instance.PodProvider.GetActivePods();
             return this;
         }
     }

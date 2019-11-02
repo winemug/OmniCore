@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Repository.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace OmniCore.Model.Interfaces
         Task Connect();
         Task Disconnect();
         int Rssi { get; }
-        Task<IMessage> ExchangeMessages(IMessage messageToSend);
+        Task PrepareForMessageExchange();
+        Task<IMessage> ExchangeMessages(IMessage messageToSend, TxPower? TxLevel = null);
     }
 }

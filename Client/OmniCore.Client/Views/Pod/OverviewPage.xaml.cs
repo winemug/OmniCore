@@ -1,5 +1,5 @@
 ﻿using Microsoft.AppCenter.Crashes;
-using OmniCore.Client.ViewModels.Pod;
+using OmniCore.Client.ViewModels.Pods;
 using OmniCore.Model;
 using OmniCore.Model.Interfaces;
 using Plugin.Permissions;

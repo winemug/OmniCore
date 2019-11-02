@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Enums;
+﻿using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

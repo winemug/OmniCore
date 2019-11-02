@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using OmniCore.Model;
-using OmniCore.Model.Enums;
+using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Diagnostics;

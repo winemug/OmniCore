@@ -1,6 +1,6 @@
 ﻿namespace OmniCore.Model.Exceptions
 {
-    using OmniCore.Model.Enums;
+    using OmniCore.Repository.Enums;
     using System;
 
     public class OmniCoreException : Exception

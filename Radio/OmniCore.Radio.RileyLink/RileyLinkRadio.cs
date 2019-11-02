@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -38,10 +39,15 @@ namespace OmniCore.Radio.RileyLink
             throw new NotImplementedException();
         }
 
-
-        public Task<IMessage> ExchangeMessages(IMessage messageToSend)
+        public Task PrepareForMessageExchange()
         {
             throw new NotImplementedException();
         }
+
+        public Task<IMessage> ExchangeMessages(IMessage messageToSend, TxPower? TxLevel = null)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

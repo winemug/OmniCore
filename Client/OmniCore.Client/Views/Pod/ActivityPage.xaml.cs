@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Pod;
+using OmniCore.Client.ViewModels.Pods;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 

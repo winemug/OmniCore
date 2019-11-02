@@ -1,5 +1,7 @@
 ﻿using Moq;
 using OmniCore.Model.Interfaces;
+using OmniCore.Repository;
+using OmniCore.Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
@@ -17,17 +19,17 @@ namespace OmniCore.Eros.Tests
         public static Guid PodId4 = new Guid("B44C2F49-9100-49B3-9BD0-C07AB8821579");
         public static void SetupRepositories(IUnityContainer container)
         {
-            var pods = new List<ErosPod>()
+            var pods = new List<Pod>()
             {
-                new ErosPod() { Id = PodId1, Archived = false }
+                new Pod() { Id = 1, PodUniqueId = PodId1, Archived = false }
             };
 
-            var mock = new Mock<IPodRepository<ErosPod>>();
+            var mock = new Mock<PodRepository>();
             mock.Setup(x => x.GetActivePods())
                 .ReturnsAsync(pods);
-            mock.Setup(x => x.CreateOrUpdate(It.IsAny<ErosPod>()));
+            mock.Setup(x => x.CreateOrUpdate(It.IsAny<Pod>()));
 
-            container.RegisterInstance<IPodRepository<ErosPod>>(mock.Object) ;
+            container.RegisterInstance<PodRepository>(mock.Object) ;
         }
 
         public static void SetupRadioProvider(IUnityContainer container)

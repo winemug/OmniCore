@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OmniCore.Model.Enums;
+using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 
 namespace OmniCore.Eros
 {
-    public class ErosRequestParameters : IPodRequestParameters
+    public class ErosRequestParameters
     {
         public static ErosRequestParameters FromJson(RequestType requestType, string parametersJson)
         {
