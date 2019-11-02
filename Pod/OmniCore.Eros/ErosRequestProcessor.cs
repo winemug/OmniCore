@@ -16,17 +16,15 @@ namespace OmniCore.Eros
     {
         private Pod Pod { get; set; }
 
-        private ConcurrentBag<PodRequest> RequestList;
+        private ConcurrentBag<ErosRequest> RequestList;
         private SemaphoreSlim RequestSemaphore = new SemaphoreSlim(1,1);
-        private IBackgroundTask RequestTask = null;
-        private IBackgroundTask SchedulerTask = null;
+        private IBackgroundTaskFactory BackgroundTaskFactory;
 
-        public async Task Initialize(Pod pod)
+        public async Task Initialize(Pod pod, IBackgroundTaskFactory backgroundTaskFactory)
         {
             Pod = pod;
-            RequestTask = null;
-            SchedulerTask = null;
-            RequestList = new ConcurrentBag<PodRequest>();
+            RequestList = new ConcurrentBag<ErosRequest>();
+            BackgroundTaskFactory = backgroundTaskFactory;
 
             using var pr = new PodRequestRepository();
             var pendingRequests = await pr.GetPendingRequests(Pod.Id.Value);
@@ -53,7 +51,7 @@ namespace OmniCore.Eros
 
         public async Task<List<PodRequest>> GetActiveRequests()
         {
-            return RequestList.ToList();
+            return RequestList.Select(rq => rq.Request).ToList();
         }
 
         public async Task QueueRequest(PodRequest newRequest)
@@ -73,60 +71,69 @@ namespace OmniCore.Eros
             newRequest.Created = utcNow;
 
             using var pr = new PodRequestRepository();
-            RequestList.Add(await pr.CreateOrUpdate(newRequest));
+            RequestList.Add(new ErosRequest(BackgroundTaskFactory, await pr.CreateOrUpdate(newRequest)));
             await ProcessQueue();
         }
 
         private async Task ProcessQueue()
         {
-            var dtNow = DateTimeOffset.UtcNow;
-            var pendingExecution = RequestList
-                .Where(r => r.RequestStatus == RequestState.Queued || r.RequestStatus == RequestState.Scheduled)
-                .OrderBy(r => r.Created);
-
-            foreach(var request in pendingExecution)
-            {
-                var stateBefore = request.RequestStatus;
-                if (request.StartEarliest.HasValue)
-                {
-                    if (dtNow < request.StartEarliest)
-                        request.RequestStatus = RequestState.Scheduled;
-                    else
-                        request.RequestStatus = RequestState.Queued;
-                }
-
-                if (request.StartLatest.HasValue && dtNow > request.StartLatest)
-                {
-                    request.RequestStatus = RequestState.Expired;
-                }
-
-                if (stateBefore != request.RequestStatus)
-                {
-                    using var pr = new PodRequestRepository();
-                    await pr.CreateOrUpdate(request);
-                }
-            }
-
             await RequestSemaphore.WaitAsync();
             try
             {
-                var activeRequest = RequestList.SingleOrDefault(r => r.RequestStatus >= RequestState.Initializing && r.RequestStatus <= RequestState.TryCancelling);
-                if (activeRequest == null)
+                var dtNow = DateTimeOffset.UtcNow;
+                var pendingExecution = RequestList
+                    .Where(r => r.Request.RequestStatus == RequestState.Queued || r.Request.RequestStatus == RequestState.Scheduled)
+                    .OrderBy(r => r.Request.StartEarliest ?? r.Request.Created);
+
+                foreach(var request in pendingExecution)
                 {
-                    var nextInQueue = pendingExecution.FirstOrDefault(r => r.RequestStatus == RequestState.Queued);
-
-                    if (nextInQueue != null)
+                    var stateBefore = request.Request.RequestStatus;
+                    if (request.Request.StartEarliest.HasValue)
                     {
-
+                        if (dtNow < request.Request.StartEarliest)
+                            request.Request.RequestStatus = RequestState.Scheduled;
+                        else
+                            request.Request.RequestStatus = RequestState.Queued;
                     }
-                    else
+
+                    if (request.Request.StartLatest.HasValue && dtNow > request.Request.StartLatest)
                     {
-                        var nextScheduled = pendingExecution.FirstOrDefault(r => r.RequestStatus == RequestState.Scheduled);
-                        if (nextScheduled != null)
-                        {
-
-                        }
+                        request.Request.RequestStatus = RequestState.Expired;
                     }
+
+                    if (stateBefore != request.Request.RequestStatus)
+                    {
+                        using var pr = new PodRequestRepository();
+                        await pr.CreateOrUpdate(request.Request);
+                    }
+                }
+
+                ErosRequest requestCandidate = null;
+                var nextInQueue = pendingExecution.FirstOrDefault(r => r.Request.RequestStatus == RequestState.Queued);
+                var nextScheduled = pendingExecution.FirstOrDefault(r => r.Request.RequestStatus == RequestState.Scheduled);
+                var activeRequest = RequestList.FirstOrDefault(r => r.IsActive);
+
+                if (nextInQueue != null)
+                {
+                    requestCandidate = nextInQueue;
+                    if (activeRequest != null && activeRequest.IsWaitingForScheduledExecution && activeRequest.TryCancelScheduledWait())
+                    {
+                        activeRequest = null;
+                    }
+                }
+                else if (nextScheduled != null)
+                {
+                    requestCandidate = nextScheduled;
+                    if (activeRequest != null && activeRequest.IsWaitingForScheduledExecution && activeRequest.Request.Id != nextScheduled.Request.Id
+                        && activeRequest.TryCancelScheduledWait())
+                    {
+                        activeRequest = null;
+                    }
+                }
+
+                if (activeRequest == null && requestCandidate != null)
+                {
+                    requestCandidate.Run();
                 }
             }
             catch { throw; }
@@ -151,5 +158,7 @@ namespace OmniCore.Eros
         {
             return false;
         }
+
+
     }
 }

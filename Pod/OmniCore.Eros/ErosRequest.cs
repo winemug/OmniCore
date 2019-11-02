@@ -1,120 +1,162 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Text;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using Newtonsoft.Json;
-//using Newtonsoft.Json.Converters;
-//using OmniCore.Repository.Enums;
-//using OmniCore.Model.Exceptions;
-//using OmniCore.Model.Interfaces;
-//using SQLite;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using OmniCore.Repository.Enums;
+using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
+using SQLite;
+using OmniCore.Repository.Entities;
 
-//namespace OmniCore.Eros
-//{
-//    public class ErosRequest : IPodRequest<ErosPod>
-//    {
-//        [JsonConverter(typeof(StringEnumConverter))]
-//        public RequestType RequestType { get; set; }
+namespace OmniCore.Eros
+{
+    public class ErosRequest : IDisposable
+    {
+        public TaskCompletionSource<bool> TaskCompletionSource { get; private set; }
+        public CancellationTokenSource CancellationTokenSource { get; private set; }
+        public IBackgroundTask BackgroundTask  { get; }
+        public PodRequest Request { get; }
+        public bool IsActive
+        {
+            get
+            {
+                if (TaskCompletionSource == null)
+                    return false;
 
-//        [JsonConverter(typeof(StringEnumConverter))]
-//        public RequestState RequestStatus { get; set; }
+                return !TaskCompletionSource.Task.IsCompleted;
+            }
+        }
+        public bool IsWaitingForScheduledExecution
+        {
+            get
+            {
+                return IsActive && BackgroundTask.IsScheduled;
+            }
+        }
 
-//        [PrimaryKey]
-//        public Guid Id { get; set; }
+        public ErosRequest(IBackgroundTaskFactory backgroundTaskFactory, PodRequest request)
+        {
+            BackgroundTask = backgroundTaskFactory.CreateBackgroundTask(async () => await ExecuteRequest());
+            Request = request;
+        }
 
-//        public Guid? ResultId { get; set;}
+        public void Dispose()
+        {
+            CancellationTokenSource?.Dispose();
+        }
 
-//        public ErosPod Pod { get; set; }
-//        public DateTimeOffset Updated { get; set; }
-//        public DateTimeOffset Created { get; set; }
+        public void Run()
+        {
+            TaskCompletionSource = new TaskCompletionSource<bool>();
 
-//        [Ignore]
-//        public IPodRequestParameters Parameters { get; set; }
+            CancellationTokenSource?.Dispose();
+            CancellationTokenSource = new CancellationTokenSource();
 
-//        public string ParametersJson
-//        {
-//            get
-//            {
-//                return Parameters?.ToJson();
-//            }
-//        }
+            if (Request.StartEarliest.HasValue)
+            {
+                BackgroundTask.RunScheduled(Request.StartEarliest.Value, true);
+            }
+            else
+            {
+                BackgroundTask.Run(true);
+            }
+        }
 
-//        public DateTimeOffset? StartEarliest { get; set; }
-//        public DateTimeOffset? StartLatest { get; set; }
+        public bool TryCancelScheduledWait()
+        {
+            if (BackgroundTask.IsScheduled && BackgroundTask.CancelScheduledWait())
+            {
+                TaskCompletionSource = null;
+                return true;
+            }
+            return false;
+        }
 
-//        public CancellationTokenSource CancellationTokenSource { get; }
-//        public TaskCompletionSource<bool> ResultSource { get; }
-//        public Task RequestTask {get; set;}
-//        public DateTimeOffset? Started { get; set; }
-//        public DateTimeOffset? ResultReceived { get; set; }
+        private async Task ExecuteRequest()
+        {
+            try
+            {
 
-//        public FailureType? FailureType { get; set; }
+            }
+            catch(OperationCanceledException oce)
+            {
 
-//        public string ExceptionText => throw new NotImplementedException();
+            }
+            catch(AggregateException ae)
+            {
 
-//        //public async Task<IPodResult> Execute(IPod pod, IRadio radio)
-//        //{
-//        //    Parameters = ErosRequestParameters.FromJson(RequestType, ParametersJson);
-//        //    var execute = true;
-//        //    if (_cancellationSource.IsCancellationRequested)
-//        //        return new ErosResult(ResultType.Canceled);
+            }
+            catch(Exception e)
+            {
 
-//        //    if (_executing)
-//        //        execute = false;
-//        //    else
-//        //        _executing = true;
-//        //    return await GetResult(pod, radio, execute);
-//        //}
+            }
+        }
 
-//        //public async Task<IPodResult> Cancel()
-//        //{
-//        //    if (!_executing)
-//        //    {
-//        //        _cancellationSource.Cancel();
-//        //        return new ErosResult(ResultType.Canceled);
-//        //    }
+        //public async Task<IPodResult> Execute(IPod pod, IRadio radio)
+        //{
+        //    Parameters = ErosRequestParameters.FromJson(RequestType, ParametersJson);
+        //    var execute = true;
+        //    if (_cancellationSource.IsCancellationRequested)
+        //        return new ErosResult(ResultType.Canceled);
 
-//        //    if (!_cancellationSource.IsCancellationRequested)
-//        //        _cancellationSource.Cancel();
-//        //    return await GetResult(null, null, false);
-//        //}
+        //    if (_executing)
+        //        execute = false;
+        //    else
+        //        _executing = true;
+        //    return await GetResult(pod, radio, execute);
+        //}
 
-//        //private async Task<IPodResult> GetResult(IPod pod, IRadio radio, bool execute)
-//        //{
-//        //    try
-//        //    {
-//        //        if (execute)
-//        //        {
-//        //            var result = await OnExecute(pod, radio, _cancellationSource.Token);
-//        //            _resultSource.TrySetResult(result);
-//        //            return result;
-//        //        }
-//        //        else
-//        //        {
-//        //            return await _resultSource.Task;
-//        //        }
-//        //    }
-//        //    catch (TaskCanceledException tce)
-//        //    {
-//        //        _resultSource.TrySetCanceled(tce.CancellationToken);
-//        //        return new ErosResult(ResultType.Canceled);
-//        //    }
-//        //    catch (Exception e)
-//        //    {
-//        //        _resultSource.TrySetException(e);
-//        //        return new ErosResult(ResultType.Error, e);
-//        //    }
-//        //}
+        //public async Task<IPodResult> Cancel()
+        //{
+        //    if (!_executing)
+        //    {
+        //        _cancellationSource.Cancel();
+        //        return new ErosResult(ResultType.Canceled);
+        //    }
 
-//        //private async Task<IPodResult> OnExecute(IPod pod, IRadio radio, CancellationToken token)
-//        //{
-//        //    throw new NotImplementedException();
-//        //}
+        //    if (!_cancellationSource.IsCancellationRequested)
+        //        _cancellationSource.Cancel();
+        //    return await GetResult(null, null, false);
+        //}
 
-//        //public void Dispose()
-//        //{
-//        //    _cancellationSource?.Dispose();
-//        //}
-//    }
-//}
+        //private async Task<IPodResult> GetResult(IPod pod, IRadio radio, bool execute)
+        //{
+        //    try
+        //    {
+        //        if (execute)
+        //        {
+        //            var result = await OnExecute(pod, radio, _cancellationSource.Token);
+        //            _resultSource.TrySetResult(result);
+        //            return result;
+        //        }
+        //        else
+        //        {
+        //            return await _resultSource.Task;
+        //        }
+        //    }
+        //    catch (TaskCanceledException tce)
+        //    {
+        //        _resultSource.TrySetCanceled(tce.CancellationToken);
+        //        return new ErosResult(ResultType.Canceled);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _resultSource.TrySetException(e);
+        //        return new ErosResult(ResultType.Error, e);
+        //    }
+        //}
+
+        //private async Task<IPodResult> OnExecute(IPod pod, IRadio radio, CancellationToken token)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public void Dispose()
+        //{
+        //    _cancellationSource?.Dispose();
+        //}
+    }
+}

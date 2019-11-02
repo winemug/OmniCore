@@ -8,8 +8,10 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IBackgroundTask
     {
-        void Run<T>(Action<T> action, bool tryRunUninterrupted = false);
-        void RunScheduled<T>(DateTimeOffset time, Action<T> action, bool tryRunUninterrupted = false);
-        bool CancelSchedule();
+        void Run(bool tryRunUninterrupted = false);
+        void RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false);
+        bool IsScheduled { get; }
+        DateTimeOffset ScheduledTime { get; }
+        bool CancelScheduledWait();
     }
 }

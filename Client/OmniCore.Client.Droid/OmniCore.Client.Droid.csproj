@@ -110,6 +110,7 @@
     <PackageReference Include="Xamarin.Forms" Version="4.3.0.947036" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackgroundTaskFactory.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="OmniCoreAppState.cs" />
     <Compile Include="MainActivity.cs" />

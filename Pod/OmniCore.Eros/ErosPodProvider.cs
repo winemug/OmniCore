@@ -20,13 +20,16 @@ namespace OmniCore.Eros
     {
         private IRadioProvider[] _radioProviders;
         private IRadioAdapter _radioAdapter;
+        private IBackgroundTaskFactory _backgroundTaskFactory;
         private Dictionary<long, ErosRequestProcessor> _requestProcessors;
 
         public ErosPodProvider(IRadioAdapter radioAdapter,
-            IRadioProvider[] radioProviders)
+            IRadioProvider[] radioProviders,
+            IBackgroundTaskFactory backgroundTaskFactory)
         {
             _radioProviders = radioProviders;
             _radioAdapter = radioAdapter;
+            _backgroundTaskFactory  = backgroundTaskFactory;
             _requestProcessors = new Dictionary<long, ErosRequestProcessor>();
         }
 
@@ -115,7 +118,7 @@ namespace OmniCore.Eros
                 var pod = await pr.Read(podId);
 
                 var erp = new ErosRequestProcessor();
-                await erp.Initialize(pod);
+                await erp.Initialize(pod, _backgroundTaskFactory);
                 _requestProcessors.Add(podId, erp);
             }
             return _requestProcessors[podId];
