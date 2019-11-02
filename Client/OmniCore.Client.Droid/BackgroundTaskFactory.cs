@@ -13,9 +13,9 @@ using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Mobile.Droid
 {
-    public class BackgroundTaskFactory<T> : IBackgroundTaskFactory<T>
+    public class BackgroundTaskFactory : IBackgroundTaskFactory
     {
-        public IBackgroundTask<T> CreateBackgroundTask(T parameter, Action<T> action)
+        public IBackgroundTask CreateBackgroundTask(Action action)
         {
             throw new NotImplementedException();
         }

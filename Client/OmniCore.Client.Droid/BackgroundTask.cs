@@ -14,13 +14,11 @@ using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Mobile.Droid
 {
-    public class BackgroundTask<T> : IBackgroundTask<T>
+    public class BackgroundTask : IBackgroundTask
     {
         public bool IsScheduled => throw new NotImplementedException();
 
         public DateTimeOffset ScheduledTime => throw new NotImplementedException();
-
-        public T ActionParameter => throw new NotImplementedException();
 
         public void Run(bool tryRunUninterrupted = false)
         {
