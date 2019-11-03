@@ -53,6 +53,7 @@ namespace OmniCore.Client.Services
         {
             return Observable.Create<IRadioPeripheral>((observer) =>
                 {
+                    var searchResults = new HashSet<Guid>();
                     var scan = CrossBleAdapter.Current
                         .Scan(new ScanConfig
                         {
@@ -61,7 +62,11 @@ namespace OmniCore.Client.Services
                             AndroidUseScanBatching = true
                         }).Subscribe((scanResult) =>
                         {
-                            observer.OnNext(new CrossBleRadioPeripheral(scanResult.Device, scanResult.Rssi));
+                            if (!searchResults.Contains(scanResult.Device.Uuid))
+                            {
+                                searchResults.Add(scanResult.Device.Uuid);
+                                observer.OnNext(new CrossBleRadioPeripheral(scanResult.Device, scanResult.Rssi));
+                            }
                         });
 
                     return Disposable.Create( () => { scan.Dispose(); });
