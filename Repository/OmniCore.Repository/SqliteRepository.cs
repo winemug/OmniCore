@@ -3,6 +3,7 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -86,6 +87,12 @@ namespace OmniCore.Repository
         {
             var c = await GetConnection();
             return await c.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
+        }
+
+        public virtual async Task<AsyncTableQuery<T>> Query(Expression<Func<T, bool>> queryExpression)
+        {
+            var c = await GetConnection();
+            return c.Table<T>().Where(queryExpression);
         }
 
         public virtual async Task Delete(long entityId)

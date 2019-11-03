@@ -8,9 +8,7 @@ namespace OmniCore.Repository.Entities
     public class Pod : UpdateableEntity
     {
         [Indexed]
-        public long IndividualId { get; set; }
-
-        public long MedicationId { get; set; }
+        public long UserProfileId { get; set; }
         public Guid? PodUniqueId { get; set; }
 
         [Indexed]

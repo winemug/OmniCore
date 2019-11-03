@@ -15,16 +15,18 @@ namespace OmniCore.Client.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainDebugPage : ContentPage
     {
-        public ObservableCollection<string> RadioNames { get; set; }
+        public ObservableCollection<IRadio> Radios { get; set; }
         public bool StartEnabled { get; set; }
         public bool StopEnabled { get; set; }
+        public bool ConfirmEnabled { get; set; }
 
         public MainDebugPage()
         {
             InitializeComponent();
-            RadioNames = new ObservableCollection<string>();
+            Radios = new ObservableCollection<IRadio>();
             StartEnabled = true;
             StopEnabled = false;
+            ConfirmEnabled = false;
             BindingContext = this;
         }
 
@@ -33,10 +35,10 @@ namespace OmniCore.Client.Views
         private async void SearchStart_Clicked(object sender, EventArgs e)
         {
             StartEnabled = false;
-            RadioNames.Clear();
+            Radios.Clear();
             radioObservable = App.Instance.PodProvider.ListAllRadios().Subscribe( radio =>
             {
-                RadioNames.Add($"Name: {radio.DeviceName} Address: {radio.DeviceId}");
+                Radios.Add(radio);
             });
             StopEnabled = true;
         }
@@ -46,6 +48,21 @@ namespace OmniCore.Client.Views
             StopEnabled = false;
             radioObservable.Dispose();
             StartEnabled = true;
+        }
+
+        private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ConfirmEnabled = e.CurrentSelection.Any();
+        }
+
+        private async void Confirm_Clicked(object sender, EventArgs e)
+        {
+            var list = new List<IRadio>();
+            foreach(IRadio radio in RadioCollection.SelectedItems)
+            {
+                list.Add(radio);
+            }
+            var pod = await App.Instance.PodProvider.New(list);
         }
     }
 }

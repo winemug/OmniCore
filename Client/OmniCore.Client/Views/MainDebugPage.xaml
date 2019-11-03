@@ -9,12 +9,20 @@
         <StackLayout>
             <Button Text="Start Search" Clicked="SearchStart_Clicked" IsEnabled="{Binding StartEnabled}"/>
             <Button Text="Stop Search" Clicked="SearchStop_Clicked" IsEnabled="{Binding StopEnabled}"/>
-            <CollectionView ItemsSource="{Binding RadioNames}">
+            <Button Text="Confirm Selection" Clicked="Confirm_Clicked" IsEnabled="{Binding ConfirmEnabled}"/>
+            <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}" SelectionMode="Multiple" SelectionChanged="CollectionView_SelectionChanged">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame BorderColor="LightGray" BackgroundColor="White" Padding="10" HorizontalOptions="FillAndExpand">
-                            <Label Text="{Binding }" />
-                        </Frame>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DeviceType}" Grid.Column="0"/>
+                        <Label Text="{Binding DeviceName}" Grid.Column="1"/>
+                        <Label Text="{Binding DeviceId}" Grid.Column="2"/>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
