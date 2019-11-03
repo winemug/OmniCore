@@ -27,8 +27,8 @@ namespace OmniCore.Repository
             using var mr = new MedicationRepository();
             using var upr = new UserProfileRepository();
 
-            var mq = await mr.Query(m => m.Hormone == HormoneType.Insulin);
-            var med = await mq.FirstOrDefaultAsync();
+            var mq = await mr.ForQuery();
+            var med = await mq.FirstOrDefaultAsync(m => m.Hormone == HormoneType.Insulin);
 
             var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = med.Id.Value, PodBasalSchedule = new [] 
                 {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,

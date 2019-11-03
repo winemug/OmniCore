@@ -89,10 +89,10 @@ namespace OmniCore.Repository
             return await c.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
         }
 
-        public virtual async Task<AsyncTableQuery<T>> Query(Expression<Func<T, bool>> queryExpression)
+        public virtual async Task<AsyncTableQuery<T>> ForQuery()
         {
             var c = await GetConnection();
-            return c.Table<T>().Where(queryExpression);
+            return c.Table<T>();
         }
 
         public virtual async Task Delete(long entityId)

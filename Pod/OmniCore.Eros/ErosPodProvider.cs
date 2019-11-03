@@ -54,11 +54,12 @@ namespace OmniCore.Eros
             await pr.CreateOrUpdate(pod);
         }
 
-        public async Task<Pod> New(List<IRadio> radios)
+        public async Task<Pod> New(UserProfile up, List<IRadio> radios)
         {
             using var pr = new PodRepository();
             var pod = new Pod
             {
+                UserProfileId = up.Id.Value,
                 PodUniqueId = Guid.NewGuid(),
                 ProviderSpecificRadioIds = radios.Select(r => r.ProviderSpecificId).ToArray(),
                 RadioAddress = GenerateRadioAddress()
@@ -66,7 +67,7 @@ namespace OmniCore.Eros
             return await pr.CreateOrUpdate(pod);
         }
 
-        public async Task<Pod> Register(Pod pod, List<IRadio> radios)
+        public async Task<Pod> Register(Pod pod, UserProfile up, List<IRadio> radios)
         {
             using var pr = new PodRepository();
             if (!pod.PodUniqueId.HasValue)

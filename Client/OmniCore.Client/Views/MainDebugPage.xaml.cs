@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Repository;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -57,12 +58,16 @@ namespace OmniCore.Client.Views
 
         private async void Confirm_Clicked(object sender, EventArgs e)
         {
-            var list = new List<IRadio>();
+            var upr = new UserProfileRepository();
+            var q = await upr.ForQuery();
+            var userProfile = await q.FirstAsync();
+
+            var radioList = new List<IRadio>();
             foreach(IRadio radio in RadioCollection.SelectedItems)
             {
-                list.Add(radio);
+                radioList.Add(radio);
             }
-            var pod = await App.Instance.PodProvider.New(list);
+            var pod = await App.Instance.PodProvider.New(userProfile, radioList);
         }
     }
 }

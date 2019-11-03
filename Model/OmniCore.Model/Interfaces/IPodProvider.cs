@@ -12,8 +12,8 @@ namespace OmniCore.Model.Interfaces
         Task<Pod> GetActivePod();
         Task<List<Pod>> GetActivePods();
         Task Archive(Pod pod);
-        Task<Pod> New(List<IRadio> radios);
-        Task<Pod> Register(Pod pod, List<IRadio> radios);
+        Task<Pod> New(UserProfile up, List<IRadio> radios);
+        Task<Pod> Register(Pod pod, UserProfile up, List<IRadio> radios);
         Task QueueRequest(PodRequest request);
         Task<bool> WaitForResult(PodRequest request, int timeout);
         Task<bool> CancelRequest(PodRequest request);
