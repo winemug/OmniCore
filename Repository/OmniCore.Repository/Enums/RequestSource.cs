@@ -9,6 +9,6 @@ namespace OmniCore.Repository.Enums
         OmniCoreUser,
         OmniCoreRemoteUser,
         AndroidAPS,
-        OmniCoreAID
+        OmniCoreADD
     }
 }
