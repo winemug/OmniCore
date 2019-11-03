@@ -6,6 +6,7 @@ namespace OmniCore.Repository.Entities
 {
     public class Pod : UpdateableEntity
     {
+        public long MedicationId { get; set; }
         public Guid? PodUniqueId { get; set; }
         public bool Archived { get; set; }
         public string[] ProviderSpecificRadioIds { get; set; }

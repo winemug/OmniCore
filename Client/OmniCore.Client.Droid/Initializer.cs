@@ -23,7 +23,7 @@ namespace OmniCore.Client.Droid
             container.RegisterSingleton<IOmniCoreApplication, OmniCoreApplication>();
             container.RegisterSingleton<IOmniCoreLogger, OmniCoreLogger>();
             container.RegisterSingleton<IAppState, OmniCoreAppState>();
-            container.RegisterSingleton(typeof(IBackgroundTaskFactory<>), typeof(BackgroundTaskFactory<>));
+            container.RegisterSingleton<IBackgroundTaskFactory, BackgroundTaskFactory>();
 
             OmniCore.Client.Initializer.RegisterTypes(container);
         }

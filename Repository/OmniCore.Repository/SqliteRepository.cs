@@ -10,7 +10,7 @@ namespace OmniCore.Repository
 {
     public class SqliteRepositoryWithUpdate<T> : SqliteRepository<T> where T : UpdateableEntity, new()
     {
-        public async Task<T> CreateOrUpdate(T entity)
+        public virtual async Task<T> CreateOrUpdate(T entity)
         {
             var c = await GetConnection();
             if (!entity.Id.HasValue)
@@ -71,7 +71,7 @@ namespace OmniCore.Repository
             await connection.CreateTableAsync<T>();
         }
 
-        public async Task<T> Create(T entity)
+        public virtual async Task<T> Create(T entity)
         {
             var c = await GetConnection();
             if (!entity.Id.HasValue)
@@ -82,13 +82,13 @@ namespace OmniCore.Repository
             return entity;
         }
 
-        public async Task<T> Read(long entityId)
+        public virtual async Task<T> Read(long entityId)
         {
             var c = await GetConnection();
             return await c.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
         }
 
-        public async Task Delete(long entityId)
+        public virtual async Task Delete(long entityId)
         {
             var c = await GetConnection();
             await c.DeleteAsync<T>(entityId);
