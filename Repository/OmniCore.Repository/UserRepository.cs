@@ -26,5 +26,16 @@ namespace OmniCore.Repository
         }
 #endif
 
+        public async Task<User> GetUserByName(string username)
+        {
+            var c = await GetConnection();
+            return await c.Table<User>().FirstOrDefaultAsync(x => x.Name == username);
+        }
+
+        public async Task<List<User>> GetUsers(string username)
+        {
+            var c = await GetConnection();
+            return await c.Table<User>().OrderBy(x => x.Name).ToListAsync();
+        }
     }
 }

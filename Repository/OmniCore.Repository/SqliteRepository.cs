@@ -61,10 +61,10 @@ namespace OmniCore.Repository
         {
             if (_connection == null)
             {
-                _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite
-                                                                                      | SQLiteOpenFlags.FullMutex);
+                _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
                 await MigrateRepository(_connection);
             }
+
         }
 
         protected virtual async Task MigrateRepository(SQLiteAsyncConnection connection)

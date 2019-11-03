@@ -23,19 +23,23 @@ namespace OmniCore.Repository
             using var ur = new UserRepository();
             using var mr = new MedicationRepository();
             using var upr = new UserProfileRepository();
-            var mq = await mr.ForQuery();
-            var urq = await ur.ForQuery();
 
-            var localUser = await urq.FirstAsync(u => u.Name == "TestUser");
+            var localUser = await ur.GetUserByName("TestUser");
 
-            var med = await mq.FirstOrDefaultAsync(m => m.Hormone == HormoneType.Insulin);
+            var meds = await mr.GetMedicationByHormone(HormoneType.Insulin);
 
-            var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = med.Id.Value, PodBasalSchedule = new [] 
+            var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = meds[0].Id.Value, PodBasalSchedule = new [] 
                 {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
                   1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m} });
             await upr.Create(profile);
 
         }
 #endif
+
+        public async Task<List<UserProfile>> GetProfilesByMedication(long userId, long medicationId)
+        {
+            var c = await GetConnection();
+            return await c.Table<UserProfile>().Where(p => p.MedicationId == medicationId && p.UserId == userId).ToListAsync();
+        }
     }
 }
