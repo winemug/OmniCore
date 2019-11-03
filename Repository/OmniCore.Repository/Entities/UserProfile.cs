@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using Newtonsoft.Json;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,7 +17,26 @@ namespace OmniCore.Repository.Entities
         public string PodTimezone { get; set; }
         public bool PodBasalAdjustForDstChanges { get; set; }
 
-        public decimal[] PodBasalSchedule { get; set; }
+        [Ignore]
+        public decimal[] PodBasalSchedule
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(PodBasalScheduleJson))
+                    return null;
+                else
+                    return JsonConvert.DeserializeObject<decimal[]>(PodBasalScheduleJson);
+            }
+            set
+            {
+                if (value == null)
+                    PodBasalScheduleJson = null;
+                else
+                    PodBasalScheduleJson = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        public string PodBasalScheduleJson { get; set; }
 
         public decimal? PodAlertReservoirLow { get; set; }
         public decimal? PodAlertBeforeExpiry { get; set; }

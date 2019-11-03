@@ -1,4 +1,5 @@
-﻿using OmniCore.Repository.Entities;
+﻿using Newtonsoft.Json;
+using OmniCore.Repository.Entities;
 using SQLite;
 using System;
 
@@ -9,7 +10,26 @@ namespace OmniCore.Repository.Entities
         [Indexed]
         public long RequestId {get; set;}
         public int UtcOffset { get; set; }
-        public decimal[] Schedule { get; set; }
+        [Ignore]
+        public decimal[] Schedule
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(ScheduleJson))
+                    return null;
+                else
+                    return JsonConvert.DeserializeObject<decimal[]>(ScheduleJson);
+            }
+            set
+            {
+                if (value == null)
+                    ScheduleJson = null;
+                else
+                    ScheduleJson = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        public string ScheduleJson { get; set; }
         public DateTimeOffset PodDateTime { get; set; }
     }
 }

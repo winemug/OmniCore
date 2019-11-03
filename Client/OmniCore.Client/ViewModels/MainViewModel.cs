@@ -1,5 +1,5 @@
 ﻿using OmniCore.Client.Views.Help;
-using OmniCore.Client.Views.Pod;
+using OmniCore.Client.Views.Pods;
 using OmniCore.Client.Views.Settings;
 using OmniCore.Client.Views.Test;
 using System;
@@ -50,16 +50,6 @@ namespace OmniCore.Client.ViewModels
                                                 Title = "Overview",
                                                 Content = new OverviewPage()
                                             },
-                                            new TabViewModel()
-                                            {
-                                                Title = "History",
-                                                Content = new ConversationsPage()
-                                            },
-                                            new TabViewModel()
-                                            {
-                                                Title = "Maintenance",
-                                                Content = new MaintenancePage()
-                                            }
                                         }
                 },
                 new FlyoutViewModel()

@@ -14,7 +14,7 @@ namespace OmniCore.Repository.Entities
         [Indexed]
         public bool Archived { get; set; }
 
-        public string[] ProviderSpecificRadioIds { get; set; }
+        public string ProviderSpecificRadioIds { get; set; }
 
         public uint? Lot { get; set; }
         public uint? Serial { get; set; }
@@ -82,7 +82,33 @@ namespace OmniCore.Repository.Entities
         public decimal? ExtendedBolusDelivered { get; set; }
         public decimal? ExtendedBolusRemaining { get; set; }
 
+        [Ignore]
         public BasalSchedule BasalSchedule { get; set; }
+
+        [Ignore]
         public ReminderConfiguration[] Reminders { get; set; }
+
+        public decimal? AlertReservoirLow { get; set; }
+        public decimal? AlertBeforeExpiry { get; set; }
+        public bool AlertExpired { get; set; }
+        public decimal? AlertBeforeAbsoluteExpiry { get; set; }
+
+        public bool DeactivateOnError { get; set; }
+
+        public bool BeepStartBolus { get; set; }
+        public bool BeepEndBolus { get; set; }
+
+        public bool BeepStartTempBasal { get; set; }
+        public bool BeepEndTempBasal { get; set; }
+        public decimal? BeepPeriodicTempBasalActive { get; set; }
+
+        public bool BeepStartExtendedBolus { get; set; }
+        public bool BeepEndExtendedBolus { get; set; }
+        public decimal? BeepPeriodicExtendedBolusActive { get; set; }
+
+        public bool UseLocalTimeZone { get; set; }
+        public bool BasalAdjustForLocalTimeZoneChanges { get; set; }
+        public string Timezone { get; set; }
+        public bool BasalAdjustForDstChanges { get; set; }
     }
 }

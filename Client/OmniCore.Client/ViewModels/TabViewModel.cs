@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.Views.Pod;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels

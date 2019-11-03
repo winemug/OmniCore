@@ -36,7 +36,7 @@ namespace OmniCore.Client
 
             UiSyncContext = SynchronizationContext.Current;
 #if DEBUG
-            MainPage = new MainDebugPage();
+            MainPage = new NavigationPage(new MainDebugPage());
 #else
             MainPage = new MainPage();
 #endif

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Client.Views.Pod
+namespace OmniCore.Client.Views.Pods
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     [Fody.ConfigureAwait(true)]

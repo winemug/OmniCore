@@ -59,7 +59,7 @@ namespace OmniCore.Repository
 
         public async Task Initialize()
         {
-            if (_connection != null)
+            if (_connection == null)
             {
                 _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite
                                                                                       | SQLiteOpenFlags.FullMutex);

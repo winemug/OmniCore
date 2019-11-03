@@ -23,17 +23,6 @@ namespace OmniCore.Repository
 
             var localUser = await this.Create(new User { Name = "TestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-20).AddDays(150), ManagedRemotely = false });
             var remoteUser = await this.Create(new User { Name = "RemoteTestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-8).AddDays(150), ManagedRemotely = true });
-
-            using var mr = new MedicationRepository();
-            using var upr = new UserProfileRepository();
-
-            var mq = await mr.ForQuery();
-            var med = await mq.FirstOrDefaultAsync(m => m.Hormone == HormoneType.Insulin);
-
-            var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = med.Id.Value, PodBasalSchedule = new [] 
-                {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
-                  1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m} });
-            await upr.Create(profile);
         }
 #endif
 

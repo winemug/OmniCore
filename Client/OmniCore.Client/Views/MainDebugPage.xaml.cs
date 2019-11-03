@@ -69,5 +69,10 @@ namespace OmniCore.Client.Views
             }
             var pod = await App.Instance.PodProvider.New(userProfile, radioList);
         }
+
+        private async void Button_Clicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PodDebugPage());
+        }
     }
 }

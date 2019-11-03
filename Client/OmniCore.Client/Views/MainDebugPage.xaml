@@ -10,6 +10,7 @@
             <Button Text="Start Search" Clicked="SearchStart_Clicked" IsEnabled="{Binding StartEnabled}"/>
             <Button Text="Stop Search" Clicked="SearchStop_Clicked" IsEnabled="{Binding StopEnabled}"/>
             <Button Text="Confirm Selection" Clicked="Confirm_Clicked" IsEnabled="{Binding ConfirmEnabled}"/>
+            <Button Text="Go to pods" Clicked="Button_Clicked"/>
             <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}" SelectionMode="Multiple" SelectionChanged="CollectionView_SelectionChanged">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>

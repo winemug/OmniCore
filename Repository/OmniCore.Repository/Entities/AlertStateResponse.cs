@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using Newtonsoft.Json;
+using SQLite;
 using System;
 
 namespace OmniCore.Repository.Entities
@@ -8,6 +9,25 @@ namespace OmniCore.Repository.Entities
         [Indexed]
         public long RequestId {get; set;}
         public uint AlertW278 { get; set; }
-        public uint[] AlertStates { get; set; }
+
+        [Ignore]
+        public int[] AlertStates
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(AlertStatesJson))
+                    return null;
+                else
+                    return JsonConvert.DeserializeObject<int[]>(AlertStatesJson);
+            }
+            set
+            {
+                if (value == null)
+                    AlertStatesJson = null;
+                else
+                    AlertStatesJson = JsonConvert.SerializeObject(value);
+            }
+        }
+        public string AlertStatesJson { get; set; }
     }
 }
