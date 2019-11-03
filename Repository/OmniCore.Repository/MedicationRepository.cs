@@ -27,7 +27,7 @@ namespace OmniCore.Repository
 
             foreach(var med in meds)
             {
-                await base.Create(med);
+                await this.Create(med);
             }
         }
     }
