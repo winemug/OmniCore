@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Repository.Enums;
+using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
     public class ReminderConfiguration : Entity
     {
+        [Indexed]
+        public int RequestId { get; set; }
         public bool IsTriggered { get; }
         public ReminderSlot Slot { get; }
         public bool Active { get; }

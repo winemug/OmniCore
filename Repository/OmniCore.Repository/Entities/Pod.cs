@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
 using OmniCore.Repository.Enums;
+using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
     public class Pod : UpdateableEntity
     {
+        [Indexed]
+        public long IndividualId { get; set; }
+
         public long MedicationId { get; set; }
         public Guid? PodUniqueId { get; set; }
+
+        [Indexed]
         public bool Archived { get; set; }
+
         public string[] ProviderSpecificRadioIds { get; set; }
 
         public uint? Lot { get; set; }

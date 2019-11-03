@@ -1,10 +1,12 @@
 ﻿using System;
 using OmniCore.Repository.Enums;
+using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
     public class PodStatus : Entity
     {
+        [Indexed]
         public long RequestId {get; set;}
         public bool Faulted { get; set; }
         public decimal NotDeliveredUnits { get; set; }

@@ -4,12 +4,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Repository.Enums;
+using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
     public class PodRequest : UpdateableEntity
     {
+        [Indexed]
         public long PodId { get; set; }
+        [Indexed]
         public RequestState RequestStatus { get; set; }
         public RequestType RequestType { get; set; }
         public string Parameters { get; set; }

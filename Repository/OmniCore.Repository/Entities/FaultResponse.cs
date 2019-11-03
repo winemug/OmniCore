@@ -1,10 +1,12 @@
 ﻿using OmniCore.Repository.Enums;
+using SQLite;
 using System;
 
 namespace OmniCore.Repository.Entities
 {
     public class FaultResponse : Entity
     {
+        [Indexed]
         public long RequestId { get; set; }
         public int FaultCode { get; set; }
         public int FaultRelativeTime { get; set; }

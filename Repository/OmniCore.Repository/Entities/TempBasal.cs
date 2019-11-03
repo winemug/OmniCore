@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,7 @@ namespace OmniCore.Repository.Entities
 {
     public class TempBasal : UpdateableEntity
     {
+        [Indexed]
         public long RequestId { get; set; }
         public int RequestedDurationMinutes { get; set; }
         public DateTimeOffset? ActualDuration { get; set; }

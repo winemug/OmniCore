@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Eros.Tests", "Pod\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Repository", "Repository\OmniCore.Repository\OmniCore.Repository.csproj", "{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Therapy", "Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj", "{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		badbg|Any CPU = badbg|Any CPU
@@ -69,6 +71,12 @@ Global
 		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B2D6156-B44A-40CF-8BAC-06104ECF1AC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.badbg|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.badbg|Any CPU.Build.0 = Debug|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A8A5CFC-6889-4C66-AB0E-82CC579690FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
