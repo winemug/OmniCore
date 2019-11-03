@@ -35,7 +35,11 @@ namespace OmniCore.Client
             InitializeComponent();
 
             UiSyncContext = SynchronizationContext.Current;
+#if DEBUG
+            MainPage = new MainDebugPage();
+#else
             MainPage = new MainPage();
+#endif
 
             //OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             Logger.Information("OmniCore App initialized");
