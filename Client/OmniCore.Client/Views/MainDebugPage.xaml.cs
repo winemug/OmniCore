@@ -58,7 +58,9 @@ namespace OmniCore.Client.Views
 
         private async void Confirm_Clicked(object sender, EventArgs e)
         {
-            var upr = new UserProfileRepository();
+            using var ur = new UserRepository();
+            var user = await ur.GetUserByName("TestUser");
+
             var q = await upr.ForQuery();
             var userProfile = await q.FirstAsync();
 

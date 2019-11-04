@@ -81,9 +81,13 @@
     <EmbeddedResource Update="Views\Test\TestPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\Users\NewUser.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Repositories\" />
+    <Folder Include="ViewModels\Users\" />
   </ItemGroup>
 </Project>
