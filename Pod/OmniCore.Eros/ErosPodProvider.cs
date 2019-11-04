@@ -35,45 +35,55 @@ namespace OmniCore.Eros
 
         public async Task<Pod> GetActivePod()
         {
-            using var pr = new PodRepository();
-            var pods = await pr.GetActivePods();
-            return pods.OrderByDescending(p => p.Created).FirstOrDefault();
+            using(var pr = new PodRepository())
+            {
+                var pods = await pr.GetActivePods();
+                return pods.OrderByDescending(p => p.Created).FirstOrDefault();
+            }
         }
 
         public async Task<List<Pod>> GetActivePods()
         {
-            using var pr = new PodRepository();
-            return (await pr.GetActivePods())
-                .OrderBy(p => p.Created).ToList();
+            using(var pr = new PodRepository())
+            {
+                return (await pr.GetActivePods())
+                    .OrderBy(p => p.Created).ToList();
+            }
         }
 
         public async Task Archive(Pod pod)
         {
-            using var pr = new PodRepository();
-            pod.Archived = true;
-            await pr.CreateOrUpdate(pod);
+            using(var pr = new PodRepository())
+            {
+                pod.Archived = true;
+                await pr.CreateOrUpdate(pod);
+            }
         }
 
         public async Task<Pod> New(UserProfile up, List<IRadio> radios)
         {
-            using var pr = new PodRepository();
-            var pod = new Pod
+            using(var pr = new PodRepository())
             {
-                UserProfileId = up.Id.Value,
-                PodUniqueId = Guid.NewGuid(),
-                ProviderSpecificRadioIds = string.Join(',', radios.Select(r => r.ProviderSpecificId)),
-                RadioAddress = GenerateRadioAddress()
-            };
-            return await pr.CreateOrUpdate(pod);
+                var pod = new Pod
+                {
+                    UserProfileId = up.Id.Value,
+                    PodUniqueId = Guid.NewGuid(),
+                    ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId)),
+                    RadioAddress = GenerateRadioAddress()
+                };
+                return await pr.CreateOrUpdate(pod);
+            }
         }
 
         public async Task<Pod> Register(Pod pod, UserProfile up, List<IRadio> radios)
         {
-            using var pr = new PodRepository();
-            if (!pod.PodUniqueId.HasValue)
-                pod.PodUniqueId = Guid.NewGuid();
-            pod.ProviderSpecificRadioIds = string.Join(',', radios.Select(r => r.ProviderSpecificId));
-            return await pr.CreateOrUpdate(pod);
+            using(var pr = new PodRepository())
+            {
+                if (!pod.PodUniqueId.HasValue)
+                    pod.PodUniqueId = Guid.NewGuid();
+                pod.ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId));
+                return await pr.CreateOrUpdate(pod);
+            }
         }
 
         public IObservable<IRadio> ListAllRadios()
@@ -115,12 +125,14 @@ namespace OmniCore.Eros
         {
             if (!_requestProcessors.ContainsKey(podId))
             {
-                using var pr = new PodRepository();
-                var pod = await pr.Read(podId);
+                using(var pr = new PodRepository())
+                {
+                    var pod = await pr.Read(podId);
 
-                var erp = new ErosRequestProcessor();
-                await erp.Initialize(pod, _backgroundTaskFactory);
-                _requestProcessors.Add(podId, erp);
+                    var erp = new ErosRequestProcessor();
+                    await erp.Initialize(pod, _backgroundTaskFactory);
+                    _requestProcessors.Add(podId, erp);
+                }
             }
             return _requestProcessors[podId];
         }

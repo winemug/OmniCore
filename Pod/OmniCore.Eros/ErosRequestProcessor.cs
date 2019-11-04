@@ -26,26 +26,28 @@ namespace OmniCore.Eros
             RequestList = new ConcurrentBag<ErosRequest>();
             BackgroundTaskFactory = backgroundTaskFactory;
 
-            using var pr = new PodRequestRepository();
-            var pendingRequests = await pr.GetPendingRequests(Pod.Id.Value);
-            foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
+            using(var pr = new PodRequestRepository())
             {
-                switch (pendingRequest.RequestStatus)
+                var pendingRequests = await pr.GetPendingRequests(Pod.Id.Value);
+                foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
                 {
-                    case RequestState.Initializing:
-                        pendingRequest.RequestStatus = RequestState.Aborted;
-                        await pr.CreateOrUpdate(pendingRequest);
-                        break;
-                    case RequestState.Executing:
-                    case RequestState.TryCancelling:
-                        pendingRequest.RequestStatus = RequestState.AbortedWhileExecuting;
-                        await pr.CreateOrUpdate(pendingRequest);
-                        break;
-                    default:
-                        await QueueRequest(pendingRequest);
-                        break;
-                }
+                    switch (pendingRequest.RequestStatus)
+                    {
+                        case RequestState.Initializing:
+                            pendingRequest.RequestStatus = RequestState.Aborted;
+                            await pr.CreateOrUpdate(pendingRequest);
+                            break;
+                        case RequestState.Executing:
+                        case RequestState.TryCancelling:
+                            pendingRequest.RequestStatus = RequestState.AbortedWhileExecuting;
+                            await pr.CreateOrUpdate(pendingRequest);
+                            break;
+                        default:
+                            await QueueRequest(pendingRequest);
+                            break;
+                    }
                 
+                }
             }
         }
 
@@ -70,9 +72,11 @@ namespace OmniCore.Eros
 
             newRequest.Created = utcNow;
 
-            using var pr = new PodRequestRepository();
-            RequestList.Add(new ErosRequest(BackgroundTaskFactory, await pr.CreateOrUpdate(newRequest)));
-            await ProcessQueue();
+            using(var pr = new PodRequestRepository())
+            {
+                RequestList.Add(new ErosRequest(BackgroundTaskFactory, await pr.CreateOrUpdate(newRequest)));
+                await ProcessQueue();
+            }
         }
 
         private async Task ProcessQueue()
@@ -103,7 +107,7 @@ namespace OmniCore.Eros
 
                     if (stateBefore != request.Request.RequestStatus)
                     {
-                        using var pr = new PodRequestRepository();
+                        using(var pr = new PodRequestRepository())
                         await pr.CreateOrUpdate(request.Request);
                     }
                 }

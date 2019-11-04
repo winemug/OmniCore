@@ -20,18 +20,20 @@ namespace OmniCore.Repository
             if (rowCount > 0)
                 return;
 
-            using var ur = new UserRepository();
-            using var mr = new MedicationRepository();
-            using var upr = new UserProfileRepository();
+            using(var ur = new UserRepository())
+            using(var mr = new MedicationRepository())
+            using(var upr = new UserProfileRepository())
+            {
+                var localUser = await ur.GetUserByName("TestUser");
 
-            var localUser = await ur.GetUserByName("TestUser");
+                var meds = await mr.GetMedicationsByHormone(HormoneType.Insulin);
 
-            var meds = await mr.GetMedicationByHormone(HormoneType.Insulin);
+                var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = meds[0].Id.Value, PodBasalSchedule = new [] 
+                    {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
+                      1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m} });
+                await upr.Create(profile);
 
-            var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = meds[0].Id.Value, PodBasalSchedule = new [] 
-                {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
-                  1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m} });
-            await upr.Create(profile);
+            }
 
         }
 #endif

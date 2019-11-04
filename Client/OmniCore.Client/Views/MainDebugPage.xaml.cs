@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Interfaces;
 using OmniCore.Repository;
+using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -58,18 +59,27 @@ namespace OmniCore.Client.Views
 
         private async void Confirm_Clicked(object sender, EventArgs e)
         {
-            using var ur = new UserRepository();
-            var user = await ur.GetUserByName("TestUser");
-
-            var q = await upr.ForQuery();
-            var userProfile = await q.FirstAsync();
-
-            var radioList = new List<IRadio>();
-            foreach(IRadio radio in RadioCollection.SelectedItems)
+            using(var ur = new UserRepository())
+            using(var mr = new MedicationRepository())
+            using(var upr = new UserProfileRepository())
             {
-                radioList.Add(radio);
+                var user = await ur.GetUserByName("TestUser");
+
+                var radioList = new List<IRadio>();
+                foreach(IRadio radio in RadioCollection.SelectedItems)
+                {
+                    radioList.Add(radio);
+                }
+            
+                var meds = await mr.GetMedicationsByHormone(HormoneType.Insulin);
+                var med = meds.First();
+
+            
+                var profiles = await upr.GetProfilesByMedication(user.Id.Value, med.Id.Value);
+                var userProfile = profiles.First();
+
+                var pod = await App.Instance.PodProvider.New(userProfile, radioList);
             }
-            var pod = await App.Instance.PodProvider.New(userProfile, radioList);
         }
 
         private async void Button_Clicked(object sender, EventArgs e)

@@ -37,7 +37,7 @@ namespace OmniCore.Repository
             return await c.Table<Medication>().FirstOrDefaultAsync(x => x.Name == medName);
         }
 
-        public async Task<List<Medication>> GetMedicationByHormone(HormoneType hormone)
+        public async Task<List<Medication>> GetMedicationsByHormone(HormoneType hormone)
         {
             var c = await GetConnection();
             return await c.Table<Medication>().Where(m => m.Hormone == hormone).OrderBy(x => x.Name).ToListAsync();
