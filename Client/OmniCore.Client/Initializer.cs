@@ -12,9 +12,5 @@ namespace OmniCore.Client
             container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
             OmniCore.Eros.Initializer.RegisterTypes(container);
         }
-
-        private static void RegisterRepositories(IUnityContainer container)
-        {
-        }
     }
 }
