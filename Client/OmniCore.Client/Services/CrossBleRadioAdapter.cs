@@ -59,7 +59,7 @@ namespace OmniCore.Client.Services
                         {
                             ScanType = BleScanType.Balanced,
                             ServiceUuids = new List<Guid>() {serviceId},
-                            AndroidUseScanBatching = true
+                            AndroidUseScanBatching = false
                         }).Subscribe((scanResult) =>
                         {
                             if (!searchResults.Contains(scanResult.Device.Uuid))

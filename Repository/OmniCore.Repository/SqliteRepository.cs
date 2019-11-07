@@ -1,6 +1,7 @@
 ﻿using OmniCore.Repository.Entities;
 using SQLite;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
@@ -34,6 +35,8 @@ namespace OmniCore.Repository
 
         public readonly string DbPath;
 
+        private static bool Migrated = false;
+
         public async Task<SQLiteAsyncConnection> GetConnection()
         {
             if (_connection == null)
@@ -62,7 +65,12 @@ namespace OmniCore.Repository
             if (_connection == null)
             {
                 _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
-                await MigrateRepository(_connection);
+                var cwl = _connection.GetConnection();
+                if (!Migrated)
+                {
+                    Migrated = true;
+                    await MigrateRepository(_connection);
+                }
             }
 
         }

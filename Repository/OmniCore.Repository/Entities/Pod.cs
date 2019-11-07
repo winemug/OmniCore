@@ -18,14 +18,14 @@ namespace OmniCore.Repository.Entities
         public string RadioIdsJson { get; set; }
 
         [Ignore]
-        public int[] RadioIds
+        public long[] RadioIds
         {
             get
             {
                 if (String.IsNullOrEmpty(RadioIdsJson))
                     return null;
                 else
-                    return JsonConvert.DeserializeObject<int[]>(RadioIdsJson);
+                    return JsonConvert.DeserializeObject<long[]>(RadioIdsJson);
             }
             set
             {

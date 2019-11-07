@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Repository.Entities;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IRadioProvider
     {
-        IObservable<IRadio> ListRadios();
+        IObservable<Radio> ListRadios();
         Task<IRadioPeripheral> GetByProviderSpecificId(string id);
     }
 }

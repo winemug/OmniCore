@@ -1,11 +1,14 @@
 ﻿using OmniCore.Model.Interfaces;
 using OmniCore.Repository;
+using OmniCore.Repository.Entities;
 using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +20,7 @@ namespace OmniCore.Client.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainDebugPage : ContentPage
     {
-        public ObservableCollection<IRadio> Radios { get; set; }
+        public ObservableCollection<Radio> Radios { get; set; }
         public bool StartEnabled { get; set; }
         public bool StopEnabled { get; set; }
         public bool ConfirmEnabled { get; set; }
@@ -25,7 +28,7 @@ namespace OmniCore.Client.Views
         public MainDebugPage()
         {
             InitializeComponent();
-            Radios = new ObservableCollection<IRadio>();
+            Radios = new ObservableCollection<Radio>();
             StartEnabled = true;
             StopEnabled = false;
             ConfirmEnabled = false;
@@ -38,10 +41,9 @@ namespace OmniCore.Client.Views
         {
             StartEnabled = false;
             Radios.Clear();
-            radioObservable = App.Instance.PodProvider.ListAllRadios().Subscribe( radio =>
-            {
-                Radios.Add(radio);
-            });
+            radioObservable = App.Instance.PodProvider.ListAllRadios()
+                .ObserveOn(App.Instance.UiSyncContext)
+                .Subscribe(radio => Radios.Add(radio));
             StopEnabled = true;
         }
 
@@ -65,8 +67,8 @@ namespace OmniCore.Client.Views
             {
                 var user = await ur.GetUserByName("TestUser");
 
-                var radioList = new List<IRadio>();
-                foreach(IRadio radio in RadioCollection.SelectedItems)
+                var radioList = new List<Radio>();
+                foreach(Radio radio in RadioCollection.SelectedItems)
                 {
                     radioList.Add(radio);
                 }

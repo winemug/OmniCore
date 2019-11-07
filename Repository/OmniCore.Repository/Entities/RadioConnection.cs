@@ -1,18 +1,17 @@
-﻿using SQLite;
+﻿using OmniCore.Repository.Enums;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace OmniCore.Repository.Entities
 {
-    public class RadioConnectionLog : Entity
+    public class RadioConnection : Entity
     {
         [Indexed]
         public long RadioId { get; set; }
-        public long PodId { get; set; }
-        public bool ConnectEvent { get; set; }
-        public bool DisconnectEvent { get; set; }
-        public bool CommandEvent { get; set; }
+        public long? PodId { get; set; } 
+        public RadioConnectionEvent EventType { get; set; }
         public bool Successful { get; set; }
         public string ErrorText { get; set; }
         public byte[] Command { get; set; }

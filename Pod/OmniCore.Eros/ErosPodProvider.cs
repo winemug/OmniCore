@@ -60,7 +60,7 @@ namespace OmniCore.Eros
             }
         }
 
-        public async Task<Pod> New(UserProfile up, List<IRadio> radios)
+        public async Task<Pod> New(UserProfile up, List<Radio> radios)
         {
             using(var pr = new PodRepository())
             {
@@ -68,27 +68,27 @@ namespace OmniCore.Eros
                 {
                     UserProfileId = up.Id.Value,
                     PodUniqueId = Guid.NewGuid(),
-                    //RadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId)),
+                    RadioIds = radios.Select(r => r.Id.Value).ToArray(),
                     RadioAddress = GenerateRadioAddress()
                 };
                 return await pr.CreateOrUpdate(pod);
             }
         }
 
-        public async Task<Pod> Register(Pod pod, UserProfile up, List<IRadio> radios)
+        public async Task<Pod> Register(Pod pod, UserProfile up, List<Radio> radios)
         {
             using(var pr = new PodRepository())
             {
                 if (!pod.PodUniqueId.HasValue)
                     pod.PodUniqueId = Guid.NewGuid();
-                //pod.ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId));
+                pod.RadioIds = radios.Select(r => r.Id.Value).ToArray();
                 return await pr.CreateOrUpdate(pod);
             }
         }
 
-        public IObservable<IRadio> ListAllRadios()
+        public IObservable<Radio> ListAllRadios()
         {
-            return Observable.Create<IRadio>((IObserver<IRadio> observer) =>
+            return Observable.Create<Radio>((IObserver<Radio> observer) =>
             {
                 var disposables = new List<IDisposable>();
                 foreach (var radioProvider in _radioProviders)

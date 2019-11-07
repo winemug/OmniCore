@@ -39,8 +39,8 @@
     </MonoDroidExtraArgs>
     <JavaMaximumHeapSize>
     </JavaMaximumHeapSize>
-    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
-    <AndroidUseAapt2>true</AndroidUseAapt2>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <AndroidUseAapt2>false</AndroidUseAapt2>
     <AndroidDexTool>dx</AndroidDexTool>
     <AndroidEnableMultiDex>false</AndroidEnableMultiDex>
     <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
