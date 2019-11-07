@@ -1,5 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
-using OmniCore.Radio.RileyLink;
+using OmniCore.Radios.RileyLink;
 using System;
 using System.Collections.Generic;
 using System.Text;

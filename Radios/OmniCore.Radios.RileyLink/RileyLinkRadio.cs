@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IRadio
     {

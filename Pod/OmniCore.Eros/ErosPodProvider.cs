@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using OmniCore.Model;
 using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
-using OmniCore.Radio.RileyLink;
+using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
 

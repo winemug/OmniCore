@@ -146,10 +146,6 @@
       <Project>{a60e73f7-1000-436b-9ac9-e185f298eb66}</Project>
       <Name>OmniCore.Eros</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Radio\OmniCore.Radio.RileyLink\OmniCore.Radio.RileyLink.csproj">
-      <Project>{9d2e17a9-64e3-4d20-bd16-968665a907c3}</Project>
-      <Name>OmniCore.Radio.RileyLink</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Repository\OmniCore.Repository\OmniCore.Repository.csproj">
       <Project>{9b2d6156-b44a-40cf-8bac-06104ecf1ac8}</Project>
       <Name>OmniCore.Repository</Name>

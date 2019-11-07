@@ -1,11 +1,11 @@
 ﻿using OmniCore.Model.Interfaces;
-using OmniCore.Radio.RileyLink;
+using OmniCore.Radios.RileyLink;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Radios.RileyLink
 {
     public static class Initializer
     {

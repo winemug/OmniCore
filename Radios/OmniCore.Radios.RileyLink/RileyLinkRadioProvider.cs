@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
 
-namespace OmniCore.Radio.RileyLink
+namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioProvider : IRadioProvider
     {
