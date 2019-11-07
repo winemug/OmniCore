@@ -22,8 +22,10 @@
                 <Editor Grid.Row="0" Grid.Column="1"/>
                 <Label Text="Date of birth" FontSize="Large" Grid.Row="1" Grid.Column="0" VerticalTextAlignment="Center"/>
                 <DatePicker Grid.Row="1" Grid.Column="1"/>
-                <Label Text="Weight" FontSize="Large" Grid.Row="2" Grid.Column="0" VerticalTextAlignment="Center"/>
+                <Label Text="Height" FontSize="Large" Grid.Row="2" Grid.Column="0" VerticalTextAlignment="Center"/>
                 <Editor Grid.Row="2" Grid.Column="1"/>
+                <Label Text="Weight" FontSize="Large" Grid.Row="3" Grid.Column="0" VerticalTextAlignment="Center"/>
+                <Editor Grid.Row="3" Grid.Column="1"/>
             </Grid>
         </ScrollView>
     </ContentPage.Content>

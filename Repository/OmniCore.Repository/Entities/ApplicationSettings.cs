@@ -7,6 +7,10 @@ namespace OmniCore.Repository.Entities
 {
     public class ApplicationSettings : UpdateableEntity
     {
-        public bool AcceptCommandsFromAAPS { get; set; }
+        public bool RadioConnectionCheck { get; set; }
+
+        public int? RadioConnectionCheckInterval { get; set; }
+
+        public int? PodStatusUpdateInterval { get; set; }
     }
 }

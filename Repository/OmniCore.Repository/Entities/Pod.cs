@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using OmniCore.Repository.Enums;
 using SQLite;
 
@@ -14,7 +15,26 @@ namespace OmniCore.Repository.Entities
         [Indexed]
         public bool Archived { get; set; }
 
-        public string ProviderSpecificRadioIds { get; set; }
+        public string RadioIdsJson { get; set; }
+
+        [Ignore]
+        public int[] RadioIds
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(RadioIdsJson))
+                    return null;
+                else
+                    return JsonConvert.DeserializeObject<int[]>(RadioIdsJson);
+            }
+            set
+            {
+                if (value == null)
+                    RadioIdsJson = null;
+                else
+                    RadioIdsJson = JsonConvert.SerializeObject(value);
+            }
+        }
 
         public uint? Lot { get; set; }
         public uint? Serial { get; set; }

@@ -68,7 +68,7 @@ namespace OmniCore.Eros
                 {
                     UserProfileId = up.Id.Value,
                     PodUniqueId = Guid.NewGuid(),
-                    ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId)),
+                    //RadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId)),
                     RadioAddress = GenerateRadioAddress()
                 };
                 return await pr.CreateOrUpdate(pod);
@@ -81,7 +81,7 @@ namespace OmniCore.Eros
             {
                 if (!pod.PodUniqueId.HasValue)
                     pod.PodUniqueId = Guid.NewGuid();
-                pod.ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId));
+                //pod.ProviderSpecificRadioIds = string.Join(",", radios.Select(r => r.ProviderSpecificId));
                 return await pr.CreateOrUpdate(pod);
             }
         }
