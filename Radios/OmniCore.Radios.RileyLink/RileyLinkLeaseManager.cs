@@ -11,31 +11,31 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkLeaseManager
     {
-        private Guid PeripheralId;
+        private Radio RadioEntity;
         private RileyLinkRadioConnection RileyLinkRadioConnection;
         private IRadioAdapter RadioAdapter;
         private SemaphoreSlim RadioSemaphore;
 
-        private static Dictionary<Guid,RileyLinkLeaseManager> LeaseManagers
-            = new Dictionary<Guid, RileyLinkLeaseManager>();
+        private static Dictionary<string,RileyLinkLeaseManager> LeaseManagers
+            = new Dictionary<string, RileyLinkLeaseManager>();
 
 
-        public static async Task<RileyLinkLeaseManager> GetManager(IRadioAdapter radioAdapter, Guid peripheralId)
+        public static async Task<RileyLinkLeaseManager> GetManager(IRadioAdapter radioAdapter, Radio radioEntity)
         {
             lock(LeaseManagers)
             {
-                if (!LeaseManagers.ContainsKey(peripheralId))
+                if (!LeaseManagers.ContainsKey(radioEntity.ProviderSpecificId))
                 {
-                    LeaseManagers.Add(peripheralId, new RileyLinkLeaseManager(radioAdapter, peripheralId));
+                    LeaseManagers.Add(radioEntity.ProviderSpecificId, new RileyLinkLeaseManager(radioAdapter, radioEntity));
                 }
-                return LeaseManagers[peripheralId];
+                return LeaseManagers[radioEntity.ProviderSpecificId];
             }
         }
 
-        private RileyLinkLeaseManager(IRadioAdapter radioAdapter, Guid peripheralId)
+        private RileyLinkLeaseManager(IRadioAdapter radioAdapter, Radio radioEntity)
         {
             RadioAdapter = radioAdapter;
-            PeripheralId = peripheralId;
+            RadioEntity = radioEntity;
             RadioSemaphore = new SemaphoreSlim(1,1);
         }
 
@@ -55,13 +55,16 @@ namespace OmniCore.Radios.RileyLink
             {
                 if (RileyLinkRadioConnection == null)
                 {
-                    var peripheral = await RadioAdapter.GetPeripheral(PeripheralId, cancellationToken);
+                    var peripheral = await RadioAdapter.GetPeripheral(RadioEntity.DeviceId, cancellationToken);
                     if (peripheral == null)
                         return null;
-                    RileyLinkRadioConnection = new RileyLinkRadioConnection(peripheral);
+                    RileyLinkRadioConnection = await RileyLinkRadioConnection.CreateInstance(peripheral, RadioEntity, request);
                 }
             }
-            catch(OperationCanceledException) { }
+            catch(OperationCanceledException)
+            {
+                RileyLinkRadioConnection?.Dispose();
+            }
             finally
             {
                 RadioSemaphore.Release();

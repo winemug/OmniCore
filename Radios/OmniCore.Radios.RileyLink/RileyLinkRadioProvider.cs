@@ -76,39 +76,36 @@ namespace OmniCore.Radios.RileyLink
             }
             return retVal;
         }
-        public async Task<IRadioLease> GetLease(string providerSpecificId, PodRequest request, CancellationToken cancellationToken)
+        public async Task<IRadioLease> GetLease(Radio radioEntity, PodRequest request, CancellationToken cancellationToken)
         {
 
-            var peripheralId = GetPeripheralId(providerSpecificId);
+            var peripheralId = GetPeripheralId(radioEntity.ProviderSpecificId);
             if (!peripheralId.HasValue)
                 return null;
 
-            var leaseManager = await RileyLinkLeaseManager.GetManager(RadioAdapter, peripheralId.Value);
+            var leaseManager = await RileyLinkLeaseManager.GetManager(RadioAdapter, radioEntity);
 
             return await leaseManager.Acquire(request, cancellationToken);
         }
 
-        public async Task<IRadioLease> GetIndependentLease(string providerSpecificId, CancellationToken cancellationToken)
-        {
-            return null;
-        }
-
         private async Task<Radio> GetRadioEntity(IRadioPeripheral peripheral)
         {
-            var rlr = new RileyLinkRadioConnection(peripheral);
-
             using(var rr = new RadioRepository())
             {
-                var entity = await rr.GetByProviderSpecificId(rlr.ProviderSpecificId);
+                var psid = "RLL" + peripheral.PeripheralId.ToString("N");
+                var entity = await rr.GetByProviderSpecificId(psid);
                 if (entity == null)
                 {
+                    var gb = peripheral.PeripheralId.ToByteArray();
+                    var macid = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
                     entity = await rr.Create(new Radio
                     {
-                        DeviceId = rlr.DeviceId,
-                        DeviceName = rlr.DeviceName,
-                        DeviceType = rlr.DeviceType,
-                        ProviderSpecificId = rlr.ProviderSpecificId
-                    });
+                        DeviceId = peripheral.PeripheralId,
+                        DeviceIdReadable = macid,
+                        DeviceName = peripheral.PeripheralName,
+                        DeviceType = "RileyLink",
+                        ProviderSpecificId = psid
+                    });;
                 }
                 return entity;
             }

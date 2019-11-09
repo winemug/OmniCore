@@ -9,7 +9,8 @@ namespace OmniCore.Repository.Entities
     {
         [Indexed]
         public string ProviderSpecificId { get; set; }
-        public string DeviceId { get; set; }
+        public Guid DeviceId { get; set; }
+        public string DeviceIdReadable { get; set; }
         public string DeviceName { get; set; }
         public string DeviceType { get; set; }
     }

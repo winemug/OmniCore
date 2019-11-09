@@ -167,7 +167,7 @@ namespace OmniCore.Eros
             {
                 foreach(var re in Radios)
                 {
-                    leaseTasks.Add(radioProvider.GetLease(re.ProviderSpecificId, Request, cts.Token));
+                    leaseTasks.Add(radioProvider.GetLease(re, Request, cts.Token));
                 }
             }
 

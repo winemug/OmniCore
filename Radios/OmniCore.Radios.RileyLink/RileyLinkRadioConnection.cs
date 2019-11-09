@@ -1,4 +1,6 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Repository;
+using OmniCore.Repository.Entities;
 using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,32 +12,93 @@ namespace OmniCore.Radios.RileyLink
     public class RileyLinkRadioConnection : IRadioConnection
     {
         private IRadioPeripheral Peripheral;
-        public RileyLinkRadioConnection(IRadioPeripheral radioPeripheral)
+        private IDisposable ConnectedSubscription = null;
+        private IDisposable ConnectionFailedSubscription = null;
+        private IDisposable DisconnectedSubscription = null;
+
+        private Radio RadioEntity;
+        private PodRequest Request;
+        private long? PodId = null;
+        private long? RequestId = null;
+
+        public async static Task<RileyLinkRadioConnection> CreateInstance(IRadioPeripheral radioPeripheral, Radio radioEntity, PodRequest request)
         {
-            Peripheral = radioPeripheral;
+            var instance = new RileyLinkRadioConnection(radioPeripheral, radioEntity, request);
+            await instance.Initialize();
+            return instance;
+        }
+        private RileyLinkRadioConnection(IRadioPeripheral radioPeripheral, Radio radioEntity, PodRequest request)
+        {
+            RadioEntity = radioEntity;
+            Request = request;
         }
 
-        public string DeviceId
+        private async Task Initialize()
         {
-            get
+            ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
             {
-                var gb = Peripheral.PeripheralId.ToByteArray();
-                return $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
-            }
-        }
+                var rssi = await Peripheral.ReadRssi();
+                using (var rcr = new RadioConnectionRepository())
+                {
+                    await rcr.Create(new RadioConnection
+                    {
+                        RadioId = RadioEntity.Id.Value,
+                        PodId = Request?.PodId,
+                        RequestId = Request?.Id,
+                        EventType = RadioConnectionEvent.Connect,
+                        Successful = true,
+                        Rssi = rssi
+                    });
+                }
+            });
 
-        public string DeviceName => Peripheral.PeripheralName;
-        public string DeviceType => "RileyLink";
-        public string ProviderSpecificId => "RLL" + Peripheral.PeripheralId.ToString("N");
+            ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
+            {
+                using (var rcr = new RadioConnectionRepository())
+                {
+                    await rcr.Create(new RadioConnection
+                    {
+                        RadioId = RadioEntity.Id.Value,
+                        PodId = Request?.PodId,
+                        RequestId = Request?.Id,
+                        EventType = RadioConnectionEvent.Connect,
+                        Successful = false,
+                        ErrorText = err.Message
+                    });
+                }
+            });
+
+            DisconnectedSubscription = Peripheral.WhenDisconnected().Subscribe( async (_) =>
+            {
+                using (var rcr = new RadioConnectionRepository())
+                {
+                    await rcr.Create(new RadioConnection
+                    {
+                        RadioId = RadioEntity.Id.Value,
+                        PodId = Request?.PodId,
+                        RequestId = Request?.Id,
+                        EventType = RadioConnectionEvent.Disconnect,
+                        Successful = true
+                    });
+                }
+            });
+
+        }
 
         public async Task<bool> Connect()
         {
-            throw new NotImplementedException();
+            if (await Peripheral.IsConnected())
+            {
+                //TODO: 
+                return true;
+            }
+            else
+                return await Peripheral.Connect();
         }
 
         public async Task Disconnect()
         {
-            throw new NotImplementedException();
+            await Peripheral.Disconnect();
         }
 
         public async Task<bool> PrepareForMessageExchange()
@@ -50,7 +113,10 @@ namespace OmniCore.Radios.RileyLink
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Peripheral?.Dispose();
+            ConnectedSubscription?.Dispose();
+            ConnectionFailedSubscription?.Dispose();
+            DisconnectedSubscription?.Dispose();
         }
     }
 }

@@ -37,5 +37,19 @@ namespace OmniCore.Client.Extensions
             }
             return default(T);
         }
+
+        public static IObservable<T> WrapAndConvert<T,U>(this IObservable<U> observable, Func<U,T> typeConversion)
+        {
+            return Observable.Create<T>((observer) =>
+                {
+                    var subscription = observable.Subscribe((u) =>
+                    {
+                        observer.OnNext(typeConversion.Invoke(u));
+                    });
+
+                    return Disposable.Create( () => { subscription.Dispose(); });
+                });
+        }
+
     }
 }

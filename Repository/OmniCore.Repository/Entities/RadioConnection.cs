@@ -11,6 +11,7 @@ namespace OmniCore.Repository.Entities
         [Indexed]
         public long RadioId { get; set; }
         public long? PodId { get; set; } 
+        public long? RequestId { get; set; }
         public RadioConnectionEvent EventType { get; set; }
         public bool Successful { get; set; }
         public string ErrorText { get; set; }

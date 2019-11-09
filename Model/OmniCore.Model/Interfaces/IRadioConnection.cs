@@ -8,11 +8,6 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IRadioConnection : IDisposable
     {
-        string DeviceId { get; }
-        string DeviceName { get; }
-        string DeviceType { get; }
-        string ProviderSpecificId { get; }
-
         Task<bool> Connect();
         Task Disconnect();
         Task<bool> PrepareForMessageExchange();
