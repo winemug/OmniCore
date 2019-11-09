@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IRadio
+    public interface IRadioConnection : IDisposable
     {
         string DeviceId { get; }
         string DeviceName { get; }
         string DeviceType { get; }
         string ProviderSpecificId { get; }
-        Task Connect();
+
+        Task<bool> Connect();
         Task Disconnect();
-        int Rssi { get; }
-        Task PrepareForMessageExchange();
+        Task<bool> PrepareForMessageExchange();
         Task<IMessage> ExchangeMessages(IMessage messageToSend, TxPower? TxLevel = null);
     }
 }

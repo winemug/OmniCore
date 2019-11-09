@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -10,88 +10,235 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using SQLite;
 using OmniCore.Repository.Entities;
+using OmniCore.Repository;
 
 namespace OmniCore.Eros
 {
     public class ErosRequest : IDisposable
     {
-        public TaskCompletionSource<bool> TaskCompletionSource { get; private set; }
-        public CancellationTokenSource CancellationTokenSource { get; private set; }
-        public IBackgroundTask BackgroundTask  { get; }
-        public PodRequest Request { get; }
-        public bool IsActive
+        private TaskCompletionSource<bool> TaskCompletionSource;
+        private CancellationTokenSource CancellationTokenSource;
+        private IBackgroundTask BackgroundTask;
+        private IBackgroundTaskFactory BackgroundTaskFactory;
+        public PodRequest Request { get; private set; }
+        private SemaphoreSlim RequestActionSemaphore;
+        private IRadioProvider[] RadioProviders;
+        private Pod Pod;
+        private Radio[] Radios;
+
+        public async Task<bool> IsActive()
         {
-            get
+            return await ExecuteSynchronously( async () =>
             {
                 if (TaskCompletionSource == null)
                     return false;
 
                 return !TaskCompletionSource.Task.IsCompleted;
-            }
+            });
         }
-        public bool IsWaitingForScheduledExecution
+        public async Task<bool> IsWaitingForScheduledExecution()
         {
-            get
-            {
-                return IsActive && BackgroundTask.IsScheduled;
-            }
+            return await IsActive() && BackgroundTask.IsScheduled;
         }
 
-        public ErosRequest(IBackgroundTaskFactory backgroundTaskFactory, PodRequest request)
+        public ErosRequest(IBackgroundTaskFactory backgroundTaskFactory, IRadioProvider[] radioProviders, PodRequest request)
         {
-            BackgroundTask = backgroundTaskFactory.CreateBackgroundTask(async () => await ExecuteRequest());
+            RequestActionSemaphore = new SemaphoreSlim(1,1);
+            BackgroundTaskFactory = backgroundTaskFactory;
+            RadioProviders = radioProviders;
             Request = request;
         }
 
         public void Dispose()
         {
+            //TODO
             CancellationTokenSource?.Dispose();
         }
 
-        public void Run()
+        public async Task<bool> Run()
         {
-            TaskCompletionSource = new TaskCompletionSource<bool>();
+            return await ExecuteSynchronously(
+                async () =>
+                {
+                    TaskCompletionSource = new TaskCompletionSource<bool>();
+                    CancellationTokenSource?.Dispose();
+                    CancellationTokenSource = new CancellationTokenSource();
+                    BackgroundTask?.Dispose();
+                    BackgroundTask = BackgroundTaskFactory.CreateBackgroundTask(async () => await ExecuteBackgroundTask(CancellationTokenSource.Token));
 
-            CancellationTokenSource?.Dispose();
-            CancellationTokenSource = new CancellationTokenSource();
+                    using (var pr = new PodRepository())
+                    {
+                        Pod = await pr.Read(Request.PodId);
+                    }
+                    using (var rr = new RadioRepository())
+                    {
+                        Radios = new Radio[Pod.RadioIds.Length];
+                        for(int i=0; i<Radios.Length; i++)
+                            Radios[i] = await rr.Read(Pod.RadioIds[i]);
+                    }
 
-            if (Request.StartEarliest.HasValue)
-            {
-                BackgroundTask.RunScheduled(Request.StartEarliest.Value, true);
-            }
-            else
-            {
-                BackgroundTask.Run(true);
-            }
+                    if (Request.StartEarliest.HasValue
+                        && await BackgroundTask.RunScheduled(Request.StartEarliest.Value, true))
+                    {
+                        await UpdateStatus(RequestState.Scheduled);
+                        return true;
+                    }
+                    else if (await BackgroundTask.Run(true))
+                    {
+                        return true;
+                    }
+                    TaskCompletionSource.TrySetResult(false);
+                    return false;
+                });
         }
 
-        public bool TryCancelScheduledWait()
+        public async Task<bool> TryCancelScheduledWait()
         {
-            if (BackgroundTask.IsScheduled && BackgroundTask.CancelScheduledWait())
-            {
-                TaskCompletionSource = null;
-                return true;
-            }
-            return false;
+            return await ExecuteSynchronously(async () => 
+                {
+                    if (BackgroundTask.IsScheduled && await BackgroundTask.CancelScheduledWait())
+                    {
+                        await UpdateStatus(RequestState.Canceled);
+                        TaskCompletionSource.TrySetResult(true);
+                        return true;
+                    }
+                    return false;
+                });
         }
 
-        private async Task ExecuteRequest()
+        private async Task ExecuteBackgroundTask(CancellationToken cancellationToken)
         {
             try
             {
+                // check request expiry
+                ImmediateCancelIfRequested(cancellationToken);
+                await ExecuteSynchronously(async () =>
+                {
+                    var now = DateTimeOffset.UtcNow;
+                    if (Request.StartLatest.HasValue && Request.StartLatest.Value < now)
+                    {
+                        await UpdateStatus(RequestState.Expired);
+                        TaskCompletionSource.TrySetResult(false);
+                        return;
+                    }
+                    else
+                    {
+                        await UpdateStatus(RequestState.Initializing);
+                    }
+                });
+
+                // get radio device
+                ImmediateCancelIfRequested(cancellationToken);
+
 
             }
-            catch(OperationCanceledException oce)
+            catch (OperationCanceledException oce)
             {
-
+                await ExecuteSynchronously(async () =>
+                {
+                    await UpdateStatus(RequestState.Canceled);
+                    TaskCompletionSource.TrySetResult(true);
+                });
             }
-            catch(AggregateException ae)
+            catch (AggregateException ae)
             {
-
+                await ExecuteSynchronously(async () =>
+                {
+                    await UpdateStatus(RequestState.Failed);
+                    TaskCompletionSource.TrySetResult(false);
+                });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
+                await ExecuteSynchronously(async () =>
+                {
+                    await UpdateStatus(RequestState.Failed);
+                    TaskCompletionSource.TrySetResult(false);
+                });
+            }
+        }
 
+        private async Task<IRadioLease> GetRadioLease()
+        {
+            var cts = new CancellationTokenSource();
+
+            var leaseTasks = new List<Task<IRadioLease>>();
+            foreach(var radioProvider in RadioProviders)
+            {
+                foreach(var re in Radios)
+                {
+                    leaseTasks.Add(radioProvider.GetLease(re.ProviderSpecificId, Request, cts.Token));
+                }
+            }
+
+            IRadioLease lease = null;
+            while(lease == null && leaseTasks.Any())
+            {
+                var leaseTask = await Task.WhenAny(leaseTasks);
+
+                if (leaseTask != null)
+                {
+                    lease = await leaseTask;
+                    leaseTasks.Remove(leaseTask);
+
+                    if (lease != null)
+                    {
+                        cts.Cancel();
+                        leaseTasks.ForEach(async (lt) => (await lt)?.Dispose());
+                        return lease;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private void ImmediateCancelIfRequested(CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new OperationCanceledException();
+        }
+
+        private async Task<T> ExecuteSynchronously<T>(Func<Task<T>> function)
+        {
+            await RequestActionSemaphore.WaitAsync();
+            try
+            {
+                return await Task.Run( () => function.Invoke());
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                RequestActionSemaphore.Release();
+            }
+        }
+
+        private async Task<Task> ExecuteSynchronously(Action action)
+        {
+            await RequestActionSemaphore.WaitAsync();
+            try
+            {
+                return Task.Run(() => action);
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                RequestActionSemaphore.Release();
+            }
+        }
+
+        private async Task UpdateStatus(RequestState newState)
+        {
+            using(var prr = new PodRequestRepository())
+            {
+                this.Request.RequestStatus = newState;
+                await prr.CreateOrUpdate(this.Request);
             }
         }
 

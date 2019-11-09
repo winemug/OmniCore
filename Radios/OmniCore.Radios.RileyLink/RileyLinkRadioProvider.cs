@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
 using OmniCore.Repository;
@@ -11,52 +14,88 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioProvider : IRadioProvider
     {
-
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
-        private readonly IRadioAdapter _radioAdapter;
+        private readonly IRadioAdapter RadioAdapter;
 
         public RileyLinkRadioProvider(IRadioAdapter radioAdapter)
         {
-            _radioAdapter = radioAdapter;
+            RadioAdapter = radioAdapter;
         }
 
         public IObservable<Radio> ListRadios()
         {
-            return Observable.Create<Radio>((IObserver<Radio> observer) =>
+            return Observable.Create<Radio>(async (IObserver<Radio> observer) =>
             {
-                var disposable = _radioAdapter.ScanPeripherals(RileyLinkServiceUUID)
-                    .Subscribe(async peripheral =>
+                var peripheralIds  = new HashSet<Guid>();
+                var connectedPeripherals = await RadioAdapter.GetConnectedPeripherals(RileyLinkServiceUUID);
+                foreach(var connectedPeripheral in connectedPeripherals)
+                {
+                    if (!peripheralIds.Contains(connectedPeripheral.PeripheralId))
                     {
-                        var re = await GetRadioEntity(peripheral);
-                        using(var rcr = new RadioConnectionRepository())
-                        {
-                            await rcr.Create(new RadioConnection
-                            {
-                                RadioId = re.Id.Value,
-                                EventType = RadioConnectionEvent.Scan,
-                                Successful = true,
-                                Rssi = peripheral.Rssi
-                            });
-                        }
+                        peripheralIds.Add(connectedPeripheral.PeripheralId);
+                        var re = await GetRadioEntity(connectedPeripheral);
                         observer.OnNext(re);
+                    }
+                }
+
+                var scanner = RadioAdapter.ScanPeripherals(RileyLinkServiceUUID)
+                    .Subscribe(async peripheralResult =>
+                    {
+                        if (!peripheralIds.Contains(peripheralResult.RadioPeripheral.PeripheralId))
+                        {
+                            peripheralIds.Add(peripheralResult.RadioPeripheral.PeripheralId);
+                            var re = await GetRadioEntity(peripheralResult.RadioPeripheral);
+                            using(var rcr = new RadioConnectionRepository())
+                            {
+                                await rcr.Create(new RadioConnection
+                                {
+                                    RadioId = re.Id.Value,
+                                    EventType = RadioConnectionEvent.Scan,
+                                    Successful = true,
+                                    Rssi = peripheralResult.Rssi
+                                });
+                            }
+                            observer.OnNext(re);
+                        }
                     });
-                return Disposable.Create(() => { disposable.Dispose(); });
+                return Disposable.Create(() => { scanner.Dispose(); });
             });
         }
 
-        public async Task<IRadioPeripheral> GetByProviderSpecificId(string id)
+        private Guid? GetPeripheralId(string providerSpecificId)
         {
-            if (!id.StartsWith("RLL"))
+            Guid? retVal= null;
+            if (providerSpecificId == null && providerSpecificId.Length > 3 && providerSpecificId.StartsWith("RLL"))
+            {
+                Guid val;
+                if (Guid.TryParse(providerSpecificId.Substring(3), out val))
+                {
+                    retVal = val;
+                }
+            }
+            return retVal;
+        }
+        public async Task<IRadioLease> GetLease(string providerSpecificId, PodRequest request, CancellationToken cancellationToken)
+        {
+
+            var peripheralId = GetPeripheralId(providerSpecificId);
+            if (!peripheralId.HasValue)
                 return null;
 
-            var peripheralId = Guid.Parse(id.Substring(3));
-            return await _radioAdapter.GetPeripheral(peripheralId);
+            var leaseManager = await RileyLinkLeaseManager.GetManager(RadioAdapter, peripheralId.Value);
+
+            return await leaseManager.Acquire(request, cancellationToken);
+        }
+
+        public async Task<IRadioLease> GetIndependentLease(string providerSpecificId, CancellationToken cancellationToken)
+        {
+            return null;
         }
 
         private async Task<Radio> GetRadioEntity(IRadioPeripheral peripheral)
         {
-            var rlr = new RileyLinkRadio(peripheral);
+            var rlr = new RileyLinkRadioConnection(peripheral);
 
             using(var rr = new RadioRepository())
             {
@@ -74,6 +113,5 @@ namespace OmniCore.Radios.RileyLink
                 return entity;
             }
         }
-
     }
 }

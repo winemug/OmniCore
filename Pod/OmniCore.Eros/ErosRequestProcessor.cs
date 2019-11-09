@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
+using OmniCore.Model.Exceptions;
 
 namespace OmniCore.Eros
 {
@@ -19,8 +20,9 @@ namespace OmniCore.Eros
         private ConcurrentBag<ErosRequest> RequestList;
         private SemaphoreSlim RequestSemaphore = new SemaphoreSlim(1,1);
         private IBackgroundTaskFactory BackgroundTaskFactory;
+        private IRadioProvider[] RadioProviders;
 
-        public async Task Initialize(Pod pod, IBackgroundTaskFactory backgroundTaskFactory)
+        public async Task Initialize(Pod pod, IBackgroundTaskFactory backgroundTaskFactory, IRadioProvider[] radioProviders)
         {
             Pod = pod;
             RequestList = new ConcurrentBag<ErosRequest>();
@@ -38,7 +40,7 @@ namespace OmniCore.Eros
                             await pr.CreateOrUpdate(pendingRequest);
                             break;
                         case RequestState.Executing:
-                        case RequestState.TryCancelling:
+                        case RequestState.TryingToCancel:
                             pendingRequest.RequestStatus = RequestState.AbortedWhileExecuting;
                             await pr.CreateOrUpdate(pendingRequest);
                             break;
@@ -67,14 +69,17 @@ namespace OmniCore.Eros
 
             if (!newRequest.StartLatest.HasValue)
             {
-                newRequest.StartLatest = DateTimeOffset.UtcNow.AddMinutes(30);
+                if (newRequest.StartEarliest.HasValue)
+                    newRequest.StartLatest = newRequest.StartEarliest.Value.AddMinutes(30);
+                else
+                    newRequest.StartLatest = utcNow.AddMinutes(30);
             }
 
             newRequest.Created = utcNow;
 
             using(var pr = new PodRequestRepository())
             {
-                RequestList.Add(new ErosRequest(BackgroundTaskFactory, await pr.CreateOrUpdate(newRequest)));
+                RequestList.Add(new ErosRequest(BackgroundTaskFactory, RadioProviders, await pr.CreateOrUpdate(newRequest)));
                 await ProcessQueue();
             }
         }
@@ -115,12 +120,14 @@ namespace OmniCore.Eros
                 ErosRequest requestCandidate = null;
                 var nextInQueue = pendingExecution.FirstOrDefault(r => r.Request.RequestStatus == RequestState.Queued);
                 var nextScheduled = pendingExecution.FirstOrDefault(r => r.Request.RequestStatus == RequestState.Scheduled);
-                var activeRequest = RequestList.FirstOrDefault(r => r.IsActive);
+                var activeRequest = RequestList.FirstOrDefault(r => r.IsActive().Result);
 
                 if (nextInQueue != null)
                 {
                     requestCandidate = nextInQueue;
-                    if (activeRequest != null && activeRequest.IsWaitingForScheduledExecution && activeRequest.TryCancelScheduledWait())
+                    if (activeRequest != null
+                        && await activeRequest.IsWaitingForScheduledExecution()
+                        && await activeRequest.TryCancelScheduledWait())
                     {
                         activeRequest = null;
                     }
@@ -128,8 +135,8 @@ namespace OmniCore.Eros
                 else if (nextScheduled != null)
                 {
                     requestCandidate = nextScheduled;
-                    if (activeRequest != null && activeRequest.IsWaitingForScheduledExecution && activeRequest.Request.Id != nextScheduled.Request.Id
-                        && activeRequest.TryCancelScheduledWait())
+                    if (activeRequest != null && await activeRequest.IsWaitingForScheduledExecution() && activeRequest.Request.Id != nextScheduled.Request.Id
+                        && await activeRequest.TryCancelScheduledWait())
                     {
                         activeRequest = null;
                     }
@@ -137,7 +144,10 @@ namespace OmniCore.Eros
 
                 if (activeRequest == null && requestCandidate != null)
                 {
-                    requestCandidate.Run();
+                    if (!await requestCandidate.Run())
+                    {
+                        throw new OmniCoreWorkflowException(FailureType.SystemError, "Couldn't create background tasks, queue aborted.");
+                    }
                 }
             }
             catch { throw; }

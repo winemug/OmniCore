@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
@@ -9,7 +10,8 @@ namespace OmniCore.Model.Interfaces
     {
         Task<bool> TryEnable();
         Task<bool> TryDisable();
-        IObservable<IRadioPeripheral> ScanPeripherals(Guid serviceId);
-        Task<IRadioPeripheral> GetPeripheral(Guid id);
+        IObservable<IRadioPeripheralScanResult> ScanPeripherals(Guid serviceId);
+        Task<List<IRadioPeripheral>> GetConnectedPeripherals(Guid serviceId);
+        Task<IRadioPeripheral> GetPeripheral(Guid id, CancellationToken cancellationToken);
     }
 }

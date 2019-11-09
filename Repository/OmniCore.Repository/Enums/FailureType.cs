@@ -21,6 +21,7 @@ namespace OmniCore.Repository.Enums
         WorkflowError,
         OperationInProgress,
         WakeLockNotAcquired,
+        SystemError,
         Unknown,
     }
 }

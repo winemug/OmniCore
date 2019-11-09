@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Threading.Tasks;
 using System.Text;
+using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 
@@ -8,18 +10,25 @@ namespace OmniCore.Mobile.Services
 {
     public class CrossBleRadioPeripheral : IRadioPeripheral
     {
-        private IDevice _bleDevice;
+        private IDevice BleDevice;
 
-        public CrossBleRadioPeripheral(IDevice bleDevice, int rssi)
+        public CrossBleRadioPeripheral(IDevice bleDevice)
         {
-            _bleDevice = bleDevice;
-            Rssi = rssi;
+            BleDevice = bleDevice;
         }
 
-        public int Rssi { get; }
+        public Guid PeripheralId => BleDevice.Uuid;
 
-        public Guid PeripheralId => _bleDevice.Uuid;
+        public string PeripheralName => BleDevice.Name;
 
-        public string PeripheralName => _bleDevice.Name;
+        public async Task<bool> IsConnected()
+        {
+            var connected = false;
+            if (BleDevice.IsConnected())
+            {
+
+            }
+            return connected;
+        }
     }
 }

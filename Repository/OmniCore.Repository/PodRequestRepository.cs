@@ -14,11 +14,7 @@ namespace OmniCore.Repository
             var c = await GetConnection();
             return await c.Table<PodRequest>()
                 .Where(r => r.Id == podId &&
-                (r.RequestStatus == RequestState.Scheduled
-                || r.RequestStatus == RequestState.Queued
-                || r.RequestStatus == RequestState.Initializing
-                || r.RequestStatus == RequestState.Executing
-                || r.RequestStatus == RequestState.TryCancelling))
+                (r.RequestStatus < RequestState.TryingToCancel))
                 .OrderBy(r => r.Created)
                 .ToListAsync();            
         }

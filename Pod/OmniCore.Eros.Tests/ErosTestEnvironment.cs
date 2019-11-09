@@ -34,24 +34,24 @@ namespace OmniCore.Eros.Tests
 
         public static void SetupRadioProvider(IUnityContainer container)
         {
-            var mockPeripheral = new Mock<IRadioPeripheral>();
+            var mockPeripheralResult = new Mock<IRadioPeripheralScanResult>();
 
             var mockAdapter = new Mock<IRadioAdapter>();
             mockAdapter.Setup(
                 a => a.ScanPeripherals(It.IsAny<Guid>()))
                     .Returns(
-                        Observable.Create<IRadioPeripheral>( (IObserver<IRadioPeripheral> observer) =>
+                        Observable.Create<IRadioPeripheralScanResult>( (IObserver<IRadioPeripheralScanResult> observer) =>
                         {
-                            observer.OnNext(mockPeripheral.Object);
+                            observer.OnNext(mockPeripheralResult.Object);
                             return Disposable.Empty;
                         }));
 
-            var mockRadio = new Mock<IRadio>();
+            var mockRadio = new Mock<Radio>();
 
             var mockProvider = new Mock<IRadioProvider>();
             mockProvider.Setup(p => p.ListRadios())
                 .Returns(
-                        Observable.Create<IRadio>((IObserver<IRadio> observer) =>
+                        Observable.Create<Radio>((IObserver<Radio> observer) =>
                         {
                             observer.OnNext(mockRadio.Object);
                             return Disposable.Empty;

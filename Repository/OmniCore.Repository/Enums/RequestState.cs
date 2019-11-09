@@ -9,9 +9,11 @@ namespace OmniCore.Repository.Enums
         Queued,
         Scheduled,
 
+        WaitingForRadioConnection,
+        WaitingToRetryPodConnection,
         Initializing,
         Executing,
-        TryCancelling,
+        TryingToCancel,
 
         Expired,
         Executed,

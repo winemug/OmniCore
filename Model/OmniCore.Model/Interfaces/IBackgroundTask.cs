@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IBackgroundTask
+    public interface IBackgroundTask : IDisposable
     {
-        void Run(bool tryRunUninterrupted = false);
-        void RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false);
+        Task<bool> Run(bool tryRunUninterrupted = false);
+        Task<bool> RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false);
         bool IsScheduled { get; }
         DateTimeOffset ScheduledTime { get; }
-        bool CancelScheduledWait();
+        Task<bool> CancelScheduledWait();
     }
 }

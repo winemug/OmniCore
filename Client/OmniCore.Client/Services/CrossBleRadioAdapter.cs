@@ -4,9 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Client.Extensions;
 using OmniCore.Mobile.Services;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
@@ -49,9 +51,17 @@ namespace OmniCore.Client.Services
             }
         }
 
-        public IObservable<IRadioPeripheral> ScanPeripherals(Guid serviceId)
+        public async Task<List<IRadioPeripheral>> GetConnectedPeripherals(Guid serviceId)
         {
-            return Observable.Create<IRadioPeripheral>((observer) =>
+            var connectedList = await CrossBleAdapter.Current.GetConnectedDevices(serviceId);
+
+            var devices = await CrossBleAdapter.Current.GetConnectedDevices(serviceId);
+            return devices.Select(d => new CrossBleRadioPeripheral(d)).ToList<IRadioPeripheral>();
+        }
+
+        public IObservable<IRadioPeripheralScanResult> ScanPeripherals(Guid serviceId)
+        {
+            return Observable.Create<IRadioPeripheralScanResult>((observer) =>
                 {
                     var searchResults = new HashSet<Guid>();
                     var scan = CrossBleAdapter.Current
@@ -65,7 +75,12 @@ namespace OmniCore.Client.Services
                             if (!searchResults.Contains(scanResult.Device.Uuid))
                             {
                                 searchResults.Add(scanResult.Device.Uuid);
-                                observer.OnNext(new CrossBleRadioPeripheral(scanResult.Device, scanResult.Rssi));
+                                var crossScanResult = new CrossBleScanResult
+                                    {
+                                        RadioPeripheral = new CrossBleRadioPeripheral(scanResult.Device),
+                                        Rssi = scanResult.Rssi
+                                        };
+                                observer.OnNext(crossScanResult );
                             }
                         });
 
@@ -74,38 +89,27 @@ namespace OmniCore.Client.Services
             );
         }
 
-        public async Task<IRadioPeripheral> GetPeripheral(Guid id)
+        public async Task<IRadioPeripheral> GetPeripheral(Guid id, CancellationToken cancellationToken)
         {
-            IDevice device = null;
-            int rssi = 0;
             try
             {
-                device = await CrossBleAdapter.Current.GetKnownDevice(id);
-            }
-            catch {}
+                var device = await CrossBleAdapter.Current.GetKnownDevice(id).RunAsyncWithTimeoutAndCancellation(TimeSpan.FromSeconds(20), cancellationToken);
 
-            if (device == null)
-            {
-                try
+                if (device == null)
                 {
-                    var devices = await CrossBleAdapter.Current.GetConnectedDevices();
-                    device = devices.FirstOrDefault(d => d.Uuid == id);
+                    device = await CrossBleAdapter.Current.ScanUntilDeviceFound(id).RunAsyncWithTimeoutAndCancellation(TimeSpan.FromSeconds(20), cancellationToken);
                 }
-                catch{ }
-            }
 
-            if (device == null)
+                if (device != null)
+                    return new CrossBleRadioPeripheral(device);
+            }
+            catch (TaskCanceledException)
             {
-                var scan = CrossBleAdapter.Current
-                    .ScanUntilDeviceFound(id).Subscribe((found) =>
-                    {
-                    });
-
             }
-            if (device == null)
-                return null;
-            else
-                return new CrossBleRadioPeripheral(device, rssi);
+
+            return null;
         }
+
+
     }
 }

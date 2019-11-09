@@ -7,39 +7,38 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadio : IRadio
+    public class RileyLinkRadioConnection : IRadioConnection
     {
-        private IRadioPeripheral _radioPeripheral;
-        public RileyLinkRadio(IRadioPeripheral radioPeripheral)
+        private IRadioPeripheral Peripheral;
+        public RileyLinkRadioConnection(IRadioPeripheral radioPeripheral)
         {
-            _radioPeripheral = radioPeripheral;
+            Peripheral = radioPeripheral;
         }
 
         public string DeviceId
         {
             get
             {
-                var gb = _radioPeripheral.PeripheralId.ToByteArray();
+                var gb = Peripheral.PeripheralId.ToByteArray();
                 return $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
             }
         }
 
-        public string DeviceName => _radioPeripheral.PeripheralName;
+        public string DeviceName => Peripheral.PeripheralName;
         public string DeviceType => "RileyLink";
-        public string ProviderSpecificId => "RLL" + _radioPeripheral.PeripheralId.ToString("N");
-        public int Rssi => _radioPeripheral.Rssi;
+        public string ProviderSpecificId => "RLL" + Peripheral.PeripheralId.ToString("N");
 
-        public Task Connect()
+        public async Task<bool> Connect()
         {
             throw new NotImplementedException();
         }
 
-        public Task Disconnect()
+        public async Task Disconnect()
         {
             throw new NotImplementedException();
         }
 
-        public Task PrepareForMessageExchange()
+        public async Task<bool> PrepareForMessageExchange()
         {
             throw new NotImplementedException();
         }
@@ -49,5 +48,9 @@ namespace OmniCore.Radios.RileyLink
             throw new NotImplementedException();
         }
 
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -130,7 +130,7 @@ namespace OmniCore.Eros
                     var pod = await pr.Read(podId);
 
                     var erp = new ErosRequestProcessor();
-                    await erp.Initialize(pod, _backgroundTaskFactory);
+                    await erp.Initialize(pod, _backgroundTaskFactory, _radioProviders);
                     _requestProcessors.Add(podId, erp);
                 }
             }
