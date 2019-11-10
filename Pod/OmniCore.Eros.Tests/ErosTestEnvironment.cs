@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using Unity;
 
 namespace OmniCore.Eros.Tests
@@ -38,7 +39,7 @@ namespace OmniCore.Eros.Tests
 
             var mockAdapter = new Mock<IRadioAdapter>();
             mockAdapter.Setup(
-                a => a.ScanPeripherals(It.IsAny<Guid>()))
+                a => a.ScanPeripherals(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                     .Returns(
                         Observable.Create<IRadioPeripheralScanResult>( (IObserver<IRadioPeripheralScanResult> observer) =>
                         {
@@ -49,7 +50,7 @@ namespace OmniCore.Eros.Tests
             var mockRadio = new Mock<Radio>();
 
             var mockProvider = new Mock<IRadioProvider>();
-            mockProvider.Setup(p => p.ListRadios())
+            mockProvider.Setup(p => p.ListRadios(It.IsAny<CancellationToken>()))
                 .Returns(
                         Observable.Create<Radio>((IObserver<Radio> observer) =>
                         {

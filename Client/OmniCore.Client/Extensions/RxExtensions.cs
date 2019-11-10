@@ -50,6 +50,5 @@ namespace OmniCore.Client.Extensions
                     return Disposable.Create( () => { subscription.Dispose(); });
                 });
         }
-
     }
 }

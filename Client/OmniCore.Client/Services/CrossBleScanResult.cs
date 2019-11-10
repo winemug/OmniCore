@@ -7,8 +7,9 @@ namespace OmniCore.Client.Services
 {
     public class CrossBleScanResult : IRadioPeripheralScanResult
     {
-        public IRadioPeripheral RadioPeripheral { get; set; }
-
+        public Guid Id { get; set; }
+        public string Name { get; set; }
         public int Rssi { get; set; }
+
     }
 }

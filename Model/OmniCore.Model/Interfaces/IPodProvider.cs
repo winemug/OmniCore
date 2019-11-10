@@ -19,6 +19,6 @@ namespace OmniCore.Model.Interfaces
         Task<bool> CancelRequest(PodRequest request);
         Task<List<PodRequest>> GetActiveRequests(Pod pod);
         Task<List<PodRequest>> GetActiveRequests();
-        IObservable<Radio> ListAllRadios();
+        IObservable<Radio> ListRadios();
     }
 }

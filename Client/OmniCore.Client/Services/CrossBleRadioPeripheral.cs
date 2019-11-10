@@ -4,25 +4,53 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Client.Extensions;
+using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 
-namespace OmniCore.Mobile.Services
+namespace OmniCore.Client.Services
 {
     public class CrossBleRadioPeripheral : IRadioPeripheral
     {
-        private IDevice BleDevice;
+        public IDevice BleDevice { get; private set; }
+
+        private SemaphoreSlim LeaseSemaphore;
+        public CrossBlePeripheralLease ActiveLease;
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
         {
             BleDevice = bleDevice;
+            LeaseSemaphore = new SemaphoreSlim(1, 1);
+            ActiveLease = null;
         }
 
         public Guid PeripheralId => BleDevice.Uuid;
 
         public string PeripheralName => BleDevice.Name;
+
+        public void SwitchToNewDevice(IDevice newBleDevice)
+        {
+            if (BleDevice.IsConnected())
+            {
+
+            }
+        }
+
+        public async Task<CrossBlePeripheralLease> AcquireLease(CancellationToken cancellationToken)
+        {
+            await LeaseSemaphore.WaitAsync(cancellationToken);
+            ActiveLease = new CrossBlePeripheralLease(this);
+            return ActiveLease;
+        }
+
+        public void Release()
+        {
+            ActiveLease = null;
+            LeaseSemaphore.Release();
+        }
 
         public async Task<bool> IsConnected()
         {
@@ -49,7 +77,8 @@ namespace OmniCore.Mobile.Services
 
         public async Task Disconnect()
         {
-            BleDevice.CancelConnection();
+            BleDevice?.CancelConnection();
+            BleDevice = null;
         }
 
         public async Task<int> ReadRssi()

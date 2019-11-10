@@ -12,6 +12,8 @@ using Unity;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Views;
 using OmniCore.Client.Constants;
+using System.IO;
+using System;
 
 namespace OmniCore.Client
 {
@@ -26,6 +28,10 @@ namespace OmniCore.Client
 
         public App(IUnityContainer container)
         {
+#if DEBUG
+            var sqlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
+            File.Delete(sqlPath);
+#endif
             Initializer.RegisterTypes(container);
 
             PodProvider = container.Resolve<IPodProvider>();

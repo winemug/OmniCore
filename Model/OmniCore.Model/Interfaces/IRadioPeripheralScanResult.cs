@@ -6,7 +6,8 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IRadioPeripheralScanResult
     {
-        IRadioPeripheral RadioPeripheral { get; }
+        Guid Id { get; }
+        string Name { get; }
         int Rssi { get; }
     }
 }

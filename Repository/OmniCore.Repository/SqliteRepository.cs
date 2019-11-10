@@ -97,6 +97,12 @@ namespace OmniCore.Repository
             return await c.Table<T>().FirstOrDefaultAsync(t => t.Id == entityId);
         }
 
+        public virtual async Task<List<T>> Read()
+        {
+            var c = await GetConnection();
+            return await c.Table<T>().ToListAsync();
+        }
+
         public virtual async Task<AsyncTableQuery<T>> ForQuery()
         {
             var c = await GetConnection();

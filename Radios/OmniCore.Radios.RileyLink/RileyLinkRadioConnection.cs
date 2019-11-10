@@ -5,35 +5,49 @@ using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioConnection : IRadioConnection
     {
-        private IRadioPeripheral Peripheral;
+        public IRadioPeripheralLease PeripheralLease { get;  }
+        private IRadioPeripheral Peripheral { get => PeripheralLease.Peripheral; }
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
 
         private Radio RadioEntity;
         private PodRequest Request;
-        private long? PodId = null;
-        private long? RequestId = null;
 
-        public async static Task<RileyLinkRadioConnection> CreateInstance(IRadioPeripheral radioPeripheral, Radio radioEntity, PodRequest request)
-        {
-            var instance = new RileyLinkRadioConnection(radioPeripheral, radioEntity, request);
-            await instance.Initialize();
-            return instance;
-        }
-        private RileyLinkRadioConnection(IRadioPeripheral radioPeripheral, Radio radioEntity, PodRequest request)
+        public RileyLinkRadioConnection(IRadioPeripheralLease radioPeripheralLease, Radio radioEntity, PodRequest request)
         {
             RadioEntity = radioEntity;
             Request = request;
+            PeripheralLease = radioPeripheralLease;
+            SubscribeToConnectionStates();
         }
 
-        private async Task Initialize()
+        public async Task<bool> Initialize(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<IMessage> ExchangeMessages(IMessage messageToSend, CancellationToken cancellationToken, TxPower? TxLevel = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            ConnectedSubscription?.Dispose();
+            ConnectionFailedSubscription?.Dispose();
+            DisconnectedSubscription?.Dispose();
+            PeripheralLease?.Dispose();
+        }
+
+        private void SubscribeToConnectionStates()
         {
             ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
             {
@@ -82,41 +96,10 @@ namespace OmniCore.Radios.RileyLink
                     });
                 }
             });
-
         }
 
-        public async Task<bool> Connect()
+        private async Task ConfigureRileyLink()
         {
-            if (await Peripheral.IsConnected())
-            {
-                //TODO: 
-                return true;
-            }
-            else
-                return await Peripheral.Connect();
-        }
-
-        public async Task Disconnect()
-        {
-            await Peripheral.Disconnect();
-        }
-
-        public async Task<bool> PrepareForMessageExchange()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IMessage> ExchangeMessages(IMessage messageToSend, TxPower? TxLevel = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            Peripheral?.Dispose();
-            ConnectedSubscription?.Dispose();
-            ConnectionFailedSubscription?.Dispose();
-            DisconnectedSubscription?.Dispose();
         }
     }
 }

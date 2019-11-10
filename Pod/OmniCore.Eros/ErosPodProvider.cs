@@ -86,25 +86,34 @@ namespace OmniCore.Eros
             }
         }
 
-        public IObservable<Radio> ListAllRadios()
+        public IObservable<Radio> ListRadios()
         {
-            return Observable.Create<Radio>((IObserver<Radio> observer) =>
+            return Observable.Create<Radio>(async (IObserver<Radio> observer) =>
             {
+                var cts = new CancellationTokenSource();
+                var ct = cts.Token;
+                var radioids = new ConcurrentDictionary<string,int>();
                 var disposables = new List<IDisposable>();
                 foreach (var radioProvider in _radioProviders)
                 {
-                    disposables.Add(radioProvider.ListRadios()
+                    disposables.Add(radioProvider.ListRadios(ct)
                         .Subscribe(radio =>
                         {
-                            observer.OnNext(radio);
-                        }));
+                            int unused;
+                            if (!radioids.TryGetValue(radio.ProviderSpecificId, out unused))
+                            {
+                                radioids.TryAdd(radio.ProviderSpecificId, 0);
+                                observer.OnNext(radio);
+                            }
+                        })) ;
                 }
 
                 return Disposable.Create(() =>
                 {
+                    cts.Cancel();
                     foreach(var disposable in disposables)
                         disposable.Dispose();
-
+                    cts.Dispose();
                 });
             });
         }

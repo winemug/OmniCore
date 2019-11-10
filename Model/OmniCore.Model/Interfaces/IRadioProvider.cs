@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces
 {
     public interface IRadioProvider
     {
-        IObservable<Radio> ListRadios();
-        Task<IRadioLease> GetLease(Radio radioEntity, PodRequest request, CancellationToken cancellationToken);
+        IObservable<Radio> ListRadios(CancellationToken cancellationToken);
+        Task<IRadioConnection> GetConnection(Radio radioEntity, PodRequest request, CancellationToken cancellationToken);
     }
 }

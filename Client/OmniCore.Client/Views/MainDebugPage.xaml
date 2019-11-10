@@ -4,29 +4,25 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.MainDebugPage">
+             x:Class="OmniCore.Client.Views.MainDebugPage"
+             Appearing="ContentPage_Appearing"
+             Disappearing="ContentPage_Disappearing">
     <ContentPage.Content>
-        <StackLayout>
-            <Button Text="Start Search" Clicked="SearchStart_Clicked" IsEnabled="{Binding StartEnabled}"/>
-            <Button Text="Stop Search" Clicked="SearchStop_Clicked" IsEnabled="{Binding StopEnabled}"/>
-            <Button Text="Confirm Selection" Clicked="Confirm_Clicked" IsEnabled="{Binding ConfirmEnabled}"/>
-            <Button Text="Go to pods" Clicked="Button_Clicked"/>
-            <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}" SelectionMode="Multiple" SelectionChanged="CollectionView_SelectionChanged">
+        <ScrollView>
+            <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
-                                <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                        <Label Text="{Binding DeviceType}" Grid.Column="0"/>
-                        <Label Text="{Binding DeviceName}" Grid.Column="1"/>
-                        <Label Text="{Binding DeviceId}" Grid.Column="2"/>
+                            <Label Text="{Binding DeviceIdReadable}" Grid.Column="0"/>
+                            <Button Text="Test" Command="{TemplateBinding TestCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-        </StackLayout>
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>

@@ -158,20 +158,20 @@ namespace OmniCore.Eros
             }
         }
 
-        private async Task<IRadioLease> GetRadioLease()
+        private async Task<IRadioConnection> GetRadioConnection()
         {
             var cts = new CancellationTokenSource();
 
-            var leaseTasks = new List<Task<IRadioLease>>();
+            var leaseTasks = new List<Task<IRadioConnection>>();
             foreach(var radioProvider in RadioProviders)
             {
                 foreach(var re in Radios)
                 {
-                    leaseTasks.Add(radioProvider.GetLease(re, Request, cts.Token));
+                    leaseTasks.Add(radioProvider.GetConnection(re, Request, cts.Token));
                 }
             }
 
-            IRadioLease lease = null;
+            IRadioConnection lease = null;
             while(lease == null && leaseTasks.Any())
             {
                 var leaseTask = await Task.WhenAny(leaseTasks);
