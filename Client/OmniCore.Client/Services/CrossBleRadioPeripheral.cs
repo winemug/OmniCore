@@ -18,13 +18,16 @@ namespace OmniCore.Client.Services
         public IDevice BleDevice { get; private set; }
 
         private SemaphoreSlim LeaseSemaphore;
+        private TaskCompletionSource<IDevice> DeviceChangedSource;
         public CrossBlePeripheralLease ActiveLease;
+
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
         {
             BleDevice = bleDevice;
             LeaseSemaphore = new SemaphoreSlim(1, 1);
             ActiveLease = null;
+            DeviceChangedSource = new TaskCompletionSource<IDevice>();
         }
 
         public Guid PeripheralId => BleDevice.Uuid;
@@ -33,9 +36,12 @@ namespace OmniCore.Client.Services
 
         public void SwitchToNewDevice(IDevice newBleDevice)
         {
-            if (BleDevice.IsConnected())
+            lock (this)
             {
-
+                BleDevice = newBleDevice;
+                var pendingSource = DeviceChangedSource;
+                DeviceChangedSource = new TaskCompletionSource<IDevice>();
+                pendingSource.TrySetResult(newBleDevice);
             }
         }
 
@@ -55,6 +61,58 @@ namespace OmniCore.Client.Services
         public async Task<bool> IsConnected()
         {
             return BleDevice.IsConnected();
+        }
+
+        public IObservable<IRadioPeripheral> WhenDeviceChanged()
+        {
+            return Observable.Create<IRadioPeripheral>(async (observer) =>
+            {
+                var cts = new CancellationTokenSource();
+                var cancelTask = Task.Delay(-1, cts.Token);
+                while (true)
+                {
+                    var newDeviceTask = DeviceChangedSource.Task;
+                    var resultTask = await Task.WhenAny(cancelTask, newDeviceTask);
+                    if (resultTask == cancelTask)
+                        break;
+                    if (await newDeviceTask != null)
+                    {
+                        observer.OnNext(this);
+                    }
+                }
+                cts.Dispose();
+                return Disposable.Create(() =>
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                });
+            });
+        }
+
+        public IObservable<IRadioPeripheral> WhenDeviceLost()
+        {
+            return Observable.Create<IRadioPeripheral>(async (observer) =>
+            {
+                var cts = new CancellationTokenSource();
+                var cancelTask = Task.Delay(-1, cts.Token);
+                while (true)
+                {
+                    var newDeviceTask = DeviceChangedSource.Task;
+                    var resultTask = await Task.WhenAny(cancelTask, newDeviceTask);
+                    if (resultTask == cancelTask)
+                        break;
+                    if (await newDeviceTask == null)
+                    {
+                        observer.OnNext(this);
+                    }
+                }
+                cts.Dispose();
+                return Disposable.Create(() =>
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                });
+            });
         }
 
         public IObservable<IRadioPeripheral> WhenConnected() =>

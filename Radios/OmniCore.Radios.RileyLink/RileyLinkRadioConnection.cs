@@ -17,6 +17,8 @@ namespace OmniCore.Radios.RileyLink
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
+        private IDisposable DeviceChangedSubscription = null;
+        private IDisposable DeviceLostSubscription = null;
 
         private Radio RadioEntity;
         private PodRequest Request;
@@ -26,6 +28,7 @@ namespace OmniCore.Radios.RileyLink
             RadioEntity = radioEntity;
             Request = request;
             PeripheralLease = radioPeripheralLease;
+            SubscribeToDeviceStates();
             SubscribeToConnectionStates();
         }
 
@@ -44,7 +47,22 @@ namespace OmniCore.Radios.RileyLink
             ConnectedSubscription?.Dispose();
             ConnectionFailedSubscription?.Dispose();
             DisconnectedSubscription?.Dispose();
+            DeviceChangedSubscription?.Dispose();
+            DeviceLostSubscription?.Dispose();
             PeripheralLease?.Dispose();
+        }
+
+        private void SubscribeToDeviceStates()
+        {
+            Peripheral.WhenDeviceChanged().Subscribe(async (_) =>
+            {
+
+            });
+
+            Peripheral.WhenDeviceLost().Subscribe(async (_) =>
+            {
+
+            });
         }
 
         private void SubscribeToConnectionStates()

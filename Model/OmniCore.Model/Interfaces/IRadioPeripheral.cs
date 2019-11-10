@@ -13,6 +13,8 @@ namespace OmniCore.Model.Interfaces
         IObservable<IRadioPeripheral> WhenConnected();
         IObservable<Exception> WhenConnectionFailed();
         IObservable<IRadioPeripheral> WhenDisconnected();
+        IObservable<IRadioPeripheral> WhenDeviceChanged();
+        IObservable<IRadioPeripheral> WhenDeviceLost();
         Task<bool> Connect();
         Task Disconnect();
         Task<int> ReadRssi();
