@@ -10,21 +10,9 @@ namespace OmniCore.Repository
 {
     public class UserRepository : SqliteRepositoryWithUpdate<User>
     {
-
-#if DEBUG
-        protected override async Task MigrateRepository(SQLiteAsyncConnection connection)
+        public UserRepository(SQLiteAsyncConnection connection) : base(connection)
         {
-            await base.MigrateRepository(connection);
-
-            var rowCount = await connection.Table<User>().CountAsync();
-
-            if (rowCount > 0)
-                return;
-
-            var localUser = await this.Create(new User { Name = "TestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-20).AddDays(150), ManagedRemotely = false });
-            var remoteUser = await this.Create(new User { Name = "RemoteTestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-8).AddDays(150), ManagedRemotely = true });
         }
-#endif
 
         public async Task<User> GetUserByName(string username)
         {

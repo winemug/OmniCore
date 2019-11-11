@@ -21,6 +21,7 @@ namespace OmniCore.Client
     {
         public static App Instance => Application.Current as App;
         public IPodProvider PodProvider { get; }
+        public IRadioProvider RileyLinkProvider { get;  }
         public IOmniCoreLogger Logger { get; }
         public IOmniCoreApplication OmniCoreApplication { get; }
 
@@ -28,10 +29,6 @@ namespace OmniCore.Client
 
         public App(IUnityContainer container)
         {
-#if DEBUG
-            var sqlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
-            File.Delete(sqlPath);
-#endif
             Initializer.RegisterTypes(container);
 
             PodProvider = container.Resolve<IPodProvider>();

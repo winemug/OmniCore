@@ -141,7 +141,7 @@ namespace OmniCore.Client.Services
                         .Scan(new ScanConfig
                         {
                             ScanType = BleScanType.Balanced,
-                            ServiceUuids = new List<Guid>() { serviceId },
+                            //ServiceUuids = new List<Guid>() { serviceId },
                             AndroidUseScanBatching = false
                         })
                         .Subscribe((scanResult) =>

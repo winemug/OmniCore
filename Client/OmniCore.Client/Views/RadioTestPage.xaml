@@ -8,6 +8,8 @@
     <ContentPage.Content>
         <StackLayout>
             <Label Text="{Binding DeviceIdReadable}" />
+            <Button Text="Connect" Clicked="Connect_Clicked"/>
+            <Button Text="Disconnect" Clicked="Disconnect_Clicked"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

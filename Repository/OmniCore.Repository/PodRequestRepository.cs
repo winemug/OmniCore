@@ -4,11 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SQLite;
 
 namespace OmniCore.Repository
 {
     public class PodRequestRepository : SqliteRepositoryWithUpdate<PodRequest>
     {
+        public PodRequestRepository(SQLiteAsyncConnection connection) : base(connection)
+        {
+        }
+
         public async Task<List<PodRequest>> GetPendingRequests(long podId)
         {
             var c = await GetConnection();

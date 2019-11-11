@@ -66,11 +66,11 @@ namespace OmniCore.Eros
                     BackgroundTask?.Dispose();
                     BackgroundTask = BackgroundTaskFactory.CreateBackgroundTask(async () => await ExecuteBackgroundTask(CancellationTokenSource.Token));
 
-                    using (var pr = new PodRepository())
+                    using (var pr = RepositoryProvider.Instance.PodRepository)
                     {
                         Pod = await pr.Read(Request.PodId);
                     }
-                    using (var rr = new RadioRepository())
+                    using (var rr = RepositoryProvider.Instance.RadioRepository)
                     {
                         Radios = new Radio[Pod.RadioIds.Length];
                         for(int i=0; i<Radios.Length; i++)
@@ -235,7 +235,7 @@ namespace OmniCore.Eros
 
         private async Task UpdateStatus(RequestState newState)
         {
-            using(var prr = new PodRequestRepository())
+            using(var prr = RepositoryProvider.Instance.PodRequestRepository)
             {
                 this.Request.RequestStatus = newState;
                 await prr.CreateOrUpdate(this.Request);

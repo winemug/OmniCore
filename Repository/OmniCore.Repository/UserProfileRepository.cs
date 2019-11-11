@@ -10,33 +10,9 @@ namespace OmniCore.Repository
 {
     public class UserProfileRepository : SqliteRepositoryWithUpdate<UserProfile>
     {
-#if DEBUG
-        protected override async Task MigrateRepository(SQLiteAsyncConnection connection)
+        public UserProfileRepository(SQLiteAsyncConnection connection) : base(connection)
         {
-            await base.MigrateRepository(connection);
-
-            var rowCount = await connection.Table<UserProfile>().CountAsync();
-
-            if (rowCount > 0)
-                return;
-
-            using(var ur = new UserRepository())
-            using(var mr = new MedicationRepository())
-            using(var upr = new UserProfileRepository())
-            {
-                var localUser = await ur.GetUserByName("TestUser");
-
-                var meds = await mr.GetMedicationsByHormone(HormoneType.Insulin);
-
-                var profile = await upr.Create(new UserProfile { UserId = localUser.Id.Value, MedicationId = meds[0].Id.Value, PodBasalSchedule = new [] 
-                    {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
-                      1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m} });
-                await upr.Create(profile);
-
-            }
-
         }
-#endif
 
         public async Task<List<UserProfile>> GetProfilesByMedication(long userId, long medicationId)
         {

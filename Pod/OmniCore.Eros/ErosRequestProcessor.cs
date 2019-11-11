@@ -28,7 +28,7 @@ namespace OmniCore.Eros
             RequestList = new ConcurrentBag<ErosRequest>();
             BackgroundTaskFactory = backgroundTaskFactory;
 
-            using(var pr = new PodRequestRepository())
+            using(var pr = RepositoryProvider.Instance.PodRequestRepository)
             {
                 var pendingRequests = await pr.GetPendingRequests(Pod.Id.Value);
                 foreach(var pendingRequest in pendingRequests.OrderBy(r => r.StartEarliest ?? r.Created))
@@ -77,7 +77,7 @@ namespace OmniCore.Eros
 
             newRequest.Created = utcNow;
 
-            using(var pr = new PodRequestRepository())
+            using(var pr = RepositoryProvider.Instance.PodRequestRepository)
             {
                 RequestList.Add(new ErosRequest(BackgroundTaskFactory, RadioProviders, await pr.CreateOrUpdate(newRequest)));
                 await ProcessQueue();
@@ -112,7 +112,7 @@ namespace OmniCore.Eros
 
                     if (stateBefore != request.Request.RequestStatus)
                     {
-                        using(var pr = new PodRequestRepository())
+                        using(var pr = RepositoryProvider.Instance.PodRequestRepository)
                         await pr.CreateOrUpdate(request.Request);
                     }
                 }

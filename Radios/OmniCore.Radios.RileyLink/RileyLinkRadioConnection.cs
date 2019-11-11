@@ -70,7 +70,7 @@ namespace OmniCore.Radios.RileyLink
             ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
             {
                 var rssi = await Peripheral.ReadRssi();
-                using (var rcr = new RadioConnectionRepository())
+                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
                 {
                     await rcr.Create(new RadioConnection
                     {
@@ -86,7 +86,7 @@ namespace OmniCore.Radios.RileyLink
 
             ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
             {
-                using (var rcr = new RadioConnectionRepository())
+                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
                 {
                     await rcr.Create(new RadioConnection
                     {
@@ -102,7 +102,7 @@ namespace OmniCore.Radios.RileyLink
 
             DisconnectedSubscription = Peripheral.WhenDisconnected().Subscribe( async (_) =>
             {
-                using (var rcr = new RadioConnectionRepository())
+                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
                 {
                     await rcr.Create(new RadioConnection
                     {

@@ -59,7 +59,7 @@ namespace OmniCore.Radios.RileyLink
                         {
                             peripheralIds.Add(peripheralResult.Id);
                             var re = await GetRadioEntity(peripheralResult);
-                            using(var rcr = new RadioConnectionRepository())
+                            using(var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
                             {
                                 await rcr.Create(new RadioConnection
                                 {
@@ -92,7 +92,7 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<Radio> GetRadioEntity(IRadioPeripheralScanResult peripheralScanResult)
         {
-            using(var rr = new RadioRepository())
+            using(var rr = RepositoryProvider.Instance.RadioRepository)
             {
                 var psid = "RLL" + peripheralScanResult.Id.ToString("N");
                 var entity = await rr.GetByProviderSpecificId(psid);

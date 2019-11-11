@@ -12,6 +12,8 @@ namespace OmniCore.Repository
 {
     public class SqliteRepositoryWithUpdate<T> : SqliteRepository<T> where T : UpdateableEntity, new()
     {
+        public SqliteRepositoryWithUpdate(SQLiteAsyncConnection connection) : base(connection) { }
+
         public virtual async Task<T> CreateOrUpdate(T entity)
         {
             var c = await GetConnection();
@@ -35,14 +37,13 @@ namespace OmniCore.Repository
 
         public readonly string DbPath;
 
-        private static bool Migrated = false;
+        public SqliteRepository(SQLiteAsyncConnection connection)
+        {
+            _connection = connection;
+        }
 
         public async Task<SQLiteAsyncConnection> GetConnection()
         {
-            if (_connection == null)
-            {
-                await Initialize();
-            }
             return _connection;
         }
 
@@ -53,26 +54,16 @@ namespace OmniCore.Repository
 
         public void Dispose()
         {
-            try
-            {
-                _connection?.CloseAsync().Wait();
-            } catch { }
-            _connection = null;
+            //try
+            //{
+            //    _connection?.CloseAsync().Wait();
+            //} catch { }
+            //_connection = null;
         }
 
         public async Task Initialize()
         {
-            if (_connection == null)
-            {
-                _connection = new SQLiteAsyncConnection(DbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
-                var cwl = _connection.GetConnection();
-                if (!Migrated)
-                {
-                    Migrated = true;
-                    await MigrateRepository(_connection);
-                }
-            }
-
+            await MigrateRepository(_connection);
         }
 
         protected virtual async Task MigrateRepository(SQLiteAsyncConnection connection)

@@ -35,7 +35,7 @@ namespace OmniCore.Eros
 
         public async Task<Pod> GetActivePod()
         {
-            using(var pr = new PodRepository())
+            using(var pr = RepositoryProvider.Instance.PodRepository)
             {
                 var pods = await pr.GetActivePods();
                 return pods.OrderByDescending(p => p.Created).FirstOrDefault();
@@ -44,7 +44,7 @@ namespace OmniCore.Eros
 
         public async Task<List<Pod>> GetActivePods()
         {
-            using(var pr = new PodRepository())
+            using(var pr = RepositoryProvider.Instance.PodRepository)
             {
                 return (await pr.GetActivePods())
                     .OrderBy(p => p.Created).ToList();
@@ -53,7 +53,7 @@ namespace OmniCore.Eros
 
         public async Task Archive(Pod pod)
         {
-            using(var pr = new PodRepository())
+            using(var pr = RepositoryProvider.Instance.PodRepository)
             {
                 pod.Archived = true;
                 await pr.CreateOrUpdate(pod);
@@ -62,7 +62,7 @@ namespace OmniCore.Eros
 
         public async Task<Pod> New(UserProfile up, List<Radio> radios)
         {
-            using(var pr = new PodRepository())
+            using(var pr = RepositoryProvider.Instance.PodRepository)
             {
                 var pod = new Pod
                 {
@@ -77,7 +77,7 @@ namespace OmniCore.Eros
 
         public async Task<Pod> Register(Pod pod, UserProfile up, List<Radio> radios)
         {
-            using(var pr = new PodRepository())
+            using(var pr = RepositoryProvider.Instance.PodRepository)
             {
                 if (!pod.PodUniqueId.HasValue)
                     pod.PodUniqueId = Guid.NewGuid();
@@ -134,7 +134,7 @@ namespace OmniCore.Eros
         {
             if (!_requestProcessors.ContainsKey(podId))
             {
-                using(var pr = new PodRepository())
+                using(var pr = RepositoryProvider.Instance.PodRepository)
                 {
                     var pod = await pr.Read(podId);
 

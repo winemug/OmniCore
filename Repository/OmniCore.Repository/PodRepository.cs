@@ -9,6 +9,10 @@ namespace OmniCore.Repository
 {
     public class PodRepository : SqliteRepositoryWithUpdate<Pod>
     {
+        public PodRepository(SQLiteAsyncConnection connection) : base(connection)
+        {
+        }
+
         public async Task<List<Pod>> GetActivePods()
         {
             var c = await GetConnection();
