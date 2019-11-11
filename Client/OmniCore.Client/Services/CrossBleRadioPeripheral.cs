@@ -124,19 +124,26 @@ namespace OmniCore.Client.Services
         public IObservable<IRadioPeripheral> WhenDisconnected() =>
             BleDevice.WhenDisconnected().WrapAndConvert((_) => this);
 
-        public async Task<bool> Connect()
+        public async Task<bool> Connect(CancellationToken cancellationToken)
         {
-            var connected = BleDevice.WhenConnected().ToTask();
-            var failed = BleDevice.WhenConnectionFailed().ToTask();
-            BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = true });
-            var result = await Task.WhenAny(connected, failed);
+            if (await IsConnected())
+                return true;
+            var connected = BleDevice.WhenConnected().FirstAsync().ToTask();
+            var failed = BleDevice.WhenConnectionFailed().FirstAsync().ToTask();
+            var canceled = Task.Delay(-1, cancellationToken);
+            BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
+            var result = await Task.WhenAny(connected, failed, canceled);
+            if (result == canceled)
+            {
+                BleDevice.CancelConnection();
+            }
             return result == connected;
         }
 
         public async Task Disconnect()
         {
-            BleDevice?.CancelConnection();
-            BleDevice = null;
+            if (BleDevice.IsConnected())
+                BleDevice?.CancelConnection();
         }
 
         public async Task<int> ReadRssi()
@@ -146,8 +153,6 @@ namespace OmniCore.Client.Services
 
         public void Dispose()
         {
-            BleDevice?.CancelConnection();
-            BleDevice = null;
         }
     }
 }

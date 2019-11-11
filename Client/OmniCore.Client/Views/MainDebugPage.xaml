@@ -18,7 +18,7 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <Label Text="{Binding DeviceIdReadable}" Grid.Column="0"/>
-                            <Button Text="Test" Command="{TemplateBinding TestCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
+                            <Button Text="Test" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=TestCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

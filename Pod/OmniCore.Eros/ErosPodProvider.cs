@@ -153,10 +153,7 @@ namespace OmniCore.Eros
                 var processor = await GetProcessor(request.PodId);
                 await processor.QueueRequest(request);
             }
-            catch (Exception e)
-            {
-                throw;
-            }
+            catch  { throw; }
 
         }
 

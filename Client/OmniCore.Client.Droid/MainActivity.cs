@@ -35,7 +35,7 @@ namespace OmniCore.Client.Droid
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = true;
+            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 

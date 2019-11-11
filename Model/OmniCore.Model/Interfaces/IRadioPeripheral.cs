@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
@@ -15,7 +16,7 @@ namespace OmniCore.Model.Interfaces
         IObservable<IRadioPeripheral> WhenDisconnected();
         IObservable<IRadioPeripheral> WhenDeviceChanged();
         IObservable<IRadioPeripheral> WhenDeviceLost();
-        Task<bool> Connect();
+        Task<bool> Connect(CancellationToken cancellationToken);
         Task Disconnect();
         Task<int> ReadRssi();
     }

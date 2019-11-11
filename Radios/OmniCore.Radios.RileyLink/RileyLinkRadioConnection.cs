@@ -56,12 +56,16 @@ namespace OmniCore.Radios.RileyLink
         {
             Peripheral.WhenDeviceChanged().Subscribe(async (_) =>
             {
-
+                ConnectedSubscription?.Dispose();
+                ConnectionFailedSubscription?.Dispose();
+                DisconnectedSubscription?.Dispose();
+                SubscribeToConnectionStates();
+                //TODO: reset gatt related mumbojumbo
             });
 
             Peripheral.WhenDeviceLost().Subscribe(async (_) =>
             {
-
+                //TODO: request peripheral device replacement
             });
         }
 

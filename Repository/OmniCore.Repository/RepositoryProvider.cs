@@ -15,39 +15,23 @@ namespace OmniCore.Repository
     {
         private RepositoryProvider() { }
 
-        private static bool IsInitialized = false;
-        private static RepositoryProvider InternalInstance = new RepositoryProvider();
+        public static RepositoryProvider Instance { get; } = new RepositoryProvider();
 
-
-        public static RepositoryProvider Instance
-        {
-            get
-            {
-                if (!IsInitialized)
-                {
-                    lock (InternalInstance)
-                    {
-                        if (!IsInitialized)
-                        {
-                            Task.Run(async () => await Instance.Initialize()).Wait();
-                            IsInitialized = true;
-                        }
-                    }
-                }
-                return InternalInstance;
-            }
-        }
-
-        private SQLiteAsyncConnection Connection;
+        private SQLiteAsyncConnection Connection => new SQLiteAsyncConnection(DatabasePath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
         public string DatabasePath;
 
-        public MedicationRepository MedicationRepository { get; private set; }
-        public UserRepository UserRepository { get; private set; }
-        public UserProfileRepository UserProfileRepository { get; private set; }
-        public RadioRepository RadioRepository { get; private set; }
-        public PodRepository PodRepository { get; private set; }
-        public PodRequestRepository PodRequestRepository { get; private set; }
-        public RadioConnectionRepository RadioConnectionRepository { get; private set; }
+        public void Init()
+        {
+            Task.Run(async () => await Instance.Initialize()).Wait();
+        }
+
+        public MedicationRepository MedicationRepository => new MedicationRepository(Connection);
+        public UserRepository UserRepository => new UserRepository(Connection);
+        public UserProfileRepository UserProfileRepository => new UserProfileRepository(Connection);
+        public RadioRepository RadioRepository => new RadioRepository(Connection);
+        public PodRepository PodRepository => new PodRepository(Connection);
+        public PodRequestRepository PodRequestRepository => new PodRequestRepository(Connection);
+        public RadioConnectionRepository RadioConnectionRepository => new RadioConnectionRepository(Connection);
 
     private async Task Initialize()
         {
@@ -56,28 +40,13 @@ namespace OmniCore.Repository
             if (File.Exists(DatabasePath))
                 File.Delete(DatabasePath);
 #endif
-            Connection = new SQLiteAsyncConnection(DatabasePath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
-
             //TODO: lame repo inits, to be ioc'ed later
-            MedicationRepository = new MedicationRepository(Connection);
             await MedicationRepository.Initialize();
-
-            UserRepository = new UserRepository(Connection);
             await UserRepository.Initialize();
-
-            UserProfileRepository = new UserProfileRepository(Connection);
             await UserProfileRepository.Initialize();
-
-            RadioRepository = new RadioRepository(Connection);
             await RadioRepository.Initialize();
-
-            PodRepository = new PodRepository(Connection);
             await PodRepository.Initialize();
-
-            PodRequestRepository = new PodRequestRepository(Connection);
             await PodRequestRepository.Initialize();
-
-            RadioConnectionRepository = new RadioConnectionRepository(Connection);
             await RadioConnectionRepository.Initialize();
 
             var med1 = await MedicationRepository.Create(

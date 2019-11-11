@@ -14,6 +14,7 @@ using OmniCore.Client.Views;
 using OmniCore.Client.Constants;
 using System.IO;
 using System;
+using OmniCore.Repository;
 
 namespace OmniCore.Client
 {
@@ -32,9 +33,11 @@ namespace OmniCore.Client
             Initializer.RegisterTypes(container);
 
             PodProvider = container.Resolve<IPodProvider>();
+            RileyLinkProvider = container.Resolve<IRadioProvider>("RileyLinkRadioProvider");
             Logger = container.Resolve<IOmniCoreLogger>();
             OmniCoreApplication = container.Resolve<IOmniCoreApplication>();
 
+            RepositoryProvider.Instance.Init();
             InitializeComponent();
 
             UiSyncContext = SynchronizationContext.Current;
@@ -56,7 +59,7 @@ namespace OmniCore.Client
         protected override void OnStart()
         {
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
-            Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
+            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
             Logger.Debug("OmniCore App OnStart called");
         }
 

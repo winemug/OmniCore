@@ -87,7 +87,7 @@ namespace OmniCore.Client.Services
             try
             {
                 var stateTask = CrossBleAdapter.Current.WhenStatusChanged()
-                    .Where(s => s == AdapterStatus.PoweredOn).ToTask(cancellationToken);
+                    .Where(s => s == AdapterStatus.PoweredOn).FirstAsync().ToTask(cancellationToken);
                 var enableTask = Task.Run(() => { CrossBleAdapter.Current.SetAdapterState(true); }, cancellationToken);
                 await Task.WhenAll(stateTask, enableTask);
                 return true;
@@ -141,7 +141,7 @@ namespace OmniCore.Client.Services
                         .Scan(new ScanConfig
                         {
                             ScanType = BleScanType.Balanced,
-                            //ServiceUuids = new List<Guid>() { serviceId },
+                            ServiceUuids = new List<Guid>() { serviceId },
                             AndroidUseScanBatching = false
                         })
                         .Subscribe((scanResult) =>
@@ -213,7 +213,6 @@ namespace OmniCore.Client.Services
             {
                 PeripheralAccessSemaphore.Release();
             }
-            return null;
         }
 
         private async Task<bool> DisconnectAllPeripherals(CancellationToken cancellationToken)

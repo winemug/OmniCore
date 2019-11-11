@@ -26,7 +26,7 @@ namespace OmniCore.Client.Views
             using (var connection = await App.Instance.RileyLinkProvider.GetConnection(RadioEntity, null, cts.Token))
             {
                 var p = connection.PeripheralLease.Peripheral;
-                await p.Connect();
+                await p.Connect(cts.Token);
             }
         }
 

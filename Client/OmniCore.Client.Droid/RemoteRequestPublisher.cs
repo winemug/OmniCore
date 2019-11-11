@@ -14,7 +14,6 @@ using OmniCore.Model.Utilities;
 using Microsoft.AppCenter.Crashes;
 using OmniCore.Client.Interfaces;
 using Unity;
-using OmniCore.Client.Interfaces;
 
 namespace OmniCore.Client.Droid
 {

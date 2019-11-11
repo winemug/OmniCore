@@ -132,7 +132,7 @@ namespace OmniCore.Eros
 
 
             }
-            catch (OperationCanceledException oce)
+            catch (OperationCanceledException)
             {
                 await ExecuteSynchronously(async () =>
                 {
@@ -140,7 +140,7 @@ namespace OmniCore.Eros
                     TaskCompletionSource.TrySetResult(true);
                 });
             }
-            catch (AggregateException ae)
+            catch (AggregateException)
             {
                 await ExecuteSynchronously(async () =>
                 {
@@ -148,7 +148,7 @@ namespace OmniCore.Eros
                     TaskCompletionSource.TrySetResult(false);
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await ExecuteSynchronously(async () =>
                 {
