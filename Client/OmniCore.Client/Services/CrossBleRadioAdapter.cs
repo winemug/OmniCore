@@ -228,7 +228,7 @@ namespace OmniCore.Client.Services
                         try
                         {
                             lease = await blePeripheral.AcquireLease(cancellationToken);
-                            await blePeripheral.Disconnect();
+                            await blePeripheral.Disconnect(TimeSpan.Zero);
                         }
                         catch (TaskCanceledException)
                         { }

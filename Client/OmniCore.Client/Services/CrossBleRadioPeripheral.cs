@@ -58,11 +58,6 @@ namespace OmniCore.Client.Services
             LeaseSemaphore.Release();
         }
 
-        public async Task<bool> IsConnected()
-        {
-            return BleDevice.IsConnected();
-        }
-
         public IObservable<IRadioPeripheral> WhenDeviceChanged()
         {
             return Observable.Create<IRadioPeripheral>(async (observer) =>
@@ -126,12 +121,31 @@ namespace OmniCore.Client.Services
 
         public async Task<bool> Connect(CancellationToken cancellationToken)
         {
-            if (await IsConnected())
+            if (BleDevice.Status == ConnectionStatus.Connected)
                 return true;
+
             var connected = BleDevice.WhenConnected().FirstAsync().ToTask();
             var failed = BleDevice.WhenConnectionFailed().FirstAsync().ToTask();
             var canceled = Task.Delay(-1, cancellationToken);
-            BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
+            if (BleDevice.Status == ConnectionStatus.Disconnecting)
+            {
+                var disconnected = BleDevice.WhenDisconnected().FirstAsync().ToTask();
+                var disconnectWait = await Task.WhenAny(disconnected, failed, canceled);
+                if (disconnectWait == canceled)
+                {
+                    return false;
+                }
+                else if (disconnectWait == failed)
+                {
+                    failed = BleDevice.WhenConnectionFailed().FirstAsync().ToTask();
+                }
+            }
+
+            if (BleDevice.Status != ConnectionStatus.Connecting)
+            {
+                BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
+            }
+
             var result = await Task.WhenAny(connected, failed, canceled);
             if (result == canceled)
             {
@@ -140,10 +154,29 @@ namespace OmniCore.Client.Services
             return result == connected;
         }
 
-        public async Task Disconnect()
+        public async Task Disconnect(TimeSpan timeout)
         {
-            if (BleDevice.IsConnected())
-                BleDevice?.CancelConnection();
+            if (BleDevice.Status == ConnectionStatus.Disconnected)
+                return;
+
+            //if (BleDevice.Status == ConnectionStatus.Connecting)
+            //{
+            //    var connected = BleDevice.WhenConnected().FirstAsync().ToTask();
+            //    var failed = BleDevice.WhenConnectionFailed().FirstAsync().ToTask();
+            //    var connectWait = await Task.WhenAny(connected, failed, timeoutTask);
+            //    if (connectWait == failed || connectWait == timeoutTask)
+            //        return;
+            //}
+
+            if (BleDevice.Status != ConnectionStatus.Disconnecting)
+                BleDevice.CancelConnection();
+
+            if (timeout == TimeSpan.Zero)
+                return;
+
+            var timeoutTask = Task.Delay(timeout);
+            var disconnected = BleDevice.WhenDisconnected().FirstAsync().ToTask();
+            await Task.WhenAny(disconnected, timeoutTask);
         }
 
         public async Task<int> ReadRssi()

@@ -10,14 +10,13 @@ namespace OmniCore.Model.Interfaces
     {
         Guid PeripheralId { get; }
         string PeripheralName { get; }
-        Task<bool> IsConnected();
         IObservable<IRadioPeripheral> WhenConnected();
         IObservable<Exception> WhenConnectionFailed();
         IObservable<IRadioPeripheral> WhenDisconnected();
         IObservable<IRadioPeripheral> WhenDeviceChanged();
         IObservable<IRadioPeripheral> WhenDeviceLost();
         Task<bool> Connect(CancellationToken cancellationToken);
-        Task Disconnect();
+        Task Disconnect(TimeSpan timeout);
         Task<int> ReadRssi();
     }
 }
