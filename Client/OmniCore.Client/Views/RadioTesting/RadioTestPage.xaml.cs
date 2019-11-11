@@ -1,4 +1,5 @@
-﻿using OmniCore.Repository.Entities;
+﻿using OmniCore.Client.ViewModels.Test;
+using OmniCore.Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +10,27 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Client.Views
+namespace OmniCore.Client.Views.RadioTesting
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RadioTestPage : ContentPage
     {
-        private Radio RadioEntity => this.BindingContext as Radio;
+        private RadioTestingViewModel ViewModel;
         public RadioTestPage()
         {
             InitializeComponent();
         }
 
+        public RadioTestPage WithViewModel(RadioTestingViewModel viewModel)
+        {
+            ViewModel = viewModel;
+            BindingContext = ViewModel;
+            return this;
+        }
         private async void Connect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(RadioEntity, null, cts.Token))
+            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
             {
                 var p = connection.PeripheralLease.Peripheral;
                 await p.Connect(cts.Token);
@@ -33,7 +40,7 @@ namespace OmniCore.Client.Views
         private async void Disconnect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(RadioEntity, null, cts.Token))
+            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
             {
                 var p = connection.PeripheralLease.Peripheral;
                 await p.Disconnect(TimeSpan.FromSeconds(3));

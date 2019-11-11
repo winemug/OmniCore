@@ -21,5 +21,14 @@ namespace OmniCore.Repository
                 .OrderByDescending(x => x.Created)
                 .ToListAsync();
         }
+
+        public override async Task<Pod> Create(Pod entity)
+        {
+            var c = await GetConnection();
+            if (await c.Table<Pod>()
+                .Where(p => !p.Archived && p.RadioAddress == entity.RadioAddress).FirstOrDefaultAsync() != null)
+                throw new Exception("Cannot have more than one active pod with the same radio address");
+            return await base.Create(entity);
+        }
     }
 }

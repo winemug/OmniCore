@@ -37,8 +37,8 @@ namespace OmniCore.Repository
         {
             DatabasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "omnicore.db3");
 #if DEBUG
-            if (File.Exists(DatabasePath))
-                File.Delete(DatabasePath);
+            //if (File.Exists(DatabasePath))
+            //    File.Delete(DatabasePath);
 #endif
             //TODO: lame repo inits, to be ioc'ed later
             await MedicationRepository.Initialize();
@@ -49,14 +49,19 @@ namespace OmniCore.Repository
             await PodRequestRepository.Initialize();
             await RadioConnectionRepository.Initialize();
 
+            var count = await (await MedicationRepository.ForQuery()).CountAsync();
+            if (count > 0)
+                return;
+
             var med1 = await MedicationRepository.Create(
                 new Medication { Hormone = HormoneType.Insulin, Name = "Novorapid U100", UnitName = "Units", UnitNameShort = "U", UnitsPerMilliliter = 100m, ProfileCode = "NRAP1" });
 
             var med2 = await MedicationRepository.Create(
                 new Medication { Hormone = HormoneType.Insulin, Name = "Fiasp U100", UnitName = "Units", UnitNameShort = "U", UnitsPerMilliliter = 100m, ProfileCode = "URAP1" });
 
+#if DEBUG
             var localUser = await UserRepository.Create(
-                new User { Name = "TestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-20).AddDays(150), ManagedRemotely = false });
+            new User { Name = "TestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-20).AddDays(150), ManagedRemotely = false });
 
             var remoteUser = await UserRepository.Create(
                 new User { Name = "RemoteTestUser", DateOfBirth = DateTimeOffset.UtcNow.AddYears(-8).AddDays(150), ManagedRemotely = true });
@@ -69,7 +74,7 @@ namespace OmniCore.Repository
                      {1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m,
                       1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m, 1m}
             });
-
+#endif
         }
     }
 }

@@ -33,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\MainDebugPage.xaml.cs">
-      <DependentUpon>MainDebugPage.xaml</DependentUpon>
+    <Compile Update="Views\RadioTesting\RadiosPage.xaml.cs">
+      <DependentUpon>RadiosPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -51,7 +51,7 @@
     <EmbeddedResource Update="Views\Help\AboutPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\MainDebugPage.xaml">
+    <EmbeddedResource Update="Views\RadioTesting\RadiosPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\MainPage.xaml">
@@ -60,10 +60,13 @@
     <EmbeddedResource Update="Views\PodDebugPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodsPage.xaml">
+    <EmbeddedResource Update="Views\RadioTesting\PodsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\RadioTestPage.xaml">
+    <EmbeddedResource Update="Views\PodTestPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\RadioTesting\RadioTestPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Settings\ApplicationSettingsPage.xaml">

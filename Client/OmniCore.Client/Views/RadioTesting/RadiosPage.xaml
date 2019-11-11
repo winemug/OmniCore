@@ -3,10 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OmniCore.Client.ViewModels.Test"
              mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.MainDebugPage"
+             x:Class="OmniCore.Client.Views.RadioTesting.RadiosPage"
              Appearing="ContentPage_Appearing"
-             Disappearing="ContentPage_Disappearing">
+             Disappearing="ContentPage_Disappearing"
+             Title="Radios">
     <ContentPage.Content>
         <ScrollView>
             <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}">
@@ -18,10 +20,13 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <Label Text="{Binding DeviceIdReadable}" Grid.Column="0"/>
-                            <Button Text="Test" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=TestCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
+                            <Button Text="Select" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RadioTestingViewModel}}, Path=NextPageCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="Searching for radios..."/>
+                </CollectionView.EmptyView>
             </CollectionView>
         </ScrollView>
     </ContentPage.Content>

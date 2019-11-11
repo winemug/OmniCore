@@ -15,6 +15,11 @@ using OmniCore.Client.Constants;
 using System.IO;
 using System;
 using OmniCore.Repository;
+using OmniCore.Client.Views.RadioTesting;
+using OmniCore.Client.ViewModels.Test;
+using System.Threading.Tasks;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 
 namespace OmniCore.Client
 {
@@ -42,7 +47,7 @@ namespace OmniCore.Client
 
             UiSyncContext = SynchronizationContext.Current;
 #if DEBUG
-            MainPage = new NavigationPage(new MainDebugPage());
+            MainPage = new NavigationPage(new RadiosPage().WithViewModel(new RadioTestingViewModel()));
 #else
             MainPage = new MainPage();
 #endif
@@ -56,11 +61,12 @@ namespace OmniCore.Client
             MainPage.SendBackButtonPressed();
         }
 
-        protected override void OnStart()
+        protected async override void OnStart()
         {
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
             //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
             Logger.Debug("OmniCore App OnStart called");
+            await EnsurePermissions();
         }
 
         protected override void OnSleep()
@@ -75,5 +81,30 @@ namespace OmniCore.Client
             Logger.Debug("OmniCore App OnResume called");
             MessagingCenter.Send(this, MessagingConstants.AppResuming);
         }
+
+        private async Task EnsurePermissions()
+        {
+            try
+            {
+                var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.LocationAlways);
+                if (status != PermissionStatus.Granted)
+                {
+                    await MainPage.DisplayAlert("Missing Permissions", "Please grant the location permission to this application in order to be able to connect to bluetooth devices.", "OK");
+                    var request = await CrossPermissions.Current.RequestPermissionsAsync(Permission.LocationAlways);
+                    if (request[Permission.LocationAlways] != PermissionStatus.Granted)
+                    {
+                        await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
+                        App.Instance.OmniCoreApplication.Exit();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                await MainPage.DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
+                Crashes.TrackError(e);
+                App.Instance.OmniCoreApplication.Exit();
+            }
+        }
+
     }
 }
