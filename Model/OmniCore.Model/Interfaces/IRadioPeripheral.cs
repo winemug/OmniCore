@@ -15,7 +15,7 @@ namespace OmniCore.Model.Interfaces
         IObservable<IRadioPeripheral> WhenDisconnected();
         IObservable<IRadioPeripheral> WhenDeviceChanged();
         IObservable<IRadioPeripheral> WhenDeviceLost();
-        Task<IRadioPeripheralCharacteristic> GetCharacteristic(Guid serviceId, Guid characteristicId);
+        Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds);
         Task<bool> Connect(CancellationToken cancellationToken);
         Task Disconnect(TimeSpan timeout);
         Task<int> ReadRssi();
