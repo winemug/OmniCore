@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Client.Extensions;
@@ -20,6 +21,8 @@ namespace OmniCore.Client.Services
         private SemaphoreSlim LeaseSemaphore;
         private TaskCompletionSource<IDevice> DeviceChangedSource;
         public CrossBlePeripheralLease ActiveLease;
+        //private ConcurrentDictionary<Tuple<Guid, Guid>, CrossBleRadioCharacteristic> CharacteristicCache;
+        //private IDisposable StatusChangedSubscription;
 
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
@@ -28,6 +31,8 @@ namespace OmniCore.Client.Services
             LeaseSemaphore = new SemaphoreSlim(1, 1);
             ActiveLease = null;
             DeviceChangedSource = new TaskCompletionSource<IDevice>();
+            //CharacteristicCache = new ConcurrentDictionary<Tuple<Guid, Guid>, CrossBleRadioCharacteristic>();
+            //CreateStatusSubscription();
         }
 
         public Guid PeripheralId => BleDevice.Uuid;
@@ -159,15 +164,6 @@ namespace OmniCore.Client.Services
             if (BleDevice.Status == ConnectionStatus.Disconnected)
                 return;
 
-            //if (BleDevice.Status == ConnectionStatus.Connecting)
-            //{
-            //    var connected = BleDevice.WhenConnected().FirstAsync().ToTask();
-            //    var failed = BleDevice.WhenConnectionFailed().FirstAsync().ToTask();
-            //    var connectWait = await Task.WhenAny(connected, failed, timeoutTask);
-            //    if (connectWait == failed || connectWait == timeoutTask)
-            //        return;
-            //}
-
             if (BleDevice.Status != ConnectionStatus.Disconnecting)
                 BleDevice.CancelConnection();
 
@@ -182,6 +178,42 @@ namespace OmniCore.Client.Services
         public async Task<int> ReadRssi()
         {
             return await BleDevice.ReadRssi();
+        }
+
+        //private void CreateStatusSubscription()
+        //{
+        //    StatusChangedSubscription?.Dispose();
+        //    StatusChangedSubscription = BleDevice.WhenStatusChanged().Subscribe(async (status) =>
+        //    {
+        //        switch(status)
+        //        {
+        //            case ConnectionStatus.Connected:
+        //                break;
+        //            default:
+        //                CharacteristicCache.Clear();
+        //                break;
+        //        }
+        //    });
+        //}
+
+        public async Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds)
+        {
+            if (BleDevice == null || !BleDevice.IsConnected())
+                return null;
+            var service = await BleDevice.GetKnownService(serviceId);
+            var characteristics = await service.DiscoverCharacteristics().ToList();
+
+            var list = new List<IRadioPeripheralCharacteristic>();
+            foreach (var characteristicId in characteristicIds)
+            {
+                var deviceChar = characteristics.FirstOrDefault(c => c.Uuid == characteristicId);
+                if (deviceChar == null)
+                    list.Add(null);
+                else
+                    list.Add(new CrossBleRadioCharacteristic(BleDevice, service, deviceChar));
+            }
+                
+            return list.ToArray();
         }
 
         public void Dispose()
