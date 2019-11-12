@@ -27,6 +27,7 @@ namespace OmniCore.Eros
             Pod = pod;
             RequestList = new ConcurrentBag<ErosRequest>();
             BackgroundTaskFactory = backgroundTaskFactory;
+            RadioProviders = radioProviders;
 
             using(var pr = RepositoryProvider.Instance.PodRequestRepository)
             {

@@ -4,7 +4,7 @@ using System;
 
 namespace OmniCore.Repository.Entities
 {
-    public class AlertStateResponse : Entity
+    public class AlertState : Entity
     {
         [Indexed]
         public long RequestId {get; set;}

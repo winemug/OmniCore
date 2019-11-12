@@ -24,16 +24,5 @@ namespace OmniCore.Repository.Entities
 
         public FailureType? FailureType { get; }
         public string ExceptionText { get; }
-
-        public int QueueWaitDuration { get; set; }
-        public int ExchangeDuration { get; set; }
-        public int TotalRadioOverhead { get; set; }
-        public int PacketExchangeCount { get; set; }
-        public int PacketExchangeDurationAverage { get; set; }
-        public int? RadioRssiAverage { get; set; }
-        public int? MobileDeviceRssiAverage { get; set; }
-        public int? PodRssi { get; set; }
-        public int? PodLowGain { get; set; }
-        public int PowerAdjustmentCount { get; set; }
     }
 }

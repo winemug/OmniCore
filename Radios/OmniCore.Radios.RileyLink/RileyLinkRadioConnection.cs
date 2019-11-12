@@ -82,9 +82,14 @@ namespace OmniCore.Radios.RileyLink
                         PodId = Request?.PodId,
                         RequestId = Request?.Id,
                         EventType = RadioConnectionEvent.Connect,
-                        Successful = true,
-                        Rssi = rssi
+                        Successful = true
                     });
+                }
+
+                using (var ssr = RepositoryProvider.Instance.SignalStrengthRepository)
+                {
+                    await ssr.Create(new SignalStrength { RadioId = RadioEntity.Id.Value,
+                        ClientRadioRssi = rssi });
                 }
             });
 

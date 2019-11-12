@@ -77,7 +77,6 @@ namespace OmniCore.Repository.Entities
         public uint ActiveMinutes { get; set; }
 
         public PodProgress Progress { get; set; }
-
         public BasalState BasalState { get; set; }
 
         public DateTimeOffset? TempBasalStart { get; set; }

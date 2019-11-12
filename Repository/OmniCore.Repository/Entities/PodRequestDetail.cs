@@ -11,6 +11,5 @@ namespace OmniCore.Repository.Entities
         public byte[] PacketSent { get; set; }
         public byte[] PacketReceived { get; set; }
         public int Retries { get; set; }
-        public int? Rssi { get; set; }
     }
 }

@@ -1,14 +1,17 @@
 ﻿using System;
+using Newtonsoft.Json;
 using OmniCore.Repository.Enums;
 using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
-    public class PodStatus : Entity
+    public class StatusResponse : Entity
     {
         [Indexed]
         public long RequestId {get; set;}
+
         public bool Faulted { get; set; }
+        public int MessageSequence { get; set; }
         public decimal NotDeliveredUnits { get; set; }
         public decimal DeliveredUnits { get; set; }
         public decimal ReservoirUnits { get; set; }

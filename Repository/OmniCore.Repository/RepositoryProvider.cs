@@ -32,6 +32,7 @@ namespace OmniCore.Repository
         public PodRepository PodRepository => new PodRepository(Connection);
         public PodRequestRepository PodRequestRepository => new PodRequestRepository(Connection);
         public RadioConnectionRepository RadioConnectionRepository => new RadioConnectionRepository(Connection);
+        public SignalStrengthRepository SignalStrengthRepository => new SignalStrengthRepository(Connection);
 
     private async Task Initialize()
         {
@@ -48,6 +49,7 @@ namespace OmniCore.Repository
             await PodRepository.Initialize();
             await PodRequestRepository.Initialize();
             await RadioConnectionRepository.Initialize();
+            await SignalStrengthRepository.Initialize();
 
             var count = await (await MedicationRepository.ForQuery()).CountAsync();
             if (count > 0)

@@ -17,6 +17,5 @@ namespace OmniCore.Repository.Entities
         public string ErrorText { get; set; }
         public byte[] Command { get; set; }
         public byte[] Response { get; set; }
-        public int? Rssi { get; set; }
     }
 }

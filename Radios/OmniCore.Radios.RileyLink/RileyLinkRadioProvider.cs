@@ -65,8 +65,15 @@ namespace OmniCore.Radios.RileyLink
                                 {
                                     RadioId = re.Id.Value,
                                     EventType = RadioConnectionEvent.Scan,
-                                    Successful = true,
-                                    Rssi = peripheralResult.Rssi
+                                    Successful = true
+                                });
+                            }
+                            using (var ssr = RepositoryProvider.Instance.SignalStrengthRepository)
+                            {
+                                await ssr.Create(new SignalStrength
+                                {
+                                    RadioId = re.Id.Value,
+                                    ClientRadioRssi = peripheralResult.Rssi
                                 });
                             }
                             observer.OnNext(re);
