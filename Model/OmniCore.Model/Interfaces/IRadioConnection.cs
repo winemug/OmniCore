@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces
     public interface IRadioConnection : IDisposable
     {
         IRadioPeripheralLease PeripheralLease { get;  }
-        Task<bool> Initialize(CancellationToken cancellationToken);
+        Task<bool> Initialize(IRadioConfiguration configuration, CancellationToken cancellationToken);
         Task<IMessage> ExchangeMessages(IMessage messageToSend, CancellationToken cancellationToken, TxPower? TxLevel = null);
     }
 }

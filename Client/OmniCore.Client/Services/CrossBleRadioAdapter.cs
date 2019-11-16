@@ -260,12 +260,12 @@ namespace OmniCore.Client.Services
 
                     if (device == null)
                     {
-                        device = await CrossBleAdapter.Current.GetKnownDevice(peripheralId).RunAsyncWithTimeoutAndCancellation(TimeSpan.FromSeconds(20), cancellationToken);
+                        device = await CrossBleAdapter.Current.GetKnownDevice(peripheralId).ToTask(TimeSpan.FromSeconds(20), cancellationToken);
                     }
 
                     if (device == null)
                     {
-                        device = await CrossBleAdapter.Current.ScanUntilDeviceFound(peripheralId).RunAsyncWithTimeoutAndCancellation(TimeSpan.FromSeconds(20), cancellationToken);
+                        device = await CrossBleAdapter.Current.ScanUntilDeviceFound(peripheralId).ToTask(TimeSpan.FromSeconds(20), cancellationToken);
                     }
 
                     if (device != null)

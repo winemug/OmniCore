@@ -33,7 +33,7 @@ namespace OmniCore.Client.Views.RadioTesting
             using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
             {
                 var p = connection.PeripheralLease.Peripheral;
-                await p.Connect(cts.Token);
+                await p.Connect(true, cts.Token);
             }
         }
 

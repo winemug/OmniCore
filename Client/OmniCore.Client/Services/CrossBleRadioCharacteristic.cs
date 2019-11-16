@@ -55,7 +55,7 @@ namespace OmniCore.Client.Services
 
         public async Task Write(byte[] data, TimeSpan timeout, CancellationToken cancellationToken)
         {
-            await Characteristic.Write(data).RunAsyncWithTimeoutAndCancellation(timeout, cancellationToken);
+            await Characteristic.Write(data).ToTask(timeout, cancellationToken);
         }
 
         public async Task<byte[]> Read(TimeSpan timeout, CancellationToken cancellationToken)

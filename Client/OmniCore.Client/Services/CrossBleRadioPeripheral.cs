@@ -39,6 +39,8 @@ namespace OmniCore.Client.Services
 
         public string PeripheralName => BleDevice.Name;
 
+        public bool IsConnected => BleDevice.IsConnected();
+
         public void SwitchToNewDevice(IDevice newBleDevice)
         {
             lock (this)
@@ -124,7 +126,7 @@ namespace OmniCore.Client.Services
         public IObservable<IRadioPeripheral> WhenDisconnected() =>
             BleDevice.WhenDisconnected().WrapAndConvert((_) => this);
 
-        public async Task<bool> Connect(CancellationToken cancellationToken)
+        public async Task<bool> Connect(bool autoConnect, CancellationToken cancellationToken)
         {
             if (BleDevice.Status == ConnectionStatus.Connected)
                 return true;
@@ -148,7 +150,7 @@ namespace OmniCore.Client.Services
 
             if (BleDevice.Status != ConnectionStatus.Connecting)
             {
-                BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = false });
+                BleDevice.Connect(new ConnectionConfig { AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = autoConnect });
             }
 
             var result = await Task.WhenAny(connected, failed, canceled);
@@ -196,17 +198,16 @@ namespace OmniCore.Client.Services
         //    });
         //}
 
-        public async Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds)
+        public async Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds, CancellationToken cancellationToken)
         {
             if (BleDevice == null || !BleDevice.IsConnected())
                 return null;
-            var service = await BleDevice.GetKnownService(serviceId);
-            var characteristics = await service.DiscoverCharacteristics().ToList();
+            var service = await BleDevice.GetKnownService(serviceId).ToTask(cancellationToken);
 
             var list = new List<IRadioPeripheralCharacteristic>();
             foreach (var characteristicId in characteristicIds)
             {
-                var deviceChar = characteristics.FirstOrDefault(c => c.Uuid == characteristicId);
+                var deviceChar = await service.GetKnownCharacteristics(new[] { characteristicId }).ToTask(cancellationToken);
                 if (deviceChar == null)
                     list.Add(null);
                 else

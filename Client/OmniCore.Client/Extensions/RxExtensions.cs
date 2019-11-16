@@ -22,8 +22,7 @@ namespace OmniCore.Client.Extensions
                 return Disposable.Create(() => source.PropertyChanged -= handler);
             });
         }
-
-        public static async Task<T> RunAsyncWithTimeoutAndCancellation<T>(this IObservable<T> observable, TimeSpan timeout, CancellationToken cancellationToken)
+        public static async Task<T> ToTask<T>(this IObservable<T> observable, TimeSpan timeout, CancellationToken cancellationToken)
         {
             try
             {
