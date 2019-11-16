@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Client.Extensions
+namespace OmniCore.Model.Utilities
 {
     public static class RxExtensions
     {

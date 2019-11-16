@@ -1,4 +1,4 @@
-﻿using OmniCore.Client.Extensions;
+﻿using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 using System;

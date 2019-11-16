@@ -7,7 +7,7 @@ using System.Reactive.Threading.Tasks;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Client.Extensions;
+using OmniCore.Model.Utilities;
 using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
