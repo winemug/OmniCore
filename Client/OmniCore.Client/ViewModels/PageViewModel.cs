@@ -1,4 +1,4 @@
-﻿using OmniCore.Client.Constants;
+﻿using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities;
 using System;

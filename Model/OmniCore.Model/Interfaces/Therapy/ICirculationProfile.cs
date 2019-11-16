@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Client.Interfaces
+namespace OmniCore.Model.Interfaces.Therapy
 {
-    public interface IPodService
+    public interface ICirculationProfile
     {
     }
 }

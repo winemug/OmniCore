@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Therapy;
 using Unity;
 
 namespace OmniCore.Therapy

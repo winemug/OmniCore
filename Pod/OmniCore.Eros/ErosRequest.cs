@@ -11,6 +11,7 @@ using OmniCore.Model.Interfaces;
 using SQLite;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

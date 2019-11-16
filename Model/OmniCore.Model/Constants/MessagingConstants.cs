@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Client.Constants
+namespace OmniCore.Model.Constants
 {
     public static class MessagingConstants
     {

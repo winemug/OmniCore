@@ -13,6 +13,7 @@ using Microsoft.AppCenter;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.Services
 {

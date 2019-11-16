@@ -11,6 +11,7 @@ using Android.Widget;
 using OmniCore.Client.Interfaces;
 using OmniCore.Mobile.Droid;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Platform;
 using Unity;
 
 namespace OmniCore.Client.Droid

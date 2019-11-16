@@ -1,5 +1,4 @@
-﻿using OmniCore.Client.Constants;
-using OmniCore.Repository.Enums;
+﻿using OmniCore.Repository.Enums;
 using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;

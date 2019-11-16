@@ -2,6 +2,7 @@
 using OmniCore.Client.Services;
 using OmniCore.Model.Interfaces;
 using Unity;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client
 {

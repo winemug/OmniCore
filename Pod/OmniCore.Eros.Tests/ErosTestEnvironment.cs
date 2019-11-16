@@ -1,5 +1,6 @@
 ﻿using Moq;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Repository;
 using OmniCore.Repository.Entities;
 using System;

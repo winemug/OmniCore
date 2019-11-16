@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Therapy
 {
-    public interface IDegradationProfile
+    public interface IAbsorptionProfile
     {
     }
 }

@@ -11,7 +11,6 @@ using OmniCore.Model.Utilities;
 using Unity;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Views;
-using OmniCore.Client.Constants;
 using System.IO;
 using System;
 using OmniCore.Repository;
@@ -20,6 +19,8 @@ using OmniCore.Client.ViewModels.Test;
 using System.Threading.Tasks;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
+using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Constants;
 
 namespace OmniCore.Client
 {

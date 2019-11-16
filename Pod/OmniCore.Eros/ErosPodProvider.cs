@@ -13,6 +13,7 @@ using OmniCore.Model.Interfaces;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

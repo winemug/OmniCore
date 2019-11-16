@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Client.Interfaces
+﻿namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IAppState
     {

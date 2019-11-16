@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

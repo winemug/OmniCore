@@ -15,6 +15,7 @@ using Android.Views;
 using Android.Widget;
 using OmniCore.Client.Interfaces;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Platform;
 using Environment = Android.OS.Environment;
 
 namespace OmniCore.Client.Droid
@@ -43,7 +44,14 @@ namespace OmniCore.Client.Droid
             }
         }
 
-        public IAppState State => new OmniCoreAppState();
+        public IAppState State
+        {
+            get
+            {
+                OmniCoreAppState omniCoreAppState = new OmniCoreAppState();
+                return omniCoreAppState;
+            }
+        }
 
         public async Task RunOnMainThread(Func<Task> asyncFunction)
         {

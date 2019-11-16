@@ -1,4 +1,5 @@
-﻿using OmniCore.Repository.Enums;
+﻿using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

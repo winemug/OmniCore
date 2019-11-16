@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Client.Interfaces
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IOmniCoreApplication
     {
