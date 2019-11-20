@@ -24,6 +24,6 @@ And if you have nothing better to do, [here](https://balya.net)'s where I'll be 
 OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
 
 ---
-If you are using the Omnipod NOT for diabetes treatment but for any other purpose, I would love to hear from you. Please get in [touch](barisk@gmail.com)!
+If you are using the Omnipod NOT for diabetes treatment but for any other purpose, I would love to hear from you. Please get in [touch](mailto:barisk@gmail.com)!
 ---
 
