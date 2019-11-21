@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj" />
-    <ProjectReference Include="..\..\Repository\OmniCore.Repository\OmniCore.Repository.csproj" />
   </ItemGroup>
 
 </Project>

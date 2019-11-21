@@ -146,10 +146,6 @@
       <Project>{a60e73f7-1000-436b-9ac9-e185f298eb66}</Project>
       <Name>OmniCore.Eros</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Repository\OmniCore.Repository\OmniCore.Repository.csproj">
-      <Project>{9b2d6156-b44a-40cf-8bac-06104ecf1ac8}</Project>
-      <Name>OmniCore.Repository</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj">
       <Project>{0a8a5cfc-6889-4c66-ab0e-82cc579690fd}</Project>
       <Name>OmniCore.Therapy</Name>
