@@ -1,21 +1,29 @@
 # OmniCore
 
-OmniCore is an Android app for controlling the Omnipod insulin pump (i.e. the "Pod"s).
+OmniCore is a platform for controlling and automating drug delivery using the Omnipod system.
 
-It implements the full functionality of the PDM (Personal Diabetes Manager). It also allows you to [close the loop](https://openaps.org/) for insulin delivery using your omnipod; currently integrated into a [customized version of Android APS](https://github.com/winemug/AndroidAPS).
+The project is currently in development and a very limited alpha version is available as an app for Android OS.
 
-The app is currently NOT released.
+An incomplete list of features for release v1.0:
 
-OmniCore currently does NOT support Omnipod Dash and can be used for Omnipod Eros only. See [roadmap](https://github.com/winemug/OmniCore/wiki/Roadmap).
+- Multiple user profiles and pods
+- View and track status of the pods, get alerts & notifications
+- View and manage basals, boluses, extended boluses
+- Custom bolus and basal patterns
+- API for integration of 3rd party apps
 
-OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
+If you need help or want to help out, or just chat with users, join our slack channel by clicking this [INVITE LINK](https://join.slack.com/t/omnicore-pdm/shared_invite/enQtODM0MzAxMDkzNzI5LWQ5MjEwNWNhOGNlZDI1YTcxNDhmYmNjNDE3YTU2MWY3OGNkMzZlMTc5MTFhYmI5MDBjNTk5YmQ1NGRhZGNlZDM)
+(Note: Previous link has expired due to more than 2000 people joining - srsly?)
 
-# Project Status Update - August 31st, 2019
-
-A limited functionality alpha release is in testing for two months now and although the results are technically positive and the issues are mostly trivial, I have identified some architectural weaknesses which need to be fixed before a first release. As I've just returned to work on this, expect more frequent updates, that is until life interferes again.
-
-Next step is a beta release to be announced here, as I believe the alpha testing has met its objective. Still if you'd like to experiment, old alpha builds are located in [Microsoft AppCenter](https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing)
+Alpha builds are located in [Microsoft AppCenter](https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing)
 
 You can follow the progress more closely [here](https://github.com/winemug/OmniCore/projects/1).
 
 And if you have nothing better to do, [here](https://balya.net)'s where I'll be ranting about life, omnicore and everything.
+
+OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
+
+---
+If you are using the Omnipod NOT for diabetes treatment but for any other purpose, I would love to hear from you. Please get in [touch](mailto:barisk@gmail.com)!
+---
+
