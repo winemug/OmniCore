@@ -6,7 +6,7 @@ using SQLite;
 
 namespace OmniCore.Repository.Entities
 {
-    public class Pod : UpdateableEntity
+    public class Pod : UpdateableEntity, IPod
     {
         [Indexed]
         public long UserProfileId { get; set; }

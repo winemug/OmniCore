@@ -2,7 +2,7 @@
 using SQLite;
 using System;
 
-namespace OmniCore.Repository.Entities
+namespace OmniCore.Model.Entities
 {
     public class AlertState : Entity
     {

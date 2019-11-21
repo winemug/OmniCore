@@ -1,8 +1,8 @@
-﻿namespace OmniCore.Model.Exceptions
-{
-    using OmniCore.Repository.Enums;
-    using System;
+﻿using OmniCore.Model.Enumerations;
+using System;
 
+namespace OmniCore.Model.Exceptions
+{
     public class OmniCoreWorkflowException : OmniCoreException
     {
         public OmniCoreWorkflowException(FailureType failureType, string message = "Unknown", Exception innerException = null)

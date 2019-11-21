@@ -1,7 +1,5 @@
-﻿using OmniCore.Repository.Enums;
+﻿using OmniCore.Model.Enumerations;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OmniCore.Model.Exceptions
 {

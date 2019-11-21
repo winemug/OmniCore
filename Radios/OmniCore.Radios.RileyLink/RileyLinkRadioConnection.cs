@@ -1,8 +1,5 @@
 ﻿using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Repository;
-using OmniCore.Repository.Entities;
-using OmniCore.Repository.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,22 +8,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Operational;
 
 namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioConnection : IRadioConnection
     {
-        public IRadioPeripheralLease PeripheralLease { get;  }
-        private IRadioPeripheral Peripheral { get => PeripheralLease.Peripheral; }
+        public IRadioPeripheralLease Lease { get;  }
+
+        private IRadio Radio;
+        private IRadioPeripheral Peripheral { get => Lease.Peripheral; }
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
         private IDisposable DeviceChangedSubscription = null;
         private IDisposable DeviceLostSubscription = null;
         private IDisposable ResponseNotifySubscription = null;
-
-        private Radio RadioEntity;
-        private PodRequest Request;
 
         private Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
         private Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
@@ -40,22 +38,21 @@ namespace OmniCore.Radios.RileyLink
 
         private RileyLinkRadioConfiguration ActiveConfiguration = null;
 
-        public RileyLinkRadioConnection(IRadioPeripheralLease radioPeripheralLease, Radio radioEntity, PodRequest request)
+        public RileyLinkRadioConnection(IRadioPeripheralLease radioPeripheralLease, IRadio radio)
         {
             Responses = new ConcurrentQueue<(byte?,byte[])>();
             ResponseEvent = new AsyncManualResetEvent();
-            RadioEntity = radioEntity;
-            Request = request;
-            PeripheralLease = radioPeripheralLease;
+            Radio = radio;
+            Lease = radioPeripheralLease;
             SubscribeToDeviceStates();
             SubscribeToConnectionStates();
         }
 
-        public async Task<bool> Initialize(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
+        public async Task<bool> Initialize(CancellationToken cancellationToken)
         {
-            var configuration = radioConfiguration as RileyLinkRadioConfiguration;
-            if (configuration == null)
-                return false;
+            //var configuration = radioConfiguration as RileyLinkRadioConfiguration;
+            //if (configuration == null)
+            //    return false;
 
             if (!Peripheral.IsConnected)
             {
@@ -82,24 +79,25 @@ namespace OmniCore.Radios.RileyLink
                 }
             }
 
-            if (ActiveConfiguration != null)
-            {
-                if (await VerifyConfiguration(configuration, cancellationToken))
-                {
+            //if (ActiveConfiguration != null)
+            //{
+            //    if (await VerifyConfiguration(configuration, cancellationToken))
+            //    {
 
-                }
-            }
-            else
-            {
-                if (await ConfigureRileyLink(configuration, cancellationToken))
-                {
-                    ActiveConfiguration = configuration;
-                }
-            }
-            return ActiveConfiguration != null;
+            //    }
+            //}
+            //else
+            //{
+            //    if (await ConfigureRileyLink(configuration, cancellationToken))
+            //    {
+            //        ActiveConfiguration = configuration;
+            //    }
+            //}
+            //return ActiveConfiguration != null;
+            return true;
         }
 
-        public async Task<IMessage> ExchangeMessages(IMessage messageToSend, CancellationToken cancellationToken, TxPower? TxLevel = null)
+        public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -112,7 +110,7 @@ namespace OmniCore.Radios.RileyLink
             DisconnectedSubscription?.Dispose();
             DeviceChangedSubscription?.Dispose();
             DeviceLostSubscription?.Dispose();
-            PeripheralLease?.Dispose();
+            Lease?.Dispose();
         }
 
         private void SubscribeToDeviceStates()

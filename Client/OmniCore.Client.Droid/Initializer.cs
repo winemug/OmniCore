@@ -10,6 +10,7 @@ using Android.Views;
 using Android.Widget;
 using OmniCore.Client.Interfaces;
 using OmniCore.Mobile.Droid;
+using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
 using Unity;

@@ -39,6 +39,7 @@ namespace OmniCore.Client.Droid
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
+            // container creation starts at the main project and follows path of references
             var container = new UnityContainer();
             Initializer.RegisterTypes(container);
 

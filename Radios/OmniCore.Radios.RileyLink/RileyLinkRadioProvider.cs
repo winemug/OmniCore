@@ -6,10 +6,9 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Operational;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Repository;
-using OmniCore.Repository.Entities;
-using OmniCore.Repository.Enums;
+
 
 namespace OmniCore.Radios.RileyLink
 {
@@ -34,9 +33,9 @@ namespace OmniCore.Radios.RileyLink
 
         }
 
-        public IObservable<Radio> ListRadios(CancellationToken cancellationToken)
+        public IObservable<IRadio> ListRadios(CancellationToken cancellationToken)
         {
-            return Observable.Create<Radio>(async (IObserver<Radio> observer) =>
+            return Observable.Create<IRadio>(async (IObserver<IRadio> observer) =>
             {
                 var peripheralIds  = new HashSet<Guid>();
                 var knownPeripherals = await RadioAdapter.GetKnownPeripherals(RileyLinkServiceUUID, cancellationToken);
