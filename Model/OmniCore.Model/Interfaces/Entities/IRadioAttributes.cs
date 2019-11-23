@@ -1,11 +1,6 @@
-﻿using OmniCore.Model.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 
-namespace OmniCore.Model.Interfaces.Attributes
+namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IRadioAttributes
     {

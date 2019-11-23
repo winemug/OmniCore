@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Interfaces.Attributes
+﻿namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IReminderSettingsAttributes
     {

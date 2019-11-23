@@ -1,11 +1,8 @@
-﻿using OmniCore.Model.Interfaces.Attributes;
-using OmniCore.Model.Interfaces.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Entities;
 
-namespace OmniCore.Model.Interfaces.Operational
+namespace OmniCore.Model.Interfaces.Workflow
 {
     public interface IPod
     {

@@ -1,9 +1,9 @@
 ﻿using OmniCore.Model.Interfaces.Entities;
-using OmniCore.Model.Interfaces.Operational;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Radios.RileyLink
 {

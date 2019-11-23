@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using OmniCore.Model.Interfaces.Attributes;
 using System;
 using System.Collections.Generic;
 

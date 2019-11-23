@@ -6,8 +6,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Operational;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Workflow;
 
 
 namespace OmniCore.Radios.RileyLink

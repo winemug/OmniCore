@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AppCenter;
+using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;

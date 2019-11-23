@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace OmniCore.Model.Interfaces.Attributes
+namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IBasalScheduleAttributes
     {

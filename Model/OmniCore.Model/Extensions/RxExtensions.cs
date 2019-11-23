@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Utilities
+namespace OmniCore.Model.Extensions
 {
     public static class RxExtensions
     {

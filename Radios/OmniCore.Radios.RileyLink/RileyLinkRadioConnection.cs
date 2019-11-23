@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Operational;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Radios.RileyLink
 {

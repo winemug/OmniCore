@@ -1,7 +1,7 @@
-﻿using OmniCore.Model.Interfaces.Operational;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Model.Interfaces.Services
 {

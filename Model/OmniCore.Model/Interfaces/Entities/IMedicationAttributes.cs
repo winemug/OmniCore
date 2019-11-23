@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OmniCore.Model.Enumerations;
+﻿using OmniCore.Model.Enumerations;
 
-namespace OmniCore.Model.Interfaces.Attributes
+namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IMedicationAttributes
     {
