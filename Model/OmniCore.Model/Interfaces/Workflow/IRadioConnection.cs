@@ -7,7 +7,8 @@ namespace OmniCore.Model.Interfaces.Workflow
 {
     public interface IRadioConnection : IDisposable
     {
-        IRadioPeripheralLease Lease { get; }
+        IRadioPeripheralLease Lease { get; set; }
+        IRadio Radio { get; set; }
         Task<bool> Initialize(CancellationToken cancellationToken);
         Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
     }

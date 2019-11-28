@@ -5,9 +5,15 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
+using OmniCore.Model.Constants;
+using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Entities;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Repositories;
 using OmniCore.Model.Interfaces.Workflow;
+using Unity;
 
 
 namespace OmniCore.Radios.RileyLink
@@ -17,21 +23,28 @@ namespace OmniCore.Radios.RileyLink
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
         private readonly IRadioAdapter RadioAdapter;
+        private readonly IRadioRepository RadioRepository;
+        private readonly ISignalStrengthRepository SignalStrengthRepository;
+        private readonly IUnityContainer Container;
 
-        public RileyLinkRadioProvider(IRadioAdapter radioAdapter)
+        private readonly AsyncLock RadioDictionaryLock;
+        private readonly Dictionary<Guid,IRadio> RadioDictionary;
+
+        public RileyLinkRadioProvider(
+            IRadioAdapter radioAdapter, 
+            IRadioRepository radioRepository,
+            ISignalStrengthRepository signalStrengthRepository,
+            IUnityContainer container)
         {
             RadioAdapter = radioAdapter;
+            RadioRepository = radioRepository;
+            SignalStrengthRepository = signalStrengthRepository;
+            Container = container;
+            RadioDictionary = new Dictionary<Guid, IRadio>();
+            RadioDictionaryLock = new AsyncLock();
         }
 
-        public async Task<IRadioConnection> GetConnection(Radio radioEntity, PodRequest request, CancellationToken cancellationToken)
-        {
-            var peripheralLease = await RadioAdapter.LeasePeripheral(radioEntity.DeviceId, cancellationToken);
-            if (peripheralLease == null)
-                return null;
-
-            return new RileyLinkRadioConnection(peripheralLease, radioEntity, request);
-
-        }
+        public string Description => "RileyLink";
 
         public IObservable<IRadio> ListRadios(CancellationToken cancellationToken)
         {
@@ -43,11 +56,11 @@ namespace OmniCore.Radios.RileyLink
                 {
                     foreach (var knownPeripheral in knownPeripherals)
                     {
-                        if (!peripheralIds.Contains(knownPeripheral.Id))
+                        if (!peripheralIds.Contains(knownPeripheral.Uuid))
                         {
-                            peripheralIds.Add(knownPeripheral.Id);
-                            var re = await GetRadioEntity(knownPeripheral);
-                            observer.OnNext(re);
+                            peripheralIds.Add(knownPeripheral.Uuid);
+                            var radio = await GetRadio(knownPeripheral);
+                            observer.OnNext(radio);
                         }
                     }
                 }
@@ -55,28 +68,15 @@ namespace OmniCore.Radios.RileyLink
                 var scanner = RadioAdapter.ScanPeripherals(RileyLinkServiceUUID, cancellationToken)
                     .Subscribe(async peripheralResult =>
                     {
-                        if (!peripheralIds.Contains(peripheralResult.Id))
+                        if (!peripheralIds.Contains(peripheralResult.Uuid))
                         {
-                            peripheralIds.Add(peripheralResult.Id);
-                            var re = await GetRadioEntity(peripheralResult);
-                            using(var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
-                            {
-                                await rcr.Create(new RadioConnection
-                                {
-                                    RadioId = re.Id.Value,
-                                    EventType = RadioConnectionEvent.Scan,
-                                    Successful = true
-                                });
-                            }
-                            using (var ssr = RepositoryProvider.Instance.SignalStrengthRepository)
-                            {
-                                await ssr.Create(new SignalStrength
-                                {
-                                    RadioId = re.Id.Value,
-                                    ClientRadioRssi = peripheralResult.Rssi
-                                });
-                            }
-                            observer.OnNext(re);
+                            peripheralIds.Add(peripheralResult.Uuid);
+                            var radio = await GetRadio(peripheralResult);
+                            var sse = await SignalStrengthRepository.New();
+                            sse.Radio = radio.Entity;
+                            sse.Rssi = peripheralResult.Rssi;
+                            await SignalStrengthRepository.Create(sse);
+                            observer.OnNext(radio);
                         }
                     });
                 return Disposable.Create(() => { scanner.Dispose(); });
@@ -97,27 +97,31 @@ namespace OmniCore.Radios.RileyLink
             return retVal;
         }
 
-        private async Task<Radio> GetRadioEntity(IRadioPeripheralScanResult peripheralScanResult)
+        private async Task<IRadio> GetRadio(IRadioPeripheralResult peripheralResult)
         {
-            using(var rr = RepositoryProvider.Instance.RadioRepository)
+            using var lockObj = await RadioDictionaryLock.LockAsync();
+
+            if (RadioDictionary.ContainsKey(peripheralResult.Uuid))
+                return RadioDictionary[peripheralResult.Uuid];
+
+            var psid = "RLL" + peripheralResult.Uuid.ToString("N");
+            var entity = await RadioRepository.GetByProviderSpecificId(psid);
+            if (entity == null)
             {
-                var psid = "RLL" + peripheralScanResult.Id.ToString("N");
-                var entity = await rr.GetByProviderSpecificId(psid);
-                if (entity == null)
-                {
-                    var gb = peripheralScanResult.Id.ToByteArray();
-                    var macid = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
-                    entity = await rr.Create(new Radio
-                    {
-                        DeviceId = peripheralScanResult.Id,
-                        DeviceIdReadable = macid,
-                        DeviceName = peripheralScanResult.Name,
-                        DeviceType = "RileyLink",
-                        ProviderSpecificId = psid
-                    });;
-                }
-                return entity;
+                var gb = peripheralResult.Uuid.ToByteArray();
+                var macid = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
+                entity = await RadioRepository.New();
+                entity.DeviceUuid = peripheralResult.Uuid;
+                entity.DeviceIdReadable = macid;
+                entity.DeviceName = peripheralResult.Name;
+                entity.ProviderSpecificId = psid;
+                await RadioRepository.Create(entity);
             }
+
+            var radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLinkRadio);
+            radio.Entity = entity;
+            RadioDictionary[peripheralResult.Uuid] = radio;
+            return radio;
         }
     }
 }

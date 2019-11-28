@@ -4,9 +4,9 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioPeripheralScanResult
+    public interface IRadioPeripheralResult
     {
-        Guid Id { get; }
+        Guid Uuid { get; }
         string Name { get; }
         int Rssi { get; }
     }

@@ -6,11 +6,10 @@ using System.Text;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
-    public class Entity : IEntity
+    public class Entity : BasicEntity, IEntity
     {
-        [AutoIncrement, PrimaryKey]
-        public long Id { get; set; }
-        public DateTimeOffset Created { get; set; }
+        public Entity() : base() {}
+
         public DateTimeOffset? Updated { get; set; }
         public bool Hidden { get; set; }
     }

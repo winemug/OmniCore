@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Repositories;
 using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioConnection : IRadioConnection
     {
-        public IRadioPeripheralLease Lease { get;  }
-
-        private IRadio Radio;
+        public IRadioPeripheralLease Lease { get; set; }
+        public IRadio Radio { get; set; }
         private IRadioPeripheral Peripheral { get => Lease.Peripheral; }
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
@@ -37,15 +37,13 @@ namespace OmniCore.Radios.RileyLink
         private AsyncManualResetEvent ResponseEvent;
 
         private RileyLinkRadioConfiguration ActiveConfiguration = null;
+        private ISignalStrengthRepository SignalStrengthRepository;
 
-        public RileyLinkRadioConnection(IRadioPeripheralLease radioPeripheralLease, IRadio radio)
+        public RileyLinkRadioConnection(ISignalStrengthRepository signalStrengthRepository)
         {
+            SignalStrengthRepository = signalStrengthRepository;
             Responses = new ConcurrentQueue<(byte?,byte[])>();
             ResponseEvent = new AsyncManualResetEvent();
-            Radio = radio;
-            Lease = radioPeripheralLease;
-            SubscribeToDeviceStates();
-            SubscribeToConnectionStates();
         }
 
         public async Task<bool> Initialize(CancellationToken cancellationToken)
@@ -56,6 +54,9 @@ namespace OmniCore.Radios.RileyLink
 
             if (!Peripheral.IsConnected)
             {
+                SubscribeToDeviceStates();
+                SubscribeToConnectionStates();
+
                 ResponseCharacteristic = null;
                 DataCharacteristic = null;
                 if (await Peripheral.Connect(true, cancellationToken))
@@ -130,28 +131,15 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
-        private void SubscribeToConnectionStates()
+        private async Task SubscribeToConnectionStates()
         {
             ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
             {
                 var rssi = await Peripheral.ReadRssi();
-                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
-                {
-                    await rcr.Create(new RadioConnection
-                    {
-                        RadioId = RadioEntity.Id.Value,
-                        PodId = Request?.PodId,
-                        RequestId = Request?.Id,
-                        EventType = RadioConnectionEvent.Connect,
-                        Successful = true
-                    });
-                }
-
-                using (var ssr = RepositoryProvider.Instance.SignalStrengthRepository)
-                {
-                    await ssr.Create(new SignalStrength { RadioId = RadioEntity.Id.Value,
-                        ClientRadioRssi = rssi });
-                }
+                var signalEntity = await SignalStrengthRepository.New();
+                signalEntity.Radio = Radio.Entity;
+                signalEntity.Rssi = rssi;
+                await SignalStrengthRepository.Create(signalEntity);
             });
 
             ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
@@ -163,7 +151,7 @@ namespace OmniCore.Radios.RileyLink
                         RadioId = RadioEntity.Id.Value,
                         PodId = Request?.PodId,
                         RequestId = Request?.Id,
-                        EventType = RadioConnectionEvent.Connect,
+                        EventType = RadioEvent.Connect,
                         Successful = false,
                         ErrorText = err.Message
                     });
@@ -179,7 +167,7 @@ namespace OmniCore.Radios.RileyLink
                         RadioId = RadioEntity.Id.Value,
                         PodId = Request?.PodId,
                         RequestId = Request?.Id,
-                        EventType = RadioConnectionEvent.Disconnect,
+                        EventType = RadioEvent.Disconnect,
                         Successful = true
                     });
                 }

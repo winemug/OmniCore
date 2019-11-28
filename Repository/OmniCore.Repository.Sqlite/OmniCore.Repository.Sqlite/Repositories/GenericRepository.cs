@@ -9,46 +9,39 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
-    public class GenericRepository<T, U> : Repository, IGenericRepository<U> where U : IEntity
+    public class GenericRepository<T, U> : BasicRepository<T,U>, IGenericRepository<U> where U : IEntity where T : Entity, U, new()
     {
 
         public GenericRepository(IRepositoryService repositoryService) : base(repositoryService)
         {
         }
 
-        public Task Create(U entity)
+        public async Task Delete(U entity)
         {
-            throw new NotImplementedException();
+            await Connection.DeleteAsync(entity);
         }
 
-        public Task Delete(U entity)
+        public async Task Hide(U entity)
         {
-            throw new NotImplementedException();
+            if (!entity.Hidden)
+            {
+                entity.Hidden = true;
+                await Update(entity);
+            }
         }
 
-        public Task Hide(U entity)
+        public async Task Restore(U entity)
         {
-            throw new NotImplementedException();
+            if (entity.Hidden)
+            {
+                entity.Hidden = false;
+                await Update(entity);
+            }
         }
 
-        public Task<U> Read(long id)
+        public async Task Update(U entity)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAsyncEnumerable<U>> ReadAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Unhide(U entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Update(U entity)
-        {
-            throw new NotImplementedException();
+            await Connection.UpdateAsync(entity);
         }
     }
 }

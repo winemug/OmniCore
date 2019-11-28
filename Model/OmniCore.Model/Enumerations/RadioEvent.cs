@@ -4,11 +4,12 @@ using System.Text;
 
 namespace OmniCore.Model.Enumerations
 {
-    public enum RadioConnectionEvent
+    public enum RadioEvent
     {
         Scan,
         Connect,
         Disconnect,
-        Command
+        Request,
+        Response
     }
 }

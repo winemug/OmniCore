@@ -9,6 +9,5 @@ namespace OmniCore.Model.Interfaces.Entities
         string DeviceIdReadable { get; set; }
         string DeviceName { get; set; }
         string UserDescription { get; set; }
-        string ProviderSpecificConfiguration { get; set; }
     }
 }

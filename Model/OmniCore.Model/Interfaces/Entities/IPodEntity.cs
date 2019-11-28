@@ -9,5 +9,6 @@ namespace OmniCore.Model.Interfaces.Entities
     {
         IUserEntity User { get; }
         IMedicationEntity Medication { get; }
+        IList<IRadioEntity> Radios { get; }
     }
 }

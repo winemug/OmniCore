@@ -115,9 +115,9 @@ namespace OmniCore.Client.Services
             }
         }
 
-        public IObservable<IRadioPeripheralScanResult> ScanPeripherals(Guid serviceId, CancellationToken cancellationToken)
+        public IObservable<IRadioPeripheralResult> ScanPeripherals(Guid serviceId, CancellationToken cancellationToken)
         {
-            return Observable.Create<IRadioPeripheralScanResult>(async (observer) =>
+            return Observable.Create<IRadioPeripheralResult>(async (observer) =>
                 {
                     if (!await PeripheralAccessSemaphore.WaitAsyncCancellable(cancellationToken))
                     {
@@ -152,9 +152,9 @@ namespace OmniCore.Client.Services
                             if (!searchResults.Contains(scanResult.Device.Uuid))
                             {
                                 searchResults.Add(scanResult.Device.Uuid);
-                                var crossScanResult = new CrossBleScanResult
+                                var crossScanResult = new CrossBleResult
                                 {
-                                    Id = scanResult.Device.Uuid,
+                                    Uuid = scanResult.Device.Uuid,
                                     Name = scanResult.Device.Name,
                                     Rssi = scanResult.Rssi
                                 };
@@ -174,7 +174,7 @@ namespace OmniCore.Client.Services
             );
         }
 
-        public async Task<IRadioPeripheralLease> LeasePeripheral(Guid id, CancellationToken cancellationToken)
+        public async Task<IRadioPeripheralLease> LeasePeripheral(Guid peripheralUuid, CancellationToken cancellationToken)
         {
             if (!await PeripheralAccessSemaphore.WaitAsyncCancellable(cancellationToken))
                 return null;
@@ -195,7 +195,7 @@ namespace OmniCore.Client.Services
             return null;
         }
 
-        public async Task<List<IRadioPeripheralScanResult>> GetKnownPeripherals(Guid serviceId, CancellationToken cancellationToken)
+        public async Task<List<IRadioPeripheralResult>> GetKnownPeripherals(Guid serviceId, CancellationToken cancellationToken)
         {
             //TODO: filter serviceId
             if (!await PeripheralAccessSemaphore.WaitAsyncCancellable(cancellationToken))
@@ -204,11 +204,11 @@ namespace OmniCore.Client.Services
             try
             {
                 return BlePeripherals.Values.ToList()
-                    .Select(p => new CrossBleScanResult
+                    .Select(p => new CrossBleResult
                     {
-                        Id = p.PeripheralId,
+                        Uuid = p.PeripheralId,
                         Name = p.PeripheralName
-                    }).ToList<IRadioPeripheralScanResult>();
+                    }).ToList<IRadioPeripheralResult>();
             }
             catch { throw; }
             finally

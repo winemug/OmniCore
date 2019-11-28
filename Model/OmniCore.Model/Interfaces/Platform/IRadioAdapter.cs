@@ -8,8 +8,8 @@ namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IRadioAdapter
     {
-        Task<List<IRadioPeripheralScanResult>> GetKnownPeripherals(Guid serviceId, CancellationToken cancellationToken);
-        IObservable<IRadioPeripheralScanResult> ScanPeripherals(Guid serviceId, CancellationToken cancellationToken);
-        Task<IRadioPeripheralLease> LeasePeripheral(Guid id, CancellationToken cancellationToken);
+        Task<List<IRadioPeripheralResult>> GetKnownPeripherals(Guid serviceId, CancellationToken cancellationToken);
+        IObservable<IRadioPeripheralResult> ScanPeripherals(Guid serviceId, CancellationToken cancellationToken);
+        Task<IRadioPeripheralLease> LeasePeripheral(Guid peripheralUuid, CancellationToken cancellationToken);
     }
 }

@@ -4,8 +4,9 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Entities
 {
-    public interface IUserEntity : IUserAttributes, IEntity
+    public interface ISignalStrengthAttributes
     {
-        bool ManagedRemotely { get; set; }
+        int Rssi { get; set; }
+
     }
 }

@@ -4,8 +4,9 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Entities
 {
-    public interface IUserEntity : IUserAttributes, IEntity
+    public interface IBasicEntity // ya basic
     {
-        bool ManagedRemotely { get; set; }
+        long Id { get; set; }
+        DateTimeOffset Created { get; set; }
     }
 }

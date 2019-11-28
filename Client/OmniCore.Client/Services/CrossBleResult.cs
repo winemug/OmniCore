@@ -6,9 +6,9 @@ using System.Text;
 
 namespace OmniCore.Client.Services
 {
-    public class CrossBleScanResult : IRadioPeripheralScanResult
+    public class CrossBleResult : IRadioPeripheralResult
     {
-        public Guid Id { get; set; }
+        public Guid Uuid { get; set; }
         public string Name { get; set; }
         public int Rssi { get; set; }
 
