@@ -142,14 +142,6 @@
       <Project>{92a55542-3401-47e9-9b2c-23fb834a6488}</Project>
       <Name>OmniCore.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Pod\OmniCore.Eros\OmniCore.Eros.csproj">
-      <Project>{a60e73f7-1000-436b-9ac9-e185f298eb66}</Project>
-      <Name>OmniCore.Eros</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj">
-      <Project>{0a8a5cfc-6889-4c66-ab0e-82cc579690fd}</Project>
-      <Name>OmniCore.Therapy</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OmniCore.Client\OmniCore.Client.csproj">
       <Project>{81322b39-1039-4f15-abe2-8289367d40eb}</Project>
       <Name>OmniCore.Client</Name>

@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj" />
-    <ProjectReference Include="..\..\Radios\OmniCore.Radios.RileyLink\OmniCore.Radios.RileyLink.csproj" />
   </ItemGroup>
 
 </Project>
