@@ -26,22 +26,26 @@ namespace OmniCore.Radios.RileyLink
         private IDisposable DeviceLostSubscription = null;
         private IDisposable ResponseNotifySubscription = null;
 
-        private Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
-        private Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
-        private Guid RileyLinkResponseCharacteristicUUID = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
+        private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
+        private readonly Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
+        private readonly Guid RileyLinkResponseCharacteristicUUID = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
         private IRadioPeripheralCharacteristic DataCharacteristic;
         private IRadioPeripheralCharacteristic ResponseCharacteristic;
 
         private ConcurrentQueue<(byte? ResponseNo, byte[] Response)> Responses;
         private AsyncManualResetEvent ResponseEvent;
-
         private RileyLinkRadioConfiguration ActiveConfiguration = null;
-        private ISignalStrengthRepository SignalStrengthRepository;
 
-        public RileyLinkRadioConnection(ISignalStrengthRepository signalStrengthRepository)
+        private readonly ISignalStrengthRepository SignalStrengthRepository;
+        private readonly IRadioEventRepository RadioEventRepository;
+
+        public RileyLinkRadioConnection(
+            ISignalStrengthRepository signalStrengthRepository,
+            IRadioEventRepository radioEventRepository)
         {
             SignalStrengthRepository = signalStrengthRepository;
+            RadioEventRepository = radioEventRepository;
             Responses = new ConcurrentQueue<(byte?,byte[])>();
             ResponseEvent = new AsyncManualResetEvent();
         }
@@ -54,8 +58,8 @@ namespace OmniCore.Radios.RileyLink
 
             if (!Peripheral.IsConnected)
             {
-                SubscribeToDeviceStates();
-                SubscribeToConnectionStates();
+                await SubscribeToDeviceStates();
+                await SubscribeToConnectionStates();
 
                 ResponseCharacteristic = null;
                 DataCharacteristic = null;
@@ -114,7 +118,7 @@ namespace OmniCore.Radios.RileyLink
             Lease?.Dispose();
         }
 
-        private void SubscribeToDeviceStates()
+        private async Task SubscribeToDeviceStates()
         {
             Peripheral.WhenDeviceChanged().Subscribe(async (_) =>
             {
@@ -140,37 +144,30 @@ namespace OmniCore.Radios.RileyLink
                 signalEntity.Radio = Radio.Entity;
                 signalEntity.Rssi = rssi;
                 await SignalStrengthRepository.Create(signalEntity);
+
+                var radioEvent = await RadioEventRepository.New();
+                radioEvent.Radio = Radio.Entity;
+                radioEvent.EventType = RadioEvent.Connect;
+                radioEvent.Success = true;
+                await RadioEventRepository.Create(radioEvent);
             });
 
             ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
             {
-                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
-                {
-                    await rcr.Create(new RadioConnection
-                    {
-                        RadioId = RadioEntity.Id.Value,
-                        PodId = Request?.PodId,
-                        RequestId = Request?.Id,
-                        EventType = RadioEvent.Connect,
-                        Successful = false,
-                        ErrorText = err.Message
-                    });
-                }
+                var radioEvent = await RadioEventRepository.New();
+                radioEvent.Radio = Radio.Entity;
+                radioEvent.EventType = RadioEvent.Connect;
+                radioEvent.Success = false;
+                await RadioEventRepository.Create(radioEvent);
             });
 
             DisconnectedSubscription = Peripheral.WhenDisconnected().Subscribe( async (_) =>
             {
-                using (var rcr = RepositoryProvider.Instance.RadioConnectionRepository)
-                {
-                    await rcr.Create(new RadioConnection
-                    {
-                        RadioId = RadioEntity.Id.Value,
-                        PodId = Request?.PodId,
-                        RequestId = Request?.Id,
-                        EventType = RadioEvent.Disconnect,
-                        Successful = true
-                    });
-                }
+                var radioEvent = await RadioEventRepository.New();
+                radioEvent.Radio = Radio.Entity;
+                radioEvent.EventType = RadioEvent.Disconnect;
+                radioEvent.Success = true;
+                await RadioEventRepository.Create(radioEvent);
             });
         }
 

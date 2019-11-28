@@ -29,16 +29,19 @@ namespace OmniCore.Radios.RileyLink
 
         private readonly AsyncLock RadioDictionaryLock;
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
+        private readonly IRadioEventRepository RadioEventRepository;
 
         public RileyLinkRadioProvider(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             ISignalStrengthRepository signalStrengthRepository,
+            IRadioEventRepository radioEventRepository,
             IUnityContainer container)
         {
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
             SignalStrengthRepository = signalStrengthRepository;
+            RadioEventRepository = radioEventRepository;
             Container = container;
             RadioDictionary = new Dictionary<Guid, IRadio>();
             RadioDictionaryLock = new AsyncLock();
@@ -71,11 +74,19 @@ namespace OmniCore.Radios.RileyLink
                         if (!peripheralIds.Contains(peripheralResult.Uuid))
                         {
                             peripheralIds.Add(peripheralResult.Uuid);
+
                             var radio = await GetRadio(peripheralResult);
                             var sse = await SignalStrengthRepository.New();
                             sse.Radio = radio.Entity;
                             sse.Rssi = peripheralResult.Rssi;
                             await SignalStrengthRepository.Create(sse);
+
+                            var radioEvent = await RadioEventRepository.New();
+                            radioEvent.Radio = radio.Entity;
+                            radioEvent.EventType = RadioEvent.Scan;
+                            radioEvent.Success = true;
+                            await RadioEventRepository.Create(radioEvent);
+
                             observer.OnNext(radio);
                         }
                     });
