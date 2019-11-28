@@ -9,7 +9,10 @@ namespace OmniCore.Model.Interfaces.Services
     {
         bool IsInitialized { get; }
         string RepositoryPath { get; }
-        Task InitializeNew(string repositoryPath);
+        Task Restore(string backupPath);
+        Task Backup(string backupPath);
+        Task<bool> IsValid(string repositoryPath);
+        Task New(string repositoryPath);
         Task Initialize(string repositoryPath);
     }
 }

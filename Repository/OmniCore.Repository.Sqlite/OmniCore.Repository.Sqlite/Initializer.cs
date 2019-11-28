@@ -11,6 +11,9 @@ namespace OmniCore.Repository.Sqlite
         public static void RegisterTypes(IUnityContainer container)
         {
             container.RegisterType<IMedicationRepository, MedicationRepository>();
+            container.RegisterType<IRadioEventRepository, RadioEventRepository>();
+            container.RegisterType<IRadioRepository, RadioRepository>();
+            container.RegisterType<ISignalStrengthRepository, SignalStrengthRepository>();
             container.RegisterType<IUserRepository, UserRepository>();
 
             container.RegisterType<IRepositoryService, RepositoryService>();
