@@ -7,8 +7,6 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IRadioService
     {
-        IRadioProvider RileyLinkProvider { get; }
-        IRadioProvider RftpProvider { get; }
-        IRadioProvider DashRadioProvider { get; }
+        IRadioProvider[] Providers { get; }
     }
 }

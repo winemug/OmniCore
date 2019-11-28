@@ -8,8 +8,7 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPodService
     {
-        IPodProvider ErosProvider { get; }
-        IPodProvider DashProvider { get; }
+        IPodProvider[] Providers{ get; }
         IPodProvider GetRemoteProvider(IUserEntity user);
     }
 }

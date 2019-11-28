@@ -6,6 +6,7 @@ namespace OmniCore.Model.Interfaces.Workflow
 {
     public interface IPodProvider
     {
+        string Description { get; }
         Task<IList<IPod>> ListActive();
         Task<IList<IPod>> ListArchived();
         Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios);
