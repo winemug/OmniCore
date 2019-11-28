@@ -15,6 +15,7 @@ using Xamarin.Forms;
 using OmniCore.Client;
 using OmniCore.Client.Interfaces;
 using System.IO;
+using OmniCore.Configuration;
 using Unity;
 using OmniCore.Mobile.Droid;
 
@@ -40,8 +41,13 @@ namespace OmniCore.Client.Droid
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             // container creation starts at the main project and follows path of references
-            var container = new UnityContainer();
-            Initializer.RegisterTypes(container);
+            var container = new UnityContainer()
+                .WithDefaultServiceProvider()
+                .WithSqlite()
+                .WithOmnipodEros()
+                .WithRileyLink()
+                .WithCrossPlatformBleAdapter()
+                .OnAndroid();
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);

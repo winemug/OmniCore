@@ -9,6 +9,5 @@ namespace OmniCore.Model.Interfaces.Services
     public interface IPodService
     {
         IPodProvider[] Providers{ get; }
-        IPodProvider GetRemoteProvider(IUserEntity user);
     }
 }

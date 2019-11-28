@@ -1,6 +1,4 @@
-﻿using OmniCore.Eros;
-using OmniCore.Client.Services;
-using OmniCore.Model.Interfaces;
+﻿using OmniCore.Client.Services;
 using Unity;
 using OmniCore.Model.Interfaces.Platform;
 
@@ -8,10 +6,10 @@ namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static void RegisterTypes(IUnityContainer container)
+        public static IUnityContainer WithCrossPlatformBleAdapter(this IUnityContainer container)
         {
             container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
-            OmniCore.Eros.Initializer.RegisterTypes(container);
+            return container;
         }
     }
 }

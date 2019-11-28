@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj" />
+    <ProjectReference Include="..\..\Pod\OmniCore.Eros\OmniCore.Eros.csproj" />
+    <ProjectReference Include="..\..\Radios\OmniCore.Radios.RileyLink\OmniCore.Radios.RileyLink.csproj" />
+    <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj" />
+  </ItemGroup>
+
+</Project>

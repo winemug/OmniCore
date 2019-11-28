@@ -9,6 +9,6 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Task<ICoreServices> GetLocalServices();
         Task<ICoreServices> GetRemoteServices(ICoreServicesDescriptor serviceDescriptor, ICoreCredentials credentials);
-        Task<IAsyncEnumerable<ICoreServicesDescriptor>> ListNearServices();
+        Task<IAsyncEnumerable<ICoreServicesDescriptor>> ListRemoteServices();
     }
 }

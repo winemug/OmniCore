@@ -36,8 +36,6 @@ namespace OmniCore.Client
 
         public App(IUnityContainer container)
         {
-            Initializer.RegisterTypes(container);
-
             PodProvider = container.Resolve<IPodProvider>();
             RileyLinkProvider = container.Resolve<IRadioProvider>("RileyLinkRadioProvider");
             Logger = container.Resolve<IOmniCoreLogger>();

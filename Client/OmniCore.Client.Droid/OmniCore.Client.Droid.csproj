@@ -138,6 +138,10 @@
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Configuration\OmniCore.Configuration\OmniCore.Configuration.csproj">
+      <Project>{937c8f56-d6b0-4192-a97d-df47930d2403}</Project>
+      <Name>OmniCore.Configuration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj">
       <Project>{92a55542-3401-47e9-9b2c-23fb834a6488}</Project>
       <Name>OmniCore.Model</Name>

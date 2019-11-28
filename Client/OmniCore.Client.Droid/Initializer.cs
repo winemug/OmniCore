@@ -19,15 +19,9 @@ namespace OmniCore.Client.Droid
 {
     public static class Initializer
     {
-        public static void RegisterTypes(IUnityContainer container)
+        public static IUnityContainer OnAndroid(this IUnityContainer container)
         {
-            container.RegisterSingleton<IRemoteRequestPublisher, RemoteRequestPublisher>();
-            container.RegisterSingleton<IOmniCoreApplication, OmniCoreApplication>();
-            container.RegisterSingleton<IOmniCoreLogger, OmniCoreLogger>();
-            container.RegisterSingleton<IAppState, OmniCoreAppState>();
-            container.RegisterSingleton<IBackgroundTaskFactory, BackgroundTaskFactory>();
-
-            OmniCore.Client.Initializer.RegisterTypes(container);
+            return container;
         }
     }
 }
