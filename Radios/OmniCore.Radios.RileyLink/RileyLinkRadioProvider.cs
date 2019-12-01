@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
@@ -38,17 +39,12 @@ namespace OmniCore.Radios.RileyLink
             IRadioRepository radioRepository,
             ISignalStrengthRepository signalStrengthRepository,
             IRadioEventRepository radioEventRepository,
-            IUnityContainer container,
-            IPodProvider[] podProviders)
+            IUnityContainer container)
         {
-            var compatiblePodProviders = new List<IPodProvider>();
-            foreach (var podProvider in podProviders)
+            PodProviders = new []
             {
-                if (podProvider.Code == ProviderConstants.PodProviderEros)
-                    compatiblePodProviders.Add(podProvider);
-            }
-
-            PodProviders = compatiblePodProviders.ToArray();
+                container.Resolve<IPodProvider>(RegistrationConstants.OmnipodEros)
+            };
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
             SignalStrengthRepository = signalStrengthRepository;
@@ -59,8 +55,7 @@ namespace OmniCore.Radios.RileyLink
         }
 
         public string Description => "RileyLink";
-        public string Code => ProviderConstants.RadioProviderRileyLink;
-        
+       
         public IObservable<IRadio> ListRadios(CancellationToken cancellationToken)
         {
             return Observable.Create<IRadio>(async (IObserver<IRadio> observer) =>
