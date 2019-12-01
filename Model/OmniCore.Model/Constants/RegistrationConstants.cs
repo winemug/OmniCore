@@ -7,7 +7,7 @@ namespace OmniCore.Model.Constants
 {
     public static class RegistrationConstants
     {
-        public static readonly string RileyLinkRadio = nameof(RileyLinkRadio);
-        public static readonly string RileyLinkRadioConnection = nameof(RileyLinkRadioConnection);
+        public static readonly string RileyLink = nameof(RileyLink);
+        public static readonly string OmnipodEros = nameof(OmnipodEros);
     }
 }

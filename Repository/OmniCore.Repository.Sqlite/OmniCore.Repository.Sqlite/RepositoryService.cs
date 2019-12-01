@@ -45,5 +45,10 @@ namespace OmniCore.Repository.Sqlite
                 IsInitialized = true;
             }
         }
+
+        public Task Shutdown()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

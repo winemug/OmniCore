@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IUserRepository : IGenericRepository<IUserEntity>
+    public interface IUserRepository : IRepository<IUserEntity>
     {
     }
 }

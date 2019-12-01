@@ -7,7 +7,7 @@ using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
-    public class RadioEventEntity : BasicEntity, IRadioEventEntity
+    public class RadioEventEntity : Entity, IRadioEventEntity
     {
         public RadioEvent EventType { get; set; }
         public bool Success { get; set; }

@@ -140,12 +140,12 @@ namespace OmniCore.Radios.RileyLink
             ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
             {
                 var rssi = await Peripheral.ReadRssi();
-                var signalEntity = await SignalStrengthRepository.New();
+                var signalEntity = SignalStrengthRepository.New();
                 signalEntity.Radio = Radio.Entity;
                 signalEntity.Rssi = rssi;
                 await SignalStrengthRepository.Create(signalEntity);
 
-                var radioEvent = await RadioEventRepository.New();
+                var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Connect;
                 radioEvent.Success = true;
@@ -154,7 +154,7 @@ namespace OmniCore.Radios.RileyLink
 
             ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
             {
-                var radioEvent = await RadioEventRepository.New();
+                var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Connect;
                 radioEvent.Success = false;
@@ -163,7 +163,7 @@ namespace OmniCore.Radios.RileyLink
 
             DisconnectedSubscription = Peripheral.WhenDisconnected().Subscribe( async (_) =>
             {
-                var radioEvent = await RadioEventRepository.New();
+                var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Disconnect;
                 radioEvent.Success = true;

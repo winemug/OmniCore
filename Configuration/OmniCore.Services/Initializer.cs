@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OmniCore.Model.Interfaces.Services;
+﻿using OmniCore.Model.Interfaces.Services;
 using Unity;
 
-namespace OmniCore.Configuration
+namespace OmniCore.Services
 {
     public static class Initializer
     {
-        public static IUnityContainer WithDefaultServiceProvider(this IUnityContainer container)
+        public static IUnityContainer WithDefaultServices(this IUnityContainer container)
         {
+            container.RegisterType<IPodService, PodService>();
+            container.RegisterType<IRadioService, RadioService>();
             container.RegisterType<ICoreServices, LocalServices>();
             container.RegisterType<ICoreServicesProvider, CoreServicesProvider>();
             return container;

@@ -16,7 +16,7 @@ namespace OmniCore.Repository.Sqlite
             container.RegisterType<ISignalStrengthRepository, SignalStrengthRepository>();
             container.RegisterType<IUserRepository, UserRepository>();
 
-            container.RegisterType<IRepositoryService, RepositoryService>();
+            container.RegisterSingleton<IRepositoryService, RepositoryService>();
         }
     }
 }

@@ -15,7 +15,7 @@ using Xamarin.Forms;
 using OmniCore.Client;
 using OmniCore.Client.Interfaces;
 using System.IO;
-using OmniCore.Configuration;
+using OmniCore.Services;
 using Unity;
 using OmniCore.Mobile.Droid;
 
@@ -42,7 +42,7 @@ namespace OmniCore.Client.Droid
 
             // container creation starts at the main project and follows path of references
             var container = new UnityContainer()
-                .WithDefaultServiceProvider()
+                .WithDefaultServices()
                 .WithSqlite()
                 .WithOmnipodEros()
                 .WithRileyLink()

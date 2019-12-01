@@ -6,7 +6,7 @@ namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IBasalScheduleEntity : IBasalScheduleAttributes, IEntity
     {
-        IManualProfileEntity UserProfile { get; }
+        ITherapyProfileEntity TherapyProfile { get; }
         IMedicationEntity Medication { get; }
     }
 }

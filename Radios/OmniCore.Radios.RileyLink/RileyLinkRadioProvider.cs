@@ -31,13 +31,24 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
         private readonly IRadioEventRepository RadioEventRepository;
 
+        public IPodProvider[] PodProviders { get; }
+
         public RileyLinkRadioProvider(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             ISignalStrengthRepository signalStrengthRepository,
             IRadioEventRepository radioEventRepository,
-            IUnityContainer container)
+            IUnityContainer container,
+            IPodProvider[] podProviders)
         {
+            var compatiblePodProviders = new List<IPodProvider>();
+            foreach (var podProvider in podProviders)
+            {
+                if (podProvider.Code == ProviderConstants.PodProviderEros)
+                    compatiblePodProviders.Add(podProvider);
+            }
+
+            PodProviders = compatiblePodProviders.ToArray();
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
             SignalStrengthRepository = signalStrengthRepository;
@@ -48,7 +59,8 @@ namespace OmniCore.Radios.RileyLink
         }
 
         public string Description => "RileyLink";
-
+        public string Code => ProviderConstants.RadioProviderRileyLink;
+        
         public IObservable<IRadio> ListRadios(CancellationToken cancellationToken)
         {
             return Observable.Create<IRadio>(async (IObserver<IRadio> observer) =>
@@ -76,12 +88,12 @@ namespace OmniCore.Radios.RileyLink
                             peripheralIds.Add(peripheralResult.Uuid);
 
                             var radio = await GetRadio(peripheralResult);
-                            var sse = await SignalStrengthRepository.New();
+                            var sse = SignalStrengthRepository.New();
                             sse.Radio = radio.Entity;
                             sse.Rssi = peripheralResult.Rssi;
                             await SignalStrengthRepository.Create(sse);
 
-                            var radioEvent = await RadioEventRepository.New();
+                            var radioEvent =RadioEventRepository.New();
                             radioEvent.Radio = radio.Entity;
                             radioEvent.EventType = RadioEvent.Scan;
                             radioEvent.Success = true;
@@ -94,20 +106,6 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
-        private Guid? GetPeripheralId(string providerSpecificId)
-        {
-            Guid? retVal= null;
-            if (providerSpecificId == null && providerSpecificId.Length > 3 && providerSpecificId.StartsWith("RLL"))
-            {
-                Guid val;
-                if (Guid.TryParse(providerSpecificId.Substring(3), out val))
-                {
-                    retVal = val;
-                }
-            }
-            return retVal;
-        }
-
         private async Task<IRadio> GetRadio(IRadioPeripheralResult peripheralResult)
         {
             using var lockObj = await RadioDictionaryLock.LockAsync();
@@ -115,21 +113,19 @@ namespace OmniCore.Radios.RileyLink
             if (RadioDictionary.ContainsKey(peripheralResult.Uuid))
                 return RadioDictionary[peripheralResult.Uuid];
 
-            var psid = "RLL" + peripheralResult.Uuid.ToString("N");
-            var entity = await RadioRepository.GetByProviderSpecificId(psid);
+            var entity = await RadioRepository.ByDeviceUuid(peripheralResult.Uuid);
             if (entity == null)
             {
                 var gb = peripheralResult.Uuid.ToByteArray();
                 var macid = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
-                entity = await RadioRepository.New();
+                entity = RadioRepository.New();
                 entity.DeviceUuid = peripheralResult.Uuid;
                 entity.DeviceIdReadable = macid;
                 entity.DeviceName = peripheralResult.Name;
-                entity.ProviderSpecificId = psid;
                 await RadioRepository.Create(entity);
             }
 
-            var radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLinkRadio);
+            var radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLink);
             radio.Entity = entity;
             RadioDictionary[peripheralResult.Uuid] = radio;
             return radio;

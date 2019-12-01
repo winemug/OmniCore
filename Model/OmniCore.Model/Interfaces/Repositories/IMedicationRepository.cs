@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IMedicationRepository : IGenericRepository<IMedicationEntity>
+    public interface IMedicationRepository : IRepository<IMedicationEntity>
     {
     }
 }

@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using OmniCore.Model.Enumerations;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Eros
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,5 +15,6 @@ namespace OmniCore.Model.Interfaces.Services
         Task<bool> IsValid(string repositoryPath);
         Task New(string repositoryPath);
         Task Initialize(string repositoryPath);
+        Task Shutdown();
     }
 }

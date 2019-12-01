@@ -4,24 +4,24 @@ using System.Text;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Workflow;
 
-namespace OmniCore.Configuration
+namespace OmniCore.Services
 {
     public class LocalServices : ICoreServices
     {
         public LocalServices(
-            IPodProvider[] podProviders,
-            IRadioProvider[] radioProviders,
+            IPodService podService,
+            IRadioService radioService,
             IRepositoryService repositoryService,
             IApplicationService applicationService)
         {
-            PodProviders = podProviders;
-            RadioProviders = radioProviders;
+            PodService = podService;
+            RadioService = radioService;
             RepositoryService = repositoryService;
             ApplicationService = applicationService;
         }
 
-        public IPodProvider[] PodProviders { get; }
-        public IRadioProvider[] RadioProviders { get; }
+        public IPodService PodService { get; }
+        public IRadioService RadioService { get; }
         public IRepositoryService RepositoryService { get; }
         public IApplicationService ApplicationService { get;}
     }

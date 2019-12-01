@@ -7,9 +7,10 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface ICoreServices
     {
-        IPodProvider[] PodProviders { get; }
-        IRadioProvider[] RadioProviders { get; }
-        IRepositoryService RepositoryService { get; }
         IApplicationService ApplicationService { get; }
+        IPodService PodService { get; }
+        IRadioService RadioService { get; }
+        IRepositoryService RepositoryService { get; }
+        IUserService UserService { get; }
     }
 }

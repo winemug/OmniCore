@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OmniCore.Model.Enumerations;
 using OmniCore.Repository.Enums;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
@@ -12,6 +13,7 @@ using SQLite;
 using OmniCore.Repository.Entities;
 using OmniCore.Repository;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Eros
 {

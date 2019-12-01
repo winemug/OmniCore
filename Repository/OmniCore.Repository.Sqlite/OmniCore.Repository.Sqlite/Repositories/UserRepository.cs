@@ -5,12 +5,13 @@ using OmniCore.Repository.Sqlite.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
-    public class UserRepository : GenericRepository<UserEntity, IUserEntity>, IUserRepository
+    public class UserRepository : Repository<UserEntity, IUserEntity>, IUserRepository
     {
-        public UserRepository(IRepositoryService repositoryService) : base(repositoryService)
+        public UserRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
         {
         }
     }

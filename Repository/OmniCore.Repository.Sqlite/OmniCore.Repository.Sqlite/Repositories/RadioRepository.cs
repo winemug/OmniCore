@@ -6,18 +6,19 @@ using OmniCore.Model.Interfaces.Entities;
 using OmniCore.Model.Interfaces.Repositories;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
+using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
-    class RadioRepository : GenericRepository<RadioEntity, IRadioEntity>, IRadioRepository
+    class RadioRepository : Repository<RadioEntity, IRadioEntity>, IRadioRepository
     {
-        public RadioRepository(IRepositoryService repositoryService) : base(repositoryService)
+        public RadioRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
         {
         }
-
-        public async Task<IRadioEntity> GetByProviderSpecificId(string providerSpecificId)
+        public async Task<IRadioEntity> ByDeviceUuid(Guid deviceUuid)
         {
-            return await Connection.Table<RadioEntity>().FirstOrDefaultAsync(x => x.ProviderSpecificId == providerSpecificId);
+            var c = await GetConnection();
+            return await c.Table<RadioEntity>().FirstOrDefaultAsync(x => x.DeviceUuid == deviceUuid);
         }
     }
 }

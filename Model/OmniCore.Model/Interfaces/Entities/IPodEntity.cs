@@ -7,8 +7,9 @@ namespace OmniCore.Model.Interfaces.Entities
 {
     public interface IPodEntity : IPodAttributes, IReminderSettingsAttributes, IEntity
     {
-        IUserEntity User { get; }
-        IMedicationEntity Medication { get; }
-        IList<IRadioEntity> Radios { get; }
+        IUserEntity User { get; set; }
+        IMedicationEntity Medication { get; set; }
+        ITherapyProfileEntity TherapyProfile { get; set; }
+        IList<IRadioEntity> Radios { get; set; }
     }
 }

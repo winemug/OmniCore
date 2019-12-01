@@ -44,7 +44,7 @@ namespace OmniCore.Radios.RileyLink
             var lease = await Adapter.LeasePeripheral(Entity.DeviceUuid, cancellationToken);
             if (lease != null)
             {
-                var connection = Container.Resolve<IRadioConnection>(RegistrationConstants.RileyLinkRadioConnection);
+                var connection = Container.Resolve<IRadioConnection>(RegistrationConstants.RileyLink);
                 connection.Lease = lease;
                 connection.Radio = this;
 

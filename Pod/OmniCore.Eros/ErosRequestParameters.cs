@@ -4,6 +4,7 @@ using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Eros
 {

@@ -6,7 +6,7 @@ using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
-    public class SignalStrengthEntity : BasicEntity, ISignalStrengthEntity
+    public class SignalStrengthEntity : Entity, ISignalStrengthEntity
     {
         public int Rssi { get; set; }
 

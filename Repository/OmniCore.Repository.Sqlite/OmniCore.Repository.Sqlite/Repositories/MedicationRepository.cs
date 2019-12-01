@@ -6,12 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
-    public class MedicationRepository : GenericRepository<MedicationEntity, IMedicationEntity>, IMedicationRepository
+    public class MedicationRepository : Repository<MedicationEntity, IMedicationEntity>, IMedicationRepository
     {
-        public MedicationRepository(IRepositoryService repositoryService) : base(repositoryService)
+        public MedicationRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
         {
         }
     }

@@ -4,9 +4,12 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Entities
 {
-    public interface IEntity : IBasicEntity
+    public interface IEntity
     {
+        long Id { get; set; }
+        DateTimeOffset Created { get; set; }
         DateTimeOffset? Updated { get; set; }
         bool Hidden { get; set; }
+        IExtendedAttribute ExtendedAttribute { get; set; }
     }
 }

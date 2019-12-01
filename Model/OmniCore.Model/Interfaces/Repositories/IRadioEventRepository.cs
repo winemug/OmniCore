@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Entities;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IRadioEventRepository : IBasicRepository<IRadioEventEntity>
+    public interface IRadioEventRepository : IRepository<IRadioEventEntity>
     {
     }
 }

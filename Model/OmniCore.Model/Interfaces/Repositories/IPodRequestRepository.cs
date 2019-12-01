@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IPodRequestRepository : IGenericRepository<IPodRequestEntity>
+    public interface IPodRequestRepository : IRepository<IPodRequestEntity>
     {
     }
 }

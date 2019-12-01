@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IRadioRepository : IGenericRepository<IRadioEntity>
+    public interface IRadioRepository : IRepository<IRadioEntity>
     {
-        Task<IRadioEntity> GetByProviderSpecificId(string providerSpecificId);
+        Task<IRadioEntity> ByDeviceUuid(Guid deviceUuid);
     }
 }

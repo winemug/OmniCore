@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Configuration
+namespace OmniCore.Services
 {
     public class CoreServicesProvider : ICoreServicesProvider
     {

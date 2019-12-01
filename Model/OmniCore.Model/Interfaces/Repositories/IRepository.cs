@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IGenericRepository<T> : IBasicRepository<T> where T : IEntity
-    { 
+    public interface IRepository<T> where T : IEntity
+    {
+        IRepository<T> WithExtendedAttributeProvider(IExtendedAttributeProvider extendedAttributeProvider);
+        T New();
+        Task Create(T entity);
+        Task<T> Read(long id);
+        IAsyncEnumerable<T> All();
         Task Update(T entity);
         Task Hide(T entity);
         Task Restore(T entity);

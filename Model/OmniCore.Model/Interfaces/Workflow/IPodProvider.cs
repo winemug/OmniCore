@@ -6,10 +6,12 @@ namespace OmniCore.Model.Interfaces.Workflow
 {
     public interface IPodProvider
     {
+        IRadioProvider[] RadioProviders { get; }
         string Description { get; }
-        Task<IList<IPod>> ListActive();
-        Task<IList<IPod>> ListArchived();
+        string Code { get; }
+        Task<IList<IPod>> ActivePods();
+        Task<IList<IPodEntity>> ArchivedPods();
         Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios);
-        Task<IPod> Register(IPod pod, IUserEntity user, IList<IRadioEntity> radios);
+        Task<IPod> Register(IPodEntity pod, IUserEntity user, IList<IRadioEntity> radios);
     }
 }

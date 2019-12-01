@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Radios.RileyLink",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Repository.Sqlite", "Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj", "{6F18BF87-E7BD-498C-A044-82A34C0DF0E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Configuration", "Configuration\OmniCore.Configuration\OmniCore.Configuration.csproj", "{937C8F56-D6B0-4192-A97D-DF47930D2403}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Services", "Configuration\OmniCore.Services\OmniCore.Services.csproj", "{937C8F56-D6B0-4192-A97D-DF47930D2403}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

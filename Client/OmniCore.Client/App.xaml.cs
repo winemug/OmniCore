@@ -21,6 +21,7 @@ using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client
 {

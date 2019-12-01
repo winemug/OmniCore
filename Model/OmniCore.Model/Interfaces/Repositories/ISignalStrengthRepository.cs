@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Entities;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface ISignalStrengthRepository : IBasicRepository<ISignalStrengthEntity>
+    public interface ISignalStrengthRepository : IRepository<ISignalStrengthEntity>
     {
     }
 }
