@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces.Repositories
 {
     public interface IPodRepository : IRepository<IPodEntity>
     {
-        Task<IList<IPodEntity>> ActivePods(string providerCode);
-        Task<IList<IPodEntity>> ArchivedPods(string providerCode);
+        Task<IList<IPodEntity>> ActivePods();
+        Task<IList<IPodEntity>> ArchivedPods();
     }
 }

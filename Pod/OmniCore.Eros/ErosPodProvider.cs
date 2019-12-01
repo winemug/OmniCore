@@ -19,7 +19,6 @@ namespace OmniCore.Eros
     public class ErosPodProvider : IPodProvider
     {
         public string Description => "Omnipod Eros";
-        public string Code => ProviderConstants.PodProviderEros;
         public IRadioProvider[] RadioProviders { get; }
         
         private readonly IRadioAdapter RadioAdapter;
@@ -33,30 +32,25 @@ namespace OmniCore.Eros
 
         public ErosPodProvider(
             IRadioAdapter radioAdapter,
-            IRadioProvider[] radioProviders,
             IPodRepository podRepository,
             IUnityContainer container)
         {
-            var compatibleRadioProviders = new List<IRadioProvider>();
-            foreach (var radioProvider in radioProviders)
+            RadioProviders = new[]
             {
-                if (radioProvider.Code == ProviderConstants.RadioProviderRileyLink ||
-                    radioProvider.Code == ProviderConstants.RadioProviderRftp)
-                    compatibleRadioProviders.Add(radioProvider);
-            }
-
-            RadioProviders = compatibleRadioProviders.ToArray();
+                container.Resolve<IRadioProvider>(RegistrationConstants.RileyLink)
+            };
             RadioAdapter = radioAdapter;
             Container = container;
             PodDictionary = new Dictionary<long, IPod>();
             PodLock = new AsyncLock();
-            PodRepository = podRepository.WithExtendedAttributes(RegistrationConstants.OmnipodEros);
+            podRepository.SetExtendedAttributeProvider(new ErosPodExtendedAttributeProvider());
+            PodRepository = podRepository; 
             RequestProcessors = new Dictionary<long, ErosRequestProcessor>();
         }
 
         public async Task<IList<IPod>> ActivePods()
         {
-            var activePodEntities = await PodRepository.ActivePods(ProviderConstants.PodProviderEros);
+            var activePodEntities = await PodRepository.ActivePods();
             var listActivePods = new List<IPod>();
             foreach (var activePodEntity in activePodEntities)
             {
@@ -67,7 +61,7 @@ namespace OmniCore.Eros
         
         public async Task<IList<IPodEntity>> ArchivedPods()
         {
-            return await PodRepository.ArchivedPods(ProviderConstants.PodProviderEros);
+            return await PodRepository.ArchivedPods();
         }
 
 //        public async Task Archive(Pod pod)
@@ -196,12 +190,13 @@ namespace OmniCore.Eros
 
         public async Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios)
         {
-            var podEntity = await PodRepository.New();
+            var podEntity = PodRepository.New();
             podEntity.Medication = medication;
             podEntity.User = user;
             podEntity.Radios = radios;
             podEntity.UniqueId = Guid.NewGuid();
-            podEntity.GetErosExtension().RadioAddress = GenerateRadioAddress();
+            var ea = podEntity.ExtendedAttribute as ErosPodExtendedAttribute; 
+            ea.RadioAddress = GenerateRadioAddress();
             await PodRepository.Create(podEntity);
             return await GetPodInternal(podEntity);
         }

@@ -8,7 +8,6 @@ namespace OmniCore.Model.Interfaces.Workflow
     {
         IRadioProvider[] RadioProviders { get; }
         string Description { get; }
-        string Code { get; }
         Task<IList<IPod>> ActivePods();
         Task<IList<IPodEntity>> ArchivedPods();
         Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios);

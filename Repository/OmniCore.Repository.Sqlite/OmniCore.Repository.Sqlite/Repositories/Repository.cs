@@ -17,7 +17,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
     {
         private readonly IDataAccess DataAccess;
         private readonly IUnityContainer Container;
-        private IExtendedAttributeProvider ExtendedAttributeProvider;
+        public IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
         public Repository(IDataAccess dataAccess, IUnityContainer container)
         {
             DataAccess = dataAccess;
@@ -64,12 +64,6 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             var c = await GetConnection();
             await c.UpdateAsync(entity);
-        }
-
-        public IRepository<InterfaceType> WithExtendedAttributeProvider(IExtendedAttributeProvider extendedAttributeProvider)
-        {
-            ExtendedAttributeProvider = extendedAttributeProvider;
-            return this;
         }
 
         public virtual async Task Create(InterfaceType entity)

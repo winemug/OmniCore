@@ -13,19 +13,29 @@ namespace OmniCore.Eros
         public uint RadioAddress { get; set; }
         
         [JsonIgnore]
-        public string StringValue
+        public string ExtensionIdentifier => RegistrationConstants.OmnipodEros;
+
+        private string ExtensionValueCached = null;
+        [JsonIgnore]
+        public string ExtensionValue
         {
             get
             {
-                return JsonConvert.SerializeObject(this);
+                if (ExtensionValueCached == null)
+                {
+                    ExtensionValueCached = JsonConvert.SerializeObject(this);
+                }
+
+                return ExtensionValueCached;
             }
             set
             {
-                JsonConvert.PopulateObject(value, this);
+                if (value != ExtensionValueCached)
+                {
+                    JsonConvert.PopulateObject(value, this);
+                    ExtensionValueCached = value;
+                }
             }
         }
-        [JsonIgnore]
-        public string Identifier => RegistrationConstants.OmnipodEros;
-        
     }
 }

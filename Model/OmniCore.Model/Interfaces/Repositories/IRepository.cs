@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces.Repositories
 {
     public interface IRepository<T> where T : IEntity
     {
-        IRepository<T> WithExtendedAttributeProvider(IExtendedAttributeProvider extendedAttributeProvider);
+        IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
         T New();
         Task Create(T entity);
         Task<T> Read(long id);
