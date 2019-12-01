@@ -12,17 +12,20 @@ namespace OmniCore.Services
             IPodService podService,
             IRadioService radioService,
             IRepositoryService repositoryService,
-            IApplicationService applicationService)
+            IApplicationService applicationService,
+            IUserService userService)
         {
             PodService = podService;
             RadioService = radioService;
             RepositoryService = repositoryService;
             ApplicationService = applicationService;
+            UserService = userService;
         }
 
         public IPodService PodService { get; }
         public IRadioService RadioService { get; }
         public IRepositoryService RepositoryService { get; }
+        public IUserService UserService { get; }
         public IApplicationService ApplicationService { get;}
     }
 }
