@@ -25,7 +25,6 @@ namespace OmniCore.Eros
         private readonly IUnityContainer Container;
 
         private readonly Dictionary<long, IPod> PodDictionary;
-        private readonly Dictionary<long, ErosRequestProcessor> RequestProcessors;
         private readonly AsyncLock PodLock;
         private readonly IPodRepository PodRepository;
 
@@ -41,11 +40,10 @@ namespace OmniCore.Eros
             };
             RadioAdapter = radioAdapter;
             Container = container;
+            podRepository.ExtendedAttributeProvider = new ErosPodExtendedAttributeProvider();
+            PodRepository = podRepository;
             PodDictionary = new Dictionary<long, IPod>();
             PodLock = new AsyncLock();
-            podRepository.SetExtendedAttributeProvider(new ErosPodExtendedAttributeProvider());
-            PodRepository = podRepository; 
-            RequestProcessors = new Dictionary<long, ErosRequestProcessor>();
         }
 
         public async Task<IList<IPod>> ActivePods()

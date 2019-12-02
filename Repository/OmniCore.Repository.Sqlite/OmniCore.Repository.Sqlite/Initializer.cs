@@ -8,8 +8,10 @@ namespace OmniCore.Repository.Sqlite
 {
     public static class Initializer
     {
-        public static void RegisterTypes(IUnityContainer container)
+        public static IUnityContainer WithSqliteRepository(this IUnityContainer container)
         {
+            
+           
             container.RegisterType<IMedicationRepository, MedicationRepository>();
             container.RegisterType<IRadioEventRepository, RadioEventRepository>();
             container.RegisterType<IRadioRepository, RadioRepository>();
@@ -17,6 +19,7 @@ namespace OmniCore.Repository.Sqlite
             container.RegisterType<IUserRepository, UserRepository>();
 
             container.RegisterSingleton<IRepositoryService, RepositoryService>();
+            return container;
         }
     }
 }

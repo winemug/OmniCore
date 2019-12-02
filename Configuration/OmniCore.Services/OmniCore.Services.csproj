@@ -6,12 +6,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj" />
-    <ProjectReference Include="..\..\Pod\OmniCore.Eros\OmniCore.Eros.csproj" />
-    <ProjectReference Include="..\..\Radios\OmniCore.Radios.RileyLink\OmniCore.Radios.RileyLink.csproj" />
-    <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="2.6.2" />
+    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.6.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

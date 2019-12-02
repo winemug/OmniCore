@@ -13,13 +13,14 @@ namespace OmniCore.Eros
 {
     public static class Initializer
     {
-        public static void RegisterTypes(IUnityContainer container)
+        public static IUnityContainer WithOmnipodEros(this IUnityContainer container)
         {
             container.RegisterSingleton<IPodProvider, ErosPodProvider>(RegistrationConstants.OmnipodEros);
             container.RegisterSingleton<IExtendedAttribute, ErosPodExtendedAttribute>(RegistrationConstants.OmnipodEros);
 
             container.RegisterType<IPodRequest, ErosPodRequest>(RegistrationConstants.OmnipodEros);
             container.RegisterType<IPod, ErosPod>(RegistrationConstants.OmnipodEros);
+            return container;
         }
     }
 }

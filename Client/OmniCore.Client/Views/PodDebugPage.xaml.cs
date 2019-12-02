@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Repository.Entities;
+using OmniCore.Model.Interfaces.Workflow;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -13,7 +13,7 @@ namespace OmniCore.Client.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class PodDebugPage : ContentPage
     {
-        public List<Pod> Pods { get; set; }
+        public List<IPod> Pods { get; set; }
 
         public PodDebugPage()
         {
@@ -26,7 +26,7 @@ namespace OmniCore.Client.Views
 
         private async void ContentPage_Appearing(object sender, EventArgs e)
         {
-            Pods = await App.Instance.PodProvider.GetActivePods();
+//            Pods = await App.Instance.PodProvider.GetActivePods();
             OnPropertyChanged(nameof(Pods));
         }
     }

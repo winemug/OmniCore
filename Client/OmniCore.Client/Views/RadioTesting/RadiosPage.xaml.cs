@@ -1,9 +1,6 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using OmniCore.Client.ViewModels.Test;
 using OmniCore.Model.Interfaces;
-using OmniCore.Repository;
-using OmniCore.Repository.Entities;
-using OmniCore.Repository.Enums;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using System;
@@ -16,6 +13,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using OmniCore.Model.Interfaces.Workflow;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -37,7 +35,7 @@ namespace OmniCore.Client.Views.RadioTesting
             ViewModel = viewModel;
             ViewModel.NextPageCommand = new Command(async (o) =>
             {
-                viewModel.Radio = o as Radio;
+                viewModel.Radio = o as IRadio;
                 var page = new PodsPage().WithViewModel(viewModel);
                 await Navigation.PushAsync(page);
             },

@@ -11,11 +11,12 @@ namespace OmniCore.Radios.RileyLink
 {
     public static class Initializer
     {
-        public static void RegisterTypes(IUnityContainer container)
+        public static IUnityContainer WithRileyLinkRadio(this IUnityContainer container)
         {
             container.RegisterSingleton<IRadioProvider, RileyLinkRadioProvider>(RegistrationConstants.RileyLink);
             container.RegisterType<IRadio, RileyLinkRadio>(RegistrationConstants.RileyLink);
             container.RegisterType<IRadioConnection, RileyLinkRadioConnection>(RegistrationConstants.RileyLink);
+            return container;
         }
     }
 }

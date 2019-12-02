@@ -1,5 +1,4 @@
 ﻿using OmniCore.Client.Services;
-using OmniCore.Eros;
 using OmniCore.Model.Interfaces;
 using System.Threading;
 using Xamarin.Forms;
@@ -13,7 +12,6 @@ using OmniCore.Client.Interfaces;
 using OmniCore.Client.Views;
 using System.IO;
 using System;
-using OmniCore.Repository;
 using OmniCore.Client.Views.RadioTesting;
 using OmniCore.Client.ViewModels.Test;
 using System.Threading.Tasks;
@@ -21,11 +19,12 @@ using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client
 {
-    public partial class App : Application
+    public partial class App : Application, IUserInterfaceApplication
     {
         public static App Instance => Application.Current as App;
         public IPodProvider PodProvider { get; }
@@ -33,19 +32,14 @@ namespace OmniCore.Client
         public IOmniCoreLogger Logger { get; }
         public IOmniCoreApplication OmniCoreApplication { get; }
 
-        public SynchronizationContext UiSyncContext;
+        public SynchronizationContext SynchronizationContext { get; }
 
-        public App(IUnityContainer container)
+        private readonly ICoreServices Services;
+        public App(ICoreServicesProvider coreServicesProvider)
         {
-            PodProvider = container.Resolve<IPodProvider>();
-            RileyLinkProvider = container.Resolve<IRadioProvider>("RileyLinkRadioProvider");
-            Logger = container.Resolve<IOmniCoreLogger>();
-            OmniCoreApplication = container.Resolve<IOmniCoreApplication>();
-
-            RepositoryProvider.Instance.Init();
+            Services = coreServicesProvider.LocalServices;
             InitializeComponent();
-
-            UiSyncContext = SynchronizationContext.Current;
+            SynchronizationContext = SynchronizationContext.Current;
 #if DEBUG
             MainPage = new NavigationPage(new RadiosPage().WithViewModel(new RadioTestingViewModel()));
 #else
@@ -67,6 +61,7 @@ namespace OmniCore.Client
             //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
             Logger.Debug("OmniCore App OnStart called");
             await EnsurePermissions();
+            //await Services.RepositoryService.Initialize();
         }
 
         protected override void OnSleep()

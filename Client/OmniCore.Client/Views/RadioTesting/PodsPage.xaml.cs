@@ -8,8 +8,7 @@ using OmniCore.Client.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using OmniCore.Client.ViewModels.Test;
-using OmniCore.Repository.Entities;
-using System.Collections.ObjectModel;
+using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client.Views.RadioTesting
 {
@@ -28,7 +27,7 @@ namespace OmniCore.Client.Views.RadioTesting
             ViewModel = viewModel;
             ViewModel.NextPageCommand = new Command(async (o) =>
             {
-                viewModel.Pod = o as Pod;
+                viewModel.Pod = o as IPod;
                 var page = new RadioTestPage().WithViewModel(viewModel);
                 await Navigation.PushAsync(page);
             },

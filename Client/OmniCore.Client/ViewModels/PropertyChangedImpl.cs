@@ -18,17 +18,10 @@ namespace OmniCore.Client.ViewModels
         {
             if (PropertyChanged != null)
             {
-                if (SynchronizationContext.Current == App.Instance.UiSyncContext)
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     PropertyChanged.Invoke(sender, eventArgs);
-                }
-                else
-                {
-                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                    {
-                        PropertyChanged.Invoke(sender, eventArgs);
-                    });
-                }
+                });
             }
         }
 

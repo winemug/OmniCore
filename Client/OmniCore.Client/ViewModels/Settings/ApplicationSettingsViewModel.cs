@@ -1,5 +1,4 @@
-﻿using OmniCore.Repository.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -12,7 +11,7 @@ namespace OmniCore.Client.ViewModels.Settings
     {
         public bool AcceptAAPSCommands { get; set; }
 
-        private ApplicationSettings Settings;
+        //private ApplicationSettings Settings;
 
         public ApplicationSettingsViewModel(Page page) : base(page)
         {

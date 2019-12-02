@@ -15,9 +15,14 @@ using Xamarin.Forms;
 using OmniCore.Client;
 using OmniCore.Client.Interfaces;
 using System.IO;
+using OmniCore.Eros;
 using OmniCore.Services;
 using Unity;
 using OmniCore.Mobile.Droid;
+using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Radios.RileyLink;
+using OmniCore.Repository.Sqlite;
+using Application = Xamarin.Forms.Application;
 
 namespace OmniCore.Client.Droid
 {
@@ -32,27 +37,28 @@ namespace OmniCore.Client.Droid
         public const string IntentEnsureServiceRunning = "EnsureServiceRunning";
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            var container = new UnityContainer()
+                .WithDefaultServiceProviders()
+                .WithSqliteRepository()
+                .WithOmnipodEros()
+                .WithRileyLinkRadio()
+                .AsXamarinApplication()
+                .OnAndroidPlatform();
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
+
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
-            // container creation starts at the main project and follows path of references
-            var container = new UnityContainer()
-                .WithDefaultServices()
-                .WithSqlite()
-                .WithOmnipodEros()
-                .WithRileyLink()
-                .WithCrossPlatformBleAdapter()
-                .OnAndroid();
-
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            LoadApplication(new App(container));
+            var uiApplication = container.Resolve<IUserInterfaceApplication>();
+            LoadApplication(uiApplication as Application);
             IsCreated = true;
         }
 

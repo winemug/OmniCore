@@ -29,7 +29,7 @@ namespace OmniCore.Client.Views.Pods
 
         private async void Update_Button_Clicked(object sender, EventArgs e)
         {
-            var pod = await App.Instance.PodProvider.GetActivePod();
+            //var pod = await App.Instance.PodProvider.GetActivePod();
             //using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
             //    "Update Status"))
             //{

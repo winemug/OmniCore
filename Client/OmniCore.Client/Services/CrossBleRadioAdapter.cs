@@ -181,7 +181,7 @@ namespace OmniCore.Client.Services
 
             try
             {
-                var blePeripheral = await GetPeripheral(id, cancellationToken);
+                var blePeripheral = await GetPeripheral(peripheralUuid, cancellationToken);
                 if (blePeripheral != null)
                 {
                     return await blePeripheral.AcquireLease(cancellationToken);

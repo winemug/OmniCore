@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Entities;
+using OmniCore.Model.Interfaces.Repositories;
 using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Eros
 {
     public class ErosPod : IPod
     {
+
+        public ErosPod(IPodRepository podRepository)
+        {
+            
+        }
         public IPodEntity Entity { get; set; }
         public Task Archive()
         {

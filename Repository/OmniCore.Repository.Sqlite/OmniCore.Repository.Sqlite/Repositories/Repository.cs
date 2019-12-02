@@ -18,7 +18,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
         private readonly IDataAccess DataAccess;
         private readonly IUnityContainer Container;
         public IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
-        public Repository(IDataAccess dataAccess, IUnityContainer container)
+        public Repository(IDataAccess dataAccess,
+            IUnityContainer container)
         {
             DataAccess = dataAccess;
             Container = container;

@@ -8,15 +8,10 @@ namespace OmniCore.Services
 {
     public class CoreServicesProvider : ICoreServicesProvider
     {
-        private readonly ICoreServices LocalServices;
+        public ICoreServices LocalServices { get; }
         public CoreServicesProvider(ICoreServices localServices)
         {
             LocalServices = localServices;
-        }
-
-        public async Task<ICoreServices> GetLocalServices()
-        {
-            return LocalServices;
         }
 
         public async Task<ICoreServices> GetRemoteServices(ICoreServicesDescriptor serviceDescriptor, ICoreCredentials credentials)

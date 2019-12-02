@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Repository.Enums;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels

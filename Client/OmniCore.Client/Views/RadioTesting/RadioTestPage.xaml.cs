@@ -1,5 +1,4 @@
 ﻿using OmniCore.Client.ViewModels.Test;
-using OmniCore.Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,21 +29,21 @@ namespace OmniCore.Client.Views.RadioTesting
         private async void Connect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
-            {
-                var p = connection.PeripheralLease.Peripheral;
-                await p.Connect(true, cts.Token);
-            }
+//            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
+//            {
+//                var p = connection.PeripheralLease.Peripheral;
+//                await p.Connect(true, cts.Token);
+//            }
         }
 
         private async void Disconnect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
-            {
-                var p = connection.PeripheralLease.Peripheral;
-                await p.Disconnect(TimeSpan.FromSeconds(3));
-            }
+//            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
+//            {
+//                var p = connection.PeripheralLease.Peripheral;
+//                await p.Disconnect(TimeSpan.FromSeconds(3));
+//            }
         }
 
     }
