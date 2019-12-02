@@ -27,7 +27,7 @@ namespace OmniCore.Client.Views.Settings
         {
             if (!await CheckPermissions())
                 return;
-            //var backupPath = Path.Combine(App.Instance.OmniCoreApplication.GetPublicDataPath(), "OmniCore_backup.db3");
+            //var backupPath = Path.Combine(XamarinApp.Instance.OmniCoreApplication.GetPublicDataPath(), "OmniCore_backup.db3");
             //if (File.Exists(backupPath))
             //{
             //    var accepted = await DisplayAlert("Database backup",
@@ -37,7 +37,7 @@ namespace OmniCore.Client.Views.Settings
             //    if (!accepted)
             //        return;
             //}
-            //var repo = await App.Instance.OmniCoreApplication.GetDatabasePath();
+            //var repo = await XamarinApp.Instance.OmniCoreApplication.GetDatabasePath();
             //File.Copy(repo.DbPath, backupPath, true);
             //await DisplayAlert("Database backup", "Backup completed", "OK");
         }
@@ -90,7 +90,7 @@ namespace OmniCore.Client.Views.Settings
                 }
             }
 
-            var storagePath = App.Instance.OmniCoreApplication.GetPublicDataPath();
+            var storagePath = XamarinApp.Instance.OmniCoreApplication.GetPublicDataPath();
             if (!Directory.Exists(storagePath))
             {
                 Directory.CreateDirectory(storagePath);

@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IUserInterfaceApplication
+    public interface IUserInterface
     {
         SynchronizationContext SynchronizationContext { get; }
     }

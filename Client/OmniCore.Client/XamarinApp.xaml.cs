@@ -24,9 +24,9 @@ using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client
 {
-    public partial class App : Application, IUserInterfaceApplication
+    public partial class XamarinApp : Application, IUserInterface
     {
-        public static App Instance => Application.Current as App;
+        public static XamarinApp Instance => Application.Current as XamarinApp;
         public IPodProvider PodProvider { get; }
         public IRadioProvider RileyLinkProvider { get;  }
         public IOmniCoreLogger Logger { get; }
@@ -35,17 +35,12 @@ namespace OmniCore.Client
         public SynchronizationContext SynchronizationContext { get; }
 
         private readonly ICoreServices Services;
-        public App(ICoreServicesProvider coreServicesProvider)
+        public XamarinApp(ICoreServicesProvider coreServicesProvider)
         {
             Services = coreServicesProvider.LocalServices;
             InitializeComponent();
             SynchronizationContext = SynchronizationContext.Current;
-#if DEBUG
             MainPage = new NavigationPage(new RadiosPage().WithViewModel(new RadioTestingViewModel()));
-#else
-            MainPage = new MainPage();
-#endif
-
             //OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
             Logger.Information("OmniCore App initialized");
         }
@@ -89,7 +84,7 @@ namespace OmniCore.Client
                     if (request[Permission.LocationAlways] != PermissionStatus.Granted)
                     {
                         await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
-                        App.Instance.OmniCoreApplication.Exit();
+                        XamarinApp.Instance.OmniCoreApplication.Exit();
                     }
                 }
             }
@@ -97,7 +92,7 @@ namespace OmniCore.Client
             {
                 await MainPage.DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
                 Crashes.TrackError(e);
-                App.Instance.OmniCoreApplication.Exit();
+                XamarinApp.Instance.OmniCoreApplication.Exit();
             }
         }
 

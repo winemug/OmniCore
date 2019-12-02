@@ -32,12 +32,10 @@ namespace OmniCore.Eros
         public ErosPodProvider(
             IRadioAdapter radioAdapter,
             IPodRepository podRepository,
-            IUnityContainer container)
+            IUnityContainer container,
+            [Dependency(RegistrationConstants.RileyLink)] IRadioProvider radioProviderRileyLink)
         {
-            RadioProviders = new[]
-            {
-                container.Resolve<IRadioProvider>(RegistrationConstants.RileyLink)
-            };
+            RadioProviders = new[] {radioProviderRileyLink};
             RadioAdapter = radioAdapter;
             Container = container;
             podRepository.ExtendedAttributeProvider = new ErosPodExtendedAttributeProvider();
@@ -46,20 +44,22 @@ namespace OmniCore.Eros
             PodLock = new AsyncLock();
         }
 
-        public async Task<IList<IPod>> ActivePods()
+        public async IAsyncEnumerable<IPod> ActivePods()
         {
-            var activePodEntities = await PodRepository.ActivePods();
-            var listActivePods = new List<IPod>();
-            foreach (var activePodEntity in activePodEntities)
+            await foreach (var activePodEntity in PodRepository.ActivePods())
             {
-                listActivePods.Add(await GetPodInternal(activePodEntity));
+                yield return await GetPodInternal(activePodEntity);
             }
-            return listActivePods.OrderByDescending(p => p.Entity.Created).ToList();
         }
         
-        public async Task<IList<IPodEntity>> ArchivedPods()
+        public async IAsyncEnumerable<IPod> ArchivedPods()
         {
-            return await PodRepository.ArchivedPods();
+            await foreach (var archivedPodEntity in PodRepository.ActivePods())
+            {
+                var pod = Container.Resolve<IPod>(RegistrationConstants.OmnipodEros);
+                pod.Entity = archivedPodEntity;
+                yield return pod;
+            }
         }
 
 //        public async Task Archive(Pod pod)

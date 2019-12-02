@@ -23,9 +23,9 @@ namespace OmniCore.Client.ViewModels
             AssociatedPage = page;
             page.Appearing += Page_Appearing;
             page.Disappearing += Page_Disappearing;
-            MessagingCenter.Subscribe<App>(this, MessagingConstants.AppResuming, async (_) =>
+            MessagingCenter.Subscribe<XamarinApp>(this, MessagingConstants.AppResuming, async (_) =>
             {
-                var typeStr = App.Instance.OmniCoreApplication.State.GetString(AppStateConstants.ActivePage, null);
+                var typeStr = XamarinApp.Instance.OmniCoreApplication.State.GetString(AppStateConstants.ActivePage, null);
                 if (typeStr == this.GetType().FullName)
                 {
                     HasAppeared = true;
@@ -36,7 +36,7 @@ namespace OmniCore.Client.ViewModels
                 }
             });
 
-            MessagingCenter.Subscribe<App>(this, MessagingConstants.AppSleeping, async (_) =>
+            MessagingCenter.Subscribe<XamarinApp>(this, MessagingConstants.AppSleeping, async (_) =>
             {
                 if (HasAppeared)
                 {
@@ -80,8 +80,8 @@ namespace OmniCore.Client.ViewModels
                     AssociatedPage.Appearing -= Page_Appearing;
                     AssociatedPage.Disappearing -= Page_Disappearing;
                 }
-                MessagingCenter.Unsubscribe<App>(this, MessagingConstants.AppSleeping);
-                MessagingCenter.Unsubscribe<App>(this, MessagingConstants.AppResuming);
+                MessagingCenter.Unsubscribe<XamarinApp>(this, MessagingConstants.AppSleeping);
+                MessagingCenter.Unsubscribe<XamarinApp>(this, MessagingConstants.AppResuming);
             }
             base.Dispose(disposing);
         }

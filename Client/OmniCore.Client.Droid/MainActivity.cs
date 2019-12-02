@@ -63,7 +63,7 @@ namespace OmniCore.Client.Droid
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            var uiApplication = container.Resolve<IUserInterfaceApplication>();
+            var uiApplication = container.Resolve<IUserInterface>();
 
             LoadApplication(uiApplication as Application);
             IsCreated = true;

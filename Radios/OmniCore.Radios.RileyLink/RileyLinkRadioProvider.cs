@@ -32,8 +32,6 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
         private readonly IRadioEventRepository RadioEventRepository;
 
-        public IPodProvider[] PodProviders { get; }
-
         public RileyLinkRadioProvider(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
@@ -41,10 +39,6 @@ namespace OmniCore.Radios.RileyLink
             IRadioEventRepository radioEventRepository,
             IUnityContainer container)
         {
-            PodProviders = new []
-            {
-                container.Resolve<IPodProvider>(RegistrationConstants.OmnipodEros)
-            };
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
             SignalStrengthRepository = signalStrengthRepository;

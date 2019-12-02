@@ -1,5 +1,6 @@
 ﻿using OmniCore.Model.Interfaces.Repositories;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Workflow;
 using OmniCore.Repository.Sqlite.Entities;
 using OmniCore.Repository.Sqlite.Repositories;
 using Unity;
@@ -11,7 +12,8 @@ namespace OmniCore.Repository.Sqlite
         public static IUnityContainer WithSqliteRepository(this IUnityContainer container)
         {
             
-           
+            container.RegisterType<IDataAccess, DataAccess>();
+            container.RegisterType<IPodRepository, PodRepository>();
             container.RegisterType<IMedicationRepository, MedicationRepository>();
             container.RegisterType<IRadioEventRepository, RadioEventRepository>();
             container.RegisterType<IRadioRepository, RadioRepository>();

@@ -7,7 +7,7 @@ namespace OmniCore.Model.Constants
 {
     public static class RegistrationConstants
     {
-        public static readonly string RileyLink = nameof(RileyLink);
-        public static readonly string OmnipodEros = nameof(OmnipodEros);
+        public const string RileyLink = nameof(RileyLink);
+        public const string OmnipodEros = nameof(OmnipodEros);
     }
 }

@@ -26,7 +26,7 @@ namespace OmniCore.Client.Views
 
         private async void ContentPage_Appearing(object sender, EventArgs e)
         {
-//            Pods = await App.Instance.PodProvider.GetActivePods();
+//            Pods = await XamarinApp.Instance.PodProvider.GetActivePods();
             OnPropertyChanged(nameof(Pods));
         }
     }

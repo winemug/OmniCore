@@ -46,8 +46,8 @@ namespace OmniCore.Client.ViewModels.Test
         {
             ScanSubscription?.Dispose();
             Radios.Clear();
-//            ScanSubscription = App.Instance.PodProvider.ListRadios()
-//                .ObserveOn(App.Instance.UiSyncContext)
+//            ScanSubscription = XamarinApp.Instance.PodProvider.ListRadios()
+//                .ObserveOn(XamarinApp.Instance.UiSyncContext)
 //                .Subscribe((radio) =>
 //                {
 //                    Radios.Add(radio);

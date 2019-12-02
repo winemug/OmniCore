@@ -146,11 +146,11 @@
 
 //        private async Task<RemoteResult> CancelBolus()
 //        {
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
-//                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, "Cancel Bolus", source: RequestSource.AndroidAPS))
+//                using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider, "Cancel Bolus", source: RequestSource.AndroidAPS))
 //                {
 //                    await pod.CancelBolus(conversation);
 //                    return await GetResult(pod, conversation);
@@ -161,11 +161,11 @@
 
 //        private async Task<RemoteResult> Bolus(decimal units)
 //        {
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
-//                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider,
+//                using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider,
 //                    $"Bolus {units:F2}U", source: RequestSource.AndroidAPS))
 //                {
 //                    await pod.Bolus(conversation, units, false);
@@ -177,11 +177,11 @@
 
 //        private async Task<RemoteResult> CancelTempBasal()
 //        {
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
-//                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+//                using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider, 
 //                    "Cancel Temp Basal", source: RequestSource.AndroidAPS))
 //                {
 //                    await pod.CancelTempBasal(conversation);
@@ -193,11 +193,11 @@
 
 //        private async Task<RemoteResult> SetTempBasal(decimal rate, decimal hours)
 //        {
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
-//                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+//                using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider, 
 //                    $"Set Temp Basal {rate:F2}U/hr for {hours:F1}h",
 //                    source: RequestSource.AndroidAPS))
 //                {
@@ -219,11 +219,11 @@
 //            var repo = await ErosRepository.GetInstance();
 //            await repo.Save(profile);
 
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
-//                using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+//                using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider, 
 //                    $"Set Basal Schedule", source: RequestSource.AndroidAPS))
 //                {
 //                    await pod.SetBasalSchedule(conversation, profile);
@@ -238,14 +238,14 @@
 
 //        private async Task<RemoteResult> GetStatus()
 //        {
-//            var podProvider = App.Instance.PodProvider;
+//            var podProvider = XamarinApp.Instance.PodProvider;
 //            var pod = await podProvider.GetActivePod();
 //            if (IsAssigned(pod))
 //            {
 //                var ts = DateTimeOffset.UtcNow - pod.LastStatus?.Created;
 //                if (ts == null || ts.Value.Minutes > 20)
 //                {
-//                    using (var conversation = await pod.StartConversation(App.Instance.ExchangeProvider, 
+//                    using (var conversation = await pod.StartConversation(XamarinApp.Instance.ExchangeProvider, 
 //                        "Update Status", source: RequestSource.AndroidAPS))
 //                    {
 //                        await pod.UpdateStatus(conversation);

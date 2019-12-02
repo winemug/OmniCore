@@ -4,9 +4,7 @@ using System.Text;
 
 namespace OmniCore.Client.Interfaces
 {
-    public interface IViewViewModel
+    public interface INavigationView
     {
-        IView View { get; }
-        IViewModel ViewModel { get; }
     }
 }

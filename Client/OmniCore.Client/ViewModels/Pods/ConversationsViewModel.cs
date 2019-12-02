@@ -25,7 +25,7 @@
 //        protected async override Task<BaseViewModel> BindData()
 //        {
 //            Results = new ObservableCollection<ResultViewModel>();
-//            var repo = App.Instance.PodRepository;
+//            var repo = XamarinApp.Instance.PodRepository;
 //            var history = await repo.GetHistoricalResultsForDisplay(MAX_RECORDS).ConfigureAwait(true);
 //            foreach (var result in history)
 //            {

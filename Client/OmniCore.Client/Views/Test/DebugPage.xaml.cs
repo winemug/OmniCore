@@ -52,7 +52,7 @@ namespace OmniCore.Client.Views.Test
 
         //private async Task PrepareForTest()
         //{
-        //    var pod = App.Instance.PodProvider.SinglePod;
+        //    var pod = XamarinApp.Instance.PodProvider.SinglePod;
         //    nonce = new Nonce((ErosPod)pod);
 
         //    var stats = new RileyLinkStatistics();
@@ -94,7 +94,7 @@ namespace OmniCore.Client.Views.Test
 
         //private async Task ExecuteCommand(RileyLinkStatistics stats, ErosMessageExchangeParameters parameters, IMessage msg)
         //{
-        //    var pod = App.Instance.PodProvider.SinglePod;
+        //    var pod = XamarinApp.Instance.PodProvider.SinglePod;
         //    var rme = new RileyLinkMessageExchange(parameters, pod, rl);
         //    var mutex = new SemaphoreSlim(0, 1);
         //    var wakeLock = OmniCoreServices.Application.NewBluetoothWakeLock("radio_test");
@@ -123,7 +123,7 @@ namespace OmniCore.Client.Views.Test
 
         private void ExitApp_Clicked(object sender, EventArgs e)
         {
-            App.Instance.OmniCoreApplication.Exit();
+            XamarinApp.Instance.OmniCoreApplication.Exit();
         }
 
         private void ExistingClicked(object sender, EventArgs e)

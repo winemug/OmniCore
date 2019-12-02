@@ -17,7 +17,7 @@ namespace OmniCore.Client.ViewModels.Help
         {
             get
             {
-                return App.Instance.OmniCoreApplication.Version;
+                return XamarinApp.Instance.OmniCoreApplication.Version;
             }
         }
 

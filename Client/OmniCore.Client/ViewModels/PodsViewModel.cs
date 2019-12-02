@@ -25,7 +25,7 @@
 //
 //        protected override async Task<BaseViewModel> BindData()
 //        {
-//            Pods = await App.Instance.PodProvider.GetActivePods();
+//            Pods = await XamarinApp.Instance.PodProvider.GetActivePods();
 //            return this;
 //        }
 //    }

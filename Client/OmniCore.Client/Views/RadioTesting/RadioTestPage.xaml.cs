@@ -29,7 +29,7 @@ namespace OmniCore.Client.Views.RadioTesting
         private async void Connect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-//            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
+//            using (var connection = await XamarinApp.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
 //            {
 //                var p = connection.PeripheralLease.Peripheral;
 //                await p.Connect(true, cts.Token);
@@ -39,7 +39,7 @@ namespace OmniCore.Client.Views.RadioTesting
         private async void Disconnect_Clicked(object sender, EventArgs e)
         {
             var cts = new CancellationTokenSource();
-//            using (var connection = await App.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
+//            using (var connection = await XamarinApp.Instance.RileyLinkProvider.GetConnection(ViewModel.Radio, null, cts.Token))
 //            {
 //                var p = connection.PeripheralLease.Peripheral;
 //                await p.Disconnect(TimeSpan.FromSeconds(3));

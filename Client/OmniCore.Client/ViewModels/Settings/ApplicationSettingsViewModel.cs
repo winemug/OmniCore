@@ -25,7 +25,7 @@ namespace OmniCore.Client.ViewModels.Settings
         protected async override Task OnDisappearing()
         {
             //Settings.AcceptCommandsFromAAPS = this.AcceptAAPSCommands;
-            //var repo = App.Instance.AppRepository;
+            //var repo = XamarinApp.Instance.AppRepository;
             //await repo.SaveOmniCoreSettings(Settings);
         }
 

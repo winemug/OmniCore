@@ -39,11 +39,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="XamarinApp.xaml.cs">
+      <DependentUpon>XamarinApp.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\RadioTesting\RadiosPage.xaml.cs">
       <DependentUpon>RadiosPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\MainPage.xaml.cs">
-      <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Settings\ApplicationSettingsPage.xaml.cs">
       <DependentUpon>ApplicationSettingsPage.xaml</DependentUpon>
@@ -58,9 +58,6 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\RadioTesting\RadiosPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\PodDebugPage.xaml">

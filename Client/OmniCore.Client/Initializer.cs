@@ -14,7 +14,7 @@ namespace OmniCore.Client
 
         public static IUnityContainer AsXamarinApplication(this IUnityContainer container)
         {
-            container.RegisterSingleton<IUserInterfaceApplication, App>();
+            container.RegisterSingleton<IUserInterface, XamarinApp>();
             return container;
         }
     }
