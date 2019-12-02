@@ -8,13 +8,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Utilities;
-using OmniCore.Client.Services;
+using OmniCore.Client.Platform;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Client.Services
+namespace OmniCore.Client.Platform
 {
     public class CrossBleRadioPeripheral : IRadioPeripheral
     {

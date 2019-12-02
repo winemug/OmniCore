@@ -16,7 +16,7 @@ using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
 using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Client.Services
+namespace OmniCore.Client.Platform
 {
     public class CrossBleRadioAdapter : IRadioAdapter
     {

@@ -1,17 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<forms:ContentPage xmlns:forms="http://xamarin.com/schemas/2014/forms">
+
+</forms:ContentPage>
+<!--<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:OmniCore.Client.ViewModels.Test"
              mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.RadioTesting.RadiosPage"
-             Appearing="ContentPage_Appearing"
-             Disappearing="ContentPage_Disappearing"
-             Title="Radios">
+             x:Class="OmniCore.Client.Views.Settings.RadioSettingsPage">
     <ContentPage.Content>
-        <ScrollView>
-            <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}">
+        <StackLayout>
+            <Switch IsToggled="{Binding ConnectAnyAvailable}"/>
+            <Label Text="Welcome to Xamarin.Forms!"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand" />
+
+            <CollectionView ItemsSource="{Binding SearchResults}" Grid.Row="4" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -19,15 +24,12 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <Label Text="{Binding DeviceIdReadable}" Grid.Column="0"/>
-                            <Button Text="Select" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RadioTestingViewModel}}, Path=NextPageCommand}" CommandParameter="{Binding}" Grid.Column="2"/>
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}"/>
+                            <Label Grid.Column="1" Text="{Binding MacAddress}"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
-                <CollectionView.EmptyView>
-                    <Label Text="Searching for radios..."/>
-                </CollectionView.EmptyView>
             </CollectionView>
-        </ScrollView>
+        </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</ContentPage>-->

@@ -16,6 +16,51 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Removed\Platform\HistoricalResult.cs" />
+    <Compile Remove="Removed\Platform\HistoricalResultType.cs" />
+    <Compile Remove="Removed\Platform\RemoteRequest.cs" />
+    <Compile Remove="Removed\Platform\RemoteRequestHandler.cs" />
+    <Compile Remove="Removed\Platform\RemoteRequestType.cs" />
+    <Compile Remove="Removed\Platform\RemoteResult.cs" />
+    <Compile Remove="Removed\ViewModels\BaseViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\FlyoutViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Help\AboutViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\MainViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\PageViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\PodsViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Pods\ActivityViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Pods\ConversationsViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Pods\MaintenanceViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Pods\OverviewViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Pods\ResultViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\PodViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\PropertyChangedImpl.cs" />
+    <Compile Remove="Removed\ViewModels\Settings\ApplicationSettingsViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Settings\RadioSettingsViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\TabViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Test\DebugViewModel.cs" />
+    <Compile Remove="Removed\ViewModels\Test\RadioTestingViewModel.cs" />
+    <Compile Remove="Removed\Views\Help\AboutPage.xaml.cs" />
+    <Compile Remove="Removed\Views\PodDebugPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Pods\OverviewPage.xaml.cs" />
+    <Compile Remove="Removed\Views\PodTestPage.xaml.cs" />
+    <Compile Remove="Removed\Views\RadioTesting\PodsPage.xaml.cs" />
+    <Compile Remove="Removed\Views\RadioTesting\RadiosPage.xaml.cs" />
+    <Compile Remove="Removed\Views\RadioTesting\RadioTestPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Settings\ApplicationSettingsPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Settings\PodSettingsPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Settings\RadioSettingsPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Test\DebugPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Test\TestPage.xaml.cs" />
+    <Compile Remove="Removed\Views\Users\NewUser.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Removed\Views\Help\AboutPage.xaml" />
+    <EmbeddedResource Remove="Removed\Views\Pods\OverviewPage.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ConfigureAwait.Fody" Version="3.3.1" />
     <PackageReference Include="Fody" Version="6.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -42,60 +87,100 @@
     <Compile Update="XamarinApp.xaml.cs">
       <DependentUpon>XamarinApp.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\RadioTesting\RadiosPage.xaml.cs">
-      <DependentUpon>RadiosPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Settings\ApplicationSettingsPage.xaml.cs">
-      <DependentUpon>ApplicationSettingsPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pods\OverviewPage.xaml.cs">
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="AppShell.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\RadioTesting\RadiosPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\PodDebugPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\RadioTesting\PodsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\PodTestPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\RadioTesting\RadioTestPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Settings\ApplicationSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Settings\PodSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Pods\OverviewPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Settings\RadioSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Test\DebugPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Test\TestPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Removed\ViewModels\Users\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Removed\Platform\HistoricalResult.cs" />
+    <None Include="Removed\Platform\HistoricalResultType.cs" />
+    <None Include="Removed\Platform\RemoteRequest.cs" />
+    <None Include="Removed\Platform\RemoteRequestHandler.cs" />
+    <None Include="Removed\Platform\RemoteRequestType.cs" />
+    <None Include="Removed\Platform\RemoteResult.cs" />
+    <None Include="Removed\ViewModels\BaseViewModel.cs" />
+    <None Include="Removed\ViewModels\FlyoutViewModel.cs" />
+    <None Include="Removed\ViewModels\Help\AboutViewModel.cs" />
+    <None Include="Removed\ViewModels\MainViewModel.cs" />
+    <None Include="Removed\ViewModels\PageViewModel.cs" />
+    <None Include="Removed\ViewModels\PodsViewModel.cs" />
+    <None Include="Removed\ViewModels\Pods\ActivityViewModel.cs" />
+    <None Include="Removed\ViewModels\Pods\ConversationsViewModel.cs" />
+    <None Include="Removed\ViewModels\Pods\MaintenanceViewModel.cs" />
+    <None Include="Removed\ViewModels\Pods\OverviewViewModel.cs" />
+    <None Include="Removed\ViewModels\Pods\ResultViewModel.cs" />
+    <None Include="Removed\ViewModels\PodViewModel.cs" />
+    <None Include="Removed\ViewModels\PropertyChangedImpl.cs" />
+    <None Include="Removed\ViewModels\Settings\ApplicationSettingsViewModel.cs" />
+    <None Include="Removed\ViewModels\Settings\RadioSettingsViewModel.cs" />
+    <None Include="Removed\ViewModels\TabViewModel.cs" />
+    <None Include="Removed\ViewModels\Test\DebugViewModel.cs" />
+    <None Include="Removed\ViewModels\Test\RadioTestingViewModel.cs" />
+    <None Include="Removed\Views\Help\AboutPage.xaml.cs" />
+    <None Include="Removed\Views\PodDebugPage.xaml.cs" />
+    <None Include="Removed\Views\Pods\OverviewPage.xaml.cs">
       <DependentUpon>OverviewPage.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Views\Help\AboutPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\RadioTesting\RadiosPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodDebugPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\RadioTesting\PodsPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\PodTestPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\RadioTesting\RadioTestPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Settings\ApplicationSettingsPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Settings\PodSettingsPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Pods\OverviewPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Settings\RadioSettingsPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Test\DebugPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Test\TestPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Users\NewUser.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ViewModels\Users\" />
+    </None>
+    <None Include="Removed\Views\PodTestPage.xaml.cs" />
+    <None Include="Removed\Views\RadioTesting\PodsPage.xaml.cs" />
+    <None Include="Removed\Views\RadioTesting\RadiosPage.xaml.cs">
+      <DependentUpon>RadiosPage.xaml</DependentUpon>
+    </None>
+    <None Include="Removed\Views\RadioTesting\RadioTestPage.xaml.cs" />
+    <None Include="Removed\Views\Settings\ApplicationSettingsPage.xaml.cs">
+      <DependentUpon>ApplicationSettingsPage.xaml</DependentUpon>
+    </None>
+    <None Include="Removed\Views\Settings\PodSettingsPage.xaml.cs" />
+    <None Include="Removed\Views\Settings\RadioSettingsPage.xaml.cs" />
+    <None Include="Removed\Views\Test\DebugPage.xaml.cs" />
+    <None Include="Removed\Views\Test\TestPage.xaml.cs" />
+    <None Include="Removed\Views\Users\NewUser.xaml.cs" />
   </ItemGroup>
 </Project>

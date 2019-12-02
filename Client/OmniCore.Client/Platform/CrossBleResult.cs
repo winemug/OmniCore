@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Client.Services
+namespace OmniCore.Client.Platform
 {
     public class CrossBleResult : IRadioPeripheralResult
     {

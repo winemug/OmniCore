@@ -1,26 +1,14 @@
-﻿using OmniCore.Client.Services;
-using OmniCore.Model.Interfaces;
-using System.Threading;
+﻿using System.Threading;
 using Xamarin.Forms;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using OmniCore.Model.Exceptions;
-using OmniCore.Model.Utilities;
-using Unity;
-using OmniCore.Client.Interfaces;
-using OmniCore.Client.Views;
-using System.IO;
 using System;
-using OmniCore.Client.Views.RadioTesting;
-using OmniCore.Client.ViewModels.Test;
 using System.Threading.Tasks;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client
 {
@@ -36,8 +24,7 @@ namespace OmniCore.Client
             CoreServices = coreServicesProvider.LocalServices;
             InitializeComponent();
             SynchronizationContext = SynchronizationContext.Current;
-            MainPage = new NavigationPage(new RadiosPage().WithViewModel(new RadioTestingViewModel()));
-            //OmniCoreServices.Publisher.Subscribe(new RemoteRequestHandler());
+            MainPage = new AppShell();
             Logger.Information("OmniCore App initialized");
         }
 
@@ -57,15 +44,12 @@ namespace OmniCore.Client
 
         protected async override void OnSleep()
         {
-            // MessagingCenter.Send(this, MessagingConstants.AppSleeping);
             Logger.Debug("OmniCore App OnSleep called");
         }
 
         protected async override void OnResume()
         {
-            //OmniCoreApplication.State.TryRemove(AppStateConstants.ActiveConversation);
             Logger.Debug("OmniCore App OnResume called");
-            // MessagingCenter.Send(this, MessagingConstants.AppResuming);
         }
 
         private async Task EnsurePermissions()

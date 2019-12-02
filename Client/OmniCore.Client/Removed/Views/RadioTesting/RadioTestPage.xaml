@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<forms:ContentPage xmlns:forms="http://xamarin.com/schemas/2014/forms">
+
+</forms:ContentPage>
+<!--<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OmniCore.Client.ViewModels.Test"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.RadioTesting.RadioTestPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="{Binding Radio.DeviceIdReadable}" />
+            <Label Text="{Binding Pod.RadioAddress}" />
+            <Button Text="Connect" Clicked="Connect_Clicked"/>
+            <Button Text="Disconnect" Clicked="Disconnect_Clicked"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>-->

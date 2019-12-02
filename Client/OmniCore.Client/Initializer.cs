@@ -1,4 +1,4 @@
-﻿using OmniCore.Client.Services;
+﻿using OmniCore.Client.Platform;
 using Unity;
 using OmniCore.Model.Interfaces.Platform;
 

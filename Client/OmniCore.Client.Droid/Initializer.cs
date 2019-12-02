@@ -1,4 +1,4 @@
-﻿using OmniCore.Client.Droid.Services;
+﻿using OmniCore.Client.Droid.Platform;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;

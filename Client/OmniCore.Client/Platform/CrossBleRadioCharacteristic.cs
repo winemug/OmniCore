@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Client.Services
+namespace OmniCore.Client.Platform
 {
     public class CrossBleRadioCharacteristic : IRadioPeripheralCharacteristic
     {

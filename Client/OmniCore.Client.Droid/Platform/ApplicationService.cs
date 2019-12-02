@@ -6,7 +6,7 @@ using Android.OS;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Client.Droid.Platform
 {
     public class ApplicationService : IApplicationService
     {

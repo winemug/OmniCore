@@ -129,7 +129,7 @@
     <Compile Include="Platform\OmniCoreAppState.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\OmniCoreApplication.cs" />
-    <Compile Include="Services\ApplicationService.cs" />
+    <Compile Include="Platform\ApplicationService.cs" />
     <Compile Include="Services\OmniCorePodService.cs" />
     <Compile Include="OmniCoreEvents.cs" />
     <Compile Include="Platform\ApplicationLogger.cs" />
