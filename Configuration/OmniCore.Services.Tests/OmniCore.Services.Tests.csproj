@@ -11,6 +11,7 @@
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="Unity" Version="5.11.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,7 @@
     <ProjectReference Include="..\..\Pod\OmniCore.Eros\OmniCore.Eros.csproj" />
     <ProjectReference Include="..\..\Radios\OmniCore.Radios.RileyLink\OmniCore.Radios.RileyLink.csproj" />
     <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj" />
+    <ProjectReference Include="..\..\Simulation\OmniCore.Simulation\OmniCore.Simulation.csproj" />
     <ProjectReference Include="..\..\Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj" />
     <ProjectReference Include="..\OmniCore.Services\OmniCore.Services.csproj" />
   </ItemGroup>

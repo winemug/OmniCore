@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.AppCenter.Analytics" Version="2.6.2" />
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.6.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Unity.Abstractions" Version="5.11.1" />
   </ItemGroup>
 
 </Project>

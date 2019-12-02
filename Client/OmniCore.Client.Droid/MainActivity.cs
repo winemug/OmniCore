@@ -34,7 +34,6 @@ namespace OmniCore.Client.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static bool IsCreated { get; private set; }
-        public const string IntentEnsureServiceRunning = "EnsureServiceRunning";
         protected override void OnCreate(Bundle savedInstanceState)
         {
             var container = new UnityContainer()
