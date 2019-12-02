@@ -132,7 +132,7 @@
     <Compile Include="Services\ApplicationService.cs" />
     <Compile Include="Services\OmniCorePodService.cs" />
     <Compile Include="OmniCoreEvents.cs" />
-    <Compile Include="Platform\OmniCoreLogger.cs" />
+    <Compile Include="Platform\ApplicationLogger.cs" />
     <Compile Include="Platform\OmniCoreWakeLock.cs" />
     <Compile Include="Platform\RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

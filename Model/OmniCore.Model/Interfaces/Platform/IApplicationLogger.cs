@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IOmniCoreLogger
+    public interface IApplicationLogger
     {
         void Verbose(string message);
         void Debug(string message);

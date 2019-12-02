@@ -26,18 +26,14 @@ namespace OmniCore.Client
 {
     public partial class XamarinApp : Application, IUserInterface
     {
-        public static XamarinApp Instance => Application.Current as XamarinApp;
-        public IPodProvider PodProvider { get; }
-        public IRadioProvider RileyLinkProvider { get;  }
-        public IOmniCoreLogger Logger { get; }
-        public IOmniCoreApplication OmniCoreApplication { get; }
-
         public SynchronizationContext SynchronizationContext { get; }
 
-        private readonly ICoreServices Services;
+        private readonly ICoreServices CoreServices;
+        private IApplicationLogger Logger => CoreServices.ApplicationService.Logger;
+            
         public XamarinApp(ICoreServicesProvider coreServicesProvider)
         {
-            Services = coreServicesProvider.LocalServices;
+            CoreServices = coreServicesProvider.LocalServices;
             InitializeComponent();
             SynchronizationContext = SynchronizationContext.Current;
             MainPage = new NavigationPage(new RadiosPage().WithViewModel(new RadioTestingViewModel()));
@@ -59,41 +55,56 @@ namespace OmniCore.Client
             //await Services.RepositoryService.Initialize();
         }
 
-        protected override void OnSleep()
+        protected async override void OnSleep()
         {
-            MessagingCenter.Send(this, MessagingConstants.AppSleeping);
+            // MessagingCenter.Send(this, MessagingConstants.AppSleeping);
             Logger.Debug("OmniCore App OnSleep called");
         }
 
-        protected override void OnResume()
+        protected async override void OnResume()
         {
-            OmniCoreApplication.State.TryRemove(AppStateConstants.ActiveConversation);
+            //OmniCoreApplication.State.TryRemove(AppStateConstants.ActiveConversation);
             Logger.Debug("OmniCore App OnResume called");
-            MessagingCenter.Send(this, MessagingConstants.AppResuming);
+            // MessagingCenter.Send(this, MessagingConstants.AppResuming);
         }
 
         private async Task EnsurePermissions()
         {
             try
             {
-                var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.LocationAlways);
-                if (status != PermissionStatus.Granted)
+                if (
+                    !await CheckAndRequestPermission(
+                    Permission.LocationAlways,
+                    "Please grant the location permission to this application in order to be able to connect to bluetooth devices.")
+                    ||
+                    !await CheckAndRequestPermission(
+                        Permission.Storage,
+                        "Please grant the storage permission to this application in order to be able to import and export files.")
+                )
                 {
-                    await MainPage.DisplayAlert("Missing Permissions", "Please grant the location permission to this application in order to be able to connect to bluetooth devices.", "OK");
-                    var request = await CrossPermissions.Current.RequestPermissionsAsync(Permission.LocationAlways);
-                    if (request[Permission.LocationAlways] != PermissionStatus.Granted)
-                    {
-                        await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
-                        XamarinApp.Instance.OmniCoreApplication.Exit();
-                    }
+                    await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
+                    CoreServices.ApplicationService.Shutdown();
                 }
+
             }
             catch (Exception e)
             {
                 await MainPage.DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
                 Crashes.TrackError(e);
-                XamarinApp.Instance.OmniCoreApplication.Exit();
+                CoreServices.ApplicationService.Shutdown();
             }
+        }
+
+        private async Task<bool> CheckAndRequestPermission(Permission permission, string requestMessage)
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
+            if (status != PermissionStatus.Granted)
+            {
+                await MainPage.DisplayAlert("Missing Permissions", requestMessage, "OK");
+                var request = await CrossPermissions.Current.RequestPermissionsAsync(permission);
+                return request[permission] == PermissionStatus.Granted;
+            }
+            return true;
         }
 
     }

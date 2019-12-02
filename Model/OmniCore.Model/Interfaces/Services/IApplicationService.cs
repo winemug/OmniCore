@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using System.Text;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces.Services
 {
     public interface IApplicationService
     {
-        Version ApplicationVersion { get; }
+        Version Version { get; }
+        IApplicationLogger Logger { get; }
+        void Shutdown();
     }
 }

@@ -23,7 +23,7 @@ namespace OmniCore.Mobile.Droid.Platform
         private static List<IRemoteRequestSubscriber> Subscribers = new List<IRemoteRequestSubscriber>();
 
         [Unity.Dependency]
-        public IOmniCoreLogger Logger { get; set; }
+        public IApplicationLogger Logger { get; set; }
 
         public async Task<string> GetResult(string request)
         {

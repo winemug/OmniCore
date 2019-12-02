@@ -28,7 +28,7 @@
 
 //        public OmniCoreCommandService()
 //        {
-//            Logger = new OmniCoreLogger();
+//            Logger = new ApplicationLogger();
 //        }
 
 //        [Unity.Dependency]
@@ -90,7 +90,7 @@
 
 //        public OmniCoreCommandHandler()
 //        {
-//            Logger = new OmniCoreLogger();
+//            Logger = new ApplicationLogger();
 //        }
 
 //        public override void HandleMessage(Message msg)

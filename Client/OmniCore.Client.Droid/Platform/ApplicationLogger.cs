@@ -15,7 +15,7 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    public class OmniCoreLogger : IOmniCoreLogger
+    public class ApplicationLogger : IApplicationLogger
     {
         public const string TAG = "OmniCore";
         public void Debug(string message)
