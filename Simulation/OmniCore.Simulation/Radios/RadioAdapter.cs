@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Simulation
+namespace OmniCore.Simulation.Radios
 {
     public class RadioAdapter : IRadioAdapter
     {

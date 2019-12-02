@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="Unity.Abstractions" Version="5.11.1" />
   </ItemGroup>
 
