@@ -64,6 +64,17 @@
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Emulator|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Emulator\</OutputPath>
+    <DefineConstants>DEBUG;DEBUG EMULATOR</DefineConstants>
+    <DebugType>portable</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>8.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
@@ -160,6 +171,10 @@
     <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj">
       <Project>{6f18bf87-e7bd-498c-a044-82a34c0df0e8}</Project>
       <Name>OmniCore.Repository.Sqlite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Simulation\OmniCore.Simulation\OmniCore.Simulation.csproj">
+      <Project>{6cdc764d-949d-47db-9405-224b91a7b0b8}</Project>
+      <Name>OmniCore.Simulation</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj">
       <Project>{0a8a5cfc-6889-4c66-ab0e-82cc579690fd}</Project>

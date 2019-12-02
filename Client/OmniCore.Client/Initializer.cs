@@ -6,10 +6,15 @@ namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static IUnityContainer AsXamarinApplication(this IUnityContainer container)
+        public static IUnityContainer WithCrossBleAdapter(this IUnityContainer container)
         {
             container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
-            container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
+            return container;
+        }
+
+        public static IUnityContainer AsXamarinApplication(this IUnityContainer container)
+        {
+            container.RegisterSingleton<IUserInterfaceApplication, App>();
             return container;
         }
     }

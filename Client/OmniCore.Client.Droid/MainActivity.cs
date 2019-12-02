@@ -22,6 +22,7 @@ using OmniCore.Mobile.Droid;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
+using OmniCore.Simulation;
 using Application = Xamarin.Forms.Application;
 
 namespace OmniCore.Client.Droid
@@ -39,11 +40,17 @@ namespace OmniCore.Client.Droid
             var container = new UnityContainer()
                 .WithDefaultServiceProviders()
                 .WithSqliteRepository()
+#if EMULATOR
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
+                .WithBleSimulator()
+#else
+                .WithOmnipodEros()
+                .WithRileyLinkRadio()
+                .WithCrossBleAdapter()
+#endif
                 .AsXamarinApplication()
                 .OnAndroidPlatform();
-
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             base.OnCreate(savedInstanceState);
@@ -57,6 +64,7 @@ namespace OmniCore.Client.Droid
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             var uiApplication = container.Resolve<IUserInterfaceApplication>();
+
             LoadApplication(uiApplication as Application);
             IsCreated = true;
         }

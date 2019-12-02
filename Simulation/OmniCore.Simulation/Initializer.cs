@@ -1,4 +1,6 @@
 ﻿using System;
+using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Simulation.Radios;
 using Unity;
 
 namespace OmniCore.Simulation
@@ -7,6 +9,7 @@ namespace OmniCore.Simulation
     {
         public static IUnityContainer WithBleSimulator(this IUnityContainer container)
         {
+            container.RegisterSingleton<IRadioAdapter, RadioAdapter>();
             return container;
         }
     }
