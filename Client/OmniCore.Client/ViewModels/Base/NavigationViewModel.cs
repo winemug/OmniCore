@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.Views.Base;
+using OmniCore.Client.Interfaces;
+using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
 {
-    public class EmptyViewModel : BaseViewModel
+    public abstract class NavigationViewModel : BaseViewModel
     {
+        protected ContentPage RootPage { get; set; }
         public override Task Initialize()
         {
             return Task.CompletedTask;

@@ -5,6 +5,7 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.Threading.Tasks;
+using OmniCore.Client.Views.Base;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;

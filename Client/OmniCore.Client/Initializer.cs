@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Platform;
-using OmniCore.Client.ViewModels;
-using OmniCore.Client.Views;
+using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.Views.Base;
 using Unity;
 using OmniCore.Model.Interfaces.Platform;
 

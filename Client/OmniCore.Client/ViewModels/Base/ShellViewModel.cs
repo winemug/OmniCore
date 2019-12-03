@@ -4,11 +4,11 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Interfaces;
-using OmniCore.Client.Views;
+using OmniCore.Client.Views.Base;
 using Unity;
 using Xamarin.Forms;
 
-namespace OmniCore.Client.ViewModels
+namespace OmniCore.Client.ViewModels.Base
 {
     public class ShellViewModel : BaseViewModel
     {

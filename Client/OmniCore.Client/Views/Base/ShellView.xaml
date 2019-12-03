@@ -3,12 +3,12 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:d="http://xamarin.com/schemas/2014/forms/design"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-       xmlns:v="clr-namespace:OmniCore.Client.Views;assembly=OmniCore.Client"
-       xmlns:vm="clr-namespace:OmniCore.Client.ViewModels;assembly=OmniCore.Client"
+       xmlns:v="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
+       xmlns:vm="clr-namespace:OmniCore.Client.ViewModels.Base;assembly=OmniCore.Client"
        xmlns:system="clr-namespace:System;assembly=netstandard"
        mc:Ignorable="d"
        Title="{Binding Title}"
-       x:Class="OmniCore.Client.ShellView">
+       x:Class="OmniCore.Client.Views.Base.ShellView">
 
     <!-- 
         Styles and Resources 

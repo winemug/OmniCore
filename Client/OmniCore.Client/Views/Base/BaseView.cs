@@ -4,7 +4,7 @@ using System.Text;
 using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
-namespace OmniCore.Client.Views
+namespace OmniCore.Client.Views.Base
 {
     public abstract class BaseView<T> : ContentPage, IView<T> where T : IViewModel
     {

@@ -7,7 +7,7 @@ using OmniCore.Client.Interfaces;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 
-namespace OmniCore.Client.ViewModels
+namespace OmniCore.Client.ViewModels.Base
 {
     [Fody.ConfigureAwait(true)]
     public abstract class BaseViewModel : IViewModel

@@ -87,8 +87,11 @@
     <Compile Update="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\ShellView.xaml.cs">
+    <Compile Update="Views\Base\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
+      <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
     <Compile Update="XamarinApp.xaml.cs">
       <DependentUpon>XamarinApp.xaml</DependentUpon>
@@ -99,7 +102,7 @@
     <EmbeddedResource Update="Views\EmptyView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\ShellView.xaml">
+    <EmbeddedResource Update="Views\Base\ShellView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">
@@ -139,6 +142,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
