@@ -9,6 +9,7 @@ using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
+using Unity;
 
 namespace OmniCore.Client
 {
@@ -19,18 +20,15 @@ namespace OmniCore.Client
         private readonly ICoreServices CoreServices;
         private IApplicationLogger Logger => CoreServices.ApplicationService.Logger;
             
-        public XamarinApp(ICoreServicesProvider coreServicesProvider)
+        public XamarinApp(ICoreServicesProvider coreServicesProvider, IUnityContainer container)
         {
             CoreServices = coreServicesProvider.LocalServices;
-            InitializeComponent();
             SynchronizationContext = SynchronizationContext.Current;
-            MainPage = new AppShell();
-            Logger.Information("OmniCore App initialized");
-        }
 
-        public void GoBack()
-        {
-            MainPage.SendBackButtonPressed();
+            InitializeComponent();
+
+            MainPage = container.Resolve<ShellView>();
+            Logger.Information("OmniCore App initialized");
         }
 
         protected async override void OnStart()

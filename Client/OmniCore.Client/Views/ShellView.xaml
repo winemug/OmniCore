@@ -3,9 +3,12 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:d="http://xamarin.com/schemas/2014/forms/design"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:v="clr-namespace:OmniCore.Client.Views;assembly=OmniCore.Client"
+       xmlns:vm="clr-namespace:OmniCore.Client.ViewModels;assembly=OmniCore.Client"
+       xmlns:system="clr-namespace:System;assembly=netstandard"
        mc:Ignorable="d"
        Title="OmniCore"
-       x:Class="OmniCore.Client.AppShell">
+       x:Class="OmniCore.Client.ShellView">
 
     <!-- 
         Styles and Resources 
@@ -29,18 +32,22 @@
     </Shell.Resources>
 
     <!-- Your Pages -->
-    <TabBar>
-        <Tab Title="Browse">
-            <!--<ShellContent ContentTemplate="{DataTemplate local:ItemsPage}" />-->
-            <ShellContent/>
+
+    <FlyoutItem Title="Flyout1"
+                FlyoutDisplayOptions="AsMultipleItems">
+        <Tab Title="U1">
+            <ShellContent ContentTemplate="{Binding View1}" />
         </Tab>
-        <Tab Title="About">
-            <ShellContent/>
-            <!--<ShellContent ContentTemplate="{DataTemplate local:AboutPage}" />-->
+        <Tab Title="U2">
+            <ShellContent ContentTemplate="{Binding View2}" />
         </Tab>
-    </TabBar>
+        <Tab Title="U3">
+            <ShellContent ContentTemplate="{Binding View3}" />
+        </Tab>
+    </FlyoutItem>
 
     <!-- Optional Templates 
+    
     // These may be provided inline as below or as separate classes.
 
     // This header appears at the top of the Flyout.

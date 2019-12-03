@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OmniCore.Client.Interfaces
 {
-    public interface IView<T> where T : IViewModel
+    public interface IView<out T> where T : IViewModel
     {
-        T ViewModel { get; set; }
+        T ViewModel { get;  }
     }
 }

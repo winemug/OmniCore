@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OmniCore.Client.Interfaces
 {
-    public interface IViewModel : IDisposable, INotifyPropertyChanged
+    public interface IViewModel : INotifyPropertyChanged
     {
-        IList<IDisposable> Disposables { get; }
+        Task Initialize();
+        Task Dispose();
     }
 }
