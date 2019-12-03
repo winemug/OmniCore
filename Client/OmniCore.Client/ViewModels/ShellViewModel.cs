@@ -14,12 +14,8 @@ namespace OmniCore.Client.ViewModels
     {
         private readonly IUnityContainer Container;
 
-        public DataTemplate View1 => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate View2 => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate View3 => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate View4 => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate View5 => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate View6 => new DataTemplate(() => Container.Resolve<EmptyView>());
+        public DataTemplate EmptyView => new DataTemplate(() => Container.Resolve<EmptyView>());
+        public string Title => "OmniCore";
 
         public ShellViewModel(IUnityContainer container)
         {
@@ -35,5 +31,40 @@ namespace OmniCore.Client.ViewModels
         {
             return Task.CompletedTask;
         }
+
+        //private void PopulateShellItems()
+        //{
+        //    MainShellItems = new List<Tab>();
+
+        //    var tab = new Tab()
+        //    {
+        //        FlyoutDisplayOptions = FlyoutDisplayOptions.AsSingleItem,
+        //        Title = "A",
+        //    };
+
+        //    var tabContents = new List<ShellContent>
+        //    {
+        //        new ShellContent()
+        //        {
+        //            Title = "A0",
+        //            Content = new DataTemplate(() => Container.Resolve<EmptyView>())
+        //        },
+        //        new ShellContent()
+        //        {
+        //            Title = "A1",
+        //            Content = new DataTemplate(() => Container.Resolve<EmptyView>()),
+        ////            Con
+        //        },
+        //        new ShellContent()
+        //        {
+        //            Title = "A2",
+        //            Content = new DataTemplate(() => Container.Resolve<EmptyView>())
+        //        }
+        //    };
+
+        //    var binding = new Binding("", source: tabContents);
+        //    tab.SetBinding(Tab.ItemsProperty, binding);
+        //    MainShellItems.Add(tab);
+        //}
     }
 }

@@ -10,10 +10,11 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class EmptyView
+    public partial class EmptyView : BaseView<EmptyViewModel>
     {
-        public EmptyView(EmptyViewModel viewModel) : base(viewModel)
+        public EmptyView(EmptyViewModel viewModel)
         {
+            ViewModel = viewModel;
             InitializeComponent();
         }
     }

@@ -11,7 +11,7 @@
              x:Class="OmniCore.Client.Views.EmptyView">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="this space intentionally left blaaaaaaaaaaaaaaaa"
+            <Label Text="this space intentionally left blaaaaaaaaaaaaaaaaa"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
         </StackLayout>

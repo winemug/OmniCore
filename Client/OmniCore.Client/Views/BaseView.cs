@@ -9,8 +9,12 @@ namespace OmniCore.Client.Views
     public abstract class BaseView<T> : ContentPage, IView<T> where T : IViewModel
     {
         public T ViewModel { get; set; }
+        protected BaseView()
+        {
 
-        protected BaseView(T viewModel)
+        }
+
+        public BaseView(T viewModel)
         {
             ViewModel = viewModel;
         }

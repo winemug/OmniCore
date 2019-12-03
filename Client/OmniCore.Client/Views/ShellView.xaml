@@ -7,7 +7,7 @@
        xmlns:vm="clr-namespace:OmniCore.Client.ViewModels;assembly=OmniCore.Client"
        xmlns:system="clr-namespace:System;assembly=netstandard"
        mc:Ignorable="d"
-       Title="OmniCore"
+       Title="{Binding Title}"
        x:Class="OmniCore.Client.ShellView">
 
     <!-- 
@@ -33,48 +33,50 @@
 
     <!-- Your Pages -->
 
-    <FlyoutItem Title="Flyout1"
-                FlyoutDisplayOptions="AsMultipleItems">
-        <Tab Title="U1">
-            <ShellContent ContentTemplate="{Binding View1}" />
-        </Tab>
-        <Tab Title="U2">
-            <ShellContent ContentTemplate="{Binding View2}" />
-        </Tab>
-        <Tab Title="U3">
-            <ShellContent ContentTemplate="{Binding View3}" />
+    <FlyoutItem Title="Main" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="System">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
         </Tab>
     </FlyoutItem>
 
-    <!-- Optional Templates 
-    
-    // These may be provided inline as below or as separate classes.
+    <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Medications">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medication"/>
+        </Tab>
+        <Tab Title="Users">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="One"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Two"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Three"/>
+        </Tab>
+        <Tab Title="Radios">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RileyLink"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RFTP"/>
+        </Tab>
+        <Tab Title="Pod">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
+        </Tab>
+    </FlyoutItem>
 
-    // This header appears at the top of the Flyout.
-    <Shell.FlyoutHeaderTemplate>
-        <DataTemplate>
-            <Grid>ContentHere</Grid>
-        </DataTemplate>
-    </Shell.FlyoutHeaderTemplate>
+    <FlyoutItem Title="Pod" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Maintenance">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="A"/>
+        </Tab>
+        <Tab Title="Therapy">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Manual"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Manual"/>
+        </Tab>
+        <Tab Title="Radio">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RileyLink"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RFTP"/>
+        </Tab>
+        <Tab Title="Pod">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
+        </Tab>
 
-    // ItemTemplate is for ShellItems as displayed in a Flyout
-    <Shell.ItemTemplate>
-        <DataTemplate>
-            <ContentView>
-                Bindable Properties: Title, Icon
-            </ContentView>
-        </DataTemplate>
-    </Shell.ItemTemplate>
-
-    // MenuItemTemplate is for MenuItems as displayed in a Flyout
-    <Shell.MenuItemTemplate>
-        <DataTemplate>
-            <ContentView>
-                Bindable Properties: Text, Icon
-            </ContentView>
-        </DataTemplate>
-    </Shell.MenuItemTemplate>
-
-    -->
+    </FlyoutItem>
 
 </Shell>
