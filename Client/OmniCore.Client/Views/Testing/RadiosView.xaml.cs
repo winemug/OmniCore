@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Wizards;
+using OmniCore.Client.ViewModels.Testing;
 using OmniCore.Client.Views.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Client.Views.Wizards.SetupWizard
+namespace OmniCore.Client.Views.Testing
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SetupWizardRootView : NavigationView<SetupWizardViewModel>
+    public partial class RadiosView : BaseView<RadiosViewModel>
     {
-        public SetupWizardRootView(SetupWizardViewModel viewModel) : base(viewModel)
+        public RadiosView(RadiosViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
         }

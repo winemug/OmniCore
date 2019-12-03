@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
-using OmniCore.Client.Interfaces;
-using OmniCore.Client.Platform;
+﻿using OmniCore.Client.Platform;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.ViewModels.Testing;
 using OmniCore.Client.Views.Base;
+using OmniCore.Client.Views.Testing;
 using Unity;
 using OmniCore.Model.Interfaces.Platform;
 
@@ -25,6 +25,9 @@ namespace OmniCore.Client
 
             container.RegisterType<EmptyViewModel>();
             container.RegisterType<EmptyView>();
+
+            container.RegisterType<RadiosViewModel>();
+            container.RegisterType<RadiosView>();
 
             return container;
         }

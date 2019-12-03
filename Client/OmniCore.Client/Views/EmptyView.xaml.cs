@@ -12,9 +12,8 @@ namespace OmniCore.Client.Views.Base
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class EmptyView : BaseView<EmptyViewModel>
     {
-        public EmptyView(EmptyViewModel viewModel)
+        public EmptyView(EmptyViewModel viewModel) : base(viewModel)
         {
-            ViewModel = viewModel;
             InitializeComponent();
         }
     }

@@ -7,5 +7,8 @@ namespace OmniCore.Client.Views.Base
 {
     public class NavigationView<T> : BaseView<T> where T : NavigationViewModel
     {
+        public NavigationView(T viewModel) : base(viewModel)
+        {
+        }
     }
 }

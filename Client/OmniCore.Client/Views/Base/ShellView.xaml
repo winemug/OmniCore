@@ -76,7 +76,11 @@
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
         </Tab>
-
     </FlyoutItem>
 
+    <FlyoutItem Title="Testing" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Radio">
+            <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
+        </Tab>
+    </FlyoutItem>
 </Shell>

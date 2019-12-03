@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Interfaces;
 using OmniCore.Client.Views.Base;
+using OmniCore.Client.Views.Testing;
 using Unity;
 using Xamarin.Forms;
 
@@ -15,6 +16,7 @@ namespace OmniCore.Client.ViewModels.Base
         private readonly IUnityContainer Container;
 
         public DataTemplate EmptyView => new DataTemplate(() => Container.Resolve<EmptyView>());
+        public DataTemplate RadiosView => new DataTemplate(() => Container.Resolve<RadiosView>());
         public string Title => "OmniCore";
 
         public ShellViewModel(IUnityContainer container)
