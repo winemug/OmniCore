@@ -2,6 +2,7 @@
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.ViewModels.Testing;
 using OmniCore.Client.Views.Base;
+using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Testing;
 using Unity;
 using OmniCore.Model.Interfaces.Platform;

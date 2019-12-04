@@ -87,7 +87,7 @@
     <Compile Update="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Base\ShellView.xaml.cs">
+    <Compile Update="Views\Main\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
@@ -102,7 +102,7 @@
     <EmbeddedResource Update="Views\EmptyView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Base\ShellView.xaml">
+    <EmbeddedResource Update="Views\Main\ShellView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">
