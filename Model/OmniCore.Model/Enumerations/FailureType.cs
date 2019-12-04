@@ -23,5 +23,6 @@ namespace OmniCore.Model.Enumerations
         WakeLockNotAcquired,
         SystemError,
         Unknown,
+        LocalStorage
     }
 }
