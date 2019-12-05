@@ -16,8 +16,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public async IAsyncEnumerable<IPodEntity> ActivePods()
         {
-            var c = await GetConnection();
-            var list = c.Table<PodEntity>().Where(e => !e.Hidden && e.State < PodState.Stopped);
+            var list = Connection.Table<PodEntity>().Where(e => !e.Hidden && e.State < PodState.Stopped);
             if (ExtendedAttributeProvider == null)
             {
                 list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);
@@ -32,8 +31,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public async IAsyncEnumerable<IPodEntity> ArchivedPods()
         {
-            var c = await GetConnection();
-            var list = c.Table<PodEntity>().Where(e => e.Hidden);
+            var list = Connection.Table<PodEntity>().Where(e => e.Hidden);
             if (ExtendedAttributeProvider == null)
             {
                 list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);

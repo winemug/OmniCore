@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text;
-using OmniCore.Client.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 

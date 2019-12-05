@@ -5,9 +5,9 @@ using SQLite;
 
 namespace OmniCore.Model.Interfaces.Repositories
 {
-    public interface IDataAccess
+    public interface IDataAccess : IDisposable
     {
         // todo: rewrite as either non-orm specific or IDbConnection
-        Task<SQLiteAsyncConnection> GetConnection();
+        SQLiteAsyncConnection Connection { get; }
     }
 }

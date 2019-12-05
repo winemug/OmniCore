@@ -17,8 +17,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
         }
         public async Task<IRadioEntity> ByDeviceUuid(Guid deviceUuid)
         {
-            var c = await GetConnection();
-            return await c.Table<RadioEntity>().FirstOrDefaultAsync(x => x.DeviceUuid == deviceUuid);
+            return await Connection.Table<RadioEntity>().FirstOrDefaultAsync(x => x.DeviceUuid == deviceUuid);
         }
     }
 }

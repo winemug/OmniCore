@@ -154,6 +154,8 @@
 
   <ItemGroup>
     <Folder Include="Removed\ViewModels\Users\" />
+    <Folder Include="ViewModels\Home\" />
+    <Folder Include="Views\Home\" />
   </ItemGroup>
 
   <ItemGroup>

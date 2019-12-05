@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Repositories;
 using SQLite;
 
@@ -11,15 +13,33 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class DataAccess : IDataAccess
     {
-        private SQLiteAsyncConnection ConnectionInternal;
+
+        private readonly IRepositoryService RepositoryService;
         public DataAccess(IRepositoryService repositoryService)
         {
-            ConnectionInternal = new SQLiteAsyncConnection
-                (repositoryService.RepositoryPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
+            RepositoryService = repositoryService;
         }
-        public async Task<SQLiteAsyncConnection> GetConnection()
+
+        private SQLiteAsyncConnection ConnectionInternal;
+        public SQLiteAsyncConnection Connection
         {
-            return ConnectionInternal;
+            get
+            {
+                if (!RepositoryService.IsInitialized)
+                    throw new OmniCoreRepositoryException(FailureType.LocalStorage, "Repository service is not initialized");
+
+                if (ConnectionInternal == null)
+                {
+                    ConnectionInternal = new SQLiteAsyncConnection
+                        (RepositoryService.RepositoryPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
+
+                }
+                return ConnectionInternal;
+            }
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

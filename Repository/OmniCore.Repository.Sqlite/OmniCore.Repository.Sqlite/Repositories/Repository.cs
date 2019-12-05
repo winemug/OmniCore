@@ -17,17 +17,19 @@ namespace OmniCore.Repository.Sqlite.Repositories
     {
         private readonly IDataAccess DataAccess;
         private readonly IUnityContainer Container;
+
         public IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
+
+        protected SQLiteAsyncConnection Connection
+        {
+            get { return DataAccess.Connection; }
+        }
+
         public Repository(IDataAccess dataAccess,
             IUnityContainer container)
         {
             DataAccess = dataAccess;
             Container = container;
-        }
-
-        protected Task<SQLiteAsyncConnection> GetConnection()
-        {
-            return DataAccess.GetConnection();
         }
 
         public InterfaceType New()
@@ -57,25 +59,21 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public async Task Delete(InterfaceType entity)
         {
-            var c = await GetConnection();
-            await c.DeleteAsync(entity);
+            await Connection.DeleteAsync(entity);
         }
 
         public virtual async Task Update(InterfaceType entity)
         {
-            var c = await GetConnection();
-            await c.UpdateAsync(entity);
+            await Connection.UpdateAsync(entity);
         }
 
         public virtual async Task Create(InterfaceType entity)
         {
-            var c = await GetConnection();
-            await c.InsertAsync(entity, typeof(ConcreteType));
+            await Connection.InsertAsync(entity, typeof(ConcreteType));
         }
         public virtual async Task<InterfaceType> Read(long id)
         {
-            var c = await GetConnection();
-            var entity = await c.Table<ConcreteType>().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await Connection.Table<ConcreteType>().FirstOrDefaultAsync(x => x.Id == id);
             if (entity != null)
                 entity.ExtendedAttribute = ExtendedAttributeProvider?.New(entity.ExtensionValue);
             return entity;
@@ -83,8 +81,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public virtual async IAsyncEnumerable<InterfaceType> All()
         {
-            var c = await GetConnection();
-            var list = c.Table<ConcreteType>().Where(e => !e.Hidden);
+            var list = Connection.Table<ConcreteType>().Where(e => !e.Hidden);
             if (ExtendedAttributeProvider == null)
             {
                 list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);

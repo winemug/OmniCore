@@ -6,6 +6,7 @@ using Microsoft.AppCenter.Crashes;
 using System;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
+using OmniCore.Client.Views.Main;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Platform;
@@ -28,7 +29,7 @@ namespace OmniCore.Client
 
             InitializeComponent();
 
-            MainPage = container.Resolve<ShellView>();
+            MainPage = GetMainPage(container);
             Logger.Information("OmniCore App initialized");
         }
 
@@ -88,6 +89,11 @@ namespace OmniCore.Client
                 return request[permission] == PermissionStatus.Granted;
             }
             return true;
+        }
+
+        private Page GetMainPage(IUnityContainer container)
+        {
+            return container.Resolve<ShellView>();
         }
 
     }

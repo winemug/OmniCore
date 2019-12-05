@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.Interfaces;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.ViewModels.Base
 {

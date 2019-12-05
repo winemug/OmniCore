@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base

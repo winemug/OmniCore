@@ -4,16 +4,25 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Repositories;
 using Unity;
 
 namespace OmniCore.Repository.Sqlite
 {
     public class RepositoryService : IRepositoryService
     {
+        public IDataAccess DataAccess { get; private set; }
         public bool IsInitialized { get; private set; }
 
         private AsyncLock InitializeLock = new AsyncLock();
         public string RepositoryPath { get; private set; }
+
+        private readonly IUnityContainer Container;
+        public RepositoryService(IUnityContainer container)
+        {
+            Container = container;
+        }
+
         public Task Restore(string backupPath)
         {
             throw new NotImplementedException();

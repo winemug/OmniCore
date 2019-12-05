@@ -32,28 +32,29 @@
 
     <!-- Your Pages -->
 
-    <FlyoutItem Title="Main" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="System">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
+    <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Home">
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Connections"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Therapies"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
         </Tab>
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Medications">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medication"/>
-        </Tab>
         <Tab Title="Users">
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="One"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Two"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Three"/>
         </Tab>
+        <Tab Title="Medications">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medication"/>
+        </Tab>
         <Tab Title="Radios">
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="RileyLink"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="RFTP"/>
         </Tab>
-        <Tab Title="Pod">
+        <Tab Title="Therapies">
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
         </Tab>

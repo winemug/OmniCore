@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nito.AsyncEx.Synchronous;
-using OmniCore.Client.Interfaces;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 

@@ -13,7 +13,6 @@ using System.Runtime.InteropServices;
 using System.Security;
 using Xamarin.Forms;
 using OmniCore.Client;
-using OmniCore.Client.Interfaces;
 using System.IO;
 using OmniCore.Eros;
 using OmniCore.Services;

@@ -9,7 +9,6 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Client.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Mobile.Droid.Platform

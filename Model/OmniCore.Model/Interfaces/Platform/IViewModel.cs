@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace OmniCore.Client.Interfaces
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IViewModel : INotifyPropertyChanged
     {
