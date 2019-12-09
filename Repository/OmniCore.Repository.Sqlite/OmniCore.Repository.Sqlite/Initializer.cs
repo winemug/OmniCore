@@ -12,7 +12,6 @@ namespace OmniCore.Repository.Sqlite
         public static IUnityContainer WithSqliteRepository(this IUnityContainer container)
         {
             
-            container.RegisterType<IDataAccess, DataAccess>();
             container.RegisterType<IPodRepository, PodRepository>();
             container.RegisterType<IMedicationRepository, MedicationRepository>();
             container.RegisterType<IRadioEventRepository, RadioEventRepository>();

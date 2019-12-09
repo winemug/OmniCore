@@ -4,6 +4,7 @@ using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
@@ -39,7 +40,8 @@ namespace OmniCore.Client
             //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
             Logger.Debug("OmniCore App OnStart called");
             await EnsurePermissions();
-            //await Services.RepositoryService.Initialize();
+            var dbPath = Path.Combine(CoreServices.ApplicationService.DataPath, "omnicore.db3");
+            await CoreServices.RepositoryService.Initialize(dbPath, CancellationToken.None);
         }
 
         protected async override void OnSleep()

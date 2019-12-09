@@ -11,7 +11,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class UserRepository : Repository<UserEntity, IUserEntity>, IUserRepository
     {
-        public UserRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public UserRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
     }

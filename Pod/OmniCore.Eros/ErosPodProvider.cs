@@ -195,7 +195,7 @@ namespace OmniCore.Eros
             podEntity.UniqueId = Guid.NewGuid();
             var ea = podEntity.ExtendedAttribute as ErosPodExtendedAttribute; 
             ea.RadioAddress = GenerateRadioAddress();
-            await PodRepository.Create(podEntity);
+            await PodRepository.Create(podEntity, CancellationToken.None);
             return await GetPodInternal(podEntity);
         }
 

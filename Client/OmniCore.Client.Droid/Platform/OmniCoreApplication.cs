@@ -19,7 +19,7 @@ using Environment = Android.OS.Environment;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    [Fody.ConfigureAwait(false)]
+    //[Fody.ConfigureAwait(false)]
     public class OmniCoreApplication : IOmniCoreApplication
     {
         public void Exit()

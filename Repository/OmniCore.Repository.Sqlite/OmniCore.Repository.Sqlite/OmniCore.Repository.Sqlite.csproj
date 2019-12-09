@@ -10,8 +10,8 @@
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.6.2" />
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Unity.Abstractions" Version="5.11.1" />
+    <PackageReference Include="System.Reactive" Version="4.3.1" />
+    <PackageReference Include="Unity.Abstractions" Version="5.11.2" />
   </ItemGroup>
 
   <ItemGroup>

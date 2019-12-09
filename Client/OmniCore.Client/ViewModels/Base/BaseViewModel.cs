@@ -9,7 +9,7 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.ViewModels.Base
 {
-    [Fody.ConfigureAwait(true)]
+    //[Fody.ConfigureAwait(true)]
     public abstract class BaseViewModel : IViewModel
     {
         public event PropertyChangedEventHandler PropertyChanged;

@@ -11,7 +11,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class SignalStrengthRepository : Repository<SignalStrengthEntity, ISignalStrengthEntity>, ISignalStrengthRepository
     {
-        public SignalStrengthRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public SignalStrengthRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
     }

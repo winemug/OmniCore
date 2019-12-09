@@ -10,6 +10,8 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Version Version { get; }
         IApplicationLogger Logger { get; }
+        string DataPath { get; }
+        string StoragePath { get; }
         void Shutdown();
     }
 }

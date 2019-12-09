@@ -11,7 +11,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class RadioEventRepository : Repository<RadioEventEntity, IRadioEventEntity>, IRadioEventRepository
     {
-        public RadioEventRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public RadioEventRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
     }

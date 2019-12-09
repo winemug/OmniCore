@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Entities;
 using OmniCore.Model.Interfaces.Repositories;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
 using Unity;
 
@@ -10,13 +12,14 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class PodRepository : Repository<PodEntity, IPodEntity>, IPodRepository
     {
-        public PodRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public PodRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
 
         public async IAsyncEnumerable<IPodEntity> ActivePods()
         {
-            var list = Connection.Table<PodEntity>().Where(e => !e.Hidden && e.State < PodState.Stopped);
+            using var access = await RepositoryService.GetAccess(CancellationToken.None);
+            var list = access.Connection.Table<PodEntity>().Where(e => !e.IsDeleted && e.State < PodState.Stopped);
             if (ExtendedAttributeProvider == null)
             {
                 list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);
@@ -31,7 +34,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public async IAsyncEnumerable<IPodEntity> ArchivedPods()
         {
-            var list = Connection.Table<PodEntity>().Where(e => e.Hidden);
+            using var access = await RepositoryService.GetAccess(CancellationToken.None);
+            var list = access.Connection.Table<PodEntity>().Where(e => e.IsDeleted);
             if (ExtendedAttributeProvider == null)
             {
                 list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);

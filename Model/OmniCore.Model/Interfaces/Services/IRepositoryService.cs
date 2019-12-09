@@ -2,22 +2,21 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Repositories;
+using SQLite;
 
 namespace OmniCore.Model.Interfaces.Services
 {
     public interface IRepositoryService
     {
-        IDataAccess DataAccess { get; }
-        bool IsInitialized { get; }
+        Task<IRepositoryAccess> GetAccess(CancellationToken cancellationToken);
         string RepositoryPath { get; }
-        Task Restore(string backupPath);
-        Task Backup(string backupPath);
-        Task<bool> IsValid(string repositoryPath);
-        Task New(string repositoryPath);
-        Task Initialize(string repositoryPath);
-        Task Shutdown();
-
+        Task Import(string importPath, CancellationToken cancellationToken);
+        Task Restore(string backupPath, CancellationToken cancellationToken);
+        Task Backup(string backupPath, CancellationToken cancellationToken);
+        Task Initialize(string repositoryPath, CancellationToken cancellationToken);
+        Task Shutdown(CancellationToken cancellationToken);
     }
 }

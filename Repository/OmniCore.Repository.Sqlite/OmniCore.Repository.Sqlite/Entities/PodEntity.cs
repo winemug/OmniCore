@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Entities;
+using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
@@ -48,14 +49,29 @@ namespace OmniCore.Repository.Sqlite.Entities
         public bool BeepStartExtendedBolus { get; set; }
         public bool BeepEndExtendedBolus { get; set; }
         public decimal? BeepWhileExtendedBolusActive { get; set; }
+
+        [Ignore]
         public IUserEntity User { get; set; }
+        public long? UserId { get; set; }
+
+        [Ignore]
         public IMedicationEntity Medication { get; set; }
+        public long? MedicationId { get; set; }
+
+        [Ignore]
         public ITherapyProfileEntity TherapyProfile { get; set; }
+        public long? TherapyProfileId { get; set; }
+
+        [Ignore]
         public IList<IRadioEntity> Radios { get; set; }
         
+        [Ignore]
         public IBasalScheduleAttributes BasalSchedule { get; set; }
+        [Ignore]
         public IReminderAttributes ExpiresSoonReminder { get; set; }
+        [Ignore]
         public IReminderAttributes ReservoirLowReminder { get; set; }
+        [Ignore]
         public IReminderAttributes ExpiredReminder { get; set; }
 
     }

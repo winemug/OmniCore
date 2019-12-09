@@ -80,13 +80,13 @@ namespace OmniCore.Radios.RileyLink
                             var sse = SignalStrengthRepository.New();
                             sse.Radio = radio.Entity;
                             sse.Rssi = peripheralResult.Rssi;
-                            await SignalStrengthRepository.Create(sse);
+                            await SignalStrengthRepository.Create(sse, CancellationToken.None);
 
                             var radioEvent =RadioEventRepository.New();
                             radioEvent.Radio = radio.Entity;
                             radioEvent.EventType = RadioEvent.Scan;
                             radioEvent.Success = true;
-                            await RadioEventRepository.Create(radioEvent);
+                            await RadioEventRepository.Create(radioEvent, CancellationToken.None);
 
                             observer.OnNext(radio);
                         }
@@ -105,13 +105,10 @@ namespace OmniCore.Radios.RileyLink
             var entity = await RadioRepository.ByDeviceUuid(peripheralResult.Uuid);
             if (entity == null)
             {
-                var gb = peripheralResult.Uuid.ToByteArray();
-                var macid = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
                 entity = RadioRepository.New();
                 entity.DeviceUuid = peripheralResult.Uuid;
-                entity.DeviceIdReadable = macid;
                 entity.DeviceName = peripheralResult.Name;
-                await RadioRepository.Create(entity);
+                await RadioRepository.Create(entity, CancellationToken.None);
             }
 
             var radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLink);

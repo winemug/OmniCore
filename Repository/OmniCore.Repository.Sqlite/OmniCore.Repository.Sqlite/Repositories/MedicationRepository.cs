@@ -12,7 +12,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class MedicationRepository : Repository<MedicationEntity, IMedicationEntity>, IMedicationRepository
     {
-        public MedicationRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public MedicationRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
     }

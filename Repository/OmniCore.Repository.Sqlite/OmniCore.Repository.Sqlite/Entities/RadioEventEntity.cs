@@ -13,14 +13,16 @@ namespace OmniCore.Repository.Sqlite.Entities
         public bool Success { get; set; }
         public byte[] Data { get; set; }
 
-        public long? RadioId => Radio?.Id;
         [Ignore]
         public IRadioEntity Radio { get; set; }
-        public long? PodId => Pod?.Id;
+        public long? RadioId { get; set; }
+
         [Ignore]
         public IPodEntity Pod { get; set; }
+        public long? PodId { get; set; }
+
         [Ignore]
-        public long? RequestId => Request?.Id;
         public IPodRequestEntity Request { get; set; }
+        public long? RequestId { get; set; }
     }
 }

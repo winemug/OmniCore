@@ -10,17 +10,17 @@ namespace OmniCore.Repository.Sqlite.Entities
     {
         public int Rssi { get; set; }
 
-        public long? PodId => Pod?.Id;
-        public long? RadioId => Radio?.Id;
-        public long? RequestId => Request?.Id;
 
         [Ignore]
         public IPodEntity Pod { get; set; }
+        public long? PodId => Pod?.Id;
 
         [Ignore]
         public IRadioEntity Radio { get; set; }
+        public long? RadioId => Radio?.Id;
 
         [Ignore]
         public IPodRequestEntity Request { get; set; }
+        public long? RequestId => Request?.Id;
     }
 }

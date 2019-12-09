@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Entities;
 using OmniCore.Model.Interfaces.Repositories;
@@ -12,12 +13,13 @@ namespace OmniCore.Repository.Sqlite.Repositories
 {
     class RadioRepository : Repository<RadioEntity, IRadioEntity>, IRadioRepository
     {
-        public RadioRepository(IDataAccess dataAccess, IUnityContainer container) : base(dataAccess, container)
+        public RadioRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
         {
         }
         public async Task<IRadioEntity> ByDeviceUuid(Guid deviceUuid)
         {
-            return await Connection.Table<RadioEntity>().FirstOrDefaultAsync(x => x.DeviceUuid == deviceUuid);
+            using var access = await RepositoryService.GetAccess(CancellationToken.None);
+            return await access.Connection.Table<RadioEntity>().FirstOrDefaultAsync(x => x.DeviceUuid == deviceUuid);
         }
     }
 }
