@@ -30,6 +30,9 @@ namespace OmniCore.Client
             container.RegisterType<RadiosViewModel>();
             container.RegisterType<RadiosView>();
 
+            container.RegisterType<RadioDiagnosticsViewModel>();
+            container.RegisterType<RadioDiagnosticsView>();
+
             return container;
         }
     }

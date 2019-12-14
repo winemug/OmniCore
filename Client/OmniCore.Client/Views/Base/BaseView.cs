@@ -13,6 +13,7 @@ namespace OmniCore.Client.Views.Base
         public BaseView(T viewModel)
         {
             ViewModel = viewModel;
+            SetBinding(ContentPage.TitleProperty, new Binding(nameof(IViewModel.Title)));
         }
 
         protected override async void OnAppearing()

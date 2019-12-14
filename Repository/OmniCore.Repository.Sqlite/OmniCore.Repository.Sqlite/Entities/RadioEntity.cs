@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 using OmniCore.Model.Interfaces.Entities;
+using OmniCore.Model.Interfaces.Workflow;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
@@ -21,5 +23,14 @@ namespace OmniCore.Repository.Sqlite.Entities
         }
         public string DeviceName { get; set; }
         public string UserDescription { get; set; }
+
+        public bool KeepConnected { get; set; }
+        public TimeSpan ResponseTimeout { get; set; }
+        public TimeSpan ConnectTimeout { get; set; }
+
+        [Ignore]
+        public IRadioConfiguration Configuration { get; set; }
+
+        public string ConfigurationJson { get; set; }
     }
 }

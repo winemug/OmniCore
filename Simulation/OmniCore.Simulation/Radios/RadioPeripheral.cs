@@ -11,55 +11,18 @@ namespace OmniCore.Simulation.Radios
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
-        public Guid PeripheralId { get; }
+        public Guid PeripheralUuid { get; }
         public string PeripheralName { get; }
-        public bool IsConnected { get; }
-        public IObservable<IRadioPeripheral> WhenConnected()
+        public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return new RadioPeripheralLease();
         }
 
-        public IObservable<Exception> WhenConnectionFailed()
+        public async Task<int> ReadRssi(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
-
-        public IObservable<IRadioPeripheral> WhenDisconnected()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IObservable<IRadioPeripheral> WhenDeviceChanged()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IObservable<IRadioPeripheral> WhenDeviceLost()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> Connect(bool autoConnect, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Disconnect(TimeSpan timeout)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> ReadRssi()
-        {
-            throw new NotImplementedException();
+            return -70;
         }
     }
 }

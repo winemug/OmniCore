@@ -14,8 +14,9 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IRadio
     {
+        public IRadioPeripheral Peripheral { get; set; }
         public IRadioEntity Entity { get; set; }
-
+        
         private readonly IRadioAdapter Adapter;
         private readonly IUnityContainer Container;
         public RileyLinkRadio(IRadioAdapter adapter,
@@ -27,33 +28,16 @@ namespace OmniCore.Radios.RileyLink
 
         public async Task<IRadioConfiguration> GetDefaultConfiguration()
         {
-            throw new NotImplementedException();
+            return new RileyLinkRadioConfiguration();
         }
 
-        //public async Task<IRadioConnection> GetConnection(Radio radioEntity, PodRequest request, CancellationToken cancellationToken)
-        //{
-        //    var peripheralLease = await RadioAdapter.LeasePeripheral(radioEntity.DeviceId, cancellationToken);
-        //    if (peripheralLease == null)
-        //        return null;
-
-        //    return new RileyLinkRadioConnection(peripheralLease, radioEntity, request);
-
-        //}
-        public async Task<IRadioConnection> GetConnection(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
+        public async Task<IRadioLease> Lease(CancellationToken cancellationToken)
         {
-            var lease = await Adapter.LeasePeripheral(Entity.DeviceUuid, cancellationToken);
-            if (lease != null)
-            {
-                var connection = Container.Resolve<IRadioConnection>(RegistrationConstants.RileyLink);
-                connection.Lease = lease;
-                connection.Radio = this;
-
-                return connection;
-
-            }
-
-            return null;
+            var peripheralLease = await Peripheral.Lease(cancellationToken);
+            var radioLease = Container.Resolve<IRadioLease>(RegistrationConstants.RileyLink);
+            radioLease.PeripheralLease = peripheralLease;
+            radioLease.Radio = this;
+            return radioLease;
         }
-
     }
 }

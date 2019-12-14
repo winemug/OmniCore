@@ -13,6 +13,7 @@ namespace OmniCore.Client.ViewModels.Base
     public abstract class BaseViewModel : IViewModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        public string Title { get; set; }
         public abstract Task Initialize();
         public abstract Task Dispose();
         protected virtual void OnPropertyChanged(string propertyName)

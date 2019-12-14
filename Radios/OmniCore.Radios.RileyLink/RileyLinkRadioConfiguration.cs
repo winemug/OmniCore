@@ -2,17 +2,22 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioConfiguration : IRadioConfiguration
     {
+        public bool KeepConnected { get; set; } = true;
+
+        public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
         // shifts in complements of 326.211 Hz
         public int FrequencyShift { get; set; } = 0;
-        public DeviationRange Deviation { get; set; } = DeviationRange.Normal;
 
-        public PowerAmplification Amplification { get; set; } = PowerAmplification.A4;
+        public TxPower Amplification { get; set; } = TxPower.A4_Normal;
 
         // 0x00 to 0x1F
         public int RxIntermediateFrequency { get; set; } = 0x06;
@@ -51,21 +56,37 @@ namespace OmniCore.Radios.RileyLink
             registers.Add(Tuple.Create(RileyLinkRegister.FREQ1, (frequency >> 8) & 0xff));
             registers.Add(Tuple.Create(RileyLinkRegister.FREQ2, (frequency >> 16) & 0xff));
 
-            switch(Deviation)
-            {
-                case DeviationRange.Normal:
-                    registers.Add(Tuple.Create(RileyLinkRegister.DEVIATN, 0x44));
-                    break;
-                case DeviationRange.Wide:
-                    registers.Add(Tuple.Create(RileyLinkRegister.DEVIATN, 0x45));
-                    break;
-                case DeviationRange.Narrow:
-                    registers.Add(Tuple.Create(RileyLinkRegister.DEVIATN, 0x43));
-                    break;
-            }
+            registers.Add(Tuple.Create(RileyLinkRegister.DEVIATN, 0x44));
 
             registers.Add(Tuple.Create(RileyLinkRegister.FREND0, 0x00));
-            registers.Add(Tuple.Create(RileyLinkRegister.PATABLE0, (int)Amplification));
+            int amplification;
+            switch (Amplification)
+            {
+                case TxPower.A0_Lowest:
+                    amplification = 0x0E;
+                    break;
+                case TxPower.A1_VeryLow:
+                    amplification = 0x1D;
+                    break;
+                case TxPower.A2_Low:
+                    amplification = 0x34;
+                    break;
+                case TxPower.A3_BelowNormal:
+                    amplification = 0x2C;
+                    break;
+                case TxPower.A4_Normal:
+                    amplification = 0x60;
+                    break;
+                case TxPower.A5_High:
+                    amplification = 0x84;
+                    break;
+                case TxPower.A6_VeryHigh:
+                    amplification = 0xC8;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            registers.Add(Tuple.Create(RileyLinkRegister.PATABLE0, amplification));
 
             registers.Add(Tuple.Create(RileyLinkRegister.FSCTRL0, 0x00));
             registers.Add(Tuple.Create(RileyLinkRegister.FSCTRL1, RxIntermediateFrequency));
@@ -108,21 +129,5 @@ namespace OmniCore.Radios.RileyLink
 
             return registers;
         }
-    }
-
-    public enum DeviationRange
-    {
-        Wide, Normal, Narrow
-    }
-
-    public enum PowerAmplification
-    {
-        A0 = 0x0E,
-        A1 = 0x1D,
-        A2 = 0x34,
-        A3 = 0x2c,
-        A4 = 0x60,
-        A5 = 0x84,
-        A6 = 0xC8
     }
 }

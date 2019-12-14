@@ -9,12 +9,12 @@ namespace OmniCore.Eros
     {
         public IPodRequestEntity Entity { get; }
         
-        public Task<bool> WaitForResult(CancellationToken cancellationToken)
+        public Task WaitForResult(CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<bool> Cancel()
+        public Task Cancel()
         {
             throw new System.NotImplementedException();
         }

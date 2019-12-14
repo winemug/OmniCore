@@ -14,12 +14,13 @@ namespace OmniCore.Simulation.Radios
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> Read(TimeSpan timeout, CancellationToken cancellationToken)
+        public Guid Uuid { get; }
+        public Task<byte[]> Read(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Write(byte[] data, TimeSpan timeout, CancellationToken cancellationToken)
+        public Task Write(byte[] data, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

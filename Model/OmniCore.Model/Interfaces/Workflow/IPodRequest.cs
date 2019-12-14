@@ -7,7 +7,7 @@ namespace OmniCore.Model.Interfaces.Workflow
     public interface IPodRequest
     {
         IPodRequestEntity Entity { get; }
-        Task<bool> WaitForResult(CancellationToken cancellationToken);
-        Task<bool> Cancel();
+        Task WaitForResult(CancellationToken cancellationToken);
+        Task Cancel();
     }
 }

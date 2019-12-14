@@ -8,6 +8,10 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class EmptyViewModel : BaseViewModel
     {
+        public EmptyViewModel()
+        {
+            Title = "Nothing to see here";
+        }
         public override Task Initialize()
         {
             return Task.CompletedTask;

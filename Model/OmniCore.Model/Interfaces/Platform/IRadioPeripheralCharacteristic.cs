@@ -8,8 +8,9 @@ namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IRadioPeripheralCharacteristic : IDisposable
     {
-        Task<byte[]> Read(TimeSpan timeout, CancellationToken cancellationToken);
-        Task Write(byte[] data, TimeSpan timeout, CancellationToken cancellationToken);
+        Guid Uuid { get; }
+        Task<byte[]> Read(CancellationToken cancellationToken);
+        Task Write(byte[] data, CancellationToken cancellationToken);
         IObservable<IRadioPeripheralCharacteristic> WhenNotificationReceived();
     }
 }

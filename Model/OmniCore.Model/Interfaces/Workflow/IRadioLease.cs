@@ -5,11 +5,12 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces.Workflow
 {
-    public interface IRadioConnection : IDisposable
+    public interface IRadioLease : IDisposable
     {
-        IRadioPeripheralLease Lease { get; set; }
+        IRadioPeripheralLease PeripheralLease { get; set; }
         IRadio Radio { get; set; }
-        Task<bool> Initialize(CancellationToken cancellationToken);
+        Task Configure(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken);
+        Task Identify(CancellationToken cancellationToken);
         Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
     }
 }

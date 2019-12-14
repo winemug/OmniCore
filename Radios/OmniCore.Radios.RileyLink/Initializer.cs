@@ -15,7 +15,7 @@ namespace OmniCore.Radios.RileyLink
         {
             container.RegisterSingleton<IRadioProvider, RileyLinkRadioProvider>(RegistrationConstants.RileyLink);
             container.RegisterType<IRadio, RileyLinkRadio>(RegistrationConstants.RileyLink);
-            container.RegisterType<IRadioConnection, RileyLinkRadioConnection>(RegistrationConstants.RileyLink);
+            container.RegisterType<IRadioLease, RileyLinkRadioLease>(RegistrationConstants.RileyLink);
             return container;
         }
     }

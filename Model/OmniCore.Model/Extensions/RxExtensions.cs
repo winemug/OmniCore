@@ -20,20 +20,6 @@ namespace OmniCore.Model.Extensions
                 return Disposable.Create(() => source.PropertyChanged -= handler);
             });
         }
-        public static async Task<T> ToTask<T>(this IObservable<T> observable, TimeSpan timeout, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var observableTask = observable.ToTask();
-                var resultTask = await Task.WhenAny(observableTask, Task.Delay(timeout, cancellationToken));
-                if (resultTask == observableTask)
-                    return await observableTask;
-            }
-            catch (TaskCanceledException)
-            {
-            }
-            return default(T);
-        }
 
         public static IObservable<T> WrapAndConvert<T,U>(this IObservable<U> observable, Func<U,T> typeConversion)
         {

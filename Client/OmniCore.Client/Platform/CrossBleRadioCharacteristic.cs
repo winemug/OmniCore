@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace OmniCore.Client.Platform
         private IGattService Service;
         private IGattCharacteristic Characteristic;
         private int NotificationSubscriptionCount;
+
+        public Guid Uuid => Characteristic.Uuid;
 
         public CrossBleRadioCharacteristic(IDevice device,
             IGattService service,
@@ -55,12 +58,12 @@ namespace OmniCore.Client.Platform
             });
         }
 
-        public async Task Write(byte[] data, TimeSpan timeout, CancellationToken cancellationToken)
+        public async Task Write(byte[] data, CancellationToken cancellationToken)
         {
-            await Characteristic.Write(data).ToTask(timeout, cancellationToken);
+            await Characteristic.Write(data).ToTask(cancellationToken);
         }
 
-        public async Task<byte[]> Read(TimeSpan timeout, CancellationToken cancellationToken)
+        public async Task<byte[]> Read(CancellationToken cancellationToken)
         {
             var readResult = await Characteristic.Read().RunAsync(cancellationToken);
             return readResult.Data;

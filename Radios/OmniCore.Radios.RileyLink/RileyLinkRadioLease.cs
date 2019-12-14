@@ -3,6 +3,7 @@ using OmniCore.Model.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,33 +15,31 @@ using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadioConnection : IRadioConnection
+    public class RileyLinkRadioLease : IRadioLease
     {
-        public IRadioPeripheralLease Lease { get; set; }
+        public IRadioPeripheralLease PeripheralLease { get; set; }
         public IRadio Radio { get; set; }
-        private IRadioPeripheral Peripheral { get => Lease.Peripheral; }
+
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
-        private IDisposable DeviceChangedSubscription = null;
-        private IDisposable DeviceLostSubscription = null;
         private IDisposable ResponseNotifySubscription = null;
 
-        private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
-        private readonly Guid RileyLinkDataCharacteristicUUID = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
-        private readonly Guid RileyLinkResponseCharacteristicUUID = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
+        private readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
+        private readonly Guid RileyLinkDataCharacteristicUuid = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
+        private readonly Guid RileyLinkResponseCharacteristicUuid = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
         private IRadioPeripheralCharacteristic DataCharacteristic;
         private IRadioPeripheralCharacteristic ResponseCharacteristic;
 
         private ConcurrentQueue<(byte? ResponseNo, byte[] Response)> Responses;
-        private AsyncManualResetEvent ResponseEvent;
+        private readonly AsyncManualResetEvent ResponseEvent;
         private RileyLinkRadioConfiguration ActiveConfiguration = null;
 
         private readonly ISignalStrengthRepository SignalStrengthRepository;
         private readonly IRadioEventRepository RadioEventRepository;
 
-        public RileyLinkRadioConnection(
+        public RileyLinkRadioLease(
             ISignalStrengthRepository signalStrengthRepository,
             IRadioEventRepository radioEventRepository)
         {
@@ -48,112 +47,97 @@ namespace OmniCore.Radios.RileyLink
             RadioEventRepository = radioEventRepository;
             Responses = new ConcurrentQueue<(byte?,byte[])>();
             ResponseEvent = new AsyncManualResetEvent();
+            SubscribeToConnectionStates();
         }
 
-        public async Task<bool> Initialize(CancellationToken cancellationToken)
+        public async Task Identify(CancellationToken cancellationToken)
         {
-            //var configuration = radioConfiguration as RileyLinkRadioConfiguration;
-            //if (configuration == null)
-            //    return false;
+        }
 
-            if (!Peripheral.IsConnected)
+        public async Task Configure(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
+        {
+            if (radioConfiguration == null)
             {
-                await SubscribeToDeviceStates();
-                await SubscribeToConnectionStates();
-
-                ResponseCharacteristic = null;
-                DataCharacteristic = null;
-                if (await Peripheral.Connect(true, cancellationToken))
-                {
-                    var characteristics = await Peripheral.GetCharacteristics(RileyLinkServiceUUID,
-                        new[] { RileyLinkResponseCharacteristicUUID, RileyLinkDataCharacteristicUUID }, cancellationToken);
-                    ResponseCharacteristic = characteristics[0];
-                    DataCharacteristic = characteristics[1];
-
-                    if (ResponseCharacteristic == null || DataCharacteristic == null)
-                        throw new OmniCoreRadioException(FailureType.RadioUnknownError, "GATT characteristics not found");
-
-                    ResponseNotifySubscription = ResponseCharacteristic.WhenNotificationReceived().Subscribe(async (_) =>
-                    {
-                        var counterData = await ResponseCharacteristic.Read(TimeSpan.FromMilliseconds(2000), CancellationToken.None);
-                        var counter = counterData?[0];
-                        var commandResponse = await DataCharacteristic.Read(TimeSpan.FromMilliseconds(2000), CancellationToken.None);
-                        Responses.Enqueue((counter, commandResponse));
-                        ResponseEvent.Set();
-                    });
-                }
+                if (ActiveConfiguration == null)
+                    radioConfiguration = await Radio.GetDefaultConfiguration();
             }
 
-            //if (ActiveConfiguration != null)
-            //{
-            //    if (await VerifyConfiguration(configuration, cancellationToken))
-            //    {
+            var configuration = radioConfiguration as RileyLinkRadioConfiguration;
+            if (configuration == null)
+                throw new OmniCoreWorkflowException(FailureType.InvalidParameter, "Invalid radio configuration");
 
-            //    }
-            //}
-            //else
-            //{
-            //    if (await ConfigureRileyLink(configuration, cancellationToken))
-            //    {
-            //        ActiveConfiguration = configuration;
-            //    }
-            //}
-            //return ActiveConfiguration != null;
-            return true;
+            using var connectCts = new CancellationTokenSource(configuration.RadioConnectTimeout);
+            await PeripheralLease.Connect(configuration.KeepConnected, connectCts.Token);
+
+            if (ActiveConfiguration.GetConfiguration().SequenceEqual(configuration.GetConfiguration()))
+                return;
+
+            await ConfigureRileyLink(configuration, cancellationToken);
+            ActiveConfiguration = configuration;
         }
 
         public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (!ActiveConfiguration.KeepConnected)
+            {
+                await PeripheralLease.Disconnect(TimeSpan.FromSeconds(3));
+            }
         }
 
         public void Dispose()
         {
             ResponseNotifySubscription?.Dispose();
+            ResponseNotifySubscription = null;
+            ResponseCharacteristic = null;
+            DataCharacteristic = null;
+
             ConnectedSubscription?.Dispose();
             ConnectionFailedSubscription?.Dispose();
             DisconnectedSubscription?.Dispose();
-            DeviceChangedSubscription?.Dispose();
-            DeviceLostSubscription?.Dispose();
-            Lease?.Dispose();
+            PeripheralLease.Dispose();
         }
 
-        private async Task SubscribeToDeviceStates()
+        private void SubscribeToConnectionStates()
         {
-            Peripheral.WhenDeviceChanged().Subscribe(async (_) =>
+            ConnectedSubscription = PeripheralLease.WhenConnected().Subscribe( async (_) =>
             {
-                ConnectedSubscription?.Dispose();
-                ConnectionFailedSubscription?.Dispose();
-                DisconnectedSubscription?.Dispose();
-                SubscribeToConnectionStates();
-                //TODO: reset gatt related mumbojumbo
-            });
-
-            Peripheral.WhenDeviceLost().Subscribe(async (_) =>
-            {
-                //TODO: request peripheral device replacement
-            });
-        }
-
-        private async Task SubscribeToConnectionStates()
-        {
-            ConnectedSubscription = Peripheral.WhenConnected().Subscribe( async (_) =>
-            {
-                var rssi = await Peripheral.ReadRssi();
-                var signalEntity = SignalStrengthRepository.New();
-                signalEntity.Radio = Radio.Entity;
-                signalEntity.Rssi = rssi;
-                await SignalStrengthRepository.Create(signalEntity, CancellationToken.None);
-
                 var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Connect;
                 radioEvent.Success = true;
                 await RadioEventRepository.Create(radioEvent, CancellationToken.None);
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var characteristics = await PeripheralLease.GetCharacteristics(RileyLinkServiceUuid,
+                    new[] { RileyLinkResponseCharacteristicUuid, RileyLinkDataCharacteristicUuid }, cts.Token);
+                if (characteristics == null || characteristics.Length != 2)
+                {
+                    await PeripheralLease.Disconnect(TimeSpan.MinValue);
+                    throw new OmniCoreRadioException(FailureType.RadioUnknownError, "GATT characteristics not found");
+                }
+
+                ResponseNotifySubscription?.Dispose();
+                ResponseCharacteristic = characteristics.First(c => c.Uuid == RileyLinkResponseCharacteristicUuid);
+                DataCharacteristic = characteristics.First(c => c.Uuid == RileyLinkDataCharacteristicUuid);
+
+                ResponseNotifySubscription = ResponseCharacteristic.WhenNotificationReceived().Subscribe(async (_) =>
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    var counterData = await ResponseCharacteristic.Read(cts.Token);
+                    var counter = counterData?[0];
+                    var commandResponse = await DataCharacteristic.Read(cts.Token);
+                    Responses.Enqueue((counter, commandResponse));
+                    ResponseEvent.Set();
+                });
             });
 
-            ConnectionFailedSubscription = Peripheral.WhenConnectionFailed().Subscribe( async (err) =>
+            ConnectionFailedSubscription = PeripheralLease.WhenConnectionFailed().Subscribe( async (err) =>
             {
+                ResponseNotifySubscription?.Dispose();
+                ResponseNotifySubscription = null;
+                ResponseCharacteristic = null;
+                DataCharacteristic = null;
+
                 var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Connect;
@@ -161,8 +145,12 @@ namespace OmniCore.Radios.RileyLink
                 await RadioEventRepository.Create(radioEvent, CancellationToken.None);
             });
 
-            DisconnectedSubscription = Peripheral.WhenDisconnected().Subscribe( async (_) =>
+            DisconnectedSubscription = PeripheralLease.WhenDisconnected().Subscribe( async (_) =>
             {
+                ResponseNotifySubscription?.Dispose();
+                ResponseNotifySubscription = null;
+                ResponseCharacteristic = null;
+
                 var radioEvent = RadioEventRepository.New();
                 radioEvent.Radio = Radio.Entity;
                 radioEvent.EventType = RadioEvent.Disconnect;
@@ -171,7 +159,7 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
-        private async Task<bool> ConfigureRileyLink(RileyLinkRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
+        private async Task ConfigureRileyLink(RileyLinkRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
         {
             await SendCommand(cancellationToken, RileyLinkCommandType.ResetRadioConfig);
             await SendCommand(cancellationToken, RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
@@ -184,13 +172,6 @@ namespace OmniCore.Radios.RileyLink
             var result = await SendCommand(cancellationToken, RileyLinkCommandType.GetState);
             if (result.Length != 2 || result[0] != 'O' || result[1] != 'K')
                 throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
-
-            return true;
-        }
-
-        private async Task<bool> VerifyConfiguration(RileyLinkRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
-        {
-            return true;
         }
 
         private async Task<byte[]> SendCommand(CancellationToken cancellationToken, RileyLinkCommandType cmd, byte[] cmdData = null)
@@ -242,7 +223,8 @@ namespace OmniCore.Radios.RileyLink
         private async Task<byte[]> SendCommandAndGetResponse(byte[] dataToWrite, CancellationToken cancellationToken)
         {
             ResponseEvent.Reset();
-            await DataCharacteristic.Write(dataToWrite, TimeSpan.FromMilliseconds(2000), cancellationToken);
+            using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            await DataCharacteristic.Write(dataToWrite, cancellationToken);
             await ResponseEvent.WaitAsync(cancellationToken);
             (byte?, byte[]) result;
             while(Responses.TryDequeue(out result))

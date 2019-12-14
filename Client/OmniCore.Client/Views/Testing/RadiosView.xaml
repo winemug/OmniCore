@@ -11,16 +11,24 @@
         <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}" SelectionMode="Single">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Label Text="{Binding Entity.DeviceIdReadable}" Grid.Column="0"/>
-                        <Label Text="{Binding Entity.DeviceName}" Grid.Column="1"/>
-                        <Label Text="{Binding Entity.UserDescription}" Grid.Column="2"/>
-                    </Grid>
+                    <Frame Padding="3">
+                        <Grid BackgroundColor="Aquamarine">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackLayout Orientation="Horizontal" Grid.Column="0">
+                                <Label Text="MAC:"/>
+                                <Label Text="{Binding Entity.DeviceIdReadable}"/>
+                            </StackLayout>
+                            <Label Text="{Binding Entity.UserDescription}" Grid.Column="1"/>
+                            <StackLayout Orientation="Horizontal" Grid.Column="0">
+                                <Button Text="Blink" Command="{Binding BlinkCommand}"/>
+                                <Button Text="Select" Command="{Binding SelectCommand}"/>
+                            </StackLayout>
+                        </Grid>
+                    </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

@@ -4,8 +4,13 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.Views.Testing;
+using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Workflow;
+using Unity;
+using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Testing
 {
@@ -13,18 +18,26 @@ namespace OmniCore.Client.ViewModels.Testing
     {
         public ObservableCollection<IRadio> Radios { get; set; }
 
-        private readonly IRadioProvider RileyLinkRadioProvider;
+        public ICommand BlinkCommand { get; }
+        public ICommand SelectCommand { get; }
 
         private IDisposable ListRadiosSubscription;
-        public RadiosViewModel(IRadioProvider[] providers)
+
+        [Unity.Dependency]
+        private IUnityContainer Container;
+        [Unity.Dependency(nameof(RegistrationConstants.RileyLink))]
+        private IRadioProvider RileyLinkRadioProvider;
+        public RadiosViewModel()
         {
-            RileyLinkRadioProvider = providers[0];
+            Title = "Radio Selection";
+            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio));
+            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio));
         }
 
         public override async Task Initialize()
         {
             Radios = new ObservableCollection<IRadio>();
-            ListRadiosSubscription = RileyLinkRadioProvider.ListRadios(CancellationToken.None).Subscribe(radio =>
+            ListRadiosSubscription = RileyLinkRadioProvider.ListRadios().Subscribe(radio =>
             {
                 Radios.Add(radio);
             });
@@ -34,6 +47,18 @@ namespace OmniCore.Client.ViewModels.Testing
         {
             ListRadiosSubscription?.Dispose();
             ListRadiosSubscription = null;
+        }
+
+        private async Task IdentifyRadio(IRadio radio)
+        {
+            var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var radioConnection = await radio.Lease(cancellation.Token);
+            await radioConnection.Identify(cancellation.Token);
+        }
+
+        private async Task SelectRadio(IRadio radio)
+        {
+            var radioDiagnosticsView = Container.Resolve<RadioDiagnosticsView>();
         }
     }
 }

@@ -9,17 +9,27 @@ namespace OmniCore.Simulation.Radios
 {
     public class RadioAdapter : IRadioAdapter
     {
-        public Task<List<IRadioPeripheralResult>> GetKnownPeripherals(Guid serviceId, CancellationToken cancellationToken)
+        public Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> TryEnableAdapter(CancellationToken cancellationToken)
+        {
+            return true;
+        }
+
+        public async Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
+        {
+            return false;
+        }
+
+        public IObservable<IRadioPeripheralResult> FindPeripherals(Guid serviceId)
         {
             throw new NotImplementedException();
         }
 
-        public IObservable<IRadioPeripheralResult> ScanPeripherals(Guid serviceId, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IRadioPeripheralLease> LeasePeripheral(Guid peripheralUuid, CancellationToken cancellationToken)
+        public Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

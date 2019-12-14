@@ -84,6 +84,9 @@
     <Compile Update="Views\Main\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Testing\RadioDiagnosticsView.xaml.cs">
+      <DependentUpon>RadioDiagnosticsView.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
       <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
@@ -136,6 +139,12 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Scratch\ScratchPage1.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Testing\RadioDiagnosticsView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Testing\RadiosView.xaml">
