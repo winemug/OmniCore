@@ -48,5 +48,8 @@ namespace OmniCore.Model.Interfaces.Entities
         decimal? ExtendedBolusDelivered { get; set; }
         decimal? ExtendedBolusRemaining { get; set; }
 
+        // eros specific
+        uint RadioAddress { get; set; }
+
     }
 }

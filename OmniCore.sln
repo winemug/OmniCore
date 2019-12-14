@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Services.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Simulation", "Simulation\OmniCore.Simulation\OmniCore.Simulation.csproj", "{6CDC764D-949D-47DB-9405-224B91A7B0B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Repository", "Repository\OmniCore.Repository\OmniCore.Repository.csproj", "{A84D0C28-F453-4857-80DB-9254C8AF9E5E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -356,36 +354,6 @@ Global
 		{6CDC764D-949D-47DB-9405-224B91A7B0B8}.Release|x64.Build.0 = Release|Any CPU
 		{6CDC764D-949D-47DB-9405-224B91A7B0B8}.Release|x86.ActiveCfg = Release|Any CPU
 		{6CDC764D-949D-47DB-9405-224B91A7B0B8}.Release|x86.Build.0 = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|ARM.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|x64.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Debug|x86.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|Any CPU.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|Any CPU.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|ARM.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|ARM.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|ARM64.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|ARM64.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|x64.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|x64.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|x86.ActiveCfg = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Emulator|x86.Build.0 = Debug|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|ARM.ActiveCfg = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|ARM.Build.0 = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|ARM64.Build.0 = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|x64.ActiveCfg = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|x64.Build.0 = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|x86.ActiveCfg = Release|Any CPU
-		{A84D0C28-F453-4857-80DB-9254C8AF9E5E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

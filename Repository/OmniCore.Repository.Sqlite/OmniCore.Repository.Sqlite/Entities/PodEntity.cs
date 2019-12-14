@@ -41,6 +41,7 @@ namespace OmniCore.Repository.Sqlite.Entities
         public decimal? ExtendedBolusAmount { get; set; }
         public decimal? ExtendedBolusDelivered { get; set; }
         public decimal? ExtendedBolusRemaining { get; set; }
+        public uint RadioAddress { get; set; }
         public bool BeepStartBolus { get; set; }
         public bool BeepEndBolus { get; set; }
         public bool BeepStartTempBasal { get; set; }

@@ -20,8 +20,6 @@ namespace OmniCore.Repository.Sqlite.Repositories
         protected readonly IRepositoryService RepositoryService;
         private readonly IUnityContainer Container;
 
-        public IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
-
         public Repository(IRepositoryService repositoryService, IUnityContainer container)
         {
             RepositoryService = repositoryService;
@@ -30,10 +28,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public InterfaceType New()
         {
-            return new ConcreteType
-            {
-                ExtendedAttribute = ExtendedAttributeProvider?.New()
-            };
+            return new ConcreteType();
         }
         public async Task Delete(InterfaceType entity, CancellationToken cancellationToken)
         {
@@ -64,8 +59,6 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             using var access = await RepositoryService.GetAccess(cancellationToken);
             var entity = await access.Connection.Table<ConcreteType>().FirstOrDefaultAsync(x => x.Id == id);
-            if (entity != null)
-                entity.ExtendedAttribute = ExtendedAttributeProvider?.New(entity.ExtensionValue);
             return entity;
         }
 
@@ -74,14 +67,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
             using var access = await RepositoryService.GetAccess(cancellationToken);
             var list = access.Connection.Table<ConcreteType>().Where(e => !e.IsDeleted);
 
-            if (ExtendedAttributeProvider == null)
-            {
-                list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);
-            }
             foreach (var entity in await list.ToListAsync())
             {
-                if (entity != null)
-                    entity.ExtendedAttribute = ExtendedAttributeProvider?.New(entity.ExtensionValue);
                 yield return entity;
             }
         }

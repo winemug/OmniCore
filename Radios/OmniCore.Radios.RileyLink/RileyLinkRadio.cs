@@ -28,7 +28,7 @@ namespace OmniCore.Radios.RileyLink
 
         public async Task<IRadioConfiguration> GetDefaultConfiguration()
         {
-            return new RileyLinkRadioConfiguration();
+            return new RadioConfiguration();
         }
 
         public async Task<IRadioLease> Lease(CancellationToken cancellationToken)

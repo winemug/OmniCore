@@ -20,14 +20,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             using var access = await RepositoryService.GetAccess(CancellationToken.None);
             var list = access.Connection.Table<PodEntity>().Where(e => !e.IsDeleted && e.State < PodState.Stopped);
-            if (ExtendedAttributeProvider == null)
-            {
-                list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);
-            }
             foreach (var entity in await list.ToListAsync())
             {
-                if (entity != null)
-                    entity.ExtendedAttribute = ExtendedAttributeProvider?.New(entity.ExtensionValue);
                 yield return entity;
             }
         }
@@ -36,14 +30,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             using var access = await RepositoryService.GetAccess(CancellationToken.None);
             var list = access.Connection.Table<PodEntity>().Where(e => e.IsDeleted);
-            if (ExtendedAttributeProvider == null)
-            {
-                list = list.Where(e => e.ExtensionIdentifier == ExtendedAttributeProvider.Identifier);
-            }
             foreach (var entity in await list.ToListAsync())
             {
-                if (entity != null)
-                    entity.ExtendedAttribute = ExtendedAttributeProvider?.New(entity.ExtensionValue);
                 yield return entity;
             }
         }

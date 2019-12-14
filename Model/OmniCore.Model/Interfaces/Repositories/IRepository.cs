@@ -10,7 +10,6 @@ namespace OmniCore.Model.Interfaces.Repositories
 {
     public interface IRepository<T> : IRepositoryInitialization where T : IEntity
     {
-        IExtendedAttributeProvider ExtendedAttributeProvider { get; set; }
         T New();
         Task Create(T entity, CancellationToken cancellationToken);
         Task<T> Read(long id, CancellationToken cancellationToken);

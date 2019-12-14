@@ -18,24 +18,5 @@ namespace OmniCore.Repository.Sqlite.Entities
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset? Updated { get; set; }
         public bool IsDeleted { get; set; }
-
-        [Ignore]
-        public IExtendedAttribute ExtendedAttribute { get; set; }
-        
-        public string ExtensionIdentifier
-        {
-            get => ExtendedAttribute?.ExtensionIdentifier;
-            set { }
-        }
-
-        public string ExtensionValue
-        {
-            get => ExtendedAttribute?.ExtensionValue;
-            set
-            {
-                if (ExtendedAttribute != null)
-                    ExtendedAttribute.ExtensionValue = value;
-            }
-        }
     }
 }

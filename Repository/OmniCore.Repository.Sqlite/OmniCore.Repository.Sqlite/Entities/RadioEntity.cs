@@ -28,9 +28,6 @@ namespace OmniCore.Repository.Sqlite.Entities
         public TimeSpan ResponseTimeout { get; set; }
         public TimeSpan ConnectTimeout { get; set; }
 
-        [Ignore]
-        public IRadioConfiguration Configuration { get; set; }
-
         public string ConfigurationJson { get; set; }
     }
 }

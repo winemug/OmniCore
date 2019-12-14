@@ -10,6 +10,5 @@ namespace OmniCore.Model.Interfaces.Entities
         DateTimeOffset Created { get; set; }
         DateTimeOffset? Updated { get; set; }
         bool IsDeleted { get; set; }
-        IExtendedAttribute ExtendedAttribute { get; set; }
     }
 }

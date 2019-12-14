@@ -10,6 +10,6 @@ namespace OmniCore.Model.Interfaces.Entities
         bool KeepConnected { get; set; }
         TimeSpan ResponseTimeout { get; set; }
         TimeSpan ConnectTimeout { get; set; }
-        IRadioConfiguration Configuration { get; set; }
+        string ConfigurationJson { get; set; }
     }
 }

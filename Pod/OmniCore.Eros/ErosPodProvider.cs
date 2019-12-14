@@ -38,7 +38,6 @@ namespace OmniCore.Eros
             RadioProviders = new[] {radioProviderRileyLink};
             RadioAdapter = radioAdapter;
             Container = container;
-            podRepository.ExtendedAttributeProvider = new ErosPodExtendedAttributeProvider();
             PodRepository = podRepository;
             PodDictionary = new Dictionary<long, IPod>();
             PodLock = new AsyncLock();
@@ -193,8 +192,7 @@ namespace OmniCore.Eros
             podEntity.User = user;
             podEntity.Radios = radios;
             podEntity.UniqueId = Guid.NewGuid();
-            var ea = podEntity.ExtendedAttribute as ErosPodExtendedAttribute; 
-            ea.RadioAddress = GenerateRadioAddress();
+            podEntity.RadioAddress = GenerateRadioAddress();
             await PodRepository.Create(podEntity, CancellationToken.None);
             return await GetPodInternal(podEntity);
         }
