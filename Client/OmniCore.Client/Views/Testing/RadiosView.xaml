@@ -8,24 +8,24 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Testing.RadiosView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollection" ItemsSource="{Binding Radios}" SelectionMode="Single">
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="Single">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="3">
+                    <Frame Padding="2">
                         <Grid BackgroundColor="Aquamarine">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
-                                <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <StackLayout Orientation="Horizontal" Grid.Column="0">
-                                <Label Text="MAC:"/>
+                            <StackLayout Orientation="Horizontal" Grid.Column="0" VerticalOptions="Center">
                                 <Label Text="{Binding Entity.DeviceIdReadable}"/>
+                                <Label Text=" "/>
+                                <Label Text="{Binding Peripheral.Rssi, TargetNullValue='--'}"/>
+                                <Label Text="dB"/>
                             </StackLayout>
-                            <Label Text="{Binding Entity.UserDescription}" Grid.Column="1"/>
-                            <StackLayout Orientation="Horizontal" Grid.Column="0">
-                                <Button Text="Blink" Command="{Binding BlinkCommand}"/>
-                                <Button Text="Select" Command="{Binding SelectCommand}"/>
+                            <StackLayout Orientation="Horizontal" Grid.Column="1" VerticalOptions="Center">
+                                <Button FontSize="Small" Text="Blink" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
+                                <Button FontSize="Small" Text="Select" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
                             </StackLayout>
                         </Grid>
                     </Frame>

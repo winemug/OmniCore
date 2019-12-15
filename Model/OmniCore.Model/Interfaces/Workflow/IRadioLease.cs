@@ -9,7 +9,7 @@ namespace OmniCore.Model.Interfaces.Workflow
     {
         IRadioPeripheralLease PeripheralLease { get; set; }
         IRadio Radio { get; set; }
-        Task Configure(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken);
+        Task Initialize(CancellationToken cancellationToken);
         Task Identify(CancellationToken cancellationToken);
         Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
     }

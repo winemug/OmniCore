@@ -13,6 +13,6 @@ namespace OmniCore.Model.Interfaces.Platform
         IObservable<IRadioPeripheralLease> WhenDisconnected();
         Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds, CancellationToken cancellationToken);
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
-        Task Disconnect(TimeSpan timeout);
+        Task Disconnect(CancellationToken cancellationToken);
     }
 }

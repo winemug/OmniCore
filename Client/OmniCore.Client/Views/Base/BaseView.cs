@@ -12,6 +12,7 @@ namespace OmniCore.Client.Views.Base
 
         public BaseView(T viewModel)
         {
+            viewModel.View = (IView<IViewModel>) this;
             ViewModel = viewModel;
             SetBinding(ContentPage.TitleProperty, new Binding(nameof(IViewModel.Title)));
         }

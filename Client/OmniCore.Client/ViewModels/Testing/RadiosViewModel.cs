@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Testing;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Workflow;
 using Unity;
 using Xamarin.Forms;
@@ -18,40 +20,49 @@ namespace OmniCore.Client.ViewModels.Testing
     {
         public ObservableCollection<IRadio> Radios { get; set; }
 
-        public ICommand BlinkCommand { get; }
-        public ICommand SelectCommand { get; }
+        public ICommand BlinkCommand { get; set; }
+        public ICommand SelectCommand { get; set; }
 
         private IDisposable ListRadiosSubscription;
 
         [Unity.Dependency]
-        private IUnityContainer Container;
+        public IUnityContainer Container { get; set; }
+
         [Unity.Dependency(nameof(RegistrationConstants.RileyLink))]
-        private IRadioProvider RileyLinkRadioProvider;
+        public IRadioProvider RileyLinkRadioProvider { get; set; }
+        [Unity.Dependency]
+        public IUserInterface UserInterface { get; set; }
+
         public RadiosViewModel()
         {
             Title = "Radio Selection";
-            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio));
-            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio));
+            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (_) => true);
+            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (_) => true);
         }
 
         public override async Task Initialize()
         {
             Radios = new ObservableCollection<IRadio>();
-            ListRadiosSubscription = RileyLinkRadioProvider.ListRadios().Subscribe(radio =>
-            {
-                Radios.Add(radio);
-            });
+            ListRadiosSubscription = RileyLinkRadioProvider.ListRadios()
+                .ObserveOn(UserInterface.SynchronizationContext)
+                .Subscribe(radio =>
+                    {
+                        radio.Peripheral.RssiUpdateTimeSpan = TimeSpan.FromSeconds(2);
+                        Radios.Add(radio);
+                    });
         }
 
         public override async Task Dispose()
         {
             ListRadiosSubscription?.Dispose();
             ListRadiosSubscription = null;
+            foreach (var radio in Radios)
+                radio.Peripheral.RssiUpdateTimeSpan = null;
         }
 
         private async Task IdentifyRadio(IRadio radio)
         {
-            var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var radioConnection = await radio.Lease(cancellation.Token);
             await radioConnection.Identify(cancellation.Token);
         }
@@ -59,6 +70,9 @@ namespace OmniCore.Client.ViewModels.Testing
         private async Task SelectRadio(IRadio radio)
         {
             var radioDiagnosticsView = Container.Resolve<RadioDiagnosticsView>();
+            radioDiagnosticsView.ViewModel.Radio = radio;
+            var np = new NavigationPage(this.View as Page);
+            await np.PushAsync(radioDiagnosticsView);
         }
     }
 }

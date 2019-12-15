@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,13 +62,14 @@ namespace OmniCore.Client.Platform
             {
                 return true;
             }
-            var stateTask = CrossBleAdapter.Current.WhenStatusChanged()
+
+            CrossBleAdapter.Current.SetAdapterState(true);
+
+            await CrossBleAdapter.Current.WhenStatusChanged()
                 .Where(s => s == AdapterStatus.PoweredOn)
                 .FirstAsync()
                 .ToTask(cancellationToken);
-                
-            var enableTask = Task.Run(() => CrossBleAdapter.Current.SetAdapterState(true), cancellationToken);
-            await Task.WhenAll(stateTask, enableTask);
+
             return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn;
         }
 
@@ -78,13 +80,12 @@ namespace OmniCore.Client.Platform
             if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff)
                 return true;
             
-            var stateTask = CrossBleAdapter.Current.WhenStatusChanged()
+            CrossBleAdapter.Current.SetAdapterState(false);
+            await CrossBleAdapter.Current.WhenStatusChanged()
                 .Where(s => s == AdapterStatus.PoweredOff)
                 .FirstAsync()
                 .ToTask(cancellationToken);
-                
-            var disableTask = Task.Run(() => CrossBleAdapter.Current.SetAdapterState(false), cancellationToken);
-            await Task.WhenAll(stateTask, disableTask);
+
             return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff;
         }
 
@@ -94,11 +95,11 @@ namespace OmniCore.Client.Platform
                 {
                     var cts = new CancellationTokenSource();
                     var cancellationToken = cts.Token;
-                    
+                    var searchLock = await PeripheralSearchLock.LockAsync(cancellationToken);
+                    IDisposable scanSubscription = null;
                     try
                     {
                         await TryEnsureAdapterEnabled(cancellationToken);
-                        using var searchLock = await PeripheralSearchLock.LockAsync(cancellationToken);
 
                         var searchResultDictionary = new Dictionary<Guid, IRadioPeripheralResult>();
 
@@ -115,8 +116,7 @@ namespace OmniCore.Client.Platform
                             {
                                 var connectedResult = new CrossBleResult
                                 {
-                                    Peripheral = new CrossBleRadioPeripheral(connectedDevice),
-                                    Rssi = await connectedDevice.ReadRssi().ToTask(cancellationToken)
+                                    Peripheral = new CrossBleRadioPeripheral(connectedDevice)
                                 };
 
                                 searchResultDictionary.Add(connectedDevice.Uuid, connectedResult);
@@ -127,26 +127,26 @@ namespace OmniCore.Client.Platform
                         if (CrossBleAdapter.Current.IsScanning)
                             CrossBleAdapter.Current.StopScan();
 
-                        using var scanSubscription = CrossBleAdapter.Current
+                        scanSubscription = CrossBleAdapter.Current
                             .Scan(new ScanConfig
                             {
-                                ScanType = BleScanType.Balanced,
+                                ScanType = BleScanType.LowLatency,
                                 ServiceUuids = new List<Guid>() {serviceId},
                                 AndroidUseScanBatching = false
                             })
                             .Subscribe((scanResult) =>
                             {
+                                IRadioPeripheralResult crossBleResult;
                                 if (searchResultDictionary.ContainsKey(scanResult.Device.Uuid))
                                 {
-                                    searchResultDictionary[scanResult.Device.Uuid]
-                                        .Rssi = scanResult.Rssi;
+                                    crossBleResult = searchResultDictionary[scanResult.Device.Uuid];
+                                    crossBleResult.Peripheral.Rssi = scanResult.Rssi;
                                 }
                                 else
                                 {
                                     var crossResult = new CrossBleResult
                                     {
-                                        Peripheral = new CrossBleRadioPeripheral(scanResult.Device),
-                                        Rssi = scanResult.Rssi
+                                        Peripheral = new CrossBleRadioPeripheral(scanResult.Device)
                                     };
                                     searchResultDictionary.Add(scanResult.Device.Uuid, crossResult);
                                     observer.OnNext(crossResult);
@@ -155,18 +155,17 @@ namespace OmniCore.Client.Platform
                     }
                     catch (Exception e)
                     {
+                        scanSubscription?.Dispose();
                         observer.OnError(e);
-                    }
-                    finally
-                    {
-                        observer.OnCompleted();
-                        cts.Dispose();
+                        searchLock?.Dispose();
                     }
 
                     return Disposable.Create(() =>
                     {
                         cts.Cancel();
                         cts.Dispose();
+                        scanSubscription?.Dispose();
+                        searchLock?.Dispose();
                     });
                 }
             );

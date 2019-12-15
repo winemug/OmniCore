@@ -10,6 +10,7 @@ namespace OmniCore.Model.Interfaces.Workflow
         bool KeepConnected { get; set; }
         TimeSpan RadioResponseTimeout { get; set; }
         TimeSpan RadioConnectTimeout { get; set; }
+        TimeSpan? RssiUpdateInterval { get; set; }
         int FrequencyShift { get; set; }
         TxPower Amplification { get; set; }
         int RxIntermediateFrequency { get; set; }

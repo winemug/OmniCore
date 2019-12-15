@@ -19,7 +19,7 @@ namespace OmniCore.Client.Platform
         private IDevice Device;
         private IGattService Service;
         private IGattCharacteristic Characteristic;
-        private int NotificationSubscriptionCount;
+        private IDisposable NotificationSubscription = null;
 
         public Guid Uuid => Characteristic.Uuid;
 
@@ -30,30 +30,19 @@ namespace OmniCore.Client.Platform
             Device = device;
             Service = service;
             Characteristic = characteristic;
-            NotificationSubscriptionCount = 0;
         }
 
         public IObservable<IRadioPeripheralCharacteristic> WhenNotificationReceived()
         {
-            return Observable.Create<IRadioPeripheralCharacteristic>(async (observer) =>
+            return Observable.Create<IRadioPeripheralCharacteristic>((observer) =>
             {
-                var subCount = Interlocked.Increment(ref NotificationSubscriptionCount);
-                if (subCount == 1)
-                {
-                    await Characteristic.EnableNotifications();
-                }
-
-                var bleNotificationSubscription = Characteristic.WhenNotificationReceived()
+                NotificationSubscription = Characteristic.RegisterAndNotify()
                     .Subscribe((_) => observer.OnNext(this));
 
                 return Disposable.Create(async () =>
                 {
-                    bleNotificationSubscription.Dispose();
-                    subCount = Interlocked.Decrement(ref NotificationSubscriptionCount);
-                    if (subCount == 0)
-                    {
-                        await Characteristic.DisableNotifications();
-                    }
+                    NotificationSubscription?.Dispose();
+                    NotificationSubscription = null;
                 });
             });
         }
@@ -65,15 +54,15 @@ namespace OmniCore.Client.Platform
 
         public async Task<byte[]> Read(CancellationToken cancellationToken)
         {
-            var readResult = await Characteristic.Read().RunAsync(cancellationToken);
-            return readResult.Data;
+            return (await Characteristic.Read().ToTask(cancellationToken)).Data;
         }
 
         public void Dispose()
         {
-            if (NotificationSubscriptionCount > 0)
+            if (NotificationSubscription != null)
             {
-                Task.Run(async () => await Characteristic.DisableNotifications()).Wait();
+                NotificationSubscription.Dispose();
+                NotificationSubscription = null;
             }
         }
     }

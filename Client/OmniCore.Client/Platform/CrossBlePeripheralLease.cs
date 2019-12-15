@@ -60,7 +60,7 @@ namespace OmniCore.Client.Platform
             }
         }
 
-        public async Task Disconnect(TimeSpan timeout)
+        public async Task Disconnect(CancellationToken cancellationToken)
         {
             if (BleDevice.Status == ConnectionStatus.Disconnected)
                 return;
@@ -68,12 +68,7 @@ namespace OmniCore.Client.Platform
             if (BleDevice.Status != ConnectionStatus.Disconnecting)
                 BleDevice.CancelConnection();
 
-            if (timeout == TimeSpan.Zero)
-                return;
-
-            var timeoutTask = Task.Delay(timeout);
-            var disconnected = BleDevice.WhenDisconnected().FirstAsync().ToTask();
-            await Task.WhenAny(disconnected, timeoutTask);
+            await BleDevice.WhenDisconnected().FirstAsync().ToTask(cancellationToken);
         }
 
         public async Task<int> ReadRssi()

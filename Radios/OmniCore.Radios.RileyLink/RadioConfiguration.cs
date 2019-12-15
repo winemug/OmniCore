@@ -12,6 +12,7 @@ namespace OmniCore.Radios.RileyLink
 
         public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(30);
         public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromMinutes(10);
 
         // shifts in complements of 326.211 Hz
         public int FrequencyShift { get; set; } = 0;

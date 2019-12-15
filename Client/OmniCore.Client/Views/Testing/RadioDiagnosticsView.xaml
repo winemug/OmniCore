@@ -9,7 +9,7 @@
              x:Class="OmniCore.Client.Views.Testing.RadioDiagnosticsView">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
+            <Label Text="ayd"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
         </StackLayout>

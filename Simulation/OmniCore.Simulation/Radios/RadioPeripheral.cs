@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,9 +21,11 @@ namespace OmniCore.Simulation.Radios
             return new RadioPeripheralLease();
         }
 
-        public async Task<int> ReadRssi(CancellationToken cancellationToken)
-        {
-            return -70;
-        }
+        public TimeSpan? RssiUpdateTimeSpan { get; set; }
+        public int? Rssi { get; set; }
+        public DateTimeOffset? RssiDate { get; }
+        public DateTimeOffset? LastSeen { get; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

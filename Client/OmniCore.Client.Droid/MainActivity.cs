@@ -56,7 +56,7 @@ namespace OmniCore.Client.Droid
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");

@@ -6,6 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Fody;
 using Nito.AsyncEx;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
@@ -35,13 +36,11 @@ namespace OmniCore.Radios.RileyLink
         public RileyLinkRadioProvider(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
-            ISignalStrengthRepository signalStrengthRepository,
             IRadioEventRepository radioEventRepository,
             IUnityContainer container)
         {
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
-            SignalStrengthRepository = signalStrengthRepository;
             RadioEventRepository = radioEventRepository;
             Container = container;
             RadioDictionary = new Dictionary<Guid, IRadio>();
@@ -60,15 +59,6 @@ namespace OmniCore.Radios.RileyLink
                     .Subscribe(async peripheralResult =>
                     {
                         var radio = await GetRadio(peripheralResult.Peripheral, cts.Token);
-
-                        if (peripheralResult.Rssi.HasValue)
-                        {
-                            var sse = SignalStrengthRepository.New();
-                            sse.Radio = radio.Entity;
-                            sse.Rssi = peripheralResult.Rssi.Value;
-                            await SignalStrengthRepository.Create(sse, cts.Token);
-                        }
-
                         var radioEvent = RadioEventRepository.New();
                         radioEvent.Radio = radio.Entity;
                         radioEvent.EventType = RadioEvent.Scan;
@@ -89,7 +79,7 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<IRadio> GetRadio(IRadioPeripheral peripheral, CancellationToken cancellationToken)
         {
-            using var lockObj = await RadioDictionaryLock.LockAsync();
+            using var lockObj = await RadioDictionaryLock.LockAsync().ConfigureAwait(true);
             IRadio radio = null;
             
             if (RadioDictionary.ContainsKey(peripheral.PeripheralUuid))
@@ -104,11 +94,14 @@ namespace OmniCore.Radios.RileyLink
                     entity = RadioRepository.New();
                     entity.DeviceUuid = peripheral.PeripheralUuid;
                     entity.DeviceName = peripheral.PeripheralName;
-                    await RadioRepository.Create(entity, cancellationToken);
+                    await RadioRepository.Create(entity, cancellationToken).ConfigureAwait(true);
                 }
 
                 radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLink);
                 radio.Entity = entity;
+                radio.Peripheral = peripheral;
+                radio.Peripheral.RssiUpdateTimeSpan = radio.GetConfiguration().RssiUpdateInterval;
+
                 RadioDictionary.Add(peripheral.PeripheralUuid, radio);
             }
             radio.Peripheral = peripheral;

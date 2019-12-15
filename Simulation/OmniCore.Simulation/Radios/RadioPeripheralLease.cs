@@ -34,7 +34,7 @@ namespace OmniCore.Simulation.Radios
             throw new NotImplementedException();
         }
 
-        public Task Disconnect(TimeSpan timeout)
+        public Task Disconnect(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
