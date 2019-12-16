@@ -36,8 +36,8 @@ namespace OmniCore.Client.ViewModels.Testing
         public RadiosViewModel()
         {
             Title = "Radio Selection";
-            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (_) => true);
-            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (_) => true);
+            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.IsBusy);
+            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.IsBusy);
         }
 
         public override async Task Initialize()

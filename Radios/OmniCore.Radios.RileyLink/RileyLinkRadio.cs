@@ -48,10 +48,15 @@ namespace OmniCore.Radios.RileyLink
         public async Task<IRadioLease> Lease(CancellationToken cancellationToken)
         {
             var peripheralLease = await Peripheral.Lease(cancellationToken);
+            IsBusy = true;
             var radioLease = Container.Resolve<IRadioLease>(RegistrationConstants.RileyLink);
             radioLease.PeripheralLease = peripheralLease;
             radioLease.Radio = this;
             return radioLease;
         }
+
+        public bool IsBusy { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

@@ -35,7 +35,6 @@ namespace OmniCore.Radios.RileyLink
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
         private IDisposable ResponseNotifySubscription = null;
-        private AsyncLock NotifyReaderLock = null;
 
         private readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
         private readonly Guid RileyLinkDataCharacteristicUuid = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
@@ -44,9 +43,8 @@ namespace OmniCore.Radios.RileyLink
         private IRadioPeripheralCharacteristic DataCharacteristic;
         private IRadioPeripheralCharacteristic ResponseCharacteristic;
 
-        private ConcurrentQueue<(byte? ResponseNo, byte[] Response)> Responses;
+        private ConcurrentQueue<byte[]> Responses;
         private readonly AsyncManualResetEvent ResponseEvent;
-        private int RileylinkCounter;
 
         private IRadioConfiguration ActiveConfiguration;
         private bool IsConfigured = false;
@@ -65,16 +63,15 @@ namespace OmniCore.Radios.RileyLink
             SignalStrengthRepository = signalStrengthRepository;
             RadioEventRepository = radioEventRepository;
             RadioRepository = radioRepository;
-            Responses = new ConcurrentQueue<(byte?,byte[])>();
+            Responses = new ConcurrentQueue<byte[]>();
             ResponseEvent = new AsyncManualResetEvent();
             ConnectionInitializionResult = new TaskCompletionSource<bool>();
-            NotifyReaderLock = new AsyncLock();
         }
 
         public async Task Identify(CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
-            await SendCommands(cancellationToken, new List<(RileyLinkCommandType, byte[])>
+            await SendCommandsAndGetResponses(cancellationToken, new List<(RileyLinkCommandType, byte[])>
             {
                 (RileyLinkCommandType.Led, new byte[] {0, 0}),
                 (RileyLinkCommandType.Led, new byte[] {1, 1}),
@@ -124,6 +121,7 @@ namespace OmniCore.Radios.RileyLink
             ResponseCharacteristic = null;
             DataCharacteristic = null;
             IsConfigured = false;
+            Radio.IsBusy = false;
 
             ConnectedSubscription?.Dispose();
             ConnectedSubscription = null;
@@ -139,9 +137,7 @@ namespace OmniCore.Radios.RileyLink
         {
             SubscribeToConnectionStates();
             using var connectCts = new CancellationTokenSource(ActiveConfiguration.RadioConnectTimeout);
-            cancellationToken.Register(() => connectCts.Cancel());
             await PeripheralLease.Connect(ActiveConfiguration.KeepConnected, connectCts.Token);
-            cancellationToken.Register(() => {});
             await ConnectionInitializionResult.Task;
         }
 
@@ -185,11 +181,8 @@ namespace OmniCore.Radios.RileyLink
                     DataCharacteristic = characteristics.First(c => c.Uuid == RileyLinkDataCharacteristicUuid);
 
                     using var cts2 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-                    var currentCounter = await ResponseCharacteristic.Read(cts2.Token).ConfigureAwait(true);
-                    RileylinkCounter = currentCounter[0];
                     ResponseNotifySubscription = ResponseCharacteristic.WhenNotificationReceived().Subscribe(async (_) =>
                     {
-                        //var notifyLock = await NotifyReaderLock.LockAsync().ConfigureAwait(true);
                         try
                         {
                             bool read = false;
@@ -197,15 +190,12 @@ namespace OmniCore.Radios.RileyLink
                             {
                                 using var notifyReadTimeout =
                                     new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-                                // var counterData = await ResponseCharacteristic.Read(notifyReadTimeout.Token).ConfigureAwait(true);
-                                var counter = 0; //counterData?[0];
                                 var commandResponse = await DataCharacteristic.Read(notifyReadTimeout.Token)
                                     .ConfigureAwait(true);
-                                Debug.WriteLine($"Ble response {counter} {BitConverter.ToString(commandResponse)}");
                                 if (commandResponse != null && commandResponse.Length > 0)
                                 {
                                     read = true;
-                                    Responses.Enqueue((0, commandResponse));
+                                    Responses.Enqueue(commandResponse);
                                     ResponseEvent.Set();
                                 }
                             }
@@ -258,19 +248,27 @@ namespace OmniCore.Radios.RileyLink
         private async Task ConfigureRileyLink(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
         {
             await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.ResetRadioConfig);
-            await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None });
-            await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.SetPreamble, new byte[] { 0x55, 0x55 });
 
-            var registers = GetParameters(radioConfiguration);
-            foreach (var register in registers)
-                await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.UpdateRegister, new[] { (byte)register.Item1, (byte)register.Item2 });
+            var commands = new List<(RileyLinkCommandType, byte[])>();
+
+            commands.Add((RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None }));
+            commands.Add((RileyLinkCommandType.SetPreamble, new byte[] { 0x55, 0x55 }));
+
+            foreach (var register in GetParameters(radioConfiguration))
+                commands.Add((RileyLinkCommandType.UpdateRegister, new[] { (byte)register.Item1, (byte)register.Item2 })) ;
+
+            var responses = await SendCommandsAndGetResponses(cancellationToken, commands);
+            if (responses.Any(r => r.Type != RileyLinkResponseType.OK))
+                throw new OmniCoreRadioException(FailureType.RadioStateError, "Failed to configure RileyLink");
 
             var (resultType, resultData) = await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.GetState);
             if (resultType != RileyLinkResponseType.OK || resultData.Length != 2 || resultData[0] != 'O' || resultData[1] != 'K')
                 throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
+            
+            IsConfigured = true;
         }
 
-        private async Task<List<(RileyLinkResponseType Type, byte[] Data)>> SendCommands(CancellationToken cancellationToken,
+        private async Task<List<(RileyLinkResponseType Type, byte[] Data)>> SendCommandsAndGetResponses(CancellationToken cancellationToken,
             List<(RileyLinkCommandType, byte[])> commandList)
         {
             var resultList = new List<(RileyLinkResponseType Type, byte[] Data)>();
@@ -285,19 +283,11 @@ namespace OmniCore.Radios.RileyLink
             var dataArray = data.ToArray();
             dataArray[0] = (byte) (dataArray.Length - 1);
 
-            // var notifyLock = await NotifyReaderLock.LockAsync().ConfigureAwait(true);
-
-            RileylinkCounter++;
-            var commandCounter = RileylinkCounter %= 256;
-
             await DataCharacteristic.Write(dataArray, cancellationToken);
 
-            for (int i = commandCounter; i < commandCounter + commandList.Count; i++)
+            for (int i = 0; i < commandList.Count; i++)
             {
-                var expectedCounter = i % 256;
-                using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-                var result = await GetResponse(expectedCounter, cancellationToken);
-                resultList.Add(result);
+                resultList.Add(await GetResponse(cancellationToken));
             }
 
 
@@ -307,23 +297,12 @@ namespace OmniCore.Radios.RileyLink
         private async Task<(RileyLinkResponseType Type, byte[] Data)> SendCommandGetResponse(CancellationToken cancellationToken, RileyLinkCommandType cmd, byte[] cmdData = null)
         {
             var data = GetCommandData(cmd, cmdData);
-            int commandCounter = 0;
 
-            //var notifyLock = await NotifyReaderLock.LockAsync().ConfigureAwait(true);
-            try
-            {
-                RileylinkCounter++;
-                commandCounter = RileylinkCounter %= 256;
-                using var responseTimeout1 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-                await DataCharacteristic.Write(data, responseTimeout1.Token).ConfigureAwait(true);
-            }
-            finally
-            {
-                //notifyLock.Dispose();
-            }
+            using var responseTimeout1 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            await DataCharacteristic.Write(data, responseTimeout1.Token).ConfigureAwait(true);
 
             using var responseTimeout2 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-            var response = await GetResponse(commandCounter, responseTimeout2.Token).ConfigureAwait(true);
+            var response = await GetResponse(responseTimeout2.Token).ConfigureAwait(true);
 
             return response;
         }
@@ -345,47 +324,36 @@ namespace OmniCore.Radios.RileyLink
             return data;
         }
 
-        private async Task<(RileyLinkResponseType Type, byte[] Data)> GetResponse(int responseNumber, CancellationToken cancellationToken)
+        private async Task<(RileyLinkResponseType Type, byte[] Data)> GetResponse(CancellationToken cancellationToken)
         {
-            bool responseFound = false;
-            (byte?, byte[]) result = ValueTuple.Create<byte?, byte[]>(null, null);
-            while (!responseFound)
+            byte[] result = null;
+            while (true)
             {
                 ResponseEvent.Reset();
-                var itemsToPutBack = new List<(byte? ResponseNo, byte[] Response)>();
-                while (Responses.TryDequeue(out result))
-                {
-                    //if (result.Item1 == responseNumber)
-                    {
-                        responseFound = true;
-                        break;
-                    }
-                    itemsToPutBack.Add(result);
-                }
-
-                foreach(var item in itemsToPutBack)
-                    Responses.Enqueue(item);
-
-                if (!responseFound)
+                if (Responses.IsEmpty)
                 {
                     await ResponseEvent.WaitAsync(cancellationToken);
                 }
+                else
+                {
+                    if (Responses.TryDequeue(out result))
+                        break;
+                }
             }
 
-            var resultData = result.Item2;
-
-            if (resultData == null || resultData.Length == 0)
+            if (result == null || result.Length == 0)
                 throw new OmniCoreRadioException(FailureType.RadioDisconnectPrematurely, "No data received from RileyLink");
 
-            var responseType = (RileyLinkResponseType)resultData[0];
-            var response = new byte[resultData.Length - 1];
-            Buffer.BlockCopy(resultData, 1, response, 0, response.Length);
+            var responseType = (RileyLinkResponseType)result[0];
+            var response = new byte[result.Length - 1];
+            Buffer.BlockCopy(result, 1, response, 0, response.Length);
             return (responseType, response);
         }
 
         private List<Tuple<RileyLinkRegister, int>> GetParameters(IRadioConfiguration configuration)
         {
             var registers = new List<Tuple<RileyLinkRegister, int>>();
+
             registers.Add(Tuple.Create(RileyLinkRegister.SYNC0, 0x5A));
             registers.Add(Tuple.Create(RileyLinkRegister.SYNC1, 0xA5));
             registers.Add(Tuple.Create(RileyLinkRegister.PKTLEN, 0x50));

@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces.Workflow
 {
-    public interface IRadio
+    public interface IRadio : INotifyPropertyChanged
     {
         IRadioPeripheral Peripheral { get; set; }
         IRadioEntity Entity { get; set; }
@@ -15,5 +15,6 @@ namespace OmniCore.Model.Interfaces.Workflow
         Task SetConfiguration(IRadioConfiguration configuration);
         IRadioConfiguration GetConfiguration();
         Task<IRadioLease> Lease(CancellationToken cancellationToken);
+        bool IsBusy { get; set; }
     }
 }
