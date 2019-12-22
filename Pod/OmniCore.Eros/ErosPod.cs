@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Entities;
-using OmniCore.Model.Interfaces.Repositories;
-using OmniCore.Model.Interfaces.Workflow;
+using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

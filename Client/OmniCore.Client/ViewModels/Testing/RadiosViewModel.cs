@@ -9,8 +9,8 @@ using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Testing;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Workflow;
 using Unity;
 using Xamarin.Forms;
 
@@ -29,21 +29,21 @@ namespace OmniCore.Client.ViewModels.Testing
         public IUnityContainer Container { get; set; }
 
         [Unity.Dependency(nameof(RegistrationConstants.RileyLink))]
-        public IRadioProvider RileyLinkRadioProvider { get; set; }
+        public IRadioService RileyLinkRadioService { get; set; }
         [Unity.Dependency]
         public IUserInterface UserInterface { get; set; }
 
         public RadiosViewModel()
         {
             Title = "Radio Selection";
-            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.IsBusy);
-            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.IsBusy);
+            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.InUse);
+            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.InUse);
         }
 
         public override async Task Initialize()
         {
             Radios = new ObservableCollection<IRadio>();
-            ListRadiosSubscription = RileyLinkRadioProvider.ListRadios()
+            ListRadiosSubscription = RileyLinkRadioService.ListRadios()
                 .ObserveOn(UserInterface.SynchronizationContext)
                 .Subscribe(radio =>
                     {
@@ -71,8 +71,7 @@ namespace OmniCore.Client.ViewModels.Testing
         {
             var radioDiagnosticsView = Container.Resolve<RadioDiagnosticsView>();
             radioDiagnosticsView.ViewModel.Radio = radio;
-            var np = new NavigationPage(this.View as Page);
-            await np.PushAsync(radioDiagnosticsView);
+            await Shell.Current.Navigation.PushAsync(radioDiagnosticsView);
         }
     }
 }

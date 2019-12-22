@@ -6,6 +6,7 @@ namespace OmniCore.Radios.RileyLink
 {
     public enum RileyLinkCommandType
     {
+        None = 0,
         GetState = 1,
         GetVersion = 2,
         GetPacket = 3,

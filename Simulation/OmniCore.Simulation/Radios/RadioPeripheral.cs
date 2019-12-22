@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Simulation.Radios
@@ -24,7 +25,10 @@ namespace OmniCore.Simulation.Radios
         public TimeSpan? RssiUpdateTimeSpan { get; set; }
         public int? Rssi { get; set; }
         public DateTimeOffset? RssiDate { get; }
-        public DateTimeOffset? LastSeen { get; }
+        
+        public PeripheralConnectionState ConnectionState { get; }
+        public DateTimeOffset? ConnectionStateDate { get; }
+        public DateTimeOffset? DisconnectDate { get; }
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

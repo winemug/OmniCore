@@ -1,6 +1,6 @@
-﻿using OmniCore.Model.Interfaces.Repositories;
+﻿using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Workflow;
 using OmniCore.Repository.Sqlite.Entities;
 using OmniCore.Repository.Sqlite.Repositories;
 using Unity;
@@ -9,7 +9,7 @@ namespace OmniCore.Repository.Sqlite
 {
     public static class Initializer
     {
-        public static IUnityContainer WithSqliteRepository(this IUnityContainer container)
+        public static IUnityContainer WithSqliteRepositories(this IUnityContainer container)
         {
             
             container.RegisterType<IPodRepository, PodRepository>();

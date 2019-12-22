@@ -1,6 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Entities;
-using OmniCore.Model.Interfaces.Repositories;
-using OmniCore.Model.Interfaces.Services;
+﻿using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,6 +6,9 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Data.Repositories;
 using SQLite;
 using Unity;
 

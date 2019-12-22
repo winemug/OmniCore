@@ -47,6 +47,11 @@ namespace OmniCore.Client.Platform
             });
         }
 
+        public async Task WriteWithoutResponse(byte[] data, CancellationToken cancellationToken)
+        {
+            await Characteristic.WriteWithoutResponse(data).ToTask(cancellationToken);
+        }
+
         public async Task Write(byte[] data, CancellationToken cancellationToken)
         {
             await Characteristic.Write(data).ToTask(cancellationToken);

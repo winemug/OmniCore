@@ -3,10 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Entities;
-using OmniCore.Model.Interfaces.Repositories;
+using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Workflow;
 using Unity;
 
 namespace OmniCore.Eros
@@ -15,7 +14,7 @@ namespace OmniCore.Eros
     {
         public static IUnityContainer WithOmnipodEros(this IUnityContainer container)
         {
-            container.RegisterSingleton<IPodProvider, ErosPodProvider>(RegistrationConstants.OmnipodEros);
+            container.RegisterSingleton<IPodService, ErosPodService>(RegistrationConstants.OmnipodEros);
 
             container.RegisterType<IPodRequest, ErosPodRequest>(RegistrationConstants.OmnipodEros);
             container.RegisterType<IPod, ErosPod>(RegistrationConstants.OmnipodEros);

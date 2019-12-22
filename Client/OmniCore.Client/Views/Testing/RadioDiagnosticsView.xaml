@@ -6,12 +6,35 @@
              xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
              xmlns:testing="clr-namespace:OmniCore.Client.ViewModels.Testing;assembly=OmniCore.Client"
              mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.Testing.RadioDiagnosticsView">
+             x:Class="OmniCore.Client.Views.Testing.RadioDiagnosticsView" x:DataType="testing:RadioDiagnosticsViewModel">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="ayd"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <ScrollView>
+            <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Peripheral State: "/>
+                    <Label Text="{Binding Radio.Peripheral.ConnectionState}"/>
+                    <Label Text=" since "/>
+                    <Label Text="{Binding Radio.Peripheral.ConnectionStateDate, TargetNullValue='who knows'}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Rssi: "/>
+                    <Label Text="{Binding Radio.Peripheral.Rssi, TargetNullValue='N/A'}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Radio In Use: "/>
+                    <Label Text="{Binding Radio.InUse}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Radio Activity: "/>
+                    <Label Text="{Binding Radio.Activity}"/>
+                    <Label Text=" since "/>
+                    <Label Text="{Binding Radio.ActivityStartDate, TargetNullValue='forever'}"/>
+                </StackLayout>
+                <Button Text="Test 1" Command="{Binding Test1Command}"/>
+                <Label Text=""
+                       VerticalOptions="CenterAndExpand" 
+                       HorizontalOptions="CenterAndExpand" />
+            </StackLayout>
+        </ScrollView>
     </ContentPage.Content>
 </base:BaseView>

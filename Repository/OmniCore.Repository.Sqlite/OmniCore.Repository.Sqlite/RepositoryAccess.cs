@@ -1,5 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Repositories;
+using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Services;
 using SQLite;
 

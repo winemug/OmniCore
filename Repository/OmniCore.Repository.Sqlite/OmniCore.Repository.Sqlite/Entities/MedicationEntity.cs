@@ -1,9 +1,9 @@
 ﻿using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Entities;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Interfaces.Data.Entities;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {

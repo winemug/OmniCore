@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,5 +10,6 @@ namespace OmniCore.Model.Interfaces.Platform
         Task<byte[]> Read(CancellationToken cancellationToken);
         Task Write(byte[] data, CancellationToken cancellationToken);
         IObservable<IRadioPeripheralCharacteristic> WhenNotificationReceived();
+        Task WriteWithoutResponse(byte[] data, CancellationToken cancellationToken);
     }
 }

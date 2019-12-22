@@ -1,5 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -7,9 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Repositories;
-using OmniCore.Model.Interfaces.Workflow;
 using Unity;
 
 namespace OmniCore.Radios.RileyLink
@@ -48,14 +48,25 @@ namespace OmniCore.Radios.RileyLink
         public async Task<IRadioLease> Lease(CancellationToken cancellationToken)
         {
             var peripheralLease = await Peripheral.Lease(cancellationToken);
-            IsBusy = true;
+            InUse = true;
             var radioLease = Container.Resolve<IRadioLease>(RegistrationConstants.RileyLink);
             radioLease.PeripheralLease = peripheralLease;
             radioLease.Radio = this;
             return radioLease;
         }
 
-        public bool IsBusy { get; set; }
+        public bool InUse { get; set; }
+        private RadioActivity ActivityInternal = RadioActivity.Idle;
+        public RadioActivity Activity
+        {
+            get => ActivityInternal;
+            set
+            {
+                ActivityInternal = value;
+                ActivityStartDate = DateTimeOffset.UtcNow;
+            }
+        }
+        public DateTimeOffset? ActivityStartDate { get; private set; } = DateTimeOffset.UtcNow;
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

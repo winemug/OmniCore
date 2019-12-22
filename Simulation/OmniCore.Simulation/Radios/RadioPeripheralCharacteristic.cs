@@ -29,5 +29,10 @@ namespace OmniCore.Simulation.Radios
         {
             throw new NotImplementedException();
         }
+
+        public Task WriteWithoutResponse(byte[] data, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

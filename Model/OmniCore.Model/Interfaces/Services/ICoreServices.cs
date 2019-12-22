@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Workflow;
+using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces.Services
 {
     public interface ICoreServices
     {
-        IApplicationService ApplicationService { get; }
-        IPodService PodService { get; }
-        IRadioService RadioService { get; }
-        IRepositoryService RepositoryService { get; }
-        IUserService UserService { get; }
+        Task StartUp();
+        Task ShutDown();
+        ICoreApplicationLogger ApplicationLogger { get; }
+        ICoreApplicationServices CoreApplicationServices { get; }
+        ICoreDataServices CoreDataServices { get; }
+        ICoreIntegrationServices CoreIntegrationServices { get; }
     }
 }

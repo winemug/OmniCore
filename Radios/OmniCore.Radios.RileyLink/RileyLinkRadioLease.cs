@@ -10,10 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Repositories;
-using OmniCore.Model.Interfaces.Workflow;
+using OmniCore.Model.Interfaces.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radios.RileyLink
@@ -112,6 +111,21 @@ namespace OmniCore.Radios.RileyLink
         public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
+            await Disconnect(cancellationToken);
+        }
+
+        public async Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds,
+            CancellationToken cancellationToken)
+        {
+            await Connect(cancellationToken);
+            var arguments = new Bytes((byte) 0).Append(timeoutMilliseconds);
+            var result = await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.GetPacket,
+                new byte[] { });
+            await Disconnect(cancellationToken);
+            if (result.Type != RileyLinkResponseType.OK)
+                throw new OmniCoreRadioException(FailureType.RadioUnknownError, $"RL returned: {result.Type}");
+
+            return (result.Data[0], result.Data[1..]);
         }
 
         public void Dispose()
@@ -121,7 +135,7 @@ namespace OmniCore.Radios.RileyLink
             ResponseCharacteristic = null;
             DataCharacteristic = null;
             IsConfigured = false;
-            Radio.IsBusy = false;
+            Radio.InUse = false;
 
             ConnectedSubscription?.Dispose();
             ConnectedSubscription = null;
@@ -247,7 +261,9 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task ConfigureRileyLink(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
         {
-            await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.ResetRadioConfig);
+            Radio.Activity = RadioActivity.Configuring;
+            await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.None);
+            await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.ResetRadioConfig);
 
             var commands = new List<(RileyLinkCommandType, byte[])>();
 
@@ -265,6 +281,7 @@ namespace OmniCore.Radios.RileyLink
             if (resultType != RileyLinkResponseType.OK || resultData.Length != 2 || resultData[0] != 'O' || resultData[1] != 'K')
                 throw new OmniCoreRadioException(FailureType.RadioStateError, "RL returned status not OK.");
             
+            Radio.Activity = RadioActivity.Idle;
             IsConfigured = true;
         }
 
@@ -292,6 +309,15 @@ namespace OmniCore.Radios.RileyLink
 
 
             return resultList;
+        }
+
+        private async Task SendCommandWithoutResponse(CancellationToken cancellationToken,
+            RileyLinkCommandType cmd, byte[] cmdData = null)
+        {
+            var data = GetCommandData(cmd, cmdData);
+
+            using var responseTimeout1 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            await DataCharacteristic.WriteWithoutResponse(data, responseTimeout1.Token).ConfigureAwait(true);
         }
 
         private async Task<(RileyLinkResponseType Type, byte[] Data)> SendCommandGetResponse(CancellationToken cancellationToken, RileyLinkCommandType cmd, byte[] cmdData = null)

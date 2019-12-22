@@ -15,9 +15,8 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces;
-using Plugin.BluetoothLE;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Repositories;
+using Plugin.BluetoothLE;
 using Unity;
 using Xamarin.Forms.Internals;
 
@@ -29,11 +28,36 @@ namespace OmniCore.Client.Platform
 
         private readonly AsyncLock LeaseLock;
         private IDisposable RssiUpdateSubscription = null;
+        private IDisposable ConnectionStateSubscription = null;
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
         {
             BleDevice = bleDevice;
             LeaseLock = new AsyncLock();
+            ConnectionStateSubscription = BleDevice.WhenStatusChanged().Subscribe(
+                (connectionStatus) =>
+                {
+                    ConnectionStateDate = DateTimeOffset.UtcNow;
+                    switch (connectionStatus)
+                    {
+                        case ConnectionStatus.Disconnected:
+                            ConnectionState = PeripheralConnectionState.Disconnected;
+                            DisconnectDate = ConnectionStateDate;
+                            break;
+                        case ConnectionStatus.Disconnecting:
+                            ConnectionState = PeripheralConnectionState.Disconnecting;
+                            DisconnectDate = null;
+                            break;
+                        case ConnectionStatus.Connected:
+                            ConnectionState = PeripheralConnectionState.Connected;
+                            DisconnectDate = null;
+                            break;
+                        case ConnectionStatus.Connecting:
+                            ConnectionState = PeripheralConnectionState.Connecting;
+                            break;
+                    }
+                }
+            );
         }
 
         public Guid PeripheralUuid => BleDevice.Uuid;
@@ -45,10 +69,10 @@ namespace OmniCore.Client.Platform
             return new CrossBlePeripheralLease(BleDevice, leaseLock);
         }
 
-        private TimeSpan? rssiUpdateTimeSpan = null;
+        private TimeSpan? RssiUpdateTimeSpanInternal = null;
         public TimeSpan? RssiUpdateTimeSpan
         {
-            get => rssiUpdateTimeSpan;
+            get => RssiUpdateTimeSpanInternal;
             set
             {
                 if (value == null)
@@ -66,7 +90,7 @@ namespace OmniCore.Client.Platform
                     });
                 }
 
-                rssiUpdateTimeSpan = value;
+                RssiUpdateTimeSpanInternal = value;
             }
         }
 
@@ -82,11 +106,15 @@ namespace OmniCore.Client.Platform
             }
         }
         public DateTimeOffset? RssiDate { get; private set; }
-        public DateTimeOffset? LastSeen { get; private set; }
+        public PeripheralConnectionState ConnectionState { get; private set; }
+        public DateTimeOffset? ConnectionStateDate { get; private set; }
+        public DateTimeOffset? DisconnectDate { get; private set; }
+
         public async void Dispose()
         {
             await LeaseLock.LockAsync(CancellationToken.None);
-            RssiUpdateSubscription.Dispose();
+            RssiUpdateSubscription?.Dispose();
+            ConnectionStateSubscription.Dispose();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

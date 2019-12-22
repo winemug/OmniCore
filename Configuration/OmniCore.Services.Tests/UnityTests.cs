@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite;
 using Unity;
 
@@ -15,13 +15,12 @@ namespace OmniCore.Services.Tests
         public void Setup()
         {
             var uiApp = new Mock<IUserInterface>().Object;
-            var appService = new Mock<IApplicationService>().Object;
+            var appService = new Mock<ICoreApplicationServices>().Object;
 
             Container = new UnityContainer()
-                .WithDefaultServiceProviders()
-                .WithSqliteRepository()
+                .WithSqliteRepositories()
                 .RegisterInstance<IUserInterface>(uiApp)
-                .RegisterInstance<IApplicationService>(appService);
+                .RegisterInstance<ICoreApplicationServices>(appService);
         }
 
         [Test]

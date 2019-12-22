@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
-using OmniCore.Model.Interfaces.Entities;
-using OmniCore.Model.Interfaces.Workflow;
+using OmniCore.Model.Interfaces.Data.Entities;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities

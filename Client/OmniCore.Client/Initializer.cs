@@ -4,8 +4,8 @@ using OmniCore.Client.ViewModels.Testing;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Testing;
-using Unity;
 using OmniCore.Model.Interfaces.Platform;
+using Unity;
 
 namespace OmniCore.Client
 {
@@ -17,7 +17,7 @@ namespace OmniCore.Client
             return container;
         }
 
-        public static IUnityContainer AsXamarinApplication(this IUnityContainer container)
+        public static IUnityContainer WithXamarinFormsUserInterface(this IUnityContainer container)
         {
             container.RegisterSingleton<IUserInterface, XamarinApp>();
 

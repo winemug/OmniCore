@@ -17,8 +17,8 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
-using Plugin.BluetoothLE;
 using OmniCore.Model.Interfaces.Platform;
+using Plugin.BluetoothLE;
 using OmniCore.Model.Interfaces.Services;
 using Unity;
 
@@ -30,7 +30,7 @@ namespace OmniCore.Client.Platform
         private AsyncLock AdapterManagementLock;
 
         [Dependency]
-        private IApplicationService ApplicationService { get; set; }
+        private ICoreApplicationServices CoreApplicationServices { get; set; }
         public CrossBleRadioAdapter()
         {
             PeripheralSearchLock = new AsyncLock();

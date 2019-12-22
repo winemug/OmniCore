@@ -94,10 +94,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter.Analytics">
-      <Version>2.6.2</Version>
+      <Version>2.6.4</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter.Crashes">
-      <Version>2.6.2</Version>
+      <Version>2.6.4</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
@@ -130,11 +130,15 @@
     <Compile Include="Platform\OmniCoreAppState.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\OmniCoreApplication.cs" />
-    <Compile Include="Platform\ApplicationService.cs" />
-    <Compile Include="Services\CoreAndroidServices.cs" />
+    <Compile Include="Platform\CoreApplicationServices.cs" />
+    <Compile Include="Services\CoreServices.cs" />
+    <Compile Include="Services\CoreServicesProvider.cs" />
+    <Compile Include="Services\DroidCoreService.cs" />
+    <Compile Include="Services\DroidCoreServiceBinder.cs" />
+    <Compile Include="Services\DroidCoreServiceConnection.cs" />
     <Compile Include="Services\OmniCorePodService.cs" />
     <Compile Include="OmniCoreEvents.cs" />
-    <Compile Include="Platform\ApplicationLogger.cs" />
+    <Compile Include="Platform\CoreApplicationLogger.cs" />
     <Compile Include="Platform\OmniCoreWakeLock.cs" />
     <Compile Include="Platform\RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -154,9 +158,9 @@
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Configuration\OmniCore.Services\OmniCore.Services.csproj">
-      <Project>{937c8f56-d6b0-4192-a97d-df47930d2403}</Project>
-      <Name>OmniCore.Services</Name>
+    <ProjectReference Include="..\..\Data\OmniCore.Data\OmniCore.Data.csproj">
+      <Project>{34324715-e9b0-407e-93f1-8b25c13ac4ef}</Project>
+      <Name>OmniCore.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj">
       <Project>{92a55542-3401-47e9-9b2c-23fb834a6488}</Project>

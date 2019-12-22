@@ -5,12 +5,14 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.IO;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
+using OmniCore.Model.Interfaces.Platform;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 using Unity;
 
@@ -19,39 +21,68 @@ namespace OmniCore.Client
     public partial class XamarinApp : Application, IUserInterface
     {
         public SynchronizationContext SynchronizationContext { get; }
+        public Task ShutDown()
+        {
+            throw new NotImplementedException();
+        }
 
+        public IObservable<IUserInterface> WhenStarting()
+        {
+            return SubjectStarting.AsObservable();
+        }
+
+        public IObservable<IUserInterface> WhenHibernating()
+        {
+            return SubjectHibernating.AsObservable();
+        }
+
+        public IObservable<IUserInterface> WhenResuming()
+        {
+            return SubjectResuming.AsObservable();
+        }
+
+        private readonly Subject<IUserInterface> SubjectStarting;
+        private readonly Subject<IUserInterface> SubjectHibernating;
+        private readonly Subject<IUserInterface> SubjectResuming;
+        
         private readonly ICoreServices CoreServices;
-        private IApplicationLogger Logger => CoreServices.ApplicationService.Logger;
+        private ICoreApplicationLogger ApplicationLogger => CoreServices.ApplicationLogger;
             
         public XamarinApp(ICoreServicesProvider coreServicesProvider, IUnityContainer container)
         {
+            SubjectStarting = new Subject<IUserInterface>();
+            SubjectHibernating = new Subject<IUserInterface>();
+            SubjectResuming = new Subject<IUserInterface>();
+            
             CoreServices = coreServicesProvider.LocalServices;
             SynchronizationContext = SynchronizationContext.Current;
 
             InitializeComponent();
 
             MainPage = GetMainPage(container);
-            Logger.Information("OmniCore App initialized");
+            ApplicationLogger.Information("OmniCore App initialized");
         }
 
-        protected async override void OnStart()
+        protected override async void OnStart()
         {
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
             //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
-            Logger.Debug("OmniCore App OnStart called");
+            ApplicationLogger.Debug("OmniCore App OnStart called");
             await EnsurePermissions();
-            var dbPath = Path.Combine(CoreServices.ApplicationService.DataPath, "omnicore.db3");
-            await CoreServices.RepositoryService.Initialize(dbPath, CancellationToken.None);
+            SubjectStarting.OnNext(this);
+            SubjectStarting.OnCompleted();
         }
 
-        protected async override void OnSleep()
+        protected override void OnSleep()
         {
-            Logger.Debug("OmniCore App OnSleep called");
+            ApplicationLogger.Debug("OmniCore App OnSleep called");
+            SubjectHibernating.OnNext(this);
         }
 
-        protected async override void OnResume()
+        protected override void OnResume()
         {
-            Logger.Debug("OmniCore App OnResume called");
+            ApplicationLogger.Debug("OmniCore App OnResume called");
+            SubjectResuming.OnNext(this);
         }
 
         private async Task EnsurePermissions()
@@ -69,7 +100,7 @@ namespace OmniCore.Client
                 )
                 {
                     await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
-                    CoreServices.ApplicationService.Shutdown();
+                    await ShutDown();
                 }
 
             }
@@ -77,7 +108,7 @@ namespace OmniCore.Client
             {
                 await MainPage.DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
                 Crashes.TrackError(e);
-                CoreServices.ApplicationService.Shutdown();
+                await ShutDown();
             }
         }
 

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Workflow;
+using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
@@ -16,6 +14,8 @@ namespace OmniCore.Model.Interfaces.Platform
         TimeSpan? RssiUpdateTimeSpan { get; set; }
         int? Rssi { get; set; }
         DateTimeOffset? RssiDate { get; }
-        DateTimeOffset? LastSeen { get; }
+        PeripheralConnectionState ConnectionState { get; }
+        DateTimeOffset? ConnectionStateDate { get; }
+        DateTimeOffset? DisconnectDate { get; }
     }
 }

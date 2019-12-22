@@ -14,8 +14,9 @@ using System.Security;
 using Xamarin.Forms;
 using OmniCore.Client;
 using System.IO;
+using OmniCore.Client.Droid.Services;
+using OmniCore.Data;
 using OmniCore.Eros;
-using OmniCore.Services;
 using Unity;
 using OmniCore.Mobile.Droid;
 using OmniCore.Model.Interfaces.Platform;
@@ -28,45 +29,37 @@ namespace OmniCore.Client.Droid
 {
     [Activity(Label = "OmniCore", Icon = "@mipmap/ic_omnicore", Theme = "@style/MainTheme", MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
-        LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
+        LaunchMode = LaunchMode.SingleTask, Exported = false, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
 
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        public static bool IsCreated { get; private set; }
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            var container = new UnityContainer()
-                .WithDefaultServiceProviders()
-                .WithSqliteRepository()
-#if EMULATOR
-                .WithOmnipodEros()
-                .WithRileyLinkRadio()
-                .WithBleSimulator()
-#else
-                .WithOmnipodEros()
-                .WithRileyLinkRadio()
-                .WithCrossBleAdapter()
-#endif
-                .AsXamarinApplication()
-                .OnAndroidPlatform();
+            var container = Initializer.SetupDependencies();
+            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
+            
             base.OnCreate(savedInstanceState);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
-            CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
+            var serviceConnection = new DroidCoreServiceConnection(); 
+            var serviceToStart = new Intent(this, typeof(DroidCoreService));
+            if (!BindService(serviceToStart, serviceConnection, Bind.AutoCreate))
+            {
+                //TODO:
+            }
+            
             var uiApplication = container.Resolve<IUserInterface>();
-
             LoadApplication(uiApplication as Application);
-            IsCreated = true;
         }
+        
+        
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
