@@ -9,26 +9,28 @@
                mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Testing.RadiosView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="Single">
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="Single" SelectionChangedCommand="{Binding SelectCommand}"
+                        SelectionChangedCommandParameter="{Binding Source={Binding Source={x:Reference RadioCollectionView}, Path=SelectedItem}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame Padding="2">
-                        <Grid BackgroundColor="Aquamarine">
+                        <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="55"/>
+                                <ColumnDefinition Width="30"/>
                             </Grid.ColumnDefinitions>
-                            <StackLayout Orientation="Horizontal" Grid.Column="0" VerticalOptions="Center">
-                                <Label Text="{Binding Entity.DeviceIdReadable}"/>
-                                <Label Text=" "/>
-                                <Label Text="{Binding Peripheral.Name}"/>
-                                <Label Text="{Binding Peripheral.Rssi, TargetNullValue='--'}"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Text="{Binding Peripheral.Name, TargetNullValue=''}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+                            <Label Text="{Binding Entity.DeviceIdReadable}" Grid.Row="1" Grid.Column="0"/>
+                            <StackLayout Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                                <Label Text="{Binding Peripheral.Rssi, TargetNullValue='??'}"/>
                                 <Label Text="dB"/>
                             </StackLayout>
-                            <StackLayout Orientation="Horizontal" Grid.Column="1" VerticalOptions="Center">
-                                <Button FontSize="Small" Text="Blink" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
-                                <Button FontSize="Small" Text="Select" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
-                            </StackLayout>
+                            <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

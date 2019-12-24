@@ -17,12 +17,11 @@ namespace OmniCore.Client.Platform
 {
     public class CrossBlePeripheralLease : IRadioPeripheralLease
     {
-        private readonly IDisposable LeaseDisposable;
-        private readonly IDevice BleDevice;
-        public CrossBlePeripheralLease(IDevice bleDevice, IDisposable leaseDisposable)
+        private readonly CrossBleRadioPeripheral CrossPeripheral;
+        private IDevice BleDevice => CrossPeripheral.BleDevice;
+        public CrossBlePeripheralLease(CrossBleRadioPeripheral crossBleRadioPeripheral)
         {
-            BleDevice = bleDevice;
-            LeaseDisposable = leaseDisposable;
+            CrossPeripheral = crossBleRadioPeripheral;
         }
 
         public IObservable<IRadioPeripheralLease> WhenConnected() =>
@@ -71,27 +70,6 @@ namespace OmniCore.Client.Platform
             await BleDevice.WhenDisconnected().FirstAsync().ToTask(cancellationToken);
         }
 
-        public async Task<int> ReadRssi()
-        {
-            return await BleDevice.ReadRssi();
-        }
-
-        public async Task<string> ReadName()
-        {
-            if (BleDevice == null || !BleDevice.IsConnected())
-                return null;
-
-            Guid genericAccessUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x18,0);
-            Guid nameCharacteristicUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x2a,0);
-            var nameCharacteristic = await BleDevice
-                .GetKnownService(genericAccessUuid)
-                .SelectMany(x => x.GetKnownCharacteristics(new Guid[] {nameCharacteristicUuid}))
-                .FirstAsync();
-
-            var result = await nameCharacteristic.Read();
-            return Encoding.ASCII.GetString(result.Data);
-        }
-
         public async Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds, CancellationToken cancellationToken)
         {
             if (BleDevice == null || !BleDevice.IsConnected())
@@ -106,7 +84,7 @@ namespace OmniCore.Client.Platform
 
         public void Dispose()
         {
-            LeaseDisposable.Dispose();
+            CrossPeripheral.ActiveLeaseLockDisposable.Dispose();
         }
     }
 }
