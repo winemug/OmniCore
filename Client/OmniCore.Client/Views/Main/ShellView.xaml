@@ -34,29 +34,27 @@
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
         <Tab Title="Home">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+            <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Connections"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Therapies"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
+        </Tab>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Data" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Data">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Statistics"/>
         </Tab>
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Users">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="One"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Two"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Three"/>
-        </Tab>
-        <Tab Title="Medications">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medication"/>
-        </Tab>
-        <Tab Title="Radios">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RileyLink"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RFTP"/>
-        </Tab>
-        <Tab Title="Therapies">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
+        <Tab Title="Configuration">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Therapies"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
         </Tab>
     </FlyoutItem>
 
@@ -78,9 +76,4 @@
         </Tab>
     </FlyoutItem>
 
-    <FlyoutItem Title="Testing" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Radio">
-            <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
-        </Tab>
-    </FlyoutItem>
 </Shell>

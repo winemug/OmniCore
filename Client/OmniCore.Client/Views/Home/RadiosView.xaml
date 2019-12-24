@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<base:BaseView x:TypeArguments="testing:RadiosViewModel" xmlns="http://xamarin.com/schemas/2014/forms"
+<base:BaseView x:TypeArguments="home:RadiosViewModel" xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
-             xmlns:testing="clr-namespace:OmniCore.Client.ViewModels.Testing;assembly=OmniCore.Client"
+             xmlns:home="clr-namespace:OmniCore.Client.ViewModels.Home;assembly=OmniCore.Client"
                xmlns:platform="clr-namespace:OmniCore.Model.Interfaces.Platform;assembly=OmniCore.Model"
                mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.Testing.RadiosView">
+             x:Class="OmniCore.Client.Views.Home.RadiosView">
     <ContentPage.Content>
         <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None" >
             <CollectionView.ItemTemplate>

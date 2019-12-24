@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
-using OmniCore.Client.Views.Testing;
+using OmniCore.Client.Views.Home;
 using Unity;
 using Xamarin.Forms;
 

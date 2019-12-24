@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Client.Views.Testing;
+using OmniCore.Client.Views.Home;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
@@ -15,7 +15,7 @@ using OmniCore.Model.Interfaces.Services;
 using Unity;
 using Xamarin.Forms;
 
-namespace OmniCore.Client.ViewModels.Testing
+namespace OmniCore.Client.ViewModels.Home
 {
     public class RadiosViewModel : BaseViewModel
     {
@@ -67,9 +67,6 @@ namespace OmniCore.Client.ViewModels.Testing
 
         private async Task SelectRadio(IRadio radio)
         {
-            var radioDiagnosticsView = Container.Resolve<RadioDiagnosticsView>();
-            radioDiagnosticsView.ViewModel.Radio = radio;
-            await Shell.Current.Navigation.PushAsync(radioDiagnosticsView);
         }
     }
 }
