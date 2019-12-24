@@ -34,7 +34,7 @@ namespace OmniCore.Repository.Sqlite
         {
             using var repositoryLock = await RepositoryAccessLock.ReaderLockAsync(cancellationToken);
             if (!IsInitialized)
-                throw new OmniCoreRepositoryException(FailureType.LocalStorage, "Not initialized");
+                throw new OmniCoreWorkflowException(FailureType.WorkflowRepositoryNotInitialized);
 
             return new RepositoryAccess(ConnectionInternal, repositoryLock);
         }
@@ -42,7 +42,7 @@ namespace OmniCore.Repository.Sqlite
         public Task Import(string importPath, CancellationToken cancellationToken)
         {
             if (!IsInitialized)
-                throw new OmniCoreRepositoryException(FailureType.LocalStorage, "Not initialized");
+                throw new OmniCoreWorkflowException(FailureType.WorkflowRepositoryNotInitialized);
 
             throw new NotImplementedException();
         }
@@ -91,7 +91,7 @@ namespace OmniCore.Repository.Sqlite
         {
             using var repositoryLock = await RepositoryAccessLock.WriterLockAsync(cancellationToken);
             if (!IsInitialized)
-                throw new OmniCoreRepositoryException(FailureType.LocalStorage, "Not initialized");
+                throw new OmniCoreWorkflowException(FailureType.WorkflowRepositoryNotInitialized);
 
             await ShutdownInternal(cancellationToken);
         }

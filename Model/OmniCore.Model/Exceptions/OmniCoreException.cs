@@ -7,7 +7,7 @@ namespace OmniCore.Model.Exceptions
     {
         public FailureType FailureType { get;  }
 
-        public OmniCoreException(FailureType failureType, string message = "Unknown", Exception inner = null) : base(message, inner)
+        protected OmniCoreException(FailureType failureType, string message = null, Exception inner = null) : base(message, inner)
         {
             FailureType = failureType;
         }

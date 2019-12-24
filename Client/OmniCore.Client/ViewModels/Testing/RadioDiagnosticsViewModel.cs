@@ -33,13 +33,23 @@ namespace OmniCore.Client.ViewModels.Testing
 
         private async Task RunTest1()
         {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(15));
-            using var radioConnection = await Radio.Lease(cancellation.Token);
-
-            await radioConnection.Initialize(cancellation.Token);
-            var result = await radioConnection.DebugGetPacket(10000, cancellation.Token);
-            
-            Debug.WriteLine($"Get result: Rssi: {result.Rssi} Data: {BitConverter.ToString(result.Data)}");
+            using (var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(60)))
+            using (var radioLease = await Radio.Lease(cancellation.Token))
+            {
+                await radioLease.Initialize(cancellation.Token);
+                for (int i = 0; i < 1000; i++)
+                {
+                    try
+                    {
+                        var result = await radioLease.DebugGetPacket(60000, cancellation.Token);
+                        Debug.WriteLine($"Get result: Rssi: {result.Rssi} Data: {BitConverter.ToString(result.Data)}");
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(e.Message);
+                    }
+                }
+            }
         }
     }
 }

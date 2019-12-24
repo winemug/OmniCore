@@ -9,8 +9,7 @@
                mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Testing.RadiosView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="Single" SelectionChangedCommand="{Binding SelectCommand}"
-                        SelectionChangedCommandParameter="{Binding Source={Binding Source={x:Reference RadioCollectionView}, Path=SelectedItem}}">
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None" >
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame Padding="2">
@@ -18,6 +17,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="55"/>
+                                <ColumnDefinition Width="30"/>
                                 <ColumnDefinition Width="30"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -31,6 +31,7 @@
                                 <Label Text="dB"/>
                             </StackLayout>
                             <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
+                            <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

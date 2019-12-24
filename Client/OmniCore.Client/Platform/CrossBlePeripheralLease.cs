@@ -55,7 +55,7 @@ namespace OmniCore.Client.Platform
             var result = await Task.WhenAny(connected, failed);
             if (result == failed)
             {
-                throw new OmniCoreRadioException(FailureType.RadioNotReachable, "Connect failed");
+                throw new OmniCorePeripheralException(FailureType.PeripheralGeneralError, "Connect failed", await failed);
             }
         }
 

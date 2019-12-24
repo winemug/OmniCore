@@ -51,7 +51,7 @@ namespace OmniCore.Client.Platform
                         if (await TryEnableAdapter(cancellationToken))
                             return;
                     }
-                    throw new OmniCoreRadioException(FailureType.BleDisabled);
+                    throw new OmniCoreAdapterException(FailureType.AdapterNotEnabled);
             }
         }
 
