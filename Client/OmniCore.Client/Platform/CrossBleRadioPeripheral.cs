@@ -60,8 +60,8 @@ namespace OmniCore.Client.Platform
             );
         }
 
-        public Guid PeripheralUuid => BleDevice.Uuid;
-        public string PeripheralName => BleDevice.Name;
+        public Guid Uuid => BleDevice.Uuid;
+        public string Name => BleDevice.Name;
 
         public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {

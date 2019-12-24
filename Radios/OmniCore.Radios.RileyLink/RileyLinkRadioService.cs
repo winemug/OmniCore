@@ -81,18 +81,18 @@ namespace OmniCore.Radios.RileyLink
             using var lockObj = await RadioDictionaryLock.LockAsync().ConfigureAwait(true);
             IRadio radio = null;
             
-            if (RadioDictionary.ContainsKey(peripheral.PeripheralUuid))
+            if (RadioDictionary.ContainsKey(peripheral.Uuid))
             {
-                radio = RadioDictionary[peripheral.PeripheralUuid];
+                radio = RadioDictionary[peripheral.Uuid];
             }
             else
             {
-                var entity = await RadioRepository.ByDeviceUuid(peripheral.PeripheralUuid);
+                var entity = await RadioRepository.ByDeviceUuid(peripheral.Uuid);
                 if (entity == null)
                 {
                     entity = RadioRepository.New();
-                    entity.DeviceUuid = peripheral.PeripheralUuid;
-                    entity.DeviceName = peripheral.PeripheralName;
+                    entity.DeviceUuid = peripheral.Uuid;
+                    entity.DeviceName = peripheral.Name;
                     await RadioRepository.Create(entity, cancellationToken).ConfigureAwait(true);
                 }
 
@@ -101,7 +101,7 @@ namespace OmniCore.Radios.RileyLink
                 radio.Peripheral = peripheral;
                 radio.Peripheral.RssiUpdateTimeSpan = radio.GetConfiguration().RssiUpdateInterval;
 
-                RadioDictionary.Add(peripheral.PeripheralUuid, radio);
+                RadioDictionary.Add(peripheral.Uuid, radio);
             }
             radio.Peripheral = peripheral;
             return radio;

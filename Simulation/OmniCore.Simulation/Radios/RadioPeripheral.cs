@@ -15,8 +15,8 @@ namespace OmniCore.Simulation.Radios
         {
         }
 
-        public Guid PeripheralUuid { get; }
-        public string PeripheralName { get; }
+        public Guid Uuid { get; }
+        public string Name { get; }
         public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {
             return new RadioPeripheralLease();
