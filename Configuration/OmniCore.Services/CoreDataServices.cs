@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Services;
 using Unity;
 
-namespace OmniCore.Data
+namespace OmniCore.Services
 {
     public class CoreDataServices : ICoreDataServices
     {
@@ -16,6 +16,7 @@ namespace OmniCore.Data
         [Dependency(RegistrationConstants.RileyLink)]
         public IRadioService RileyLinkRadioService { get; set; }
 
+        [Dependency]
         public IRepositoryService RepositoryService { get; set; }
     }
 }

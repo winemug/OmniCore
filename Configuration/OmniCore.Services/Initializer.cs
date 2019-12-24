@@ -1,16 +1,15 @@
 ﻿using OmniCore.Model.Interfaces.Services;
-using OmniCore.Repository.Sqlite;
 using Unity;
 
-namespace OmniCore.Data
+namespace OmniCore.Services
 {
     public static class Initializer
     {
-        public static IUnityContainer WithDefaultDataServices(this IUnityContainer container)
+        public static IUnityContainer WithDefaultServices(this IUnityContainer container)
         {
             container.RegisterSingleton<ICoreDataServices, CoreDataServices>();
-            container.WithSqliteRepositories();
-            
+            container.RegisterSingleton<ICoreIntegrationServices, CoreIntegrationServices>();
+           
             return container;
         }
     }

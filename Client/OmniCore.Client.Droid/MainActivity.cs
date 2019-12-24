@@ -1,52 +1,70 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Android;
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
-using Plugin.Permissions;
 using Android.Content;
-using Plugin.BluetoothLE;
-using System.Runtime.InteropServices;
-using System.Security;
-using Xamarin.Forms;
-using OmniCore.Client;
-using System.IO;
+using Android.Support.Design.Widget;
+using Android.Support.V4.App;
+using Android.Support.V4.Content;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
+using Nito.AsyncEx;
 using OmniCore.Client.Droid.Services;
-using OmniCore.Data;
-using OmniCore.Eros;
 using Unity;
-using OmniCore.Mobile.Droid;
 using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Radios.RileyLink;
-using OmniCore.Repository.Sqlite;
-using OmniCore.Simulation;
+using OmniCore.Model.Interfaces.Services;
+using Plugin.BluetoothLE;
 using Application = Xamarin.Forms.Application;
+using Permission = Android.Content.PM.Permission;
 
 namespace OmniCore.Client.Droid
 {
     [Activity(Label = "OmniCore", Icon = "@mipmap/ic_omnicore", Theme = "@style/MainTheme", MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
-        LaunchMode = LaunchMode.SingleTask, Exported = false, AlwaysRetainTaskState = false,
+        LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
 
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        protected override void OnCreate(Bundle savedInstanceState)
+        private TaskCompletionSource<bool> PermissionsRequestResult;
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
-            var container = Initializer.SetupDependencies();
-            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             
             base.OnCreate(savedInstanceState);
 
-            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
+            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
+            CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
+
+            PermissionsRequestResult = new TaskCompletionSource<bool>();
+            if (ShouldWaitForPermissionsResult())
+            {
+                if (!await PermissionsRequestResult.Task)
+                {
+                    Shutdown();
+                }
+            }
+
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
+
+
+            var container = Initializer.SetupDependencies();
+
+            var coreServices = container.Resolve<ICoreServices>();
+
+            await coreServices.StartUp().ConfigureAwait(true);
 
             var serviceConnection = new DroidCoreServiceConnection(); 
             var serviceToStart = new Intent(this, typeof(DroidCoreService));
@@ -54,17 +72,47 @@ namespace OmniCore.Client.Droid
             {
                 //TODO:
             }
-            
+
             var uiApplication = container.Resolve<IUserInterface>();
+
             LoadApplication(uiApplication as Application);
         }
-        
-        
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
-            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            PermissionsRequestResult.TrySetResult(grantResults.All(r => r == Permission.Granted));
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        private bool ShouldWaitForPermissionsResult()
+        {
+            var permissions = new List<string>()
+            {
+                Manifest.Permission.AccessCoarseLocation,
+                Manifest.Permission.BluetoothAdmin,
+                Manifest.Permission.ReadExternalStorage,
+                Manifest.Permission.WriteExternalStorage,
+            };
+
+            foreach (var permission in permissions.ToArray())
+            {
+                if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.AccessCoarseLocation) ==
+                    (int) Permission.Granted)
+                    permissions.Remove(permission);
+            }
+
+            if (permissions.Count > 0)
+            {
+                ActivityCompat.RequestPermissions(this, permissions.ToArray(), 34);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void Shutdown()
+        {
+            this.FinishAffinity();
         }
     }
 }

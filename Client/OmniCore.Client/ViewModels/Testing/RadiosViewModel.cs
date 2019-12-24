@@ -11,6 +11,7 @@ using OmniCore.Client.Views.Testing;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 using Unity;
 using Xamarin.Forms;
 
@@ -31,7 +32,7 @@ namespace OmniCore.Client.ViewModels.Testing
         [Unity.Dependency(nameof(RegistrationConstants.RileyLink))]
         public IRadioService RileyLinkRadioService { get; set; }
         [Unity.Dependency]
-        public IUserInterface UserInterface { get; set; }
+        public ICoreApplicationServices ApplicationServices { get; set; }
 
         public RadiosViewModel()
         {
@@ -44,10 +45,9 @@ namespace OmniCore.Client.ViewModels.Testing
         {
             Radios = new ObservableCollection<IRadio>();
             ListRadiosSubscription = RileyLinkRadioService.ListRadios()
-                .ObserveOn(UserInterface.SynchronizationContext)
+                .ObserveOn(ApplicationServices.UiSynchronizationContext)
                 .Subscribe(radio =>
                     {
-                        radio.Peripheral.RssiUpdateTimeSpan = TimeSpan.FromSeconds(2);
                         Radios.Add(radio);
                     });
         }
@@ -56,8 +56,6 @@ namespace OmniCore.Client.ViewModels.Testing
         {
             ListRadiosSubscription?.Dispose();
             ListRadiosSubscription = null;
-            foreach (var radio in Radios)
-                radio.Peripheral.RssiUpdateTimeSpan = null;
         }
 
         private async Task IdentifyRadio(IRadio radio)

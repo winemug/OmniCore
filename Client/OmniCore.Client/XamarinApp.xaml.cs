@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Interfaces.Platform;
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
 using OmniCore.Model.Interfaces.Services;
 using Unity;
 
@@ -46,7 +44,7 @@ namespace OmniCore.Client
         private readonly Subject<IUserInterface> SubjectResuming;
         
         private readonly ICoreServices CoreServices;
-        private ICoreApplicationLogger ApplicationLogger => CoreServices.ApplicationLogger;
+        private ICoreApplicationLogger ApplicationLogger => CoreServices.CoreApplicationServices.ApplicationLogger;
             
         public XamarinApp(ICoreServicesProvider coreServicesProvider, IUnityContainer container)
         {
@@ -65,63 +63,8 @@ namespace OmniCore.Client
 
         protected override async void OnStart()
         {
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
-            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
-            ApplicationLogger.Debug("OmniCore App OnStart called");
-            await EnsurePermissions();
             SubjectStarting.OnNext(this);
             SubjectStarting.OnCompleted();
-        }
-
-        protected override void OnSleep()
-        {
-            ApplicationLogger.Debug("OmniCore App OnSleep called");
-            SubjectHibernating.OnNext(this);
-        }
-
-        protected override void OnResume()
-        {
-            ApplicationLogger.Debug("OmniCore App OnResume called");
-            SubjectResuming.OnNext(this);
-        }
-
-        private async Task EnsurePermissions()
-        {
-            try
-            {
-                if (
-                    !await CheckAndRequestPermission(
-                    Permission.LocationAlways,
-                    "Please grant the location permission to this application in order to be able to connect to bluetooth devices.")
-                    ||
-                    !await CheckAndRequestPermission(
-                        Permission.Storage,
-                        "Please grant the storage permission to this application in order to be able to import and export files.")
-                )
-                {
-                    await MainPage.DisplayAlert("Missing Permissions", "OmniCore cannot run without the necessary permissions.", "OK");
-                    await ShutDown();
-                }
-
-            }
-            catch (Exception e)
-            {
-                await MainPage.DisplayAlert("Missing Permissions", "Error while querying / acquiring permissions", "OK");
-                Crashes.TrackError(e);
-                await ShutDown();
-            }
-        }
-
-        private async Task<bool> CheckAndRequestPermission(Permission permission, string requestMessage)
-        {
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
-            if (status != PermissionStatus.Granted)
-            {
-                await MainPage.DisplayAlert("Missing Permissions", requestMessage, "OK");
-                var request = await CrossPermissions.Current.RequestPermissionsAsync(permission);
-                return request[permission] == PermissionStatus.Granted;
-            }
-            return true;
         }
 
         private Page GetMainPage(IUnityContainer container)

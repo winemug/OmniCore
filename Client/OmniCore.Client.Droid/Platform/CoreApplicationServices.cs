@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -64,6 +65,8 @@ namespace OmniCore.Client.Droid.Platform
         {
             return Container.Resolve<IBackgroundTask>();
         }
+
+        public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
 
         public IObservable<IUserInterface> WhenStarted()
         {

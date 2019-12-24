@@ -39,13 +39,14 @@
     </MonoDroidExtraArgs>
     <JavaMaximumHeapSize>
     </JavaMaximumHeapSize>
-    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
     <AndroidUseAapt2>false</AndroidUseAapt2>
     <AndroidDexTool>dx</AndroidDexTool>
     <AndroidEnableMultiDex>false</AndroidEnableMultiDex>
     <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
     <MandroidI18n />
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -111,9 +112,6 @@
     <PackageReference Include="Plugin.BluetoothLE">
       <Version>6.2.6</Version>
     </PackageReference>
-    <PackageReference Include="Plugin.Permissions">
-      <Version>3.0.0.12</Version>
-    </PackageReference>
     <PackageReference Include="PropertyChanged.Fody">
       <Version>3.2.1</Version>
     </PackageReference>
@@ -158,6 +156,10 @@
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Configuration\OmniCore.Services\OmniCore.Services.csproj">
+      <Project>{937C8F56-D6B0-4192-A97D-DF47930D2403}</Project>
+      <Name>OmniCore.Services</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Data\OmniCore.Data\OmniCore.Data.csproj">
       <Project>{34324715-e9b0-407e-93f1-8b25c13ac4ef}</Project>
       <Name>OmniCore.Data</Name>

@@ -130,7 +130,7 @@ namespace OmniCore.Client.Platform
                         scanSubscription = CrossBleAdapter.Current
                             .Scan(new ScanConfig
                             {
-                                ScanType = BleScanType.LowLatency,
+                                ScanType = BleScanType.Balanced,
                                 ServiceUuids = new List<Guid>() {serviceId},
                                 AndroidUseScanBatching = false
                             })
@@ -141,6 +141,8 @@ namespace OmniCore.Client.Platform
                                 {
                                     crossBleResult = searchResultDictionary[scanResult.Device.Uuid];
                                     crossBleResult.Peripheral.Rssi = scanResult.Rssi;
+                                    if (!string.IsNullOrEmpty(scanResult.AdvertisementData.LocalName))
+                                        crossBleResult.Peripheral.Name = scanResult.AdvertisementData.LocalName;
                                 }
                                 else
                                 {

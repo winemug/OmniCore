@@ -8,8 +8,4 @@
       <PackageReference Include="Unity.Abstractions" Version="5.11.3" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj" />
-    </ItemGroup>
-
 </Project>

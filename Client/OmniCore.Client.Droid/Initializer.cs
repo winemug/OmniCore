@@ -1,11 +1,12 @@
 ﻿using OmniCore.Client.Droid.Platform;
 using OmniCore.Client.Droid.Services;
-using OmniCore.Data;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
+using OmniCore.Repository.Sqlite;
+using OmniCore.Services;
 using OmniCore.Simulation;
 using Unity;
 
@@ -16,14 +17,16 @@ namespace OmniCore.Client.Droid
         public static IUnityContainer SetupDependencies()
         {
             return new UnityContainer()
+                .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
+                .WithAAPSIntegration()
 #if EMULATOR
                 .WithBleSimulator()
 #else
                 .WithCrossBleAdapter()
 #endif
-                .WithDefaultDataServices()
+                .WithSqliteRepositories()
                 .WithXamarinFormsUserInterface()
                 .OnAndroidPlatform();
         }
@@ -37,6 +40,11 @@ namespace OmniCore.Client.Droid
             container.RegisterSingleton<ICoreServices, CoreServices>();
             container.RegisterSingleton<ICoreServicesProvider, CoreServicesProvider>();
 
+            return container;
+        }
+
+        public static IUnityContainer WithAAPSIntegration(this IUnityContainer container)
+        {
             return container;
         }
     }

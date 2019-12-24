@@ -9,7 +9,7 @@ namespace OmniCore.Model.Interfaces.Platform
     public interface IRadioPeripheral : IDisposable, INotifyPropertyChanged
     {
         Guid Uuid { get; }
-        string Name { get; }
+        string Name { get; set; }
         Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken);
         TimeSpan? RssiUpdateTimeSpan { get; set; }
         int? Rssi { get; set; }

@@ -76,6 +76,22 @@ namespace OmniCore.Client.Platform
             return await BleDevice.ReadRssi();
         }
 
+        public async Task<string> ReadName()
+        {
+            if (BleDevice == null || !BleDevice.IsConnected())
+                return null;
+
+            Guid genericAccessUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x18,0);
+            Guid nameCharacteristicUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x2a,0);
+            var nameCharacteristic = await BleDevice
+                .GetKnownService(genericAccessUuid)
+                .SelectMany(x => x.GetKnownCharacteristics(new Guid[] {nameCharacteristicUuid}))
+                .FirstAsync();
+
+            var result = await nameCharacteristic.Read();
+            return Encoding.ASCII.GetString(result.Data);
+        }
+
         public async Task<IRadioPeripheralCharacteristic[]> GetCharacteristics(Guid serviceId, Guid[] characteristicIds, CancellationToken cancellationToken)
         {
             if (BleDevice == null || !BleDevice.IsConnected())

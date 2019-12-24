@@ -29,11 +29,13 @@ namespace OmniCore.Client.Platform
         private readonly AsyncLock LeaseLock;
         private IDisposable RssiUpdateSubscription = null;
         private IDisposable ConnectionStateSubscription = null;
+        private IDisposable NameSubscription = null;
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
         {
             BleDevice = bleDevice;
             LeaseLock = new AsyncLock();
+            NameSubscription = BleDevice.WhenNameUpdated().Subscribe((name) => this.Name = name);
             ConnectionStateSubscription = BleDevice.WhenStatusChanged().Subscribe(
                 (connectionStatus) =>
                 {
@@ -61,7 +63,7 @@ namespace OmniCore.Client.Platform
         }
 
         public Guid Uuid => BleDevice.Uuid;
-        public string Name => BleDevice.Name;
+        public string Name { get; set; }
 
         public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {
@@ -113,6 +115,7 @@ namespace OmniCore.Client.Platform
         public async void Dispose()
         {
             await LeaseLock.LockAsync(CancellationToken.None);
+            NameSubscription?.Dispose();
             RssiUpdateSubscription?.Dispose();
             ConnectionStateSubscription.Dispose();
         }

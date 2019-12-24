@@ -11,7 +11,6 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Task StartUp();
         Task ShutDown();
-        ICoreApplicationLogger ApplicationLogger { get; }
         ICoreApplicationServices CoreApplicationServices { get; }
         ICoreDataServices CoreDataServices { get; }
         ICoreIntegrationServices CoreIntegrationServices { get; }

@@ -182,6 +182,7 @@ namespace OmniCore.Radios.RileyLink
                     await RadioEventRepository.Create(radioEvent, CancellationToken.None);
 
                     using var cts1 = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+
                     var characteristics = await PeripheralLease.GetCharacteristics(RileyLinkServiceUuid,
                         new[] { RileyLinkResponseCharacteristicUuid, RileyLinkDataCharacteristicUuid }, cts1.Token);
                     if (characteristics == null || characteristics.Length != 2)
