@@ -45,7 +45,7 @@
         </Tab>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Archive"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup & Restore"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup &amp; Restore"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">

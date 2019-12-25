@@ -26,7 +26,6 @@ namespace OmniCore.Client.Platform
     public class CrossBleRadioPeripheral : IRadioPeripheral
     {
         public IDevice BleDevice { get; private set; }
-
         private AsyncLock LeaseLock;
         public IDisposable ActiveLeaseLockDisposable { get; private set; }
         private IDisposable RssiUpdateSubscription = null;
@@ -35,9 +34,19 @@ namespace OmniCore.Client.Platform
 
         public CrossBleRadioPeripheral(IDevice bleDevice)
         {
-            BleDevice = bleDevice;
             LeaseLock = new AsyncLock();
-            NameSubscription = BleDevice.WhenNameUpdated().Subscribe((name) => this.Name = name);
+            SetDevice(bleDevice);
+        }
+
+        public void SetDevice(IDevice bleDevice)
+        {
+            BleDevice = bleDevice;
+            NameSubscription = BleDevice.WhenNameUpdated().Subscribe((name) =>
+            {
+                if (!string.IsNullOrEmpty(name))
+                    this.Name = name;
+            });
+
             ConnectionStateSubscription = BleDevice.WhenStatusChanged().Subscribe(
                 async (connectionStatus) =>
                 {
@@ -62,6 +71,8 @@ namespace OmniCore.Client.Platform
                     }
                 }
             );
+
+            RssiUpdateTimeSpan = RssiUpdateTimeSpanInternal;
         }
 
         public Guid Uuid => BleDevice.Uuid;
@@ -87,7 +98,8 @@ namespace OmniCore.Client.Platform
                 else
                 {
                     RssiUpdateSubscription?.Dispose();
-                    RssiUpdateSubscription = BleDevice.ReadRssiContinuously(value).Subscribe(rssi =>
+                    RssiUpdateSubscription = BleDevice.ReadRssi().Concat(BleDevice.ReadRssiContinuously(value))
+                        .Subscribe(rssi =>
                     {
                         Rssi = rssi;
                         RssiDate = DateTimeOffset.UtcNow;

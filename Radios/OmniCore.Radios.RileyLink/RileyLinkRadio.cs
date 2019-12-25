@@ -26,6 +26,7 @@ namespace OmniCore.Radios.RileyLink
             if (string.IsNullOrEmpty(json))
                 return DefaultConfiguration;
             return JsonConvert.DeserializeObject<RadioConfiguration>(json);
+
         }
 
         public async Task SetConfiguration(IRadioConfiguration configuration)

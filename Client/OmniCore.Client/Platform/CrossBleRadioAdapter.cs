@@ -28,6 +28,7 @@ namespace OmniCore.Client.Platform
     {
         private AsyncLock PeripheralSearchLock;
         private AsyncLock AdapterManagementLock;
+        private Dictionary<Guid, CrossBleRadioPeripheral> PeripheralCache;
 
         [Dependency]
         private ICoreApplicationServices CoreApplicationServices { get; set; }
@@ -35,6 +36,7 @@ namespace OmniCore.Client.Platform
         {
             PeripheralSearchLock = new AsyncLock();
             AdapterManagementLock = new AsyncLock();
+            PeripheralCache = new Dictionary<Guid, CrossBleRadioPeripheral>();
         }
 
         public async Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
@@ -104,19 +106,19 @@ namespace OmniCore.Client.Platform
                         var searchResultDictionary = new Dictionary<Guid, IRadioPeripheralResult>();
 
                         var connectedDevices = await CrossBleAdapter.Current
-                            .GetConnectedDevices();
+                            .GetConnectedDevices().ToTask(cancellationToken);
 
                         foreach (var connectedDevice in connectedDevices.Where(d => d.IsConnected()))
                         {
                             if (searchResultDictionary.ContainsKey(connectedDevice.Uuid))
                                 continue;
 
-                            var service = await connectedDevice.GetKnownService(serviceId);
+                            var service = await connectedDevice.GetKnownService(serviceId).ToTask(cancellationToken);
                             if (service != null)
                             {
                                 var connectedResult = new CrossBleResult
                                 {
-                                    Peripheral = new CrossBleRadioPeripheral(connectedDevice)
+                                    Peripheral = CacheGetPeripheral(connectedDevice)
                                 };
 
                                 searchResultDictionary.Add(connectedDevice.Uuid, connectedResult);
@@ -148,7 +150,8 @@ namespace OmniCore.Client.Platform
                                 {
                                     var crossResult = new CrossBleResult
                                     {
-                                        Peripheral = new CrossBleRadioPeripheral(scanResult.Device)
+                                        Peripheral = CacheGetPeripheral(scanResult.Device),
+                                        Rssi = scanResult.Rssi
                                     };
                                     searchResultDictionary.Add(scanResult.Device.Uuid, crossResult);
                                     observer.OnNext(crossResult);
@@ -197,6 +200,26 @@ namespace OmniCore.Client.Platform
                 Peripheral = new CrossBleRadioPeripheral(scanResult.Device),
                 Rssi = scanResult.Rssi
             };
+        }
+
+        private CrossBleRadioPeripheral CacheGetPeripheral(IDevice bleDevice)
+        {
+            CrossBleRadioPeripheral peripheral;
+            if (PeripheralCache.ContainsKey(bleDevice.Uuid))
+            {
+                peripheral = PeripheralCache[bleDevice.Uuid];
+                if (!ReferenceEquals(peripheral.BleDevice, bleDevice))
+                {
+                    peripheral.SetDevice(bleDevice);
+                }
+            }
+            else
+            {
+                peripheral = new CrossBleRadioPeripheral(bleDevice);
+            }
+
+            PeripheralCache[bleDevice.Uuid] = peripheral;
+            return peripheral;
         }
     }
 }
