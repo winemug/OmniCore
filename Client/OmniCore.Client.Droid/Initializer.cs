@@ -2,6 +2,7 @@
 using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
+using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
@@ -20,7 +21,7 @@ namespace OmniCore.Client.Droid
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
-                .WithAAPSIntegration()
+                .WithAapsIntegration()
 #if EMULATOR
                 .WithBleSimulator()
 #else
@@ -43,8 +44,9 @@ namespace OmniCore.Client.Droid
             return container;
         }
 
-        public static IUnityContainer WithAAPSIntegration(this IUnityContainer container)
+        public static IUnityContainer WithAapsIntegration(this IUnityContainer container)
         {
+            container.RegisterSingleton<IIntegrationService, AapsIntegrationService>(RegistrationConstants.AapsIntegration);
             return container;
         }
     }

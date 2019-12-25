@@ -33,47 +33,35 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Home">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
-            <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Connections"/>
-        </Tab>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+        <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activity"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Data" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Data">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Statistics"/>
+        <Tab Title="Statistics">
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radio"/>
         </Tab>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Configuration">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users"/>
+
+        <Tab Title="Users">
+        </Tab>
+            <Tab Title="Metrics">
+        </Tab>
+            
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Therapies"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
-        </Tab>
-    </FlyoutItem>
-
-    <FlyoutItem Title="Pod" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Maintenance">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="A"/>
-        </Tab>
-        <Tab Title="Therapy">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Manual"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Manual"/>
-        </Tab>
-        <Tab Title="Radio">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RileyLink"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="RFTP"/>
-        </Tab>
-        <Tab Title="Pod">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Eros"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Omnipod Dash"/>
-        </Tab>
+        
     </FlyoutItem>
 
 </Shell>
+

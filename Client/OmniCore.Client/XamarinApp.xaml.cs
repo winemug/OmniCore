@@ -44,7 +44,7 @@ namespace OmniCore.Client
         private readonly Subject<IUserInterface> SubjectResuming;
         
         private readonly ICoreServices CoreServices;
-        private ICoreApplicationLogger ApplicationLogger => CoreServices.CoreApplicationServices.ApplicationLogger;
+        private ICoreApplicationLogger ApplicationLogger => CoreServices.ApplicationServices.ApplicationLogger;
             
         public XamarinApp(ICoreServicesProvider coreServicesProvider, IUnityContainer container)
         {

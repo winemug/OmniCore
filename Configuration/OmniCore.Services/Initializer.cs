@@ -9,6 +9,7 @@ namespace OmniCore.Services
         {
             container.RegisterSingleton<ICoreDataServices, CoreDataServices>();
             container.RegisterSingleton<ICoreIntegrationServices, CoreIntegrationServices>();
+            container.RegisterSingleton<ICoreAutomationServices, CoreAutomationServices>();
            
             return container;
         }
