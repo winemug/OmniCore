@@ -33,7 +33,6 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Overview"/>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
         <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios"/>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activity"/>
@@ -45,22 +44,17 @@
             <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radio"/>
         </Tab>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Archive"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup & Restore"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users"/>
-
-        <Tab Title="Users">
-        </Tab>
-            <Tab Title="Metrics">
-        </Tab>
-            
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Therapies"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
-        
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Automation"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Integration"/>
     </FlyoutItem>
 
 </Shell>
