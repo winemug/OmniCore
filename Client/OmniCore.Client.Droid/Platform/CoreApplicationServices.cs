@@ -22,8 +22,7 @@ namespace OmniCore.Client.Droid.Platform
         }
 
         public ICoreApplicationLogger ApplicationLogger { get; }
-        
-        public IUserInterface UserInterface { get; }
+
         public string DataPath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 
         public string StoragePath
@@ -68,19 +67,25 @@ namespace OmniCore.Client.Droid.Platform
 
         public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
 
-        public IObservable<IUserInterface> WhenStarted()
+        public T CreateView<T>() where T: IView<IViewModel>
+        {
+            return Container.Resolve<T>();
+        }
+
+        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenStarted()
         {
             throw new NotImplementedException();
         }
 
-        public IObservable<IUserInterface> WhenHibernating()
+        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenHibernating()
         {
             throw new NotImplementedException();
         }
 
-        public IObservable<IUserInterface> WhenResuming()
+        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenResuming()
         {
             throw new NotImplementedException();
         }
+
     }
 }

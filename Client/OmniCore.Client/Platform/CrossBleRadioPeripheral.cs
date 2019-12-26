@@ -41,12 +41,14 @@ namespace OmniCore.Client.Platform
         public void SetDevice(IDevice bleDevice)
         {
             BleDevice = bleDevice;
+            NameSubscription?.Dispose();
             NameSubscription = BleDevice.WhenNameUpdated().Subscribe((name) =>
             {
                 if (!string.IsNullOrEmpty(name))
                     this.Name = name;
             });
 
+            ConnectionStateSubscription?.Dispose();
             ConnectionStateSubscription = BleDevice.WhenStatusChanged().Subscribe(
                 async (connectionStatus) =>
                 {

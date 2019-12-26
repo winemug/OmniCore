@@ -13,8 +13,9 @@ namespace OmniCore.Model.Interfaces.Services
         void Shutdown();
         SynchronizationContext UiSynchronizationContext { get; }
         ICoreApplicationLogger ApplicationLogger { get; }
-        IObservable<IUserInterface> WhenStarted();
-        IObservable<IUserInterface> WhenHibernating();
-        IObservable<IUserInterface> WhenResuming();
+        T CreateView<T>() where T: IView<IViewModel>;
+        IObservable<ICoreApplicationServices> WhenStarted();
+        IObservable<ICoreApplicationServices> WhenHibernating();
+        IObservable<ICoreApplicationServices> WhenResuming();
     }
 }

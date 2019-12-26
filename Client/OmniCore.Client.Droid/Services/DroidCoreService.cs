@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Runtime;
+using Android.Service.Autofill;
+using Java.Lang;
 using OmniCore.Model.Interfaces.Services;
 using Unity;
 
@@ -13,14 +16,13 @@ namespace OmniCore.Client.Droid.Services
     [Service]
     public class DroidCoreService : Service, ICoreServices
     {
-        [Dependency]
         public ICoreApplicationServices ApplicationServices { get; set; }
-        [Dependency]
         public ICoreDataServices DataServices { get; set; }
-        [Dependency]
         public ICoreIntegrationServices IntegrationServices { get; set; }
-        [Dependency]
         public ICoreAutomationServices AutomationServices { get; set; }
+
+        private static bool IsStarted = false;
+        private IUnityContainer Container;
 
         public async Task StartUp()
         {
@@ -40,34 +42,35 @@ namespace OmniCore.Client.Droid.Services
         public override IBinder OnBind(Intent intent)
         {
             Binder = new DroidCoreServiceBinder(this);
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            if (!IsStarted)
             {
-                StartForegroundService(intent);
+                if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                    StartForegroundService(intent);
+                else
+                    StartService(intent);
             }
-            else
-            {
-                StartService(intent);
-            }
-
             return Binder;
         }
 
         public override void OnCreate()
         {
-            base.OnCreate();
+            Container = Initializer.SetupDependencies();
+
+            ApplicationServices = Container.Resolve<ICoreApplicationServices>();
+            DataServices = Container.Resolve<ICoreDataServices>();
+            IntegrationServices = Container.Resolve<ICoreIntegrationServices>();
+            AutomationServices = Container.Resolve<ICoreAutomationServices>();
+
+            Container.RegisterInstance<ICoreServices>(this);
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            var notification = new Notification.Builder(this)
-                .SetContentTitle("OmniCore")
-                .SetContentText("Service is running")
-                .Build();
-        
-            var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-            notificationManager.Notify(1, notification);
-
-            StartForeground(1, notification);
+            if (!IsStarted)
+            {
+                CreateNotification();
+                IsStarted = true;
+            }
 
             return StartCommandResult.Sticky;
         }
@@ -80,6 +83,31 @@ namespace OmniCore.Client.Droid.Services
         public override void OnDestroy()
         {
             base.OnDestroy();
+        }
+
+        private void CreateNotification()
+        {
+            var notificationManager = (NotificationManager) GetSystemService(NotificationService);
+
+            var notificationBuilder = new Notification.Builder(this)
+                .SetSmallIcon(Resource.Drawable.ic_pod)
+                .SetContentTitle("OmniCore")
+                .SetContentText("Service is running");
+
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                var channelId = "OmniCoreGeneralNotifications";
+                var channel = new NotificationChannel(channelId, "Service Notifications", NotificationImportance.Default)
+                {
+                    Description = "General service notifications."
+                };
+
+                notificationManager.CreateNotificationChannel(channel);
+                notificationBuilder.SetChannelId(channelId);
+            }
+            var notification = notificationBuilder.Build();
+            notificationManager.Notify(1, notification);
+            StartForeground(1, notification);
         }
     }
 }

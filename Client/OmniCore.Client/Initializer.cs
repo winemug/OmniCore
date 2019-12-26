@@ -17,10 +17,8 @@ namespace OmniCore.Client
             return container;
         }
 
-        public static IUnityContainer WithXamarinFormsUserInterface(this IUnityContainer container)
+        public static IUnityContainer WithXamarinForms(this IUnityContainer container)
         {
-            container.RegisterSingleton<IUserInterface, XamarinApp>();
-
             container.RegisterType<ShellViewModel>();
             container.RegisterType<ShellView>();
 

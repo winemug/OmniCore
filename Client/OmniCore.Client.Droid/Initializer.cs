@@ -28,7 +28,7 @@ namespace OmniCore.Client.Droid
                 .WithCrossBleAdapter()
 #endif
                 .WithSqliteRepositories()
-                .WithXamarinFormsUserInterface()
+                .WithXamarinForms()
                 .OnAndroidPlatform();
         }
 
@@ -37,9 +37,6 @@ namespace OmniCore.Client.Droid
             container.RegisterType<IBackgroundTask, BackgroundTask>();
             container.RegisterSingleton<ICoreApplicationServices, CoreApplicationServices>();
             container.RegisterSingleton<ICoreApplicationLogger, CoreApplicationLogger>();
-
-            container.RegisterSingleton<ICoreServices, DroidCoreService>();
-            container.RegisterSingleton<ICoreServicesProvider, DroidCoreServiceConnection>();
 
             return container;
         }

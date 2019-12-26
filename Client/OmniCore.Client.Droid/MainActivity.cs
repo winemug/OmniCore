@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Android;
 using Android.App;
@@ -59,20 +61,17 @@ namespace OmniCore.Client.Droid
                 }
             }
 
-            var container = Initializer.SetupDependencies();
-
-            var provider = container.Resolve<ICoreServicesProvider>();
-
             var startIntent = new Intent(this, typeof(DroidCoreService));
-            if (!BindService(startIntent, provider as IServiceConnection, Bind.AutoCreate))
+            var connection = new DroidCoreServiceConnection();
+
+            if (!BindService(startIntent, connection, Bind.AutoCreate))
             {
                 //TODO:
             }
 
-            await provider.LocalServices.StartUp().ConfigureAwait(true);
-
-            var uiApplication = container.Resolve<IUserInterface>();
-            LoadApplication(uiApplication as Application);
+            var services = await connection.WhenConnected();
+            await services.StartUp().ConfigureAwait(true);
+            LoadApplication(new XamarinApp(services));
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
