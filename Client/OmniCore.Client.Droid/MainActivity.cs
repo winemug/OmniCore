@@ -70,7 +70,7 @@ namespace OmniCore.Client.Droid
             }
 
             var services = await connection.WhenConnected();
-            await services.StartUp().ConfigureAwait(true);
+            await services.Startup().ConfigureAwait(true);
             LoadApplication(new XamarinApp(services));
         }
 

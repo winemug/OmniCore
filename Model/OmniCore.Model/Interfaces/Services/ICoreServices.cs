@@ -9,8 +9,8 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface ICoreServices
     {
-        Task StartUp();
-        Task ShutDown();
+        Task Startup();
+        Task Shutdown();
         ICoreApplicationServices ApplicationServices { get; }
         ICoreDataServices DataServices { get; }
         ICoreIntegrationServices IntegrationServices { get; }

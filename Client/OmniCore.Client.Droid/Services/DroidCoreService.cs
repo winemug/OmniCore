@@ -24,15 +24,16 @@ namespace OmniCore.Client.Droid.Services
         private static bool IsStarted = false;
         private IUnityContainer Container;
 
-        public async Task StartUp()
+        public async Task Startup()
         {
-
             var dbPath = Path.Combine(ApplicationServices.DataPath, "oc.db3");
             await DataServices.RepositoryService.Initialize(dbPath, CancellationToken.None);
+            await DataServices.OmnipodErosService.Startup(CancellationToken.None);
         }
 
-        public async Task ShutDown()
+        public async Task Shutdown()
         {
+            await DataServices.OmnipodErosService.Shutdown(CancellationToken.None);
             await DataServices.RepositoryService.Shutdown(CancellationToken.None);
         }
 

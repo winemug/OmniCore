@@ -19,6 +19,7 @@ namespace OmniCore.Eros
     public class ErosPodService : IPodService
     {
         public string Description => "Omnipod Eros";
+
         public IRadioService[] RadioProviders { get; }
         
         private readonly IRadioAdapter RadioAdapter;
@@ -41,6 +42,14 @@ namespace OmniCore.Eros
             PodRepository = podRepository;
             PodDictionary = new Dictionary<long, IPod>();
             PodLock = new AsyncLock();
+        }
+
+        public async Task Startup(CancellationToken cancellationToken)
+        {
+        }
+
+        public async Task Shutdown(CancellationToken cancellationToken)
+        {
         }
 
         public async IAsyncEnumerable<IPod> ActivePods()
