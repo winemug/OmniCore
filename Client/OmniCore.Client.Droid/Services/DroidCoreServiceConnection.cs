@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Android.Content;
 using Android.OS;
 using OmniCore.Model.Interfaces.Data;
@@ -7,22 +8,38 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class DroidCoreServiceConnection : Java.Lang.Object, IServiceConnection
+    public class DroidCoreServiceConnection : Java.Lang.Object, IServiceConnection, ICoreServicesProvider
     {
         
-        public bool IsConnected { get; private set; }
-        public DroidCoreServiceBinder Binder { get; private set; }
+        public DroidCoreServiceConnection(ICoreServices localServices)
+        {
+            LocalServices = localServices;
+        }
+
+        public ICoreServices Services => Binder?.Services;
+
+        private DroidCoreServiceBinder Binder;
         
         public void OnServiceConnected(ComponentName name, IBinder service)
         {
             Binder = service as DroidCoreServiceBinder;
-            IsConnected = this.Binder != null;
         }
 
         public void OnServiceDisconnected(ComponentName name)
         {
-            IsConnected = false;
             Binder = null;
+        }
+
+        public ICoreServices LocalServices { get; }
+
+        public async Task<ICoreServices> GetRemoteServices(ICoreServicesDescriptor serviceDescriptor, ICoreCredentials credentials)
+        {
+            return null;
+        }
+
+        public async Task<IAsyncEnumerable<ICoreServicesDescriptor>> ListRemoteServices()
+        {
+            return null;
         }
     }
 }

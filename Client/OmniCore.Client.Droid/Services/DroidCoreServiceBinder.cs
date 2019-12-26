@@ -1,13 +1,15 @@
-﻿using Android.OS;
+﻿using Android.Bluetooth;
+using Android.OS;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
     public class DroidCoreServiceBinder : Binder
     {
-        private readonly DroidCoreService ServiceImplementation;
+        public ICoreServices Services { get; }
         public DroidCoreServiceBinder(DroidCoreService serviceImplementation)
         {
-            ServiceImplementation = serviceImplementation;
+            Services = serviceImplementation;
         }
     }
 }

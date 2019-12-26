@@ -38,8 +38,8 @@ namespace OmniCore.Client.Droid
             container.RegisterSingleton<ICoreApplicationServices, CoreApplicationServices>();
             container.RegisterSingleton<ICoreApplicationLogger, CoreApplicationLogger>();
 
-            container.RegisterSingleton<ICoreServices, CoreServices>();
-            container.RegisterSingleton<ICoreServicesProvider, CoreServicesProvider>();
+            container.RegisterSingleton<ICoreServices, DroidCoreService>();
+            container.RegisterSingleton<ICoreServicesProvider, DroidCoreServiceConnection>();
 
             return container;
         }

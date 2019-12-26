@@ -47,6 +47,9 @@ namespace OmniCore.Client.Droid
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
+
             PermissionsRequestResult = new TaskCompletionSource<bool>();
             if (ShouldWaitForPermissionsResult())
             {
@@ -56,25 +59,19 @@ namespace OmniCore.Client.Droid
                 }
             }
 
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
-            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
-
-
             var container = Initializer.SetupDependencies();
 
-            var coreServices = container.Resolve<ICoreServices>();
+            var provider = container.Resolve<ICoreServicesProvider>();
 
-            await coreServices.StartUp().ConfigureAwait(true);
-
-            var serviceConnection = new DroidCoreServiceConnection(); 
-            var serviceToStart = new Intent(this, typeof(DroidCoreService));
-            if (!BindService(serviceToStart, serviceConnection, Bind.AutoCreate))
+            var startIntent = new Intent(this, typeof(DroidCoreService));
+            if (!BindService(startIntent, provider as IServiceConnection, Bind.AutoCreate))
             {
                 //TODO:
             }
 
-            var uiApplication = container.Resolve<IUserInterface>();
+            await provider.LocalServices.StartUp().ConfigureAwait(true);
 
+            var uiApplication = container.Resolve<IUserInterface>();
             LoadApplication(uiApplication as Application);
         }
 
