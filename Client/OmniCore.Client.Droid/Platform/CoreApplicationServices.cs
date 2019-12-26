@@ -72,6 +72,11 @@ namespace OmniCore.Client.Droid.Platform
             return Container.Resolve<T>();
         }
 
+        public IDisposable KeepAwake()
+        {
+            return new KeepAwakeLock();
+        }
+
         IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenStarted()
         {
             throw new NotImplementedException();
