@@ -19,6 +19,8 @@ namespace OmniCore.Client
 
         public static IUnityContainer WithXamarinForms(this IUnityContainer container)
         {
+            container.RegisterType<UnityRouteFactory>();
+            
             container.RegisterType<ShellViewModel>();
             container.RegisterType<ShellView>();
 

@@ -13,8 +13,9 @@ namespace OmniCore.Client.Views.Home
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RadiosView : BaseView<RadiosViewModel>
     {
-        public RadiosView(RadiosViewModel viewModel) : base(viewModel)
+        public RadiosView(RadiosViewModel viewModel, UnityRouteFactory routeFactory) : base(viewModel)
         {
+            Routing.RegisterRoute("Home//Radios//Detail", routeFactory.WithType(typeof(RadioDetailView)));
             InitializeComponent();
         }
     }

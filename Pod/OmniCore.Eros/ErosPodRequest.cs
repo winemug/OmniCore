@@ -20,7 +20,6 @@ namespace OmniCore.Eros
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public bool CanCancel { get; private set; }

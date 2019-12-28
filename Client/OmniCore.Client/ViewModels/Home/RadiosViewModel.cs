@@ -7,7 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
+using OmniCore.Client.Views.Main;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
@@ -43,6 +45,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         public override async Task Initialize()
         {
+            
             Radios = new ObservableCollection<IRadio>();
             ListRadiosSubscription = RileyLinkRadioService.ListRadios()
                 .ObserveOn(ApplicationServices.UiSynchronizationContext)
@@ -67,6 +70,9 @@ namespace OmniCore.Client.ViewModels.Home
 
         private async Task SelectRadio(IRadio radio)
         {
+            var view = Container.Resolve<RadioDetailView>();
+            view.ViewModel.Radio = radio;
+            await Shell.Current.Navigation.PushAsync(view);
         }
     }
 }
