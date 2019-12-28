@@ -24,5 +24,7 @@ namespace OmniCore.Model.Interfaces.Platform
         Task<IPodRequest> RequestStartExtendedBolus();
         Task<IPodRequest> RequestCancelExtendedBolus();
         Task<IPodRequest> RequestDeactivate();
+        Task StartQueue();
+        Task StopQueue();
     }
 }

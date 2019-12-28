@@ -1,22 +1,74 @@
-﻿using System.Threading;
+﻿using System;
+using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Eros
 {
     public class ErosPodRequest : IPodRequest
     {
-        public IPodRequestEntity Entity { get; }
-        
-        public Task WaitForResult(CancellationToken cancellationToken)
+        public IPodRequestEntity Entity { get; set; }
+        public IPod Pod { get; set; }
+
+        public ErosPodRequest()
         {
-            throw new System.NotImplementedException();
+            CanCancel = true;
         }
 
-        public Task Cancel()
+        public void Dispose()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
+
+        public bool CanCancel { get; private set; }
+        public void TryCancel()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenCannotCancel()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenStarted()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenFinished()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<Exception> WhenFailed()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenCanceled()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenMadeRedundant()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenResultLinked()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ITask> WhenRescheduled()
+        {
+            throw new NotImplementedException();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

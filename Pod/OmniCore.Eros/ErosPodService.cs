@@ -7,6 +7,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Fody;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
@@ -46,10 +47,22 @@ namespace OmniCore.Eros
 
         public async Task Startup(CancellationToken cancellationToken)
         {
+            await foreach (var activePodEntity in PodRepository.ActivePods())
+            {
+                await GetPodInternal(activePodEntity);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
         }
 
         public async Task Shutdown(CancellationToken cancellationToken)
         {
+            using (var podLock = await PodLock.LockAsync())
+            {
+                foreach(var pod in PodDictionary.Values)
+                {
+                    await pod.StopQueue();
+                }
+            }
         }
 
         public async IAsyncEnumerable<IPod> ActivePods()
@@ -219,6 +232,7 @@ namespace OmniCore.Eros
 
             var pod = Container.Resolve<IPod>(RegistrationConstants.OmnipodEros);
             pod.Entity = podEntity;
+            await pod.StartQueue();
             PodDictionary[podEntity.Id] = pod;
             return pod;
         }

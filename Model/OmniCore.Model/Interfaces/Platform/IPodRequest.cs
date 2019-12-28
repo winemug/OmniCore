@@ -1,13 +1,14 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IPodRequest
+    public interface IPodRequest : ITask, INotifyPropertyChanged
     {
-        IPodRequestEntity Entity { get; }
-        Task WaitForResult(CancellationToken cancellationToken);
-        Task Cancel();
+        IPodRequestEntity Entity { get; set; }
+        IPod Pod { get; set; }
     }
 }

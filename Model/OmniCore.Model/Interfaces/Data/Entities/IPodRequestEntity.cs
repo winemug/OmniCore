@@ -2,6 +2,6 @@
 {
     public interface IPodRequestEntity : IPodRequestAttributes, IEntity
     {
-        IPodEntity Pod { get; }
+        IPodEntity Pod { get; set; }
     }
 }
