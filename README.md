@@ -40,7 +40,7 @@ Direct donations:<br/>
 PayPal:  https://paypal.me/winemug/ <br/>
 
 Sponsorship:<br/>
-GitHub: https://github.com/sponsors/winemug/dashboard/tiers (activation pending)
+GitHub profile: https://github.com/winemug (activation pending)
 
 If you can:
 - donate hardware such as Pods (expired or not, especially Omnipod Dash), used phones (Android or iOS), radio equipment and electronic tools
