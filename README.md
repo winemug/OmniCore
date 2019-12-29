@@ -2,28 +2,57 @@
 
 OmniCore is a platform for controlling and automating drug delivery using the Omnipod system.
 
-The project is currently in development and a very limited alpha version is available as an app for Android OS.
+**Update 29.12.2019:**<br/>
+Beta v1.0 is scheduled for release in 2019 - so happy new year!
 
-An incomplete list of features for release v1.0:
+I'm overwhelmed with all kinds of work for the moment, so expect documentation and more information to appear in due time following the release. In the meantime, check out the updated roadmap:
+https://github.com/winemug/OmniCore/wiki/Roadmap
 
-- Multiple user profiles and pods
-- View and track status of the pods, get alerts & notifications
-- View and manage basals, boluses, extended boluses
-- Custom bolus and basal patterns
-- API for integration of 3rd party apps
+## All thanks to
 
-If you need help or want to help out, or just chat with users, join our slack channel by clicking this [INVITE LINK](https://join.slack.com/t/omnicore-pdm/shared_invite/enQtODM0MzAxMDkzNzI5LWQ5MjEwNWNhOGNlZDI1YTcxNDhmYmNjNDE3YTU2MWY3OGNkMzZlMTc5MTFhYmI5MDBjNTk5YmQ1NGRhZGNlZDM)
-(Note: Previous link has expired due to more than 2000 people joining - srsly?)
+[Joe](https://github.com/itsmojo) for his original work on the Omnipod,<br/>
+[Eddie](https://github.com/eurenda) for the thousand pods and thousand words,<br/>
+[Jeremy](https://github.com/jhaydraude) for his work on AndroidAPS customizations,<br/>
+[Dan](https://github.com/dexdan), [Tim], [Jeff](https://github.com/scudrunner), [Jordan](https://github.com/jordan-damron), [Theo](https://github.com/vanelsberg), [Jacob], [Rene](https://github.com/Flori3000), [Miguel], [Maite], [Yann], [Rick], [Edward], [Mark], [Mike] for donating their precious time and resources,<br/>
+[Andy](https://github.com/andyrozman) for all the insight<br/>
+[Jetbrains](https://www.jetbrains.com/?from=OmniCore) for being awesome (seriously, check out [Rider](https://www.jetbrains.com/rider/))<br/>
+and [Insulet](https://myomnipod.com/) for being a bro so far.
 
-Alpha builds are located in [Microsoft AppCenter](https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing)
+## Downloads
 
-You can follow the progress more closely [here](https://github.com/winemug/OmniCore/projects/1).
+Alpha builds are located in Microsoft AppCenter: https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing
 
-And if you have nothing better to do, [here](https://balya.net)'s where I'll be ranting about life, omnicore and everything.
+Beta and other releases will be available in GitHub 
 
-OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)
+AndroidAPS for OmniCore: https://github.com/winemug/AndroidAPS/releases
 
----
-If you are using the Omnipod NOT for diabetes treatment but for any other purpose, I would love to hear from you. Please get in [touch](mailto:barisk@gmail.com)!
----
+## Support
+Facebook page for announcements and feedback: https://www.facebook.com/OmniCorePdm/ (new)
 
+Support group on facebook: https://www.facebook.com/groups/2141146659318874/ (managed by community members)
+
+Join the live discussion on slack: [invite link](https://join.slack.com/t/omnicore-pdm/shared_invite/enQtODM0MzAxMDkzNzI5LWQ5MjEwNWNhOGNlZDI1YTcxNDhmYmNjNDE3YTU2MWY3OGNkMzZlMTc5MTFhYmI5MDBjNTk5YmQ1NGRhZGNlZDM)
+
+## Contributions
+If you have the means to do so, please consider donating money, resources or time for the project, all of which I am currently struggling to afford.  
+ 
+Direct donations:<br/>
+PayPal:  https://paypal.me/winemug/ <br/>
+
+Sponsorship:<br/>
+GitHub: https://github.com/sponsors/winemug/dashboard/tiers (activation pending)
+
+If you can:
+- donate hardware such as Pods (expired or not, especially Omnipod Dash), used phones (Android or iOS), radio equipment and electronic tools
+- donate cloud resources
+- write code on .NET/Xamarin, Tizen, Android, iOS or develop a back-end<br/>
+- make things look better and more usable<br/>
+- make text read in other languages <br/>
+
+then please send an e-mail to my e-mail address below.
+
+## Contact
+[barisk@gmail.com](mailto:barisk@gmail.com)
+
+OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)<br/>
+Ramblings and otherwise: https://balya.net/<br/>
