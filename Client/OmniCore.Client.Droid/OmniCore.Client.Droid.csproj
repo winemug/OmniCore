@@ -115,8 +115,11 @@
     <PackageReference Include="PropertyChanged.Fody">
       <Version>3.2.1</Version>
     </PackageReference>
+    <PackageReference Include="SuaveControls.FloatingActionButton">
+      <Version>2018.1.5</Version>
+    </PackageReference>
     <PackageReference Include="System.Reactive">
-      <Version>4.3.1</Version>
+      <Version>4.3.2</Version>
     </PackageReference>
     <PackageReference Include="Unity">
       <Version>5.11.2</Version>
