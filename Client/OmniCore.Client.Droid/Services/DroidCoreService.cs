@@ -91,7 +91,7 @@ namespace OmniCore.Client.Droid.Services
             var notificationManager = (NotificationManager) GetSystemService(NotificationService);
 
             var notificationBuilder = new Notification.Builder(this)
-                .SetSmallIcon(Resource.Drawable.ic_pod)
+                .SetSmallIcon(Resource.Drawable.ic_stat_pod)
                 .SetContentTitle("OmniCore")
                 .SetContentText("Service is running");
 

@@ -150,8 +150,23 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_action_pod.png" />
+    <AndroidResource Include="Resources\drawable-hdpi\ic_stat_pod.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\ic_action_pod.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\ic_stat_pod.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_action_pod.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_stat_pod.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_action_pod.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_stat_pod.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_action_pod.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_stat_pod.png" />
     <AndroidResource Include="Resources\layout\Tabbar.axml" />
     <AndroidResource Include="Resources\layout\Toolbar.axml" />
+    <AndroidResource Include="Resources\mipmap-hdpi\ic_launcher.png" />
+    <AndroidResource Include="Resources\mipmap-mdpi\ic_launcher.png" />
+    <AndroidResource Include="Resources\mipmap-xhdpi\ic_launcher.png" />
+    <AndroidResource Include="Resources\mipmap-xxhdpi\ic_launcher.png" />
+    <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_launcher.png" />
     <AndroidResource Include="Resources\values\styles.xml" />
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
@@ -193,18 +208,7 @@
       <Name>OmniCore.Client</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\drawable-hdpi\" />
-    <Folder Include="Resources\drawable-mdpi\" />
-    <Folder Include="Resources\drawable-xhdpi\" />
-    <Folder Include="Resources\drawable-xxhdpi\" />
-    <Folder Include="Resources\drawable-xxxhdpi\" />
-    <Folder Include="Resources\mipmap-hdpi" />
-    <Folder Include="Resources\mipmap-mdpi" />
-    <Folder Include="Resources\mipmap-xhdpi" />
-    <Folder Include="Resources\mipmap-xxhdpi" />
-    <Folder Include="Resources\mipmap-xxxhdpi" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
   </ItemGroup>

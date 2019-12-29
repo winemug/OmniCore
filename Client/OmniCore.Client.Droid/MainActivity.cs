@@ -27,7 +27,7 @@ using Permission = Android.Content.PM.Permission;
 
 namespace OmniCore.Client.Droid
 {
-    [Activity(Label = "OmniCore", Icon = "@mipmap/ic_omnicore", Theme = "@style/MainTheme", MainLauncher = true,
+    [Activity(Label = "OmniCore", Icon = "@mipmap/ic_launcher", Theme = "@style/MainTheme", MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
