@@ -199,97 +199,14 @@
     <Folder Include="Resources\drawable-xhdpi\" />
     <Folder Include="Resources\drawable-xxhdpi\" />
     <Folder Include="Resources\drawable-xxxhdpi\" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\ic_android_phone.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\ic_pod.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\ic_rl433.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\ic_refresh.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\signal_wifi_0_bar.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\signal_wifi_1_bar.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\signal_wifi_2_bar.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\signal_wifi_3_bar.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\signal_wifi_4_bar.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
+    <Folder Include="Resources\mipmap-hdpi" />
+    <Folder Include="Resources\mipmap-mdpi" />
+    <Folder Include="Resources\mipmap-xhdpi" />
+    <Folder Include="Resources\mipmap-xxhdpi" />
+    <Folder Include="Resources\mipmap-xxxhdpi" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-anydpi-v26\ic_omnicore.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-anydpi-v26\ic_omnicore_round.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-hdpi\ic_omnicore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-hdpi\ic_omnicore_foreground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-hdpi\ic_omnicore_round.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-mdpi\ic_omnicore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-mdpi\ic_omnicore_foreground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-mdpi\ic_omnicore_round.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xhdpi\ic_omnicore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xhdpi\ic_omnicore_round.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xhdpi\ic_omnicore_foreground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxhdpi\ic_omnicore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxhdpi\ic_omnicore_foreground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxhdpi\ic_omnicore_round.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_omnicore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_omnicore_foreground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_omnicore_round.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\ic_omnicore_background.xml" />
