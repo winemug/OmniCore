@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<base:BaseView x:TypeArguments="home:PodsViewModel" xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
+             xmlns:home="clr-namespace:OmniCore.Client.ViewModels.Home;assembly=OmniCore.Client"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Home.PodsView">
+    <ContentPage.Content>
+        <ScrollView>
+            <CollectionView x:Name="PodCollectionView" ItemsSource="{Binding Pods}" SelectionMode="None" >
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="2">
+                            <Grid BackgroundColor="#eeeeee">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Label Text="Pod"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+    </ContentPage.Content>
+    <Shell.TitleView>
+        <ContentView>
+            <StackLayout Orientation="Horizontal" HorizontalOptions="End">
+                <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center" Command="{Binding AddCommand}"/>
+            </StackLayout>
+        </ContentView>
+    </Shell.TitleView>
+</base:BaseView>

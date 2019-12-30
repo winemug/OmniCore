@@ -5,22 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
 {
     public class ShellViewModel : BaseViewModel
     {
-        private readonly IUnityContainer Container;
 
-        public DataTemplate EmptyView => new DataTemplate(() => Container.Resolve<EmptyView>());
-        public DataTemplate RadiosView => new DataTemplate(() => Container.Resolve<RadiosView>());
+        public DataTemplate EmptyView => new DataTemplate(() => Bootstrapper.Container.Get<EmptyView>());
+        public DataTemplate RadiosView => new DataTemplate(() => Bootstrapper.Container.Get<RadiosView>());
+        public DataTemplate PodsView => new DataTemplate(() => Bootstrapper.Container.Get<PodsView>());
         public string Title => "OmniCore";
 
-        public ShellViewModel(IUnityContainer container)
+        public ShellViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
         {
-            Container = container;
         }
 
         public override Task Initialize()

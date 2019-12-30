@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IRadioPeripheralCharacteristic : IDisposable
     {

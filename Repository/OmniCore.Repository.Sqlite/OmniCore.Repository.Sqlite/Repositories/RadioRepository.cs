@@ -8,13 +8,12 @@ using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
-using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
     class RadioRepository : Repository<RadioEntity, IRadioEntity>, IRadioRepository
     {
-        public RadioRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
+        public RadioRepository(IRepositoryService repositoryService) : base(repositoryService)
         {
         }
         public async Task<IRadioEntity> ByDeviceUuid(Guid deviceUuid)

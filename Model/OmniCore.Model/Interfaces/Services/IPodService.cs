@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Model.Interfaces.Data
+namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IPodService
+    public interface IPodService : ICoreService
     {
-        Task Startup(CancellationToken cancellationToken);
-        Task Shutdown(CancellationToken cancellationToken);
         IRadioService[] RadioProviders { get; }
         string Description { get; }
         IAsyncEnumerable<IPod> ActivePods();

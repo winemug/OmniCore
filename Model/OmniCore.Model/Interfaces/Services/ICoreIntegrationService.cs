@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface ICoreAutomationServices
+    public interface ICoreIntegrationService : ICoreService
     {
     }
 }

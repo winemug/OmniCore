@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.ViewModels.Base
 {
     public class EmptyViewModel : BaseViewModel
     {
-        public EmptyViewModel()
+        public EmptyViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
         {
             Title = "Nothing to see here";
         }

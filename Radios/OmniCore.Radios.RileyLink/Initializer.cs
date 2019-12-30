@@ -5,19 +5,18 @@ using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Radios.RileyLink
 {
     public static class Initializer
     {
-        public static IUnityContainer WithRileyLinkRadio(this IUnityContainer container)
+        public static ICoreContainer WithRileyLinkRadio(this ICoreContainer container)
         {
-            container.RegisterSingleton<IRadioService, RileyLinkRadioService>(RegistrationConstants.RileyLink);
-            container.RegisterType<IRadio, RileyLinkRadio>(RegistrationConstants.RileyLink);
-            container.RegisterType<IRadioLease, RileyLinkRadioLease>(RegistrationConstants.RileyLink);
-            return container;
+            return container
+                .One<IRadioService, RileyLinkRadioService>()
+                .Many<IRadio, RileyLinkRadio>()
+                .Many<IRadioLease, RileyLinkRadioLease>();
         }
     }
 }

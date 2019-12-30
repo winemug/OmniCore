@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<base:BaseView x:TypeArguments="wizards:PodWizardViewModel" xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
+             xmlns:wizards="clr-namespace:OmniCore.Client.ViewModels.Wizards;assembly=OmniCore.Client"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardMainView">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <StackLayout Orientation="Horizontal">
+                <Switch IsToggled="{Binding OptionNewPod}"/>
+                <Label Text="Initialize a new pod"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Switch IsToggled="{Binding OptionExistingPod}"/>
+                <Label Text="Continue an existing pod session"/>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+    <Shell.TitleView>
+        <ContentView>
+            <StackLayout Orientation="Horizontal" HorizontalOptions="End">
+                <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="End" VerticalOptions="Center" Command="{Binding NextPageCommand}"/>
+            </StackLayout>
+        </ContentView>
+    </Shell.TitleView>
+</base:BaseView>

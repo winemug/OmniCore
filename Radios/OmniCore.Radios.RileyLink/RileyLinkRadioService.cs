@@ -13,20 +13,20 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Services;
 
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadioService : IRadioService
+    public class RileyLinkRadioService : OmniCoreService, IRadioService
     {
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
         private readonly IRadioAdapter RadioAdapter;
         private readonly IRadioRepository RadioRepository;
         private readonly ISignalStrengthRepository SignalStrengthRepository;
-        private readonly IUnityContainer Container;
+        private readonly ICoreContainer Container;
 
         private readonly AsyncLock RadioDictionaryLock;
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
@@ -36,7 +36,7 @@ namespace OmniCore.Radios.RileyLink
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             IRadioEventRepository radioEventRepository,
-            IUnityContainer container)
+            ICoreContainer container) : base()
         {
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
@@ -96,7 +96,7 @@ namespace OmniCore.Radios.RileyLink
                     await RadioRepository.Create(entity, cancellationToken).ConfigureAwait(true);
                 }
 
-                radio = Container.Resolve<IRadio>(RegistrationConstants.RileyLink);
+                radio = Container.Get<IRadio>();
                 radio.Entity = entity;
                 radio.Peripheral = peripheral;
                 radio.Peripheral.RssiUpdateTimeSpan = radio.GetConfiguration().RssiUpdateInterval;
@@ -105,6 +105,26 @@ namespace OmniCore.Radios.RileyLink
             }
             radio.Peripheral = peripheral;
             return radio;
+        }
+
+        protected override Task OnStart(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnStop(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnPause(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnResume(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

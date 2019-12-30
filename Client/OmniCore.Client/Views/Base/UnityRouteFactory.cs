@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Services;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base
 {
     public class UnityRouteFactory : RouteFactory
     {
-        private readonly IUnityContainer Container;
+        private readonly ICoreContainer Container;
         
-        public UnityRouteFactory(IUnityContainer unityContainer)
+        public UnityRouteFactory(ICoreBootstrapper bootstrapper)
         {
-            Container = unityContainer;
+            Container = bootstrapper.Container;
         }
 
         private Type ViewType;
@@ -22,10 +22,10 @@ namespace OmniCore.Client.Views.Base
             ViewType = viewType;
             return this;
         }
-        
+
         public override Element GetOrCreate()
         {
-            return Container.Resolve(ViewType) as Element;
+            return null;
         }
     }
 }

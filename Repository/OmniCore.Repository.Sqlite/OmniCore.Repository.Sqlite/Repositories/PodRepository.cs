@@ -7,13 +7,12 @@ using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
-using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
     public class PodRepository : Repository<PodEntity, IPodEntity>, IPodRepository
     {
-        public PodRepository(IRepositoryService repositoryService, IUnityContainer container) : base(repositoryService, container)
+        public PodRepository(IRepositoryService repositoryService) : base(repositoryService)
         {
         }
 

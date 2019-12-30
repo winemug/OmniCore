@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Model.Interfaces.Services;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -18,6 +19,10 @@ namespace OmniCore.Client.ViewModels.Base
         public override Task Dispose()
         {
             return Task.CompletedTask;
+        }
+
+        protected NavigationViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        {
         }
     }
 }

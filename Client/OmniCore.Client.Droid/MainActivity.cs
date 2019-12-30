@@ -19,7 +19,6 @@ using Microsoft.AppCenter.Crashes;
 using Nito.AsyncEx;
 using OmniCore.Client.Droid.Services;
 using Unity;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 using Application = Xamarin.Forms.Application;
@@ -47,10 +46,8 @@ namespace OmniCore.Client.Droid
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
+            Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
-
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
-            //Crashes.ShouldProcessErrorReport = report => !(report.Exception is OmniCoreException);
 
             PermissionsRequestResult = new TaskCompletionSource<bool>();
             if (ShouldWaitForPermissionsResult())
@@ -69,9 +66,8 @@ namespace OmniCore.Client.Droid
                 //TODO:
             }
 
-            var services = await connection.WhenConnected();
-            await services.Startup().ConfigureAwait(true);
-            LoadApplication(new XamarinApp(services));
+            var bootstrapper = await connection.WhenConnected();
+            LoadApplication(new XamarinApp(bootstrapper));
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)

@@ -3,7 +3,7 @@ using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
@@ -15,36 +15,16 @@ namespace OmniCore.Client.Droid
 {
     public static class Initializer
     {
-        public static IUnityContainer SetupDependencies()
+        public static ICoreContainer OnAndroidPlatform(this ICoreContainer container)
         {
-            return new UnityContainer()
-                .WithDefaultServices()
-                .WithOmnipodEros()
-                .WithRileyLinkRadio()
-                .WithAapsIntegration()
-#if EMULATOR
-                .WithBleSimulator()
-#else
-                .WithCrossBleAdapter()
-#endif
-                .WithSqliteRepositories()
-                .WithXamarinForms()
-                .OnAndroidPlatform();
+            return container
+                .One<ICoreApplicationService, CoreApplicationService>()
+                .One<ICoreLoggingService, CoreLoggingService>();
         }
 
-        public static IUnityContainer OnAndroidPlatform(this IUnityContainer container)
+        public static ICoreContainer WithAapsIntegration(this ICoreContainer container)
         {
-            container.RegisterType<IBackgroundTask, BackgroundTask>();
-            container.RegisterSingleton<ICoreApplicationServices, CoreApplicationServices>();
-            container.RegisterSingleton<ICoreApplicationLogger, CoreApplicationLogger>();
-
-            return container;
-        }
-
-        public static IUnityContainer WithAapsIntegration(this IUnityContainer container)
-        {
-            container.RegisterSingleton<IIntegrationService, AapsIntegrationService>(RegistrationConstants.AapsIntegration);
-            return container;
+            return container.One<ICoreIntegrationService, AapsIntegrationService>();
         }
     }
 }

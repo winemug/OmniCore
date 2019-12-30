@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Eros

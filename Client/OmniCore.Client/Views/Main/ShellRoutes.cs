@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using Unity;
-using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Main
 {
@@ -16,13 +13,13 @@ namespace OmniCore.Client.Views.Main
             { typeof(RadioDetailView), RadioDetailView},
         };
 
-        public static void RegisterRoutes(IUnityContainer container)
-        {
-            foreach (var entry in RouteDictionary)
-            {
-                var urf = container.Resolve<UnityRouteFactory>().WithType(entry.Key);
-                Routing.RegisterRoute(entry.Value, urf);
-            }
-        }
+        //public static void RegisterRoutes(IUnityContainer container)
+        //{
+        //    foreach (var entry in RouteDictionary)
+        //    {
+        //        var urf = container.Resolve<UnityRouteFactory>().WithType(entry.Key);
+        //        Routing.RegisterRoute(entry.Value, urf);
+        //    }
+        //}
     }
 }

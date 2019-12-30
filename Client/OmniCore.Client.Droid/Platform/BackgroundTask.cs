@@ -11,7 +11,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Mobile.Droid.Platform
 {

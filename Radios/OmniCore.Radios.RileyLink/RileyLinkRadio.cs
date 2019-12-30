@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Radios.RileyLink
 {
@@ -35,14 +35,12 @@ namespace OmniCore.Radios.RileyLink
             await RadioRepository.Update(Entity, CancellationToken.None);
         }
 
-        private readonly IRadioAdapter Adapter;
-        private readonly IUnityContainer Container;
+        private readonly ICoreContainer Container;
         private readonly IRadioRepository RadioRepository;
-        public RileyLinkRadio(IRadioAdapter adapter,
-            IUnityContainer container,
+        public RileyLinkRadio(
+            ICoreContainer container,
             IRadioRepository radioRepository)
         {
-            Adapter = adapter;
             Container = container;
             RadioRepository = radioRepository;
         }
@@ -50,7 +48,7 @@ namespace OmniCore.Radios.RileyLink
         {
             var peripheralLease = await Peripheral.Lease(cancellationToken);
             InUse = true;
-            var radioLease = Container.Resolve<IRadioLease>(RegistrationConstants.RileyLink);
+            var radioLease = Container.Get<IRadioLease>();
             radioLease.PeripheralLease = peripheralLease;
             radioLease.Radio = this;
             return radioLease;

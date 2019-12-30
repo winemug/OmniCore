@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Threading;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -10,11 +11,15 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Model.Interfaces.Platform;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Services;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    public class CoreApplicationLogger : ICoreApplicationLogger
+    public class CoreLoggingService : OmniCoreService, ICoreLoggingService
     {
         public const string TAG = "OmniCore";
         public void Debug(string message)
@@ -71,6 +76,27 @@ namespace OmniCore.Mobile.Droid.Platform
                     break;
             }
             return errMessage.ToString();
+        }
+
+        protected override Task OnStart(CancellationToken cancellationToken)
+        {
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            return Task.CompletedTask;
+        }
+
+        protected override Task OnStop(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task OnPause(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnResume(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

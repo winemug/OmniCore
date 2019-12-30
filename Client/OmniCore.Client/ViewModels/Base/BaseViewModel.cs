@@ -5,13 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.ViewModels.Base
 {
     //[Fody.ConfigureAwait(true)]
     public abstract class BaseViewModel : IViewModel
     {
+        protected ICoreBootstrapper Bootstrapper { get; private set; }
+        public BaseViewModel(ICoreBootstrapper bootstrapper)
+        {
+            Bootstrapper = bootstrapper;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         public string Title { get; set; }
         public IView<IViewModel> View { get; set; }

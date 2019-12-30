@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.ViewModels.Home
 {
@@ -16,6 +16,10 @@ namespace OmniCore.Client.ViewModels.Home
         }
 
         public override async Task Dispose()
+        {
+        }
+
+        public RadioDetailViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
         {
         }
     }

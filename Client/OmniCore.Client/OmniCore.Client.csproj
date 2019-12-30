@@ -73,9 +73,7 @@
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.6" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.2.1" />
-    <PackageReference Include="SuaveControls.FloatingActionButton" Version="2018.1.5" />
     <PackageReference Include="System.Reactive" Version="4.3.2" />
-    <PackageReference Include="Unity.Abstractions" Version="5.11.3" />
     <PackageReference Include="Xamarin.Forms" Version="4.4.0.991265" />
   </ItemGroup>
 
@@ -86,6 +84,9 @@
   <ItemGroup>
     <Compile Update="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Home\PodsView.xaml.cs">
+      <DependentUpon>PodsView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Main\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
@@ -148,6 +149,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Home\RadiosView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMainView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml">

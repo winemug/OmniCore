@@ -1,39 +1,39 @@
 ﻿using OmniCore.Client.Platform;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.ViewModels.Home;
+using OmniCore.Client.ViewModels.Wizards;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Client.Views.Wizards.NewPod;
+using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static IUnityContainer WithCrossBleAdapter(this IUnityContainer container)
+        public static ICoreContainer WithCrossBleAdapter(this ICoreContainer container)
         {
-            container.RegisterSingleton<IRadioAdapter, CrossBleRadioAdapter>();
-            return container;
+            return container.One<IRadioAdapter, CrossBleRadioAdapter>();
         }
 
-        public static IUnityContainer WithXamarinForms(this IUnityContainer container)
+        public static ICoreContainer WithXamarinForms(this ICoreContainer container)
         {
-            container.RegisterType<UnityRouteFactory>();
-            
-            container.RegisterType<ShellViewModel>();
-            container.RegisterType<ShellView>();
-
-            container.RegisterType<EmptyViewModel>();
-            container.RegisterType<EmptyView>();
-
-            container.RegisterType<RadiosViewModel>();
-            container.RegisterType<RadiosView>();
-
-            container.RegisterType<RadioDetailViewModel>();
-            container.RegisterType<RadioDetailView>();
-
-            return container;
+            return container
+                .One<UnityRouteFactory>()
+                .Many<ShellViewModel>()
+                .Many<ShellView>()
+                .Many<EmptyViewModel>()
+                .Many<EmptyView>()
+                .Many<PodsViewModel>()
+                .Many<PodsView>()
+                .Many<PodWizardViewModel>()
+                .Many<PodWizardMainView>()
+                .Many<RadiosViewModel>()
+                .Many<RadiosView>()
+                .Many<RadioDetailViewModel>()
+                .Many<RadioDetailView>();
         }
     }
 }

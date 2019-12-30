@@ -10,7 +10,6 @@ using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
 using SQLite;
-using Unity;
 
 namespace OmniCore.Repository.Sqlite.Repositories
 {
@@ -19,12 +18,10 @@ namespace OmniCore.Repository.Sqlite.Repositories
         where ConcreteType : Entity, InterfaceType, new()
     {
         protected readonly IRepositoryService RepositoryService;
-        private readonly IUnityContainer Container;
 
-        public Repository(IRepositoryService repositoryService, IUnityContainer container)
+        public Repository(IRepositoryService repositoryService)
         {
             RepositoryService = repositoryService;
-            Container = container;
         }
 
         public InterfaceType New()

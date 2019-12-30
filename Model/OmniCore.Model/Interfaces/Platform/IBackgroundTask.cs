@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IBackgroundTask : IDisposable
     {

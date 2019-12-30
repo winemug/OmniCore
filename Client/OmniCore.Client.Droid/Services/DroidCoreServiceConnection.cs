@@ -7,14 +7,13 @@ using Android.Content;
 using Android.OS;
 using Javax.Security.Auth;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
     public class DroidCoreServiceConnection : Java.Lang.Object, IServiceConnection
     {
-        private Subject<ICoreServices> ServiceConnected = new Subject<ICoreServices>();
+        private Subject<ICoreBootstrapper> ServiceConnected = new Subject<ICoreBootstrapper>();
         private Subject<IServiceConnection> ServiceDisconnected = new Subject<IServiceConnection>();
 
         private DroidCoreServiceBinder Binder;
@@ -24,7 +23,7 @@ namespace OmniCore.Client.Droid.Services
             Binder = service as DroidCoreServiceBinder;
             if (Binder != null)
             {
-                ServiceConnected.OnNext(Binder.Services);
+                ServiceConnected.OnNext(Binder.Bootstrapper);
                 ServiceConnected.OnCompleted();
             }
         }
@@ -35,7 +34,7 @@ namespace OmniCore.Client.Droid.Services
             ServiceDisconnected.OnCompleted();
         }
 
-        public IObservable<ICoreServices> WhenConnected()
+        public IObservable<ICoreBootstrapper> WhenConnected()
         {
             return ServiceConnected.AsObservable();
         }

@@ -2,48 +2,38 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Acr.Logging;
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Service.Autofill;
 using Java.Lang;
+using Nito.AsyncEx;
+using Nito.AsyncEx.Synchronous;
+using OmniCore.Eros;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Radios.RileyLink;
+using OmniCore.Repository.Sqlite;
+using OmniCore.Services;
 using Unity;
 
 namespace OmniCore.Client.Droid.Services
 {
     [Service]
-    public class DroidCoreService : Service, ICoreServices
+    public class DroidCoreService : Service, ICoreBootstrapper
     {
-        public ICoreApplicationServices ApplicationServices { get; set; }
-        public ICoreDataServices DataServices { get; set; }
-        public ICoreIntegrationServices IntegrationServices { get; set; }
-        public ICoreAutomationServices AutomationServices { get; set; }
-
-        private static bool IsStarted = false;
-        private IUnityContainer Container;
-
-        public async Task Startup()
-        {
-            var dbPath = Path.Combine(ApplicationServices.DataPath, "oc.db3");
-            await DataServices.RepositoryService.Initialize(dbPath, CancellationToken.None);
-            await DataServices.OmnipodErosService.Startup(CancellationToken.None);
-        }
-
-        public async Task Shutdown()
-        {
-            await DataServices.OmnipodErosService.Shutdown(CancellationToken.None);
-            await DataServices.RepositoryService.Shutdown(CancellationToken.None);
-        }
-
+        private bool AndroidServiceStarted = false;
 
         public DroidCoreServiceBinder Binder { get; private set; }
-     
+
+        public ICoreContainer Container { get; private set; }
+
         public override IBinder OnBind(Intent intent)
         {
             Binder = new DroidCoreServiceBinder(this);
-            if (!IsStarted)
+            if (!AndroidServiceStarted)
             {
                 if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                     StartForegroundService(intent);
@@ -55,22 +45,36 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnCreate()
         {
-            Container = Initializer.SetupDependencies();
+            StartServices(CancellationToken.None);
 
-            ApplicationServices = Container.Resolve<ICoreApplicationServices>();
-            DataServices = Container.Resolve<ICoreDataServices>();
-            IntegrationServices = Container.Resolve<ICoreIntegrationServices>();
-            AutomationServices = Container.Resolve<ICoreAutomationServices>();
+            Container = new OmniCoreContainer()
+                .Existing<ICoreBootstrapper>(this)
+                .WithOmnipodEros()
+                .WithRileyLinkRadio()
+                .WithAapsIntegration()
+#if EMULATOR
+                .WithBleSimulator()
+#else
+                .WithCrossBleAdapter()
+#endif
+                .WithSqliteRepositories()
+                .WithXamarinForms()
+                .OnAndroidPlatform();
 
-            Container.RegisterInstance<ICoreServices>(this);
+            LoggingService = Container.Get<ICoreLoggingService>();
+            ApplicationService = Container.Get<ICoreApplicationService>();
+            RepositoryService = Container.Get<IRepositoryService>();
+            RadioService = Container.Get<IRadioService>();
+            PodService = Container.Get<IPodService>();
+            IntegrationService = Container.Get<ICoreIntegrationService>();
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            if (!IsStarted)
+            if (!AndroidServiceStarted)
             {
                 CreateNotification();
-                IsStarted = true;
+                AndroidServiceStarted = true;
             }
 
             return StartCommandResult.Sticky;
@@ -83,6 +87,7 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnDestroy()
         {
+            StopServices(CancellationToken.None);
             base.OnDestroy();
         }
 
@@ -110,5 +115,32 @@ namespace OmniCore.Client.Droid.Services
             notificationManager.Notify(1, notification);
             StartForeground(1, notification);
         }
+
+        public void StartServices(CancellationToken cancellationToken)
+        {
+            LoggingService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            ApplicationService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            RepositoryService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            RadioService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            PodService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            IntegrationService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+        }
+
+        public void StopServices(CancellationToken cancellationToken)
+        {
+            IntegrationService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            PodService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            RadioService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            RepositoryService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            ApplicationService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            LoggingService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+        }
+
+        public ICoreLoggingService LoggingService { get; private set; }
+        public ICoreApplicationService ApplicationService { get; private set; }
+        public IRepositoryService RepositoryService { get; private set; }
+        public IRadioService RadioService { get; private set; }
+        public IPodService PodService { get; private set; }
+        public ICoreIntegrationService IntegrationService { get; private set; }
     }
 }

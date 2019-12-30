@@ -7,6 +7,6 @@ namespace OmniCore.Model.Interfaces.Data.Repositories
 {
     public interface IRepositoryInitialization
     {
-        Task Initialize(Version migrateFrom, SQLiteAsyncConnection connection, CancellationToken cancellationToken);
+        
     }
 }

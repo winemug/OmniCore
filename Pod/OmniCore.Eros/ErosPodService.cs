@@ -9,60 +9,41 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fody;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodService : IPodService
+    public class ErosPodService : OmniCoreService, IPodService
     {
         public string Description => "Omnipod Eros";
 
         public IRadioService[] RadioProviders { get; }
         
         private readonly IRadioAdapter RadioAdapter;
-        private readonly IUnityContainer Container;
+        private readonly ICoreContainer Container;
 
         private readonly Dictionary<long, IPod> PodDictionary;
-        private readonly AsyncLock PodLock;
+        private readonly AsyncLock PodCreateLock;
         private readonly IPodRepository PodRepository;
 
 
         public ErosPodService(
             IRadioAdapter radioAdapter,
             IPodRepository podRepository,
-            IUnityContainer container,
-            [Dependency(RegistrationConstants.RileyLink)] IRadioService radioServiceRileyLink)
+            ICoreContainer container,
+            IRadioService radioServiceRileyLink)
         {
             RadioProviders = new[] {radioServiceRileyLink};
             RadioAdapter = radioAdapter;
             Container = container;
             PodRepository = podRepository;
             PodDictionary = new Dictionary<long, IPod>();
-            PodLock = new AsyncLock();
-        }
-
-        public async Task Startup(CancellationToken cancellationToken)
-        {
-            await foreach (var activePodEntity in PodRepository.ActivePods())
-            {
-                await GetPodInternal(activePodEntity);
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-        }
-
-        public async Task Shutdown(CancellationToken cancellationToken)
-        {
-            using (var podLock = await PodLock.LockAsync())
-            {
-                foreach(var pod in PodDictionary.Values)
-                {
-                    await pod.StopQueue();
-                }
-            }
+            PodCreateLock = new AsyncLock();
         }
 
         public async IAsyncEnumerable<IPod> ActivePods()
@@ -77,7 +58,7 @@ namespace OmniCore.Eros
         {
             await foreach (var archivedPodEntity in PodRepository.ActivePods())
             {
-                var pod = Container.Resolve<IPod>(RegistrationConstants.OmnipodEros);
+                var pod = Container.Get<IPod>();
                 pod.Entity = archivedPodEntity;
                 yield return pod;
             }
@@ -226,15 +207,46 @@ namespace OmniCore.Eros
 
         private async Task<IPod> GetPodInternal(IPodEntity podEntity)
         {
-            using var podLock = await PodLock.LockAsync();
+            using var podLock = await PodCreateLock.LockAsync();
             if (PodDictionary.ContainsKey(podEntity.Id))
                 return PodDictionary[podEntity.Id];
 
-            var pod = Container.Resolve<IPod>(RegistrationConstants.OmnipodEros);
+            var pod = Container.Get<IPod>();
             pod.Entity = podEntity;
             await pod.StartQueue();
             PodDictionary[podEntity.Id] = pod;
             return pod;
+        }
+
+        protected override async Task OnStart(CancellationToken cancellationToken)
+        {
+            await foreach (var activePodEntity in PodRepository.ActivePods())
+            {
+                await GetPodInternal(activePodEntity);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+        }
+
+        protected override async Task OnStop(CancellationToken cancellationToken)
+        {
+            using (var podLock = await PodCreateLock.LockAsync())
+            {
+                foreach (var pod in PodDictionary.Values)
+                {
+                    await pod.StopQueue();
+                }
+            }
+            PodDictionary.Clear();
+        }
+
+        protected override Task OnPause(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnResume(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

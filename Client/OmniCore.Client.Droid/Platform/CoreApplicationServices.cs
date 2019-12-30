@@ -1,28 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Services;
 using Unity;
 using Environment = Android.OS.Environment;
 
 namespace OmniCore.Client.Droid.Platform
 {
-    public class CoreApplicationServices : ICoreApplicationServices
+    public class CoreApplicationService : OmniCoreService, ICoreApplicationService
     {
-        private readonly IUnityContainer Container;
-        public CoreApplicationServices(ICoreApplicationLogger coreApplicationLogger, IUnityContainer container)
-        {
-            ApplicationLogger = coreApplicationLogger;
-            Container = container;
-        }
-
-        public ICoreApplicationLogger ApplicationLogger { get; }
-
         public string DataPath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 
         public string StoragePath
@@ -50,7 +43,34 @@ namespace OmniCore.Client.Droid.Platform
             }
         }
 
-        public void Shutdown()
+        public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
+
+        public IDisposable KeepAwake()
+        {
+            return new KeepAwakeLock();
+        }
+
+        IObservable<ICoreApplicationService> ICoreApplicationService.WhenStarted()
+        {
+            throw new NotImplementedException();
+        }
+
+        IObservable<ICoreApplicationService> ICoreApplicationService.WhenHibernating()
+        {
+            throw new NotImplementedException();
+        }
+
+        IObservable<ICoreApplicationService> ICoreApplicationService.WhenResuming()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnStart(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnStop(CancellationToken cancellationToken)
         {
             if (Application.Context is Activity activity)
                 activity.FinishAffinity();
@@ -58,39 +78,18 @@ namespace OmniCore.Client.Droid.Platform
             {
                 Process.KillProcess(Process.MyPid());
             }
+
+            return Task.CompletedTask;
         }
 
-        public IBackgroundTask CreateBackgroundTask()
-        {
-            return Container.Resolve<IBackgroundTask>();
-        }
-
-        public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
-
-        public T CreateView<T>() where T: IView<IViewModel>
-        {
-            return Container.Resolve<T>();
-        }
-
-        public IDisposable KeepAwake()
-        {
-            return new KeepAwakeLock();
-        }
-
-        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenStarted()
+        protected override Task OnPause(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenHibernating()
+        protected override Task OnResume(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
-
-        IObservable<ICoreApplicationServices> ICoreApplicationServices.WhenResuming()
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }

@@ -7,8 +7,7 @@ using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces.Platform;
-using Unity;
+using OmniCore.Model.Interfaces.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -19,9 +18,8 @@ namespace OmniCore.Client.Views.Main
     {
         public ShellViewModel ViewModel { get; }
 
-        public ShellView(ShellViewModel viewModel, IUnityContainer container)
+        public ShellView(ShellViewModel viewModel)
         {
-            ShellRoutes.RegisterRoutes(container);
             viewModel.Initialize().WaitAndUnwrapException();
             BindingContext = ViewModel = viewModel;
             InitializeComponent();

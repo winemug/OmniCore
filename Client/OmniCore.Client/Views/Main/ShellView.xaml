@@ -33,7 +33,7 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods" Route="Pods"/>
+        <ShellContent ContentTemplate="{Binding PodsView}" Title="Pods" Route="Pods"/>
         <ShellContent ContentTemplate="{Binding RadiosView}" Title="Radios" Route="Radios"/>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activities" Route="Activities"/>
     </FlyoutItem>

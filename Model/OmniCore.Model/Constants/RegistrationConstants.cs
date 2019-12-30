@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Unity.Injection;
-using Unity.Resolution;
 
 namespace OmniCore.Model.Constants
 {

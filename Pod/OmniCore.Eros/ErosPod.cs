@@ -2,22 +2,21 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
-using Unity;
 
 namespace OmniCore.Eros
 {
     public class ErosPod : IPod
     {
 
-        private readonly IUnityContainer Container;
+        private readonly ICoreContainer Container;
         private readonly IPodRequestRepository PodRequestRepository;
         private readonly ITaskQueue TaskQueue;
 
-        public ErosPod(IUnityContainer container,
+        public ErosPod(ICoreContainer container,
             IPodRequestRepository podRequestRepository,
             ITaskQueue taskQueue)
         {
@@ -124,7 +123,7 @@ namespace OmniCore.Eros
 
         private async Task<IPodRequest> CreatePodRequest()
         {
-            var request = Container.Resolve<IPodRequest>(RegistrationConstants.OmnipodEros);
+            var request = Container.Get<IPodRequest>();
             request.Pod = this;
 
             request.Entity = PodRequestRepository.New();
