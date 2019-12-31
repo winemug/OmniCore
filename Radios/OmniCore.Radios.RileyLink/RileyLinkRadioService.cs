@@ -109,12 +109,12 @@ namespace OmniCore.Radios.RileyLink
 
         protected override Task OnStart(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         protected override Task OnPause(CancellationToken cancellationToken)

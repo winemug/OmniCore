@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Interfaces.Services;
@@ -12,7 +13,7 @@ namespace OmniCore.Model.Interfaces
         ICoreContainer One<T>();
         ICoreContainer One<TI, TC>() where TC : TI;
         ICoreContainer Existing<T>(T instance);
-        IList<T> AllAssignable<T>();
         T Get<T>();
+        T[] GetAll<T>();
     }
 }

@@ -45,8 +45,6 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnCreate()
         {
-            StartServices(CancellationToken.None);
-
             Container = new OmniCoreContainer()
                 .Existing<ICoreBootstrapper>(this)
                 .WithOmnipodEros()
@@ -67,6 +65,8 @@ namespace OmniCore.Client.Droid.Services
             RadioService = Container.Get<IRadioService>();
             PodService = Container.Get<IPodService>();
             IntegrationService = Container.Get<ICoreIntegrationService>();
+
+            StartServices(CancellationToken.None);
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -116,24 +116,24 @@ namespace OmniCore.Client.Droid.Services
             StartForeground(1, notification);
         }
 
-        public void StartServices(CancellationToken cancellationToken)
+        public async Task StartServices(CancellationToken cancellationToken)
         {
-            LoggingService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            ApplicationService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            RepositoryService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            RadioService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            PodService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            IntegrationService.StartService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            await LoggingService.StartService(cancellationToken);
+            await ApplicationService.StartService(cancellationToken);
+            await RepositoryService.StartService(cancellationToken);
+            await RadioService.StartService(cancellationToken);
+            await PodService.StartService(cancellationToken);
+            await IntegrationService.StartService(cancellationToken);
         }
 
-        public void StopServices(CancellationToken cancellationToken)
+        public async Task StopServices(CancellationToken cancellationToken)
         {
-            IntegrationService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            PodService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            RadioService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            RepositoryService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            ApplicationService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
-            LoggingService.StopService(cancellationToken).WaitAndUnwrapException(cancellationToken);
+            await IntegrationService.StopService(cancellationToken);
+            await PodService.StopService(cancellationToken);
+            await RadioService.StopService(cancellationToken);
+            await RepositoryService.StopService(cancellationToken);
+            await ApplicationService.StopService(cancellationToken);
+            await LoggingService.StopService(cancellationToken);
         }
 
         public ICoreLoggingService LoggingService { get; private set; }

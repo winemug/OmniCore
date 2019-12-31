@@ -8,8 +8,8 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface ICoreBootstrapper
     {
-        void StartServices(CancellationToken cancellationToken);
-        void StopServices(CancellationToken cancellationToken);
+        Task StartServices(CancellationToken cancellationToken);
+        Task StopServices(CancellationToken cancellationToken);
 
         ICoreContainer Container { get; }
         ICoreLoggingService LoggingService { get; }

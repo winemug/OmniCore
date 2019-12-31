@@ -26,7 +26,10 @@ namespace OmniCore.Repository.Sqlite.Repositories
 
         public InterfaceType New()
         {
-            return new ConcreteType();
+            return new ConcreteType()
+            {
+                Uuid = Guid.NewGuid()
+            };
         }
         public async Task Delete(InterfaceType entity, CancellationToken cancellationToken)
         {
@@ -34,23 +37,25 @@ namespace OmniCore.Repository.Sqlite.Repositories
             await access.Connection.DeleteAsync(entity);
         }
 
-        public virtual async Task Initialize(Version migrateFrom, SQLiteAsyncConnection connection, CancellationToken cancellationToken)
-        {
-            if (migrateFrom == null)
-            {
-                await connection.CreateTableAsync<ConcreteType>();
-            }
-        }
-
         public virtual async Task Update(InterfaceType entity, CancellationToken cancellationToken)
         {
             using var access = await RepositoryService.GetAccess(cancellationToken);
+            entity.Updated = DateTimeOffset.UtcNow;
+
+            if (!entity.Uuid.HasValue)
+                entity.Uuid = Guid.NewGuid();
+
             await access.Connection.UpdateAsync(entity);
         }
 
         public virtual async Task Create(InterfaceType entity, CancellationToken cancellationToken)
         {
             using var access = await RepositoryService.GetAccess(cancellationToken);
+            entity.Created = DateTimeOffset.UtcNow;
+
+            if (!entity.Uuid.HasValue)
+                entity.Uuid = Guid.NewGuid();
+            
             await access.Connection.InsertAsync(entity, typeof(ConcreteType));
         }
         public virtual async Task<InterfaceType> Read(long id, CancellationToken cancellationToken)

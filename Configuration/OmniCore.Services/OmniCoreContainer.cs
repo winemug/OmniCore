@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using OmniCore.Model.Interfaces;
@@ -34,7 +35,8 @@ namespace OmniCore.Services
 
         public ICoreContainer Many<TI, TC>() where TC : TI
         {
-            throw new System.NotImplementedException();
+            this.RegisterType<TI,TC>();
+            return this;
         }
 
         public ICoreContainer One<TI, TC>() where TC : TI
@@ -43,17 +45,18 @@ namespace OmniCore.Services
             return this;
         }
 
-        public IList<T> AllAssignable<T>()
-        {
-            return this.Registrations
-                .Where(r => r.MappedToType.IsAssignableFrom(typeof(T)))
-                .Select(x => (T) ((IUnityContainer)this).Resolve(x.RegisteredType, x.Name))
-                .ToList();
-        }
-
         public T Get<T>()
         {
             return this.Resolve<T>();
+        }
+
+        public T[] GetAll<T>()
+        {
+            return this.Registrations
+                .Where(r => r.MappedToType.GetInterfaces()
+                    .Any(i => i == typeof(T)))
+                .Select(x => (T) ((IUnityContainer) this).Resolve(x.RegisteredType, x.Name))
+                .ToArray();
         }
     }
 }

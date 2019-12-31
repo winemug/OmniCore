@@ -3,6 +3,7 @@ using OmniCore.Model.Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -26,11 +27,11 @@ namespace OmniCore.Repository.Sqlite
         private bool IsInitialized;
         private SQLiteAsyncConnection ConnectionInternal;
 
-        private readonly ICoreContainer Container;
+        private readonly ICoreBootstrapper Bootstrapper;
 
-        public RepositoryService(ICoreContainer container) : base(null)
+        public RepositoryService(ICoreBootstrapper bootstrapper) : base(null)
         {
-            Container = container;
+            Bootstrapper = bootstrapper;
             RepositoryAccessLock = new AsyncReaderWriterLock();
         }
 
@@ -66,37 +67,6 @@ namespace OmniCore.Repository.Sqlite
             throw new NotImplementedException();
         }
 
-        public async Task Initialize(string repositoryPath, CancellationToken cancellationToken)
-        {
-            using var repositoryLock = await RepositoryAccessLock.WriterLockAsync(cancellationToken);
-            if (IsInitialized)
-                await ShutdownInternal(cancellationToken);
-
-            RepositoryPath = repositoryPath;
-
-            ConnectionInternal = new SQLiteAsyncConnection
-                (repositoryPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite);
-
-            var repositories = Container.AllAssignable<IRepository<IEntity>>();
-
-            foreach (var repository in repositories)
-            {
-                if (repository != null)
-                    await repository.Initialize(null, ConnectionInternal, cancellationToken);
-            }
-
-            IsInitialized = true;
-        }
-
-        public async Task Shutdown(CancellationToken cancellationToken)
-        {
-            using var repositoryLock = await RepositoryAccessLock.WriterLockAsync(cancellationToken);
-            if (!IsInitialized)
-                throw new OmniCoreWorkflowException(FailureType.WorkflowRepositoryNotInitialized);
-
-            await ShutdownInternal(cancellationToken);
-        }
-
         private async Task ShutdownInternal(CancellationToken cancellationToken)
         {
             if (ConnectionInternal != null)
@@ -104,14 +74,34 @@ namespace OmniCore.Repository.Sqlite
             ConnectionInternal = null;
         }
 
-        protected override Task OnStart(CancellationToken cancellationToken)
+        protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using var repositoryLock = await RepositoryAccessLock.WriterLockAsync(cancellationToken);
+            if (IsInitialized)
+                await ShutdownInternal(cancellationToken);
+
+            var path = Path.Combine(Bootstrapper.ApplicationService.DataPath, "oc.db3");
+
+            var migrators = Bootstrapper.Container.GetAll<IRepositoryMigrator>();
+
+            foreach (var migrator in migrators)
+            {
+                await migrator.ExecuteMigration(
+                    Bootstrapper.ApplicationService.Version,
+                    path, cancellationToken);
+            }
+
+            ConnectionInternal = new SQLiteAsyncConnection(path, SQLiteOpenFlags.ReadWrite);
+            IsInitialized = true;
         }
 
-        protected override Task OnStop(CancellationToken cancellationToken)
+        protected override async Task OnStop(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using var repositoryLock = await RepositoryAccessLock.WriterLockAsync(cancellationToken);
+            if (!IsInitialized)
+                throw new OmniCoreWorkflowException(FailureType.WorkflowRepositoryNotInitialized);
+
+            await ShutdownInternal(cancellationToken);
         }
 
         protected override Task OnPause(CancellationToken cancellationToken)

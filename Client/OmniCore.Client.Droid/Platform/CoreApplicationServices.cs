@@ -67,7 +67,7 @@ namespace OmniCore.Client.Droid.Platform
 
         protected override Task OnStart(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)

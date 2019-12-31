@@ -15,6 +15,8 @@ namespace OmniCore.Repository.Sqlite.Entities
 
         [AutoIncrement, PrimaryKey]
         public long Id { get; set; }
+        
+        public Guid? Uuid { get; set; }
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset? Updated { get; set; }
         public bool IsDeleted { get; set; }

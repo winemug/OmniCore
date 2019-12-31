@@ -15,6 +15,5 @@ namespace OmniCore.Model.Interfaces.Data.Repositories
         IAsyncEnumerable<T> All(CancellationToken cancellationToken);
         Task Update(T entity, CancellationToken cancellationToken);
         Task Delete(T entity, CancellationToken cancellationToken);
-        Task Initialize(Version migrateFrom, SQLiteAsyncConnection connection, CancellationToken cancellationToken);
     }
 }
