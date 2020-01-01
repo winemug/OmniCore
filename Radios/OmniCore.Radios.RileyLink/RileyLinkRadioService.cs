@@ -6,7 +6,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Fody;
 using Nito.AsyncEx;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
