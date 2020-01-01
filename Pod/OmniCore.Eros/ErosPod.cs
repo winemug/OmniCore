@@ -26,6 +26,8 @@ namespace OmniCore.Eros
         }
 
         public IPodEntity Entity { get; set; }
+        public IPodRequest ActiveRequest { get; }
+
         public Task Archive()
         {
             throw new System.NotImplementedException();

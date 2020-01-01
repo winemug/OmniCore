@@ -22,7 +22,7 @@ namespace OmniCore.Eros
         }
 
         public bool CanCancel { get; private set; }
-        public void TryCancel()
+        public void RequestCancellation()
         {
             throw new NotImplementedException();
         }
