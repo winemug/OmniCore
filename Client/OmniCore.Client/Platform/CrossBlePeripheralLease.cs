@@ -19,9 +19,12 @@ namespace OmniCore.Client.Platform
     {
         private readonly CrossBleRadioPeripheral CrossPeripheral;
         private IDevice BleDevice => CrossPeripheral.BleDevice;
-        public CrossBlePeripheralLease(CrossBleRadioPeripheral crossBleRadioPeripheral)
+        private IDisposable BluetoothLock = null;
+        private readonly ICoreServices Services;
+        public CrossBlePeripheralLease(ICoreServices services, CrossBleRadioPeripheral crossBleRadioPeripheral)
         {
             CrossPeripheral = crossBleRadioPeripheral;
+            BluetoothLock = Services.ApplicationService.BluetoothKeepAwake();
         }
 
         public IObservable<IRadioPeripheralLease> WhenConnected() =>
@@ -84,6 +87,8 @@ namespace OmniCore.Client.Platform
 
         public void Dispose()
         {
+            BluetoothLock?.Dispose();
+            BluetoothLock = null;
             CrossPeripheral.ActiveLeaseLockDisposable.Dispose();
         }
     }

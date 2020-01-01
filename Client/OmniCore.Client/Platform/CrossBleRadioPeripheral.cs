@@ -30,9 +30,11 @@ namespace OmniCore.Client.Platform
         private IDisposable RssiUpdateSubscription = null;
         private IDisposable ConnectionStateSubscription = null;
         private IDisposable NameSubscription = null;
+        private readonly ICoreServices Services;
 
-        public CrossBleRadioPeripheral(IDevice bleDevice)
+        public CrossBleRadioPeripheral(ICoreServices services, IDevice bleDevice)
         {
+            Services = services;
             LeaseLock = new AsyncLock();
             SetDevice(bleDevice);
         }
@@ -82,7 +84,7 @@ namespace OmniCore.Client.Platform
         public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {
             ActiveLeaseLockDisposable = await LeaseLock.LockAsync(cancellationToken);
-            return new CrossBlePeripheralLease(this);
+            return new CrossBlePeripheralLease(Services,this);
         }
 
         private TimeSpan? RssiUpdateTimeSpanInternal = null;
