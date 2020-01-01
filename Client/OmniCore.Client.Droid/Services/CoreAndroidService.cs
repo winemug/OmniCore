@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Acr.Logging;
@@ -9,6 +12,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Service.Autofill;
 using Java.Lang;
+using Java.Util;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Eros;
@@ -18,6 +22,7 @@ using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
 using Unity;
+using Notification = Android.App.Notification;
 
 namespace OmniCore.Client.Droid.Services
 {
@@ -30,6 +35,11 @@ namespace OmniCore.Client.Droid.Services
 
         public ICoreContainer Container { get; private set; }
 
+        private readonly ISubject<ICoreServices> UnexpectedStopRequestSubject =
+            new Subject<ICoreServices>();
+        public IObservable<ICoreServices> OnUnexpectedStopRequest
+            => UnexpectedStopRequestSubject;
+        
         public override IBinder OnBind(Intent intent)
         {
             Binder = new CoreServiceBinder(this);
@@ -66,7 +76,7 @@ namespace OmniCore.Client.Droid.Services
             PodService = Container.Get<IPodService>();
             IntegrationService = Container.Get<ICoreIntegrationService>();
 
-            StartServices(CancellationToken.None);
+            StartServices(CancellationToken.None).WaitAndUnwrapException();
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -87,10 +97,10 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnDestroy()
         {
-            StopServices(CancellationToken.None);
+            UnexpectedStopRequestSubject.OnNext(this);
+            StopServices(CancellationToken.None).WaitAndUnwrapException();
             base.OnDestroy();
         }
-
         private void CreateNotification()
         {
             var notificationManager = (NotificationManager) GetSystemService(NotificationService);

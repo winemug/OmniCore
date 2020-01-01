@@ -12,5 +12,7 @@ namespace OmniCore.Model.Interfaces.Services
         SynchronizationContext UiSynchronizationContext { get; }
         IDisposable DisplayKeepAwake();
         IDisposable BluetoothKeepAwake();
+        void StorePreferences((string Key, string Value)[] preferences);
+        (string Key, string Value)[] ReadPreferences((string Key, string DefaultValue)[] preferences);
     }
 }

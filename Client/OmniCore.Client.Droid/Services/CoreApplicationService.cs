@@ -81,5 +81,26 @@ namespace OmniCore.Client.Droid.Services
         {
             throw new NotImplementedException();
         }
+
+        public void StorePreferences((string Key, string Value)[] preferences)
+        {
+            using var sharedPreferences = Application.Context.GetSharedPreferences("OmniCore", FileCreationMode.Private);
+            using var editor = sharedPreferences.Edit();
+            foreach(var preference in preferences)
+                editor.PutString(preference.Key, preference.Value);
+            editor.Commit();
+        }
+        
+        public (string Key, string Value)[] ReadPreferences((string Key, string DefaultValue)[] preferences)
+        {
+            using var sharedPreferences = Application.Context.GetSharedPreferences("OmniCore", FileCreationMode.Private);
+            var preferencesResult = new ValueTuple<string, string>[preferences.Length];
+
+            for (int i = 0; i < preferences.Length; i++)
+                preferencesResult[i] = (preferences[i].Key,
+                    sharedPreferences.GetString(preferences[i].Key, preferences[i].DefaultValue));
+
+            return preferencesResult;
+        }
     }
 }

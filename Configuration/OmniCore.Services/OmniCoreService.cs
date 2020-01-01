@@ -25,7 +25,6 @@ namespace OmniCore.Services
         protected abstract Task OnStop(CancellationToken cancellationToken);
         protected abstract Task OnPause(CancellationToken cancellationToken);
         protected abstract Task OnResume(CancellationToken cancellationToken);
-
         private readonly ICoreService[] Dependencies = new ICoreService[0];
 
         protected OmniCoreService(params ICoreService[] dependencies)

@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Task StartServices(CancellationToken cancellationToken);
         Task StopServices(CancellationToken cancellationToken);
-
+        IObservable<ICoreServices> OnUnexpectedStopRequest { get; }
         ICoreContainer Container { get; }
         ICoreLoggingService LoggingService { get; }
         ICoreApplicationService ApplicationService { get; }
