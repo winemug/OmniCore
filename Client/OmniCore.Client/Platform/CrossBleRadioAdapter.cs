@@ -28,7 +28,7 @@ namespace OmniCore.Client.Platform
         private AsyncLock AdapterManagementLock;
         private Dictionary<Guid, CrossBleRadioPeripheral> PeripheralCache;
 
-        public CrossBleRadioAdapter(ICoreBootstrapper bootstrapper)
+        public CrossBleRadioAdapter(ICoreServices services)
         {
             PeripheralSearchLock = new AsyncLock();
             AdapterManagementLock = new AsyncLock();

@@ -19,7 +19,7 @@ namespace OmniCore.Client.ViewModels.Home
         {
         }
 
-        public RadioDetailViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public RadioDetailViewModel(ICoreServices services) : base(services)
         {
         }
     }

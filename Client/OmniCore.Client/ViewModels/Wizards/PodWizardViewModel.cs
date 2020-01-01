@@ -29,7 +29,7 @@ namespace OmniCore.Client.ViewModels.Wizards
 
         }
 
-        public PodWizardViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public PodWizardViewModel(ICoreServices services) : base(services)
         {
         }
     }

@@ -27,11 +27,11 @@ namespace OmniCore.Client.ViewModels.Home
 
         public ICommand AddCommand { get; set; }
 
-        private ICoreApplicationService ApplicationService => Bootstrapper.ApplicationService;
+        private ICoreApplicationService ApplicationService => Services.ApplicationService;
 
-        private IPodService PodService => Bootstrapper.PodService;
+        private IPodService PodService => Services.PodService;
 
-        public PodsViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public PodsViewModel(ICoreServices services) : base(services)
         {
             Title = "Pods";
             SelectCommand = new Command<IPod>(async pod => await SelectPod(pod));
@@ -55,7 +55,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         private async Task AddPod()
         {
-            await Shell.Current.Navigation.PushAsync(Bootstrapper.Container.Get<PodWizardMainView>());
+            await Shell.Current.Navigation.PushAsync(Services.Container.Get<PodWizardMainView>());
         }
 
         private async Task SelectPod(IPod pod)

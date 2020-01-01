@@ -26,7 +26,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         private IDisposable ListRadiosSubscription;
 
-        public RadiosViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public RadiosViewModel(ICoreServices services) : base(services)
         {
             Title = "Radio Selection";
             BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.InUse);
@@ -37,8 +37,8 @@ namespace OmniCore.Client.ViewModels.Home
         {
             
             Radios = new ObservableCollection<IRadio>();
-            ListRadiosSubscription = Bootstrapper.RadioService.ListRadios()
-                .ObserveOn(Bootstrapper.ApplicationService.UiSynchronizationContext)
+            ListRadiosSubscription = Services.RadioService.ListRadios()
+                .ObserveOn(Services.ApplicationService.UiSynchronizationContext)
                 .Subscribe(radio =>
                     {
                         Radios.Add(radio);
@@ -60,7 +60,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         private async Task SelectRadio(IRadio radio)
         {
-            var view = Bootstrapper.Container.Get<RadioDetailView>();
+            var view = Services.Container.Get<RadioDetailView>();
             view.ViewModel.Radio = radio;
             await Shell.Current.Navigation.PushAsync(view);
         }

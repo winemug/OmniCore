@@ -22,7 +22,7 @@ using Unity;
 namespace OmniCore.Client.Droid.Services
 {
     [Service]
-    public class CoreBootstrapper : Service, ICoreBootstrapper
+    public class CoreAndroidService : Service, ICoreServices
     {
         private bool AndroidServiceStarted = false;
 
@@ -46,7 +46,7 @@ namespace OmniCore.Client.Droid.Services
         public override void OnCreate()
         {
             Container = new OmniCoreContainer()
-                .Existing<ICoreBootstrapper>(this)
+                .Existing<ICoreServices>(this)
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
                 .WithAapsIntegration()

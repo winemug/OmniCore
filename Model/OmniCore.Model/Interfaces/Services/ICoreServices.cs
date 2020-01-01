@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface ICoreBootstrapper
+    public interface ICoreServices
     {
         Task StartServices(CancellationToken cancellationToken);
         Task StopServices(CancellationToken cancellationToken);

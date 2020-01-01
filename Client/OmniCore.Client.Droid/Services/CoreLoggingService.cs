@@ -17,7 +17,7 @@ using Microsoft.AppCenter.Crashes;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Services;
 
-namespace OmniCore.Mobile.Droid.Platform
+namespace OmniCore.Mobile.Droid.Services
 {
     public class CoreLoggingService : OmniCoreService, ICoreLoggingService
     {

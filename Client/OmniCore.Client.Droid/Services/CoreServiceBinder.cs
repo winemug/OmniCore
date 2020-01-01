@@ -6,10 +6,10 @@ namespace OmniCore.Client.Droid.Services
 {
     public class CoreServiceBinder : Binder
     {
-        public ICoreBootstrapper Bootstrapper { get; }
-        public CoreServiceBinder(CoreBootstrapper bootstrapperImplementation)
+        public ICoreServices AndroidService { get; }
+        public CoreServiceBinder(CoreAndroidService androidServiceImplementation)
         {
-            Bootstrapper = bootstrapperImplementation;
+            AndroidService = androidServiceImplementation;
         }
     }
 }

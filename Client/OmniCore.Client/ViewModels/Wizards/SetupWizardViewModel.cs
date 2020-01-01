@@ -10,7 +10,7 @@ namespace OmniCore.Client.ViewModels.Wizards
 {
     public class SetupWizardViewModel : NavigationViewModel
     {
-        public SetupWizardViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public SetupWizardViewModel(ICoreServices services) : base(services)
         {
         }
     }

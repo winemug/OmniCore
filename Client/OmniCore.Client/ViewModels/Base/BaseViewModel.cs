@@ -12,10 +12,10 @@ namespace OmniCore.Client.ViewModels.Base
     //[Fody.ConfigureAwait(true)]
     public abstract class BaseViewModel : IViewModel
     {
-        protected ICoreBootstrapper Bootstrapper { get; private set; }
-        public BaseViewModel(ICoreBootstrapper bootstrapper)
+        protected ICoreServices Services { get; private set; }
+        public BaseViewModel(ICoreServices services)
         {
-            Bootstrapper = bootstrapper;
+            Services = services;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

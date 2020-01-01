@@ -13,7 +13,7 @@ namespace OmniCore.Client.Droid.Services
 {
     public class CoreServiceConnection : Java.Lang.Object, IServiceConnection
     {
-        private Subject<ICoreBootstrapper> ServiceConnected = new Subject<ICoreBootstrapper>();
+        private Subject<ICoreServices> ServiceConnected = new Subject<ICoreServices>();
         private Subject<IServiceConnection> ServiceDisconnected = new Subject<IServiceConnection>();
 
         private CoreServiceBinder Binder;
@@ -23,7 +23,7 @@ namespace OmniCore.Client.Droid.Services
             Binder = service as CoreServiceBinder;
             if (Binder != null)
             {
-                ServiceConnected.OnNext(Binder.Bootstrapper);
+                ServiceConnected.OnNext(Binder.AndroidService);
                 ServiceConnected.OnCompleted();
             }
         }
@@ -34,7 +34,7 @@ namespace OmniCore.Client.Droid.Services
             ServiceDisconnected.OnCompleted();
         }
 
-        public IObservable<ICoreBootstrapper> WhenConnected()
+        public IObservable<ICoreServices> WhenConnected()
         {
             return ServiceConnected.AsObservable();
         }

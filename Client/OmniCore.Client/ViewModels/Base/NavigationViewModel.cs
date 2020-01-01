@@ -21,7 +21,7 @@ namespace OmniCore.Client.ViewModels.Base
             return Task.CompletedTask;
         }
 
-        protected NavigationViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        protected NavigationViewModel(ICoreServices services) : base(services)
         {
         }
     }

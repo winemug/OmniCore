@@ -13,7 +13,7 @@ using Android.Widget;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Mobile.Droid.Platform
+namespace OmniCore.Mobile.Droid.Services
 {
     public class BackgroundTask : IBackgroundTask
     {

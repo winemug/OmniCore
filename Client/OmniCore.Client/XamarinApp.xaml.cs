@@ -16,12 +16,12 @@ namespace OmniCore.Client
 {
     public partial class XamarinApp : Application
     {
-        public XamarinApp(ICoreBootstrapper bootstrapper)
+        public XamarinApp(ICoreServices services)
         {
             InitializeComponent();
 
-            MainPage = bootstrapper.Container.Get<ShellView>();
-            bootstrapper.LoggingService.Information("OmniCore App initialized");
+            MainPage = services.Container.Get<ShellView>();
+            services.LoggingService.Information("OmniCore App initialized");
         }
     }
 }

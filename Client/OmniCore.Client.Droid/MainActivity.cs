@@ -58,7 +58,7 @@ namespace OmniCore.Client.Droid
                 }
             }
 
-            var startIntent = new Intent(this, typeof(CoreBootstrapper));
+            var startIntent = new Intent(this, typeof(CoreAndroidService));
             var connection = new CoreServiceConnection();
 
             if (!BindService(startIntent, connection, Bind.AutoCreate))
@@ -66,8 +66,8 @@ namespace OmniCore.Client.Droid
                 //TODO:
             }
 
-            var bootstrapper = await connection.WhenConnected();
-            LoadApplication(new XamarinApp(bootstrapper));
+            var coreServices = await connection.WhenConnected();
+            LoadApplication(new XamarinApp(coreServices));
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)

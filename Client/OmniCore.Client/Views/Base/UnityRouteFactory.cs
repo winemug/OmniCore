@@ -11,9 +11,9 @@ namespace OmniCore.Client.Views.Base
     {
         private readonly ICoreContainer Container;
         
-        public UnityRouteFactory(ICoreBootstrapper bootstrapper)
+        public UnityRouteFactory(ICoreServices services)
         {
-            Container = bootstrapper.Container;
+            Container = services.Container;
         }
 
         private Type ViewType;

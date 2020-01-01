@@ -9,7 +9,7 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class EmptyViewModel : BaseViewModel
     {
-        public EmptyViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public EmptyViewModel(ICoreServices services) : base(services)
         {
             Title = "Nothing to see here";
         }

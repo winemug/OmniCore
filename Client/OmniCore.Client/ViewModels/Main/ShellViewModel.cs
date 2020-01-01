@@ -13,12 +13,12 @@ namespace OmniCore.Client.ViewModels.Base
     public class ShellViewModel : BaseViewModel
     {
 
-        public DataTemplate EmptyView => new DataTemplate(() => Bootstrapper.Container.Get<EmptyView>());
-        public DataTemplate RadiosView => new DataTemplate(() => Bootstrapper.Container.Get<RadiosView>());
-        public DataTemplate PodsView => new DataTemplate(() => Bootstrapper.Container.Get<PodsView>());
+        public DataTemplate EmptyView => new DataTemplate(() => Services.Container.Get<EmptyView>());
+        public DataTemplate RadiosView => new DataTemplate(() => Services.Container.Get<RadiosView>());
+        public DataTemplate PodsView => new DataTemplate(() => Services.Container.Get<PodsView>());
         public string Title => "OmniCore";
 
-        public ShellViewModel(ICoreBootstrapper bootstrapper) : base(bootstrapper)
+        public ShellViewModel(ICoreServices services) : base(services)
         {
         }
 
