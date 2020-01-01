@@ -23,6 +23,7 @@ namespace OmniCore.Client.Platform
         private readonly ICoreServices Services;
         public CrossBlePeripheralLease(ICoreServices services, CrossBleRadioPeripheral crossBleRadioPeripheral)
         {
+            Services = services;
             CrossPeripheral = crossBleRadioPeripheral;
             BluetoothLock = Services.ApplicationService.BluetoothKeepAwake();
         }
