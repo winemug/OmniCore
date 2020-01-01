@@ -9,6 +9,7 @@ using Acr.Logging;
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Provider;
 using Android.Runtime;
 using Android.Service.Autofill;
 using Java.Lang;
@@ -134,16 +135,48 @@ namespace OmniCore.Client.Droid.Services
             await RadioService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
+            
+            var previousState = ApplicationService.ReadPreferences(new []
+            {
+                ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
+            })[0];
+            
+            if (!string.IsNullOrEmpty(previousState.Value))
+            {
+                //TODO: check states of requests - create notifications
+                StoreRunningServicesValue(string.Empty);
+            }
+        }
+
+        private void StoreRunningServicesValue(string value)
+        {
+            ApplicationService.StorePreferences(new []
+            {
+                ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
+            });
         }
 
         public async Task StopServices(CancellationToken cancellationToken)
         {
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(RepositoryService)},{nameof(RadioService)}," +
+                                      $"{nameof(PodService)},{nameof(IntegrationService)}");
             await IntegrationService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(RepositoryService)},{nameof(RadioService)}," +
+                                      $"{nameof(PodService)}");
             await PodService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(RepositoryService)},{nameof(RadioService)}");
             await RadioService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(RepositoryService)}");
             await RepositoryService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}");
             await ApplicationService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)}");
             await LoggingService.StopService(cancellationToken);
+            StoreRunningServicesValue(string.Empty);
         }
 
         public ICoreLoggingService LoggingService { get; private set; }

@@ -7,6 +7,7 @@ namespace OmniCore.Model.Interfaces.Services
     public interface IPod
     {
         IPodEntity Entity { get; set; }
+        IPodRequest ActiveRequest { get; }
         Task Archive();
         Task<IList<IPodRequest>> GetActiveRequests();
         Task<IPodRequest> RequestPair();

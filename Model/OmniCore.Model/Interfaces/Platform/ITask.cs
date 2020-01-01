@@ -8,7 +8,7 @@ namespace OmniCore.Model.Interfaces.Services
     public interface ITask : IDisposable
     {
         bool CanCancel { get; }
-        void TryCancel();
+        void RequestCancellation();
         IObservable<ITask> WhenCannotCancel();
         IObservable<ITask> WhenStarted();
         IObservable<ITask> WhenFinished();
