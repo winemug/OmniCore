@@ -16,6 +16,7 @@ using Java.Lang;
 using Java.Util;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+using OmniCore.Client.Droid.Platform;
 using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
@@ -27,19 +28,17 @@ using OmniCore.Services;
 using Unity;
 using Notification = Android.App.Notification;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Client.Droid
 {
-    [Service]
+    [Service(Exported = false)]
     public class AndroidService : Service
     {
         private bool AndroidServiceStarted = false;
 
-        public AndroidServiceBinder Binder { get; private set; }
-        public ICoreServices CoreServices { get; private set; }
+        private ICoreServices CoreServices;
 
         public override IBinder OnBind(Intent intent)
         {
-            Binder = new AndroidServiceBinder(this);
             if (!AndroidServiceStarted)
             {
                 if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
@@ -47,7 +46,7 @@ namespace OmniCore.Client.Droid.Services
                 else
                     StartService(intent);
             }
-            return Binder;
+            return new AndroidServiceBinder(CoreServices);
         }
 
         public override void OnCreate()

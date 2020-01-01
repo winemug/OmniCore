@@ -22,7 +22,7 @@ namespace OmniCore.Client.Views.Main
 
         public ShellView(ShellViewModel viewModel)
         {
-            var task = Task.Run( async () => viewModel.OnInitialize());
+            var task = Task.Run( async () => viewModel.Initialize());
             task.Wait();
             if (!task.IsCompletedSuccessfully)
             {

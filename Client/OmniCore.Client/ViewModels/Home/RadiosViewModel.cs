@@ -38,7 +38,7 @@ namespace OmniCore.Client.ViewModels.Home
             
             Radios = new ObservableCollection<IRadio>();
             ListRadiosSubscription = Services.RadioService.ListRadios()
-                .ObserveOn(Client.UiSynchronizationContext)
+                .ObserveOn(Client.SynchronizationContext)
                 .Subscribe(radio =>
                     {
                         Radios.Add(radio);

@@ -12,7 +12,7 @@ using OmniCore.Services;
 using Unity;
 using Environment = Android.OS.Environment;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Client.Droid.Platform
 {
     public class CoreApplicationService : OmniCoreService, ICoreApplicationService
     {

@@ -10,12 +10,10 @@ using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Client.Droid.Platform
 {
     public class CoreServices : ICoreServices
     {
-        private bool AndroidServiceStarted = false;
-
         public ICoreContainer Container { get; private set; }
         public ICoreLoggingService LoggingService { get; private set; }
         public ICoreApplicationService ApplicationService { get; private set; }

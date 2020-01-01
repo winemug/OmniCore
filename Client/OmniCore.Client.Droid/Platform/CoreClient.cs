@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Android.App;
+using Android.Content;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
 
@@ -7,13 +9,12 @@ namespace OmniCore.Client.Droid.Platform
 {
     public class CoreClient : ICoreClient
     {
-        public CoreClient(ICoreContainer clientContainer, ICoreServicesConnection servicesConnection)
+        public ICoreServices CoreServices { get; set; }
+        public ICoreContainer Container { get; }
+        public SynchronizationContext SynchronizationContext => Application.SynchronizationContext;
+        public CoreClient(ICoreContainer clientContainer)
         {
             Container = clientContainer;
-            ServicesConnection = servicesConnection;
         }
-        public ICoreContainer Container { get; }
-        public ICoreServicesConnection ServicesConnection { get; }
-        public SynchronizationContext UiSynchronizationContext => Application.SynchronizationContext;
     }
 }

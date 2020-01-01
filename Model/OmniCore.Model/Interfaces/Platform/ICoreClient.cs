@@ -1,11 +1,12 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
     public interface ICoreClient
     {
+        ICoreServices CoreServices { get; set; }
         ICoreContainer Container { get; }
-        ICoreServicesConnection ServicesConnection { get; }
-        SynchronizationContext UiSynchronizationContext { get; }
+        SynchronizationContext SynchronizationContext { get; }
     }
 }

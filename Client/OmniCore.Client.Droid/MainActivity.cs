@@ -9,11 +9,12 @@ using Android.Runtime;
 using Android.OS;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
-using OmniCore.Client.Droid.Services;
+using OmniCore.Client.Droid;
 using OmniCore.Model.Interfaces.Platform;
 using Plugin.BluetoothLE;
 using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
+using OmniCore.Client.Droid.Platform;
 using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 using Application = Xamarin.Forms.Application;
@@ -26,26 +27,13 @@ namespace OmniCore.Client.Droid
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
 
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : BaseActivity
     {
-        private bool savedValue = false;
-
-        private ICoreContainer ClientContainer;
-
-        public MainActivity()
-        {
-            ClientContainer = Initializer.AndroidClientContainer()
-                .WithXamarinForms();
-        }
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            Debug.WriteLine("ONCREATE");
-            savedValue = true;
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             
-            base.OnCreate(savedInstanceState);
-
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
@@ -59,18 +47,7 @@ namespace OmniCore.Client.Droid
                 this.FinishAffinity();
             }
 
-            if (!ConnectToService())
-            {
-                this.FinishAffinity();
-            }
-            
-            LoadApplication((Application) ClientContainer.Get<IPlatformApplication>());
-        }
-
-        private bool ConnectToService()
-        {
-            var servicesConnection = ClientContainer.Get<ICoreServicesConnection>();
-            return servicesConnection.Connect();
+            base.OnCreate(savedInstanceState);
         }
 
         private ISubject<bool> PermissionResultSubject;
@@ -105,48 +82,6 @@ namespace OmniCore.Client.Droid
                 return PermissionResultSubject.AsObservable();
             }
             return Observable.Return(true);
-        }
-
-        protected override void OnStart()
-        {
-            Debug.WriteLine($"ONSTART {savedValue}");
-            savedValue = true;
-            base.OnStart();
-        }
-
-        protected override void OnResume()
-        {
-            Debug.WriteLine($"ONRESUME {savedValue}");
-            savedValue = true;
-            base.OnResume();
-        }
-
-        protected override void OnPause()
-        {
-            Debug.WriteLine($"ONPAUSE {savedValue}");
-            savedValue = true;
-            base.OnPause();
-        }
-
-        protected override void OnStop()
-        {
-            Debug.WriteLine($"ONSTOP {savedValue}");
-            savedValue = true;
-            base.OnStop();
-        }
-
-        protected override void OnRestart()
-        {
-            Debug.WriteLine($"ONRESTART {savedValue}");
-            savedValue = true;
-            base.OnRestart();
-        }
-
-        protected override void OnDestroy()
-        {
-            Debug.WriteLine($"ONDESTROY {savedValue}");
-            savedValue = true;
-            base.OnDestroy();
         }
     }
 }

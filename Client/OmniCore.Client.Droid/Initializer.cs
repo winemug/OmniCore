@@ -1,7 +1,7 @@
 ﻿using OmniCore.Client.Droid.Platform;
-using OmniCore.Client.Droid.Services;
+using OmniCore.Client.Droid;
 using OmniCore.Eros;
-using OmniCore.Mobile.Droid.Services;
+using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
@@ -27,10 +27,11 @@ namespace OmniCore.Client.Droid
             return container.One<ICoreIntegrationService, AapsIntegrationService>();
         }
 
-        public static ICoreContainer AndroidClientContainer()
+        public static ICoreContainer AndroidClientContainer(ICoreClientContext clientContext)
         {
             return new OmniCoreContainer()
-                .One<ICoreServicesConnection, CoreServicesConnection>()
+                .Existing(clientContext)
+                .One<ICoreServicesConnection, AndroidServiceConnection>()
                 .One<ICoreClient, CoreClient>();
         }
     }

@@ -11,14 +11,12 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public abstract class BaseViewModel : IViewModel
     {
-        protected ICoreServices Services { get; private set; }
+        protected ICoreServices Services => Client.CoreServices;
         protected ICoreClient Client { get; private set; }
 
-        private ICoreServicesConnection ServicesConnection;
         public BaseViewModel(ICoreClient client)
         {
             Client = client;
-            Services = client.ServicesConnection.CoreServices;
         }
 
         public async Task Initialize()

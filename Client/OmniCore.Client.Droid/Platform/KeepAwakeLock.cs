@@ -10,7 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Client.Droid.Platform
 {
     public class KeepAwakeLock : IDisposable
     {

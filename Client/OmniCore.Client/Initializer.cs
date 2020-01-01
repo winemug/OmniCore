@@ -21,7 +21,7 @@ namespace OmniCore.Client
         public static ICoreContainer WithXamarinForms(this ICoreContainer container)
         {
             return container
-                .One<IPlatformApplication, XamarinApp>()
+                .One<XamarinApp>()
                 .One<UnityRouteFactory>()
                 .Many<ShellViewModel>()
                 .Many<ShellView>()

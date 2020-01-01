@@ -33,6 +33,7 @@ namespace OmniCore.Model.Enumerations
 
         ServiceStartupFailure,
         UserInterfaceInitialization,
-        ServiceStopFailure
+        ServiceStopFailure,
+        ServiceConnectionFailed
     }
 }
