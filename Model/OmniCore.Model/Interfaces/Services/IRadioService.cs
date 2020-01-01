@@ -1,7 +1,7 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IRadioService : ICoreService
     {

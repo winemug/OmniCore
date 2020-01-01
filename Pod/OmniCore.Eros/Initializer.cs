@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

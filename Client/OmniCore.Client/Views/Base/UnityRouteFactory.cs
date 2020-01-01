@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base

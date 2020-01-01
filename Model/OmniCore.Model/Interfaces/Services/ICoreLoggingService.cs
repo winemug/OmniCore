@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface ICoreLoggingService : ICoreService
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Simulation.Radios;
 
 namespace OmniCore.Simulation

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -11,17 +11,17 @@ namespace OmniCore.Client.ViewModels.Base
     public abstract class NavigationViewModel : BaseViewModel
     {
         protected ContentPage RootPage { get; set; }
-        public override Task Initialize()
+        public override Task OnInitialize()
         {
             return Task.CompletedTask;
         }
 
-        public override Task Dispose()
+        public override Task OnDispose()
         {
             return Task.CompletedTask;
         }
 
-        protected NavigationViewModel(ICoreServices services) : base(services)
+        protected NavigationViewModel(ICoreClient client) : base(client)
         {
         }
     }

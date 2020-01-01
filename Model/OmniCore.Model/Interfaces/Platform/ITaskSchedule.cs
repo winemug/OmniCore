@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface ITaskSchedule
     {

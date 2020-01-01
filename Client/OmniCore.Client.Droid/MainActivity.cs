@@ -2,27 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using Android;
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
-using Android.Content;
-using Android.Support.Design.Widget;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
-using Nito.AsyncEx;
 using OmniCore.Client.Droid.Services;
-using Unity;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Plugin.BluetoothLE;
-using Application = Xamarin.Forms.Application;
 using Permission = Android.Content.PM.Permission;
+using System.Reactive.Subjects;
+using OmniCore.Model.Interfaces;
+using OmniCore.Services;
+using Application = Xamarin.Forms.Application;
+using Debug = System.Diagnostics.Debug;
 
 namespace OmniCore.Client.Droid
 {
@@ -33,9 +28,19 @@ namespace OmniCore.Client.Droid
 
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        private TaskCompletionSource<bool> PermissionsRequestResult;
-        protected override async void OnCreate(Bundle savedInstanceState)
+        private bool savedValue = false;
+
+        private ICoreContainer ClientContainer;
+
+        public MainActivity()
         {
+            ClientContainer = Initializer.AndroidClientContainer()
+                .WithXamarinForms();
+        }
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            Debug.WriteLine("ONCREATE");
+            savedValue = true;
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
             
@@ -49,34 +54,34 @@ namespace OmniCore.Client.Droid
             Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            PermissionsRequestResult = new TaskCompletionSource<bool>();
-            if (ShouldWaitForPermissionsResult())
+            if (!CheckPermissions().Wait())
             {
-                if (!await PermissionsRequestResult.Task)
-                {
-                    Shutdown();
-                }
+                this.FinishAffinity();
             }
 
-            var startIntent = new Intent(this, typeof(CoreAndroidService));
-            var connection = new CoreServiceConnection();
-
-            if (!BindService(startIntent, connection, Bind.AutoCreate))
+            if (!ConnectToService())
             {
-                //TODO:
+                this.FinishAffinity();
             }
-
-            var coreServices = await connection.WhenConnected();
-            LoadApplication(new XamarinApp(coreServices));
+            
+            LoadApplication((Application) ClientContainer.Get<IPlatformApplication>());
         }
 
+        private bool ConnectToService()
+        {
+            var servicesConnection = ClientContainer.Get<ICoreServicesConnection>();
+            return servicesConnection.Connect();
+        }
+
+        private ISubject<bool> PermissionResultSubject;
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
-            PermissionsRequestResult.TrySetResult(grantResults.All(r => r == Permission.Granted));
+            PermissionResultSubject.OnNext(grantResults.All(r => r == Permission.Granted));
+            PermissionResultSubject.OnCompleted();
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        private bool ShouldWaitForPermissionsResult()
+        private IObservable<bool> CheckPermissions()
         {
             var permissions = new List<string>()
             {
@@ -95,16 +100,53 @@ namespace OmniCore.Client.Droid
 
             if (permissions.Count > 0)
             {
+                PermissionResultSubject = new Subject<bool>();
                 ActivityCompat.RequestPermissions(this, permissions.ToArray(), 34);
-                return true;
+                return PermissionResultSubject.AsObservable();
             }
-
-            return false;
+            return Observable.Return(true);
         }
 
-        private void Shutdown()
+        protected override void OnStart()
         {
-            this.FinishAffinity();
+            Debug.WriteLine($"ONSTART {savedValue}");
+            savedValue = true;
+            base.OnStart();
+        }
+
+        protected override void OnResume()
+        {
+            Debug.WriteLine($"ONRESUME {savedValue}");
+            savedValue = true;
+            base.OnResume();
+        }
+
+        protected override void OnPause()
+        {
+            Debug.WriteLine($"ONPAUSE {savedValue}");
+            savedValue = true;
+            base.OnPause();
+        }
+
+        protected override void OnStop()
+        {
+            Debug.WriteLine($"ONSTOP {savedValue}");
+            savedValue = true;
+            base.OnStop();
+        }
+
+        protected override void OnRestart()
+        {
+            Debug.WriteLine($"ONRESTART {savedValue}");
+            savedValue = true;
+            base.OnRestart();
+        }
+
+        protected override void OnDestroy()
+        {
+            Debug.WriteLine($"ONDESTROY {savedValue}");
+            savedValue = true;
+            base.OnDestroy();
         }
     }
 }

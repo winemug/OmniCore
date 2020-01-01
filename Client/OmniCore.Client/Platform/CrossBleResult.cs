@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 using OmniCore.Client.Annotations;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.Platform
 {

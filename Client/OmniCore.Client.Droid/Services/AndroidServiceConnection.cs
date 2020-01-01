@@ -7,42 +7,39 @@ using Android.Content;
 using Android.OS;
 using Javax.Security.Auth;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class CoreServiceConnection : Java.Lang.Object, IServiceConnection
+    public class AndroidServiceConnection : Java.Lang.Object, IServiceConnection
     {
-        private Subject<ICoreServices> ServiceConnected = new Subject<ICoreServices>();
-        private Subject<IServiceConnection> ServiceDisconnected = new Subject<IServiceConnection>();
+        private readonly Subject<AndroidService> ServiceConnected = new Subject<AndroidService>();
+        private readonly Subject<AndroidServiceConnection> ServiceDisconnected = new Subject<AndroidServiceConnection>();
 
-        private CoreServiceBinder Binder;
+        private AndroidServiceBinder Binder;
         
         public void OnServiceConnected(ComponentName name, IBinder service)
         {
-            Binder = service as CoreServiceBinder;
+            Binder = service as AndroidServiceBinder;
             if (Binder != null)
             {
                 ServiceConnected.OnNext(Binder.AndroidService);
-                ServiceConnected.OnCompleted();
             }
         }
         public void OnServiceDisconnected(ComponentName name)
         {
             Binder = null;
             ServiceDisconnected.OnNext(this);
-            ServiceDisconnected.OnCompleted();
         }
 
-        public IObservable<ICoreServices> WhenConnected()
+        public IObservable<AndroidService> WhenConnected()
         {
             return ServiceConnected.AsObservable();
         }
 
-        public IObservable<IServiceConnection> WhenDisconnected()
+        public IObservable<AndroidServiceConnection> WhenDisconnected()
         {
             return ServiceDisconnected.AsObservable();
         }
-
     }
 }

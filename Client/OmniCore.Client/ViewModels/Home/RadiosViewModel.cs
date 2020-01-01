@@ -12,7 +12,7 @@ using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -26,26 +26,26 @@ namespace OmniCore.Client.ViewModels.Home
 
         private IDisposable ListRadiosSubscription;
 
-        public RadiosViewModel(ICoreServices services) : base(services)
+        public RadiosViewModel(ICoreClient client) : base(client)
         {
             Title = "Radio Selection";
             BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.InUse);
             SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.InUse);
         }
 
-        public override async Task Initialize()
+        public override async Task OnInitialize()
         {
             
             Radios = new ObservableCollection<IRadio>();
             ListRadiosSubscription = Services.RadioService.ListRadios()
-                .ObserveOn(Services.ApplicationService.UiSynchronizationContext)
+                .ObserveOn(Client.UiSynchronizationContext)
                 .Subscribe(radio =>
                     {
                         Radios.Add(radio);
                     });
         }
 
-        public override async Task Dispose()
+        public override async Task OnDispose()
         {
             ListRadiosSubscription?.Dispose();
             ListRadiosSubscription = null;

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces
 {

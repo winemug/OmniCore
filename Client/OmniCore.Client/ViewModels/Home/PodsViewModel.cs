@@ -14,7 +14,7 @@ using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -31,14 +31,14 @@ namespace OmniCore.Client.ViewModels.Home
 
         private IPodService PodService => Services.PodService;
 
-        public PodsViewModel(ICoreServices services) : base(services)
+        public PodsViewModel(ICoreClient client) : base(client)
         {
             Title = "Pods";
             SelectCommand = new Command<IPod>(async pod => await SelectPod(pod));
             AddCommand = new Command(async _ => await AddPod());
         }
 
-        public override async Task Initialize()
+        public override async Task OnInitialize()
         {
             
             Pods = new List<IPod>();
@@ -48,7 +48,7 @@ namespace OmniCore.Client.ViewModels.Home
             }
         }
 
-        public override async Task Dispose()
+        public override async Task OnDispose()
         {
             Pods = null;
         }

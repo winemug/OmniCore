@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Data.Entities;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IRadio : INotifyPropertyChanged
     {

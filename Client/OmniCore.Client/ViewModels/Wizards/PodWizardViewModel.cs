@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards
@@ -14,12 +14,12 @@ namespace OmniCore.Client.ViewModels.Wizards
     public class PodWizardViewModel : BaseViewModel
     {
         public ICommand NextPageCommand { get; set; }
-        public override async Task Initialize()
+        public override async Task OnInitialize()
         {
             NextPageCommand = new Command(async () => await NextPage());
         }
 
-        public override Task Dispose()
+        public override Task OnDispose()
         {
             return Task.CompletedTask;
         }
@@ -29,7 +29,7 @@ namespace OmniCore.Client.ViewModels.Wizards
 
         }
 
-        public PodWizardViewModel(ICoreServices services) : base(services)
+        public PodWizardViewModel(ICoreClient client) : base(client)
         {
         }
     }

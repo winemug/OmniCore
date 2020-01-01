@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -18,16 +18,16 @@ namespace OmniCore.Client.ViewModels.Base
         public DataTemplate PodsView => new DataTemplate(() => Services.Container.Get<PodsView>());
         public string Title => "OmniCore";
 
-        public ShellViewModel(ICoreServices services) : base(services)
+        public ShellViewModel(ICoreClient client) : base(client)
         {
         }
 
-        public override Task Initialize()
+        public override Task OnInitialize()
         {
             return Task.CompletedTask;
         }
 
-        public override Task Dispose()
+        public override Task OnDispose()
         {
             return Task.CompletedTask;
         }

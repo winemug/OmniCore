@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Model.Interfaces.Services
+﻿namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IView<out T> where T : IViewModel
     {

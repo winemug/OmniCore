@@ -1,5 +1,5 @@
 ﻿using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

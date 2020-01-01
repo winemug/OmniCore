@@ -1,7 +1,7 @@
 ﻿using System;
 using OmniCore.Model.Enumerations;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IRadioConfiguration
     {

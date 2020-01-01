@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IPodRequest : ITask, INotifyPropertyChanged
     {

@@ -30,5 +30,9 @@ namespace OmniCore.Model.Enumerations
         WorkflowPodFaulted,
         WorkflowPodResponseUnrecognized,
         WorkflowInvalidParameter,
-   }
+
+        ServiceStartupFailure,
+        UserInterfaceInitialization,
+        ServiceStopFailure
+    }
 }

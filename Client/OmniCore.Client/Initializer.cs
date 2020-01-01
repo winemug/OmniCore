@@ -7,13 +7,13 @@ using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static ICoreContainer WithCrossBleAdapter(this ICoreContainer container)
+        public static ICoreContainer WithCrossBleRadioAdapter(this ICoreContainer container)
         {
             return container.One<IRadioAdapter, CrossBleRadioAdapter>();
         }
@@ -21,6 +21,7 @@ namespace OmniCore.Client
         public static ICoreContainer WithXamarinForms(this ICoreContainer container)
         {
             return container
+                .One<IPlatformApplication, XamarinApp>()
                 .One<UnityRouteFactory>()
                 .Many<ShellViewModel>()
                 .Many<ShellView>()

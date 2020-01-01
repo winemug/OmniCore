@@ -14,7 +14,7 @@ using Android.Widget;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Services;
 
 namespace OmniCore.Mobile.Droid.Services

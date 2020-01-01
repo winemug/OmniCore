@@ -10,7 +10,7 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Radios.RileyLink
 {

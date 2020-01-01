@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Services
+namespace OmniCore.Model.Interfaces.Platform
 {
     public interface IViewModel : INotifyPropertyChanged
     {
