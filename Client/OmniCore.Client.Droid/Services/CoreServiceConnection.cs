@@ -11,16 +11,16 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class DroidCoreServiceConnection : Java.Lang.Object, IServiceConnection
+    public class CoreServiceConnection : Java.Lang.Object, IServiceConnection
     {
         private Subject<ICoreBootstrapper> ServiceConnected = new Subject<ICoreBootstrapper>();
         private Subject<IServiceConnection> ServiceDisconnected = new Subject<IServiceConnection>();
 
-        private DroidCoreServiceBinder Binder;
+        private CoreServiceBinder Binder;
         
         public void OnServiceConnected(ComponentName name, IBinder service)
         {
-            Binder = service as DroidCoreServiceBinder;
+            Binder = service as CoreServiceBinder;
             if (Binder != null)
             {
                 ServiceConnected.OnNext(Binder.Bootstrapper);

@@ -22,17 +22,17 @@ using Unity;
 namespace OmniCore.Client.Droid.Services
 {
     [Service]
-    public class DroidCoreService : Service, ICoreBootstrapper
+    public class CoreBootstrapper : Service, ICoreBootstrapper
     {
         private bool AndroidServiceStarted = false;
 
-        public DroidCoreServiceBinder Binder { get; private set; }
+        public CoreServiceBinder Binder { get; private set; }
 
         public ICoreContainer Container { get; private set; }
 
         public override IBinder OnBind(Intent intent)
         {
-            Binder = new DroidCoreServiceBinder(this);
+            Binder = new CoreServiceBinder(this);
             if (!AndroidServiceStarted)
             {
                 if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)

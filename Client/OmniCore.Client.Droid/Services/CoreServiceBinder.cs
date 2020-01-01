@@ -4,12 +4,12 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class DroidCoreServiceBinder : Binder
+    public class CoreServiceBinder : Binder
     {
         public ICoreBootstrapper Bootstrapper { get; }
-        public DroidCoreServiceBinder(DroidCoreService serviceImplementation)
+        public CoreServiceBinder(CoreBootstrapper bootstrapperImplementation)
         {
-            Bootstrapper = serviceImplementation;
+            Bootstrapper = bootstrapperImplementation;
         }
     }
 }

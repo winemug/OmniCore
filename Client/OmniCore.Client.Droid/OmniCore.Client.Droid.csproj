@@ -129,9 +129,9 @@
     <Compile Include="Platform\OmniCoreApplication.cs" />
     <Compile Include="Services\CoreApplicationServices.cs" />
     <Compile Include="Services\AapsIntegrationService.cs" />
-    <Compile Include="Services\DroidCoreService.cs" />
-    <Compile Include="Services\DroidCoreServiceBinder.cs" />
-    <Compile Include="Services\DroidCoreServiceConnection.cs" />
+    <Compile Include="Services\CoreBootstrapper.cs" />
+    <Compile Include="Services\CoreServiceBinder.cs" />
+    <Compile Include="Services\CoreServiceConnection.cs" />
     <Compile Include="OmniCoreEvents.cs" />
     <Compile Include="Platform\CoreLoggingService.cs" />
     <Compile Include="Platform\OmniCoreWakeLock.cs" />

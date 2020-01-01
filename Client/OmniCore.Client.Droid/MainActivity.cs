@@ -58,8 +58,8 @@ namespace OmniCore.Client.Droid
                 }
             }
 
-            var startIntent = new Intent(this, typeof(DroidCoreService));
-            var connection = new DroidCoreServiceConnection();
+            var startIntent = new Intent(this, typeof(CoreBootstrapper));
+            var connection = new CoreServiceConnection();
 
             if (!BindService(startIntent, connection, Bind.AutoCreate))
             {
