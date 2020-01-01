@@ -12,7 +12,7 @@ using OmniCore.Services;
 using Unity;
 using Environment = Android.OS.Environment;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid.Services
 {
     public class CoreApplicationService : OmniCoreService, ICoreApplicationService
     {
@@ -45,24 +45,14 @@ namespace OmniCore.Client.Droid.Platform
 
         public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
 
-        public IDisposable KeepAwake()
+        public IDisposable DisplayKeepAwake()
         {
             return new KeepAwakeLock();
         }
 
-        IObservable<ICoreApplicationService> ICoreApplicationService.WhenStarted()
+        public IDisposable BluetoothKeepAwake()
         {
-            throw new NotImplementedException();
-        }
-
-        IObservable<ICoreApplicationService> ICoreApplicationService.WhenHibernating()
-        {
-            throw new NotImplementedException();
-        }
-
-        IObservable<ICoreApplicationService> ICoreApplicationService.WhenResuming()
-        {
-            throw new NotImplementedException();
+            return new BluetoothWakeLock();
         }
 
         protected override Task OnStart(CancellationToken cancellationToken)

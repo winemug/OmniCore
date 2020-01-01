@@ -127,7 +127,7 @@
     <Compile Include="Platform\OmniCoreAppState.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\OmniCoreApplication.cs" />
-    <Compile Include="Platform\CoreApplicationServices.cs" />
+    <Compile Include="Services\CoreApplicationServices.cs" />
     <Compile Include="Services\AapsIntegrationService.cs" />
     <Compile Include="Services\DroidCoreService.cs" />
     <Compile Include="Services\DroidCoreServiceBinder.cs" />

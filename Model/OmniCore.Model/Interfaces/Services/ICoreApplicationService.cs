@@ -10,9 +10,7 @@ namespace OmniCore.Model.Interfaces.Services
         string DataPath { get; }
         string StoragePath { get; }
         SynchronizationContext UiSynchronizationContext { get; }
-        IDisposable KeepAwake();
-        IObservable<ICoreApplicationService> WhenStarted();
-        IObservable<ICoreApplicationService> WhenHibernating();
-        IObservable<ICoreApplicationService> WhenResuming();
+        IDisposable DisplayKeepAwake();
+        IDisposable BluetoothKeepAwake();
     }
 }
