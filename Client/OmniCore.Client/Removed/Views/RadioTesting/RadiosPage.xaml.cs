@@ -20,7 +20,6 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.RadioTesting
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    [Fody.ConfigureAwait(true)]
     public partial class RadiosPage : ContentPage
     {
         private RadioTestingViewModel ViewModel;

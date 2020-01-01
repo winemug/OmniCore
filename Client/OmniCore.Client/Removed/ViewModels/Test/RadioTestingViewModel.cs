@@ -12,7 +12,6 @@ using OmniCore.Model.Interfaces.Workflow;
 
 namespace OmniCore.Client.ViewModels.Test
 {
-    [ConfigureAwait(true)]
     public class RadioTestingViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

@@ -9,7 +9,6 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels
 {
-    [Fody.ConfigureAwait(true)]
     public class PropertyChangedImpl : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

@@ -14,7 +14,6 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Settings
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    [Fody.ConfigureAwait(true)]
     public partial class GeneralSettingsPage : ContentPage
     {
         public GeneralSettingsPage()

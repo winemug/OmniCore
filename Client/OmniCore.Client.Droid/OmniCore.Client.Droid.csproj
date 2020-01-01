@@ -86,9 +86,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ConfigureAwait.Fody">
-      <Version>3.3.1</Version>
-    </PackageReference>
     <PackageReference Include="Fody">
       <Version>6.0.5</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

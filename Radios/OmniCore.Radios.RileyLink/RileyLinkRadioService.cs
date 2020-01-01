@@ -78,7 +78,7 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<IRadio> GetRadio(IRadioPeripheral peripheral, CancellationToken cancellationToken)
         {
-            using var lockObj = await RadioDictionaryLock.LockAsync().ConfigureAwait(true);
+            using var lockObj = await RadioDictionaryLock.LockAsync();
             IRadio radio = null;
             
             if (RadioDictionary.ContainsKey(peripheral.Uuid))
@@ -93,7 +93,7 @@ namespace OmniCore.Radios.RileyLink
                     entity = RadioRepository.New();
                     entity.DeviceUuid = peripheral.Uuid;
                     entity.DeviceName = peripheral.Name;
-                    await RadioRepository.Create(entity, cancellationToken).ConfigureAwait(true);
+                    await RadioRepository.Create(entity, cancellationToken);
                 }
 
                 radio = Container.Get<IRadio>();

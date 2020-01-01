@@ -12,7 +12,6 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels
 {
-    [Fody.ConfigureAwait(true)]
     public abstract class PageViewModel : BaseViewModel
     {
         protected Page AssociatedPage;

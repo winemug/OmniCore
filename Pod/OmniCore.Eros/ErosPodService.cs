@@ -7,7 +7,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Fody;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;

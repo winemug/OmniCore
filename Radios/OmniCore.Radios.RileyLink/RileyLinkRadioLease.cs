@@ -180,8 +180,8 @@ namespace OmniCore.Radios.RileyLink
                 {
                     using var notifyReadTimeout =
                         new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
-                    var commandResponse = await DataCharacteristic.Read(notifyReadTimeout.Token)
-                        .ConfigureAwait(true);
+                    var commandResponse = await DataCharacteristic.Read(notifyReadTimeout.Token);
+
                     if (commandResponse != null && commandResponse.Length > 0)
                     {
                         //Debug.WriteLine($"{DateTimeOffset.Now} RL: Response {BitConverter.ToString(commandResponse)}");
@@ -320,7 +320,7 @@ namespace OmniCore.Radios.RileyLink
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing noresponse {BitConverter.ToString(data)}");
-            await DataCharacteristic.WriteWithoutResponse(data, linkedCancellation.Token).ConfigureAwait(true);
+            await DataCharacteristic.WriteWithoutResponse(data, linkedCancellation.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written noresponse {BitConverter.ToString(data)}");
         }
 
@@ -332,10 +332,10 @@ namespace OmniCore.Radios.RileyLink
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing {BitConverter.ToString(data)}");
-            await DataCharacteristic.Write(data, linkedCancellation.Token).ConfigureAwait(true);
+            await DataCharacteristic.Write(data, linkedCancellation.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written {BitConverter.ToString(data)}");
 
-            var response = await GetResponse(cancellationToken).ConfigureAwait(true);
+            var response = await GetResponse(cancellationToken);
 
             return response;
         }

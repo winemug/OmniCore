@@ -18,7 +18,6 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Pods
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    [Fody.ConfigureAwait(true)]
     public partial class OverviewPage : ContentPage
     {
         public OverviewPage()
