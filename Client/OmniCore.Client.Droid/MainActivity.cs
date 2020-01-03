@@ -14,7 +14,10 @@ using OmniCore.Model.Interfaces.Platform;
 using Plugin.BluetoothLE;
 using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
+using Android.Content;
 using OmniCore.Client.Droid.Platform;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 using Application = Xamarin.Forms.Application;
@@ -27,13 +30,24 @@ namespace OmniCore.Client.Droid
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
 
-    public class MainActivity : BaseActivity
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, ICoreClientContext
     {
+        private ICoreContainer ClientContainer;
+        private IDisposable ServiceConnectSubscription;
+        private IDisposable ServiceDisconnectSubscription;
+        private ICoreServicesConnection CoreServicesConnection;
+        private IServiceConnection ServiceConnection => CoreServicesConnection as IServiceConnection;
+        private bool ConnectRequested = false;
+        private bool SavedValue = false;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
-            
+
+            base.OnCreate(savedInstanceState);
+
+            //TODO: move
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
@@ -42,12 +56,23 @@ namespace OmniCore.Client.Droid
             Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
+            //TODO: move to service
             if (!CheckPermissions().Wait())
             {
                 this.FinishAffinity();
             }
 
-            base.OnCreate(savedInstanceState);
+            SavedValue = true;
+
+            ClientContainer = Initializer.AndroidClientContainer(this)
+                .WithXamarinForms();
+
+            CoreServicesConnection = ClientContainer.Get<ICoreServicesConnection>();
+            
+            ConnectToAndroidService();
+
+            LoadXamarinApplication();
+
         }
 
         private ISubject<bool> PermissionResultSubject;
@@ -83,5 +108,64 @@ namespace OmniCore.Client.Droid
             }
             return Observable.Return(true);
         }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+        }
+
+        protected override void OnPause()
+        {
+            base.OnPause();
+        }
+
+        protected override void OnStop()
+        {
+            base.OnStop();
+            DisconnectFromAndroidService();
+        }
+
+        protected override void OnRestart()
+        {
+            base.OnRestart();
+        }
+
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            DisconnectFromAndroidService();
+        }
+
+        private void LoadXamarinApplication()
+        {
+            LoadApplication(ClientContainer.Get<XamarinApp>());
+        }
+        
+        private void ConnectToAndroidService()
+        {
+            if (ConnectRequested)
+                return;
+            
+            var intent = new Intent(this, typeof(AndroidService));
+            if (!BindService(intent, ServiceConnection, Bind.AutoCreate))
+                throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
+            ConnectRequested = true;
+        }
+
+        private void DisconnectFromAndroidService()
+        {
+            if (!ConnectRequested)
+                return;
+            
+            base.UnbindService(ServiceConnection);
+            ConnectRequested = false;
+        }
+
     }
 }

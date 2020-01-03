@@ -1,6 +1,8 @@
 ﻿using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx.Synchronous;
+using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
@@ -16,7 +18,7 @@ namespace OmniCore.Client
         {
             Client = client;
             InitializeComponent();
-            MainPage = Client.Container.Get<ShellView>();
+            MainPage = Client.GetView<ShellView, ShellViewModel>();
         }
     }
 }

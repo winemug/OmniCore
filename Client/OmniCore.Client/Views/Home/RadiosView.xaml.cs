@@ -11,11 +11,10 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Home
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RadiosView : BaseView<RadiosViewModel>
+    public partial class RadiosView
     {
-        public RadiosView(RadiosViewModel viewModel, UnityRouteFactory routeFactory) : base(viewModel)
+        public RadiosView()
         {
-            Routing.RegisterRoute("Home//Radios//Detail", routeFactory.WithType(typeof(RadioDetailView)));
             InitializeComponent();
         }
     }

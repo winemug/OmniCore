@@ -13,7 +13,7 @@ namespace OmniCore.Client.Views.Wizards.NewPod
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class PodWizardMainView
     {
-        public PodWizardMainView(PodWizardViewModel viewModel) : base(viewModel)
+        public PodWizardMainView()
         {
             InitializeComponent();
         }

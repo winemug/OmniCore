@@ -11,16 +11,6 @@ namespace OmniCore.Client.ViewModels.Base
     {
         public EmptyViewModel(ICoreClient client) : base(client)
         {
-            Title = "Nothing to see here";
-        }
-        public override Task OnInitialize()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override Task OnDispose()
-        {
-            return Task.CompletedTask;
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
+using OmniCore.Client.ViewModels.Home;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Model.Interfaces.Platform;
@@ -12,24 +14,13 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class ShellViewModel : BaseViewModel
     {
-
-        public DataTemplate EmptyView => new DataTemplate(() => Services.Container.Get<EmptyView>());
-        public DataTemplate RadiosView => new DataTemplate(() => Services.Container.Get<RadiosView>());
-        public DataTemplate PodsView => new DataTemplate(() => Services.Container.Get<PodsView>());
+        public DataTemplate EmptyView => new DataTemplate(() => Client.GetView<EmptyView, EmptyViewModel>());
+        public DataTemplate RadiosView => new DataTemplate(() => Client.GetView<RadiosView, RadiosViewModel>());
+        public DataTemplate PodsView => new DataTemplate(() => Client.GetView<PodsView, PodsViewModel>());
         public string Title => "OmniCore";
 
         public ShellViewModel(ICoreClient client) : base(client)
         {
-        }
-
-        public override Task OnInitialize()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override Task OnDispose()
-        {
-            return Task.CompletedTask;
         }
 
         //private void PopulateShellItems()
@@ -66,5 +57,9 @@ namespace OmniCore.Client.ViewModels.Base
         //    tab.SetBinding(Tab.ItemsProperty, binding);
         //    MainShellItems.Add(tab);
         //}
+        protected override Task OnInitialize()
+        {
+            return Task.CompletedTask;
+        }
     }
 }

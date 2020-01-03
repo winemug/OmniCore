@@ -1,13 +1,16 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IViewModel : INotifyPropertyChanged
+    public interface IViewModel : INotifyPropertyChanged, IDisposable
     {
-        string Title { get; set; }
-        IView<IViewModel> View { get; set; }
-        Task Initialize();
-        Task Dispose();
+        void InitializeModel(IView view);
+    }
+
+    public interface IViewModel<in T> : IViewModel
+    {
+        void InitializeModel(IView view, T parameter);
     }
 }

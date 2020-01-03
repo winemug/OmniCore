@@ -28,14 +28,12 @@ namespace OmniCore.Client.ViewModels.Home
 
         public RadiosViewModel(ICoreClient client) : base(client)
         {
-            Title = "Radio Selection";
             BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.InUse);
             SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.InUse);
         }
 
-        public override async Task OnInitialize()
+        protected override Task OnInitialize()
         {
-            
             Radios = new ObservableCollection<IRadio>();
             ListRadiosSubscription = Services.RadioService.ListRadios()
                 .ObserveOn(Client.SynchronizationContext)
@@ -43,9 +41,10 @@ namespace OmniCore.Client.ViewModels.Home
                     {
                         Radios.Add(radio);
                     });
+            return Task.CompletedTask;
         }
 
-        public override async Task OnDispose()
+        protected override void OnDispose()
         {
             ListRadiosSubscription?.Dispose();
             ListRadiosSubscription = null;

@@ -15,12 +15,12 @@ namespace OmniCore.Client.Droid.Platform
     public class CoreServices : ICoreServices
     {
         public ICoreContainer Container { get; private set; }
-        public ICoreLoggingService LoggingService { get; private set; }
-        public ICoreApplicationService ApplicationService { get; private set; }
-        public IRepositoryService RepositoryService { get; private set; }
-        public IRadioService RadioService { get; private set; }
-        public IPodService PodService { get; private set; }
-        public ICoreIntegrationService IntegrationService { get; private set; }
+        public ICoreLoggingService LoggingService => Container.Get<ICoreLoggingService>();
+        public ICoreApplicationService ApplicationService => Container.Get<ICoreApplicationService>();
+        public IRepositoryService RepositoryService => Container.Get<IRepositoryService>();
+        public IRadioService RadioService => Container.Get<IRadioService>();
+        public IPodService PodService => Container.Get<IPodService>();
+        public ICoreIntegrationService IntegrationService => Container.Get<ICoreIntegrationService>();
 
         private readonly ISubject<ICoreServices> UnexpectedStopRequestSubject;
 
@@ -29,27 +29,8 @@ namespace OmniCore.Client.Droid.Platform
         
         public CoreServices()
         {
-            Container = new OmniCoreContainer()
-                .Existing<ICoreServices>(this)
-                .WithOmnipodEros()
-                .WithRileyLinkRadio()
-                .WithAapsIntegrationService()
-#if EMULATOR
-                .WithBleSimulator()
-#else
-                .WithCrossBleRadioAdapter()
-#endif
-                .WithSqliteRepositories()
-                .WithAndroidPlatformServices();
-
-            LoggingService = Container.Get<ICoreLoggingService>();
-            ApplicationService = Container.Get<ICoreApplicationService>();
-            RepositoryService = Container.Get<IRepositoryService>();
-            RadioService = Container.Get<IRadioService>();
-            PodService = Container.Get<IPodService>();
-            IntegrationService = Container.Get<ICoreIntegrationService>();
-            
             UnexpectedStopRequestSubject = new Subject<ICoreServices>();
+            Container = Initializer.AndroidServiceContainer(this);
         }
 
         public async Task StartServices(CancellationToken cancellationToken)

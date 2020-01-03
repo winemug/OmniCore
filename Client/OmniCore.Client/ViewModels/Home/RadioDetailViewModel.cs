@@ -8,19 +8,18 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.ViewModels.Home
 {
-    public class RadioDetailViewModel : BaseViewModel
+    public class RadioDetailViewModel : BaseViewModel<IRadio>
     {
         public IRadio Radio { get; set; }
-        public override async Task OnInitialize()
-        {
-        }
-
-        public override async Task OnDispose()
-        {
-        }
 
         public RadioDetailViewModel(ICoreClient client) : base(client)
         {
+        }
+
+        public override Task OnInitialize(IRadio parameter)
+        {
+            Radio = parameter;
+            return Task.CompletedTask;
         }
     }
 }

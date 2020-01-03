@@ -31,8 +31,24 @@ namespace OmniCore.Client.Droid
         {
             return new OmniCoreContainer()
                 .Existing(clientContext)
-                .One<ICoreServicesConnection, AndroidServiceConnection>()
+                .One<ICoreServicesConnection, CoreServicesConnection>()
                 .One<ICoreClient, CoreClient>();
+        }
+
+        public static ICoreContainer AndroidServiceContainer(ICoreServices coreServices)
+        {
+            return new OmniCoreContainer()
+                .Existing(coreServices)
+                .WithOmnipodEros()
+                .WithRileyLinkRadio()
+                .WithAapsIntegrationService()
+#if EMULATOR
+                .WithBleSimulator()
+#else
+                .WithCrossBleRadioAdapter()
+#endif
+                .WithSqliteRepositories()
+                .WithAndroidPlatformServices();
         }
     }
 }

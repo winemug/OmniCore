@@ -1,7 +1,13 @@
-﻿namespace OmniCore.Model.Interfaces.Platform
+﻿using System.Threading.Tasks;
+
+namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IView<out T> where T : IViewModel
+    public interface IView
     {
-        T ViewModel { get;  }
+    }
+
+    public interface IView<in TModel> : IView where TModel : IViewModel
+    {
+        void SetViewModel(TModel viewModel);
     }
 }

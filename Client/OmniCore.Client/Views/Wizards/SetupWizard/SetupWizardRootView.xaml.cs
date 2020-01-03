@@ -11,9 +11,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Wizards.SetupWizard
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SetupWizardRootView : NavigationView<SetupWizardViewModel>
+    public partial class SetupWizardRootView
     {
-        public SetupWizardRootView(SetupWizardViewModel viewModel) : base(viewModel)
+        public SetupWizardRootView()
         {
             InitializeComponent();
         }

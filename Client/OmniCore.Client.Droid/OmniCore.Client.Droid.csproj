@@ -39,7 +39,7 @@
     </MonoDroidExtraArgs>
     <JavaMaximumHeapSize>
     </JavaMaximumHeapSize>
-    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <AndroidUseAapt2>false</AndroidUseAapt2>
     <AndroidDexTool>dx</AndroidDexTool>
     <AndroidEnableMultiDex>false</AndroidEnableMultiDex>
@@ -125,11 +125,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AndroidService.cs" />
-    <Compile Include="BaseActivity.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Platform\AapsIntegrationService.cs" />
     <Compile Include="Platform\AndroidServiceBinder.cs" />
-    <Compile Include="Platform\AndroidServiceConnection.cs" />
+    <Compile Include="Platform\CoreServicesConnection.cs" />
     <Compile Include="Platform\BluetoothWakeLock.cs" />
     <Compile Include="Platform\CoreApplicationService.cs" />
     <Compile Include="Platform\CoreClient.cs" />

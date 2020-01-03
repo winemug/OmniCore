@@ -8,20 +8,23 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
 {
-    public abstract class NavigationViewModel : BaseViewModel
+    public class NavigationViewModel : BaseViewModel
     {
-        protected ContentPage RootPage { get; set; }
-        public override Task OnInitialize()
-        {
-            return Task.CompletedTask;
-        }
+        //protected ContentPage RootPage { get; set; }
+        //public override Task OnInitialize()
+        //{
+        //    return Task.CompletedTask;
+        //}
 
-        public override Task OnDispose()
-        {
-            return Task.CompletedTask;
-        }
+        //public override Task OnDispose()
+        //{
+        //    return Task.CompletedTask;
+        //}
 
-        protected NavigationViewModel(ICoreClient client) : base(client)
+        //protected NavigationViewModel(ICoreClient client) : base(client)
+        //{
+        //}
+        public NavigationViewModel(ICoreClient client) : base(client)
         {
         }
     }

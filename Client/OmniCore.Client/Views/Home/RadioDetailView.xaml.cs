@@ -12,7 +12,7 @@ namespace OmniCore.Client.Views.Home
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RadioDetailView
     {
-        public RadioDetailView(RadioDetailViewModel viewModel) : base(viewModel)
+        public RadioDetailView()
         {
             InitializeComponent();
         }

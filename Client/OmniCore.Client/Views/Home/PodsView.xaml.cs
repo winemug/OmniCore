@@ -11,15 +11,11 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Home
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PodsView : BaseView<PodsViewModel>
+    public partial class PodsView
     {
-        public PodsView(PodsViewModel viewModel) : base(viewModel)
+        public PodsView()
         {
             InitializeComponent();
-        }
-
-        private void Button_OnClicked(object sender, EventArgs e)
-        {
         }
     }
 }

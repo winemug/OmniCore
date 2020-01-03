@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.ViewModels.Wizards;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
@@ -33,12 +34,11 @@ namespace OmniCore.Client.ViewModels.Home
 
         public PodsViewModel(ICoreClient client) : base(client)
         {
-            Title = "Pods";
             SelectCommand = new Command<IPod>(async pod => await SelectPod(pod));
             AddCommand = new Command(async _ => await AddPod());
         }
 
-        public override async Task OnInitialize()
+        protected override async Task OnInitialize()
         {
             
             Pods = new List<IPod>();
@@ -48,14 +48,14 @@ namespace OmniCore.Client.ViewModels.Home
             }
         }
 
-        public override async Task OnDispose()
+        protected override void OnDispose()
         {
             Pods = null;
         }
 
         private async Task AddPod()
         {
-            await Shell.Current.Navigation.PushAsync(Services.Container.Get<PodWizardMainView>());
+            await Shell.Current.Navigation.PushAsync(Client.GetView<PodWizardMainView,PodWizardViewModel>());
         }
 
         private async Task SelectPod(IPod pod)

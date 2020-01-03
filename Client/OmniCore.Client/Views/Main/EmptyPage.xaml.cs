@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Base;
+
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace OmniCore.Client.Views.Base
+namespace OmniCore.Client.Views.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class EmptyView
+    public partial class EmptyPage : ContentPage
     {
-        public EmptyView()
+        public EmptyPage()
         {
             InitializeComponent();
         }

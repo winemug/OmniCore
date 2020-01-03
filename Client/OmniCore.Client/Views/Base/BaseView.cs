@@ -1,33 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base
 {
-    public abstract class BaseView<T> : ContentPage, IView<T> where T : IViewModel
+    public abstract class BaseView<TModel> : ContentPage, IView<TModel>
+        where TModel : IViewModel
     {
-        public T ViewModel { get; set; }
+        public TModel ViewModel { get; private set; }
 
-        public BaseView(T viewModel)
+        public void SetViewModel(TModel viewModel)
         {
-            viewModel.View = (IView<IViewModel>) this;
-            ViewModel = viewModel;
-            SetBinding(ContentPage.TitleProperty, new Binding(nameof(IViewModel.Title)));
-        }
-
-        protected override async void OnAppearing()
-        {
-            await ViewModel.Initialize();
+            this.ViewModel = viewModel;
             BindingContext = ViewModel;
-            base.OnAppearing();
-        }
-
-        protected override async void OnDisappearing()
-        {
-            await ViewModel.Dispose();
-            base.OnDisappearing();
         }
     }
 }

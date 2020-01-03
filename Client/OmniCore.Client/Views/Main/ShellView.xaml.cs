@@ -18,18 +18,14 @@ namespace OmniCore.Client.Views.Main
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ShellView : Shell, IView<ShellViewModel>
     {
-        public ShellViewModel ViewModel { get; }
-
-        public ShellView(ShellViewModel viewModel)
+        public ShellView()
         {
-            var task = Task.Run( async () => viewModel.Initialize());
-            task.Wait();
-            if (!task.IsCompletedSuccessfully)
-            {
-                throw new OmniCoreUserInterfaceException(FailureType.UserInterfaceInitialization, null, task.Exception);
-            }
-            BindingContext = ViewModel = viewModel;
             InitializeComponent();
+        }
+
+        public void SetViewModel(ShellViewModel viewModel)
+        {
+            BindingContext = viewModel;
         }
     }
 }
