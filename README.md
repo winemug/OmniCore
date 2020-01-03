@@ -2,6 +2,15 @@
 
 OmniCore is a platform for controlling and automating drug delivery using the Omnipod system.
 
+**Update 03.01.2020:**<br/>
+Dear podders
+
+Missed the deadline due some undiscovered issues in the very last minute (Murphy's law) - that sparked a need for a thorough review and in some cases re-write. Since the next release is targeting stability and I am very picky about it, it took several sleepless nights to dissect everything apart to look for potential problems of similar nature.
+
+Now the issues are fixed and consciousness cleared, I can finally write this update. It still requires some time to fit back all the screws, which isn't a lot of work but I can start earliest mid next week (around the 8th).   
+
+My apologies to everyone expecting the release sooner and many thanks to those who have donated to make life bearable. (it absolutely does)
+
 **Update 29.12.2019:**<br/>
 Beta v1.0 is scheduled for release in 2019 - so happy new year!
 
@@ -14,7 +23,7 @@ https://github.com/winemug/OmniCore/wiki/Roadmap
 [Eddie](https://github.com/eurenda) for the thousand pods and thousand words,<br/>
 [Jeremy](https://github.com/jhaydraude) for his work on AndroidAPS customizations,<br/>
 [Dan](https://github.com/dexdan), [Tim], [Jeff](https://github.com/scudrunner), [Jordan](https://github.com/jordan-damron), [Theo](https://github.com/vanelsberg), [Jacob], [Rene](https://github.com/Flori3000), [Miguel], [Maite], [Yann], [Rick], [Edward], [Mark], [Mike] for donating their precious time and resources,<br/>
-[Andy](https://github.com/andyrozman) for all the insight<br/>
+[Adrian](https://github.com/AdrianLxM/) for all the insight<br/>
 [Jetbrains](https://www.jetbrains.com/?from=OmniCore) for being awesome (seriously, check out [Rider](https://www.jetbrains.com/rider/))<br/>
 and [Insulet](https://myomnipod.com/) for being a bro so far.
 
@@ -40,7 +49,7 @@ Direct donations:<br/>
 PayPal:  https://paypal.me/winemug/ <br/>
 
 Sponsorship:<br/>
-GitHub: https://github.com/sponsors/winemug/dashboard/tiers (activation pending)
+GitHub: https://github.com/winemug/
 
 If you can:
 - donate hardware such as Pods (expired or not, especially Omnipod Dash), used phones (Android or iOS), radio equipment and electronic tools
