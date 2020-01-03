@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces
         TimeSpan RadioConnectTimeout { get; set; }
         TimeSpan? RssiUpdateInterval { get; set; }
         int FrequencyShift { get; set; }
-        TxPower Amplification { get; set; }
+        TransmissionPower Amplification { get; set; }
         int RxIntermediateFrequency { get; set; }
         int PqeThreshold { get; set; }
         int FilterBWExponent { get; set; }

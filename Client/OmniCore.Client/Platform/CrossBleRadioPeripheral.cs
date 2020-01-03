@@ -56,19 +56,19 @@ namespace OmniCore.Client.Platform
                     switch (connectionStatus)
                     {
                         case ConnectionStatus.Disconnected:
-                            ConnectionState = PeripheralConnectionState.Disconnected;
+                            State = PeripheralState.Disconnected;
                             DisconnectDate = ConnectionStateDate;
                             break;
                         case ConnectionStatus.Disconnecting:
-                            ConnectionState = PeripheralConnectionState.Disconnecting;
+                            State = PeripheralState.Disconnecting;
                             DisconnectDate = null;
                             break;
                         case ConnectionStatus.Connected:
-                            ConnectionState = PeripheralConnectionState.Connected;
+                            State = PeripheralState.Connected;
                             DisconnectDate = null;
                             break;
                         case ConnectionStatus.Connecting:
-                            ConnectionState = PeripheralConnectionState.Connecting;
+                            State = PeripheralState.Connecting;
                             break;
                     }
                 }
@@ -126,7 +126,7 @@ namespace OmniCore.Client.Platform
             }
         }
         public DateTimeOffset? RssiDate { get; private set; }
-        public PeripheralConnectionState ConnectionState { get; private set; }
+        public PeripheralState State { get; private set; }
         public DateTimeOffset? ConnectionStateDate { get; private set; }
         public DateTimeOffset? DisconnectDate { get; private set; }
 

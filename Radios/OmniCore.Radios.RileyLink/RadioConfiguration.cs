@@ -17,7 +17,7 @@ namespace OmniCore.Radios.RileyLink
         // shifts in complements of 326.211 Hz
         public int FrequencyShift { get; set; } = 0;
 
-        public TxPower Amplification { get; set; } = TxPower.A4_Normal;
+        public TransmissionPower Amplification { get; set; } = TransmissionPower.Normal;
 
         // 0x00 to 0x1F
         public int RxIntermediateFrequency { get; set; } = 0x06;

@@ -402,25 +402,25 @@ namespace OmniCore.Radios.RileyLink
             int amplification;
             switch (configuration.Amplification)
             {
-                case TxPower.A0_Lowest:
+                case TransmissionPower.Lowest:
                     amplification = 0x0E;
                     break;
-                case TxPower.A1_VeryLow:
+                case TransmissionPower.VeryLow:
                     amplification = 0x1D;
                     break;
-                case TxPower.A2_Low:
+                case TransmissionPower.Low:
                     amplification = 0x34;
                     break;
-                case TxPower.A3_BelowNormal:
+                case TransmissionPower.BelowNormal:
                     amplification = 0x2C;
                     break;
-                case TxPower.A4_Normal:
+                case TransmissionPower.Normal:
                     amplification = 0x60;
                     break;
-                case TxPower.A5_High:
+                case TransmissionPower.High:
                     amplification = 0x84;
                     break;
-                case TxPower.A6_VeryHigh:
+                case TransmissionPower.VeryHigh:
                     amplification = 0xC8;
                     break;
                 default:

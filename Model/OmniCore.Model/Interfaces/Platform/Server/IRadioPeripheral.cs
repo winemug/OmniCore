@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces
         TimeSpan? RssiUpdateTimeSpan { get; set; }
         int? Rssi { get; set; }
         DateTimeOffset? RssiDate { get; }
-        PeripheralConnectionState ConnectionState { get; }
+        PeripheralState State { get; }
         DateTimeOffset? ConnectionStateDate { get; }
         DateTimeOffset? DisconnectDate { get; }
     }
