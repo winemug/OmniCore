@@ -17,6 +17,7 @@ using Java.Util;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.Droid;
+using OmniCore.Client.Droid.Platform;
 using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
