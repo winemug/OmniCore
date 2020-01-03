@@ -7,7 +7,7 @@ using Android.Graphics;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid
 {
     public class CoreClient : ICoreClient
     {

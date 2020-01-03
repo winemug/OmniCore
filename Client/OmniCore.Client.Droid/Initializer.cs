@@ -1,5 +1,4 @@
-﻿using OmniCore.Client.Droid.Platform;
-using OmniCore.Client.Droid;
+﻿using OmniCore.Client.Droid;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Constants;
@@ -34,7 +33,7 @@ namespace OmniCore.Client.Droid
         {
             return new OmniCoreContainer<IClientResolvable>()
                 .Existing(clientContext)
-                .One<ICoreClientConnection, CoreClientConnection>()
+                .One<ICoreClientConnection, AndroidServiceConnection>()
                 .One<ICoreClient, CoreClient>();
         }
 

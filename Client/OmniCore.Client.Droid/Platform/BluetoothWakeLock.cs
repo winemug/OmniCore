@@ -10,7 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid
 {
     public class BluetoothWakeLock : IDisposable
     {

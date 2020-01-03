@@ -15,7 +15,6 @@ using Plugin.BluetoothLE;
 using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
 using Android.Content;
-using OmniCore.Client.Droid.Platform;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;

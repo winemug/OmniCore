@@ -125,10 +125,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AndroidService.cs" />
+    <Compile Include="AndroidServiceBinder.cs" />
+    <Compile Include="AndroidServiceConnection.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Platform\AapsIntegrationService.cs" />
-    <Compile Include="Platform\AndroidServiceBinder.cs" />
-    <Compile Include="Platform\CoreClientConnection.cs" />
     <Compile Include="Platform\BluetoothWakeLock.cs" />
     <Compile Include="Platform\CoreApplicationFunctions.cs" />
     <Compile Include="Platform\CoreClient.cs" />

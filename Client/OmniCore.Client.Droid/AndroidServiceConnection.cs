@@ -15,14 +15,14 @@ using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid
 {
-    public class CoreClientConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
+    public class AndroidServiceConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
     {
         private AndroidServiceBinder Binder;
         private ISubject<ICoreServiceApi> CoreServicesSubject;
 
-        public CoreClientConnection()
+        public AndroidServiceConnection()
         {
             CoreServicesSubject = new BehaviorSubject<ICoreServiceApi>(null);
         }

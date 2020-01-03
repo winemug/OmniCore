@@ -13,7 +13,7 @@ using Android.Widget;
 using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Services;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid
 {
     public class AapsIntegrationService : OmniCoreService, ICoreIntegrationService
     {
