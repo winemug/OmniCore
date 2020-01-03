@@ -29,13 +29,13 @@ namespace OmniCore.Client.Platform
         private Dictionary<Guid, CrossBleRadioPeripheral> PeripheralCache;
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICoreApplicationService ApplicationService;
+        private readonly ICoreApplicationFunctions ApplicationFunctions;
 
         public CrossBleRadioAdapter(ICoreContainer<IServerResolvable> container,
-            ICoreApplicationService applicationService)
+            ICoreApplicationFunctions applicationFunctions)
         {
             Container = container;
-            ApplicationService = applicationService;
+            ApplicationFunctions = applicationFunctions;
             PeripheralSearchLock = new AsyncLock();
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new Dictionary<Guid, CrossBleRadioPeripheral>();
@@ -106,7 +106,7 @@ namespace OmniCore.Client.Platform
                     {
                         await TryEnsureAdapterEnabled(cancellationToken);
 
-                        bluetoothLock = ApplicationService.BluetoothKeepAwake();
+                        bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
                         var searchResultDictionary = new Dictionary<Guid, IRadioPeripheralResult>();
 
                         var connectedDevices = await CrossBleAdapter.Current
@@ -186,7 +186,7 @@ namespace OmniCore.Client.Platform
         {
             await TryEnsureAdapterEnabled(cancellationToken);
             using var searchLock = await PeripheralSearchLock.LockAsync(cancellationToken);
-            using var btLock = ApplicationService.BluetoothKeepAwake();
+            using var btLock = ApplicationFunctions.BluetoothKeepAwake();
 
             var devices = await CrossBleAdapter.Current.GetConnectedDevices();
             var device = devices.FirstOrDefault(d => d.Uuid == peripheralUuid);

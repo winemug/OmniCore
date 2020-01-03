@@ -1,8 +1,9 @@
 ﻿using System;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ICoreLoggingService : ICoreService
+    public interface ICoreLoggingFunctions : ICoreServerFunctions
     {
         void Verbose(string message);
         void Debug(string message);

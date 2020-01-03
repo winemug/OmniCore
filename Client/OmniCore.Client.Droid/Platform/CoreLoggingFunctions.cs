@@ -19,7 +19,7 @@ using OmniCore.Services;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    public class CoreLoggingService : OmniCoreService, ICoreLoggingService
+    public class CoreLoggingFunctions : OmniCoreService, ICoreLoggingFunctions
     {
         public const string TAG = "OmniCore";
         public void Debug(string message)

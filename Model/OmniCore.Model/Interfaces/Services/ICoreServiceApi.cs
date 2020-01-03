@@ -11,8 +11,8 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Task StartServices(CancellationToken cancellationToken);
         Task StopServices(CancellationToken cancellationToken);
-        ICoreLoggingService LoggingService { get; }
-        ICoreApplicationService ApplicationService { get; }
+        ICoreLoggingFunctions LoggingFunctions { get; }
+        ICoreApplicationFunctions ApplicationFunctions { get; }
         IRepositoryService RepositoryService { get; }
         IRadioService RadioService { get; }
         IPodService PodService { get; }

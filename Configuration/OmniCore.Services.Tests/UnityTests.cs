@@ -13,11 +13,11 @@ namespace OmniCore.Services.Tests
         //[SetUp]
         //public void Setup()
         //{
-        //    var appService = new Mock<ICoreApplicationService>().Object;
+        //    var appService = new Mock<ICoreApplicationFunctions>().Object;
 
         //    Container = new UnityContainer()
         //        .WithSqliteRepositories()
-        //        .RegisterInstance<ICoreApplicationService>(appService);
+        //        .RegisterInstance<ICoreApplicationFunctions>(appService);
         //}
 
         //[Test]

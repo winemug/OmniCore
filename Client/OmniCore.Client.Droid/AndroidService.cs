@@ -37,8 +37,8 @@ namespace OmniCore.Client.Droid
         private bool AndroidServiceStarted = false;
 
         public ICoreContainer<IServerResolvable> ServerContainer { get; private set; }
-        public ICoreLoggingService LoggingService => ServerContainer.Get<ICoreLoggingService>();
-        public ICoreApplicationService ApplicationService => ServerContainer.Get<ICoreApplicationService>();
+        public ICoreLoggingFunctions LoggingFunctions => ServerContainer.Get<ICoreLoggingFunctions>();
+        public ICoreApplicationFunctions ApplicationFunctions => ServerContainer.Get<ICoreApplicationFunctions>();
         public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
         public IRadioService RadioService => ServerContainer.Get<IRadioService>();
         public IPodService PodService => ServerContainer.Get<IPodService>();
@@ -126,16 +126,14 @@ namespace OmniCore.Client.Droid
             StartForeground(1, notification);
         }
 
-                public async Task StartServices(CancellationToken cancellationToken)
+        public async Task StartServices(CancellationToken cancellationToken)
         {
-            await LoggingService.StartService(cancellationToken);
-            await ApplicationService.StartService(cancellationToken);
             await RepositoryService.StartService(cancellationToken);
             await RadioService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
             
-            var previousState = ApplicationService.ReadPreferences(new []
+            var previousState = ApplicationFunctions.ReadPreferences(new []
             {
                 ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
             })[0];
@@ -145,14 +143,14 @@ namespace OmniCore.Client.Droid
                 //TODO: check states of requests - create notifications
                 
             }
-            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+            StoreRunningServicesValue($"{nameof(LoggingFunctions)},{nameof(ApplicationFunctions)}," +
                                       $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}," +
                                       $"{nameof(PodService)},{nameof(IntegrationService)}");
         }
 
         private void StoreRunningServicesValue(string value)
         {
-            ApplicationService.StorePreferences(new []
+            ApplicationFunctions.StorePreferences(new []
             {
                 ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
             });
@@ -161,27 +159,14 @@ namespace OmniCore.Client.Droid
         public async Task StopServices(CancellationToken cancellationToken)
         {
             await IntegrationService.StopService(cancellationToken);
-            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
-                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}," +
-                                      $"{nameof(PodService)}");
             await PodService.StopService(cancellationToken);
-            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
-                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}");
             await RadioService.StopService(cancellationToken);
-            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
-                                      $"{nameof(Repository.Sqlite.RepositoryService)}");
             await RepositoryService.StopService(cancellationToken);
-            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}");
-            await ApplicationService.StopService(cancellationToken);
-            StoreRunningServicesValue($"{nameof(LoggingService)}");
-            await LoggingService.StopService(cancellationToken);
-            StoreRunningServicesValue(string.Empty);
         }
         
         public void UnexpectedStopRequested()
         {
             UnexpectedStopRequestSubject.OnNext(this);
         }
-
     }
 }

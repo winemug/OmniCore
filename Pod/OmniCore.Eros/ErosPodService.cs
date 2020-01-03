@@ -27,7 +27,7 @@ namespace OmniCore.Eros
         
         private readonly IRadioAdapter RadioAdapter;
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICoreApplicationService ApplicationService;
+        private readonly ICoreApplicationFunctions ApplicationFunctions;
         private readonly ICoreServiceApi ServiceApi;
 
         private readonly ConcurrentDictionary<long, IPod> PodDictionary;
@@ -40,11 +40,11 @@ namespace OmniCore.Eros
             IPodRepository podRepository,
             IRadioService radioServiceRileyLink,
             ICoreContainer<IServerResolvable> container,
-            ICoreApplicationService applicationService,
+            ICoreApplicationFunctions applicationFunctions,
             ICoreServiceApi serviceApi)
         {
             Container = container;
-            ApplicationService = applicationService;
+            ApplicationFunctions = applicationFunctions;
             ServiceApi = serviceApi;
 
             RadioProviders = new[] {radioServiceRileyLink};
@@ -116,7 +116,7 @@ namespace OmniCore.Eros
 
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            var previousState = ApplicationService.ReadPreferences(new []
+            var previousState = ApplicationFunctions.ReadPreferences(new []
             {
                 ("ErosPodService_StopRequested_ActiveRequests", string.Empty),
             })[0];
@@ -125,7 +125,7 @@ namespace OmniCore.Eros
             {
                 //TODO: check states of requests - create notifications
                 
-                ApplicationService.StorePreferences(new []
+                ApplicationFunctions.StorePreferences(new []
                 {
                     ("ErosPodService_StopRequested_ActiveRequests", string.Empty),
                 });
@@ -153,7 +153,7 @@ namespace OmniCore.Eros
                         ar.RequestCancellation();
                 }
             }
-            ApplicationService.StorePreferences(new []
+            ApplicationFunctions.StorePreferences(new []
             {
                 ("ErosPodService_StopRequested_ActiveRequests", runningRequestIds.ToString()),
             });

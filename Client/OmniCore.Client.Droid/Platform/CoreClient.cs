@@ -15,6 +15,12 @@ namespace OmniCore.Client.Droid.Platform
         public SynchronizationContext SynchronizationContext => Application.SynchronizationContext;
 
         public ICoreClientConnection ClientConnection { get; }
+
+        public IDisposable DisplayKeepAwake()
+        {
+            return new KeepAwakeLock();
+        }
+
         public CoreClient(ICoreContainer<IClientResolvable> clientContainer,
             ICoreClientConnection connection)
         {

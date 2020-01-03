@@ -20,8 +20,8 @@ namespace OmniCore.Client.Droid
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<ICoreApplicationService, CoreApplicationService>()
-                .One<ICoreLoggingService, CoreLoggingService>();
+                .One<ICoreApplicationFunctions, CoreApplicationFunctions>()
+                .One<ICoreLoggingFunctions, CoreLoggingFunctions>();
         }
 
         public static ICoreContainer<IServerResolvable> WithAapsIntegrationService

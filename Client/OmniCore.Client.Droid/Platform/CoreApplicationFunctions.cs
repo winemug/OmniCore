@@ -14,7 +14,7 @@ using Environment = Android.OS.Environment;
 
 namespace OmniCore.Client.Droid.Platform
 {
-    public class CoreApplicationService : OmniCoreService, ICoreApplicationService
+    public class CoreApplicationFunctions : OmniCoreService, ICoreApplicationFunctions
     {
         public string DataPath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 
@@ -44,11 +44,6 @@ namespace OmniCore.Client.Droid.Platform
         }
 
         public SynchronizationContext UiSynchronizationContext => Android.App.Application.SynchronizationContext;
-
-        public IDisposable DisplayKeepAwake()
-        {
-            return new KeepAwakeLock();
-        }
 
         public IDisposable BluetoothKeepAwake()
         {

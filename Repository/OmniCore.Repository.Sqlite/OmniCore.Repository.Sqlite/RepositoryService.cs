@@ -28,13 +28,13 @@ namespace OmniCore.Repository.Sqlite
         private SQLiteAsyncConnection ConnectionInternal;
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICoreApplicationService ApplicationService;
+        private readonly ICoreApplicationFunctions ApplicationFunctions;
 
         public RepositoryService(ICoreContainer<IServerResolvable> container,
-            ICoreApplicationService applicationService) : base(null)
+            ICoreApplicationFunctions applicationFunctions) : base(null)
         {
             Container = container;
-            ApplicationService = applicationService;
+            ApplicationFunctions = applicationFunctions;
             RepositoryAccessLock = new AsyncReaderWriterLock();
         }
 
@@ -83,14 +83,14 @@ namespace OmniCore.Repository.Sqlite
             if (IsInitialized)
                 await ShutdownInternal(cancellationToken);
 
-            var path = Path.Combine(ApplicationService.DataPath, "oc.db3");
+            var path = Path.Combine(ApplicationFunctions.DataPath, "oc.db3");
 
             var migrators = Container.GetAll<IRepositoryMigrator>();
 
             foreach (var migrator in migrators)
             {
                 await migrator.ExecuteMigration(
-                    ApplicationService.Version,
+                    ApplicationFunctions.Version,
                     path, cancellationToken);
             }
 
