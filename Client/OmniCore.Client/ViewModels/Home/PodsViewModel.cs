@@ -58,11 +58,9 @@ namespace OmniCore.Client.ViewModels.Home
             await Shell.Current.Navigation.PushAsync(Client.GetView<PodWizardMainView,PodWizardViewModel>());
         }
 
-        private async Task SelectPod(IPod pod)
+        private Task SelectPod(IPod pod)
         {
-            //var view = Container.Resolve<RadioDetailView>();
-            //view.ViewModel.Radio = radio;
-            //await Shell.Current.Navigation.PushAsync(view);
+            throw new NotImplementedException();
         }
     }
 }

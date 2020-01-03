@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
@@ -129,7 +130,7 @@ namespace OmniCore.Eros
 
             request.Entity = PodRequestRepository.New();
             request.Entity.Pod = this.Entity;
-
+            await PodRequestRepository.Create(request.Entity, CancellationToken.None);
             return request;
         }
     }

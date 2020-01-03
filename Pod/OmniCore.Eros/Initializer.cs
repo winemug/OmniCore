@@ -13,7 +13,7 @@ namespace OmniCore.Eros
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IPodService, ErosPodServiceBase>()
+                .One<IPodService, ErosPodService>()
                 .Many<IPodRequest, ErosPodRequest>()
                 .Many<IPod, ErosPod>();
         }

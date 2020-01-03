@@ -31,12 +31,10 @@ namespace OmniCore.Client.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, ICoreClientContext
     {
         private ICoreContainer<IClientResolvable> ClientContainer;
-        private IDisposable ServiceConnectSubscription;
-        private IDisposable ServiceDisconnectSubscription;
         private ICoreClientConnection CoreClientConnection;
         private IServiceConnection ServiceConnection => CoreClientConnection as IServiceConnection;
         private bool ConnectRequested = false;
-        private bool SavedValue = false;
+        private bool DisconnectRequested = false;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -60,14 +58,10 @@ namespace OmniCore.Client.Droid
                 this.FinishAffinity();
             }
 
-            SavedValue = true;
-
             ClientContainer = Initializer.AndroidClientContainer(this)
                 .WithXamarinForms();
 
             CoreClientConnection = ClientContainer.Get<ICoreClientConnection>();
-            
-            ConnectToAndroidService();
 
             LoadXamarinApplication();
 
@@ -107,19 +101,10 @@ namespace OmniCore.Client.Droid
             return Observable.Return(true);
         }
 
-        protected override void OnStart()
-        {
-            base.OnStart();
-        }
-
         protected override void OnResume()
         {
+            ConnectToAndroidService();
             base.OnResume();
-        }
-
-        protected override void OnPause()
-        {
-            base.OnPause();
         }
 
         protected override void OnStop()
@@ -127,19 +112,6 @@ namespace OmniCore.Client.Droid
             base.OnStop();
             DisconnectFromAndroidService();
         }
-
-        protected override void OnRestart()
-        {
-            base.OnRestart();
-        }
-
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            DisconnectFromAndroidService();
-        }
-
         private void LoadXamarinApplication()
         {
             LoadApplication(ClientContainer.Get<XamarinApp>());
@@ -154,16 +126,17 @@ namespace OmniCore.Client.Droid
             if (!BindService(intent, ServiceConnection, Bind.AutoCreate))
                 throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
             ConnectRequested = true;
+            DisconnectRequested = false;
         }
 
         private void DisconnectFromAndroidService()
         {
-            if (!ConnectRequested)
+            if (DisconnectRequested)
                 return;
             
             base.UnbindService(ServiceConnection);
             ConnectRequested = false;
+            DisconnectRequested = true;
         }
-
     }
 }

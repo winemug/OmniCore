@@ -121,14 +121,16 @@ namespace OmniCore.Repository.Sqlite
             }
         }
 
-        private async Task Import_1_0_0_x(string importPath, Version fromVersion, Version toVersion, string targetPath,
+        private Task Import_1_0_0_x(string importPath, Version fromVersion, Version toVersion, string targetPath,
             CancellationToken cancellationToken)
         {
+            throw new NotImplementedException();
         }
         
-        private async Task Import_1_0_1_1201(string importPath, Version fromVersion, Version toVersion, string targetPath,
+        private Task Import_1_0_1_1201(string importPath, Version fromVersion, Version toVersion, string targetPath,
             CancellationToken cancellationToken)
         {
+            throw new NotImplementedException();
         }
 
     }

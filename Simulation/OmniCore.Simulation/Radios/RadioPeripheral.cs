@@ -22,9 +22,9 @@ namespace OmniCore.Simulation.Radios
             get;
             set;
         }
-        public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
+        public Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
         {
-            return new RadioPeripheralLease();
+            return Task.FromResult((IRadioPeripheralLease)new RadioPeripheralLease());
         }
 
         public TimeSpan? RssiUpdateTimeSpan { get; set; }

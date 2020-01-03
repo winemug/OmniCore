@@ -50,7 +50,7 @@ namespace OmniCore.Client.Platform
 
             ConnectionStateSubscription?.Dispose();
             ConnectionStateSubscription = BleDevice.WhenStatusChanged().Subscribe(
-                async (connectionStatus) =>
+                (connectionStatus) =>
                 {
                     ConnectionStateDate = DateTimeOffset.UtcNow;
                     switch (connectionStatus)

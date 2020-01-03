@@ -17,7 +17,7 @@ using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodServiceBase : OmniCoreServiceBase, IPodService
+    public class ErosPodService : OmniCoreServiceBase, IPodService
     {
         public string Description => "Omnipod Eros";
 
@@ -33,7 +33,7 @@ namespace OmniCore.Eros
         private readonly IPodRepository PodRepository;
 
 
-        public ErosPodServiceBase(
+        public ErosPodService(
             IRadioAdapter radioAdapter,
             IPodRepository podRepository,
             IRadioService radioServiceRileyLink,
@@ -94,7 +94,7 @@ namespace OmniCore.Eros
             return await GetPodInternal(podEntity);
         }
 
-        public async Task<IPod> Register(IPodEntity podEntity, IUserEntity user, IList<IRadioEntity> radios)
+        public Task<IPod> Register(IPodEntity podEntity, IUserEntity user, IList<IRadioEntity> radios)
         {
             throw new NotImplementedException();
         }

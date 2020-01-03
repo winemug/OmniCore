@@ -38,7 +38,7 @@ namespace OmniCore.Client.Platform
                 NotificationSubscription = Characteristic.RegisterAndNotify()
                     .Subscribe((_) => observer.OnNext(this));
 
-                return Disposable.Create(async () =>
+                return Disposable.Create(() =>
                 {
                     NotificationSubscription?.Dispose();
                     NotificationSubscription = null;

@@ -14,7 +14,7 @@ namespace OmniCore.Radios.RileyLink
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IRadioService, RileyLinkRadioServiceBase>()
+                .One<IRadioService, RileyLinkRadioService>()
                 .Many<IRadio, RileyLinkRadio>()
                 .Many<IRadioLease, RileyLinkRadioLease>();
         }

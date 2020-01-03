@@ -14,14 +14,14 @@ namespace OmniCore.Simulation.Radios
             return Task.CompletedTask;
         }
 
-        public async Task<bool> TryEnableAdapter(CancellationToken cancellationToken)
+        public Task<bool> TryEnableAdapter(CancellationToken cancellationToken)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
-        public async Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
+        public Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public IObservable<IRadioPeripheralResult> FindPeripherals(Guid serviceId)

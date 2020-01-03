@@ -20,9 +20,9 @@ namespace OmniCore.Client.ViewModels.Wizards
             return Task.CompletedTask;
         }
 
-        private async Task NextPage()
+        private Task NextPage()
         {
-
+            throw new NotImplementedException();
         }
 
         public PodWizardViewModel(ICoreClient client) : base(client)

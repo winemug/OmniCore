@@ -20,17 +20,17 @@ namespace OmniCore.Mobile.Droid.Platform
 
         public DateTimeOffset ScheduledTime => throw new NotImplementedException();
 
-        public async Task<bool> Run(bool tryRunUninterrupted = false)
+        public Task<bool> Run(bool tryRunUninterrupted = false)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false)
+        public Task<bool> RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CancelScheduledWait()
+        public Task<bool> CancelScheduledWait()
         {
             throw new NotImplementedException();
         }

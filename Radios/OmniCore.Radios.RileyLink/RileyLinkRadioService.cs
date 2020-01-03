@@ -17,20 +17,19 @@ using OmniCore.Services;
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadioServiceBase : OmniCoreServiceBase, IRadioService
+    public class RileyLinkRadioService : OmniCoreServiceBase, IRadioService
     {
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
         private readonly IRadioAdapter RadioAdapter;
         private readonly IRadioRepository RadioRepository;
-        private readonly ISignalStrengthRepository SignalStrengthRepository;
         private readonly ICoreContainer<IServerResolvable> Container;
 
         private readonly AsyncLock RadioDictionaryLock;
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
         private readonly IRadioEventRepository RadioEventRepository;
 
-        public RileyLinkRadioServiceBase(
+        public RileyLinkRadioService(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             IRadioEventRepository radioEventRepository,
