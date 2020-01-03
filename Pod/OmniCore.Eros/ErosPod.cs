@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Eros.Annotations;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data.Entities;
@@ -133,5 +135,9 @@ namespace OmniCore.Eros
             await PodRequestRepository.Create(request.Entity, CancellationToken.None);
             return request;
         }
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 }

@@ -14,12 +14,8 @@ namespace OmniCore.Client.Platform
         
         public int? Rssi { get; set; }
         
+#pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+#pragma warning restore CS0067
     }
 }

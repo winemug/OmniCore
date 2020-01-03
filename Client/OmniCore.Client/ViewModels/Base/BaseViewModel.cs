@@ -16,7 +16,9 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public abstract class BaseViewModel : IViewModel
     {
+#pragma warning disable CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
 
         protected ICoreServiceApi ServiceApi { get; set; }
         protected ICoreClient Client { get; set; }

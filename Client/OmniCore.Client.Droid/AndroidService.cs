@@ -104,7 +104,9 @@ namespace OmniCore.Client.Droid
         {
             var notificationManager = (NotificationManager) GetSystemService(NotificationService);
 
+#pragma warning disable CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
             var notificationBuilder = new Notification.Builder(this)
+#pragma warning restore CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
                 .SetSmallIcon(Resource.Drawable.ic_stat_pod)
                 .SetContentTitle("OmniCore")
                 .SetContentText("Service is running");

@@ -159,6 +159,8 @@ namespace OmniCore.Client.Platform
             ConnectionStateSubscription.Dispose();
         }
 
+#pragma warning disable CS0067 // The event 'CrossBleRadioPeripheral.PropertyChanged' is never used
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'CrossBleRadioPeripheral.PropertyChanged' is never used
     }
 }

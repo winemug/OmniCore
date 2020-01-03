@@ -67,6 +67,8 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
+#pragma warning disable CS0067 // The event 'ErosPodRequest.PropertyChanged' is never used
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'ErosPodRequest.PropertyChanged' is never used
     }
 }

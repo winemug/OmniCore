@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPod : IServerResolvable
+    public interface IPod : IServerResolvable, INotifyPropertyChanged
     {
         IPodEntity Entity { get; set; }
         IPodRequest ActiveRequest { get; }

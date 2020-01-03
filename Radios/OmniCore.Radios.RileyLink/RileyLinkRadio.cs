@@ -66,6 +66,8 @@ namespace OmniCore.Radios.RileyLink
         }
         public DateTimeOffset? ActivityStartDate { get; private set; } = DateTimeOffset.UtcNow;
 
+#pragma warning disable CS0067 // The event 'RileyLinkRadio.PropertyChanged' is never used
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'RileyLinkRadio.PropertyChanged' is never used
     }
 }

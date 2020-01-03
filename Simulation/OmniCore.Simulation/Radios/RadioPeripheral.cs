@@ -35,6 +35,8 @@ namespace OmniCore.Simulation.Radios
         public DateTimeOffset? ConnectionStateDate { get; }
         public DateTimeOffset? DisconnectDate { get; }
 
+#pragma warning disable CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
     }
 }
