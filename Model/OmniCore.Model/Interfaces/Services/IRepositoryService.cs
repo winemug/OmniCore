@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Repositories;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces
 {
     public interface IRepositoryService : ICoreService
     {

@@ -10,7 +10,6 @@ using Android.OS;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using OmniCore.Client.Droid;
-using OmniCore.Model.Interfaces.Platform;
 using Plugin.BluetoothLE;
 using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;

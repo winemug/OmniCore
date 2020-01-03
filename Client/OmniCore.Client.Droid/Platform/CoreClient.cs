@@ -5,7 +5,6 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.Droid
 {

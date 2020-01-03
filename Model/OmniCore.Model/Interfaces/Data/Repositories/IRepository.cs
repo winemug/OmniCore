@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using SQLite;
 
 namespace OmniCore.Model.Interfaces.Data.Repositories

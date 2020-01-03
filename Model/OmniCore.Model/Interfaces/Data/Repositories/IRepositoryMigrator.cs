@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using SQLite;
 
 namespace OmniCore.Model.Interfaces.Data.Repositories

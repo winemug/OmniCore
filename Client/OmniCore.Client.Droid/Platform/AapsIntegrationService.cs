@@ -10,12 +10,12 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 
 namespace OmniCore.Client.Droid
 {
-    public class AapsIntegrationService : OmniCoreService, ICoreIntegrationService
+    public class AapsIntegrationServiceBase : OmniCoreServiceBase, ICoreIntegrationService
     {
         protected override Task OnStart(CancellationToken cancellationToken)
         {

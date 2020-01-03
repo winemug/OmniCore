@@ -3,8 +3,6 @@ using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
@@ -26,7 +24,7 @@ namespace OmniCore.Client.Droid
         public static ICoreContainer<IServerResolvable> WithAapsIntegrationService
             (this ICoreContainer<IServerResolvable> container)
         {
-            return container.One<ICoreIntegrationService, AapsIntegrationService>();
+            return container.One<ICoreIntegrationService, AapsIntegrationServiceBase>();
         }
 
         public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces
 {
     public interface IRadioPeripheralResult : INotifyPropertyChanged, IServerResolvable
     {

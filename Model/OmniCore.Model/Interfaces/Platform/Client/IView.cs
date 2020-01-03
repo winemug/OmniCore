@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces
 {
     public interface IView : IClientResolvable
     {

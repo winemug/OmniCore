@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Platform;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;
 

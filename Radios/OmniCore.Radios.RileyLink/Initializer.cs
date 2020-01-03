@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Radios.RileyLink
 {
@@ -15,7 +14,7 @@ namespace OmniCore.Radios.RileyLink
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IRadioService, RileyLinkRadioService>()
+                .One<IRadioService, RileyLinkRadioServiceBase>()
                 .Many<IRadio, RileyLinkRadio>()
                 .Many<IRadioLease, RileyLinkRadioLease>();
         }

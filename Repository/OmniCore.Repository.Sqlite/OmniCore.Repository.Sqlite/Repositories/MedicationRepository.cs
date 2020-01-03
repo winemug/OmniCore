@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Platform;
+﻿using OmniCore.Model.Interfaces;
 using OmniCore.Repository.Sqlite.Entities;
 using System;
 using System.Collections.Generic;

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Eros
 {

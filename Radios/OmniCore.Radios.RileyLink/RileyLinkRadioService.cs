@@ -12,13 +12,12 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Services;
 
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadioService : OmniCoreService, IRadioService
+    public class RileyLinkRadioServiceBase : OmniCoreServiceBase, IRadioService
     {
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
@@ -31,7 +30,7 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
         private readonly IRadioEventRepository RadioEventRepository;
 
-        public RileyLinkRadioService(
+        public RileyLinkRadioServiceBase(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             IRadioEventRepository radioEventRepository,

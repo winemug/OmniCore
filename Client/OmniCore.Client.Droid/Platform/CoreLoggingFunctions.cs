@@ -14,12 +14,12 @@ using Android.Widget;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    public class CoreLoggingFunctions : OmniCoreService, ICoreLoggingFunctions
+    public class CoreLoggingFunctions : OmniCoreServiceBase, ICoreLoggingFunctions
     {
         public const string TAG = "OmniCore";
         public void Debug(string message)

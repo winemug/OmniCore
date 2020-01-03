@@ -5,7 +5,7 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using OmniCore.Repository.Sqlite.Entities;
 
 namespace OmniCore.Repository.Sqlite.Repositories

@@ -1,7 +1,6 @@
 ﻿using Android.Bluetooth;
 using Android.OS;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Client.Droid.Platform
 {

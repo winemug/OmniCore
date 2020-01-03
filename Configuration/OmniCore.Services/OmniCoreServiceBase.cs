@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Services
 {
-    public abstract class OmniCoreService : ICoreService
+    public abstract class OmniCoreServiceBase : ICoreService
     {
         private ConcurrentDictionary<ICoreService, bool> Dependents;
 
@@ -27,7 +27,7 @@ namespace OmniCore.Services
         protected abstract Task OnResume(CancellationToken cancellationToken);
         private readonly ICoreService[] Dependencies = new ICoreService[0];
 
-        protected OmniCoreService(params ICoreService[] dependencies)
+        protected OmniCoreServiceBase(params ICoreService[] dependencies)
         {
             Dependents = new ConcurrentDictionary<ICoreService, bool>();
             StartStopLock = new AsyncLock();

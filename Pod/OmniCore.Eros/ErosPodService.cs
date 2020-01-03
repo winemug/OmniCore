@@ -9,17 +9,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodService : OmniCoreService, IPodService
+    public class ErosPodServiceBase : OmniCoreServiceBase, IPodService
     {
         public string Description => "Omnipod Eros";
 
@@ -35,7 +33,7 @@ namespace OmniCore.Eros
         private readonly IPodRepository PodRepository;
 
 
-        public ErosPodService(
+        public ErosPodServiceBase(
             IRadioAdapter radioAdapter,
             IPodRepository podRepository,
             IRadioService radioServiceRileyLink,

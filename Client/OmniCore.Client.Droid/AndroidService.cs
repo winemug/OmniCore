@@ -22,8 +22,6 @@ using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
@@ -145,7 +143,7 @@ namespace OmniCore.Client.Droid
                 
             }
             StoreRunningServicesValue($"{nameof(LoggingFunctions)},{nameof(ApplicationFunctions)}," +
-                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}," +
+                                      $"{nameof(Repository.Sqlite.RepositoryServiceBase)},{nameof(RadioService)}," +
                                       $"{nameof(PodService)},{nameof(IntegrationService)}");
         }
 

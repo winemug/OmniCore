@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Client.ViewModels.Home
 {

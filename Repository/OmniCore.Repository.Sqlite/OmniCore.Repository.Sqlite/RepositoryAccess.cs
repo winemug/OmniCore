@@ -1,6 +1,6 @@
 ﻿using System;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite

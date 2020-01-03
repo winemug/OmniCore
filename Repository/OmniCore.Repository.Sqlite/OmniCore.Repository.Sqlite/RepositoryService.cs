@@ -1,5 +1,4 @@
 ﻿using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Platform;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +18,7 @@ using SQLite;
 
 namespace OmniCore.Repository.Sqlite
 {
-    public class RepositoryService : OmniCoreService, IRepositoryService
+    public class RepositoryServiceBase : OmniCoreServiceBase, IRepositoryService
     {
         public string RepositoryPath { get; private set; }
 
@@ -30,7 +29,7 @@ namespace OmniCore.Repository.Sqlite
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
 
-        public RepositoryService(ICoreContainer<IServerResolvable> container,
+        public RepositoryServiceBase(ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions) : base(null)
         {
             Container = container;

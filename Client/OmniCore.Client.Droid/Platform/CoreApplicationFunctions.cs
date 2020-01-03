@@ -7,14 +7,13 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Services;
 using Unity;
 using Environment = Android.OS.Environment;
 
 namespace OmniCore.Client.Droid
 {
-    public class CoreApplicationFunctions : OmniCoreService, ICoreApplicationFunctions
+    public class CoreApplicationFunctions : OmniCoreServiceBase, ICoreApplicationFunctions
     {
         public string DataPath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 

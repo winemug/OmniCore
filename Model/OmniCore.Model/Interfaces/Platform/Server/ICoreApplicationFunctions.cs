@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces;
 
-namespace OmniCore.Model.Interfaces.Platform
+namespace OmniCore.Model.Interfaces
 {
     public interface ICoreApplicationFunctions : ICoreServerFunctions
     {

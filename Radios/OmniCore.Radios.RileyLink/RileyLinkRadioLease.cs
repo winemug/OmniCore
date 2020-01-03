@@ -12,7 +12,6 @@ using Newtonsoft.Json;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Platform;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radios.RileyLink

@@ -18,7 +18,6 @@ using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces;
 using Plugin.BluetoothLE;
-using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client.Platform
 {
