@@ -52,14 +52,6 @@ namespace OmniCore.Client.Droid
         public override void OnCreate()
         {
             CoreServices = new CoreServices();
-            
-            var t = Task.Run(async () => await CoreServices.StartServices(CancellationToken.None));
-            t.Wait();
-            if (!t.IsCompletedSuccessfully)
-            {
-                //TODO: log
-                throw new OmniCoreWorkflowException(FailureType.ServiceStartupFailure, null, t.Exception);
-            }
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -68,6 +60,14 @@ namespace OmniCore.Client.Droid
             {
                 CreateNotification();
                 AndroidServiceStarted = true;
+
+                var t = Task.Run(async () => await CoreServices.StartServices(CancellationToken.None));
+                t.Wait();
+                if (!t.IsCompletedSuccessfully)
+                {
+                    //TODO: log
+                    throw new OmniCoreWorkflowException(FailureType.ServiceStartupFailure, null, t.Exception);
+                }
             }
 
             return StartCommandResult.Sticky;
