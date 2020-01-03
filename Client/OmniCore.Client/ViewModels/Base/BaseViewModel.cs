@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -18,7 +19,7 @@ namespace OmniCore.Client.ViewModels.Base
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected ICoreServices Services { get; set; }
+        protected ICoreServiceApi ServiceApi { get; set; }
         protected ICoreClient Client { get; set; }
         protected IView View { get; set; }
 
@@ -47,10 +48,10 @@ namespace OmniCore.Client.ViewModels.Base
         {
             View = view;
             Subscription?.Dispose();
-            Subscription = Client.ServicesConnection.WhenConnectionChanged().Subscribe(async (services) =>
+            Subscription = Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
             {
-                Services = services;
-                if (services != null)
+                ServiceApi = api;
+                if (api != null)
                 {
                     await OnInitialize();
                 }
@@ -73,10 +74,10 @@ namespace OmniCore.Client.ViewModels.Base
         {
             View = view;
             Subscription?.Dispose();
-            Subscription = Client.ServicesConnection.WhenConnectionChanged().Subscribe(async (services) =>
+            Subscription = Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
             {
-                Services = services;
-                if (services != null)
+                ServiceApi = api;
+                if (api != null)
                 {
                     await OnInitialize();
                 }

@@ -13,24 +13,24 @@ using Javax.Security.Auth;
 using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Client.Droid.Platform
 {
-    public class CoreServicesConnection : Java.Lang.Object, IServiceConnection, ICoreServicesConnection
+    public class CoreClientConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
     {
         private AndroidServiceBinder Binder;
-        private ISubject<ICoreServices> CoreServicesSubject;
-        private IObservable<ICoreServices> ServicesObservable;
+        private ISubject<ICoreServiceApi> CoreServicesSubject;
 
-        public CoreServicesConnection()
+        public CoreClientConnection()
         {
-            CoreServicesSubject = new BehaviorSubject<ICoreServices>(null);
+            CoreServicesSubject = new BehaviorSubject<ICoreServiceApi>(null);
         }
 
         public void OnServiceConnected(ComponentName name, IBinder service)
         {
             Binder = service as AndroidServiceBinder;
-            CoreServicesSubject.OnNext(Binder.CoreServices);
+            CoreServicesSubject.OnNext(Binder.ServiceApi);
         }
 
         public void OnServiceDisconnected(ComponentName name)
@@ -39,7 +39,7 @@ namespace OmniCore.Client.Droid.Platform
             CoreServicesSubject.OnNext(null);
         }
 
-        public IObservable<ICoreServices> WhenConnectionChanged()
+        public IObservable<ICoreServiceApi> WhenConnectionChanged()
         {
             return CoreServicesSubject.AsObservable();
         }

@@ -64,6 +64,11 @@ namespace OmniCore.Services
             }
         }
 
+        public virtual Task OnBeforeStopRequest()
+        {
+            return Task.CompletedTask;
+        }
+
         public async Task StopService(CancellationToken cancellationToken)
         {
             using var ssl = await StartStopLock.LockAsync(cancellationToken);

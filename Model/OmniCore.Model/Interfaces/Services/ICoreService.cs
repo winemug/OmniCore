@@ -12,6 +12,7 @@ namespace OmniCore.Model.Interfaces.Platform
         bool IsPaused { get; }
         void RegisterDependentServices(params ICoreService[] dependentServices);
         Task StartService(CancellationToken cancellationToken);
+        Task OnBeforeStopRequest();
         Task StopService(CancellationToken cancellationToken);
         Task PauseService(CancellationToken cancellationToken);
         Task ResumeService(CancellationToken cancellationToken);

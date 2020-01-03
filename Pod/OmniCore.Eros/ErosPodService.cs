@@ -14,6 +14,7 @@ using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Services;
 
 namespace OmniCore.Eros
@@ -25,7 +26,9 @@ namespace OmniCore.Eros
         public IRadioService[] RadioProviders { get; }
         
         private readonly IRadioAdapter RadioAdapter;
-        private readonly ICoreServices Services;
+        private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly ICoreApplicationService ApplicationService;
+        private readonly ICoreServiceApi ServiceApi;
 
         private readonly ConcurrentDictionary<long, IPod> PodDictionary;
         private readonly AsyncLock PodCreateLock;
@@ -33,13 +36,17 @@ namespace OmniCore.Eros
 
 
         public ErosPodService(
-            ICoreServices services,
-            ICoreApplicationService applicationService,
             IRadioAdapter radioAdapter,
             IPodRepository podRepository,
-            IRadioService radioServiceRileyLink)
+            IRadioService radioServiceRileyLink,
+            ICoreContainer<IServerResolvable> container,
+            ICoreApplicationService applicationService,
+            ICoreServiceApi serviceApi)
         {
-            Services = services;
+            Container = container;
+            ApplicationService = applicationService;
+            ServiceApi = serviceApi;
+
             RadioProviders = new[] {radioServiceRileyLink};
             RadioAdapter = radioAdapter;
             PodRepository = podRepository;
@@ -59,7 +66,7 @@ namespace OmniCore.Eros
         {
             await foreach (var archivedPodEntity in PodRepository.ActivePods())
             {
-                var pod = Services.ServerContainer.Get<IPod>();
+                var pod = Container.Get<IPod>();
                 pod.Entity = archivedPodEntity;
                 yield return pod;
             }
@@ -100,7 +107,7 @@ namespace OmniCore.Eros
             if (PodDictionary.ContainsKey(podEntity.Id))
                 return PodDictionary[podEntity.Id];
 
-            var pod = Services.ServerContainer.Get<IPod>();
+            var pod = Container.Get<IPod>();
             pod.Entity = podEntity;
             await pod.StartQueue();
             PodDictionary[podEntity.Id] = pod;
@@ -109,7 +116,7 @@ namespace OmniCore.Eros
 
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            var previousState = this.Services.ApplicationService.ReadPreferences(new []
+            var previousState = ApplicationService.ReadPreferences(new []
             {
                 ("ErosPodService_StopRequested_ActiveRequests", string.Empty),
             })[0];
@@ -118,38 +125,39 @@ namespace OmniCore.Eros
             {
                 //TODO: check states of requests - create notifications
                 
-                Services.ApplicationService.StorePreferences(new []
+                ApplicationService.StorePreferences(new []
                 {
                     ("ErosPodService_StopRequested_ActiveRequests", string.Empty),
                 });
             }
-            
-            Services.OnUnexpectedStopRequest.Subscribe((services) =>
-            {
-                var listCopy = PodDictionary.Values.ToList();
-                
-                var runningRequestIds = new StringBuilder();
-                foreach (var pod in listCopy)
-                {
-                    var ar = pod.ActiveRequest;
-                    if (ar != null)
-                    {
-                        runningRequestIds.Append($"{ar.Entity.Id},");
-                        if (ar.CanCancel)
-                            ar.RequestCancellation();
-                    }
-                }
-                services.ApplicationService.StorePreferences(new []
-                {
-                    ("ErosPodService_StopRequested_ActiveRequests", runningRequestIds.ToString()),
-                });
-            });
             
             await foreach (var activePodEntity in PodRepository.ActivePods())
             {
                 await GetPodInternal(activePodEntity);
                 cancellationToken.ThrowIfCancellationRequested();
             }
+        }
+
+        public override Task OnBeforeStopRequest()
+        {
+            var listCopy = PodDictionary.Values.ToList();
+                
+            var runningRequestIds = new StringBuilder();
+            foreach (var pod in listCopy)
+            {
+                var ar = pod.ActiveRequest;
+                if (ar != null)
+                {
+                    runningRequestIds.Append($"{ar.Entity.Id},");
+                    if (ar.CanCancel)
+                        ar.RequestCancellation();
+                }
+            }
+            ApplicationService.StorePreferences(new []
+            {
+                ("ErosPodService_StopRequested_ActiveRequests", runningRequestIds.ToString()),
+            });
+            return Task.CompletedTask;
         }
 
         protected override async Task OnStop(CancellationToken cancellationToken)

@@ -28,9 +28,9 @@ namespace OmniCore.Client.ViewModels.Home
 
         public ICommand AddCommand { get; set; }
 
-        private ICoreApplicationService ApplicationService => Services.ApplicationService;
+        private ICoreApplicationService ApplicationService => ServiceApi.ApplicationService;
 
-        private IPodService PodService => Services.PodService;
+        private IPodService PodService => ServiceApi.PodService;
 
         public PodsViewModel(ICoreClient client) : base(client)
         {

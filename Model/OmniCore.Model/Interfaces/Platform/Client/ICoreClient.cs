@@ -7,7 +7,7 @@ namespace OmniCore.Model.Interfaces.Platform
     public interface ICoreClient : IClientResolvable
     {
         ICoreContainer<IClientResolvable> ClientContainer { get; }
-        ICoreServicesConnection ServicesConnection { get; }
+        ICoreClientConnection ClientConnection { get; }
         SynchronizationContext SynchronizationContext { get; }
         TView GetView<TView, TViewModel>(TViewModel viewModelInstance)
             where TView : IView<TViewModel>

@@ -128,12 +128,11 @@
     <Compile Include="Initializer.cs" />
     <Compile Include="Platform\AapsIntegrationService.cs" />
     <Compile Include="Platform\AndroidServiceBinder.cs" />
-    <Compile Include="Platform\CoreServicesConnection.cs" />
+    <Compile Include="Platform\CoreClientConnection.cs" />
     <Compile Include="Platform\BluetoothWakeLock.cs" />
     <Compile Include="Platform\CoreApplicationService.cs" />
     <Compile Include="Platform\CoreClient.cs" />
     <Compile Include="Platform\CoreLoggingService.cs" />
-    <Compile Include="Platform\CoreServices.cs" />
     <Compile Include="Platform\KeepAwakeLock.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\RemoteRequestPublisher.cs" />

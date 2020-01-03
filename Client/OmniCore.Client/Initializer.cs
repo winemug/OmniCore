@@ -16,7 +16,11 @@ namespace OmniCore.Client
         public static ICoreContainer<IServerResolvable> WithCrossBleRadioAdapter
             (this ICoreContainer<IServerResolvable> container)
         {
-            return container.One<IRadioAdapter, CrossBleRadioAdapter>();
+            return container.One<IRadioAdapter, CrossBleRadioAdapter>()
+                .Many<IRadioPeripheral, CrossBleRadioPeripheral>()
+                .Many<IRadioPeripheralLease, CrossBlePeripheralLease>()
+                .Many<IRadioPeripheralCharacteristic, CrossBleRadioCharacteristic>()
+                .Many<IRadioPeripheralResult, CrossBleResult>();
         }
 
         public static ICoreContainer<IClientResolvable> WithXamarinForms

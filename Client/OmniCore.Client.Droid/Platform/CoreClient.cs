@@ -14,12 +14,12 @@ namespace OmniCore.Client.Droid.Platform
         public ICoreContainer<IClientResolvable> ClientContainer { get; }
         public SynchronizationContext SynchronizationContext => Application.SynchronizationContext;
 
-        public ICoreServicesConnection ServicesConnection { get; }
+        public ICoreClientConnection ClientConnection { get; }
         public CoreClient(ICoreContainer<IClientResolvable> clientContainer,
-            ICoreServicesConnection connection)
+            ICoreClientConnection connection)
         {
             ClientContainer = clientContainer;
-            ServicesConnection = connection;
+            ClientConnection = connection;
         }
 
         public TView GetView<TView, TViewModel>(TViewModel viewModelInstance) where TView : IView<TViewModel> where TViewModel : IViewModel

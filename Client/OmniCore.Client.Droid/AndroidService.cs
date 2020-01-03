@@ -22,6 +22,7 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Platform;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
@@ -31,11 +32,19 @@ using Notification = Android.App.Notification;
 namespace OmniCore.Client.Droid
 {
     [Service(Exported = true, Enabled = true, DirectBootAware = true, Name = "net.balya.omnicore.commandservice", Icon="@mipmap/ic_launcher")]
-    public class AndroidService : Service
+    public class AndroidService : Service, ICoreServiceApi
     {
         private bool AndroidServiceStarted = false;
 
-        private ICoreServices CoreServices;
+        public ICoreContainer<IServerResolvable> ServerContainer { get; private set; }
+        public ICoreLoggingService LoggingService => ServerContainer.Get<ICoreLoggingService>();
+        public ICoreApplicationService ApplicationService => ServerContainer.Get<ICoreApplicationService>();
+        public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
+        public IRadioService RadioService => ServerContainer.Get<IRadioService>();
+        public IPodService PodService => ServerContainer.Get<IPodService>();
+        public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
+
+        private ISubject<ICoreServiceApi> UnexpectedStopRequestSubject;
 
         public override IBinder OnBind(Intent intent)
         {
@@ -46,12 +55,14 @@ namespace OmniCore.Client.Droid
                 else
                     StartService(intent);
             }
-            return new AndroidServiceBinder(CoreServices);
+            return new AndroidServiceBinder(this);
         }
 
         public override void OnCreate()
         {
-            CoreServices = new CoreServices();
+            UnexpectedStopRequestSubject = new Subject<ICoreServiceApi>();
+            ServerContainer = Initializer.AndroidServiceContainer(this);
+            base.OnCreate();
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -61,7 +72,7 @@ namespace OmniCore.Client.Droid
                 CreateNotification();
                 AndroidServiceStarted = true;
 
-                var t = Task.Run(async () => await CoreServices.StartServices(CancellationToken.None));
+                var t = Task.Run(async () => await StartServices(CancellationToken.None));
                 t.Wait();
                 if (!t.IsCompletedSuccessfully)
                 {
@@ -80,8 +91,8 @@ namespace OmniCore.Client.Droid
 
         public override void OnDestroy()
         {
-            CoreServices.UnexpectedStopRequested();
-            var t = Task.Run(async () => await CoreServices.StopServices(CancellationToken.None));
+            UnexpectedStopRequested();
+            var t = Task.Run(async () => await StopServices(CancellationToken.None));
             t.Wait();
             if (!t.IsCompletedSuccessfully)
             {
@@ -114,5 +125,63 @@ namespace OmniCore.Client.Droid
             notificationManager.Notify(1, notification);
             StartForeground(1, notification);
         }
+
+                public async Task StartServices(CancellationToken cancellationToken)
+        {
+            await LoggingService.StartService(cancellationToken);
+            await ApplicationService.StartService(cancellationToken);
+            await RepositoryService.StartService(cancellationToken);
+            await RadioService.StartService(cancellationToken);
+            await PodService.StartService(cancellationToken);
+            await IntegrationService.StartService(cancellationToken);
+            
+            var previousState = ApplicationService.ReadPreferences(new []
+            {
+                ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
+            })[0];
+            
+            if (!string.IsNullOrEmpty(previousState.Value))
+            {
+                //TODO: check states of requests - create notifications
+                
+            }
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}," +
+                                      $"{nameof(PodService)},{nameof(IntegrationService)}");
+        }
+
+        private void StoreRunningServicesValue(string value)
+        {
+            ApplicationService.StorePreferences(new []
+            {
+                ("CoreAndroidService_StopRequested_RunningServices", string.Empty),
+            });
+        }
+
+        public async Task StopServices(CancellationToken cancellationToken)
+        {
+            await IntegrationService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}," +
+                                      $"{nameof(PodService)}");
+            await PodService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(Repository.Sqlite.RepositoryService)},{nameof(RadioService)}");
+            await RadioService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}," +
+                                      $"{nameof(Repository.Sqlite.RepositoryService)}");
+            await RepositoryService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)},{nameof(ApplicationService)}");
+            await ApplicationService.StopService(cancellationToken);
+            StoreRunningServicesValue($"{nameof(LoggingService)}");
+            await LoggingService.StopService(cancellationToken);
+            StoreRunningServicesValue(string.Empty);
+        }
+        
+        public void UnexpectedStopRequested()
+        {
+            UnexpectedStopRequestSubject.OnNext(this);
+        }
+
     }
 }

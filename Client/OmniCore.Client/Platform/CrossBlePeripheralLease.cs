@@ -17,15 +17,14 @@ namespace OmniCore.Client.Platform
 {
     public class CrossBlePeripheralLease : IRadioPeripheralLease
     {
-        private readonly CrossBleRadioPeripheral CrossPeripheral;
+        public CrossBleRadioPeripheral CrossPeripheral { get; set; }
+
         private IDevice BleDevice => CrossPeripheral.BleDevice;
         private IDisposable BluetoothLock = null;
-        private readonly ICoreServices Services;
-        public CrossBlePeripheralLease(ICoreServices services, CrossBleRadioPeripheral crossBleRadioPeripheral)
+
+        public CrossBlePeripheralLease(ICoreApplicationService applicationService)
         {
-            Services = services;
-            CrossPeripheral = crossBleRadioPeripheral;
-            BluetoothLock = Services.ApplicationService.BluetoothKeepAwake();
+            BluetoothLock = applicationService.BluetoothKeepAwake();
         }
 
         public IObservable<IRadioPeripheralLease> WhenConnected() =>

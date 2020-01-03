@@ -35,8 +35,8 @@ namespace OmniCore.Client.Droid
         private ICoreContainer<IClientResolvable> ClientContainer;
         private IDisposable ServiceConnectSubscription;
         private IDisposable ServiceDisconnectSubscription;
-        private ICoreServicesConnection CoreServicesConnection;
-        private IServiceConnection ServiceConnection => CoreServicesConnection as IServiceConnection;
+        private ICoreClientConnection CoreClientConnection;
+        private IServiceConnection ServiceConnection => CoreClientConnection as IServiceConnection;
         private bool ConnectRequested = false;
         private bool SavedValue = false;
 
@@ -67,7 +67,7 @@ namespace OmniCore.Client.Droid
             ClientContainer = Initializer.AndroidClientContainer(this)
                 .WithXamarinForms();
 
-            CoreServicesConnection = ClientContainer.Get<ICoreServicesConnection>();
+            CoreClientConnection = ClientContainer.Get<ICoreClientConnection>();
             
             ConnectToAndroidService();
 
