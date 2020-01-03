@@ -11,11 +11,11 @@ namespace OmniCore.Client.Droid.Platform
 {
     public class CoreClient : ICoreClient
     {
-        public ICoreContainer ClientContainer { get; }
+        public ICoreContainer<IClientResolvable> ClientContainer { get; }
         public SynchronizationContext SynchronizationContext => Application.SynchronizationContext;
 
         public ICoreServicesConnection ServicesConnection { get; }
-        public CoreClient(ICoreContainer clientContainer,
+        public CoreClient(ICoreContainer<IClientResolvable> clientContainer,
             ICoreServicesConnection connection)
         {
             ClientContainer = clientContainer;

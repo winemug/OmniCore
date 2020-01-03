@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadio : INotifyPropertyChanged
+    public interface IRadio : INotifyPropertyChanged, IServerResolvable
     {
         IRadioPeripheral Peripheral { get; set; }
         IRadioEntity Entity { get; set; }

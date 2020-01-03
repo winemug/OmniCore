@@ -1,6 +1,6 @@
 ﻿namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ICoreClientContext
+    public interface IClientResolvable : IResolvable
     {
     }
 }

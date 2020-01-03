@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ICoreServicesConnection : IDisposable
+    public interface ICoreServicesConnection : IClientResolvable
     {
         IObservable<ICoreServices> WhenConnectionChanged();
     }

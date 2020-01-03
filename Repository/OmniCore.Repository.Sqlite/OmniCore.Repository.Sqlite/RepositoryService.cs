@@ -82,7 +82,7 @@ namespace OmniCore.Repository.Sqlite
 
             var path = Path.Combine(Services.ApplicationService.DataPath, "oc.db3");
 
-            var migrators = Services.Container.GetAll<IRepositoryMigrator>();
+            var migrators = Services.ServerContainer.GetAll<IRepositoryMigrator>();
 
             foreach (var migrator in migrators)
             {

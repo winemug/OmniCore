@@ -10,7 +10,8 @@ namespace OmniCore.Eros
 {
     public static class Initializer
     {
-        public static ICoreContainer WithOmnipodEros(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithOmnipodEros
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container
                 .One<IPodService, ErosPodService>()

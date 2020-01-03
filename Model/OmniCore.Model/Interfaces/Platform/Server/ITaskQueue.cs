@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ITaskQueue
+    public interface ITaskQueue : IServerResolvable
     {
         Task Startup();
         Task Shutdown();

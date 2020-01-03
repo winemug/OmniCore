@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Platform;
 using SQLite;
 
 namespace OmniCore.Model.Interfaces.Data.Repositories
 {
-    public interface IRepository<T> where T : IEntity
+    public interface IRepository<T> : IServerResolvable
+        where T : IEntity
     {
         T New();
         Task Create(T entity, CancellationToken cancellationToken);

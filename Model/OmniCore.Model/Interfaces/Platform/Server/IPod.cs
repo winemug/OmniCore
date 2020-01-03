@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IPod
+    public interface IPod : IServerResolvable
     {
         IPodEntity Entity { get; set; }
         IPodRequest ActiveRequest { get; }

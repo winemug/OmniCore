@@ -11,7 +11,7 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Client
 {
-    public partial class XamarinApp : Application
+    public partial class XamarinApp : Application, IClientResolvable
     {
         private readonly ICoreClient Client;
         public XamarinApp(ICoreClient client)

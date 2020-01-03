@@ -13,12 +13,14 @@ namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static ICoreContainer WithCrossBleRadioAdapter(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithCrossBleRadioAdapter
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container.One<IRadioAdapter, CrossBleRadioAdapter>();
         }
 
-        public static ICoreContainer WithXamarinForms(this ICoreContainer container)
+        public static ICoreContainer<IClientResolvable> WithXamarinForms
+            (this ICoreContainer<IClientResolvable> container)
         {
             return container
                 .One<XamarinApp>()

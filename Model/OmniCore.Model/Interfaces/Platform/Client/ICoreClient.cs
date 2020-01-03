@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ICoreClient
+    public interface ICoreClient : IClientResolvable
     {
-        ICoreContainer ClientContainer { get; }
+        ICoreContainer<IClientResolvable> ClientContainer { get; }
         ICoreServicesConnection ServicesConnection { get; }
         SynchronizationContext SynchronizationContext { get; }
         TView GetView<TView, TViewModel>(TViewModel viewModelInstance)

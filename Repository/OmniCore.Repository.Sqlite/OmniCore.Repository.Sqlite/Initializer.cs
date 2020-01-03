@@ -10,7 +10,8 @@ namespace OmniCore.Repository.Sqlite
 {
     public static class Initializer
     {
-        public static ICoreContainer WithSqliteRepositories(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithSqliteRepositories
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container
                 .Many<IPodRepository, PodRepository>()

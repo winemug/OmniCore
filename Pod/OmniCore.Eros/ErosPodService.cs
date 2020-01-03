@@ -59,7 +59,7 @@ namespace OmniCore.Eros
         {
             await foreach (var archivedPodEntity in PodRepository.ActivePods())
             {
-                var pod = Services.Container.Get<IPod>();
+                var pod = Services.ServerContainer.Get<IPod>();
                 pod.Entity = archivedPodEntity;
                 yield return pod;
             }
@@ -100,7 +100,7 @@ namespace OmniCore.Eros
             if (PodDictionary.ContainsKey(podEntity.Id))
                 return PodDictionary[podEntity.Id];
 
-            var pod = Services.Container.Get<IPod>();
+            var pod = Services.ServerContainer.Get<IPod>();
             pod.Entity = podEntity;
             await pod.StartQueue();
             PodDictionary[podEntity.Id] = pod;

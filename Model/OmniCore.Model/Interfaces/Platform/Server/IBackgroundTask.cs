@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IBackgroundTask : IDisposable
+    public interface IBackgroundTask : IDisposable, IServerResolvable
     {
         Task<bool> Run(bool tryRunUninterrupted = false);
         Task<bool> RunScheduled(DateTimeOffset time, bool tryRunUninterrupted = false);

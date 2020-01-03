@@ -25,7 +25,7 @@ namespace OmniCore.Radios.RileyLink
         private readonly IRadioAdapter RadioAdapter;
         private readonly IRadioRepository RadioRepository;
         private readonly ISignalStrengthRepository SignalStrengthRepository;
-        private readonly ICoreContainer Container;
+        private readonly ICoreContainer<IServerResolvable> Container;
 
         private readonly AsyncLock RadioDictionaryLock;
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
@@ -35,7 +35,7 @@ namespace OmniCore.Radios.RileyLink
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
             IRadioEventRepository radioEventRepository,
-            ICoreContainer container) : base()
+            ICoreContainer<IServerResolvable> container) : base()
         {
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;

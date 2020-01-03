@@ -3,7 +3,7 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioConfiguration
+    public interface IRadioConfiguration : IServerResolvable
     {
         bool KeepConnected { get; set; }
         TimeSpan RadioResponseTimeout { get; set; }

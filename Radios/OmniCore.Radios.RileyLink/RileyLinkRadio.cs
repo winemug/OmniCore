@@ -35,10 +35,10 @@ namespace OmniCore.Radios.RileyLink
             await RadioRepository.Update(Entity, CancellationToken.None);
         }
 
-        private readonly ICoreContainer Container;
+        private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IRadioRepository RadioRepository;
         public RileyLinkRadio(
-            ICoreContainer container,
+            ICoreContainer<IServerResolvable> container,
             IRadioRepository radioRepository)
         {
             Container = container;

@@ -14,13 +14,13 @@ namespace OmniCore.Client.Droid.Platform
 {
     public class CoreServices : ICoreServices
     {
-        public ICoreContainer Container { get; private set; }
-        public ICoreLoggingService LoggingService => Container.Get<ICoreLoggingService>();
-        public ICoreApplicationService ApplicationService => Container.Get<ICoreApplicationService>();
-        public IRepositoryService RepositoryService => Container.Get<IRepositoryService>();
-        public IRadioService RadioService => Container.Get<IRadioService>();
-        public IPodService PodService => Container.Get<IPodService>();
-        public ICoreIntegrationService IntegrationService => Container.Get<ICoreIntegrationService>();
+        public ICoreContainer<IServerResolvable> ServerContainer { get; private set; }
+        public ICoreLoggingService LoggingService => ServerContainer.Get<ICoreLoggingService>();
+        public ICoreApplicationService ApplicationService => ServerContainer.Get<ICoreApplicationService>();
+        public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
+        public IRadioService RadioService => ServerContainer.Get<IRadioService>();
+        public IPodService PodService => ServerContainer.Get<IPodService>();
+        public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
 
         private readonly ISubject<ICoreServices> UnexpectedStopRequestSubject;
 
@@ -30,7 +30,7 @@ namespace OmniCore.Client.Droid.Platform
         public CoreServices()
         {
             UnexpectedStopRequestSubject = new Subject<ICoreServices>();
-            Container = Initializer.AndroidServiceContainer(this);
+            ServerContainer = Initializer.AndroidServiceContainer(this);
         }
 
         public async Task StartServices(CancellationToken cancellationToken)

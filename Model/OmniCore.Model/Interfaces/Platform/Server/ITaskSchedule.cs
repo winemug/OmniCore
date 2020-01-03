@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ITaskSchedule
+    public interface ITaskSchedule : IServerResolvable
     {
         ITask RelatedTask { get; set; }
         TimeSpan? ExecuteRelativeEarliest { get; set; }

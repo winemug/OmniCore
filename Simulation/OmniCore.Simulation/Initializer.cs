@@ -7,7 +7,8 @@ namespace OmniCore.Simulation
 {
     public static class Initializer
     {
-        public static ICoreContainer WithBleSimulator(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithBleSimulator
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container.Many<IRadioAdapter, RadioAdapter>();
         }

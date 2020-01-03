@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IView
+    public interface IView : IClientResolvable
     {
     }
 

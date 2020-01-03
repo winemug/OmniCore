@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioPeripheralLease : IDisposable
+    public interface IRadioPeripheralLease : IDisposable, IServerResolvable
     {
         IObservable<IRadioPeripheralLease> WhenConnected();
         IObservable<Exception> WhenConnectionFailed();

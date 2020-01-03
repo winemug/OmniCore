@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioLease : IDisposable
+    public interface IRadioLease : IDisposable, IServerResolvable
     {
         IRadioPeripheralLease PeripheralLease { get; set; }
         IRadio Radio { get; set; }

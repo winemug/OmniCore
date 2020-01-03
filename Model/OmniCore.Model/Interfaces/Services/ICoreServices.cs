@@ -6,18 +6,20 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ICoreServices
+    public interface ICoreServices : IClientResolvable, IServerResolvable //TODO: preliminary before change
     {
         Task StartServices(CancellationToken cancellationToken);
         Task StopServices(CancellationToken cancellationToken);
-        IObservable<ICoreServices> OnUnexpectedStopRequest { get; }
-        ICoreContainer Container { get; }
         ICoreLoggingService LoggingService { get; }
         ICoreApplicationService ApplicationService { get; }
         IRepositoryService RepositoryService { get; }
         IRadioService RadioService { get; }
         IPodService PodService { get; }
         ICoreIntegrationService IntegrationService { get; }
+        
+        //TODO: temporary as above
+        ICoreContainer<IServerResolvable> ServerContainer { get; }
+        IObservable<ICoreServices> OnUnexpectedStopRequest { get; }
         void UnexpectedStopRequested();
     }
 }

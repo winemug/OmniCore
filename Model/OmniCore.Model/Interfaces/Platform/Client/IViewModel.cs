@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IViewModel : INotifyPropertyChanged, IDisposable
+    public interface IViewModel : INotifyPropertyChanged, IDisposable, IClientResolvable
     {
         void InitializeModel(IView view);
     }

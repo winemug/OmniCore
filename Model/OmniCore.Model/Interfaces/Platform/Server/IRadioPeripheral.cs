@@ -6,7 +6,7 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioPeripheral : IDisposable, INotifyPropertyChanged
+    public interface IRadioPeripheral : IDisposable, INotifyPropertyChanged, IServerResolvable
     {
         Guid Uuid { get; }
         string Name { get; set; }

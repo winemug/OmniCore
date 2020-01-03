@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Platform;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IPodRequest : ITask, INotifyPropertyChanged
+    public interface IPodRequest : ITask, INotifyPropertyChanged, IServerResolvable
     {
         IPodRequestEntity Entity { get; set; }
         IPod Pod { get; set; }

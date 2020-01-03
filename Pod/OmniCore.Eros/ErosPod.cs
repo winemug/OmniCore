@@ -12,11 +12,11 @@ namespace OmniCore.Eros
     public class ErosPod : IPod
     {
 
-        private readonly ICoreContainer Container;
+        private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IPodRequestRepository PodRequestRepository;
         private readonly ITaskQueue TaskQueue;
 
-        public ErosPod(ICoreContainer container,
+        public ErosPod(ICoreContainer<IServerResolvable> container,
             IPodRequestRepository podRequestRepository,
             ITaskQueue taskQueue)
         {

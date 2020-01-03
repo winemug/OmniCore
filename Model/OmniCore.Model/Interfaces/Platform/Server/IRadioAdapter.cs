@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioAdapter
+    public interface IRadioAdapter : IServerResolvable
     {
         Task TryEnsureAdapterEnabled(CancellationToken cancellationToken);
         Task<bool> TryEnableAdapter(CancellationToken cancellationToken);

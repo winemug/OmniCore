@@ -15,29 +15,31 @@ namespace OmniCore.Client.Droid
 {
     public static class Initializer
     {
-        public static ICoreContainer WithAndroidPlatformServices(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithAndroidPlatformServices
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container
                 .One<ICoreApplicationService, CoreApplicationService>()
                 .One<ICoreLoggingService, CoreLoggingService>();
         }
 
-        public static ICoreContainer WithAapsIntegrationService(this ICoreContainer container)
+        public static ICoreContainer<IServerResolvable> WithAapsIntegrationService
+            (this ICoreContainer<IServerResolvable> container)
         {
             return container.One<ICoreIntegrationService, AapsIntegrationService>();
         }
 
-        public static ICoreContainer AndroidClientContainer(ICoreClientContext clientContext)
+        public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)
         {
-            return new OmniCoreContainer()
+            return new OmniCoreContainer<IClientResolvable>()
                 .Existing(clientContext)
                 .One<ICoreServicesConnection, CoreServicesConnection>()
                 .One<ICoreClient, CoreClient>();
         }
 
-        public static ICoreContainer AndroidServiceContainer(ICoreServices coreServices)
+        public static ICoreContainer<IServerResolvable> AndroidServiceContainer(ICoreServices coreServices)
         {
-            return new OmniCoreContainer()
+            return new OmniCoreContainer<IServerResolvable>()
                 .Existing(coreServices)
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()

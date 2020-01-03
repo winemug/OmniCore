@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface IRadioPeripheralCharacteristic : IDisposable
+    public interface IRadioPeripheralCharacteristic : IDisposable, IServerResolvable
     {
         Guid Uuid { get; }
         Task<byte[]> Read(CancellationToken cancellationToken);

@@ -32,7 +32,7 @@ namespace OmniCore.Client.Droid
 
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, ICoreClientContext
     {
-        private ICoreContainer ClientContainer;
+        private ICoreContainer<IClientResolvable> ClientContainer;
         private IDisposable ServiceConnectSubscription;
         private IDisposable ServiceDisconnectSubscription;
         private ICoreServicesConnection CoreServicesConnection;

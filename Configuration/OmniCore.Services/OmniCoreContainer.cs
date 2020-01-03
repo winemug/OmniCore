@@ -8,49 +8,57 @@ using Unity;
 
 namespace OmniCore.Services
 {
-    public class OmniCoreContainer : UnityContainer, ICoreContainer
+    public class OmniCoreContainer<R> : UnityContainer, ICoreContainer<R>
+        where R : IResolvable
     {
         public OmniCoreContainer()
         {
-            this.RegisterInstance<ICoreContainer>(this);
+            this.RegisterInstance<ICoreContainer<R>>(this);
         }
 
-        public ICoreContainer Many<T>()
+        public ICoreContainer<R> Many<T>()
+            where T : R
         {
             this.RegisterType<T>();
             return this;
         }
 
-        public ICoreContainer One<T>()
+        public ICoreContainer<R> One<T>()
+            where T : R
         {
             this.RegisterSingleton<T>();
             return this;
         }
 
-        public ICoreContainer Existing<T>(T instance)
+        public ICoreContainer<R> Existing<T>(T instance)
+            where T : R
         {
             this.RegisterInstance(instance);
             return this;
         }
 
-        public ICoreContainer Many<TI, TC>() where TC : TI
+        public ICoreContainer<R> Many<TI, TC>() where TC : TI
+            where TI : R
         {
             this.RegisterType<TI,TC>();
             return this;
         }
 
-        public ICoreContainer One<TI, TC>() where TC : TI
+        public ICoreContainer<R> One<TI, TC>() where TC : TI
+            where TI : R
         {
             this.RegisterSingleton<TI, TC>();
             return this;
         }
 
         public T Get<T>()
+            where T : R
         {
             return this.Resolve<T>();
         }
 
         public T[] GetAll<T>()
+            where T : R
         {
             return this.Registrations
                 .Where(r => r.MappedToType.GetInterfaces()

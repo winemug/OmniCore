@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Platform
 {
-    public interface ITask : IDisposable
+    public interface ITask : IDisposable, IServerResolvable
     {
         bool CanCancel { get; }
         void RequestCancellation();
