@@ -13,9 +13,11 @@ using OmniCore.Client.Droid;
 using Plugin.BluetoothLE;
 using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Android.Content;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Services;
 using Application = Xamarin.Forms.Application;
@@ -41,6 +43,10 @@ namespace OmniCore.Client.Droid
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) => OnUnhandledException(args.ExceptionObject);
+            TaskScheduler.UnobservedTaskException += (sender, args) => OnUnhandledException(args.Exception);
+            AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) => OnUnhandledException(args.Exception);
+
             base.OnCreate(savedInstanceState);
 
             //TODO: move
@@ -65,6 +71,18 @@ namespace OmniCore.Client.Droid
 
             LoadXamarinApplication();
 
+        }
+
+        private void OnUnhandledException(object exceptionObject)
+        {
+            if (exceptionObject != null && exceptionObject is Exception e)
+            {
+                Debug.WriteLine(e.AsDebugFriendly());
+            }
+            else
+            {
+                Debug.WriteLine($"****** Unknown exception object {exceptionObject}");
+            }
         }
 
         private ISubject<bool> PermissionResultSubject;
@@ -112,6 +130,7 @@ namespace OmniCore.Client.Droid
             base.OnStop();
             DisconnectFromAndroidService();
         }
+
         private void LoadXamarinApplication()
         {
             LoadApplication(ClientContainer.Get<XamarinApp>());
