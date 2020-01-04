@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces
         Task TryEnsureAdapterEnabled(CancellationToken cancellationToken);
         Task<bool> TryEnableAdapter(CancellationToken cancellationToken);
         Task<bool> TryDisableAdapter(CancellationToken cancellationToken);
-        IObservable<IRadioPeripheralResult> FindPeripherals(Guid serviceId);
-        Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, CancellationToken cancellationToken);
+        IObservable<IRadioPeripheralResult> FindPeripherals(Guid serviceUuid);
+        Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, Guid serviceUuid, CancellationToken cancellationToken);
     }
 }

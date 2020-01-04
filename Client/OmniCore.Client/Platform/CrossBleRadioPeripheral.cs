@@ -38,9 +38,10 @@ namespace OmniCore.Client.Platform
             LeaseLock = new AsyncLock();
         }
 
-        public void SetDevice(IDevice bleDevice)
+        public void SetDevice(IDevice bleDevice, Guid serviceUuid)
         {
             BleDevice = bleDevice;
+            ServiceUuid = serviceUuid;
             NameSubscription?.Dispose();
             NameSubscription = BleDevice.WhenNameUpdated().Subscribe((name) =>
             {
@@ -78,6 +79,7 @@ namespace OmniCore.Client.Platform
         }
 
         public Guid Uuid => BleDevice.Uuid;
+        public Guid ServiceUuid { get; private set; }
         public string Name { get; set; }
 
         public async Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
