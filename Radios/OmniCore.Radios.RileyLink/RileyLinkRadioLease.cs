@@ -66,7 +66,8 @@ namespace OmniCore.Radios.RileyLink
         public async Task Identify(CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
-            await SendCommandsAndGetResponses(cancellationToken, new List<(RileyLinkCommandType, byte[])>
+            await SendCommandsAndGetResponses(cancellationToken, TimeSpan.FromSeconds(10),
+                new List<(RileyLinkCommandType, byte[])>
             {
                 (RileyLinkCommandType.Led, new byte[] {0, 0}),
                 (RileyLinkCommandType.Led, new byte[] {1, 1}),
@@ -116,7 +117,8 @@ namespace OmniCore.Radios.RileyLink
             await Connect(cancellationToken);
             Radio.Activity = RadioActivity.Listening;
             var arguments = new Bytes((byte) 0).Append(timeoutMilliseconds);
-            var result = await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.GetPacket,
+            var result = await SendCommandGetResponse(cancellationToken, TimeSpan.FromMilliseconds(timeoutMilliseconds),
+                RileyLinkCommandType.GetPacket,
                 arguments.ToArray());
             Radio.Activity = RadioActivity.Idle;
             await Disconnect(cancellationToken);
@@ -189,13 +191,6 @@ namespace OmniCore.Radios.RileyLink
                         break;
                     }
                 }
-                try
-                {
-                }
-                finally
-                {
-                    //notifyLock.Dispose();
-                }
             });
         }
 
@@ -258,10 +253,10 @@ namespace OmniCore.Radios.RileyLink
         {
             Radio.Activity = RadioActivity.Configuring;
             await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.Reset);
-            await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.None);
+            await SendCommandGetResponse(cancellationToken, TimeSpan.FromSeconds(1), RileyLinkCommandType.None);
             //await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.ResetRadioConfig);
 
-            var commands = new List<(RileyLinkCommandType, byte[])>();
+            var commands = new List<(RileyLinkCommandType Command, byte[] Data)>();
 
             commands.Add((RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None }));
             commands.Add((RileyLinkCommandType.SetPreamble, new byte[] { 0x55, 0x55 }));
@@ -269,12 +264,11 @@ namespace OmniCore.Radios.RileyLink
             foreach (var register in GetParameters(radioConfiguration))
                 commands.Add((RileyLinkCommandType.UpdateRegister, new[] { (byte)register.Item1, (byte)register.Item2 })) ;
 
-            var responses = await SendCommandsAndGetResponses(cancellationToken, commands);
+            var responses = await SendCommandsAndGetResponses(cancellationToken, TimeSpan.FromSeconds(15), commands);
             if (responses.Any(r => r.Type != RileyLinkResponseType.OK))
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "Failed to configure RileyLink");
 
-            await Task.Delay(2000);
-            var (resultType, resultData) = await SendCommandGetResponse(cancellationToken, RileyLinkCommandType.GetState);
+            var (resultType, resultData) = await SendCommandGetResponse(cancellationToken, TimeSpan.FromSeconds(2), RileyLinkCommandType.GetState);
             if (resultType != RileyLinkResponseType.OK || resultData.Length != 2 || resultData[0] != 'O' || resultData[1] != 'K')
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
             
@@ -283,15 +277,15 @@ namespace OmniCore.Radios.RileyLink
         }
 
         private async Task<List<(RileyLinkResponseType Type, byte[] Data)>> SendCommandsAndGetResponses(CancellationToken cancellationToken,
-            List<(RileyLinkCommandType, byte[])> commandList)
+            TimeSpan expectedProcessingDuration, List<(RileyLinkCommandType Command, byte[] Data)> commandList)
         {
             var resultList = new List<(RileyLinkResponseType Type, byte[] Data)>();
             var data = new Bytes((byte) 0);
             foreach (var command in commandList)
             {
-                data.Append((byte)command.Item1);
+                data.Append((byte)command.Command);
                 if (command.Item2 != null)
-                    data.Append(command.Item2);
+                    data.Append(command.Data);
             }
 
             var dataArray = data.ToArray();
@@ -305,7 +299,7 @@ namespace OmniCore.Radios.RileyLink
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written {BitConverter.ToString(dataArray)}");
             for (int i = 0; i < commandList.Count; i++)
             {
-                resultList.Add(await GetResponse(cancellationToken));
+                resultList.Add(await GetResponse(cancellationToken, expectedProcessingDuration));
             }
 
             return resultList;
@@ -323,7 +317,7 @@ namespace OmniCore.Radios.RileyLink
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written noresponse {BitConverter.ToString(data)}");
         }
 
-        private async Task<(RileyLinkResponseType Type, byte[] Data)> SendCommandGetResponse(CancellationToken cancellationToken, RileyLinkCommandType cmd, byte[] cmdData = null)
+        private async Task<(RileyLinkResponseType Type, byte[] Data)> SendCommandGetResponse(CancellationToken cancellationToken, TimeSpan expectedProcessingDuration, RileyLinkCommandType cmd, byte[] cmdData = null)
         {
             var data = GetCommandData(cmd, cmdData);
 
@@ -334,7 +328,7 @@ namespace OmniCore.Radios.RileyLink
             await DataCharacteristic.Write(data, linkedCancellation.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written {BitConverter.ToString(data)}");
 
-            var response = await GetResponse(cancellationToken);
+            var response = await GetResponse(cancellationToken, expectedProcessingDuration);
 
             return response;
         }
@@ -356,7 +350,7 @@ namespace OmniCore.Radios.RileyLink
             return data;
         }
 
-        private async Task<(RileyLinkResponseType Type, byte[] Data)> GetResponse(CancellationToken cancellationToken)
+        private async Task<(RileyLinkResponseType Type, byte[] Data)> GetResponse(CancellationToken cancellationToken, TimeSpan expectedProcessingDuration)
         {
             byte[] result = null;
             while (true)
@@ -364,7 +358,11 @@ namespace OmniCore.Radios.RileyLink
                 ResponseEvent.Reset();
                 if (Responses.IsEmpty)
                 {
-                    await ResponseEvent.WaitAsync(cancellationToken);
+                    using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout.Add(expectedProcessingDuration));
+                    using var linkedCancellation =
+                        CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
+                    
+                    await ResponseEvent.WaitAsync(linkedCancellation.Token);
                 }
                 else
                 {
