@@ -33,10 +33,14 @@ namespace OmniCore.Client.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, ICoreClientContext
     {
         private ICoreContainer<IClientResolvable> ClientContainer;
-        private ICoreClientConnection CoreClientConnection;
-        private IServiceConnection ServiceConnection => CoreClientConnection as IServiceConnection;
+
+        private IServiceConnection ServiceConnection => (IServiceConnection) ClientContainer.Get<ICoreClientConnection>();
         private bool ConnectRequested = false;
         private bool DisconnectRequested = false;
+
+#if DEBUG
+        private IDisposable ScreenLockDisposable = null;
+#endif
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -66,8 +70,6 @@ namespace OmniCore.Client.Droid
 
             ClientContainer = Initializer.AndroidClientContainer(this)
                 .WithXamarinForms();
-
-            CoreClientConnection = ClientContainer.Get<ICoreClientConnection>();
 
             LoadXamarinApplication();
 
@@ -121,8 +123,20 @@ namespace OmniCore.Client.Droid
 
         protected override void OnResume()
         {
+#if DEBUG
+            ScreenLockDisposable = ClientContainer.Get<ICoreClient>().DisplayKeepAwake();
+#endif
             ConnectToAndroidService();
             base.OnResume();
+        }
+
+        protected override void OnPause()
+        {
+#if DEBUG
+            ScreenLockDisposable?.Dispose();
+            ScreenLockDisposable = null;
+#endif
+            base.OnPause();
         }
 
         protected override void OnStop()
