@@ -16,6 +16,7 @@ namespace OmniCore.Simulation.Radios
         }
 
         public Guid Uuid { get; }
+        public Guid ServiceUuid { get; }
 
         public string Name
         {

@@ -29,7 +29,7 @@ namespace OmniCore.Simulation.Radios
             throw new NotImplementedException();
         }
 
-        public Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, CancellationToken cancellationToken)
+        public Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, Guid serviceUuid, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
