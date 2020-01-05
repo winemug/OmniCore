@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,34 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IRadio
     {
+        public IObservable<bool> CanBlink()
+        {
+            return Observable.Create<bool>(async (observer) =>
+            {
+                observer.OnNext(true);
+                return Disposable.Empty;
+            });
+        }
+
+        public IObservable<IRadio> Blink()
+        {
+            return Observable.Create<IRadio>(async (observer) =>
+            {
+                var cts = new CancellationTokenSource();
+                var lease = await Lease(cts.Token);
+
+                await lease.Identify(cts.Token);
+
+                observer.OnNext(this);
+                observer.OnCompleted();
+
+                return Disposable.Create( () =>
+                {
+                    lease?.Dispose();
+                });
+            });
+        }
+
         public IRadioPeripheral Peripheral { get; set; }
         public IRadioEntity Entity { get; set; }
         public IRadioConfiguration DefaultConfiguration { get => new RadioConfiguration(); }
