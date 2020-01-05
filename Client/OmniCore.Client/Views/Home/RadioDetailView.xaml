@@ -12,7 +12,7 @@
             <StackLayout Orientation="Vertical">
                 <StackLayout Orientation="Horizontal">
                     <Label Text="Peripheral State: "/>
-                    <Label Text="{Binding Radio.Peripheral.ConnectionState}"/>
+                    <Label Text="{Binding Radio.Peripheral.State}"/>
                     <Label Text=" since "/>
                     <Label Text="{Binding Radio.Peripheral.ConnectionStateDate, TargetNullValue='who knows'}"/>
                 </StackLayout>

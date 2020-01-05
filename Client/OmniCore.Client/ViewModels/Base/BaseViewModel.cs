@@ -80,7 +80,7 @@ namespace OmniCore.Client.ViewModels.Base
                 ServiceApi = api;
                 if (api != null)
                 {
-                    await OnInitialize();
+                    await OnInitialize(parameter);
                 }
             });
         }
