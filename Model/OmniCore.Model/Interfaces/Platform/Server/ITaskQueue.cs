@@ -7,9 +7,9 @@ namespace OmniCore.Model.Interfaces
 {
     public interface ITaskQueue : IServerResolvable
     {
-        Task Startup();
-        Task Shutdown();
-        Task<IList<ITask>> List();
-        Task Enqueue(ITask task);
+        void Startup();
+        void Shutdown();
+        IEnumerable<ITask> List();
+        void Enqueue(ITask task);
     }
 }

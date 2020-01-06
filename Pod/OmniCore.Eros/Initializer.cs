@@ -14,8 +14,9 @@ namespace OmniCore.Eros
         {
             return container
                 .One<IPodService, ErosPodService>()
+                .Many<IPod, ErosPod>()
                 .Many<IPodRequest, ErosPodRequest>()
-                .Many<IPod, ErosPod>();
+                .Many<ITaskQueue, ErosPodRequestQueue>();
         }
     }
 }

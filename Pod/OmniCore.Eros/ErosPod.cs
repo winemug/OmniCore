@@ -42,6 +42,7 @@ namespace OmniCore.Eros
 
         public Task<IPodRequest> RequestPair()
         {
+            var request = NewPodRequest();
             throw new System.NotImplementedException();
         }
 
@@ -117,15 +118,15 @@ namespace OmniCore.Eros
 
         public async Task StartQueue()
         {
-            await TaskQueue.Startup();
+            TaskQueue.Startup();
         }
 
         public async Task StopQueue()
         {
-            await TaskQueue.Shutdown();
+            TaskQueue.Shutdown();
         }
 
-        private async Task<IPodRequest> CreatePodRequest()
+        private async Task<IPodRequest> NewPodRequest()
         {
             var request = Container.Get<IPodRequest>();
             request.Pod = this;

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
     public interface ITask : IDisposable, IServerResolvable
     {
+        Action<CancellationToken> Action { get; set; }
+        Task Run();
         bool CanCancel { get; }
         void RequestCancellation();
         IObservable<ITask> WhenCannotCancel();
