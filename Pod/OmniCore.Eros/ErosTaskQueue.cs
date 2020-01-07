@@ -32,10 +32,11 @@ namespace OmniCore.Eros
             return Tasks.AsEnumerable();
         }
 
-        public void Enqueue(ITask task)
+        public ITask Enqueue(ITask task)
         {
             Tasks.Enqueue(task);
             QueueTask.ContinueWith(_ => GetNext());
+            return task;
         }
 
         private Task GetNext()

@@ -10,6 +10,6 @@ namespace OmniCore.Model.Interfaces
         void Startup();
         void Shutdown();
         IEnumerable<ITask> List();
-        void Enqueue(ITask task);
+        ITask Enqueue(ITask task);
     }
 }

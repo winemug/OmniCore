@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Eros.Annotations;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Data.Entities;
 using OmniCore.Model.Interfaces.Data.Repositories;
@@ -40,10 +41,12 @@ namespace OmniCore.Eros
             throw new System.NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestPair()
+        public async Task<IPodRequest> RequestPair(uint radioAddress)
         {
-            var request = NewPodRequest();
-            throw new System.NotImplementedException();
+            return (IPodRequest) TaskQueue.Enqueue(
+                (await NewPodRequest())
+                    .WithPair(radioAddress)
+            );
         }
 
         public Task<IPodRequest> RequestPrime()
@@ -56,9 +59,12 @@ namespace OmniCore.Eros
             throw new System.NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestStatus()
+        public async Task<IPodRequest> RequestStatus(StatusRequestType requestType)
         {
-            throw new System.NotImplementedException();
+            return (IPodRequest) TaskQueue.Enqueue(
+                (await NewPodRequest())
+                .WithStatus(requestType)
+            );
         }
 
         public Task<IPodRequest> RequestConfigureAlerts()
@@ -126,9 +132,9 @@ namespace OmniCore.Eros
             TaskQueue.Shutdown();
         }
 
-        private async Task<IPodRequest> NewPodRequest()
+        private async Task<ErosPodRequest> NewPodRequest()
         {
-            var request = Container.Get<IPodRequest>();
+            var request = Container.Get<IPodRequest>() as ErosPodRequest;
             request.Pod = this;
 
             request.Entity = PodRequestRepository.New();
