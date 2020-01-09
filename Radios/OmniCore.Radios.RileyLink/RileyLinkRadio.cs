@@ -497,9 +497,5 @@ namespace OmniCore.Radios.RileyLink
 
             return registers;
         }
-
-#pragma warning disable CS0067 // The event 'RileyLinkRadio.PropertyChanged' is never used
-        public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067 // The event 'RileyLinkRadio.PropertyChanged' is never used
     }
 }

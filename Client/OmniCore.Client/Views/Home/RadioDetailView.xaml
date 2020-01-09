@@ -5,30 +5,35 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
              xmlns:home="clr-namespace:OmniCore.Client.ViewModels.Home;assembly=OmniCore.Client"
+             xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Home.RadioDetailView">
     <ContentPage.Content>
-        <ScrollView>
+        <ScrollView x:DataType="{x:Type home:RadioDetailViewModel}">
             <StackLayout Orientation="Vertical">
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Peripheral State: "/>
-                    <Label Text="{Binding Radio.Peripheral.State}"/>
-                    <Label Text=" since "/>
-                    <Label Text="{Binding Radio.Peripheral.ConnectionStateDate, TargetNullValue='who knows'}"/>
+                    <Label Text="Name: "/>
+                    <Label Text="{Binding Radio.Name}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Address: "/>
+                    <Label Text="{Binding Radio.MacAddress}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Discovery State: "/>
+                    <Label Text="{Binding Radio.DiscoveryState}"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Connection State: "/>
+                    <Label Text="{Binding Radio.ConnectionState}"/>
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
                     <Label Text="Rssi: "/>
-                    <Label Text="{Binding Radio.Peripheral.Rssi, TargetNullValue='N/A'}"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Radio In Use: "/>
-                    <Label Text="{Binding Radio.InUse}"/>
+                    <Label Text="{Binding Radio.Rssi}"/>
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
                     <Label Text="Radio Activity: "/>
                     <Label Text="{Binding Radio.Activity}"/>
-                    <Label Text=" since "/>
-                    <Label Text="{Binding Radio.ActivityStartDate, TargetNullValue='forever'}"/>
                 </StackLayout>
                 <Button Text="Test 1" Command="{Binding Test1Command}"/>
                 <Label Text=""

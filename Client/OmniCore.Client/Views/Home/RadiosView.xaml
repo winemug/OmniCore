@@ -27,7 +27,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-                            <Label Text="{Binding Mac}" Grid.Row="1" Grid.Column="0"/>
+                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="0"/>
                             <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1"/>
                             <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
                             <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>

@@ -14,10 +14,11 @@ namespace OmniCore.Client.Models
     {
 
         public string Name { get; set; }
-        public string Mac => Radio.Entity.DeviceIdReadable;
+        public string MacAddress { get; set; }
         public string Rssi { get; set; }
         public string DiscoveryState { get; set; }
         public string ConnectionState { get; set; }
+        public string Activity { get; set; }
 
         public readonly IRadio Radio;
         public RadioModel(IRadio radio)
@@ -28,6 +29,9 @@ namespace OmniCore.Client.Models
             radio.Peripheral.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
             radio.Peripheral.State.Subscribe(state => DiscoveryState = state.ToString());
             radio.Peripheral.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
+            var gb = radio.Peripheral.PeripheralUuid.ToByteArray();
+            MacAddress = $"{gb[10]:X2}:{gb[11]:X2}:{gb[12]:X2}:{gb[13]:X2}:{gb[14]:X2}:{gb[15]:X2}";
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Common.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface IRadio : INotifyPropertyChanged, IServerResolvable, ILeaseable<IRadio>
+    public interface IRadio : IServerResolvable, ILeaseable<IRadio>
     {
         IRadioPeripheral Peripheral { get; set; }
         IRadioEntity Entity { get; set; }

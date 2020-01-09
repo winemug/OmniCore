@@ -22,7 +22,6 @@ namespace OmniCore.Client.ViewModels.Home
     {
         public ObservableCollection<RadioModel> Radios { get; set; }
 
-        public ICommand BlinkCommand { get; set; }
         public ICommand SelectCommand { get; set; }
 
 
@@ -30,7 +29,6 @@ namespace OmniCore.Client.ViewModels.Home
         private IDisposable ListRadiosSubscription;
         public RadiosViewModel(ICoreClient client) : base(client)
         {
-            BlinkCommand = new Command<RadioModel>(async rm => await IdentifyRadio(rm.Radio));
             SelectCommand = new Command<RadioModel>(async rm => await SelectRadio(rm.Radio));
         }
 
@@ -52,16 +50,9 @@ namespace OmniCore.Client.ViewModels.Home
             ListRadiosSubscription = null;
         }
 
-        private async Task IdentifyRadio(IRadio radio)
-        {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            using var radioLease = await radio.Lease(cancellation.Token);
-            await radio.Identify(cancellation.Token);
-        }
-
         private async Task SelectRadio(IRadio radio)
         {
-            var view = Client.GetView<RadioDetailView,RadioDetailViewModel>();
+            var view = Client.GetView<RadioDetailView,RadioDetailViewModel, IRadio>(radio);
             await Shell.Current.Navigation.PushAsync(view);
         }
     }

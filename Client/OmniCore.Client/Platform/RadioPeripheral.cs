@@ -69,7 +69,7 @@ namespace OmniCore.Client.Platform
             ConnectionStateSubject = new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
             RssiReceivedSubject = new Subject<int>();
         }
-
+         
         public void RequestRssi()
         {
             ThrowIfNotOnLease();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Model.Interfaces.Common;
 
@@ -10,7 +11,7 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class RadioDetailViewModel : BaseViewModel<IRadio>
     {
-        public IRadio Radio { get; set; }
+        public RadioModel Radio { get; set; }
 
         public RadioDetailViewModel(ICoreClient client) : base(client)
         {
@@ -18,7 +19,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         public override Task OnInitialize(IRadio parameter)
         {
-            Radio = parameter;
+            Radio = new RadioModel(parameter);
             return Task.CompletedTask;
         }
     }
