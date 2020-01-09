@@ -1,6 +1,6 @@
-﻿using OmniCore.Model.Interfaces.Data.Entities;
+﻿using OmniCore.Model.Interfaces.Common.Data.Entities;
 
-namespace OmniCore.Model.Interfaces.Data.Repositories
+namespace OmniCore.Model.Interfaces.Common.Data.Repositories
 {
     public interface IUserRepository : IRepository<IUserEntity>
     {

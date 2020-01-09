@@ -5,7 +5,7 @@ using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client

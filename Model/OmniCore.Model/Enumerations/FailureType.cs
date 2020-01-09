@@ -35,6 +35,7 @@ namespace OmniCore.Model.Enumerations
         UserInterfaceInitialization,
         ServiceStopFailure,
         ServiceConnectionFailed,
-        Internal
+        Internal,
+        ConnectionFailed
     }
 }

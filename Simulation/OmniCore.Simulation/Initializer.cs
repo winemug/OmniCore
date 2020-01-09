@@ -1,5 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Simulation.Radios;
 
 namespace OmniCore.Simulation
@@ -9,7 +9,7 @@ namespace OmniCore.Simulation
         public static ICoreContainer<IServerResolvable> WithBleSimulator
             (this ICoreContainer<IServerResolvable> container)
         {
-            return container.Many<IRadioAdapter, RadioAdapter>();
+            return container;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Interfaces;
+﻿using OmniCore.Model.Interfaces.Common;
 using System;
 using System.Linq;
 using System.Collections.Generic;

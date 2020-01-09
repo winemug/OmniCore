@@ -10,7 +10,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Services;
 
 namespace OmniCore.Client.Droid

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.Views.Base;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Client.ViewModels.Base
 {

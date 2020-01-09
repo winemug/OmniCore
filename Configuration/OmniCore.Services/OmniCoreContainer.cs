@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Unity;
 
 namespace OmniCore.Services

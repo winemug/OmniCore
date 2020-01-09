@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Common.Data.Entities;
 using SQLite;
 
-namespace OmniCore.Model.Interfaces.Data.Repositories
+namespace OmniCore.Model.Interfaces.Common.Data.Repositories
 {
     public interface IRepository<T> : IServerResolvable
         where T : IEntity

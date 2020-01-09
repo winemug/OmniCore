@@ -1,0 +1,326 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Linq;
+using System.Reactive.Subjects;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Nito.AsyncEx;
+using OmniCore.Model.Utilities;
+using OmniCore.Client.Platform;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Exceptions;
+using OmniCore.Model.Extensions;
+using OmniCore.Model.Interfaces.Common;
+using Plugin.BluetoothLE;
+using Xamarin.Forms.Internals;
+using ValueTuple = System.ValueTuple;
+
+namespace OmniCore.Client.Platform
+{
+    public class RadioPeripheral : IRadioPeripheral
+    {
+        private readonly IRadioAdapter RadioAdapter;
+        private readonly ICoreContainer<IServerResolvable> CoreContainer;
+
+        private Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> CharacteristicsDictionary;
+        private IDisposable DeviceStateSubscription;
+        private IDisposable DeviceNameSubscription;
+        private IDisposable DeviceRssiSubscription;
+
+        private IDevice Device;
+        private ISubject<string> NameSubject;
+        private ISubject<PeripheralState> PeripheralStateSubject;
+        private ISubject<PeripheralConnectionState> ConnectionStateSubject;
+        private ISubject<int> RssiReceivedSubject;
+        private TimeSpan? RssiAutoUpdateIntervalInternal;
+
+        public Guid PeripheralUuid => Device.Uuid;
+        public Guid[] ServiceUuids { get; private set; }
+        public IObservable<string> Name => NameSubject;
+        public IObservable<PeripheralState> PeripheralState => PeripheralStateSubject;
+        public IObservable<PeripheralConnectionState> ConnectionState => ConnectionStateSubject;
+        public IObservable<int> Rssi => RssiReceivedSubject;
+
+        public TimeSpan? RssiAutoUpdateInterval
+        {
+            get => RssiAutoUpdateIntervalInternal;
+            set
+            {
+                ThrowIfNotOnLease();
+                RssiAutoUpdateIntervalInternal = value;
+                UpdateRssiSubscription();
+            }
+        }
+
+        public RadioPeripheral(IRadioAdapter radioAdapter,
+            ICoreContainer<IServerResolvable> coreContainer)
+        {
+            RadioAdapter = radioAdapter;
+            CoreContainer = coreContainer;
+
+            NameSubject = new BehaviorSubject<string>(null);
+            PeripheralStateSubject = new BehaviorSubject<PeripheralState>(Model.Enumerations.PeripheralState.Offline);
+            ConnectionStateSubject = new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
+            RssiReceivedSubject = new Subject<int>();
+        }
+
+        public void RequestRssi()
+        {
+            ThrowIfNotOnLease();
+
+            Device?.ReadRssi().Subscribe(rssi => RssiReceivedSubject.OnNext(rssi));
+        }
+
+        public async Task Connect(bool autoConnect, CancellationToken cancellationToken)
+        {
+            ThrowIfNotOnLease();
+
+            PeripheralState.Subscribe(async state =>
+            {
+                switch (state)
+                {
+                    case Model.Enumerations.PeripheralState.Discovering:
+                        break;
+                    case Model.Enumerations.PeripheralState.Offline:
+                        await RadioAdapter.FindPeripherals().FirstAsync(p => p.PeripheralUuid == PeripheralUuid);
+                        break;
+                    case Model.Enumerations.PeripheralState.Online:
+
+                        switch (await ConnectionState.FirstAsync())
+                        {
+                            case PeripheralConnectionState.Connecting:
+                                break;
+                            case PeripheralConnectionState.Connected:
+                                return;
+                            case PeripheralConnectionState.Disconnecting:
+                                await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected);
+                                break;
+                        }
+                        Device.Connect(new ConnectionConfig()
+                            {AndroidConnectionPriority = ConnectionPriority.Normal, AutoConnect = autoConnect});
+                        break;
+                }
+            }, cancellationToken);
+
+            var connectedTask = ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Connected).ToTask(cancellationToken);
+            var failedTask = Device.WhenConnectionFailed().ToTask(cancellationToken);
+
+            var which = await Task.WhenAny(connectedTask, failedTask);
+            if (which == failedTask)
+                throw new OmniCorePeripheralException(FailureType.ConnectionFailed, null, failedTask.Result);
+        }
+
+        public async Task Disconnect(CancellationToken cancellationToken)
+        {
+            ThrowIfNotOnLease();
+
+            switch (await PeripheralState.FirstAsync())
+            {
+                case Model.Enumerations.PeripheralState.Offline:
+                case Model.Enumerations.PeripheralState.Discovering:
+                    return;
+            }
+
+            await PeripheralState.FirstAsync(s => s == Model.Enumerations.PeripheralState.Online).ToTask(cancellationToken);
+
+            switch (await ConnectionState.FirstAsync())
+            {
+                case PeripheralConnectionState.Disconnecting:
+                    break;
+                case PeripheralConnectionState.Disconnected:
+                    return;
+                case PeripheralConnectionState.Connecting:
+                case PeripheralConnectionState.Connected:
+                    Device?.CancelConnection();
+                    break;
+            }
+
+            await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
+        }
+
+        public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken)
+        {
+            ThrowIfNotOnLease();
+
+            return (await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken)).Data;
+        }
+
+        public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken)
+        {
+            ThrowIfNotOnLease();
+
+            await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
+        }
+
+        public async Task WriteToCharacteristicWithoutResponse(Guid serviceUuid, Guid characteristicUuid, byte[] data,
+            CancellationToken cancellationToken)
+        {
+            ThrowIfNotOnLease();
+
+            await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data).ToTask(cancellationToken);
+        }
+
+        public void BeforeDiscovery()
+        {
+            if (Device != null && Device.IsConnected())
+                return;
+
+            SetDeviceInternal(null);
+            PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Discovering);
+        }
+
+        public void AfterDiscovery()
+        {
+            if (Device == null)
+                PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
+        }
+
+        public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
+        {
+            ThrowIfNotOnLease();
+
+            return GetCharacteristic(serviceUuid, characteristicUuid)
+                .RegisterAndNotify()
+                .Select(r => r.Data);
+        }
+
+        public void SetDevice(IDevice newDevice)
+        {
+            ThrowIfNotOnLease();
+
+            SetDeviceInternal(newDevice);
+        }
+
+        public void SetParametersFromScanResult(IScanResult scanResult)
+        {
+            ThrowIfNotOnLease();
+
+            SetDeviceInternal(scanResult.Device);
+            ServiceUuids = scanResult.AdvertisementData.ServiceUuids;
+
+            if (!string.IsNullOrEmpty(scanResult.AdvertisementData.LocalName))
+            {
+                NameSubject.OnNext(scanResult.AdvertisementData.LocalName);
+            }
+
+            RssiReceivedSubject.OnNext(scanResult.Rssi);
+        }
+
+        private void UpdateRssiSubscription()
+        {
+            DeviceRssiSubscription?.Dispose();
+            DeviceRssiSubscription = null;
+            if (Device != null && RssiAutoUpdateInterval != null)
+            {
+                DeviceRssiSubscription = Device.WhenReadRssiContinuously(RssiAutoUpdateInterval)
+                    .Subscribe(rssi => RssiReceivedSubject.OnNext(rssi));
+            }
+        }
+
+        private void SetDeviceInternal(IDevice newDevice)
+        {
+            if (!ReferenceEquals(Device, newDevice))
+            {
+                if (Device != null && newDevice == null)
+                {
+                    PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
+                }
+                else if (newDevice != null)
+                {
+                    PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Online);
+                }
+
+                DeviceStateSubscription?.Dispose();
+                DeviceNameSubscription?.Dispose();
+                DeviceRssiSubscription?.Dispose();
+
+                DeviceStateSubscription = null;
+                DeviceNameSubscription = null;
+                DeviceRssiSubscription = null;
+
+                Device = newDevice;
+                if (Device != null)
+                {
+                    DeviceStateSubscription = Device.WhenStatusChanged().Subscribe(async status =>
+                    {
+                        switch (status)
+                        {
+                            case ConnectionStatus.Disconnected:
+                                ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnected);
+                                break;
+                            case ConnectionStatus.Disconnecting:
+                                ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnecting);
+                                break;
+                            case ConnectionStatus.Connected:
+                                await DiscoverServicesAndCharacteristics(CancellationToken.None);
+                                ConnectionStateSubject.OnNext(PeripheralConnectionState.Connected);
+                                break;
+                            case ConnectionStatus.Connecting:
+                                ConnectionStateSubject.OnNext(PeripheralConnectionState.Connecting);
+                                break;
+                        }
+                    });
+
+                    DeviceNameSubscription = Device.WhenNameUpdated().Where(s => !string.IsNullOrEmpty(s))
+                        .Subscribe(s => NameSubject.OnNext(s));
+
+                    UpdateRssiSubscription();
+                }
+            }
+        }
+
+        private async Task DiscoverServicesAndCharacteristics(CancellationToken cancellationToken)
+        {
+            CharacteristicsDictionary = new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
+            await Device.DiscoverServices().ForEachAsync(service =>
+            {
+                service.DiscoverCharacteristics().ForEachAsync(characteristic =>
+                {
+                    CharacteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
+                }, cancellationToken);
+            }, cancellationToken);
+        }
+
+        private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)
+        {
+            var characteristic = CharacteristicsDictionary[(serviceUuid, characteristicUuid)];
+            if (characteristic == null)
+                throw new OmniCorePeripheralException(FailureType.PeripheralGeneralError, "Characteristic not found on peripheral");
+            return characteristic;
+        }
+
+        //public async Task<string> ReadName()
+        //{
+        //    if (BleDevice == null || !BleDevice.IsConnected())
+        //        return null;
+
+        //    Guid genericAccessUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x18,0);
+        //    Guid nameCharacteristicUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x2a,0);
+        //    var nameCharacteristic = await BleDevice
+        //        .GetKnownService(genericAccessUuid)
+        //        .SelectMany(x => x.GetKnownCharacteristics(new Guid[] {nameCharacteristicUuid}))
+        //        .FirstAsync();
+
+        //    var result = await nameCharacteristic.Read();
+        //    return Encoding.ASCII.GetString(result.Data);
+        //}
+
+        public async Task<ILease<IRadioPeripheral>> Lease(CancellationToken cancellationToken)
+        {
+            return await Lease<IRadioPeripheral>.NewLease(this, cancellationToken);
+        }
+
+        public bool OnLease { get; set; }
+        public void ThrowIfNotOnLease()
+        {
+            if (!OnLease)
+                throw new OmniCoreWorkflowException(FailureType.Internal, "Instance must be leased to perform the operation");
+        }
+    }
+}

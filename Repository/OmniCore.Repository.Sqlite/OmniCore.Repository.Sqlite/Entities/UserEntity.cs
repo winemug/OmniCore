@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Common.Data.Entities;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {

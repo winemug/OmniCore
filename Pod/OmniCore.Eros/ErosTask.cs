@@ -6,11 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Eros
 {
-    public class ErosTask : ITask
+    public abstract class ErosTask : ITask
     {
         private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
         private readonly ISubject<ITask> CannotCancelSubject = new AsyncSubject<ITask>();
@@ -27,8 +27,6 @@ namespace OmniCore.Eros
         }
 
         private bool CanCancelInternal = true;
-
-        public Action<CancellationToken> Action { get; set; }
 
         public bool CanCancel
         {
@@ -59,7 +57,7 @@ namespace OmniCore.Eros
 
             try
             {
-                await Task.Run( () => Action(TaskCancellationSource.Token));
+                await ExecuteRequest(TaskCancellationSource.Token);
             }
             catch (OperationCanceledException oe)
             {
@@ -75,6 +73,8 @@ namespace OmniCore.Eros
             FinishedSubject.OnNext(this);
             FinishedSubject.OnCompleted();
         }
+
+        protected abstract Task ExecuteRequest(CancellationToken cancellationToken);
 
         public void RequestCancellation()
         {

@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base

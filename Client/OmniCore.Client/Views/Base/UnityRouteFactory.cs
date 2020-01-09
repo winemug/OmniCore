@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base

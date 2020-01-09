@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Eros
 {
@@ -43,9 +43,7 @@ namespace OmniCore.Eros
         {
             if (!IsShuttingDown && Tasks.TryDequeue(out var erosTask))
             {
-                return new Task(() =>
-                    {
-                    });
+                return new Task(async () => await erosTask.Run());
             }
             else
             {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Common
 {
     public interface ICoreServiceApi : IServerResolvable, IClientResolvable
     {

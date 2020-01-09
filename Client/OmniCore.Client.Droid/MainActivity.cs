@@ -18,7 +18,7 @@ using Android.Content;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Services;
 using Application = Xamarin.Forms.Application;
 using Debug = System.Diagnostics.Debug;

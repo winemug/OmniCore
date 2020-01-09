@@ -11,8 +11,8 @@ using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common.Data;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -53,8 +53,8 @@ namespace OmniCore.Client.ViewModels.Home
         private async Task IdentifyRadio(IRadio radio)
         {
             using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            using var radioConnection = await radio.Lease(cancellation.Token);
-            await radioConnection.Identify(cancellation.Token);
+            using var radioLease = await radio.Lease(cancellation.Token);
+            await radio.Identify(cancellation.Token);
         }
 
         private async Task SelectRadio(IRadio radio)

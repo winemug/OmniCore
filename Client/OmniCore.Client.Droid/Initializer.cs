@@ -2,7 +2,7 @@
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;

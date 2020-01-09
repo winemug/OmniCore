@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Model.Interfaces.Data.Entities
+﻿namespace OmniCore.Model.Interfaces.Common.Data.Entities
 {
     public interface IPodRequestEntity : IPodRequestAttributes, IEntity
     {

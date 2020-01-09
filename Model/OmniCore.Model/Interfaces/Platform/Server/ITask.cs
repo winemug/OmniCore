@@ -4,11 +4,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Common
 {
     public interface ITask : IDisposable, IServerResolvable
     {
-        Action<CancellationToken> Action { get; set; }
         Task Run();
         bool CanCancel { get; }
         void RequestCancellation();

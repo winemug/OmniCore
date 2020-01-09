@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common.Data;
+using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Repository.Sqlite.Entities;
 
 namespace OmniCore.Repository.Sqlite.Repositories

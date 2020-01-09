@@ -5,39 +5,39 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Simulation.Radios
 {
-    public class RadioPeripheral : IRadioPeripheral
-    {
-        public void Dispose()
-        {
-        }
+//    public class RadioPeripheral : IRadioPeripheral
+//    {
+//        public void Dispose()
+//        {
+//        }
 
-        public Guid Uuid { get; }
-        public Guid ServiceUuid { get; }
+//        public Guid Uuid { get; }
+//        public Guid ServiceUuid { get; }
 
-        public string Name
-        {
-            get;
-            set;
-        }
-        public Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
-        {
-            return Task.FromResult((IRadioPeripheralLease)new RadioPeripheralLease());
-        }
+//        public string Name
+//        {
+//            get;
+//            set;
+//        }
+//        public Task<IRadioPeripheralLease> Lease(CancellationToken cancellationToken)
+//        {
+//            return Task.FromResult((IRadioPeripheralLease)new RadioPeripheralLease());
+//        }
 
-        public TimeSpan? RssiUpdateTimeSpan { get; set; }
-        public int? Rssi { get; set; }
-        public DateTimeOffset? RssiDate { get; }
+//        public TimeSpan? RssiUpdateTimeSpan { get; set; }
+//        public int? Rssi { get; set; }
+//        public DateTimeOffset? RssiDate { get; }
         
-        public PeripheralState State { get; }
-        public DateTimeOffset? ConnectionStateDate { get; }
-        public DateTimeOffset? DisconnectDate { get; }
+//        public PeripheralState State { get; }
+//        public DateTimeOffset? ConnectionStateDate { get; }
+//        public DateTimeOffset? DisconnectDate { get; }
 
-#pragma warning disable CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
-        public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
-    }
+//#pragma warning disable CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
+//        public event PropertyChangedEventHandler PropertyChanged;
+//#pragma warning restore CS0067 // The event 'RadioPeripheral.PropertyChanged' is never used
+//    }
 }

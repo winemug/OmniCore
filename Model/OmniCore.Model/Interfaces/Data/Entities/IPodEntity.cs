@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace OmniCore.Model.Interfaces.Data.Entities
+namespace OmniCore.Model.Interfaces.Common.Data.Entities
 {
     public interface IPodEntity : IPodAttributes, IReminderSettingsAttributes, IEntity
     {

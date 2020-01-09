@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Radios.RileyLink
 {
@@ -10,8 +10,17 @@ namespace OmniCore.Radios.RileyLink
     {
         public bool KeepConnected { get; set; } = true;
 
-        public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(30);
-        public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(20);
+        public TimeSpan RadioResponseCooldown { get; set; } = TimeSpan.FromSeconds(5);
+
+        public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(20);
+        public TimeSpan RadioConnectCooldown { get; set; } = TimeSpan.FromSeconds(5);
+
+        public TimeSpan RadioDisconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+        public TimeSpan RadioDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RadioDiscoveryCooldown { get; set; } = TimeSpan.FromSeconds(45);
+
         public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromMinutes(10);
 
         // shifts in complements of 326.211 Hz

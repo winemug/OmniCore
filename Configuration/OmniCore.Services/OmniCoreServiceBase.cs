@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Services
 {

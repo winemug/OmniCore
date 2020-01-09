@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
@@ -20,6 +21,19 @@ namespace OmniCore.Eros
         private uint MessageSequence;
         private uint MessageAddress;
         private bool IsWithCriticalFollowup;
+
+        private readonly IRadioService RadioService;
+        public ErosPodRequest(IRadioService radioService)
+        {
+            RadioService = radioService;
+        }
+
+        protected override async Task ExecuteRequest(CancellationToken cancellationToken)
+        {
+            foreach (var radioEntity in this.Pod.Entity.Radios)
+            {
+            }
+        }
 
         public ErosPodRequest WithPair(uint address)
         {
@@ -77,6 +91,7 @@ namespace OmniCore.Eros
 
         private uint GetNonce()
         {
+            //TODO:
             return 0;
         }
 

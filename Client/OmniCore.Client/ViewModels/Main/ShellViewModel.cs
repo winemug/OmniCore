@@ -7,7 +7,7 @@ using Nito.AsyncEx;
 using OmniCore.Client.ViewModels.Home;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base

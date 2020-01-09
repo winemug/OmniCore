@@ -1,7 +1,7 @@
-﻿using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Data.Entities;
-using OmniCore.Model.Interfaces.Data.Repositories;
+﻿using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Common.Data;
+using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Common.Data.Repositories;
 using OmniCore.Repository.Sqlite.Entities;
 using OmniCore.Repository.Sqlite.Repositories;
 

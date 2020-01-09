@@ -6,7 +6,7 @@ using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Wizards.NewPod;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Client
 {
@@ -15,11 +15,9 @@ namespace OmniCore.Client
         public static ICoreContainer<IServerResolvable> WithCrossBleRadioAdapter
             (this ICoreContainer<IServerResolvable> container)
         {
-            return container.One<IRadioAdapter, CrossBleRadioAdapter>()
-                .Many<IRadioPeripheral, CrossBleRadioPeripheral>()
-                .Many<IRadioPeripheralLease, CrossBlePeripheralLease>()
-                .Many<IRadioPeripheralCharacteristic, CrossBleRadioCharacteristic>()
-                .Many<IRadioPeripheralResult, CrossBleResult>();
+            return container
+                .One<IRadioAdapter, RadioAdapter>()
+                .Many<IRadioPeripheral, RadioPeripheral>();
         }
 
         public static ICoreContainer<IClientResolvable> WithXamarinForms

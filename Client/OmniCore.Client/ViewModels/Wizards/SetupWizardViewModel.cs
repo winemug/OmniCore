@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.SetupWizard;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards

@@ -1,7 +1,7 @@
 ﻿using System;
 using OmniCore.Model.Enumerations;
 
-namespace OmniCore.Model.Interfaces.Data.Entities
+namespace OmniCore.Model.Interfaces.Common.Data.Entities
 {
     public interface IPodAttributes
     {

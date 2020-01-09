@@ -1,9 +1,9 @@
-﻿using OmniCore.Model.Interfaces;
+﻿using OmniCore.Model.Interfaces.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Common.Data;
 
 namespace OmniCore.Eros
 {
@@ -16,7 +16,7 @@ namespace OmniCore.Eros
                 .One<IPodService, ErosPodService>()
                 .Many<IPod, ErosPod>()
                 .Many<IPodRequest, ErosPodRequest>()
-                .Many<ITaskQueue, ErosPodRequestQueue>();
+                .Many<ITaskQueue, ErosTaskQueue>();
         }
     }
 }

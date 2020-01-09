@@ -1,8 +1,8 @@
 ﻿using System;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 using SQLite;
 
-namespace OmniCore.Model.Interfaces.Data.Repositories
+namespace OmniCore.Model.Interfaces.Common.Data.Repositories
 {
     public interface IRepositoryAccess : IDisposable, IServerResolvable
     {

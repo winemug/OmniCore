@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Common;
 
-namespace OmniCore.Model.Interfaces
+namespace OmniCore.Model.Interfaces.Common
 {
     public interface ICoreClientFunctions : IClientResolvable
     {
