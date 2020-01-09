@@ -32,7 +32,7 @@ namespace OmniCore.Simulation.Radios
 //        public int? Rssi { get; set; }
 //        public DateTimeOffset? RssiDate { get; }
         
-//        public PeripheralState State { get; }
+//        public State State { get; }
 //        public DateTimeOffset? ConnectionStateDate { get; }
 //        public DateTimeOffset? DisconnectDate { get; }
 

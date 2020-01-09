@@ -35,7 +35,7 @@ namespace OmniCore.Client.Platform
 
         private IDevice Device;
         private ISubject<string> NameSubject;
-        private ISubject<PeripheralState> PeripheralStateSubject;
+        private ISubject<PeripheralState> StateSubject;
         private ISubject<PeripheralConnectionState> ConnectionStateSubject;
         private ISubject<int> RssiReceivedSubject;
         private TimeSpan? RssiAutoUpdateIntervalInternal;
@@ -43,7 +43,7 @@ namespace OmniCore.Client.Platform
         public Guid PeripheralUuid => Device.Uuid;
         public Guid[] ServiceUuids { get; private set; }
         public IObservable<string> Name => NameSubject;
-        public IObservable<PeripheralState> PeripheralState => PeripheralStateSubject;
+        public IObservable<PeripheralState> State => StateSubject;
         public IObservable<PeripheralConnectionState> ConnectionState => ConnectionStateSubject;
         public IObservable<int> Rssi => RssiReceivedSubject;
 
@@ -65,7 +65,7 @@ namespace OmniCore.Client.Platform
             CoreContainer = coreContainer;
 
             NameSubject = new BehaviorSubject<string>(null);
-            PeripheralStateSubject = new BehaviorSubject<PeripheralState>(Model.Enumerations.PeripheralState.Offline);
+            StateSubject = new BehaviorSubject<PeripheralState>(PeripheralState.Offline);
             ConnectionStateSubject = new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
             RssiReceivedSubject = new Subject<int>();
         }
@@ -81,16 +81,16 @@ namespace OmniCore.Client.Platform
         {
             ThrowIfNotOnLease();
 
-            PeripheralState.Subscribe(async state =>
+            State.Subscribe(async state =>
             {
                 switch (state)
                 {
-                    case Model.Enumerations.PeripheralState.Discovering:
+                    case PeripheralState.Discovering:
                         break;
-                    case Model.Enumerations.PeripheralState.Offline:
+                    case PeripheralState.Offline:
                         await RadioAdapter.FindPeripherals().FirstAsync(p => p.PeripheralUuid == PeripheralUuid);
                         break;
-                    case Model.Enumerations.PeripheralState.Online:
+                    case PeripheralState.Online:
 
                         switch (await ConnectionState.FirstAsync())
                         {
@@ -120,14 +120,14 @@ namespace OmniCore.Client.Platform
         {
             ThrowIfNotOnLease();
 
-            switch (await PeripheralState.FirstAsync())
+            switch (await State.FirstAsync())
             {
                 case Model.Enumerations.PeripheralState.Offline:
                 case Model.Enumerations.PeripheralState.Discovering:
                     return;
             }
 
-            await PeripheralState.FirstAsync(s => s == Model.Enumerations.PeripheralState.Online).ToTask(cancellationToken);
+            await State.FirstAsync(s => s == Model.Enumerations.PeripheralState.Online).ToTask(cancellationToken);
 
             switch (await ConnectionState.FirstAsync())
             {
@@ -172,13 +172,13 @@ namespace OmniCore.Client.Platform
                 return;
 
             SetDeviceInternal(null);
-            PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Discovering);
+            StateSubject.OnNext(Model.Enumerations.PeripheralState.Discovering);
         }
 
         public void AfterDiscovery()
         {
             if (Device == null)
-                PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
+                StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
         }
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
@@ -229,11 +229,11 @@ namespace OmniCore.Client.Platform
             {
                 if (Device != null && newDevice == null)
                 {
-                    PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
+                    StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
                 }
                 else if (newDevice != null)
                 {
-                    PeripheralStateSubject.OnNext(Model.Enumerations.PeripheralState.Online);
+                    StateSubject.OnNext(Model.Enumerations.PeripheralState.Online);
                 }
 
                 DeviceStateSubscription?.Dispose();

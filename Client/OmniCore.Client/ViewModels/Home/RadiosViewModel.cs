@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
@@ -19,27 +20,28 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class RadiosViewModel : BaseViewModel
     {
-        public ObservableCollection<IRadio> Radios { get; set; }
+        public ObservableCollection<RadioModel> Radios { get; set; }
 
         public ICommand BlinkCommand { get; set; }
         public ICommand SelectCommand { get; set; }
 
-        private IDisposable ListRadiosSubscription;
 
+
+        private IDisposable ListRadiosSubscription;
         public RadiosViewModel(ICoreClient client) : base(client)
         {
-            BlinkCommand = new Command<IRadio>(async radio => await IdentifyRadio(radio), (radio) => radio != null && !radio.InUse);
-            SelectCommand = new Command<IRadio>(async radio => await SelectRadio(radio), (radio) => radio != null && !radio.InUse);
+            BlinkCommand = new Command<RadioModel>(async rm => await IdentifyRadio(rm.Radio));
+            SelectCommand = new Command<RadioModel>(async rm => await SelectRadio(rm.Radio));
         }
 
         protected override Task OnInitialize()
         {
-            Radios = new ObservableCollection<IRadio>();
+            Radios = new ObservableCollection<RadioModel>();
             ListRadiosSubscription = ServiceApi.RadioService.ListRadios()
                 .ObserveOn(Client.SynchronizationContext)
                 .Subscribe(radio =>
                     {
-                        Radios.Add(radio);
+                        Radios.Add(new RadioModel(radio));
                     });
             return Task.CompletedTask;
         }

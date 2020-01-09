@@ -11,7 +11,7 @@ namespace OmniCore.Model.Interfaces.Common
         Guid PeripheralUuid { get; }
         Guid[] ServiceUuids { get; }
         IObservable<string> Name { get; }
-        IObservable<PeripheralState> PeripheralState { get; }
+        IObservable<PeripheralState> State { get; }
         IObservable<PeripheralConnectionState> ConnectionState { get; }
         IObservable<int> Rssi{ get; }
         TimeSpan? RssiAutoUpdateInterval { get; set; }

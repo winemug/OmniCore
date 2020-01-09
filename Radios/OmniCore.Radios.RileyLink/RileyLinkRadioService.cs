@@ -53,7 +53,7 @@ namespace OmniCore.Radios.RileyLink
                 var cts = new CancellationTokenSource();
                 
                 var scanner = RadioAdapter.FindPeripherals()
-                    .Where(p => p.ServiceUuids.Contains(RileyLinkServiceUUID))
+                    //.Where(p => p.ServiceUuids.Contains(RileyLinkServiceUUID))
                     .Subscribe(async peripheral =>
                     {
                         var radio = await GetRadio(peripheral, cts.Token);
@@ -98,7 +98,6 @@ namespace OmniCore.Radios.RileyLink
                 radio = Container.Get<IRadio>();
                 radio.Entity = entity;
                 radio.Peripheral = peripheral;
-                radio.Peripheral.RssiAutoUpdateInterval = radio.GetConfiguration().RssiUpdateInterval;
 
                 RadioDictionary.Add(peripheral.PeripheralUuid, radio);
             }

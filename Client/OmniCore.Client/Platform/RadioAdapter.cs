@@ -30,6 +30,7 @@ namespace OmniCore.Client.Platform
     {
         private AsyncLock AdapterManagementLock;
         private ConcurrentDictionary<Guid, IRadioPeripheral> PeripheralCache;
+        private IDisposable BluetoothWakeLockDisposable;
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
@@ -45,6 +46,7 @@ namespace OmniCore.Client.Platform
             CompatibleScan =
                 Observable.Create<IScanResult>(observer =>
                     {
+                        BluetoothWakeLockDisposable = applicationFunctions.BluetoothKeepAwake();
                         PeripheralCache.Values.ForEach((p) => p.BeforeDiscovery());
                         observer.OnCompleted();
                         return Disposable.Empty;
@@ -53,10 +55,8 @@ namespace OmniCore.Client.Platform
                     .Finally(() =>
                     {
                         PeripheralCache.Values.ForEach((p) => p.AfterDiscovery());
-                    })
-                    .Publish()
-                    .Replay()
-                    .RefCount();
+                        BluetoothWakeLockDisposable.Dispose();
+                    });
         }
 
         public async Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
@@ -153,10 +153,13 @@ namespace OmniCore.Client.Platform
                         }
 
                         scanSubscription = CompatibleScan
-                            .Subscribe((scanResult) =>
+                            .Subscribe(async (scanResult) =>
                             {
                                 var peripheral = GetPeripheral(scanResult.Device.Uuid) as RadioPeripheral;
-                                peripheral.SetParametersFromScanResult(scanResult);
+                                using (var _ = await peripheral.Lease(cancellationToken))
+                                {
+                                    peripheral.SetParametersFromScanResult(scanResult);
+                                }
 
                                 if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
                                 {

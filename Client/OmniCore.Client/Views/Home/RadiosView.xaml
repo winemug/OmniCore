@@ -6,12 +6,14 @@
              xmlns:base="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
              xmlns:home="clr-namespace:OmniCore.Client.ViewModels.Home;assembly=OmniCore.Client"
                xmlns:platform="clr-namespace:OmniCore.Model.Interfaces.Common;assembly=OmniCore.Model"
+               xmlns:system="clr-namespace:System;assembly=netstandard"
+               xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
                mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Home.RadiosView">
     <ContentPage.Content>
         <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None" >
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="{x:Type models:RadioModel}">
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
@@ -24,12 +26,9 @@
                                 <RowDefinition/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <Label Text="{Binding Peripheral.Name, TargetNullValue=''}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-                            <Label Text="{Binding Entity.DeviceIdReadable}" Grid.Row="1" Grid.Column="0"/>
-                            <StackLayout Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
-                                <Label Text="{Binding Peripheral.Rssi, TargetNullValue='??'}"/>
-                                <Label Text="dB"/>
-                            </StackLayout>
+                            <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+                            <Label Text="{Binding Mac}" Grid.Row="1" Grid.Column="0"/>
+                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1"/>
                             <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
                             <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
                         </Grid>
