@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
@@ -25,6 +27,7 @@ namespace OmniCore.Client.ViewModels.Base
         protected IView View { get; set; }
 
         protected IDisposable Subscription;
+        protected List<IDisposable> DisposeList = new List<IDisposable>();
 
         protected virtual Task OnInitialize()
         {
@@ -43,20 +46,29 @@ namespace OmniCore.Client.ViewModels.Base
         public void Dispose()
         {
             OnDispose();
+            DisposeDisposables();
         }
 
         public void InitializeModel(IView view)
         {
             View = view;
-            Subscription?.Dispose();
-            Subscription = Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
+            Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
             {
                 ServiceApi = api;
                 if (api != null)
                 {
                     await OnInitialize();
                 }
-            });
+            }).AutoDispose(this);
+        }
+
+        public IList<IDisposable> Disposables { get; } = new List<IDisposable>(); 
+        public void DisposeDisposables()
+        {
+            foreach(var disposable in Disposables)
+                disposable.Dispose();
+
+            Disposables.Clear();
         }
     }
 
@@ -74,15 +86,14 @@ namespace OmniCore.Client.ViewModels.Base
         public void InitializeModel(IView view, TParameter parameter)
         {
             View = view;
-            Subscription?.Dispose();
-            Subscription = Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
+            Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
             {
                 ServiceApi = api;
                 if (api != null)
                 {
                     await OnInitialize(parameter);
                 }
-            });
+            }).AutoDispose(this);
         }
     }
 }

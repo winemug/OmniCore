@@ -14,6 +14,7 @@ namespace OmniCore.Model.Interfaces.Common
         IObservable<PeripheralState> State { get; }
         IObservable<PeripheralConnectionState> ConnectionState { get; }
         IObservable<int> Rssi{ get; }
+
         TimeSpan? RssiAutoUpdateInterval { get; set; }
         void RequestRssi();
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
@@ -22,7 +23,5 @@ namespace OmniCore.Model.Interfaces.Common
         Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken);
         IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid ServiceUuid, Guid CharacteristicUuid);
         Task WriteToCharacteristicWithoutResponse(Guid ServiceUuid, Guid CharacteristicUuid, byte[] data, CancellationToken cancellationToken);
-        void BeforeDiscovery();
-        void AfterDiscovery();
     }
 }

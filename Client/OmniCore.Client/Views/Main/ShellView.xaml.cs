@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Reactive.Linq;
 
 namespace OmniCore.Client.Views.Main
 {
@@ -27,5 +29,12 @@ namespace OmniCore.Client.Views.Main
         {
             BindingContext = viewModel;
         }
+
+        public IObservable<IView> WhenAppearing() =>
+            Observable.Never<IView>();
+
+        public IObservable<IView> WhenDisappearing() =>
+            Observable.Never<IView>();
+
     }
 }

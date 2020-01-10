@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface ICoreService : IDisposable, IServerResolvable
+    public interface ICoreService : IDisposableHandler, IServerResolvable
     {
         bool IsStarted { get; }
         bool IsPaused { get; }

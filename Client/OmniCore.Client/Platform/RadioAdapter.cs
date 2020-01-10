@@ -31,10 +31,12 @@ namespace OmniCore.Client.Platform
         private AsyncLock AdapterManagementLock;
         private ConcurrentDictionary<Guid, IRadioPeripheral> PeripheralCache;
         private IDisposable BluetoothWakeLockDisposable;
+        private IObservable<IScanResult> ConnectableScanObservable;
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
-        private readonly IObservable<IScanResult> CompatibleScan;
+        private readonly ISubject<IRadioAdapter> ScanStartingSubject;
+        private readonly ISubject<IRadioAdapter> ScanFinishedSubject;
 
         public RadioAdapter(ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions)
@@ -43,21 +45,33 @@ namespace OmniCore.Client.Platform
             ApplicationFunctions = applicationFunctions;
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new ConcurrentDictionary<Guid, IRadioPeripheral>();
-            CompatibleScan =
-                Observable.Create<IScanResult>(observer =>
-                    {
-                        BluetoothWakeLockDisposable = applicationFunctions.BluetoothKeepAwake();
-                        PeripheralCache.Values.ForEach((p) => p.BeforeDiscovery());
-                        observer.OnCompleted();
-                        return Disposable.Empty;
-                    }).Concat(CrossBleAdapter.Current
-                        .Scan())
-                    .Finally(() =>
-                    {
-                        PeripheralCache.Values.ForEach((p) => p.AfterDiscovery());
-                        BluetoothWakeLockDisposable.Dispose();
-                    });
+            ScanStartingSubject = new Subject<IRadioAdapter>();
+            ScanFinishedSubject = new Subject<IRadioAdapter>();
+            ResetConnectableObservable();
         }
+
+        private void ResetConnectableObservable()
+        {
+            ConnectableScanObservable = Observable.Create<IScanResult>(observer =>
+                {
+                    BluetoothWakeLockDisposable = ApplicationFunctions.BluetoothKeepAwake();
+                    ScanStartingSubject.OnNext(this);
+                    observer.OnCompleted();
+                    return Disposable.Empty;
+                }).Concat(CrossBleAdapter.Current
+                    .Scan())
+                .Finally(() =>
+                {
+                    ScanFinishedSubject.OnNext(this);
+                    BluetoothWakeLockDisposable.Dispose();
+                    ResetConnectableObservable();
+                })
+                .Publish()
+                .RefCount(TimeSpan.FromSeconds(5));
+        }
+
+        public IObservable<IRadioAdapter> WhenDiscoveryStarting() => ScanStartingSubject.AsObservable();
+        public IObservable<IRadioAdapter> WhenDiscoveryFinished() => ScanFinishedSubject.AsObservable();
 
         public async Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
         {
@@ -152,7 +166,7 @@ namespace OmniCore.Client.Platform
                             await Task.Delay(1000, cancellationToken);
                         }
 
-                        scanSubscription = CompatibleScan
+                        scanSubscription = ConnectableScanObservable
                             .Subscribe(async (scanResult) =>
                             {
                                 var peripheral = GetPeripheral(scanResult.Device.Uuid) as RadioPeripheral;

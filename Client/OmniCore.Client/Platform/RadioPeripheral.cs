@@ -68,8 +68,23 @@ namespace OmniCore.Client.Platform
             StateSubject = new BehaviorSubject<PeripheralState>(PeripheralState.Offline);
             ConnectionStateSubject = new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
             RssiReceivedSubject = new Subject<int>();
+
+            radioAdapter.WhenDiscoveryStarting().Subscribe( _ =>
+            {
+                if (Device != null && Device.IsConnected())
+                    return;
+
+                SetDeviceInternal(null);
+                StateSubject.OnNext(Model.Enumerations.PeripheralState.Discovering);
+            });
+
+            radioAdapter.WhenDiscoveryFinished().Subscribe(_ =>
+            {
+                if (Device == null)
+                    StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
+            });
         }
-         
+
         public void RequestRssi()
         {
             ThrowIfNotOnLease();
@@ -164,21 +179,6 @@ namespace OmniCore.Client.Platform
             ThrowIfNotOnLease();
 
             await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data).ToTask(cancellationToken);
-        }
-
-        public void BeforeDiscovery()
-        {
-            if (Device != null && Device.IsConnected())
-                return;
-
-            SetDeviceInternal(null);
-            StateSubject.OnNext(Model.Enumerations.PeripheralState.Discovering);
-        }
-
-        public void AfterDiscovery()
-        {
-            if (Device == null)
-                StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
         }
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)

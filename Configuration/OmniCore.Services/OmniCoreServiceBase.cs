@@ -125,6 +125,16 @@ namespace OmniCore.Services
             using var ssl = StartStopLock.Lock();
             using var prl = PauseResumeLock.Lock();
             Dependents = null;
+            DisposeDisposables();
+        }
+
+        public IList<IDisposable> Disposables { get; } = new List<IDisposable>();
+        public void DisposeDisposables()
+        {
+            foreach(var disposable in Disposables)
+                disposable.Dispose();
+
+            Disposables.Clear();
         }
     }
 }
