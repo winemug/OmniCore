@@ -8,6 +8,8 @@ namespace OmniCore.Model.Interfaces.Common
         bool KeepConnected { get; set; }
         TimeSpan RadioResponseTimeout { get; set; }
         TimeSpan RadioConnectTimeout { get; set; }
+        TimeSpan RadioDiscoveryTimeout { get; set; }
+        TimeSpan RadioDiscoveryCooldown { get; set; }
         TimeSpan? RssiUpdateInterval { get; set; }
         int FrequencyShift { get; set; }
         TransmissionPower Amplification { get; set; }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using OmniCore.Client.Annotations;
@@ -10,27 +9,22 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Client.Models
 {
-    public class RadioModel : INotifyPropertyChanged
+    public class RadioPeripheralModel : INotifyPropertyChanged
     {
-
+        private readonly IRadioPeripheral Peripheral;
         public string Name { get; set; }
-
-        public string MacAddress => Radio.Peripheral.PeripheralUuid.AsMacAddress();
-
+        public string MacAddress => Peripheral.PeripheralUuid.AsMacAddress();
         public string Rssi { get; set; }
         public string DiscoveryState { get; set; }
         public string ConnectionState { get; set; }
-        public string Activity { get; set; }
 
-        public readonly IRadio Radio;
-        public RadioModel(IRadio radio)
+        public RadioPeripheralModel(IRadioPeripheral peripheral)
         {
-            Radio = radio;
-
-            radio.Peripheral.Name.Subscribe(s => Name = s);
-            radio.Peripheral.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
-            radio.Peripheral.State.Subscribe(state => DiscoveryState = state.ToString());
-            radio.Peripheral.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
+            Peripheral = peripheral;
+            Peripheral.Name.Subscribe(s => Name = s);
+            Peripheral.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
+            Peripheral.State.Subscribe(state => DiscoveryState = state.ToString());
+            Peripheral.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

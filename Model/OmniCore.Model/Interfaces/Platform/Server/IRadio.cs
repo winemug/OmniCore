@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Common.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface IRadio : IServerResolvable, ILeaseable<IRadio>
+    public interface IRadio : IServerResolvable, ILeaseable<IRadio>, IDisposable
     {
         IRadioPeripheral Peripheral { get; set; }
         IRadioEntity Entity { get; set; }
@@ -23,5 +23,6 @@ namespace OmniCore.Model.Interfaces.Common
         Task Identify(CancellationToken cancellationToken);
         Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
         Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
+        void Start(IRadioEntity radioEntity, IRadioPeripheral getPeripheral);
     }
 }

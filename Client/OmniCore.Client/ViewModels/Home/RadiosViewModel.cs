@@ -23,9 +23,15 @@ namespace OmniCore.Client.ViewModels.Home
     {
         public ObservableCollection<RadioModel> Radios { get; set; }
         public ICommand SelectCommand { get; set; }
+        public ICommand AddCommand { get; set; }
         public RadiosViewModel(ICoreClient client) : base(client)
         {
             SelectCommand = new Command<RadioModel>(async rm => await SelectRadio(rm.Radio));
+            AddCommand = new Command(async _ =>
+            {
+                await Shell.Current.Navigation.
+                    PushAsync(Client.ViewPresenter.GetView<RadioScanView>(false));
+            });
         }
 
         protected override Task OnPageAppearing()

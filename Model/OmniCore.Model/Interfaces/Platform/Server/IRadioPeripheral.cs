@@ -17,6 +17,7 @@ namespace OmniCore.Model.Interfaces.Common
 
         TimeSpan? RssiAutoUpdateInterval { get; set; }
         void RequestRssi();
+        Task Locate(CancellationToken cancellationToken);
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
         Task Disconnect(CancellationToken cancellationToken);
         Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken);

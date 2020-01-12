@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ using Nito.AsyncEx;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Common.Data.Repositories;
@@ -54,6 +56,9 @@ namespace OmniCore.Radios.RileyLink
         private IDisposable ConnectedSubscription = null;
         private IDisposable ConnectionFailedSubscription = null;
         private IDisposable DisconnectedSubscription = null;
+        private IDisposable PeripheralStateSubscription = null;
+        private IDisposable PeripheralRssiSubscription = null;
+        private IDisposable LocateSubscription = null;
         private IDisposable ResponseNotifySubscription = null;
 
         private readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
@@ -99,6 +104,69 @@ namespace OmniCore.Radios.RileyLink
         {
             Entity.ConfigurationJson = JsonConvert.SerializeObject(configuration);
             await RadioRepository.Update(Entity, cancellationToken);
+            ApplyConfiguration(cancellationToken);
+        }
+
+        public void ApplyConfiguration(CancellationToken cancellationToken)
+        {
+            var configuration = GetConfiguration();
+            PeripheralStateSubscription?.Dispose();
+            PeripheralStateSubscription = Peripheral.State.Subscribe(async (state) =>
+            {
+                switch (state)
+                {
+                    case PeripheralState.Offline:
+                        await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = Observable.Interval(configuration.RadioDiscoveryCooldown).Subscribe(
+                            async _ =>
+                            {
+                                using var cts = new CancellationTokenSource(configuration.RadioDiscoveryTimeout);
+                                try
+                                {
+                                    await Peripheral.Locate(cts.Token);
+                                }
+                                catch (OperationCanceledException e)
+                                {
+                                }
+                            });
+                        break;
+                    case PeripheralState.Online:
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = null;
+                        await RecordRadioEvent(RadioEvent.Online, CancellationToken.None);
+                        break;
+                    case PeripheralState.Discovering:
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = null;
+                        break;
+                }
+            });
+
+        PeripheralRssiSubscription?.Dispose();
+            PeripheralRssiSubscription = Peripheral.Rssi.Subscribe(async (rssi) =>
+                {
+                    await RecordRssi(rssi, CancellationToken.None);
+                });
+            Peripheral.RssiAutoUpdateInterval = GetConfiguration().RssiUpdateInterval;
+        }
+
+        private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken, string text = null, byte[] data = null)
+        {
+            var radioEvent = RadioEventRepository.New();
+            radioEvent.Radio = Entity;
+            radioEvent.EventType = eventType;
+            radioEvent.Text = text;
+            radioEvent.Data = data;
+            await RadioEventRepository.Create(radioEvent, cancellationToken);
+        }
+
+        private async Task RecordRssi(int rssi, CancellationToken cancellationToken)
+        {
+            var sse = SignalStrengthRepository.New();
+            sse.Radio = Entity;
+            sse.Rssi = rssi;
+            await SignalStrengthRepository.Create(sse, cancellationToken);
         }
 
         public async Task Identify(CancellationToken cancellationToken)
@@ -168,17 +236,54 @@ namespace OmniCore.Radios.RileyLink
             return (result.Data[0], result.Data[1..]);
         }
 
+        public void Start(IRadioEntity radioEntity, IRadioPeripheral peripheral)
+        {
+            Entity = radioEntity;
+            Peripheral = peripheral;
+
+            ConnectedSubscription?.Dispose();
+            ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
+                .Subscribe( async (_) =>
+                {
+                    IsConfigured = false;
+                    await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
+                });
+
+            DisconnectedSubscription?.Dispose();
+            DisconnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Disconnected)
+                .Subscribe( async (_) =>
+                {
+                    ResponseNotifySubscription?.Dispose();
+                    ResponseNotifySubscription = null;
+                    IsConfigured = false;
+
+                    await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
+                });
+
+            ApplyConfiguration(CancellationToken.None);
+        }
+
         public void Dispose()
         {
+            Peripheral.RssiAutoUpdateInterval = null;
+            PeripheralRssiSubscription?.Dispose();
+            PeripheralRssiSubscription = null;
+
+            PeripheralStateSubscription?.Dispose();
+            PeripheralStateSubscription = null;
+
             ResponseNotifySubscription?.Dispose();
             ResponseNotifySubscription = null;
+
             IsConfigured = false;
             InUse = false;
 
             ConnectedSubscription?.Dispose();
             ConnectedSubscription = null;
+
             ConnectionFailedSubscription?.Dispose();
             ConnectionFailedSubscription = null;
+
             DisconnectedSubscription?.Dispose();
             DisconnectedSubscription = null;
         }
@@ -187,7 +292,6 @@ namespace OmniCore.Radios.RileyLink
         {
             using var _ = Peripheral.Lease(cancellationToken);
 
-            SubscribeToConnectionStates();
             using var connectionTimeout = new CancellationTokenSource(ActiveConfiguration.RadioConnectTimeout);
             using (var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, connectionTimeout.Token))
@@ -202,11 +306,8 @@ namespace OmniCore.Radios.RileyLink
                     ResponseNotifySubscription = null;
                     IsConfigured = false;
 
-                    var radioEvent = RadioEventRepository.New();
-                    radioEvent.Radio = Entity;
-                    radioEvent.EventType = RadioEvent.Connect;
-                    radioEvent.Success = false;
-                    await RadioEventRepository.Create(radioEvent, CancellationToken.None);
+                    await RecordRadioEvent(RadioEvent.Error, CancellationToken.None,
+                        $"Connect failed: {e.AsDebugFriendly()}");
                 }
             }
 
@@ -234,44 +335,12 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task Disconnect(CancellationToken cancellationToken)
         {
-            SubscribeToConnectionStates();
             if (!ActiveConfiguration.KeepConnected)
             {
                 await Peripheral.Disconnect(cancellationToken);
             }
         }
 
-
-        private void SubscribeToConnectionStates()
-        {
-            if (ConnectedSubscription != null)
-                return;
-
-            ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
-                .Subscribe( async (_) =>
-                {
-                    IsConfigured = false;
-                    var radioEvent = RadioEventRepository.New();
-                    radioEvent.Radio = Entity;
-                    radioEvent.EventType = RadioEvent.Connect;
-                    radioEvent.Success = true;
-                    await RadioEventRepository.Create(radioEvent, CancellationToken.None);
-                });
-
-            DisconnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Disconnected)
-                .Subscribe( async (_) =>
-                {
-                    ResponseNotifySubscription?.Dispose();
-                    ResponseNotifySubscription = null;
-                    IsConfigured = false;
-
-                    var radioEvent = RadioEventRepository.New();
-                    radioEvent.Radio = Entity;
-                    radioEvent.EventType = RadioEvent.Disconnect;
-                    radioEvent.Success = true;
-                    await RadioEventRepository.Create(radioEvent, CancellationToken.None);
-                });
-        }
 
         private async Task ConfigureRileyLink(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
         {

@@ -71,14 +71,13 @@ namespace OmniCore.Client.ViewModels.Base
             var page = (Page) view;
             page.Appearing += PageAppearing;
             page.Disappearing += PageDisappearing;
+            page.BindingContext = this;
         }
 
         private async void PageAppearing(object sender, EventArgs args)
         {
             ServiceApi = await Client.ClientConnection.WhenConnectionChanged().FirstAsync(c => c != null);
             await OnPageAppearing();
-            var page = (Page)View;
-            page.BindingContext = this;
         }
 
         private async void PageDisappearing(object sender, EventArgs args)

@@ -9,5 +9,6 @@ namespace OmniCore.Model.Interfaces.Common
     {
         string Description { get; }
         IObservable<IRadio> ListRadios();
+        IObservable<IRadioPeripheral> ScanRadios();
     }
 }

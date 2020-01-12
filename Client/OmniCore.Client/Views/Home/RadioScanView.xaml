@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-               xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
-               mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.Home.RadiosView">
+             xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Home.RadioScanView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None" >
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Peripherals}" SelectionMode="None" >
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type models:RadioModel}">
+                <DataTemplate x:DataType="{x:Type models:RadioPeripheralModel}">
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
@@ -25,19 +25,10 @@
                             <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
                             <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="0"/>
                             <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1"/>
-                            <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
-                            <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
     </ContentPage.Content>
-    <Shell.TitleView>
-        <ContentView>
-            <StackLayout Orientation="Horizontal" HorizontalOptions="End">
-                <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center" Command="{Binding AddCommand}"/>
-            </StackLayout>
-        </ContentView>
-    </Shell.TitleView>
 </ContentPage>

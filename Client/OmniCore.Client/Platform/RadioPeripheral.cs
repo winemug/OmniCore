@@ -52,7 +52,6 @@ namespace OmniCore.Client.Platform
             get => RssiAutoUpdateIntervalInternal;
             set
             {
-                ThrowIfNotOnLease();
                 RssiAutoUpdateIntervalInternal = value;
                 UpdateRssiSubscription();
             }
@@ -64,9 +63,9 @@ namespace OmniCore.Client.Platform
             RadioAdapter = radioAdapter;
             CoreContainer = coreContainer;
 
-            NameSubject = new BehaviorSubject<string>(null);
-            StateSubject = new BehaviorSubject<PeripheralState>(PeripheralState.Offline);
-            ConnectionStateSubject = new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
+            NameSubject = new ParticularBehaviorSubject<string>(null);
+            StateSubject = new ParticularBehaviorSubject<PeripheralState>(PeripheralState.Offline);
+            ConnectionStateSubject = new ParticularBehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
             RssiReceivedSubject = new Subject<int>();
 
             radioAdapter.WhenDiscoveryStarting().Subscribe( _ =>
@@ -92,36 +91,33 @@ namespace OmniCore.Client.Platform
             Device?.ReadRssi().Subscribe(rssi => RssiReceivedSubject.OnNext(rssi));
         }
 
+        public async Task Locate(CancellationToken cancellationToken)
+        {
+            if (await State.FirstAsync() == PeripheralState.Offline)
+            {
+                await RadioAdapter
+                    .FindPeripherals()
+                    .FirstAsync(p => p.PeripheralUuid == PeripheralUuid)
+                    .ToTask(cancellationToken);
+            }
+
+            await State.FirstAsync(s => s == PeripheralState.Online || s == PeripheralState.Busy).ToTask(cancellationToken);
+        }
+
         public async Task Connect(bool autoConnect, CancellationToken cancellationToken)
         {
             ThrowIfNotOnLease();
+            await Locate(cancellationToken);
+            var state = await ConnectionState.FirstAsync();
+            if (state == PeripheralConnectionState.Connected)
+                return;
 
-            State.Subscribe(async state =>
+            if (state != PeripheralConnectionState.Connecting)
             {
-                switch (state)
-                {
-                    case PeripheralState.Discovering:
-                        break;
-                    case PeripheralState.Offline:
-                        await RadioAdapter.FindPeripherals().FirstAsync(p => p.PeripheralUuid == PeripheralUuid);
-                        break;
-                    case PeripheralState.Online:
-
-                        switch (await ConnectionState.FirstAsync())
-                        {
-                            case PeripheralConnectionState.Connecting:
-                                break;
-                            case PeripheralConnectionState.Connected:
-                                return;
-                            case PeripheralConnectionState.Disconnecting:
-                                await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected);
-                                break;
-                        }
-                        Device.Connect(new ConnectionConfig()
-                            {AndroidConnectionPriority = ConnectionPriority.Normal, AutoConnect = autoConnect});
-                        break;
-                }
-            }, cancellationToken);
+                await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
+                Device.Connect(new ConnectionConfig()
+                    {AndroidConnectionPriority = ConnectionPriority.Normal, AutoConnect = autoConnect});
+            }
 
             var connectedTask = ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Connected).ToTask(cancellationToken);
             var failedTask = Device.WhenConnectionFailed().ToTask(cancellationToken);

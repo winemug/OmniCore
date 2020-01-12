@@ -30,6 +30,7 @@ namespace OmniCore.Client
                 .WithViewViewModel<PodsView, PodsViewModel>()
                 .WithViewViewModel<RadiosView, RadiosViewModel>()
                 .WithViewViewModel<RadioDetailView, RadioDetailViewModel>()
+                .WithViewViewModel<RadioScanView, RadioScanViewModel>()
                 .WithViewViewModel<EmptyView, EmptyViewModel>();
         }
     }

@@ -6,10 +6,10 @@ namespace OmniCore.Model.Enumerations
 {
     public enum RadioEvent
     {
-        Scan,
+        Offline,
+        Online,
         Connect,
         Disconnect,
-        Request,
-        Response
+        Error
     }
 }
