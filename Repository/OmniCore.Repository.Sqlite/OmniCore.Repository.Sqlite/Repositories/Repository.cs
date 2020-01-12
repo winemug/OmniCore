@@ -3,6 +3,7 @@ using OmniCore.Repository.Sqlite.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -66,7 +67,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
             return entity;
         }
 
-        public virtual async IAsyncEnumerable<InterfaceType> All
+        public virtual async IAsyncEnumerable<InterfaceType> Enumerate
             ([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             using var access = await RepositoryService.GetAccess(cancellationToken);
@@ -76,6 +77,14 @@ namespace OmniCore.Repository.Sqlite.Repositories
             {
                 yield return entity;
             }
+        }
+        public async Task<IList<InterfaceType>> All(CancellationToken cancellationToken)
+        {
+            using var access = await RepositoryService.GetAccess(cancellationToken);
+            var list = await access.Connection.Table<ConcreteType>().Where(e => !e.IsDeleted)
+                .ToListAsync();
+
+            return list.ToList<InterfaceType>();
         }
     }
 }
