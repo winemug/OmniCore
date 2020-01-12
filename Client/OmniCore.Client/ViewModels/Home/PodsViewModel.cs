@@ -38,7 +38,7 @@ namespace OmniCore.Client.ViewModels.Home
             AddCommand = new Command(async _ => await AddPod());
         }
 
-        protected override async Task OnInitialize()
+        protected override async Task OnPageAppearing()
         {
             
             Pods = new List<IPod>();
@@ -48,14 +48,9 @@ namespace OmniCore.Client.ViewModels.Home
             }
         }
 
-        protected override void OnDispose()
-        {
-            Pods = null;
-        }
-
         private async Task AddPod()
         {
-            await Shell.Current.Navigation.PushAsync(Client.GetView<PodWizardMainView,PodWizardViewModel>());
+            await Shell.Current.Navigation.PushAsync(Client.ViewPresenter.GetView<PodWizardMainView>(false));
         }
 
         private Task SelectPod(IPod pod)

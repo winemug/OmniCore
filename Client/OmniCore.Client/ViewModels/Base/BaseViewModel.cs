@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -12,6 +13,7 @@ using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Client;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -23,19 +25,16 @@ namespace OmniCore.Client.ViewModels.Base
 #pragma warning restore CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
 
         protected ICoreServiceApi ServiceApi { get; set; }
-        protected ICoreClient Client { get; set; }
-        protected IView View { get; set; }
+        protected ICoreClient Client { get; }
 
-        protected IDisposable Subscription;
-        protected List<IDisposable> DisposeList = new List<IDisposable>();
+        public IView View { get; protected set; }
+        public object Parameter { get; protected set; }
 
-        protected virtual Task OnInitialize()
+        private bool ViaShell = false;
+
+        protected virtual Task PageAppearing()
         {
             return Task.CompletedTask;
-        }
-
-        protected virtual void OnDispose()
-        {
         }
 
         public BaseViewModel(ICoreClient client)
@@ -43,26 +42,18 @@ namespace OmniCore.Client.ViewModels.Base
             Client = client;
         }
 
-        public void Dispose()
+        protected virtual Task OnPageAppearing()
         {
-            OnDispose();
-            DisposeDisposables();
+            return Task.CompletedTask;
         }
 
-        public void InitializeModel(IView view)
+        protected virtual Task OnPageDisappearing()
         {
-            View = view;
-            Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
-            {
-                ServiceApi = api;
-                if (api != null)
-                {
-                    await OnInitialize();
-                }
-            }).AutoDispose(this);
+            return Task.CompletedTask;
         }
 
         public IList<IDisposable> Disposables { get; } = new List<IDisposable>(); 
+
         public void DisposeDisposables()
         {
             foreach(var disposable in Disposables)
@@ -70,30 +61,36 @@ namespace OmniCore.Client.ViewModels.Base
 
             Disposables.Clear();
         }
-    }
 
-    public abstract class BaseViewModel<TParameter> : BaseViewModel, IViewModel<TParameter>
-    {
-        public abstract Task OnInitialize(TParameter parameter);
-        public BaseViewModel(ICoreClient client) : base(client)
+        public void SetParameters(IView view, bool viaShell, object parameter)
         {
-        }
-        protected override Task OnInitialize()
-        {
-            throw new InvalidOperationException();
-        }
-
-        public void InitializeModel(IView view, TParameter parameter)
-        {
+            ViaShell = viaShell;
+            Parameter = parameter;
             View = view;
-            Client.ClientConnection.WhenConnectionChanged().Subscribe(async (api) =>
+            Parameter = parameter;
+            var page = (Page) view;
+            page.Appearing += PageAppearing;
+            page.Disappearing += PageDisappearing;
+        }
+
+        private async void PageAppearing(object sender, EventArgs args)
+        {
+            ServiceApi = await Client.ClientConnection.WhenConnectionChanged().FirstAsync(c => c != null);
+            await OnPageAppearing();
+            var page = (Page)View;
+            page.BindingContext = this;
+        }
+
+        private async void PageDisappearing(object sender, EventArgs args)
+        {
+            await OnPageDisappearing();
+            DisposeDisposables();
+            if (!ViaShell)
             {
-                ServiceApi = api;
-                if (api != null)
-                {
-                    await OnInitialize(parameter);
-                }
-            }).AutoDispose(this);
+                var page = (Page) View;
+                page.Appearing -= PageAppearing;
+                page.Disappearing -= PageDisappearing;
+            }
         }
     }
 }

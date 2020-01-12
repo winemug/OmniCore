@@ -7,6 +7,7 @@ using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Client;
 
 namespace OmniCore.Client
 {
@@ -24,20 +25,8 @@ namespace OmniCore.Client
             (this ICoreContainer<IClientResolvable> container)
         {
             return container
-                .One<XamarinApp>()
-                .One<UnityRouteFactory>()
-                .Many<ShellViewModel>()
-                .Many<ShellView>()
-                .Many<EmptyViewModel>()
-                .Many<EmptyView>()
-                .Many<PodsViewModel>()
-                .Many<PodsView>()
-                .Many<PodWizardViewModel>()
-                .Many<PodWizardMainView>()
-                .Many<RadiosViewModel>()
-                .Many<RadiosView>()
-                .Many<RadioDetailViewModel>()
-                .Many<RadioDetailView>();
+                .One<IViewPresenter, ViewPresenter>()
+                .One<XamarinApp>();
         }
     }
 }

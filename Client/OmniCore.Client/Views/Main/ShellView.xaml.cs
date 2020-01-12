@@ -14,27 +14,25 @@ using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Reactive.Linq;
+using OmniCore.Model.Interfaces.Platform.Client;
 
 namespace OmniCore.Client.Views.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ShellView : Shell, IView<ShellViewModel>
+    public partial class ShellView : Shell
     {
-        public ShellView()
+        public DataTemplate EmptyView { get; }
+        public DataTemplate RadiosView { get; }
+        public DataTemplate PodsView { get; }
+
+        public ShellView(IViewPresenter viewPresenter)
         {
             InitializeComponent();
+            EmptyView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
+            RadiosView = new DataTemplate(() => viewPresenter.GetView<RadiosView>(true));
+            PodsView = new DataTemplate(() => viewPresenter.GetView<PodsView>(true));
+
+            BindingContext = this;
         }
-
-        public void SetViewModel(ShellViewModel viewModel)
-        {
-            BindingContext = viewModel;
-        }
-
-        public IObservable<IView> WhenAppearing() =>
-            Observable.Never<IView>();
-
-        public IObservable<IView> WhenDisappearing() =>
-            Observable.Never<IView>();
-
     }
 }

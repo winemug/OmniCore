@@ -1,11 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<views:BaseView
-    x:TypeArguments="viewModels:EmptyViewModel" xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:views="clr-namespace:OmniCore.Client.Views.Base;assembly=OmniCore.Client"
-             xmlns:viewModels="clr-namespace:OmniCore.Client.ViewModels.Base;assembly=OmniCore.Client"
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Base.EmptyView">
     <ContentPage.Content>
@@ -15,4 +12,4 @@
                 HorizontalOptions="CenterAndExpand" />
         </StackLayout>
     </ContentPage.Content>
-</views:BaseView>
+</ContentPage>

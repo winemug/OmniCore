@@ -11,7 +11,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
 {
-    public class RadioDetailViewModel : BaseViewModel<IRadio>
+    public class RadioDetailViewModel : BaseViewModel
     {
         public RadioModel Radio { get; set; }
         public ICommand Test1Command { get; set; }
@@ -20,9 +20,9 @@ namespace OmniCore.Client.ViewModels.Home
             Test1Command = new Command(() => { });
         }
 
-        public override Task OnInitialize(IRadio parameter)
+        protected override Task OnPageAppearing()
         {
-            Radio = new RadioModel(parameter);
+            Radio = new RadioModel((IRadio)Parameter);
             return Task.CompletedTask;
         }
     }

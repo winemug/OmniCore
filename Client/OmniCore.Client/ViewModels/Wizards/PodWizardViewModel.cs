@@ -13,18 +13,6 @@ namespace OmniCore.Client.ViewModels.Wizards
 {
     public class PodWizardViewModel : BaseViewModel
     {
-        public ICommand NextPageCommand { get; set; }
-        protected override Task OnInitialize()
-        {
-            NextPageCommand = new Command(async () => await NextPage());
-            return Task.CompletedTask;
-        }
-
-        private Task NextPage()
-        {
-            throw new NotImplementedException();
-        }
-
         public PodWizardViewModel(ICoreClient client) : base(client)
         {
         }
