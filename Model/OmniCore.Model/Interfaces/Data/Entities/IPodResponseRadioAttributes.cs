@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OmniCore.Model.Interfaces.Common.Data.Entities
+namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
     public interface IPodResponseRadioAttributes
     {

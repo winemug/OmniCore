@@ -21,7 +21,7 @@ using OmniCore.Client.Droid.Platform;
 using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;

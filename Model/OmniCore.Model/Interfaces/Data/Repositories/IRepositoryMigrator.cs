@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using SQLite;
 
-namespace OmniCore.Model.Interfaces.Common.Data.Repositories
+namespace OmniCore.Model.Interfaces.Platform.Common.Data.Repositories
 {
     public interface IRepositoryMigrator : IServerResolvable
     {

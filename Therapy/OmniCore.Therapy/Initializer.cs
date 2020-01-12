@@ -1,5 +1,5 @@
-﻿using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Common.Therapy;
+﻿using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Therapy;
 
 namespace OmniCore.Therapy
 {

@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IPod : IServerResolvable
     {

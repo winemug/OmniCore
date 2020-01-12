@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using OmniCore.Eros.Annotations;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
-using OmniCore.Model.Interfaces.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 
 namespace OmniCore.Eros
 {

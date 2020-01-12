@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Client;
 using Xamarin.Forms;
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface ICoreLoggingFunctions : ICoreServerFunctions
     {

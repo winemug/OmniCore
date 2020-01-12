@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Model.Interfaces.Common
+﻿namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IClientResolvable : IResolvable
     {

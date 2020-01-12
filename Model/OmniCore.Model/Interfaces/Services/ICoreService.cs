@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces.Platform.Common
 {
-    public interface ICoreService : IDisposableHandler, IServerResolvable
+    public interface ICoreService : IDisposablesContainer, IServerResolvable
     {
         bool IsStarted { get; }
         bool IsPaused { get; }

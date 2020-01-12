@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home

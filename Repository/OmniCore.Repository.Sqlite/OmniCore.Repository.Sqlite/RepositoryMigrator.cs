@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using OmniCore.Repository.Sqlite.Entities;
 using SQLite;
 

@@ -1,10 +1,10 @@
-﻿using OmniCore.Model.Interfaces.Common;
+﻿using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Radios.RileyLink;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Common.Data;
+using OmniCore.Model.Interfaces.Platform.Common.Data;
 
 namespace OmniCore.Radios.RileyLink
 {

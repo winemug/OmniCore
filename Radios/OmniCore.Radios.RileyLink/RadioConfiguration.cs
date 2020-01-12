@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Radios.RileyLink
 {

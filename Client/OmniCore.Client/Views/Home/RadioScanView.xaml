@@ -13,6 +13,7 @@
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="55"/>
                                 <ColumnDefinition Width="30"/>
@@ -22,9 +23,10 @@
                                 <RowDefinition/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="0"/>
-                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1"/>
+                            <CheckBox IsChecked="{Binding IsChecked}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
+                            <Label Text="{Binding Name}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"/>
+                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="2"/>
+                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="3"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

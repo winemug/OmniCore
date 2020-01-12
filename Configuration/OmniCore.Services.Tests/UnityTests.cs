@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Repository.Sqlite;
 using Unity;
 

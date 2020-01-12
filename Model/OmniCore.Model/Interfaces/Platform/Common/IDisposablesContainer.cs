@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces.Platform.Common
 {
-    public interface IDisposableHandler
+    public interface IDisposablesContainer
     {
         IList<IDisposable> Disposables { get; }
         void DisposeDisposables();

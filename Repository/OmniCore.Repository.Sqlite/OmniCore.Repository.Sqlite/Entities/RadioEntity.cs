@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities

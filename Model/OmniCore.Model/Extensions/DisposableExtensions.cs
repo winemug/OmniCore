@@ -1,14 +1,14 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Model.Extensions
 {
     public static class DisposableExtensions
     {
-        public static void AutoDispose(this IDisposable disposable, IDisposableHandler disposableHandler)
+        public static void AutoDispose(this IDisposable disposable, IDisposablesContainer disposablesContainer)
         {
-            if (!disposableHandler.Disposables.Contains(disposable))
-                disposableHandler.Disposables.Add(disposable);
+            if (!disposablesContainer.Disposables.Contains(disposable))
+                disposablesContainer.Disposables.Add(disposable);
         }
     }
 }

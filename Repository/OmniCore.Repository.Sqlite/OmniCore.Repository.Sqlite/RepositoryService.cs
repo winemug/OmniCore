@@ -9,10 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Common.Data;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
-using OmniCore.Model.Interfaces.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Data;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using OmniCore.Services;
 using SQLite;
 

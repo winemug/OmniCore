@@ -1,5 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Repository.Sqlite.Entities;
 
 namespace OmniCore.Repository.Sqlite.Entities

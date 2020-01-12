@@ -12,8 +12,8 @@ using Android.OS;
 using Javax.Security.Auth;
 using Nito.AsyncEx;
 using OmniCore.Client.Droid.Platform;
-using OmniCore.Model.Interfaces.Common.Data;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Data;
+using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Client.Droid
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using OmniCore.Model.Interfaces.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
-namespace OmniCore.Model.Interfaces.Common.Data.Repositories
+namespace OmniCore.Model.Interfaces.Platform.Common.Data.Repositories
 {
     public interface IPodRepository : IRepository<IPodEntity>
     {

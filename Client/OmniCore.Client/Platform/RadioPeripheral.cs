@@ -16,7 +16,7 @@ using OmniCore.Client.Platform;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;
 using ValueTuple = System.ValueTuple;

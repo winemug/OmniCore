@@ -9,7 +9,7 @@ using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.ViewModels.Home;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Client;
 using Xamarin.Forms;
 

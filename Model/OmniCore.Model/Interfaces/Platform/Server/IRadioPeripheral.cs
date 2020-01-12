@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IRadioPeripheral : ILeaseable<IRadioPeripheral>, IServerResolvable
     {

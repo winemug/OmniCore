@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using OmniCore.Client.Annotations;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Client.Models
 {
