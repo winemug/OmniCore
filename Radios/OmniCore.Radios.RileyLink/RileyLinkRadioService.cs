@@ -70,6 +70,11 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
+        public Task<bool> VerifyPeripheral(IRadioPeripheral peripheral)
+        {
+            throw new NotImplementedException();
+        }
+
         public IObservable<IRadio> ListRadios()
         {
             return Observable.Create<IRadio>( async (IObserver<IRadio> observer) =>

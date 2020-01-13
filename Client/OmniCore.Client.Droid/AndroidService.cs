@@ -22,6 +22,7 @@ using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
@@ -41,6 +42,7 @@ namespace OmniCore.Client.Droid
         public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
         public IRadioService RadioService => ServerContainer.Get<IRadioService>();
         public IPodService PodService => ServerContainer.Get<IPodService>();
+        public ICoreNotificationService NotificationService => ServerContainer.Get<ICoreNotificationService>();
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
 
         private ISubject<ICoreServiceApi> UnexpectedStopRequestSubject;
@@ -102,7 +104,7 @@ namespace OmniCore.Client.Droid
         }
         private void CreateNotification()
         {
-            var notificationManager = (NotificationManager) GetSystemService(NotificationService);
+            var notificationManager = (NotificationManager) GetSystemService(Context.NotificationService);
 
 #pragma warning disable CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
             var notificationBuilder = new Notification.Builder(this)

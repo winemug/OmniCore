@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
@@ -16,6 +17,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         IRepositoryService RepositoryService { get; }
         IRadioService RadioService { get; }
         IPodService PodService { get; }
+        ICoreNotificationService NotificationService { get; }
         ICoreIntegrationService IntegrationService { get; }
     }
 }

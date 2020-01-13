@@ -10,6 +10,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         string Description { get; }
         IObservable<IRadio> ListRadios();
         IObservable<IRadioPeripheral> ScanRadios();
-        Task VerifyPeripheral(IRadioPeripheral peripheral);
+        Task<bool> VerifyPeripheral(IRadioPeripheral peripheral);
     }
 }

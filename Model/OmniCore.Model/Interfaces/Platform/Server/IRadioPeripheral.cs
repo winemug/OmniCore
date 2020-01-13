@@ -20,7 +20,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         Task Locate(CancellationToken cancellationToken);
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
         Task Disconnect(CancellationToken cancellationToken);
-        Task<Guid[]> GetServiceIds(CancellationToken cancellationToken);
         Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken);
         Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken);
         IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid ServiceUuid, Guid CharacteristicUuid);
