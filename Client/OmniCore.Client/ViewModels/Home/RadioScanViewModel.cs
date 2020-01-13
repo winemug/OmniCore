@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.Views.Home;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Utilities;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -44,7 +46,9 @@ namespace OmniCore.Client.ViewModels.Home
             var selected = Peripherals.Where(p => p.IsChecked).ToList();
             foreach (var peripheral in selected)
             {
-
+                var progress = new TaskProgress();
+                var popup = Client.ViewPresenter.GetView<ProgressPopupView>(false, progress);
+                await ServiceApi.RadioService.VerifyPeripheral(peripheral.Peripheral);
             }
         }
     }

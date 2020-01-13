@@ -72,6 +72,7 @@
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.2.6" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.2.3" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="1.2.0.223" />
     <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
@@ -102,6 +103,9 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Views\EmptyView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Home\ProgressPopupView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Home\RadioDetailView.xaml">

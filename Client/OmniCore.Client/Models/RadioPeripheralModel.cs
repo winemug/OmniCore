@@ -11,7 +11,7 @@ namespace OmniCore.Client.Models
 {
     public class RadioPeripheralModel : INotifyPropertyChanged
     {
-        private readonly IRadioPeripheral Peripheral;
+        public readonly IRadioPeripheral Peripheral;
         public string Name { get; set; }
         public string MacAddress => Peripheral.PeripheralUuid.AsMacAddress();
         public string Rssi { get; set; }

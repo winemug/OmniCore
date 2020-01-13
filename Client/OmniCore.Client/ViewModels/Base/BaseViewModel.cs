@@ -32,11 +32,6 @@ namespace OmniCore.Client.ViewModels.Base
 
         private bool ViaShell = false;
 
-        protected virtual Task PageAppearing()
-        {
-            return Task.CompletedTask;
-        }
-
         public BaseViewModel(ICoreClient client)
         {
             Client = client;

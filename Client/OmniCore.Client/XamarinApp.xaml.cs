@@ -31,6 +31,7 @@ namespace OmniCore.Client
                 .WithViewViewModel<RadiosView, RadiosViewModel>()
                 .WithViewViewModel<RadioDetailView, RadioDetailViewModel>()
                 .WithViewViewModel<RadioScanView, RadioScanViewModel>()
+                .WithViewViewModel<ProgressPopupView, ProgressPopupViewModel>()
                 .WithViewViewModel<EmptyView, EmptyViewModel>();
         }
     }

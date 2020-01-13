@@ -104,6 +104,9 @@
     <PackageReference Include="Plugin.BluetoothLE">
       <Version>6.2.6</Version>
     </PackageReference>
+    <PackageReference Include="Rg.Plugins.Popup">
+      <Version>1.2.0.223</Version>
+    </PackageReference>
     <PackageReference Include="sqlite-net-pcl">
       <Version>1.6.292</Version>
     </PackageReference>
