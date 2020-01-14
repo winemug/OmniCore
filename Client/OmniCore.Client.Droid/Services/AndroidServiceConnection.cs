@@ -11,11 +11,10 @@ using Android.Content;
 using Android.OS;
 using Javax.Security.Auth;
 using Nito.AsyncEx;
-using OmniCore.Client.Droid.Platform;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
+
 using OmniCore.Model.Interfaces.Platform.Common;
 
-namespace OmniCore.Client.Droid
+namespace OmniCore.Client.Droid.Services
 {
     public class AndroidServiceConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
     {

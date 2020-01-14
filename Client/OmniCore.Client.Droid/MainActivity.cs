@@ -15,6 +15,7 @@ using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Android.Content;
+using OmniCore.Client.Droid.Services;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;

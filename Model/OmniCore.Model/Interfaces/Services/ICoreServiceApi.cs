@@ -14,10 +14,10 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         Task StopServices(CancellationToken cancellationToken);
         ICoreLoggingFunctions LoggingFunctions { get; }
         ICoreApplicationFunctions ApplicationFunctions { get; }
+        ICoreNotificationFunctions NotificationFunctions { get; }
         IRepositoryService RepositoryService { get; }
         IRadioService RadioService { get; }
         IPodService PodService { get; }
-        ICoreNotificationService NotificationService { get; }
         ICoreIntegrationService IntegrationService { get; }
     }
 }

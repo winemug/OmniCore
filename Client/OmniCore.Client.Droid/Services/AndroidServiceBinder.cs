@@ -2,7 +2,7 @@
 using Android.OS;
 using OmniCore.Model.Interfaces.Platform.Common;
 
-namespace OmniCore.Client.Droid.Platform
+namespace OmniCore.Client.Droid.Services
 {
     public class AndroidServiceBinder : Binder
     {
