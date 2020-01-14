@@ -14,6 +14,8 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         IRadioPeripheral GetPeripheral(Guid peripheralUuid);
         IObservable<IRadioAdapter> WhenDiscoveryStarting();
         IObservable<IRadioAdapter> WhenDiscoveryFinished();
+        IObservable<IRadioAdapter> WhenAdapterDisabled();
+        IObservable<IRadioAdapter> WhenAdapterEnabled();
 
     }
 }

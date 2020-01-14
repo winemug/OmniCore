@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces.Platform.Server
         string Message { get; }
         TimeSpan? Timeout { get; }
         bool AutoDismiss { get; }
-        void Update(string title, string message, TimeSpan? timeout);
+        void Update(string title, string message, TimeSpan? timeout = null);
         void Dismiss();
         IObservable<ICoreNotification> WhenDismissed();
          bool IsDismissed { get; }

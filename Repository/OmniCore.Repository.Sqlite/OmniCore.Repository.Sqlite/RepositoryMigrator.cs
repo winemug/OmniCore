@@ -25,15 +25,15 @@ namespace OmniCore.Repository.Sqlite
         public async Task ExecuteMigration(Version migrateTo, string path,
             CancellationToken cancellationToken)
         {
-            ICoreNotification migrationNotification;
+            ICoreNotification migrationInformation;
             
             if (!File.Exists(path))
             {
-                var initializeNotification = NotificationFunctions.CreateNotification(
+                migrationInformation = NotificationFunctions.CreateNotification(
                     NotificationCategory.ApplicationInformation,
                     "Database", "Creating new omnicore database");
                 await InitializeDatabase(path, migrateTo, cancellationToken);
-                initializeNotification.Update("Database", "Created new database", TimeSpan.FromSeconds(30));
+                migrationInformation.Update("Database", "Created new database", TimeSpan.FromSeconds(30));
             }
             else
             {
@@ -41,7 +41,10 @@ namespace OmniCore.Repository.Sqlite
 
                 if (repoVersion == null)
                 {
-                    //TODO: move away but notify
+                    migrationInformation = NotificationFunctions.CreateNotification(
+                        NotificationCategory.ApplicationImportant,
+                        "Database error",
+                        "Failed to determine the version of existing database, a new database will be created instead.");
                     var backupPath = path + ".couldntupgrade";
                     if (File.Exists(backupPath))
                         File.Delete(backupPath);
@@ -51,10 +54,15 @@ namespace OmniCore.Repository.Sqlite
                 }
                 else
                 {
+                    migrationInformation = NotificationFunctions.CreateNotification(
+                        NotificationCategory.ApplicationInformation,
+                        "Database", "Migrating database of the previously installed OmniCore version");
                     while (repoVersion != migrateTo)
                     {
                         repoVersion = await MigrateDatabase(path, repoVersion, migrateTo, cancellationToken);
                     }
+                    
+                    migrationInformation.Update("Database", "Database migrated successfully from previous version.", null);
                 }
             }
         }

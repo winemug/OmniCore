@@ -21,6 +21,7 @@ using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;
 
@@ -34,15 +35,18 @@ namespace OmniCore.Client.Platform
         private IObservable<IScanResult> ConnectableScanObservable;
 
         private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly ICoreNotificationFunctions NotificationFunctions;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
         private readonly ISubject<IRadioAdapter> ScanStartingSubject;
         private readonly ISubject<IRadioAdapter> ScanFinishedSubject;
 
         public RadioAdapter(ICoreContainer<IServerResolvable> container,
-            ICoreApplicationFunctions applicationFunctions)
+            ICoreApplicationFunctions applicationFunctions,
+            ICoreNotificationFunctions notificationFunctions)
         {
             Container = container;
             ApplicationFunctions = applicationFunctions;
+            NotificationFunctions = notificationFunctions;
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new ConcurrentDictionary<Guid, IRadioPeripheral>();
             ScanStartingSubject = new Subject<IRadioAdapter>();
@@ -72,6 +76,36 @@ namespace OmniCore.Client.Platform
 
         public IObservable<IRadioAdapter> WhenDiscoveryStarting() => ScanStartingSubject.AsObservable();
         public IObservable<IRadioAdapter> WhenDiscoveryFinished() => ScanFinishedSubject.AsObservable();
+        public IObservable<IRadioAdapter> WhenAdapterDisabled()
+        {
+            return Observable.Create<IRadioAdapter>(observer =>
+            {
+                
+                if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff)
+                {
+                    observer.OnNext(this);                    
+                }
+
+                return CrossBleAdapter.Current.WhenStatusChanged()
+                    .Where(s => s == AdapterStatus.PoweredOff)
+                    .Subscribe(_ => { observer.OnNext(this); });
+            });
+        }
+
+        public IObservable<IRadioAdapter> WhenAdapterEnabled()
+        {
+            return Observable.Create<IRadioAdapter>(observer =>
+            {
+                if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn)
+                {
+                    observer.OnNext(this);                    
+                }
+
+                return CrossBleAdapter.Current.WhenStatusChanged()
+                    .Where(s => s == AdapterStatus.PoweredOn)
+                    .Subscribe(_ => { observer.OnNext(this); });
+            });
+        }
 
         public async Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
         {

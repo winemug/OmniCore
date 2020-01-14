@@ -14,6 +14,8 @@ using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Common.Data;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Services;
 
 
@@ -26,6 +28,7 @@ namespace OmniCore.Radios.RileyLink
         private readonly IRadioAdapter RadioAdapter;
         private readonly IRadioRepository RadioRepository;
         private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly ICoreNotificationFunctions NotificationFunctions;
 
         private readonly AsyncLock RadioDictionaryLock;
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
@@ -34,11 +37,13 @@ namespace OmniCore.Radios.RileyLink
         public RileyLinkRadioService(
             IRadioAdapter radioAdapter, 
             IRadioRepository radioRepository,
+            ICoreNotificationFunctions notificationFunctions,
             ICoreContainer<IServerResolvable> container) : base()
         {
             RadioAdapter = radioAdapter;
             RadioRepository = radioRepository;
             Container = container;
+            NotificationFunctions = notificationFunctions;
             RadioDictionary = new Dictionary<Guid, IRadio>();
             RadioDictionaryLock = new AsyncLock();
         }
@@ -115,8 +120,44 @@ namespace OmniCore.Radios.RileyLink
             return radio;
         }
 
+        private IDisposable AdapterEnabledSubscription;
+        private IDisposable AdapterDisabledSubscription;
+        private ICoreNotification AdapterStatusNotification;
+        
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
+            await RadioAdapter.TryEnsureAdapterEnabled(cancellationToken);
+
+            AdapterEnabledSubscription = RadioAdapter.WhenAdapterEnabled().Subscribe(_ => 
+            {
+                if (AdapterStatusNotification != null)
+                {
+                    AdapterStatusNotification.Dispose();
+                    AdapterStatusNotification = NotificationFunctions.CreateNotification(
+                        NotificationCategory.RadioInformation, null, "Bluetooth is enabled.",
+                        TimeSpan.FromSeconds(30), true);
+                }
+            });
+            
+            AdapterDisabledSubscription = RadioAdapter.WhenAdapterDisabled().Subscribe(async _ => 
+            {
+                AdapterStatusNotification?.Dispose();
+                AdapterStatusNotification = NotificationFunctions.CreateNotification(
+                    NotificationCategory.RadioImportant, "Bluetooth disabled", "Trying to enable bluetooth"
+                    , null, false);
+                    
+                using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                if (!await RadioAdapter.TryEnableAdapter(timeoutSource.Token))
+                {
+                    AdapterStatusNotification?.Dispose();
+                    AdapterStatusNotification = NotificationFunctions.CreateNotification(
+                        NotificationCategory.RadioImmediateAction, "Couldn't enable bluetooth",
+                        "Bluetooth is turned off, please turn it on manually."
+                        , null, true);
+                }
+            });
+            
+            // TODO: have pod service pre-load radios if necessary
             foreach (var radioEntity in await RadioRepository.All(cancellationToken))
             {
                 await GetRadio(radioEntity, cancellationToken);
@@ -125,6 +166,12 @@ namespace OmniCore.Radios.RileyLink
 
         protected override async Task OnStop(CancellationToken cancellationToken)
         {
+            AdapterEnabledSubscription.Dispose();
+            AdapterEnabledSubscription = null;
+            
+            AdapterDisabledSubscription.Dispose();
+            AdapterDisabledSubscription = null;
+            
             using var lockObj = await RadioDictionaryLock.LockAsync();
             var disconnectTasks = new List<Task>();
             foreach (var radio in RadioDictionary.Values)
