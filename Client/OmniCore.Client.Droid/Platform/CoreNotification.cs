@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using Android.App;
 using Android.Content;
 using OmniCore.Model.Enumerations;
@@ -12,61 +15,104 @@ namespace OmniCore.Client.Droid.Platform
         public NotificationCategory Category { get; private set; }
         public string Title { get; private set; }
         public string Message { get; private set; }
+        public TimeSpan? Timeout { get; private set; }
+        public bool AutoDismiss { get; private set; }
         public Notification NativeNotification { get; private set; }
 
+        public bool IsDismissed => IsAutomaticallyDismissed || IsManuallyDismissed;
+        public bool IsAutomaticallyDismissed  { get; private set; }
+        public bool IsManuallyDismissed { get; private set; }
+        
         private Context Context;
+        private ISubject<ICoreNotification> DismissSubject;
 
         public void CreateInternal(
             Context context,
             int id,
             NotificationCategory category,
             string title,
-            string message)
+            string message,
+            TimeSpan? timeout = null,
+            bool autoDismiss = true)
         {
             Id = id;
             Category = category;
             Title = title;
             Message = message;
-            
-            var notificationManager = (NotificationManager)
-                context.GetSystemService(Context.NotificationService);
-#pragma warning disable CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
-            var notificationBuilder = new Notification.Builder(context)
-#pragma warning restore CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
-                .SetSmallIcon(Resource.Drawable.ic_stat_pod);
-            if (!string.IsNullOrEmpty(title))
-                notificationBuilder.SetContentTitle(title);
-            if (!string.IsNullOrEmpty(message))
-                notificationBuilder.SetContentText(message);
+            Timeout = timeout;
+            AutoDismiss = autoDismiss;
 
-            notificationBuilder.SetCategory(category.ToString());
+            DismissSubject = new AsyncSubject<ICoreNotification>();
             
-            var notification = notificationBuilder.Build();
-            NativeNotification = notification;
-            notificationManager.Notify(id, notification);
+            SetNotification();
         }
-
-        public void Update(string title, string message)
+        public void Update(string title, string message, TimeSpan? timeout = null)
         {
-            Title = title;
-            Message = message;
-            
-            var notificationManager = (NotificationManager)
-                Context.GetSystemService(Context.NotificationService);
-            notificationManager.Notify(Id, NativeNotification);
+            lock (this)
+            {
+                Title = title;
+                Message = message;
+                Timeout = timeout;
+
+                SetNotification();
+                var notificationManager = (NotificationManager)
+                    Context.GetSystemService(Context.NotificationService);
+
+                notificationManager.Notify(Id, NativeNotification);
+            }
         }
 
         public void Dismiss()
         {
-            var notificationManager = (NotificationManager)
-                Context.GetSystemService(Context.NotificationService);
-            
-            throw new NotImplementedException();
+            lock (this)
+            {
+                if (NativeNotification != null)
+                {
+                    var notificationManager = (NotificationManager)
+                        Context.GetSystemService(Context.NotificationService);
+
+                    notificationManager.Cancel(Id);
+                    IsManuallyDismissed = true;
+                    NativeNotification.Dispose();
+                    NativeNotification = null;
+                    DismissSubject.OnNext(this);
+                }
+            }
         }
 
         public IObservable<ICoreNotification> WhenDismissed()
         {
-            throw new NotImplementedException();
+            return DismissSubject.AsObservable();
+        }
+        
+        private void SetNotification()
+        {
+            var notificationManager = (NotificationManager)
+                Context.GetSystemService(Context.NotificationService);
+#pragma warning disable CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
+            notificationManager.Notify(Id, NativeNotification);
+
+            var notificationBuilder = new Notification.Builder(Context)
+#pragma warning restore CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
+                .SetSmallIcon(Resource.Drawable.ic_stat_pod);
+            if (!string.IsNullOrEmpty(Title))
+                notificationBuilder.SetContentTitle(Title);
+            if (!string.IsNullOrEmpty(Message))
+                notificationBuilder.SetContentText(Message);
+            notificationBuilder.SetCategory(Category.ToString());
+            notificationBuilder.SetOnlyAlertOnce(true);
+            notificationBuilder.SetAutoCancel(AutoDismiss);
+            if (Timeout.HasValue)
+                notificationBuilder.SetTimeoutAfter((long)Timeout.Value.TotalMilliseconds);
+           
+            NativeNotification?.Dispose();
+            NativeNotification = notificationBuilder.Build();
+            notificationManager.Notify(Id, NativeNotification);
+        }
+
+        public void Dispose()
+        {
+            Dismiss();
         }
     }
 }

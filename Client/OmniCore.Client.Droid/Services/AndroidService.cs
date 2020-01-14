@@ -193,8 +193,8 @@ namespace OmniCore.Client.Droid.Services
             NotificationChannelDictionary.Add(category, channel);
         }
 
-        public ICoreNotification CreateNotification(NotificationCategory category,
-            string title, string message)
+        public ICoreNotification CreateNotification(NotificationCategory category, string title, string message,
+            TimeSpan? timeout = null, bool autoDismiss = true)
         {
             var notification = ServerContainer.Get<ICoreNotification>() as CoreNotification;
             if (notification == null)
@@ -202,13 +202,16 @@ namespace OmniCore.Client.Droid.Services
                 //TODO: throw?
             }
             var notificationId = Interlocked.Increment(ref NotificationIdCounter);
-            notification.CreateInternal(this, notificationId, category, title, message);
+            notification.CreateInternal(this, notificationId, category, title, message,
+                timeout, autoDismiss);
             return notification;
         }
 
         public void ClearNotifications()
         {
-            throw new NotImplementedException();
+            var notificationManager = (NotificationManager)
+                GetSystemService(Context.NotificationService);
+            notificationManager.CancelAll();
         }
 
         public IObservable<ICoreNotification> WhenNotificationAdded()

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
 using SQLite;
 
@@ -14,12 +16,24 @@ namespace OmniCore.Repository.Sqlite
 {
     public class RepositoryMigrator : IRepositoryMigrator
     {
+        private readonly ICoreNotificationFunctions NotificationFunctions;
+        public RepositoryMigrator(ICoreNotificationFunctions notificationFunctions)
+        {
+            NotificationFunctions = notificationFunctions;
+        }
+        
         public async Task ExecuteMigration(Version migrateTo, string path,
             CancellationToken cancellationToken)
         {
+            ICoreNotification migrationNotification;
+            
             if (!File.Exists(path))
             {
+                var initializeNotification = NotificationFunctions.CreateNotification(
+                    NotificationCategory.ApplicationInformation,
+                    "Database", "Creating new omnicore database");
                 await InitializeDatabase(path, migrateTo, cancellationToken);
+                initializeNotification.Update("Database", "Created new database", TimeSpan.FromSeconds(30));
             }
             else
             {

@@ -13,6 +13,7 @@ using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Common.Data;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Services;
 using SQLite;
 
@@ -28,12 +29,15 @@ namespace OmniCore.Repository.Sqlite
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
+        private readonly ICoreNotificationFunctions NotificationFunctions;
 
         public RepositoryServiceBase(ICoreContainer<IServerResolvable> container,
-            ICoreApplicationFunctions applicationFunctions) : base(null)
+            ICoreApplicationFunctions applicationFunctions,
+            ICoreNotificationFunctions notificationFunctions) : base(null)
         {
             Container = container;
             ApplicationFunctions = applicationFunctions;
+            NotificationFunctions = notificationFunctions;
             RepositoryAccessLock = new AsyncReaderWriterLock();
         }
 
