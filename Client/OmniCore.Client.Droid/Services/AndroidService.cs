@@ -30,6 +30,7 @@ using OmniCore.Radios.RileyLink;
 using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
 using Unity;
+using Enum = Java.Lang.Enum;
 using Notification = Android.App.Notification;
 
 namespace OmniCore.Client.Droid.Services
@@ -68,7 +69,6 @@ namespace OmniCore.Client.Droid.Services
             UnexpectedStopRequestSubject = new Subject<ICoreServiceApi>();
             ServerContainer = Initializer.AndroidServiceContainer(this, this);
             base.OnCreate();
-            InitializeNotifications();
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -109,6 +109,8 @@ namespace OmniCore.Client.Droid.Services
                 throw new OmniCoreWorkflowException(FailureType.ServiceStopFailure, null, t.Exception);
             }
             ServiceNotification.Dismiss();
+            if (NotificationsInitialized)
+                DeinitializeNotifications();
             base.OnDestroy();
         }
         public async Task StartServices(CancellationToken cancellationToken)
@@ -185,17 +187,33 @@ namespace OmniCore.Client.Droid.Services
             NotificationImportance importance)
         {
             var notificationManager = (NotificationManager) GetSystemService(Context.NotificationService);
-            var channel = new NotificationChannel(category.ToString(), title, importance)
+            var channel = new NotificationChannel(category.ToString("G"), title, importance)
             {
                 Description = description
             };
             notificationManager.CreateNotificationChannel(channel);
+
             NotificationChannelDictionary.Add(category, channel);
         }
 
+        private void DeinitializeNotifications()
+        {
+            foreach (var notificationChannel in NotificationChannelDictionary.Values)
+            {
+                notificationChannel.Dispose();
+            }
+        }
+
+        private bool NotificationsInitialized = false;
         public ICoreNotification CreateNotification(NotificationCategory category, string title, string message,
             TimeSpan? timeout = null, bool autoDismiss = true)
         {
+            if (!NotificationsInitialized)
+            {
+                InitializeNotifications();
+                NotificationsInitialized = true;
+            }
+
             var notification = ServerContainer.Get<ICoreNotification>() as CoreNotification;
             if (notification == null)
             {

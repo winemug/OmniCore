@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 using Android.App;
 using Android.Content;
 using OmniCore.Model.Enumerations;
@@ -41,6 +40,7 @@ namespace OmniCore.Client.Droid.Platform
             Message = message;
             Timeout = timeout;
             AutoDismiss = autoDismiss;
+            Context = context;
 
             DismissSubject = new AsyncSubject<ICoreNotification>();
             
@@ -90,7 +90,6 @@ namespace OmniCore.Client.Droid.Platform
             var notificationManager = (NotificationManager)
                 Context.GetSystemService(Context.NotificationService);
 #pragma warning disable CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
-            notificationManager.Notify(Id, NativeNotification);
 
             var notificationBuilder = new Notification.Builder(Context)
 #pragma warning restore CS0618 // 'Notification.Builder.Builder(Context)' is obsolete: 'deprecated'
@@ -99,7 +98,7 @@ namespace OmniCore.Client.Droid.Platform
                 notificationBuilder.SetContentTitle(Title);
             if (!string.IsNullOrEmpty(Message))
                 notificationBuilder.SetContentText(Message);
-            notificationBuilder.SetCategory(Category.ToString());
+            notificationBuilder.SetChannelId(Category.ToString("G"));
             notificationBuilder.SetOnlyAlertOnce(true);
             notificationBuilder.SetAutoCancel(AutoDismiss);
             if (Timeout.HasValue)
