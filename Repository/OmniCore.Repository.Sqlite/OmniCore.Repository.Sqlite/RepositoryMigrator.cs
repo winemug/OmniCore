@@ -52,7 +52,7 @@ namespace OmniCore.Repository.Sqlite
 
                     await InitializeDatabase(path, migrateTo, cancellationToken);
                 }
-                else
+                else if (repoVersion != migrateTo)
                 {
                     migrationInformation = NotificationFunctions.CreateNotification(
                         NotificationCategory.ApplicationInformation,
@@ -113,12 +113,12 @@ namespace OmniCore.Repository.Sqlite
             if (rc > 0)
                 return new Version(1,0,0,702);
 
-            rc = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM sqlite_master WHERE type=? AND name=?",
-                "table", "MigrationHistory");
+            //rc = await connection.ExecuteScalarAsync<int>(
+            //    "SELECT COUNT(*) FROM sqlite_master WHERE type=? AND name=?",
+            //    "table", "MigrationHistoryEntity");
 
-            if (rc == 0)
-                return null;
+            //if (rc == 0)
+            //    return null;
 
             var lastHistoryRecord = await connection.Table<MigrationHistoryEntity>().OrderByDescending(mh => mh.Created)
                 .Take(1).FirstOrDefaultAsync();
