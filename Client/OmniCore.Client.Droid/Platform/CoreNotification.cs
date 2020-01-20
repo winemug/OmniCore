@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Android.App;
 using Android.Content;
+using Android.Support.V4.App;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Platform.Server;
 
@@ -97,7 +98,11 @@ namespace OmniCore.Client.Droid.Platform
             if (!string.IsNullOrEmpty(Title))
                 notificationBuilder.SetContentTitle(Title);
             if (!string.IsNullOrEmpty(Message))
+            {
+                notificationBuilder.SetStyle(new Notification.BigTextStyle());
                 notificationBuilder.SetContentText(Message);
+            }
+
             notificationBuilder.SetChannelId(Category.ToString("G"));
             notificationBuilder.SetOnlyAlertOnce(true);
             notificationBuilder.SetAutoCancel(AutoDismiss);
