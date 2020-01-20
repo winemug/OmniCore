@@ -19,6 +19,7 @@ namespace OmniCore.Repository.Sqlite.Entities
         public DateTimeOffset? InsertionStart { get; set; }
         public DateTimeOffset? Started { get; set; }
         public DateTimeOffset? Stopped { get; set; }
+        public DateTimeOffset? MarkedAsMalfunctioning { get; set; }
         public DateTimeOffset? Faulted { get; set; }
         public decimal DeliveredUnits { get; set; }
         public decimal ReservoirUnits { get; set; }

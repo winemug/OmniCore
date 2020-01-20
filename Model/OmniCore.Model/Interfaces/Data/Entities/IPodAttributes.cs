@@ -19,6 +19,8 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
         DateTimeOffset? InsertionStart { get; set; }
         DateTimeOffset? Started { get; set; }
         DateTimeOffset? Stopped { get; set; }
+
+        DateTimeOffset? MarkedAsMalfunctioning { get; set; }
         DateTimeOffset? Faulted { get; set; }
 
 
