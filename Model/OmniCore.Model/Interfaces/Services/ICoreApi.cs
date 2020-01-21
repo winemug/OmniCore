@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
-    public interface ICoreServiceApi : IServerResolvable, IClientResolvable
+    public interface ICoreApi : IServerResolvable, IClientResolvable
     {
         Task StartServices(CancellationToken cancellationToken);
         Task StopServices(CancellationToken cancellationToken);

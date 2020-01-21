@@ -7,6 +7,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface ICoreClientConnection : IClientResolvable
     {
-        IObservable<ICoreServiceApi> WhenConnectionChanged();
+        IObservable<ICoreApi> WhenConnectionChanged();
     }
 }

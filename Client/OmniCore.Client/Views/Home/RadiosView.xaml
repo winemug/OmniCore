@@ -35,9 +35,8 @@
     </ContentPage.Content>
     <Shell.TitleView>
         <ContentView>
-            <StackLayout Orientation="Horizontal" HorizontalOptions="End">
-                <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center" Command="{Binding AddCommand}"/>
-            </StackLayout>
+            <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                         Command="{Binding AddCommand}"/>
         </ContentView>
     </Shell.TitleView>
 </ContentPage>

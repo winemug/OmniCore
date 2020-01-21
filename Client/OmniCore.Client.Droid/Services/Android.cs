@@ -15,6 +15,9 @@ using Android.Runtime;
 using Android.Service.Autofill;
 using Java.Lang;
 using Java.Util;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.Droid;
@@ -35,8 +38,8 @@ using Notification = Android.App.Notification;
 
 namespace OmniCore.Client.Droid.Services
 {
-    [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.ServiceApi", Icon="@mipmap/ic_launcher")]
-    public class AndroidService : Service, ICoreServiceApi, ICoreNotificationFunctions
+    [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.Api", Icon="@mipmap/ic_launcher")]
+    public class Android : Service, ICoreApi, ICoreNotificationFunctions
     {
         private bool AndroidServiceStarted = false;
 
@@ -49,14 +52,14 @@ namespace OmniCore.Client.Droid.Services
         public ICoreNotificationFunctions NotificationFunctions => ServerContainer.Get<ICoreNotificationFunctions>();
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
 
-        private ISubject<ICoreServiceApi> UnexpectedStopRequestSubject;
+        private ISubject<ICoreApi> UnexpectedStopRequestSubject;
         private CoreNotification ServiceNotification; 
 
         public override IBinder OnBind(Intent intent)
         {
             if (!AndroidServiceStarted)
             {
-                if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.O)
                     StartForegroundService(intent);
                 else
                     StartService(intent);
@@ -66,7 +69,8 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnCreate()
         {
-            UnexpectedStopRequestSubject = new Subject<ICoreServiceApi>();
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            UnexpectedStopRequestSubject = new Subject<ICoreApi>();
             ServerContainer = Initializer.AndroidServiceContainer(this, this);
             base.OnCreate();
         }
@@ -76,7 +80,7 @@ namespace OmniCore.Client.Droid.Services
             if (!AndroidServiceStarted)
             {
                 ServiceNotification = NotificationFunctions.CreateNotification(NotificationCategory.ApplicationInformation,
-                    "Service running in background", null)
+                    "OmniCore Android Service","OmniCore is starting...")
                     as CoreNotification;
                 this.StartForeground(ServiceNotification.Id, ServiceNotification.NativeNotification);
                 AndroidServiceStarted = true;
@@ -88,6 +92,15 @@ namespace OmniCore.Client.Droid.Services
                     //TODO: log
                     throw new OmniCoreWorkflowException(FailureType.ServiceStartupFailure, null, t.Exception);
                 }
+
+                //TODO:
+                //var statusNotifiers = ServerContainer.GetAll<INotifyStatus>();
+                //foreach (var statusNotifier in statusNotifiers)
+                //{
+                //}
+
+
+                ServiceNotification.Update(null, "OmniCore is running in background.");
             }
 
             return StartCommandResult.Sticky;
@@ -119,7 +132,6 @@ namespace OmniCore.Client.Droid.Services
             await RadioService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
-           
         }
 
         public async Task StopServices(CancellationToken cancellationToken)

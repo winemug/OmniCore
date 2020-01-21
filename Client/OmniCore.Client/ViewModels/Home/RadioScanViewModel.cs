@@ -30,7 +30,7 @@ namespace OmniCore.Client.ViewModels.Home
         protected override Task OnPageAppearing()
         {
             Peripherals = new ObservableCollection<RadioPeripheralModel>();
-            ServiceApi.RadioService.ScanRadios()
+            Api.RadioService.ScanRadios()
                 .ObserveOn(Client.SynchronizationContext)
                 .Subscribe(peripheral =>
                 {
@@ -48,7 +48,7 @@ namespace OmniCore.Client.ViewModels.Home
             {
                 var progress = new TaskProgress();
                 var popup = Client.ViewPresenter.GetView<ProgressPopupView>(false, progress);
-                await ServiceApi.RadioService.VerifyPeripheral(peripheral.Peripheral);
+                await Api.RadioService.VerifyPeripheral(peripheral.Peripheral);
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Server;
 
 namespace OmniCore.Services
 {
@@ -17,6 +19,7 @@ namespace OmniCore.Services
 
         private AsyncLock StartStopLock;
         private AsyncLock PauseResumeLock;
+        private readonly ISubject<INotifyStatus> ServiceStatusSubject;
 
         public bool IsStarted { get; private set; }
         public bool IsPaused { get; private set; }
@@ -40,6 +43,17 @@ namespace OmniCore.Services
             {
                 dependency.RegisterDependentServices(this);
             }
+
+            this.StatusFlag = NotifyStatusFlag.OK;
+            this.StatusMessage = "Service created";
+            ServiceStatusSubject = new BehaviorSubject<INotifyStatus>(this);
+        }
+
+        protected void SetStatus(NotifyStatusFlag flag, string message)
+        {
+            this.StatusFlag = flag;
+            this.StatusMessage = message;
+            ServiceStatusSubject.OnNext(this);
         }
 
         public void RegisterDependentServices(ICoreService[] dependentServices)
@@ -135,6 +149,13 @@ namespace OmniCore.Services
                 disposable.Dispose();
 
             Disposables.Clear();
+        }
+
+        public NotifyStatusFlag StatusFlag { get; private set; }
+        public string StatusMessage { get; private set; }
+        public IObservable<INotifyStatus> WhenStatusUpdated()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,22 +6,12 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardMainView">
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical">
-            <StackLayout Orientation="Horizontal">
-                <Switch IsToggled="{Binding OptionNewPod}"/>
-                <Label Text="Initialize a new pod"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Switch IsToggled="{Binding OptionExistingPod}"/>
-                <Label Text="Continue an existing pod session"/>
-            </StackLayout>
-        </StackLayout>
+        <Label Text="Let's get started" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
     </ContentPage.Content>
     <Shell.TitleView>
         <ContentView>
-            <StackLayout Orientation="Horizontal" HorizontalOptions="End">
-                <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="End" VerticalOptions="Center" Command="{Binding NextPageCommand}"/>
-            </StackLayout>
+            <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                    Command="{Binding NextPageCommand}" Padding="4"/>
         </ContentView>
     </Shell.TitleView>
 </ContentPage>

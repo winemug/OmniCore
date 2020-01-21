@@ -121,7 +121,7 @@
   <ItemGroup>
     <Compile Include="Platform\CoreNotification.cs" />
     <Compile Include="Services\AapsIntegrationService.cs" />
-    <Compile Include="Services\AndroidService.cs" />
+    <Compile Include="Services\Android.cs" />
     <Compile Include="Services\AndroidServiceBinder.cs" />
     <Compile Include="Services\AndroidServiceConnection.cs" />
     <Compile Include="Initializer.cs" />

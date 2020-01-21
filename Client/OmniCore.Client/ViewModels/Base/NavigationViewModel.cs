@@ -10,6 +10,12 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class NavigationViewModel : BaseViewModel
     {
+        public bool CanGoForwards { get; set; }
+
+        public bool CanGoBackwards { get; set; }
+
+        public Page PreviousPage { get; set; }
+
         //protected ContentPage RootPage { get; set; }
         //public override Task OnInitialize()
         //{
@@ -27,5 +33,7 @@ namespace OmniCore.Client.ViewModels.Base
         public NavigationViewModel(ICoreClient client) : base(client)
         {
         }
+
+        public abstract Task<Page> GetNextPage();
     }
 }

@@ -6,10 +6,10 @@ namespace OmniCore.Client.Droid.Services
 {
     public class AndroidServiceBinder : Binder
     {
-        public ICoreServiceApi ServiceApi { get; }
-        public AndroidServiceBinder(ICoreServiceApi serviceApi)
+        public ICoreApi Api { get; }
+        public AndroidServiceBinder(ICoreApi api)
         {
-            ServiceApi = serviceApi;
+            Api = api;
         }
     }
 }

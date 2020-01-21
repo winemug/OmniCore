@@ -18,7 +18,7 @@ namespace OmniCore.Model.Exceptions
             var errorString = new StringBuilder()
                 .AppendLine($"Exception: {this.GetType().Name}")
                 .AppendLine($"FailureType: {FailureType}")
-                .AppendLine($"Error Message: {Message ?? "<none>"}")
+                .AppendLine($"Error StatusMessage: {Message ?? "<none>"}")
                 .AppendLine($"Stack trace: {this.StackTrace}");
 
             if (InnerException == null)

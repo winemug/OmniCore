@@ -24,7 +24,7 @@ namespace OmniCore.Client.ViewModels.Base
         public event PropertyChangedEventHandler PropertyChanged;
 #pragma warning restore CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
 
-        protected ICoreServiceApi ServiceApi { get; set; }
+        protected ICoreApi Api { get; set; }
         protected ICoreClient Client { get; }
 
         public IView View { get; protected set; }
@@ -71,7 +71,7 @@ namespace OmniCore.Client.ViewModels.Base
 
         private async void PageAppearing(object sender, EventArgs args)
         {
-            ServiceApi = await Client.ClientConnection.WhenConnectionChanged().FirstAsync(c => c != null);
+            Api = await Client.ClientConnection.WhenConnectionChanged().FirstAsync(c => c != null);
             await OnPageAppearing();
         }
 

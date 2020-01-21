@@ -93,6 +93,12 @@
     <Compile Update="Views\Main\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml.cs">
+      <DependentUpon>PodWizardMedicationSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml.cs">
+      <DependentUpon>PodWizardPodTypeSelection.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
       <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
@@ -112,6 +118,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Home\RadioScanView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Main\NavigationView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Main\ShellView.xaml">
@@ -156,7 +165,28 @@
     <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardAdvancedOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardCreationOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardExistingPodOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardIntegrationOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMainView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardRadioSelection.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml">

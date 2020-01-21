@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardCreationOptions">
+    <ContentPage.Content>
+            <!--<StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal">
+                    <Switch IsToggled="{Binding OptionNewPod}"/>
+                    <Label Text="Initialize a new pod"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Switch IsToggled="{Binding OptionNewPod}"/>
+                    <Label Text="Initialize a new pod"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Switch IsToggled="{Binding OptionExistingPod}"/>
+                    <Label Text="Continue an existing pod session"/>
+                </StackLayout>
+            </StackLayout>-->
+            <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start">
+                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
+                    <Label Text="I want to activate a new pod" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                    <Grid Grid.Row="1" Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </Grid>
+                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
+                    <Label Text="I want to continue where I left off" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                    <Grid Grid.Row="1" Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox IsChecked="False" HorizontalOptions="End"/>
+                        <Label Text="Continue activating pod xyzt" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                        <CheckBox IsChecked="False" HorizontalOptions="End" Grid.Row="1"/>
+                        <Label Text="Start pod uvwa" FontSize="Large" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
+                    <Label Text="The pod I have is already running" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                    <Grid Grid.Row="1" Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox IsChecked="False" HorizontalOptions="End"/>
+                        <Label Text="and I know all there is to know" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                        <CheckBox IsChecked="False" HorizontalOptions="End" Grid.Row="1"/>
+                        <Label Text="I want a new pod dammit" FontSize="Large" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+            </StackLayout>
+    </ContentPage.Content>
+    <Shell.TitleView>
+        <ContentView>
+            <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                    Command="{Binding NextPageCommand}" Padding="4"/>
+        </ContentView>
+    </Shell.TitleView>
+</ContentPage>

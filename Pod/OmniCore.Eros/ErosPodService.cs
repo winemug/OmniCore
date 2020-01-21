@@ -26,7 +26,7 @@ namespace OmniCore.Eros
         private readonly IRadioAdapter RadioAdapter;
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
-        private readonly ICoreServiceApi ServiceApi;
+        private readonly ICoreApi Api;
 
         private readonly ConcurrentDictionary<long, IPod> PodDictionary;
         private readonly AsyncLock PodCreateLock;
@@ -39,11 +39,11 @@ namespace OmniCore.Eros
             IRadioService radioServiceRileyLink,
             ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions,
-            ICoreServiceApi serviceApi)
+            ICoreApi api)
         {
             Container = container;
             ApplicationFunctions = applicationFunctions;
-            ServiceApi = serviceApi;
+            Api = api;
 
             RadioProviders = new[] {radioServiceRileyLink};
             RadioAdapter = radioAdapter;

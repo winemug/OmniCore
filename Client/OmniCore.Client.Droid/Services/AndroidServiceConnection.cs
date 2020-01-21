@@ -19,17 +19,17 @@ namespace OmniCore.Client.Droid.Services
     public class AndroidServiceConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
     {
         private AndroidServiceBinder Binder;
-        private ISubject<ICoreServiceApi> CoreServicesSubject;
+        private ISubject<ICoreApi> CoreServicesSubject;
 
         public AndroidServiceConnection()
         {
-            CoreServicesSubject = new BehaviorSubject<ICoreServiceApi>(null);
+            CoreServicesSubject = new BehaviorSubject<ICoreApi>(null);
         }
 
         public void OnServiceConnected(ComponentName name, IBinder service)
         {
             Binder = service as AndroidServiceBinder;
-            CoreServicesSubject.OnNext(Binder.ServiceApi);
+            CoreServicesSubject.OnNext(Binder.Api);
         }
 
         public void OnServiceDisconnected(ComponentName name)
@@ -38,7 +38,7 @@ namespace OmniCore.Client.Droid.Services
             CoreServicesSubject.OnNext(null);
         }
 
-        public IObservable<ICoreServiceApi> WhenConnectionChanged()
+        public IObservable<ICoreApi> WhenConnectionChanged()
         {
             return CoreServicesSubject.AsObservable();
         }

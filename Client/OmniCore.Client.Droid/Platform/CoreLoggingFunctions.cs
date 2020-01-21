@@ -19,7 +19,7 @@ using OmniCore.Services;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
-    public class CoreLoggingFunctions : OmniCoreServiceBase, ICoreLoggingFunctions
+    public class CoreLoggingFunctions : ICoreLoggingFunctions
     {
         public const string TAG = "OmniCore";
         public void Debug(string message)
@@ -64,7 +64,7 @@ namespace OmniCore.Mobile.Droid.Platform
             errMessage.AppendLine($"Exception: {e}");
             while (true)
             {
-                errMessage.AppendLine($"Message: {e.Message}");
+                errMessage.AppendLine($"StatusMessage: {e.Message}");
                 errMessage.AppendLine($"Requestor: {e.Source}");
                 errMessage.AppendLine($"Trace: {e.StackTrace}");
                 e = e.InnerException;
@@ -76,27 +76,6 @@ namespace OmniCore.Mobile.Droid.Platform
                     break;
             }
             return errMessage.ToString();
-        }
-
-        protected override Task OnStart(CancellationToken cancellationToken)
-        {
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
-            return Task.CompletedTask;
-        }
-
-        protected override Task OnStop(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        protected override Task OnPause(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Task OnResume(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
     }
 }
