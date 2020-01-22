@@ -61,6 +61,7 @@ namespace OmniCore.Client.Droid
 
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
+            Xamarin.Forms.Forms.SetFlags("CarouselView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             //TODO: move to service

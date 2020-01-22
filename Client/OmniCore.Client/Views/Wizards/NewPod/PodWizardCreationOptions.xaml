@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardCreationOptions">
-    <ContentPage.Content>
+    <ContentView.Content>
             <!--<StackLayout Orientation="Vertical">
                 <StackLayout Orientation="Horizontal">
                     <Switch IsToggled="{Binding OptionNewPod}"/>
@@ -96,11 +96,11 @@
                     </Grid>
                 </Grid>
             </StackLayout>
-    </ContentPage.Content>
+    </ContentView.Content>
     <Shell.TitleView>
         <ContentView>
             <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
                     Command="{Binding NextPageCommand}" Padding="4"/>
         </ContentView>
     </Shell.TitleView>
-</ContentPage>
+</ContentView>

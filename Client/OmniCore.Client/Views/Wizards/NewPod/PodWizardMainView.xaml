@@ -6,7 +6,30 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardMainView">
     <ContentPage.Content>
-        <Label Text="Let's get started" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+        <StackLayout Orientation="Vertical">
+            <CarouselView x:Name="WizardCarousel"
+                          ItemsSource="{Binding Views}"
+                          VerticalOptions="StartAndExpand"
+                          HorizontalOptions="CenterAndExpand">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame HasShadow="True"
+                               BorderColor="DarkGray"
+                               CornerRadius="5"
+                               Margin="20"
+                               HorizontalOptions="Center"
+                               VerticalOptions="CenterAndExpand">
+                            <ContentPresenter Content="{Binding }"/>
+                        </Frame>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+            <IndicatorView ItemsSourceBy="WizardCarousel"
+                           IndicatorColor="LightGray"
+                           SelectedIndicatorColor="DarkGray"
+                           HorizontalOptions="Center"
+                           VerticalOptions="End"/>
+        </StackLayout>
     </ContentPage.Content>
     <Shell.TitleView>
         <ContentView>

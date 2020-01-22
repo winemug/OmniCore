@@ -11,6 +11,9 @@ namespace OmniCore.Model.Interfaces.Platform.Client
             where TView : IView
             where TViewModel : IViewModel;
 
+        IViewPresenter WithView<TView>()
+            where TView : IView;
+
         T GetView<T>(bool viaShell, object parameter = null)
             where T : IView;
     }

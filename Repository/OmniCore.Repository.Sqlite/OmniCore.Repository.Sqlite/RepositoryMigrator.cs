@@ -6,10 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Repository.Sqlite.Entities;
+using OmniCore.Repository.Sqlite.Repositories;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite
@@ -17,9 +19,15 @@ namespace OmniCore.Repository.Sqlite
     public class RepositoryMigrator : IRepositoryMigrator
     {
         private readonly ICoreNotificationFunctions NotificationFunctions;
-        public RepositoryMigrator(ICoreNotificationFunctions notificationFunctions)
+        private readonly IMedicationRepository MedicationRepository;
+        private readonly IUserRepository UserRepository;
+        public RepositoryMigrator(ICoreNotificationFunctions notificationFunctions,
+            IMedicationRepository medicationRepository,
+            IUserRepository userRepository)
         {
             NotificationFunctions = notificationFunctions;
+            MedicationRepository = medicationRepository;
+            UserRepository = userRepository;
         }
         
         public async Task ExecuteMigration(Version migrateTo, string path,
@@ -160,6 +168,10 @@ namespace OmniCore.Repository.Sqlite
             await connection.CreateTableAsync<RadioEventEntity>();
             await connection.CreateTableAsync<SignalStrengthEntity>();
             await connection.CreateTableAsync<MedicationEntity>();
+            await connection.CreateTableAsync<UserEntity>();
+
+            await MedicationRepository.EnsureDefaults(connection, cancellationToken);
+            await UserRepository.EnsureDefaults(connection, cancellationToken);
         }
 
         //private List<(Func<Version, bool> Predicate, Func<string, Version> Migration)> GetMigrationEvaluators()

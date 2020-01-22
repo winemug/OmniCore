@@ -10,7 +10,7 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Wizards.NewPod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PodWizardCreationOptions : ContentPage
+    public partial class PodWizardCreationOptions
     {
         public PodWizardCreationOptions()
         {

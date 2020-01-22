@@ -44,6 +44,17 @@ namespace OmniCore.Client.Platform
             return this;
         }
 
+        public IViewPresenter WithView<TView>() where TView : IView
+        {
+            ClientContainer.One<TView>();
+
+            ViewDictionary.Add(typeof(TView), (viaShell, parameter) =>
+            {
+                return ClientContainer.Get<TView>();
+            });
+            return this;
+        }
+
         public T GetView<T>(bool viaShell, object parameter = null)
             where T : IView
         {
