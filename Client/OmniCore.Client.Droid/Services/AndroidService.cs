@@ -39,7 +39,7 @@ using Notification = Android.App.Notification;
 namespace OmniCore.Client.Droid.Services
 {
     [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.Api", Icon="@mipmap/ic_launcher")]
-    public class Android : Service, ICoreApi, ICoreNotificationFunctions
+    public class AndroidService : Service, ICoreApi, ICoreNotificationFunctions
     {
         private bool AndroidServiceStarted = false;
 

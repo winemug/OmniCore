@@ -45,12 +45,13 @@ namespace OmniCore.Repository.Sqlite
                         NotificationCategory.ApplicationImportant,
                         "Database error",
                         "Failed to determine the version of existing database, a new database will be created instead.");
-                    var backupPath = path + ".couldntupgrade";
+                    var backupPath = path + ".failedmigration";
                     if (File.Exists(backupPath))
                         File.Delete(backupPath);
                     File.Move(path, backupPath);
 
                     await InitializeDatabase(path, migrateTo, cancellationToken);
+                    migrationInformation.Update("Database", "Created new database", TimeSpan.FromSeconds(30));
                 }
                 else if (repoVersion != migrateTo)
                 {
@@ -158,6 +159,7 @@ namespace OmniCore.Repository.Sqlite
             await connection.CreateTableAsync<RadioEntity>();
             await connection.CreateTableAsync<RadioEventEntity>();
             await connection.CreateTableAsync<SignalStrengthEntity>();
+            await connection.CreateTableAsync<MedicationEntity>();
         }
 
         //private List<(Func<Version, bool> Predicate, Func<string, Version> Migration)> GetMigrationEvaluators()

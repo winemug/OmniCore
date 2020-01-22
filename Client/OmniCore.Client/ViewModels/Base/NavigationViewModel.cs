@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
 {
-    public class NavigationViewModel : BaseViewModel
+    public abstract class NavigationViewModel : BaseViewModel
     {
         public bool CanGoForwards { get; set; }
 
@@ -30,7 +30,7 @@ namespace OmniCore.Client.ViewModels.Base
         //protected NavigationViewModel(ICoreClient client) : base(client)
         //{
         //}
-        public NavigationViewModel(ICoreClient client) : base(client)
+        protected NavigationViewModel(ICoreClient client) : base(client)
         {
         }
 

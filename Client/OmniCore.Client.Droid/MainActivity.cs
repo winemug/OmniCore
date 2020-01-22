@@ -170,7 +170,7 @@ namespace OmniCore.Client.Droid
             if (ConnectRequested)
                 return;
             
-            var intent = new Intent(this, typeof(Services.Android));
+            var intent = new Intent(this, typeof(Services.AndroidService));
             if (!BindService(intent, ServiceConnection, Bind.AutoCreate))
                 throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
             ConnectRequested = true;

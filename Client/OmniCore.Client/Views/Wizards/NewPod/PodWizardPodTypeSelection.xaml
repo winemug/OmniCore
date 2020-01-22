@@ -9,8 +9,6 @@
         <StackLayout>
             <Label Text="Omnipod Eros"/>
             <ImageButton/>
-        </StackLayout>
-        <StackLayout>
             <Label Text="Omnipod Dash"/>
             <ImageButton/>
         </StackLayout>
