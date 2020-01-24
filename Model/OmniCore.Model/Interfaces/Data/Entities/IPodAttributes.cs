@@ -52,6 +52,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 
         // eros specific
         uint RadioAddress { get; set; }
-
+        uint Lot { get; set; }
+        uint Serial { get; set; }
     }
 }

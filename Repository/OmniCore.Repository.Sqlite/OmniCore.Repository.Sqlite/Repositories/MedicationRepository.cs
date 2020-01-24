@@ -20,29 +20,35 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
         }
 
-        public async Task EnsureDefaults(SQLiteAsyncConnection connection, CancellationToken cancellationToken)
+        public override async Task EnsureSchemaAndDefaults(CancellationToken cancellationToken)
         {
-            DefaultMedication = await connection.Table<MedicationEntity>().FirstOrDefaultAsync(m => m.Hormone == HormoneType.Unknown);
-            if (DefaultMedication == null)
-            {
-                var med = New();
-                med.Hormone = HormoneType.Unknown;
-                med.Name = "Unknown medication";
-                med.UnitName = "millilitre";
-                med.UnitsPerMilliliter = 1;
-                med.UnitNameShort = "mL";
+            await base.EnsureSchemaAndDefaults(cancellationToken);
 
-                await connection.InsertAsync(med);
-                DefaultMedication = med;
-            }
+            await DataTask(async c =>
+            {
+                DefaultMedication = await c.Table<MedicationEntity>().FirstOrDefaultAsync(m => m.Hormone == HormoneType.Unknown);
+                if (DefaultMedication == null)
+                {
+                    var med = New();
+                    med.Hormone = HormoneType.Unknown;
+                    med.Name = "Unknown medication";
+                    med.UnitName = "millilitre";
+                    med.UnitsPerMilliliter = 1;
+                    med.UnitNameShort = "mL";
+
+                    await Create(med, cancellationToken);
+                    DefaultMedication = med;
+                }
+            }, cancellationToken);
         }
 
         public async Task<IMedicationEntity> GetDefaultMedication(CancellationToken cancellationToken)
         {
             if (DefaultMedication == null)
             {
-                using var access = await RepositoryService.GetAccess(cancellationToken);
-                DefaultMedication = await access.Connection.Table<MedicationEntity>().FirstOrDefaultAsync(m => m.Hormone == HormoneType.Unknown);
+                DefaultMedication = await DataTask(c => c.Table<MedicationEntity>()
+                    .FirstOrDefaultAsync(m => m.Hormone == HormoneType.Unknown)
+                    , cancellationToken);
             }
             return DefaultMedication;
         }

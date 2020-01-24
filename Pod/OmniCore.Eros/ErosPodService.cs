@@ -54,20 +54,15 @@ namespace OmniCore.Eros
 
         public async IAsyncEnumerable<IPod> ActivePods()
         {
-            await foreach (var activePodEntity in PodRepository.ActivePods())
+            foreach (var activePodEntity in await PodRepository.ActivePods(CancellationToken.None))
             {
                 yield return await GetPodInternal(activePodEntity);
             }
         }
         
-        public async IAsyncEnumerable<IPod> ArchivedPods()
+        public IAsyncEnumerable<IPod> ArchivedPods()
         {
-            await foreach (var archivedPodEntity in PodRepository.ActivePods())
-            {
-                var pod = Container.Get<IPod>();
-                pod.Entity = archivedPodEntity;
-                yield return pod;
-            }
+            throw new NotImplementedException();
         }
 
         private uint GenerateRadioAddress()
@@ -129,7 +124,7 @@ namespace OmniCore.Eros
                 });
             }
             
-            await foreach (var activePodEntity in PodRepository.ActivePods())
+            foreach (var activePodEntity in await PodRepository.ActivePods(cancellationToken))
             {
                 await GetPodInternal(activePodEntity);
                 cancellationToken.ThrowIfCancellationRequested();

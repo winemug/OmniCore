@@ -20,8 +20,9 @@ namespace OmniCore.Repository.Sqlite
                 .Many<ISignalStrengthRepository, SignalStrengthRepository>()
                 .Many<IUserRepository, UserRepository>()
                 .Many<IMigrationHistoryRepository, MigrationHistoryRepository>()
+                .Many<IPodRequestRepository, PodRequestRepository>()
                 .Many<IRepositoryMigrator, RepositoryMigrator>()
-                .One<IRepositoryService, RepositoryServiceBase>();
+                .One<IRepositoryService, RepositoryService>();
         }
     }
 }

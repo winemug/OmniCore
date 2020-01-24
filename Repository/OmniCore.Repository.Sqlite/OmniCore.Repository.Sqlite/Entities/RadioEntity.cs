@@ -37,11 +37,6 @@ namespace OmniCore.Repository.Sqlite.Entities
 
         public string DeviceName { get; set; }
         public string UserDescription { get; set; }
-
-        public bool KeepConnected { get; set; }
-        public TimeSpan ResponseTimeout { get; set; }
-        public TimeSpan ConnectTimeout { get; set; }
-
         public string ConfigurationJson { get; set; }
     }
 }

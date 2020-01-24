@@ -19,25 +19,31 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
         }
 
+        public override async Task EnsureSchemaAndDefaults(CancellationToken cancellationToken)
+        {
+            await base.EnsureSchemaAndDefaults(cancellationToken);
+            var defaultUser = await GetDefaultUser(cancellationToken);
+          
+            if (defaultUser == null)
+            {
+                defaultUser = New();
+                defaultUser.ManagedRemotely = false;
+                defaultUser.Name = "Default User";
+                await Create(defaultUser, cancellationToken);
+                DefaultUser = defaultUser;
+            }
+        }
+
         public async Task EnsureDefaults(SQLiteAsyncConnection connection, CancellationToken cancellationToken)
         {
-            DefaultUser = await connection.Table<UserEntity>().OrderBy(u => u.Id).FirstOrDefaultAsync();
-            if (DefaultUser == null)
-            {
-                var user = New();
-                user.ManagedRemotely = false;
-                user.Name = "Default User";
-                await connection.InsertAsync(user);
-                DefaultUser = user;
-            }
         }
 
         public async Task<IUserEntity> GetDefaultUser(CancellationToken cancellationToken)
         {
             if (DefaultUser == null)
             {
-                using var access = await RepositoryService.GetAccess(cancellationToken);
-                DefaultUser = await access.Connection.Table<UserEntity>().OrderBy(u => u.Id).FirstOrDefaultAsync();
+                DefaultUser = await DataTask(c => c.Table<UserEntity>()
+                    .OrderBy(u => u.Id).FirstOrDefaultAsync(), cancellationToken);
             }
             return DefaultUser;
         }
