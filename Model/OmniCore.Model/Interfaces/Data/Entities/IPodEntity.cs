@@ -2,11 +2,12 @@
 
 namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
-    public interface IPodEntity : IPodAttributes, IPodSettingsAttributes, IEntity
+    public interface IPodEntity : IPodAttributes, IPodSettingsAttributes, IBasalScheduleAttributes, IEntity
     {
         IUserEntity User { get; set; }
         IMedicationEntity Medication { get; set; }
         ITherapyProfileEntity TherapyProfile { get; set; }
+        IBasalScheduleEntity ReferenceBasalSchedule { get; set; }
         IList<IRadioEntity> Radios { get; set; }
     }
 }

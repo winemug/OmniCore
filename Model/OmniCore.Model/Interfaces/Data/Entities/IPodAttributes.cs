@@ -5,8 +5,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
     public interface IPodAttributes
     {
-        IBasalScheduleAttributes BasalSchedule { get; set; }
-        Guid? UniqueId { get; set; }
         string HwRevision { get; set; }
         string SwRevision { get; set; }
 

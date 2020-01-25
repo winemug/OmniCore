@@ -83,7 +83,6 @@ namespace OmniCore.Eros
             podEntity.Medication = medication;
             podEntity.User = user;
             podEntity.Radios = radios;
-            podEntity.UniqueId = Guid.NewGuid();
             podEntity.RadioAddress = GenerateRadioAddress();
             await PodRepository.Create(podEntity, CancellationToken.None);
             return await GetPodInternal(podEntity);

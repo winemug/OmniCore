@@ -5,6 +5,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
     public interface IBasalScheduleAttributes
     {
-        IList<(TimeSpan start, decimal hourlyRate)> Schedule { get; set; }
+        IList<(TimeSpan start, decimal hourlyRate)> BasalScheduleEntries { get; set; }
     }
 }

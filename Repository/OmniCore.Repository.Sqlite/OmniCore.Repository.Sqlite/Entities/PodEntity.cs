@@ -8,7 +8,6 @@ namespace OmniCore.Repository.Sqlite.Entities
 {
     public class PodEntity : Entity, IPodEntity
     {
-        public Guid? UniqueId { get; set; }
         public string HwRevision { get; set; }
         public string SwRevision { get; set; }
 
@@ -70,16 +69,19 @@ namespace OmniCore.Repository.Sqlite.Entities
         public long? TherapyProfileId { get; set; }
 
         [Ignore]
+        public IBasalScheduleEntity ReferenceBasalSchedule { get; set; }
+        public long? ReferenceBasalScheduleId { get; set; }
+
+        [Ignore]
         public IList<IRadioEntity> Radios { get; set; }
         
-        [Ignore]
-        public IBasalScheduleAttributes BasalSchedule { get; set; }
         [Ignore]
         public IReminderAttributes ExpiresSoonReminder { get; set; }
         [Ignore]
         public IReminderAttributes ReservoirLowReminder { get; set; }
         [Ignore]
         public IReminderAttributes ExpiredReminder { get; set; }
-
+        [Ignore]
+        public IList<(TimeSpan start, decimal hourlyRate)> BasalScheduleEntries { get; set; }
     }
 }
