@@ -11,9 +11,12 @@ namespace OmniCore.Repository.Sqlite.Entities
         public Guid? UniqueId { get; set; }
         public string HwRevision { get; set; }
         public string SwRevision { get; set; }
+
         public TimeSpan PodUtcOffset { get; set; }
+        
         public bool AutoAdjustPodTime { get; set; }
         public bool DeactivateOnError { get; set; }
+        public int? ExecuteCommandRssiThreshold { get; set; }
         public PodState State { get; set; }
         public DateTimeOffset? ActivationStart { get; set; }
         public DateTimeOffset? InsertionStart { get; set; }

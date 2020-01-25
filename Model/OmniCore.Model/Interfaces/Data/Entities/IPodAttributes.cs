@@ -11,8 +11,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
         string SwRevision { get; set; }
 
         TimeSpan PodUtcOffset { get; set; }
-        bool AutoAdjustPodTime { get; set; }
-        bool DeactivateOnError { get; set; }
 
         PodState State { get; set; }
         DateTimeOffset? ActivationStart { get; set; }

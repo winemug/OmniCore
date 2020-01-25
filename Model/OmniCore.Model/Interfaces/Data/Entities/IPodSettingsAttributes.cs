@@ -1,7 +1,11 @@
 ﻿namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
-    public interface IReminderSettingsAttributes
+    public interface IPodSettingsAttributes
     {
+        bool AutoAdjustPodTime { get; set; }
+        bool DeactivateOnError { get; set; }
+        int? ExecuteCommandRssiThreshold { get; set; }
+        
         IReminderAttributes ExpiresSoonReminder { get; set; }
         IReminderAttributes ReservoirLowReminder { get; set; }
         IReminderAttributes ExpiredReminder { get; set; }
