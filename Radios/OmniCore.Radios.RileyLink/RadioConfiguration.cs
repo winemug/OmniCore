@@ -9,6 +9,7 @@ namespace OmniCore.Radios.RileyLink
     public class RadioConfiguration : IRadioConfiguration
     {
         public bool KeepConnected { get; set; } = true;
+        public int? CommandExecutionRssiThreshold { get; set; } = null;
 
         public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(20);
         public TimeSpan RadioResponseCooldown { get; set; } = TimeSpan.FromSeconds(5);

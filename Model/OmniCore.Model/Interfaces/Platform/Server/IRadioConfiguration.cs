@@ -6,6 +6,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
     public interface IRadioConfiguration : IServerResolvable
     {
         bool KeepConnected { get; set; }
+        int? CommandExecutionRssiThreshold { get; set; }
         TimeSpan RadioResponseTimeout { get; set; }
         TimeSpan RadioConnectTimeout { get; set; }
         TimeSpan RadioDiscoveryTimeout { get; set; }
