@@ -73,7 +73,8 @@ namespace OmniCore.Repository.Sqlite.Entities
         public long? ReferenceBasalScheduleId { get; set; }
 
         [Ignore]
-        public IList<IRadioEntity> Radios { get; set; }
+        public IRadioEntity Radio { get; set; }
+        public long? RadioId { get; set; }
         
         [Ignore]
         public IReminderAttributes ExpiresSoonReminder { get; set; }

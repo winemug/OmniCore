@@ -32,9 +32,9 @@ namespace OmniCore.Repository.Sqlite.Repositories
                     var med = New();
                     med.Hormone = HormoneType.Unknown;
                     med.Name = "Unknown medication";
-                    med.UnitName = "millilitre";
-                    med.UnitsPerMilliliter = 1;
-                    med.UnitNameShort = "mL";
+                    med.UnitName = "microliters";
+                    med.UnitsPerMilliliter = 1000;
+                    med.UnitNameShort = "µL";
 
                     await Create(med, cancellationToken);
                     DefaultMedication = med;

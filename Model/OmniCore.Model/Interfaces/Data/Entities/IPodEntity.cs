@@ -8,6 +8,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
         IMedicationEntity Medication { get; set; }
         ITherapyProfileEntity TherapyProfile { get; set; }
         IBasalScheduleEntity ReferenceBasalSchedule { get; set; }
-        IList<IRadioEntity> Radios { get; set; }
+        IRadioEntity Radio { get; set; }
     }
 }

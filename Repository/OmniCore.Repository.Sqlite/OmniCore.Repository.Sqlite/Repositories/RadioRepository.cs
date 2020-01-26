@@ -31,7 +31,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             await base.EnsureSchemaAndDefaults(cancellationToken);
 
-            var radioId = Guid.Parse("00000000-0000-0000-0000-000780393d00");
+            var radioId = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7");
 
             var r = await ByDeviceUuid(radioId, cancellationToken);
             if (r == null)

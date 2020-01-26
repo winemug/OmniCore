@@ -30,9 +30,7 @@ namespace OmniCore.Eros
 
         protected override async Task ExecuteRequest(CancellationToken cancellationToken)
         {
-            foreach (var radioEntity in this.Pod.Entity.Radios)
-            {
-            }
+            // TODO: Pod.Radio
         }
 
         public ErosPodRequest WithPair(uint address)

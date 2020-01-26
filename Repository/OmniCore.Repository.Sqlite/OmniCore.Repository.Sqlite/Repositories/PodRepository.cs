@@ -28,6 +28,15 @@ namespace OmniCore.Repository.Sqlite.Repositories
             MedicationRepository = medicationRepository;
         }
 
+        public override IPodEntity New()
+        {
+            var entity = base.New();
+            entity.ReservoirLowReminder = new ReminderAttributes();
+            entity.ExpiresSoonReminder = new ReminderAttributes();
+            entity.ExpiredReminder = new ReminderAttributes();
+            return entity;
+        }
+
         public async Task<IList<IPodEntity>> ActivePods(CancellationToken cancellationToken)
         {
             var list = await DataTask(c =>
@@ -49,10 +58,21 @@ namespace OmniCore.Repository.Sqlite.Repositories
                 .FirstOrDefaultAsync(p => p.Lot == lot
                                           && p.Serial == serial), cancellationToken);
         }
-#if DEBUG
+
+        public override async Task Create(IPodEntity entity, CancellationToken cancellationToken)
+        {
+            var ce = (PodEntity) entity;
+            ce.UserId = ce.User?.Id;
+            ce.MedicationId = ce.Medication?.Id;
+            ce.ReferenceBasalScheduleId = ce.ReferenceBasalSchedule?.Id;
+            ce.TherapyProfileId = ce.TherapyProfile?.Id;
+
+            await base.Create(entity, cancellationToken);
+        }
         public override async Task EnsureSchemaAndDefaults(CancellationToken cancellationToken)
         {
             await base.EnsureSchemaAndDefaults(cancellationToken);
+#if DEBUG
             uint lot = 45048;
             uint serial = 380019;
             uint radioAddress = 0x1f0e89f2;
@@ -69,7 +89,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
                     UserRepository.WithDirectAccess(DirectAccess);
                     MedicationRepository.WithDirectAccess(DirectAccess);
                     p = New();
-                    p.Radios = new List<IRadioEntity> {radio};
+                    p.Radio = radio;
                     p.User = await UserRepository.GetDefaultUser(CancellationToken.None);
                     p.Medication = await MedicationRepository.GetDefaultMedication(CancellationToken.None);
                     p.Lot = lot;
@@ -78,7 +98,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
                     await Create(p, cancellationToken);
                 }
             }, cancellationToken);
-        }
 #endif
+        }
     }
 }

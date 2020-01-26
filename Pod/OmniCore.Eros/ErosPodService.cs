@@ -77,12 +77,12 @@ namespace OmniCore.Eros
             return address;
         }
 
-        public async Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios)
+        public async Task<IPod> New(IUserEntity user, IMedicationEntity medication, IRadioEntity radio)
         {
             var podEntity = PodRepository.New();
             podEntity.Medication = medication;
             podEntity.User = user;
-            podEntity.Radios = radios;
+            podEntity.Radio = radio;
             podEntity.RadioAddress = GenerateRadioAddress();
             await PodRepository.Create(podEntity, CancellationToken.None);
             return await GetPodInternal(podEntity);

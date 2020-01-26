@@ -156,12 +156,7 @@ namespace OmniCore.Radios.RileyLink
                         , null, true);
                 }
             });
-            
-            // TODO: have pod service pre-load radios if necessary
-            foreach (var radioEntity in await RadioRepository.All(cancellationToken))
-            {
-                await GetRadio(radioEntity, cancellationToken);
-            }
+           
         }
 
         protected override async Task OnStop(CancellationToken cancellationToken)

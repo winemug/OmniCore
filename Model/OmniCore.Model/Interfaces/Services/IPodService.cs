@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         string Description { get; }
         IAsyncEnumerable<IPod> ActivePods();
         IAsyncEnumerable<IPod> ArchivedPods();
-        Task<IPod> New(IUserEntity user, IMedicationEntity medication, IList<IRadioEntity> radios);
+        Task<IPod> New(IUserEntity user, IMedicationEntity medication, IRadioEntity radio);
         Task<IPod> Register(IPodEntity pod, IUserEntity user, IList<IRadioEntity> radios);
     }
 }

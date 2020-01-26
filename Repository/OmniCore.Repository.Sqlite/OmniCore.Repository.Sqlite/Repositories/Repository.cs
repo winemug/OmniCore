@@ -28,7 +28,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
             AccessProvider = repositoryService.AccessProvider;
         }
         
-        public InterfaceType New()
+        public virtual InterfaceType New()
         {
             return new ConcreteType()
             {
@@ -128,7 +128,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
                 return await schemaTask(DirectAccess.Connection);
         }
         
-        public Task Delete(InterfaceType entity, CancellationToken cancellationToken)
+        public virtual Task Delete(InterfaceType entity, CancellationToken cancellationToken)
         {
             return DataTask(c => c.DeleteAsync(entity), cancellationToken);
         }
