@@ -32,7 +32,7 @@ namespace OmniCore.Repository.Sqlite.Repositories
         {
             return new ConcreteType()
             {
-                Uuid = Guid.NewGuid()
+                SyncId = Guid.NewGuid()
             };
         }
         public virtual Task EnsureSchemaAndDefaults(CancellationToken cancellationToken)
@@ -139,8 +139,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
             {
                 entity.Updated = DateTimeOffset.UtcNow;
 
-                if (!entity.Uuid.HasValue)
-                    entity.Uuid = Guid.NewGuid();
+                if (!entity.SyncId.HasValue)
+                    entity.SyncId = Guid.NewGuid();
 
                 return c.UpdateAsync(entity);
             }, cancellationToken);
@@ -152,8 +152,8 @@ namespace OmniCore.Repository.Sqlite.Repositories
             {
                 entity.Created = DateTimeOffset.UtcNow;
 
-                if (!entity.Uuid.HasValue)
-                    entity.Uuid = Guid.NewGuid();
+                if (!entity.SyncId.HasValue)
+                    entity.SyncId = Guid.NewGuid();
 
                 return c.InsertAsync(entity, typeof(ConcreteType));
             }, cancellationToken);

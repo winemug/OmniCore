@@ -5,7 +5,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
     public interface IEntity
     {
         long Id { get; set; }
-        Guid? Uuid { get; set; }
+        Guid? SyncId { get; set; }
         DateTimeOffset Created { get; set; }
         DateTimeOffset? Updated { get; set; }
         bool IsDeleted { get; set; }
