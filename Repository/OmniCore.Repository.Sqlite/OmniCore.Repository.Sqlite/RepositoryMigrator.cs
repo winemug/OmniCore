@@ -90,6 +90,7 @@ namespace OmniCore.Repository.Sqlite
             await ServerContainer.Get<IPodRepository>().WithAccessProvider(targetAccessProvider).EnsureSchemaAndDefaults(cancellationToken);
             await ServerContainer.Get<IRadioEventRepository>().WithAccessProvider(targetAccessProvider).EnsureSchemaAndDefaults(cancellationToken);
             await ServerContainer.Get<ISignalStrengthRepository>().WithAccessProvider(targetAccessProvider).EnsureSchemaAndDefaults(cancellationToken);
+            await ServerContainer.Get<IMedicationDeliveryRepository>().WithAccessProvider(targetAccessProvider).EnsureSchemaAndDefaults(cancellationToken);
         }
 
         public async Task<Version> MigrateDatabase(IRepositoryAccessProvider accessProvider, Version fromVersion, Version toVersion, CancellationToken cancellationToken)

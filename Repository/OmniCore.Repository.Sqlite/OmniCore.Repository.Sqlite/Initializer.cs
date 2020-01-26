@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Interfaces.Platform.Common;
+﻿using OmniCore.Model.Interfaces.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Common.Data;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
@@ -21,6 +22,7 @@ namespace OmniCore.Repository.Sqlite
                 .Many<IUserRepository, UserRepository>()
                 .Many<IMigrationHistoryRepository, MigrationHistoryRepository>()
                 .Many<IPodRequestRepository, PodRequestRepository>()
+                .Many<IMedicationDeliveryRepository, MedicationDeliveryRepository>()
                 .Many<IRepositoryMigrator, RepositoryMigrator>()
                 .One<IRepositoryService, RepositoryService>();
         }

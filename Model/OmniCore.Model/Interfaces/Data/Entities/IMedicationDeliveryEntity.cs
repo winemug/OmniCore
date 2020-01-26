@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
-    public interface IMedicationDeliveryEntity
+    public interface IMedicationDeliveryEntity : IEntity
     {
         IUser User { get; set; }
         IMedicationEntity Medication { get; set; }

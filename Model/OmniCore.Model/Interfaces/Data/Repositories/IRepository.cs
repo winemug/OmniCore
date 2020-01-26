@@ -10,7 +10,6 @@ using SQLite;
 namespace OmniCore.Model.Interfaces.Platform.Common.Data.Repositories
 {
     public interface IRepository<T> : IServerResolvable
-        where T : IEntity
     {
         T New();
         Task Create(T entity, CancellationToken cancellationToken);
