@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Utilities;
 
@@ -13,7 +13,7 @@ namespace OmniCore.Eros
 {
     public class ErosPodRequest : ErosTask, IPodRequest
     {
-        public IPodRequestEntity Entity { get; set; }
+        public PodRequestEntity Entity { get; set; }
         public IPod Pod { get; set; }
 
         private readonly List<RequestPart> Parts = new List<RequestPart>();

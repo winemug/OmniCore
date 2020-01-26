@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
@@ -12,9 +11,9 @@ namespace OmniCore.Model.Interfaces.Platform.Common
     {
         IRadioService[] RadioProviders { get; }
         string Description { get; }
-        IAsyncEnumerable<IPod> ActivePods();
-        IAsyncEnumerable<IPod> ArchivedPods();
-        Task<IPod> New(IUserEntity user, IMedicationEntity medication, IRadioEntity radio);
-        Task<IPod> Register(IPodEntity pod, IUserEntity user, IList<IRadioEntity> radios);
+        IList<IPod> ActivePods(CancellationToken cancellationToken);
+        IList<IPod> ArchivedPods(CancellationToken cancellationToken);
+        Task<IPod> New(UserEntity user, MedicationEntity medication, RadioEntity radio);
+        Task<IPod> Register(PodEntity pod, UserEntity user, RadioEntity radio);
     }
 }

@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
-using OmniCore.Repository.Sqlite;
+using OmniCore.Repository;
 using OmniCore.Services;
 using OmniCore.Simulation;
 using Unity;
@@ -54,7 +54,7 @@ namespace OmniCore.Client.Droid
 #else
                 .WithCrossBleRadioAdapter()
 #endif
-                .WithSqliteRepositories()
+                .WithEfCoreRepository()
                 .WithAndroidPlatformServices();
         }
     }

@@ -107,9 +107,6 @@
     <PackageReference Include="Rg.Plugins.Popup">
       <Version>1.2.0.223</Version>
     </PackageReference>
-    <PackageReference Include="sqlite-net-pcl">
-      <Version>1.6.292</Version>
-    </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>4.3.2</Version>
     </PackageReference>
@@ -184,9 +181,9 @@
       <Project>{a813ab77-2593-41e5-8e8d-a8d5e768fece}</Project>
       <Name>OmniCore.Radios.RileyLink</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj">
-      <Project>{6f18bf87-e7bd-498c-a044-82a34c0df0e8}</Project>
-      <Name>OmniCore.Repository.Sqlite</Name>
+    <ProjectReference Include="..\..\Repository\OmniCore.Repository\OmniCore.Repository.csproj">
+      <Project>{A29C5D63-3713-428C-A69F-CA0B564B9C68}</Project>
+      <Name>OmniCore.Repository</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Simulation\OmniCore.Simulation\OmniCore.Simulation.csproj">
       <Project>{6cdc764d-949d-47db-9405-224b91a7b0b8}</Project>

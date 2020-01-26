@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using SQLite;
 
@@ -13,7 +14,7 @@ namespace OmniCore.Repository.Sqlite
             RepositoryLock = repositoryLock;
         }
 
-        public SQLiteAsyncConnection Connection { get; private set; }
+        public IDbConnection Connection { get; private set; }
 
         public void Dispose()
         {

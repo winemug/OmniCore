@@ -1,41 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Eros.Annotations;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 
 namespace OmniCore.Eros
 {
     public class ErosPod : IPod
     {
+        public PodEntity Entity { get; set; }
+        public PodRunningState RunningState { get; }
+        public IPodRequest ActiveRequest { get; }
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly IPodRequestRepository PodRequestRepository;
+        private readonly IRepositoryService RepositoryService;
         private readonly ITaskQueue TaskQueue;
         private readonly IRadioService RadioService;
         private IRadio Radio;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
-            IPodRequestRepository podRequestRepository,
             ITaskQueue taskQueue,
             IRadioService radioService)
         {
             Container = container;
-            PodRequestRepository = podRequestRepository;
             TaskQueue = taskQueue;
             RadioService = radioService;
+            RunningState = new PodRunningState();
         }
-
-        public IPodEntity Entity { get; set; }
-        public IPodRequest ActiveRequest { get; }
-
         public Task Archive()
         {
             throw new System.NotImplementedException();
@@ -127,16 +127,12 @@ namespace OmniCore.Eros
             throw new System.NotImplementedException();
         }
 
-        public async Task StartQueue()
+        public async Task StartMonitoring()
         {
             Radio = await RadioService.ListRadios().FirstOrDefaultAsync(r => r.Entity.Id == Entity.Radio.Id);
             Radio.StartMonitoring();
+            await StartStateMonitoring();
             TaskQueue.Startup();
-        }
-
-        public async Task StopQueue()
-        {
-            TaskQueue.Shutdown();
         }
 
         private async Task<ErosPodRequest> NewPodRequest()
@@ -144,10 +140,82 @@ namespace OmniCore.Eros
             var request = Container.Get<IPodRequest>() as ErosPodRequest;
             request.Pod = this;
 
-            request.Entity = PodRequestRepository.New();
-            request.Entity.Pod = this.Entity;
-            await PodRequestRepository.Create(request.Entity, CancellationToken.None);
+            request.Entity = new PodRequestEntity
+            {
+                Pod = Entity
+            };
+
+            using var context = Container.Get<IRepositoryContext>();
+            await context.PodRequests.AddAsync(request.Entity);
+            await context.Save(CancellationToken.None);
             return request;
+        }
+
+        private async Task StartStateMonitoring()
+        {
+            using var context = Container.Get<IRepositoryContext>();
+            var requests = context.PodRequests
+                .Where(pr => pr.Pod.Id == Entity.Id)
+                .OrderByDescending(p => p.Created);
+
+            var responses = context.PodResponses
+                .Where(pr => pr.Pod.Id == Entity.Id)
+                .OrderByDescending(p => p.Created);
+
+            RunningState.LastRadioContact = responses.FirstOrDefault()?.Created;
+            RunningState.State = DetermineRunningState(responses);
+            
+            RunningState.LastUpdated = DateTimeOffset.UtcNow;
+        }
+
+        private PodState DetermineRunningState(IOrderedQueryable<PodResponseEntity> responses)
+        {
+            PodState state = PodState.Unknown;
+            var progress = responses.FirstOrDefault(r => r.Progress.HasValue)
+                ?.Progress;
+            if (progress.HasValue)
+            {
+                switch (progress)
+                {
+                    case PodProgress.InitialState:
+                    case PodProgress.TankPowerActivated:
+                    case PodProgress.TankFillCompleted:
+                        state = PodState.Pairing;
+                        break;
+                    case PodProgress.PairingSuccess:
+                        state = PodState.Paired;
+                        break;
+                    case PodProgress.Purging:
+                        state = PodState.Priming;
+                        break;
+                    case PodProgress.ReadyForInjection:
+                        state = PodState.Primed;
+                        break;
+                    case PodProgress.BasalScheduleSet:
+                    case PodProgress.Priming:
+                        state = PodState.Starting;
+                        break;
+                    case PodProgress.Running:
+                    case PodProgress.RunningLow:
+                        state = PodState.Started;
+                        break;
+                    case PodProgress.ErrorShuttingDown:
+                        state = PodState.Faulted;
+                        break;
+                    case PodProgress.AlertExpiredShuttingDown:
+                        state = PodState.Expired;
+                        break;
+                    case PodProgress.Inactive:
+                        state = PodState.Stopped;
+                        break;
+                }
+            }
+
+            return state;
+        }
+        public void Dispose()
+        {
+            TaskQueue.Shutdown();
         }
     }
 }

@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radios.RileyLink
@@ -25,9 +25,7 @@ namespace OmniCore.Radios.RileyLink
     public class RileyLinkRadio : IRadio
     {
         public IRadioPeripheral Peripheral { get; set; }
-        public IRadioEntity Entity { get; set; }
-        public IRadioConfiguration DefaultConfiguration { get => new RadioConfiguration(); }
-
+        public RadioEntity Entity { get; set; }
         public async Task<ILease<IRadio>> Lease(CancellationToken cancellationToken)
         {
             return await Lease<IRadio>.NewLease(this, cancellationToken);
@@ -68,48 +66,20 @@ namespace OmniCore.Radios.RileyLink
         private ConcurrentQueue<byte[]> Responses;
         private readonly AsyncManualResetEvent ResponseEvent;
 
-        private IRadioConfiguration ActiveConfiguration;
+        private RadioOptions ActiveOptions;
         private bool IsConfigured = false;
 
-        private readonly ISignalStrengthRepository SignalStrengthRepository;
-        private readonly IRadioEventRepository RadioEventRepository;
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly IRadioRepository RadioRepository;
-
 
         public RileyLinkRadio(
-            ICoreContainer<IServerResolvable> container,
-            ISignalStrengthRepository signalStrengthRepository,
-            IRadioEventRepository radioEventRepository,
-            IRadioRepository radioRepository)
+            ICoreContainer<IServerResolvable> container)
         {
             Container = container;
-            RadioRepository = radioRepository;
-            SignalStrengthRepository = signalStrengthRepository;
-            RadioEventRepository = radioEventRepository;
-            RadioRepository = radioRepository;
             Responses = new ConcurrentQueue<byte[]>();
             ResponseEvent = new AsyncManualResetEvent();
         }
-
-        public IRadioConfiguration GetConfiguration()
-        {
-            var json = Entity.ConfigurationJson;
-            if (string.IsNullOrEmpty(json))
-                return DefaultConfiguration;
-            return JsonConvert.DeserializeObject<RadioConfiguration>(json);
-        }
-
-        public async Task SetConfiguration(IRadioConfiguration configuration, CancellationToken cancellationToken)
-        {
-            Entity.ConfigurationJson = JsonConvert.SerializeObject(configuration);
-            await RadioRepository.Update(Entity, cancellationToken);
-            ApplyConfiguration(cancellationToken);
-        }
-
         public void ApplyConfiguration(CancellationToken cancellationToken)
         {
-            var configuration = GetConfiguration();
             PeripheralStateSubscription?.Dispose();
             PeripheralStateSubscription = Peripheral.State.Subscribe(async (state) =>
             {
@@ -118,10 +88,10 @@ namespace OmniCore.Radios.RileyLink
                     case PeripheralState.Offline:
                         await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
                         LocateSubscription?.Dispose();
-                        LocateSubscription = Observable.Interval(configuration.RadioDiscoveryCooldown).Subscribe(
+                        LocateSubscription = Observable.Interval(Entity.Options.RadioDiscoveryCooldown).Subscribe(
                             async _ =>
                             {
-                                using var cts = new CancellationTokenSource(configuration.RadioDiscoveryTimeout);
+                                using var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
                                 try
                                 {
                                     await Peripheral.Locate(cts.Token);
@@ -148,25 +118,34 @@ namespace OmniCore.Radios.RileyLink
                 {
                     await RecordRssi(rssi, CancellationToken.None);
                 });
-            Peripheral.RssiAutoUpdateInterval = GetConfiguration().RssiUpdateInterval;
+            Peripheral.RssiAutoUpdateInterval = Entity.Options.RssiUpdateInterval;
         }
 
         private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken, string text = null, byte[] data = null)
         {
-            var radioEvent = RadioEventRepository.New();
-            radioEvent.Radio = Entity;
-            radioEvent.EventType = eventType;
-            radioEvent.Text = text;
-            radioEvent.Data = data;
-            await RadioEventRepository.Create(radioEvent, cancellationToken);
+            using var context = Container.Get<IRepositoryContext>();
+            await context.RadioEvents.AddAsync(
+                new RadioEventEntity
+                {
+                    Radio = Entity,
+                    EventType = eventType,
+                    Text = text,
+                    Data = data
+                }, cancellationToken);
+            await context.Save(cancellationToken);
         }
 
         private async Task RecordRssi(int rssi, CancellationToken cancellationToken)
         {
-            var sse = SignalStrengthRepository.New();
-            sse.Radio = Entity;
-            sse.Rssi = rssi;
-            await SignalStrengthRepository.Create(sse, cancellationToken);
+            using var context = Container.Get<IRepositoryContext>();
+            await context.RadioEvents.AddAsync(
+                new RadioEventEntity
+                {
+                    Radio = Entity,
+                    EventType = RadioEvent.RssiReceived,
+                    Rssi = rssi
+                }, cancellationToken);
+            await context.Save(cancellationToken);
         }
 
         public async Task Identify(CancellationToken cancellationToken)
@@ -228,13 +207,12 @@ namespace OmniCore.Radios.RileyLink
 
             if (IsConfigured)
             {
-                var radioConfiguration = GetConfiguration();
-                if (GetParameters(ActiveConfiguration).SequenceEqual(GetParameters(radioConfiguration)))
+                if (GetParameters(ActiveOptions).SequenceEqual(GetParameters(Entity.Options)))
                     return;
                 else
-                    ActiveConfiguration = radioConfiguration;
+                    ActiveOptions = Entity.Options;
             }
-            await ConfigureRileyLink(ActiveConfiguration, cancellationToken);
+            await ConfigureRileyLink(cancellationToken);
         }
 
         public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
@@ -289,13 +267,13 @@ namespace OmniCore.Radios.RileyLink
         {
             using var _ = Peripheral.Lease(cancellationToken);
 
-            using var connectionTimeout = new CancellationTokenSource(ActiveConfiguration.RadioConnectTimeout);
+            using var connectionTimeout = new CancellationTokenSource(Entity.Options.RadioConnectTimeout);
             using (var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, connectionTimeout.Token))
             {
                 try
                 {
-                    await Peripheral.Connect(ActiveConfiguration.KeepConnected, linkedCancellation.Token);
+                    await Peripheral.Connect(Entity.Options.KeepConnected, linkedCancellation.Token);
                 }
                 catch (Exception e)
                 {
@@ -315,7 +293,7 @@ namespace OmniCore.Radios.RileyLink
                     while (true)
                     {
                         using var notifyReadTimeout =
-                            new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+                            new CancellationTokenSource(Entity.Options.RadioResponseTimeout);
                         var commandResponse = await Peripheral.ReadFromCharacteristic(RileyLinkServiceUuid, RileyLinkDataCharacteristicUuid,
                             notifyReadTimeout.Token);
 
@@ -332,14 +310,14 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task Disconnect(CancellationToken cancellationToken)
         {
-            if (!ActiveConfiguration.KeepConnected)
+            if (!Entity.Options.KeepConnected)
             {
                 await Peripheral.Disconnect(cancellationToken);
             }
         }
 
 
-        private async Task ConfigureRileyLink(IRadioConfiguration radioConfiguration, CancellationToken cancellationToken)
+        private async Task ConfigureRileyLink(CancellationToken cancellationToken)
         {
             Activity = RadioActivity.Configuring;
             await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.Reset);
@@ -351,7 +329,7 @@ namespace OmniCore.Radios.RileyLink
             commands.Add((RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None }));
             commands.Add((RileyLinkCommandType.SetPreamble, new byte[] { 0x55, 0x55 }));
 
-            foreach (var register in GetParameters(radioConfiguration))
+            foreach (var register in GetParameters(Entity.Options))
                 commands.Add((RileyLinkCommandType.UpdateRegister, new[] { (byte)register.Item1, (byte)register.Item2 })) ;
 
             var responses = await SendCommandsAndGetResponses(cancellationToken, TimeSpan.FromSeconds(15), commands);
@@ -381,7 +359,7 @@ namespace OmniCore.Radios.RileyLink
             var dataArray = data.ToArray();
             dataArray[0] = (byte) (dataArray.Length - 1);
 
-            using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            using var responseTimeout = new CancellationTokenSource(Entity.Options.RadioResponseTimeout);
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing {BitConverter.ToString(dataArray)} Count: {commandList.Count}");
@@ -401,7 +379,7 @@ namespace OmniCore.Radios.RileyLink
             RileyLinkCommandType cmd, byte[] cmdData = null)
         {
             var data = GetCommandData(cmd, cmdData);
-            using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            using var responseTimeout = new CancellationTokenSource(Entity.Options.RadioResponseTimeout);
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing noresponse {BitConverter.ToString(data)}");
@@ -415,7 +393,7 @@ namespace OmniCore.Radios.RileyLink
         {
             var data = GetCommandData(cmd, cmdData);
 
-            using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout);
+            using var responseTimeout = new CancellationTokenSource(Entity.Options.RadioResponseTimeout);
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing {BitConverter.ToString(data)}");
@@ -454,7 +432,7 @@ namespace OmniCore.Radios.RileyLink
                 ResponseEvent.Reset();
                 if (Responses.IsEmpty)
                 {
-                    using var responseTimeout = new CancellationTokenSource(ActiveConfiguration.RadioResponseTimeout.Add(expectedProcessingDuration));
+                    using var responseTimeout = new CancellationTokenSource(Entity.Options.RadioResponseTimeout.Add(expectedProcessingDuration));
                     using var linkedCancellation =
                         CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
                     
@@ -476,7 +454,7 @@ namespace OmniCore.Radios.RileyLink
             return (responseType, response);
         }
 
-        private List<Tuple<RileyLinkRegister, int>> GetParameters(IRadioConfiguration configuration)
+        private List<Tuple<RileyLinkRegister, int>> GetParameters(RadioOptions configuration)
         {
             var registers = new List<Tuple<RileyLinkRegister, int>>();
 

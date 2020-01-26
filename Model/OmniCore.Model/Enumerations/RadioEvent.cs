@@ -10,6 +10,7 @@ namespace OmniCore.Model.Enumerations
         Online,
         Connect,
         Disconnect,
+        RssiReceived,
         Error
     }
 }

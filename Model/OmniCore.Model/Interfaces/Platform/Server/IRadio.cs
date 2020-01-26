@@ -2,19 +2,16 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IRadio : IServerResolvable, ILeaseable<IRadio>, IDisposable
     {
         IRadioPeripheral Peripheral { get; set; }
-        IRadioEntity Entity { get; set; }
-        IRadioConfiguration DefaultConfiguration { get; }
-        Task SetConfiguration(IRadioConfiguration configuration, CancellationToken cancellationToken);
-        IRadioConfiguration GetConfiguration();
+        RadioEntity Entity { get; set; }
         bool InUse { get; set; }
         RadioActivity Activity { get; set; }
         DateTimeOffset? ActivityStartDate { get; }

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
 
 namespace OmniCore.Eros
 {

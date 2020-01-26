@@ -8,10 +8,11 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
+using OmniCore.Model.Entities;
+using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Services;
 
@@ -30,12 +31,10 @@ namespace OmniCore.Eros
 
         private readonly ConcurrentDictionary<long, IPod> PodDictionary;
         private readonly AsyncLock PodCreateLock;
-        private readonly IPodRepository PodRepository;
 
 
         public ErosPodService(
             IRadioAdapter radioAdapter,
-            IPodRepository podRepository,
             IRadioService radioServiceRileyLink,
             ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions,
@@ -47,20 +46,27 @@ namespace OmniCore.Eros
 
             RadioProviders = new[] {radioServiceRileyLink};
             RadioAdapter = radioAdapter;
-            PodRepository = podRepository;
             PodDictionary = new ConcurrentDictionary<long, IPod>();
             PodCreateLock = new AsyncLock();
         }
 
-        public async IAsyncEnumerable<IPod> ActivePods()
+        public IList<IPod> ActivePods(CancellationToken cancellationToken)
         {
-            foreach (var activePodEntity in await PodRepository.ActivePods(CancellationToken.None))
-            {
-                yield return await GetPodInternal(activePodEntity);
-            }
+            using var context = Container.Get<IRepositoryContext>();
+            var pods = new List<IPod>();
+            context.Pods.Where(p => !p.IsDeleted)
+                .Include(p => p.Medication)
+                .Include(p => p.Radio)
+                .Include(p => p.User)
+                .Include(p => p.ExpiredReminder)
+                .Include(p => p.ExpiresSoonReminder)
+                .Include(p => p.ReservoirLowReminder)
+                .ToList()
+                .ForEach(async p => pods.Add(await GetPodInternal(p)));
+            return pods;
         }
         
-        public IAsyncEnumerable<IPod> ArchivedPods()
+        public IList<IPod> ArchivedPods(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -77,31 +83,36 @@ namespace OmniCore.Eros
             return address;
         }
 
-        public async Task<IPod> New(IUserEntity user, IMedicationEntity medication, IRadioEntity radio)
+        public async Task<IPod> New(UserEntity user, MedicationEntity medication, RadioEntity radio)
         {
-            var podEntity = PodRepository.New();
-            podEntity.Medication = medication;
-            podEntity.User = user;
-            podEntity.Radio = radio;
-            podEntity.RadioAddress = GenerateRadioAddress();
-            await PodRepository.Create(podEntity, CancellationToken.None);
+            var podEntity = new PodEntity
+            {
+                Medication = medication,
+                User = user,
+                Radio = radio,
+                RadioAddress = GenerateRadioAddress()
+            };
+
+            using var context = Container.Get<IRepositoryContext>();
+            context.Pods.Add(podEntity);
+            await context.Save(CancellationToken.None);
+
             return await GetPodInternal(podEntity);
         }
 
-        public Task<IPod> Register(IPodEntity podEntity, IUserEntity user, IList<IRadioEntity> radios)
+        public Task<IPod> Register(PodEntity podEntity, UserEntity user, RadioEntity radio)
         {
             throw new NotImplementedException();
         }
 
-        private async Task<IPod> GetPodInternal(IPodEntity podEntity)
+        private async Task<IPod> GetPodInternal(PodEntity podEntity)
         {
             using var podLock = await PodCreateLock.LockAsync();
             if (PodDictionary.ContainsKey(podEntity.Id))
                 return PodDictionary[podEntity.Id];
 
             var pod = Container.Get<IPod>();
-            pod.Entity = await PodRepository.Read(podEntity.Id, CancellationToken.None);
-            await pod.StartQueue();
+            pod.Entity = podEntity;
             PodDictionary[podEntity.Id] = pod;
             return pod;
         }
@@ -122,10 +133,10 @@ namespace OmniCore.Eros
                     ("ErosPodService_StopRequested_ActiveRequests", string.Empty),
                 });
             }
-            
-            foreach (var activePodEntity in await PodRepository.ActivePods(cancellationToken))
+
+            foreach (var pod in ActivePods(cancellationToken))
             {
-                await GetPodInternal(activePodEntity);
+                await pod.StartMonitoring();
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
@@ -158,7 +169,7 @@ namespace OmniCore.Eros
             {
                 foreach (var pod in PodDictionary.Values)
                 {
-                    await pod.StopQueue();
+                    pod.Dispose();
                 }
             }
             PodDictionary.Clear();

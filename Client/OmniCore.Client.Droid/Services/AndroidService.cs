@@ -30,7 +30,6 @@ using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Radios.RileyLink;
-using OmniCore.Repository.Sqlite;
 using OmniCore.Services;
 using Unity;
 using Enum = Java.Lang.Enum;

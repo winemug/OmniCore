@@ -20,7 +20,6 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;

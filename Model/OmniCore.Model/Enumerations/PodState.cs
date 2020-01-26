@@ -8,10 +8,13 @@ namespace OmniCore.Model.Enumerations
     {
         Unknown,
         Pairing,
-        PendingStart,
+        Paired,
+        Priming,
+        Primed,
         Starting,
         Started,
         Stopped,
-        Faulted
+        Faulted,
+        Expired,
     }
 }

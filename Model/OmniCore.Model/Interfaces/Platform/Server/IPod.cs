@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
-    public interface IPod : IServerResolvable
+    public interface IPod : IServerResolvable, IDisposable
     {
-        IPodEntity Entity { get; set; }
+        PodEntity Entity { get; set; }
+        PodRunningState RunningState { get; }
         IPodRequest ActiveRequest { get; }
         Task Archive();
         Task<IList<IPodRequest>> GetActiveRequests();
@@ -28,7 +30,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         Task<IPodRequest> RequestStartExtendedBolus();
         Task<IPodRequest> RequestCancelExtendedBolus();
         Task<IPodRequest> RequestDeactivate();
-        Task StartQueue();
-        Task StopQueue();
+        Task StartMonitoring();
     }
 }

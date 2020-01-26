@@ -15,7 +15,6 @@ using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -42,7 +41,7 @@ namespace OmniCore.Client.ViewModels.Home
         {
             
             Pods = new List<IPod>();
-            await foreach (var pod in PodService.ActivePods())
+            foreach (var pod in PodService.ActivePods(CancellationToken.None))
             {
                 Pods.Add(pod);
             }

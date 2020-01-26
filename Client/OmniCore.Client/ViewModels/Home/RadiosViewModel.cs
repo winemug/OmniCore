@@ -13,7 +13,6 @@ using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Platform.Common.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
 using Xamarin.Forms;
 
