@@ -100,7 +100,7 @@ namespace OmniCore.Eros
                 return PodDictionary[podEntity.Id];
 
             var pod = Container.Get<IPod>();
-            pod.Entity = podEntity;
+            pod.Entity = await PodRepository.Read(podEntity.Id, CancellationToken.None);
             await pod.StartQueue();
             PodDictionary[podEntity.Id] = pod;
             return pod;

@@ -8,7 +8,7 @@ namespace OmniCore.Repository.Sqlite.Entities
     public class MedicationDeliveryEntity : Entity, IMedicationDeliveryEntity
     {
         [Ignore]
-        public IUser User { get; set; }
+        public IUserEntity User { get; set; }
         public long? UserId { get; set; }
 
         [Ignore]
@@ -16,7 +16,7 @@ namespace OmniCore.Repository.Sqlite.Entities
         public long? MedicationId { get; set; }
         
         [Ignore]
-        public IPod Pod { get; set; }
+        public IPodEntity Pod { get; set; }
         public long? PodId { get; set; }
 
         public DateTimeOffset? DeliveryStart { get; set; }

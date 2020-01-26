@@ -4,9 +4,9 @@ namespace OmniCore.Model.Interfaces.Platform.Common.Data.Entities
 {
     public interface IMedicationDeliveryEntity : IEntity
     {
-        IUser User { get; set; }
+        IUserEntity User { get; set; }
         IMedicationEntity Medication { get; set; }
-        IPod Pod { get; set; }
+        IPodEntity Pod { get; set; }
 
         DateTimeOffset? DeliveryStart { get; set; }
         TimeSpan? IntendedDuration { get; set; }

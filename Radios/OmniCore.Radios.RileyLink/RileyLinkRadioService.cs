@@ -113,8 +113,8 @@ namespace OmniCore.Radios.RileyLink
             else
             {
                 radio = Container.Get<IRadio>();
-                radio.Start(radioEntity, RadioAdapter.GetPeripheral(radioEntity.DeviceUuid));
-
+                radio.Entity = await RadioRepository.Read(radioEntity.Id, cancellationToken);
+                radio.Peripheral = RadioAdapter.GetPeripheral(radioEntity.DeviceUuid);
                 RadioDictionary.Add(radioEntity.DeviceUuid, radio);
             }
             return radio;

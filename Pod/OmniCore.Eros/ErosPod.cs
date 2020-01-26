@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,14 +19,18 @@ namespace OmniCore.Eros
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IPodRequestRepository PodRequestRepository;
         private readonly ITaskQueue TaskQueue;
+        private readonly IRadioService RadioService;
+        private IRadio Radio;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
             IPodRequestRepository podRequestRepository,
-            ITaskQueue taskQueue)
+            ITaskQueue taskQueue,
+            IRadioService radioService)
         {
             Container = container;
             PodRequestRepository = podRequestRepository;
             TaskQueue = taskQueue;
+            RadioService = radioService;
         }
 
         public IPodEntity Entity { get; set; }
@@ -124,6 +129,8 @@ namespace OmniCore.Eros
 
         public async Task StartQueue()
         {
+            Radio = await RadioService.ListRadios().FirstOrDefaultAsync(r => r.Entity.Id == Entity.Radio.Id);
+            Radio.StartMonitoring();
             TaskQueue.Startup();
         }
 

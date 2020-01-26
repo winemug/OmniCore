@@ -1,11 +1,16 @@
 ﻿using System;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
+using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
     public class PodRequestEntity : Entity, IPodRequestEntity
     {
+        [Ignore]
+        public IPodEntity Pod { get; set; }
+        public long? PodId { get; set; }
+
         public RequestState RequestStatus { get; set; }
         public RequestType RequestType { get; set; }
         public string Parameters { get; set; }
@@ -15,6 +20,5 @@ namespace OmniCore.Repository.Sqlite.Entities
         public DateTimeOffset? ResultReceived { get; set; }
         public FailureType? FailureType { get; set; }
         public string ErrorText { get; set; }
-        public IPodEntity Pod { get; set; }
     }
 }

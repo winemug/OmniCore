@@ -198,6 +198,30 @@ namespace OmniCore.Radios.RileyLink
             await Disconnect(cancellationToken);
         }
 
+        public void StartMonitoring()
+        {
+            ConnectedSubscription?.Dispose();
+            ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
+                .Subscribe( async (_) =>
+                {
+                    IsConfigured = false;
+                    await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
+                });
+
+            DisconnectedSubscription?.Dispose();
+            DisconnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Disconnected)
+                .Subscribe( async (_) =>
+                {
+                    ResponseNotifySubscription?.Dispose();
+                    ResponseNotifySubscription = null;
+                    IsConfigured = false;
+
+                    await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
+                });
+
+            ApplyConfiguration(CancellationToken.None);
+        }
+
         public async Task Initialize(CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
@@ -234,33 +258,6 @@ namespace OmniCore.Radios.RileyLink
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, $"RL returned: {result.Type}");
 
             return (result.Data[0], result.Data[1..]);
-        }
-
-        public void Start(IRadioEntity radioEntity, IRadioPeripheral peripheral)
-        {
-            Entity = radioEntity;
-            Peripheral = peripheral;
-
-            ConnectedSubscription?.Dispose();
-            ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
-                .Subscribe( async (_) =>
-                {
-                    IsConfigured = false;
-                    await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
-                });
-
-            DisconnectedSubscription?.Dispose();
-            DisconnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Disconnected)
-                .Subscribe( async (_) =>
-                {
-                    ResponseNotifySubscription?.Dispose();
-                    ResponseNotifySubscription = null;
-                    IsConfigured = false;
-
-                    await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
-                });
-
-            ApplyConfiguration(CancellationToken.None);
         }
 
         public void Dispose()

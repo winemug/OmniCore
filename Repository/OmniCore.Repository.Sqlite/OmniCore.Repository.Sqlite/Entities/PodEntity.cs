@@ -78,11 +78,18 @@ namespace OmniCore.Repository.Sqlite.Entities
         
         [Ignore]
         public IReminderAttributes ExpiresSoonReminder { get; set; }
+        public string ExpiresSoonReminderJson { get; set; }
+
         [Ignore]
         public IReminderAttributes ReservoirLowReminder { get; set; }
+        public string ReservoirLowReminderJson { get; set; }
+
         [Ignore]
         public IReminderAttributes ExpiredReminder { get; set; }
+        public string ExpiredReminderJson { get; set; }
+
         [Ignore]
         public IList<(TimeSpan start, decimal hourlyRate)> BasalScheduleEntries { get; set; }
+        public string BasalScheduleEntriesJson { get; set; }
     }
 }

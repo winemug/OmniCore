@@ -19,10 +19,10 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         RadioActivity Activity { get; set; }
         DateTimeOffset? ActivityStartDate { get; }
 
+        void StartMonitoring();
         Task Initialize(CancellationToken cancellationToken);
         Task Identify(CancellationToken cancellationToken);
         Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
         Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
-        void Start(IRadioEntity radioEntity, IRadioPeripheral getPeripheral);
     }
 }
