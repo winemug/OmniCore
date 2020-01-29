@@ -56,14 +56,13 @@ namespace OmniCore.Radios.RileyLink
                 var cts = new CancellationTokenSource();
 
                 List<Guid> knownRadioIds = null;
-                using (var context = Container.Get<IRepositoryContext>())
-                {
-                    knownRadioIds = context.Radios.Select(r => r.DeviceUuid).ToList();
-                }
-              
+                var context = Container.Get<IRepositoryContext>();
+                knownRadioIds = context.Radios.Select(r => r.DeviceUuid).ToList();
+
                 var scanner = RadioAdapter.FindPeripherals()
                     //.Where(p => p.ServiceUuids.Contains(RileyLinkServiceUUID))
-                    .Where(p => !knownRadioIds.Contains(p.PeripheralUuid))
+                    .Where(p => p.PeripheralUuid.HasValue && 
+                        !knownRadioIds.Contains(p.PeripheralUuid.Value))
                     .Subscribe(async peripheral =>
                     {
                         observer.OnNext(peripheral);
@@ -88,12 +87,10 @@ namespace OmniCore.Radios.RileyLink
             return Observable.Create<IRadio>( async (IObserver<IRadio> observer) =>
             {
                 var cts = new CancellationTokenSource();
-                using (var context = Container.Get<IRepositoryContext>())
+                var context = Container.Get<IRepositoryContext>();
+                foreach (var radioEntity in context.Radios)
                 {
-                    foreach (var radioEntity in context.Radios)
-                    {
-                        observer.OnNext(await GetRadio(radioEntity, cts.Token));
-                    }
+                    observer.OnNext(await GetRadio(radioEntity, cts.Token));
                 }
 
                 observer.OnCompleted();

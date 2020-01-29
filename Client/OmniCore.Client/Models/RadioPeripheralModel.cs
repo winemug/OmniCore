@@ -13,7 +13,7 @@ namespace OmniCore.Client.Models
     {
         public readonly IRadioPeripheral Peripheral;
         public string Name { get; set; }
-        public string MacAddress => Peripheral.PeripheralUuid.AsMacAddress();
+        public string MacAddress => Peripheral.PeripheralUuid?.AsMacAddress();
         public string Rssi { get; set; }
         public string DiscoveryState { get; set; }
         public string ConnectionState { get; set; }

@@ -25,7 +25,10 @@ namespace OmniCore.Repository
         }
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            await using var context = (RepositoryContext) ServerContainer.Get<IRepositoryContext>();
+            var context = (RepositoryContext) ServerContainer.Get<IRepositoryContext>();
+            #if DEBUG
+            //context.Database.EnsureDeleted();
+            #endif
             await context.Database.MigrateAsync(cancellationToken);
             await context.SeedData();
         }
@@ -45,12 +48,6 @@ namespace OmniCore.Repository
         {
             throw new NotImplementedException();
         }
-
-        public IRepositoryContext GetContext()
-        {
-            return ServerContainer.Get<IRepositoryContext>();
-        }
-
         public Task Import(string importPath, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

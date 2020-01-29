@@ -5,7 +5,6 @@ namespace OmniCore.Model.Entities
 {
     public class PodResponseEntity : Entity
     {
-        public PodEntity Pod { get; set; }
         public PodRequestEntity PodRequest { get; set; }
         public PodProgress? Progress { get; set; }
         public bool? Faulted { get; set; }

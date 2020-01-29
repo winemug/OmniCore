@@ -52,15 +52,12 @@ namespace OmniCore.Eros
 
         public IList<IPod> ActivePods(CancellationToken cancellationToken)
         {
-            using var context = Container.Get<IRepositoryContext>();
+            var context = Container.Get<IRepositoryContext>();
             var pods = new List<IPod>();
             context.Pods.Where(p => !p.IsDeleted)
                 .Include(p => p.Medication)
                 .Include(p => p.Radio)
                 .Include(p => p.User)
-                .Include(p => p.ExpiredReminder)
-                .Include(p => p.ExpiresSoonReminder)
-                .Include(p => p.ReservoirLowReminder)
                 .ToList()
                 .ForEach(async p => pods.Add(await GetPodInternal(p)));
             return pods;
@@ -93,7 +90,7 @@ namespace OmniCore.Eros
                 RadioAddress = GenerateRadioAddress()
             };
 
-            using var context = Container.Get<IRepositoryContext>();
+            var context = Container.Get<IRepositoryContext>();
             context.Pods.Add(podEntity);
             await context.Save(CancellationToken.None);
 

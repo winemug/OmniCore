@@ -16,7 +16,7 @@ namespace OmniCore.Model.Entities
         //public BasalSchedule BasalSchedule { get; set; }
 
         [JsonField]
-        public PodOptions Options { get; set; }
+        public PodOptions Options { get; set; } = new PodOptions();
         
         [JsonField]
         public ReminderSettings ExpiresSoonReminder { get; set; }

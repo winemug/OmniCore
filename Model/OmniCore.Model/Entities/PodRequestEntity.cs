@@ -11,11 +11,12 @@ namespace OmniCore.Model.Entities
         public RequestState RequestStatus { get; set; }
         public RequestType RequestType { get; set; }
         public string Parameters { get; set; }
-        public DateTimeOffset? StartEarliest { get; set; }
-        public DateTimeOffset? StartLatest { get; set; }
-        public DateTimeOffset? Started { get; set; }
-        public DateTimeOffset? ResultReceived { get; set; }
+        public DateTime? StartEarliest { get; set; }
+        public DateTime? StartLatest { get; set; }
+        public DateTime? Started { get; set; }
+        public DateTime? ResultReceived { get; set; }
         public FailureType? FailureType { get; set; }
         public string ErrorText { get; set; }
+        public ICollection<PodResponseEntity> Responses { get; set; }
     }
 }

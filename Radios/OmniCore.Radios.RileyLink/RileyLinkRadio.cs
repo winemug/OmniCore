@@ -78,71 +78,17 @@ namespace OmniCore.Radios.RileyLink
             Responses = new ConcurrentQueue<byte[]>();
             ResponseEvent = new AsyncManualResetEvent();
         }
-        public void ApplyConfiguration(CancellationToken cancellationToken)
+        private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken,
+            string text = null, byte[] data = null, int? rssi = null)
         {
-            PeripheralStateSubscription?.Dispose();
-            PeripheralStateSubscription = Peripheral.State.Subscribe(async (state) =>
-            {
-                switch (state)
-                {
-                    case PeripheralState.Offline:
-                        await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
-                        LocateSubscription?.Dispose();
-                        LocateSubscription = Observable.Interval(Entity.Options.RadioDiscoveryCooldown).Subscribe(
-                            async _ =>
-                            {
-                                using var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
-                                try
-                                {
-                                    await Peripheral.Locate(cts.Token);
-                                }
-                                catch (OperationCanceledException e)
-                                {
-                                }
-                            });
-                        break;
-                    case PeripheralState.Online:
-                        LocateSubscription?.Dispose();
-                        LocateSubscription = null;
-                        await RecordRadioEvent(RadioEvent.Online, CancellationToken.None);
-                        break;
-                    case PeripheralState.Discovering:
-                        LocateSubscription?.Dispose();
-                        LocateSubscription = null;
-                        break;
-                }
-            });
-
-        PeripheralRssiSubscription?.Dispose();
-            PeripheralRssiSubscription = Peripheral.Rssi.Subscribe(async (rssi) =>
-                {
-                    await RecordRssi(rssi, CancellationToken.None);
-                });
-            Peripheral.RssiAutoUpdateInterval = Entity.Options.RssiUpdateInterval;
-        }
-
-        private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken, string text = null, byte[] data = null)
-        {
-            using var context = Container.Get<IRepositoryContext>();
+            var context = Container.Get<IRepositoryContext>();
             await context.RadioEvents.AddAsync(
                 new RadioEventEntity
                 {
                     Radio = Entity,
                     EventType = eventType,
                     Text = text,
-                    Data = data
-                }, cancellationToken);
-            await context.Save(cancellationToken);
-        }
-
-        private async Task RecordRssi(int rssi, CancellationToken cancellationToken)
-        {
-            using var context = Container.Get<IRepositoryContext>();
-            await context.RadioEvents.AddAsync(
-                new RadioEventEntity
-                {
-                    Radio = Entity,
-                    EventType = RadioEvent.RssiReceived,
+                    Data = data,
                     Rssi = rssi
                 }, cancellationToken);
             await context.Save(cancellationToken);
@@ -179,6 +125,14 @@ namespace OmniCore.Radios.RileyLink
 
         public void StartMonitoring()
         {
+            PeripheralRssiSubscription?.Dispose();
+            PeripheralRssiSubscription = Peripheral.Rssi.Subscribe(async (rssi) =>
+            {
+                await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
+                    null, rssi);
+            });
+            Peripheral.RssiAutoUpdateInterval = Entity.Options.RssiUpdateInterval;
+
             ConnectedSubscription?.Dispose();
             ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
                 .Subscribe( async (_) =>
@@ -198,7 +152,49 @@ namespace OmniCore.Radios.RileyLink
                     await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
                 });
 
-            ApplyConfiguration(CancellationToken.None);
+            PeripheralStateSubscription?.Dispose();
+            PeripheralStateSubscription = Peripheral.State.Subscribe(async (state) =>
+            {
+                switch (state)
+                {
+                    case PeripheralState.Offline:
+                        await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = Observable.Interval(Entity.Options.RadioDiscoveryCooldown).Subscribe(
+                            async _ =>
+                            {
+                                using var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
+                                try
+                                {
+                                    await Peripheral.Locate(cts.Token);
+                                }
+                                catch (OperationCanceledException e)
+                                {
+                                }
+                            });
+                        break;
+                    case PeripheralState.Online:
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = null;
+                        await RecordRadioEvent(RadioEvent.Online, CancellationToken.None);
+                        if (Entity.Options.KeepConnected)
+                        {
+                            using var cts = new CancellationTokenSource(Entity.Options.RadioConnectTimeout);
+                            try
+                            {
+                                await Peripheral.Connect(true, cts.Token);
+                            }
+                            catch (OperationCanceledException e)
+                            {
+                            }
+                        }
+                        break;
+                    case PeripheralState.Discovering:
+                        LocateSubscription?.Dispose();
+                        LocateSubscription = null;
+                        break;
+                }
+            });
         }
 
         public async Task Initialize(CancellationToken cancellationToken)

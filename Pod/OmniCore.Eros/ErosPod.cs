@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using OmniCore.Eros.Annotations;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Entities;
@@ -145,7 +146,7 @@ namespace OmniCore.Eros
                 Pod = Entity
             };
 
-            using var context = Container.Get<IRepositoryContext>();
+            var context = Container.Get<IRepositoryContext>();
             await context.PodRequests.AddAsync(request.Entity);
             await context.Save(CancellationToken.None);
             return request;
@@ -153,14 +154,13 @@ namespace OmniCore.Eros
 
         private async Task StartStateMonitoring()
         {
-            using var context = Container.Get<IRepositoryContext>();
-            var requests = context.PodRequests
+            var context = Container.Get<IRepositoryContext>();
+            var responses = context.PodRequests
                 .Where(pr => pr.Pod.Id == Entity.Id)
-                .OrderByDescending(p => p.Created);
-
-            var responses = context.PodResponses
-                .Where(pr => pr.Pod.Id == Entity.Id)
-                .OrderByDescending(p => p.Created);
+                .OrderByDescending(p => p.Created)
+                .Include(pr => pr.Responses)
+                .SelectMany(pr => pr.Responses)
+                .OrderByDescending(r => r.Created);
 
             RunningState.LastRadioContact = responses.FirstOrDefault()?.Created;
             RunningState.State = DetermineRunningState(responses);
@@ -171,44 +171,43 @@ namespace OmniCore.Eros
         private PodState DetermineRunningState(IOrderedQueryable<PodResponseEntity> responses)
         {
             PodState state = PodState.Unknown;
-            var progress = responses.FirstOrDefault(r => r.Progress.HasValue)
-                ?.Progress;
-            if (progress.HasValue)
+            var progress = responses
+                .FirstOrDefault(r => r.Progress.HasValue)?
+                .Progress;
+            
+            switch (progress)
             {
-                switch (progress)
-                {
-                    case PodProgress.InitialState:
-                    case PodProgress.TankPowerActivated:
-                    case PodProgress.TankFillCompleted:
-                        state = PodState.Pairing;
-                        break;
-                    case PodProgress.PairingSuccess:
-                        state = PodState.Paired;
-                        break;
-                    case PodProgress.Purging:
-                        state = PodState.Priming;
-                        break;
-                    case PodProgress.ReadyForInjection:
-                        state = PodState.Primed;
-                        break;
-                    case PodProgress.BasalScheduleSet:
-                    case PodProgress.Priming:
-                        state = PodState.Starting;
-                        break;
-                    case PodProgress.Running:
-                    case PodProgress.RunningLow:
-                        state = PodState.Started;
-                        break;
-                    case PodProgress.ErrorShuttingDown:
-                        state = PodState.Faulted;
-                        break;
-                    case PodProgress.AlertExpiredShuttingDown:
-                        state = PodState.Expired;
-                        break;
-                    case PodProgress.Inactive:
-                        state = PodState.Stopped;
-                        break;
-                }
+                case PodProgress.InitialState:
+                case PodProgress.TankPowerActivated:
+                case PodProgress.TankFillCompleted:
+                    state = PodState.Pairing;
+                    break;
+                case PodProgress.PairingSuccess:
+                    state = PodState.Paired;
+                    break;
+                case PodProgress.Purging:
+                    state = PodState.Priming;
+                    break;
+                case PodProgress.ReadyForInjection:
+                    state = PodState.Primed;
+                    break;
+                case PodProgress.BasalScheduleSet:
+                case PodProgress.Priming:
+                    state = PodState.Starting;
+                    break;
+                case PodProgress.Running:
+                case PodProgress.RunningLow:
+                    state = PodState.Started;
+                    break;
+                case PodProgress.ErrorShuttingDown:
+                    state = PodState.Faulted;
+                    break;
+                case PodProgress.AlertExpiredShuttingDown:
+                    state = PodState.Expired;
+                    break;
+                case PodProgress.Inactive:
+                    state = PodState.Stopped;
+                    break;
             }
 
             return state;

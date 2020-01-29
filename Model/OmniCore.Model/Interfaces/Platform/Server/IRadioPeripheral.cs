@@ -9,7 +9,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IRadioPeripheral : ILeaseable<IRadioPeripheral>, IServerResolvable
     {
-        Guid PeripheralUuid { get; }
+        Guid? PeripheralUuid { get; }
         Guid[] ServiceUuids { get; }
         IObservable<string> Name { get; }
         IObservable<PeripheralState> State { get; }

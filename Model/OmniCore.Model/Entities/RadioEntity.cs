@@ -13,6 +13,6 @@ namespace OmniCore.Model.Entities
         public string UserDescription { get; set; }
 
         [JsonField]
-        public RadioOptions Options { get; set; }
+        public RadioOptions Options { get; set; } = new RadioOptions();
     }
 }

@@ -13,7 +13,7 @@ namespace OmniCore.Repository
         {
             return container
                 .One<IRepositoryService, RepositoryService>()
-                .Many<IRepositoryContext, RepositoryContext>();
+                .One<IRepositoryContext, RepositoryContext>();
         }
     }
 }

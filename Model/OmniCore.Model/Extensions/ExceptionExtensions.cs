@@ -16,18 +16,22 @@ namespace OmniCore.Model.Extensions
             exceptionsList.WithException(exception, new List<Exception>());
             readable.AppendLine();
 
+            int x = 0;
             foreach (var exceptionList in exceptionsList)
             {
-                readable.AppendLine("*** Thrown exceptions (inside out):");
+                x++;
+                readable.AppendLine($"***\t({x})\tThrown exceptions (inside out):");
                 exceptionList.Reverse();
+                int y = 0;
                 foreach (var exceptionEntry in exceptionList)
                 {
-                    readable.AppendLine($"{exceptionEntry.GetType().Name}: {exceptionEntry.Message}");
+                    y++;
+                    readable.AppendLine($"***\t({x}.{y})\t{exceptionEntry.GetType().Name}: {exceptionEntry.Message}");
+                    readable.AppendLine(exceptionEntry.StackTrace);
+                    readable.AppendLine();
                 }
-
-                readable.AppendLine();
             }
-            
+           
             return readable.ToString();
         }
 

@@ -66,6 +66,7 @@ namespace OmniCore.Repository
                     Name = "First User",
                 });
             }
+            await SaveChangesAsync();
             
             #if DEBUG
 
@@ -76,6 +77,7 @@ namespace OmniCore.Repository
                     DeviceUuid = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7"),
                     UserDescription = "greenie"
                 });
+                await SaveChangesAsync();
             }
 
             if (!Pods.Any())
@@ -85,18 +87,21 @@ namespace OmniCore.Repository
                     Lot = 1,
                     Serial = 1,
                     RadioAddress = 0x11121212,
-                    Radio = Radios.FirstOrDefault()
+                    Radio = Radios.First(),
+                    User = Users.First()
                 });
+                await SaveChangesAsync();
             }
             
             #endif
-            
-            await SaveChangesAsync();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite(ConnectionString);
+            #if DEBUG
+            optionsBuilder.EnableDetailedErrors(true);
+            #endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

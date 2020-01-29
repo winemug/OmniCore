@@ -40,7 +40,7 @@ namespace OmniCore.Client.Platform
         private ISubject<int> RssiReceivedSubject;
         private TimeSpan? RssiAutoUpdateIntervalInternal;
 
-        public Guid PeripheralUuid => Device.Uuid;
+        public Guid? PeripheralUuid => Device?.Uuid;
         public Guid[] ServiceUuids { get; private set; }
         public IObservable<string> Name => NameSubject;
         public IObservable<PeripheralState> State => StateSubject;
@@ -223,15 +223,6 @@ namespace OmniCore.Client.Platform
         {
             if (!ReferenceEquals(Device, newDevice))
             {
-                if (Device != null && newDevice == null)
-                {
-                    StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
-                }
-                else if (newDevice != null)
-                {
-                    StateSubject.OnNext(Model.Enumerations.PeripheralState.Online);
-                }
-
                 DeviceStateSubscription?.Dispose();
                 DeviceNameSubscription?.Dispose();
                 DeviceRssiSubscription?.Dispose();
@@ -240,9 +231,17 @@ namespace OmniCore.Client.Platform
                 DeviceNameSubscription = null;
                 DeviceRssiSubscription = null;
 
+                var oldDevice = Device;
                 Device = newDevice;
+                
+                if (oldDevice != null && newDevice == null)
+                {
+                    StateSubject.OnNext(PeripheralState.Offline);
+                }
+                
                 if (Device != null)
                 {
+                    StateSubject.OnNext(PeripheralState.Online);
                     DeviceStateSubscription = Device.WhenStatusChanged().Subscribe(async status =>
                     {
                         switch (status)

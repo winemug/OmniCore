@@ -9,8 +9,8 @@ using OmniCore.Repository;
 namespace OmniCore.Repository.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20200126135435_mig001")]
-    partial class mig001
+    [Migration("20200129140626_m0000")]
+    partial class m0000
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,13 +24,13 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<decimal?>("DeliveredAmount")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("DeliveryStart")
+                    b.Property<DateTime?>("DeliveryStart")
                         .HasColumnType("TEXT");
 
                     b.Property<decimal?>("IntendedAmount")
@@ -42,28 +42,18 @@ namespace OmniCore.Repository.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("MedicationId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long?>("PodId")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MedicationId");
-
                     b.HasIndex("PodId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("MedicationDeliveries");
                 });
@@ -74,7 +64,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Hormone")
@@ -101,7 +91,7 @@ namespace OmniCore.Repository.Migrations
                     b.Property<decimal>("UnitsPerMilliliter")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -115,7 +105,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ExpiredReminder")
@@ -160,7 +150,7 @@ namespace OmniCore.Repository.Migrations
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.Property<long?>("UserId")
@@ -183,7 +173,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ErrorText")
@@ -207,22 +197,22 @@ namespace OmniCore.Repository.Migrations
                     b.Property<int>("RequestType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset?>("ResultReceived")
+                    b.Property<DateTime?>("ResultReceived")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("StartEarliest")
+                    b.Property<DateTime?>("StartEarliest")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("StartLatest")
+                    b.Property<DateTime?>("StartLatest")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Started")
+                    b.Property<DateTime?>("Started")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -238,7 +228,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FaultResponse")
@@ -248,9 +238,6 @@ namespace OmniCore.Repository.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("PodId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("PodRequestId")
@@ -268,15 +255,13 @@ namespace OmniCore.Repository.Migrations
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("VersionResponse")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PodId");
 
                     b.HasIndex("PodRequestId");
 
@@ -289,7 +274,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeviceName")
@@ -310,7 +295,7 @@ namespace OmniCore.Repository.Migrations
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserDescription")
@@ -327,7 +312,7 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Data")
@@ -339,13 +324,7 @@ namespace OmniCore.Repository.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("PodId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long?>("RadioId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("RequestId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("Rssi")
@@ -357,16 +336,12 @@ namespace OmniCore.Repository.Migrations
                     b.Property<string>("Text")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PodId");
-
                     b.HasIndex("RadioId");
-
-                    b.HasIndex("RequestId");
 
                     b.ToTable("RadioEvents");
                 });
@@ -377,10 +352,10 @@ namespace OmniCore.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("Gender")
@@ -398,7 +373,7 @@ namespace OmniCore.Repository.Migrations
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -408,17 +383,9 @@ namespace OmniCore.Repository.Migrations
 
             modelBuilder.Entity("OmniCore.Model.Entities.MedicationDeliveryEntity", b =>
                 {
-                    b.HasOne("OmniCore.Model.Entities.MedicationEntity", "Medication")
-                        .WithMany()
-                        .HasForeignKey("MedicationId");
-
                     b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
                         .WithMany()
                         .HasForeignKey("PodId");
-
-                    b.HasOne("OmniCore.Model.Entities.UserEntity", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("OmniCore.Model.Entities.PodEntity", b =>
@@ -445,28 +412,16 @@ namespace OmniCore.Repository.Migrations
 
             modelBuilder.Entity("OmniCore.Model.Entities.PodResponseEntity", b =>
                 {
-                    b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
-                        .WithMany()
-                        .HasForeignKey("PodId");
-
                     b.HasOne("OmniCore.Model.Entities.PodRequestEntity", "PodRequest")
-                        .WithMany()
+                        .WithMany("Responses")
                         .HasForeignKey("PodRequestId");
                 });
 
             modelBuilder.Entity("OmniCore.Model.Entities.RadioEventEntity", b =>
                 {
-                    b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
-                        .WithMany()
-                        .HasForeignKey("PodId");
-
                     b.HasOne("OmniCore.Model.Entities.RadioEntity", "Radio")
                         .WithMany()
                         .HasForeignKey("RadioId");
-
-                    b.HasOne("OmniCore.Model.Entities.PodRequestEntity", "Request")
-                        .WithMany()
-                        .HasForeignKey("RequestId");
                 });
 #pragma warning restore 612, 618
         }

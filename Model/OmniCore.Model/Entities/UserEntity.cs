@@ -8,7 +8,7 @@ namespace OmniCore.Model.Entities
         public bool ManagedRemotely { get; set; }
         public string Name { get; set; }
         public Genotype? Gender { get; set; }
-        public DateTimeOffset? DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
     }
 
 }

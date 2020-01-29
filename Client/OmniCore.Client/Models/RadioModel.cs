@@ -15,7 +15,7 @@ namespace OmniCore.Client.Models
 
         public string Name { get; set; }
 
-        public string MacAddress => Radio.Peripheral.PeripheralUuid.AsMacAddress();
+        public string MacAddress => Radio.Peripheral.PeripheralUuid?.AsMacAddress();
 
         public string Rssi { get; set; }
         public string DiscoveryState { get; set; }

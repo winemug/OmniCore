@@ -189,8 +189,11 @@ namespace OmniCore.Client.Platform
                                 ((RadioPeripheral) peripheral).SetDevice(connectedDevice);
                             }
 
-                            observer.OnNext(peripheral);
-                            observedPeripheralUuids.Add(peripheral.PeripheralUuid);
+                            if (peripheral.PeripheralUuid.HasValue)
+                            {
+                                observer.OnNext(peripheral);
+                                observedPeripheralUuids.Add(peripheral.PeripheralUuid.Value);
+                            }
                         }
 
                         if (!CrossBleAdapter.Current.IsScanning)
@@ -208,10 +211,11 @@ namespace OmniCore.Client.Platform
                                     peripheral.SetParametersFromScanResult(scanResult);
                                 }
 
-                                if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
+                                if (peripheral.PeripheralUuid.HasValue &&
+                                    !observedPeripheralUuids.Contains(peripheral.PeripheralUuid.Value))
                                 {
                                     observer.OnNext(peripheral);
-                                    observedPeripheralUuids.Add(peripheral.PeripheralUuid);
+                                    observedPeripheralUuids.Add(peripheral.PeripheralUuid.Value);
                                 }
                             });
                     }
