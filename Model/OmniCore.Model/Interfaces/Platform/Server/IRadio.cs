@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IRadio : IServerResolvable, ILeaseable<IRadio>, IDisposable
     {
-        IRadioPeripheral Peripheral { get; set; }
+        IBlePeripheral Peripheral { get; set; }
         RadioEntity Entity { get; set; }
         bool InUse { get; set; }
         RadioActivity Activity { get; set; }

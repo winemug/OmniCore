@@ -54,11 +54,6 @@ namespace OmniCore.Client.Droid
 
             base.OnCreate(savedInstanceState);
 
-            //TODO: move
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
-            CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
-
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
             Xamarin.Forms.Forms.SetFlags("CarouselView_Experimental");
@@ -116,7 +111,7 @@ namespace OmniCore.Client.Droid
             var permissions = new List<string>()
             {
                 Manifest.Permission.AccessCoarseLocation,
-                Manifest.Permission.BluetoothAdmin,
+                Manifest.Permission.BluetoothPrivileged,
                 Manifest.Permission.ReadExternalStorage,
                 Manifest.Permission.WriteExternalStorage,
             };

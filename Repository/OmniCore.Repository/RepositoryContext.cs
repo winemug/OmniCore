@@ -75,8 +75,21 @@ namespace OmniCore.Repository
                 Radios.Add(new RadioEntity
                 {
                     DeviceUuid = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7"),
-                    UserDescription = "greenie"
+                    UserDescription = "greenie",
+                    Options = new RadioOptions
+                    {
+                        RssiUpdateInterval = TimeSpan.FromSeconds(20),
+                        RadioDiscoveryCooldown =  TimeSpan.FromSeconds(5),
+                        RadioDiscoveryTimeout = TimeSpan.FromSeconds(30)
+                    }
                 });
+                
+                Radios.Add(new RadioEntity
+                {
+                    DeviceUuid = Guid.Parse("00000000-0000-0000-0000-000780393D00"),
+                    UserDescription = "eddie"
+                });
+                
                 await SaveChangesAsync();
             }
 

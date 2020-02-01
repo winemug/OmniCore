@@ -17,8 +17,8 @@ namespace OmniCore.Client
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IRadioAdapter, RadioAdapter>()
-                .Many<IRadioPeripheral, RadioPeripheral>();
+                .One<IBlePeripheralAdapter, BlePeripheralAdapter>()
+                .Many<IBlePeripheral, BlePeripheral>();
         }
 
         public static ICoreContainer<IClientResolvable> WithXamarinForms

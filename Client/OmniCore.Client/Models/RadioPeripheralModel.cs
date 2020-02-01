@@ -11,7 +11,7 @@ namespace OmniCore.Client.Models
 {
     public class RadioPeripheralModel : INotifyPropertyChanged
     {
-        public readonly IRadioPeripheral Peripheral;
+        public readonly IBlePeripheral Peripheral;
         public string Name { get; set; }
         public string MacAddress => Peripheral.PeripheralUuid?.AsMacAddress();
         public string Rssi { get; set; }
@@ -19,7 +19,7 @@ namespace OmniCore.Client.Models
         public string ConnectionState { get; set; }
         public bool IsChecked { get; set; }
 
-        public RadioPeripheralModel(IRadioPeripheral peripheral)
+        public RadioPeripheralModel(IBlePeripheral peripheral)
         {
             Peripheral = peripheral;
             Peripheral.Name.Subscribe(s => Name = s);

@@ -6,9 +6,9 @@ namespace OmniCore.Model.Enumerations
 {
     public enum PeripheralState
     {
+        Unknown,
         Offline,
-        Discovering,
-        Online,
-        Busy
+        Searching,
+        Online
     }
 }

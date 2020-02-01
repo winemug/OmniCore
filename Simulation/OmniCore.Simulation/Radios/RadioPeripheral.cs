@@ -9,7 +9,7 @@ using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Simulation.Radios
 {
-//    public class RadioPeripheral : IRadioPeripheral
+//    public class RadioPeripheral : IBlePeripheral
 //    {
 //        public void Dispose()
 //        {

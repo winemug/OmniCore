@@ -24,7 +24,7 @@ namespace OmniCore.Eros
 
         public IRadioService[] RadioProviders { get; }
         
-        private readonly IRadioAdapter RadioAdapter;
+        private readonly IBlePeripheralAdapter BlePeripheralAdapter;
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
         private readonly ICoreApi Api;
@@ -34,7 +34,7 @@ namespace OmniCore.Eros
 
 
         public ErosPodService(
-            IRadioAdapter radioAdapter,
+            IBlePeripheralAdapter blePeripheralAdapter,
             IRadioService radioServiceRileyLink,
             ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions,
@@ -45,7 +45,7 @@ namespace OmniCore.Eros
             Api = api;
 
             RadioProviders = new[] {radioServiceRileyLink};
-            RadioAdapter = radioAdapter;
+            BlePeripheralAdapter = blePeripheralAdapter;
             PodDictionary = new ConcurrentDictionary<long, IPod>();
             PodCreateLock = new AsyncLock();
         }

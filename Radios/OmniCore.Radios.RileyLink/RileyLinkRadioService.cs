@@ -25,7 +25,7 @@ namespace OmniCore.Radios.RileyLink
     {
         private readonly Guid RileyLinkServiceUUID = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
 
-        private readonly IRadioAdapter RadioAdapter;
+        private readonly IBlePeripheralAdapter BlePeripheralAdapter;
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreNotificationFunctions NotificationFunctions;
         private readonly IRepositoryService RepositoryService;
@@ -34,12 +34,12 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid,IRadio> RadioDictionary;
 
         public RileyLinkRadioService(
-            IRadioAdapter radioAdapter, 
+            IBlePeripheralAdapter blePeripheralAdapter, 
             IRepositoryService repositoryService,
             ICoreNotificationFunctions notificationFunctions,
             ICoreContainer<IServerResolvable> container) : base()
         {
-            RadioAdapter = radioAdapter;
+            BlePeripheralAdapter = blePeripheralAdapter;
             RepositoryService = repositoryService;
             Container = container;
             NotificationFunctions = notificationFunctions;
@@ -49,9 +49,9 @@ namespace OmniCore.Radios.RileyLink
 
         public string Description => "RileyLink";
 
-        public IObservable<IRadioPeripheral> ScanRadios()
+        public IObservable<IBlePeripheral> ScanRadios()
         {
-            return Observable.Create<IRadioPeripheral>( async (IObserver<IRadioPeripheral> observer) =>
+            return Observable.Create<IBlePeripheral>( async (IObserver<IBlePeripheral> observer) =>
             {
                 var cts = new CancellationTokenSource();
 
@@ -59,7 +59,7 @@ namespace OmniCore.Radios.RileyLink
                 var context = Container.Get<IRepositoryContext>();
                 knownRadioIds = context.Radios.Select(r => r.DeviceUuid).ToList();
 
-                var scanner = RadioAdapter.FindPeripherals()
+                var scanner = BlePeripheralAdapter.FindPeripherals()
                     //.Where(p => p.ServiceUuids.Contains(RileyLinkServiceUUID))
                     .Where(p => p.PeripheralUuid.HasValue && 
                         !knownRadioIds.Contains(p.PeripheralUuid.Value))
@@ -77,7 +77,7 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
-        public Task<bool> VerifyPeripheral(IRadioPeripheral peripheral)
+        public Task<bool> VerifyPeripheral(IBlePeripheral peripheral)
         {
             throw new NotImplementedException();
         }
@@ -116,7 +116,7 @@ namespace OmniCore.Radios.RileyLink
             {
                 radio = Container.Get<IRadio>();
                 radio.Entity = radioEntity;
-                radio.Peripheral = RadioAdapter.GetPeripheral(radioEntity.DeviceUuid);
+                radio.Peripheral = BlePeripheralAdapter.GetPeripheral(radioEntity.DeviceUuid);
                 RadioDictionary.Add(radioEntity.DeviceUuid, radio);
             }
             return radio;
@@ -128,9 +128,9 @@ namespace OmniCore.Radios.RileyLink
         
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            await RadioAdapter.TryEnsureAdapterEnabled(cancellationToken);
+            await BlePeripheralAdapter.TryEnsureAdapterEnabled(cancellationToken);
 
-            AdapterEnabledSubscription = RadioAdapter.WhenAdapterEnabled().Subscribe(_ => 
+            AdapterEnabledSubscription = BlePeripheralAdapter.WhenAdapterEnabled().Subscribe(_ => 
             {
                 if (AdapterStatusNotification != null)
                 {
@@ -141,7 +141,7 @@ namespace OmniCore.Radios.RileyLink
                 }
             });
             
-            AdapterDisabledSubscription = RadioAdapter.WhenAdapterDisabled().Subscribe(async _ => 
+            AdapterDisabledSubscription = BlePeripheralAdapter.WhenAdapterDisabled().Subscribe(async _ => 
             {
                 AdapterStatusNotification?.Dispose();
                 AdapterStatusNotification = NotificationFunctions.CreateNotification(
@@ -149,7 +149,7 @@ namespace OmniCore.Radios.RileyLink
                     , null, false);
                     
                 using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-                if (!await RadioAdapter.TryEnableAdapter(timeoutSource.Token))
+                if (!await BlePeripheralAdapter.TryEnableAdapter(timeoutSource.Token))
                 {
                     AdapterStatusNotification?.Dispose();
                     AdapterStatusNotification = NotificationFunctions.CreateNotification(

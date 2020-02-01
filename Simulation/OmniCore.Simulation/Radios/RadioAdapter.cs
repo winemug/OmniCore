@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Simulation.Radios
 {
-    //public class RadioAdapter : IRadioAdapter
+    //public class RadioAdapter : IBlePeripheralAdapter
     //{
     //    public Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
     //    {
@@ -24,7 +24,7 @@ namespace OmniCore.Simulation.Radios
     //        return Task.FromResult(false);
     //    }
 
-    //    public IObservable<IRadioPeripheral> FindPeripherals()
+    //    public IObservable<IBlePeripheral> FindPeripherals()
     //    {
     //        throw new NotImplementedException();
     //    }

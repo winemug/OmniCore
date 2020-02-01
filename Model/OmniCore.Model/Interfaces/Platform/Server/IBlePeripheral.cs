@@ -7,7 +7,7 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
-    public interface IRadioPeripheral : ILeaseable<IRadioPeripheral>, IServerResolvable
+    public interface IBlePeripheral : ILeaseable<IBlePeripheral>, IServerResolvable
     {
         Guid? PeripheralUuid { get; }
         Guid[] ServiceUuids { get; }
@@ -17,7 +17,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         IObservable<int> Rssi{ get; }
         TimeSpan? RssiAutoUpdateInterval { get; set; }
         void RequestRssi();
-        Task Locate(CancellationToken cancellationToken);
+        IObservable<IBlePeripheral> Locate();
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
         Task Disconnect(CancellationToken cancellationToken);
         Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken);

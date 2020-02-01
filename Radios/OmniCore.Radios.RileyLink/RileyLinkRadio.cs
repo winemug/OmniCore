@@ -3,9 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +26,7 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IRadio
     {
-        public IRadioPeripheral Peripheral { get; set; }
+        public IBlePeripheral Peripheral { get; set; }
         public RadioEntity Entity { get; set; }
         public async Task<ILease<IRadio>> Lease(CancellationToken cancellationToken)
         {
@@ -155,26 +157,27 @@ namespace OmniCore.Radios.RileyLink
             PeripheralStateSubscription?.Dispose();
             PeripheralStateSubscription = Peripheral.State.Subscribe(async (state) =>
             {
+                LocateSubscription?.Dispose();
                 switch (state)
                 {
+                    case PeripheralState.Unknown:
+                        LocateSubscription = Peripheral
+                            .Locate()
+                            .Timeout(Entity.Options.RadioDiscoveryTimeout)
+                            .Subscribe();
+                        break;
                     case PeripheralState.Offline:
                         await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
-                        LocateSubscription?.Dispose();
-                        LocateSubscription = Observable.Interval(Entity.Options.RadioDiscoveryCooldown).Subscribe(
-                            async _ =>
-                            {
-                                using var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
-                                try
-                                {
-                                    await Peripheral.Locate(cts.Token);
-                                }
-                                catch (OperationCanceledException e)
-                                {
-                                }
-                            });
+                        LocateSubscription = Observable.Timer(Entity.Options.RadioDiscoveryCooldown)
+                            .Select(l => Peripheral)
+                            .Concat(
+                                Peripheral
+                                    .Locate()
+                                    .Timeout(Entity.Options.RadioDiscoveryTimeout)
+                            ).Subscribe();
+                            
                         break;
                     case PeripheralState.Online:
-                        LocateSubscription?.Dispose();
                         LocateSubscription = null;
                         await RecordRadioEvent(RadioEvent.Online, CancellationToken.None);
                         if (Entity.Options.KeepConnected)
@@ -188,10 +191,6 @@ namespace OmniCore.Radios.RileyLink
                             {
                             }
                         }
-                        break;
-                    case PeripheralState.Discovering:
-                        LocateSubscription?.Dispose();
-                        LocateSubscription = null;
                         break;
                 }
             });
@@ -269,7 +268,7 @@ namespace OmniCore.Radios.RileyLink
             {
                 try
                 {
-                    await Peripheral.Connect(Entity.Options.KeepConnected, linkedCancellation.Token);
+                    await Peripheral.Connect(false, linkedCancellation.Token);
                 }
                 catch (Exception e)
                 {

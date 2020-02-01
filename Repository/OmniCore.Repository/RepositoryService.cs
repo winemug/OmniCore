@@ -27,7 +27,7 @@ namespace OmniCore.Repository
         {
             var context = (RepositoryContext) ServerContainer.Get<IRepositoryContext>();
             #if DEBUG
-            //context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
             #endif
             await context.Database.MigrateAsync(cancellationToken);
             await context.SeedData();

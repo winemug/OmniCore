@@ -14,6 +14,7 @@ using Android.Widget;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Platform.Common;
 using OmniCore.Services;
 
@@ -25,6 +26,7 @@ namespace OmniCore.Mobile.Droid.Platform
         public void Debug(string message)
         {
             Log.Debug(TAG, message);
+            System.Diagnostics.Debug.WriteLine(message);
         }
 
         public void Error(string message)
@@ -34,7 +36,7 @@ namespace OmniCore.Mobile.Droid.Platform
 
         public void Error(string message, Exception e)
         {
-            Log.Error(TAG, FormatExceptionMessage(message, e));
+            Log.Error(TAG, $"{message}\n{e.AsDebugFriendly()}");
         }
 
         public void Information(string message)
@@ -54,28 +56,7 @@ namespace OmniCore.Mobile.Droid.Platform
 
         public void Warning(string message, Exception e)
         {
-            Log.Warn(TAG, FormatExceptionMessage(message,e));
-        }
-
-        private string FormatExceptionMessage(string message, Exception e)
-        {
-            var errMessage = new StringBuilder();
-            errMessage.AppendLine(message);
-            errMessage.AppendLine($"Exception: {e}");
-            while (true)
-            {
-                errMessage.AppendLine($"StatusMessage: {e.Message}");
-                errMessage.AppendLine($"Requestor: {e.Source}");
-                errMessage.AppendLine($"Trace: {e.StackTrace}");
-                e = e.InnerException;
-                if (e != null)
-                {
-                    errMessage.AppendLine($"Inner Exception: {e}");
-                }
-                else
-                    break;
-            }
-            return errMessage.ToString();
+            Log.Warn(TAG, $"{message}\n{e.AsDebugFriendly()}");
         }
     }
 }
