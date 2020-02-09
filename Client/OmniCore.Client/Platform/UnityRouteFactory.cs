@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 

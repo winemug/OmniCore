@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Internal;
 
-namespace OmniCore.Model.Interfaces.Base
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface ICoreService : IDisposablesContainer, IServerResolvable, INotifyStatus
     {

@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Base;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IRepositoryService : ICoreService
+    public interface ICoreRepositoryService : ICoreService
     {
         Task Import(string importPath, CancellationToken cancellationToken);
         Task Restore(string backupPath, CancellationToken cancellationToken);

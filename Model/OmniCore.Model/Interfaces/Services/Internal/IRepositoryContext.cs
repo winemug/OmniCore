@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {

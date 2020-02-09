@@ -30,7 +30,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         private ICoreApplicationFunctions ApplicationFunctions => Api.ApplicationFunctions;
 
-        private IPodService PodService => Api.PodService;
+        private ICorePodService CorePodService => Api.CorePodService;
 
         public PodsViewModel(ICoreClient client) : base(client)
         {
@@ -42,7 +42,7 @@ namespace OmniCore.Client.ViewModels.Home
         {
             
             Pods = new List<IPod>();
-            foreach (var pod in await PodService.ActivePods(CancellationToken.None))
+            foreach (var pod in await CorePodService.ActivePods(CancellationToken.None))
             {
                 Pods.Add(pod);
             }

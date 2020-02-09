@@ -1,6 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Base;
-
-namespace OmniCore.Model.Interfaces.Common
+﻿namespace OmniCore.Model.Interfaces.Common
 {
     public interface ICoreContainer<in TResolvable> : IServerResolvable, IClientResolvable
         where TResolvable : IResolvable

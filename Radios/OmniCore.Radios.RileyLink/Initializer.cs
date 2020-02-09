@@ -1,5 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Base;
-using OmniCore.Model.Interfaces.Common;
+﻿using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Radios.RileyLink

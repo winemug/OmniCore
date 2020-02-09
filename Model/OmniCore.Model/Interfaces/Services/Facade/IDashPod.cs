@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface IPodDash : IPod
+    public interface IDashPod : IPod
     {
         Task<IPodRequest> Activate();
     }

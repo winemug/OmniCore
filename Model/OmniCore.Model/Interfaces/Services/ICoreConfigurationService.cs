@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IConfigurationService : IServerResolvable
+    public interface ICoreConfigurationService : IServerResolvable
     {
         Task<IDashConfiguration> GetDefaultDashConfiguration();
         Task SetDefaultDashConfiguration(IDashConfiguration dashConfiguration);

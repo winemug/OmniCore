@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
@@ -14,14 +13,14 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Eros
 {
-    public class ErosPod : IPodEros
+    public class ErosPod : IErosPod
     {
         public PodEntity Entity { get; set; }
         public PodRunningState RunningState { get; }
         public IPodRequest ActiveRequest { get; }
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly IRepositoryService RepositoryService;
+        private readonly ICoreRepositoryService CoreRepositoryService;
         private readonly ITaskQueue TaskQueue;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,

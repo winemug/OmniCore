@@ -26,7 +26,6 @@ using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
@@ -46,11 +45,11 @@ namespace OmniCore.Client.Droid.Services
         public ICoreContainer<IServerResolvable> ServerContainer { get; private set; }
         public ICoreLoggingFunctions LoggingFunctions => ServerContainer.Get<ICoreLoggingFunctions>();
         public ICoreApplicationFunctions ApplicationFunctions => ServerContainer.Get<ICoreApplicationFunctions>();
-        public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
-        public IPodService PodService => ServerContainer.Get<IPodService>();
+        public ICoreRepositoryService CoreRepositoryService => ServerContainer.Get<ICoreRepositoryService>();
+        public ICorePodService CorePodService => ServerContainer.Get<ICorePodService>();
         public ICoreNotificationFunctions NotificationFunctions => ServerContainer.Get<ICoreNotificationFunctions>();
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
-        public IConfigurationService ConfigurationService => ServerContainer.Get<IConfigurationService>();
+        public ICoreConfigurationService CoreConfigurationService => ServerContainer.Get<ICoreConfigurationService>();
 
         private ISubject<ICoreApi> UnexpectedStopRequestSubject;
         private CoreNotification ServiceNotification; 
@@ -128,16 +127,16 @@ namespace OmniCore.Client.Droid.Services
         }
         public async Task StartServices(CancellationToken cancellationToken)
         {
-            await RepositoryService.StartService(cancellationToken);
-            await PodService.StartService(cancellationToken);
+            await CoreRepositoryService.StartService(cancellationToken);
+            await CorePodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
         }
 
         public async Task StopServices(CancellationToken cancellationToken)
         {
             await IntegrationService.StopService(cancellationToken);
-            await PodService.StopService(cancellationToken);
-            await RepositoryService.StopService(cancellationToken);
+            await CorePodService.StopService(cancellationToken);
+            await CoreRepositoryService.StopService(cancellationToken);
         }
         
         public void UnexpectedStopRequested()

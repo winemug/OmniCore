@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Client

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
@@ -22,13 +21,13 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid, IErosRadio> RadioDictionary;
         
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly IRepositoryService RepositoryService;
+        private readonly ICoreRepositoryService CoreRepositoryService;
         
         public RileyLinkRadioProvider(
-            IRepositoryService repositoryService,
+            ICoreRepositoryService coreRepositoryService,
             ICoreContainer<IServerResolvable> container)
         {
-            RepositoryService = repositoryService;
+            CoreRepositoryService = coreRepositoryService;
             Container = container;
             
             RadioDictionary = new Dictionary<Guid, IErosRadio>();

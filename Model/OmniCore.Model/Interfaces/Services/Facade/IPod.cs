@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {

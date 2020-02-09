@@ -3,7 +3,6 @@ using OmniCore.Client.Droid.Platform;
 using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;

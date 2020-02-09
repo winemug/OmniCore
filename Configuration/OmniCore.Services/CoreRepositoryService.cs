@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Services
 {
-    public class RepositoryService : OmniCoreServiceBase, IRepositoryService
+    public class CoreRepositoryService : OmniCoreServiceBase, ICoreRepositoryService
     {
         private readonly ICoreContainer<IServerResolvable> ServerContainer;
         private readonly ICoreApplicationFunctions CoreApplicationFunctions;
-        public RepositoryService(ICoreContainer<IServerResolvable> serverContainer,
+        public CoreRepositoryService(ICoreContainer<IServerResolvable> serverContainer,
             ICoreApplicationFunctions coreApplicationFunctions)
         {
             ServerContainer = serverContainer;

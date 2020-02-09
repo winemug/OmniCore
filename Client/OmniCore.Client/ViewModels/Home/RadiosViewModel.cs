@@ -36,7 +36,7 @@ namespace OmniCore.Client.ViewModels.Home
         protected override Task OnPageAppearing()
         {
             Radios = new ObservableCollection<RadioModel>();
-            Api.PodService.ListErosRadios()
+            Api.CorePodService.ListErosRadios()
                 .ObserveOn(Client.SynchronizationContext)
                 .Subscribe(radio =>
                     {

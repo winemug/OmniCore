@@ -16,7 +16,6 @@ using Nito.AsyncEx;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;

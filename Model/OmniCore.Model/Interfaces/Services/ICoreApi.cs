@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services
 {
@@ -11,9 +11,9 @@ namespace OmniCore.Model.Interfaces.Services
         ICoreLoggingFunctions LoggingFunctions { get; }
         ICoreApplicationFunctions ApplicationFunctions { get; }
         ICoreNotificationFunctions NotificationFunctions { get; }
-        IRepositoryService RepositoryService { get; }
-        IConfigurationService ConfigurationService { get; }
-        IPodService PodService { get; }
+        ICoreRepositoryService CoreRepositoryService { get; }
+        ICoreConfigurationService CoreConfigurationService { get; }
+        ICorePodService CorePodService { get; }
         ICoreIntegrationService IntegrationService { get; }
     }
 }

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
@@ -17,19 +16,19 @@ namespace OmniCore.Eros
     public class ErosPodProvider : IErosPodProvider
     {
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ConcurrentDictionary<long, IPodEros> PodDictionary;
+        private readonly ConcurrentDictionary<long, IErosPod> PodDictionary;
         private readonly AsyncLock PodLock;
 
         public ErosPodProvider(ICoreContainer<IServerResolvable> container)
         {
             Container = container;
-            PodDictionary = new ConcurrentDictionary<long, IPodEros>();
+            PodDictionary = new ConcurrentDictionary<long, IErosPod>();
             PodLock = new AsyncLock();
         }
-        public async Task<IList<IPodEros>> ActivePods(CancellationToken cancellationToken)
+        public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
         {
             var context = Container.Get<IRepositoryContext>();
-            var pods = new List<IPodEros>();
+            var pods = new List<IErosPod>();
             context.Pods.Where(p => !p.IsDeleted)
                 .Include(p => p.Medication)
                 .Include(p => p.Radios)
@@ -39,7 +38,7 @@ namespace OmniCore.Eros
             return pods;
         }
         
-        private async Task<IPodEros> GetPodInternal(PodEntity podEntity)
+        private async Task<IErosPod> GetPodInternal(PodEntity podEntity)
         {
             using var podLock = await PodLock.LockAsync();
             if (PodDictionary.ContainsKey(podEntity.Id))

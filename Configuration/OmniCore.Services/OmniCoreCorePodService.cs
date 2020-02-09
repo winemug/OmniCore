@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
@@ -19,7 +18,7 @@ using IUser = OmniCore.Model.Interfaces.Services.Facade.IUser;
 
 namespace OmniCore.Services
 {
-    public class OmniCorePodService : OmniCoreServiceBase, IPodService
+    public class OmniCoreCorePodService : OmniCoreServiceBase, ICorePodService
     {
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IErosRadioProvider[] ErosRadioProviders;
@@ -33,7 +32,7 @@ namespace OmniCore.Services
         private IDisposable AdapterDisabledSubscription;
         private ICoreNotification AdapterStatusNotification;
         
-        public OmniCorePodService(
+        public OmniCoreCorePodService(
             ICoreContainer<IServerResolvable> container,
             IErosRadioProvider[] erosRadioProviders,
             ICoreApplicationFunctions applicationFunctions,
@@ -181,12 +180,12 @@ namespace OmniCore.Services
             return null;
         }
 
-        public async Task<IPodEros> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken)
+        public async Task<IErosPod> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }
         
-        public async Task<IPodDash> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)
+        public async Task<IDashPod> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }

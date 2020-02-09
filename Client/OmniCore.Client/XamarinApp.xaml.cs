@@ -10,8 +10,8 @@ using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Common;
 using Xamarin.Forms;
 
 namespace OmniCore.Client

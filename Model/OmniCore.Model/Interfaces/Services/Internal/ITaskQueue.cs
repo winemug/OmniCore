@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services.Internal

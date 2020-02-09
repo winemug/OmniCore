@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using OmniCore.Model.Interfaces.Base;
 using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Client

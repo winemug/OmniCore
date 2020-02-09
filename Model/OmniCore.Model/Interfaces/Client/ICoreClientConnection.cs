@@ -1,5 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Client
