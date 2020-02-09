@@ -22,8 +22,8 @@ namespace OmniCore.Client.ViewModels.Wizards
         public ICommand NextPageCommand { get; private set; }
         public ContentView ActiveView { get; private set; }
 
-        private PodWizardCreationOptions CreationOptionsView = new PodWizardCreationOptions();
-        private PodWizardExistingPodOptions ExistingInActivationView = new PodWizardExistingPodOptions();
+        private PodWizardActivationTypeSelection ActivationTypeSelectionView = new PodWizardActivationTypeSelection();
+        private PodWizardPendingActivationsWarning PendingActivationsWarningView = new PodWizardPendingActivationsWarning();
         private PodWizardAdvancedOptions Page3 = new PodWizardAdvancedOptions();
         private PodWizardIntegrationOptions Page5 = new PodWizardIntegrationOptions();
         private PodWizardMedicationSelection Page6 = new PodWizardMedicationSelection();
@@ -41,11 +41,11 @@ namespace OmniCore.Client.ViewModels.Wizards
                 var activePods = await Api.CorePodService.ActivePods(CancellationToken.None);
                 if (activePods.Any(p => p.RunningState.State <= PodState.Started))
                 {
-                    ActiveView = ExistingInActivationView;
+                    ActiveView = PendingActivationsWarningView;
                 }
                 else
                 {
-                    ActiveView = CreationOptionsView;
+                    ActiveView = ActivationTypeSelectionView;
                 }
             }
             else

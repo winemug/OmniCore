@@ -4,7 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardCreationOptions">
+             x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardActivationTypeSelection">
     <ContentView.Content>
         <ScrollView>
         <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start"
@@ -41,7 +41,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Label Text="Recover a pod created by a third party, which failed to start or has already started."
+                <Label Text="Recover a pod that is stuck in activation or already started by another application"
                        FontSize="Body" HorizontalOptions="StartAndExpand" Padding="10" Grid.Row="0"/>
 
                 <Button Text="Omnipod Eros Recovery" Grid.Row="1" HorizontalOptions="Center"/>

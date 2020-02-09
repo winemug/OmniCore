@@ -32,10 +32,4 @@
                            VerticalOptions="End"/>-->
         </StackLayout>
     </ContentPage.Content>
-    <Shell.TitleView>
-        <ContentView>
-            <Button Image="ic_action_arrow_forward.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
-                    Command="{Binding NextPageCommand}" Padding="4"/>
-        </ContentView>
-    </Shell.TitleView>
 </ContentPage>

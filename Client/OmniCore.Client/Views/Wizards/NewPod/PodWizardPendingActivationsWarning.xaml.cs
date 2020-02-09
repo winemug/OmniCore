@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Wizards.NewPod
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PodWizardExistingPodOptions
+    public partial class PodWizardPendingActivationsWarning
     {
-        public PodWizardExistingPodOptions()
+        public PodWizardPendingActivationsWarning()
         {
             InitializeComponent();
         }

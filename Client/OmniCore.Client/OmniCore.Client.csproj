@@ -92,6 +92,12 @@
     <Compile Update="Views\Main\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml.cs">
+      <DependentUpon>PodWizardPendingActivationsWarning.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardActivationTypeSelection.xaml.cs">
+      <DependentUpon>PodWizardActivationTypeSelection.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml.cs">
       <DependentUpon>PodWizardMedicationSelection.xaml</DependentUpon>
     </Compile>
@@ -167,10 +173,10 @@
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardAdvancedOptions.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardCreationOptions.xaml">
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardActivationTypeSelection.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardExistingPodOptions.xaml">
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardIntegrationOptions.xaml">
