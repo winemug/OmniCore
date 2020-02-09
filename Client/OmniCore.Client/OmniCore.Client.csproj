@@ -95,9 +95,6 @@
     <Compile Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml.cs">
       <DependentUpon>PodWizardMedicationSelection.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml.cs">
-      <DependentUpon>PodWizardPodTypeSelection.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
       <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
@@ -183,9 +180,6 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardRadioSelection.xaml">

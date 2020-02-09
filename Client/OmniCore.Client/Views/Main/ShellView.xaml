@@ -31,9 +31,9 @@
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
         <Tab Title="Pods">
-            <ShellContent ContentTemplate="{Binding PodsView}" Title="Active" Route="Pods"/>
-            <ShellContent ContentTemplate="{Binding PodsView}" Title="Waiting" Route="Pods"/>
-            <ShellContent ContentTemplate="{Binding PodsView}" Title="Archived" Route="Pods"/>
+            <ShellContent ContentTemplate="{Binding PodsView}" Title="Active" Route="ActivePods"/>
+            <ShellContent ContentTemplate="{Binding PodsView}" Title="Waiting" Route="WaitingPods"/>
+            <ShellContent ContentTemplate="{Binding PodsView}" Title="Archived" Route="ArchivedPods"/>
         </Tab>
         <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activities" Route="Activities"/>
     </FlyoutItem>
