@@ -6,82 +6,49 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardCreationOptions">
     <ContentView.Content>
-            <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start">
-                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
-                    <Label Text="I want to activate a new pod" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                    <Grid Grid.Row="1" Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </Grid>
-                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
-                    <Label Text="I want to continue where I left off" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                    <Grid Grid.Row="1" Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox IsChecked="False" HorizontalOptions="End"/>
-                        <Label Text="Continue activating pod xyzt" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                        <CheckBox IsChecked="False" HorizontalOptions="End" Grid.Row="1"/>
-                        <Label Text="Start pod uvwa" FontSize="Large" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                    </Grid>
-                </Grid>
-                <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="False" HorizontalOptions="End"/>
-                    <Label Text="The pod I have is already running" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                    <Grid Grid.Row="1" Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox IsChecked="False" HorizontalOptions="End"/>
-                        <Label Text="and I know all there is to know" FontSize="Large" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                        <CheckBox IsChecked="False" HorizontalOptions="End" Grid.Row="1"/>
-                        <Label Text="I want a new pod dammit" FontSize="Large" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center"/>
-                    </Grid>
-                </Grid>
+        <ScrollView>
+        <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start"
+                     Padding="10">
+
+            <Label Text="Add a new pod"
+                   FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" Padding="10"/>
+
+            <Grid Padding="5" BackgroundColor="#FACAAD">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Text="Start an Omnipod Eros using a radio device such as RileyLink or Rftp"
+                       FontSize="Body" HorizontalOptions="StartAndExpand" Padding="10"/>
+
+                <Button Text="Omnipod Eros" Grid.Row="1" HorizontalOptions="Center"/>
+            </Grid>
+
+            <Grid Padding="5" BackgroundColor="#8DADFA">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Text="Start an Omnipod Dash using your mobile device."
+                       FontSize="Body" HorizontalOptions="StartAndExpand" Padding="10"/>
+
+                <Button Text="Omnipod Dash" Grid.Row="1" HorizontalOptions="Center"/>
+            </Grid>
+
+            <Grid Padding="5" BackgroundColor="#8DBD7A">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Text="Recover a pod created by a third party, which failed to start or has already started."
+                       FontSize="Body" HorizontalOptions="StartAndExpand" Padding="10" Grid.Row="0"/>
+
+                <Button Text="Omnipod Eros Recovery" Grid.Row="1" HorizontalOptions="Center"/>
+            </Grid>
+
             </StackLayout>
+        </ScrollView>
     </ContentView.Content>
     <Shell.TitleView>
         <ContentView>

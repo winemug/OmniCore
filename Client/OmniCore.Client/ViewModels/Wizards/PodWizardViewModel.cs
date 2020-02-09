@@ -17,10 +17,7 @@ namespace OmniCore.Client.ViewModels.Wizards
     public class PodWizardViewModel : BaseViewModel
     {
         public ICommand NextPageCommand { get; private set; }
-
-        public ObservableCollection<ContentView> Views { get; private set; }
-
-        private Func<Page> NextPageFunction = null;
+        public ContentView ActiveView { get; private set; }
 
         private PodWizardCreationOptions Page1 = new PodWizardCreationOptions();
         private PodWizardExistingPodOptions Page2 = new PodWizardExistingPodOptions();
@@ -30,20 +27,20 @@ namespace OmniCore.Client.ViewModels.Wizards
         private PodWizardMedicationSelection Page6 = new PodWizardMedicationSelection();
         private PodWizardRadioSelection Page7 = new PodWizardRadioSelection();
 
+        public bool OptionActivateNewPod { get; set; }
+
         public PodWizardViewModel(ICoreClient client) : base(client)
         {
-            Views = new ObservableCollection<ContentView>(
-                new ContentView[] { Page1, Page2, Page3, Page4, Page5, Page6, Page7});
-
+            ActiveView = Page1;
             NextPageCommand = new Command(async () => { await GoToNextPage(); });
         }
         private async Task GoToNextPage()
         {
-            var nextPage = NextPageFunction?.Invoke();
-            if (nextPage != null)
-            {
-                await Shell.Current.Navigation.PushAsync(nextPage);
-            }
+            //var nextPage = NextPageFunction?.Invoke();
+            //if (nextPage != null)
+            //{
+            //    await Shell.Current.Navigation.PushAsync(nextPage);
+            //}
         }
     }
 }
