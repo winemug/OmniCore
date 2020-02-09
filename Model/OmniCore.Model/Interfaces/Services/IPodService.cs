@@ -4,16 +4,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Services.ServiceEntities;
 
 namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IPodService : ICoreService
     {
-        IRadioService[] RadioProviders { get; }
-        string Description { get; }
-        IList<IPod> ActivePods(CancellationToken cancellationToken);
-        IList<IPod> ArchivedPods(CancellationToken cancellationToken);
-        Task<IPod> New(UserEntity user, MedicationEntity medication, RadioEntity radio);
-        Task<IPod> Register(PodEntity pod, UserEntity user, RadioEntity radio);
+        Task<IList<IPod>> ActivePods(CancellationToken cancellationToken);
+        Task<IList<IPod>> ArchivedPods(CancellationToken cancellationToken);
+        Task<IPodEros> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken);
+        IObservable<IErosRadio> ListErosRadios();
+        Task<IPodDash> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken);
     }
 }

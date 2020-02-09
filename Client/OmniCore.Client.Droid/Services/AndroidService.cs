@@ -46,10 +46,10 @@ namespace OmniCore.Client.Droid.Services
         public ICoreLoggingFunctions LoggingFunctions => ServerContainer.Get<ICoreLoggingFunctions>();
         public ICoreApplicationFunctions ApplicationFunctions => ServerContainer.Get<ICoreApplicationFunctions>();
         public IRepositoryService RepositoryService => ServerContainer.Get<IRepositoryService>();
-        public IRadioService RadioService => ServerContainer.Get<IRadioService>();
         public IPodService PodService => ServerContainer.Get<IPodService>();
         public ICoreNotificationFunctions NotificationFunctions => ServerContainer.Get<ICoreNotificationFunctions>();
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
+        public IConfigurationService ConfigurationService => ServerContainer.Get<IConfigurationService>();
 
         private ISubject<ICoreApi> UnexpectedStopRequestSubject;
         private CoreNotification ServiceNotification; 
@@ -128,7 +128,6 @@ namespace OmniCore.Client.Droid.Services
         public async Task StartServices(CancellationToken cancellationToken)
         {
             await RepositoryService.StartService(cancellationToken);
-            await RadioService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
         }
@@ -137,7 +136,6 @@ namespace OmniCore.Client.Droid.Services
         {
             await IntegrationService.StopService(cancellationToken);
             await PodService.StopService(cancellationToken);
-            await RadioService.StopService(cancellationToken);
             await RepositoryService.StopService(cancellationToken);
         }
         

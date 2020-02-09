@@ -9,8 +9,8 @@ namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IBlePeripheral : ILeaseable<IBlePeripheral>, IServerResolvable
     {
-        Guid? PeripheralUuid { get; }
-        Guid[] ServiceUuids { get; }
+        Guid PeripheralUuid { get; }
+        Guid PrimaryServiceUuid { get; }
         IObservable<string> Name { get; }
         IObservable<PeripheralState> State { get; }
         IObservable<PeripheralConnectionState> ConnectionState { get; }

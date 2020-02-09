@@ -1,6 +1,6 @@
 ﻿namespace OmniCore.Model.Entities
 {
-    public class PodOptions
+    public class ErosPodOptions
     {
         public bool AutoAdjustPodTime { get; set; }
         public bool DeactivateOnError { get; set; }

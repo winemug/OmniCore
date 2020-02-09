@@ -32,7 +32,7 @@ namespace OmniCore.Client
                 .WithViewViewModel<PodsView, PodsViewModel>()
                 .WithViewViewModel<RadiosView, RadiosViewModel>()
                 .WithViewViewModel<RadioDetailView, RadioDetailViewModel>()
-                .WithViewViewModel<RadioScanView, RadioScanViewModel>()
+                .WithViewViewModel<RadioScanView, RadiosViewModel>()
                 .WithViewViewModel<ProgressPopupView, ProgressPopupViewModel>()
                 .WithViewViewModel<EmptyView, EmptyViewModel>()
                 .WithViewViewModel<PodWizardMainView, PodWizardViewModel>()

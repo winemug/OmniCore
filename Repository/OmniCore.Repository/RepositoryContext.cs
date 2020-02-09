@@ -70,41 +70,41 @@ namespace OmniCore.Repository
             
             #if DEBUG
 
-            if (!Radios.Any())
-            {
-                Radios.Add(new RadioEntity
-                {
-                    DeviceUuid = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7"),
-                    UserDescription = "greenie",
-                    Options = new RadioOptions
-                    {
-                        RssiUpdateInterval = TimeSpan.FromSeconds(20),
-                        RadioDiscoveryCooldown =  TimeSpan.FromSeconds(5),
-                        RadioDiscoveryTimeout = TimeSpan.FromSeconds(30)
-                    }
-                });
-                
-                Radios.Add(new RadioEntity
-                {
-                    DeviceUuid = Guid.Parse("00000000-0000-0000-0000-000780393D00"),
-                    UserDescription = "eddie"
-                });
-                
-                await SaveChangesAsync();
-            }
-
-            if (!Pods.Any())
-            {
-                Pods.Add(new PodEntity
-                {
-                    Lot = 1,
-                    Serial = 1,
-                    RadioAddress = 0x11121212,
-                    Radio = Radios.First(),
-                    User = Users.First()
-                });
-                await SaveChangesAsync();
-            }
+            // if (!Radios.Any())
+            // {
+            //     Radios.Add(new RadioEntity
+            //     {
+            //         DeviceUuid = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7"),
+            //         UserDescription = "greenie",
+            //         Options = new RadioOptions
+            //         {
+            //             RssiUpdateInterval = TimeSpan.FromSeconds(20),
+            //             RadioDiscoveryCooldown =  TimeSpan.FromSeconds(5),
+            //             RadioDiscoveryTimeout = TimeSpan.FromSeconds(30)
+            //         }
+            //     });
+            //     
+            //     Radios.Add(new RadioEntity
+            //     {
+            //         DeviceUuid = Guid.Parse("00000000-0000-0000-0000-000780393D00"),
+            //         UserDescription = "eddie"
+            //     });
+            //     
+            //     await SaveChangesAsync();
+            // }
+            //
+            // if (!Pods.Any())
+            // {
+            //     Pods.Add(new PodEntity
+            //     {
+            //         Lot = 1,
+            //         Serial = 1,
+            //         RadioAddress = 0x11121212,
+            //         Radio = Radios.First(),
+            //         User = Users.First()
+            //     });
+            //     await SaveChangesAsync();
+            // }
             
             #endif
         }

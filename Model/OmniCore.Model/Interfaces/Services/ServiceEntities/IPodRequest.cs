@@ -8,7 +8,6 @@ namespace OmniCore.Model.Interfaces.Platform.Common
 {
     public interface IPodRequest : ITask, IServerResolvable
     {
-        PodRequestEntity Entity { get; set; }
         IPod Pod { get; set; }
     }
 }

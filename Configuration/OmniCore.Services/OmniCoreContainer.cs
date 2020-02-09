@@ -50,6 +50,13 @@ namespace OmniCore.Services
             return this;
         }
 
+        public ICoreContainer<R> One<TI, TC>(string discriminator) where TC : TI
+            where TI : R
+        {
+            this.RegisterSingleton<TI, TC>(discriminator);
+            return this;
+        }
+
         public T Get<T>()
             where T : R
         {

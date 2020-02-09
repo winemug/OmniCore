@@ -11,8 +11,8 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         Task TryEnsureAdapterEnabled(CancellationToken cancellationToken);
         Task<bool> TryEnableAdapter(CancellationToken cancellationToken);
         Task<bool> TryDisableAdapter(CancellationToken cancellationToken);
-        IObservable<IBlePeripheral> FindPeripherals();
-        IBlePeripheral GetPeripheral(Guid peripheralUuid);
+        IObservable<IBlePeripheral> FindErosRadioPeripherals();
+        IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid);
         IObservable<IBlePeripheralAdapter> WhenDiscoveryStarting();
         IObservable<IBlePeripheralAdapter> WhenDiscoveryFinished();
         IObservable<IBlePeripheralAdapter> WhenAdapterDisabled();

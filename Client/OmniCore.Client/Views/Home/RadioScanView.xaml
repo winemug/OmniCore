@@ -9,7 +9,7 @@
     <ContentPage.Content>
         <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Peripherals}" SelectionMode="None" >
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type models:RadioPeripheralModel}">
+                <DataTemplate x:DataType="{x:Type models:RadioModel}">
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>

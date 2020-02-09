@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Constants;
+using OmniCore.Model.Interfaces.Platform.Server;
 
 namespace OmniCore.Eros
 {
@@ -12,8 +13,8 @@ namespace OmniCore.Eros
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IPodService, ErosPodService>()
-                .Many<IPod, ErosPod>()
+                .One<IErosPodProvider, ErosPodProvider>()
+                .Many<ErosPod>()
                 .Many<IPodRequest, ErosPodRequest>()
                 .Many<ITaskQueue, ErosTaskQueue>();
         }

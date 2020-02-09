@@ -20,6 +20,7 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;
@@ -37,19 +38,24 @@ namespace OmniCore.Client.Platform
         private readonly ICoreNotificationFunctions NotificationFunctions;
         private readonly ICoreLoggingFunctions Logging;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
+        private readonly IErosRadioProvider[] ErosRadioProviders;
         private readonly ISubject<IBlePeripheralAdapter> ScanStartingSubject;
         private readonly ISubject<IBlePeripheralAdapter> ScanFinishedSubject;
         private readonly ISubject<bool> ScanningStateSubject;
+        private readonly List<Guid> ErosRadioServiceUuids;
 
         public BlePeripheralAdapter(ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions,
             ICoreNotificationFunctions notificationFunctions,
-            ICoreLoggingFunctions loggingFunctions)
+            ICoreLoggingFunctions loggingFunctions,
+            IErosRadioProvider[] erosRadioProviders)
         {
             Container = container;
             ApplicationFunctions = applicationFunctions;
             NotificationFunctions = notificationFunctions;
             Logging = loggingFunctions;
+            ErosRadioProviders = erosRadioProviders;
+            
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new ConcurrentDictionary<Guid, IBlePeripheral>();
             ScanStartingSubject = new Subject<IBlePeripheralAdapter>();
@@ -61,6 +67,9 @@ namespace OmniCore.Client.Platform
             CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
             CrossBleAdapter.AndroidConfiguration.RefreshServices = true;
+
+            ErosRadioServiceUuids = erosRadioProviders
+                .Select(rp => rp.ServiceUuid).ToList();
 
             ResetConnectableObservable();
         }
@@ -80,8 +89,7 @@ namespace OmniCore.Client.Platform
                             {
                                 ScanType = BleScanType.LowLatency,
                                 AndroidUseScanBatching = false,
-                                //TODO:
-                                ServiceUuids = { Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845")}
+                                ServiceUuids = ErosRadioServiceUuids
                             }))
                 .Finally(() =>
                 {
@@ -198,7 +206,7 @@ namespace OmniCore.Client.Platform
             return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff;
         }
 
-        public IObservable<IBlePeripheral> FindPeripherals()
+        public IObservable<IBlePeripheral> FindErosRadioPeripherals()
         {
             return Observable.Create<IBlePeripheral>(async (observer) =>
                 {
@@ -224,37 +232,36 @@ namespace OmniCore.Client.Platform
 
                         foreach (var connectedDevice in connectedDevices)
                         {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            var peripheral = GetPeripheral(connectedDevice.Uuid);
-                            using (var _ = peripheral.Lease(cancellationToken))
-                            {
-                                ((BlePeripheral) peripheral).SetDevice(connectedDevice);
-                            }
+                            var service= await connectedDevice.DiscoverServices()
+                                .FirstOrDefaultAsync(s => ErosRadioServiceUuids.Contains(s.Uuid));
 
-                            if (peripheral.PeripheralUuid.HasValue)
+                            if (service != null)
                             {
-                                Logging.Debug($"BLE: {peripheral.PeripheralUuid?.AsMacAddress()} Notifying connected peripheral as found");
+                                var peripheral = GetPeripheral(connectedDevice.Uuid, service.Uuid);
+                                ((BlePeripheral) peripheral).SetDevice(connectedDevice);
+
+                                Logging.Debug(
+                                    $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
                                 observer.OnNext(peripheral);
-                                observedPeripheralUuids.Add(peripheral.PeripheralUuid.Value);
+                                observedPeripheralUuids.Add(peripheral.PeripheralUuid);
                             }
+                            cancellationToken.ThrowIfCancellationRequested();
                         }
 
                         Logging.Debug($"BLE: Connecting to scan observable");
                         scanSubscription = ConnectableScanObservable
                             .Subscribe(async (scanResult) =>
                             {
-                                var peripheral = GetPeripheral(scanResult.Device.Uuid) as BlePeripheral;
-                                using (var _ = await peripheral.Lease(cancellationToken))
-                                {
-                                    peripheral.SetParametersFromScanResult(scanResult);
-                                }
+                                var peripheral = GetPeripheral(scanResult.Device.Uuid,
+                                    scanResult.AdvertisementData.ServiceUuids[0]) as BlePeripheral;
+                                
+                                peripheral.SetParametersFromScanResult(scanResult);
 
-                                if (peripheral.PeripheralUuid.HasValue &&
-                                    !observedPeripheralUuids.Contains(peripheral.PeripheralUuid.Value))
+                                if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
                                 {
-                                    Logging.Debug($"BLE: {peripheral.PeripheralUuid?.AsMacAddress()} Notifying found peripheral");
+                                    Logging.Debug($"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying found peripheral");
                                     observer.OnNext(peripheral);
-                                    observedPeripheralUuids.Add(peripheral.PeripheralUuid.Value);
+                                    observedPeripheralUuids.Add(peripheral.PeripheralUuid);
                                 }
                             });
                     }
@@ -280,11 +287,14 @@ namespace OmniCore.Client.Platform
             );
         }
 
-        public IBlePeripheral GetPeripheral(Guid peripheralUuid)
+        public IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
         {
             return PeripheralCache.GetOrAdd(peripheralUuid, _ =>
             {
-                return Container.Get<IBlePeripheral>();
+                var p = (BlePeripheral) Container.Get<IBlePeripheral>();
+                p.PeripheralUuid = peripheralUuid;
+                p.PrimaryServiceUuid = primaryServiceUuid;
+                return p;
             });
         }
     }

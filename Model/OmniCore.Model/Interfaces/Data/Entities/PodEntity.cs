@@ -8,15 +8,16 @@ namespace OmniCore.Model.Entities
 {
     public class PodEntity : Entity
     {
+        public PodType Type { get; set; }
         public UserEntity User { get; set; }
         public MedicationEntity Medication { get; set; }
         // public TherapyProfileEntity TherapyProfile { get; set; }
         // public BasalScheduleEntity ReferenceBasalSchedule { get; set; }
-        public RadioEntity Radio { get; set; }
+        public ICollection<RadioEntity> Radios { get; set; }
         //public BasalSchedule BasalSchedule { get; set; }
 
         [JsonField]
-        public PodOptions Options { get; set; } = new PodOptions();
+        public ErosPodOptions Options { get; set; } = new ErosPodOptions();
         
         [JsonField]
         public ReminderSettings ExpiresSoonReminder { get; set; }

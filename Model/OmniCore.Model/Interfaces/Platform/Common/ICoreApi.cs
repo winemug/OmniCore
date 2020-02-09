@@ -16,7 +16,7 @@ namespace OmniCore.Model.Interfaces.Platform.Common
         ICoreApplicationFunctions ApplicationFunctions { get; }
         ICoreNotificationFunctions NotificationFunctions { get; }
         IRepositoryService RepositoryService { get; }
-        IRadioService RadioService { get; }
+        IConfigurationService ConfigurationService { get; }
         IPodService PodService { get; }
         ICoreIntegrationService IntegrationService { get; }
     }

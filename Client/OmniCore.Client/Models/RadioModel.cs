@@ -15,22 +15,23 @@ namespace OmniCore.Client.Models
 
         public string Name { get; set; }
 
-        public string MacAddress => Radio.Peripheral.PeripheralUuid?.AsMacAddress();
-
+        public string MacAddress => Radio.Address;
         public string Rssi { get; set; }
         public string DiscoveryState { get; set; }
         public string ConnectionState { get; set; }
         public string Activity { get; set; }
+        
+        public bool IsChecked { get; set; }
 
         public readonly IRadio Radio;
         public RadioModel(IRadio radio)
         {
             Radio = radio;
 
-            radio.Peripheral.Name.Subscribe(s => Name = s);
-            radio.Peripheral.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
-            radio.Peripheral.State.Subscribe(state => DiscoveryState = state.ToString());
-            radio.Peripheral.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
+            radio.Name.Subscribe(s => Name = s);
+            radio.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
+            radio.State.Subscribe(state => DiscoveryState = state.ToString());
+            radio.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

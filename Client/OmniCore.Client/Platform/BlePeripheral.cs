@@ -43,9 +43,8 @@ namespace OmniCore.Client.Platform
         private ISubject<PeripheralConnectionState> ConnectionStateSubject;
         private ISubject<int> RssiReceivedSubject;
         private TimeSpan? RssiAutoUpdateIntervalInternal;
-
-        public Guid? PeripheralUuid => Device?.Uuid;
-        public Guid[] ServiceUuids { get; private set; }
+        public Guid PeripheralUuid { get; set; }
+        public Guid PrimaryServiceUuid { get; set; }
         public IObservable<string> Name => NameSubject;
         public IObservable<PeripheralState> State => StateSubject;
         public IObservable<PeripheralConnectionState> ConnectionState => ConnectionStateSubject;
@@ -79,11 +78,11 @@ namespace OmniCore.Client.Platform
 
                 if (Device != null && Device.IsConnected())
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device is connected, not resetting internal reference");
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device is connected, not resetting internal reference");
                     return;
                 }
 
-                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Resetting internal reference");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Resetting internal reference");
                 SetDeviceInternal(null);
                 StateSubject.OnNext(PeripheralState.Searching);
             });
@@ -92,12 +91,12 @@ namespace OmniCore.Client.Platform
             {
                 if (Device == null)
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Discovery finished with no internal reference.");
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Discovery finished with no internal reference.");
                     StateSubject.OnNext(Model.Enumerations.PeripheralState.Offline);
                 }
                 else
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Discovery finished, internal reference available.");
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Discovery finished, internal reference available.");
                     StateSubject.OnNext(Model.Enumerations.PeripheralState.Online);
                 }
             });
@@ -109,10 +108,10 @@ namespace OmniCore.Client.Platform
 
             if (Device != null)
             {
-                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Rssi requested");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi requested");
                 Device.ReadRssi().Subscribe(rssi =>
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Rssi received");
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi received");
                     RssiReceivedSubject.OnNext(rssi);
                 });
             }
@@ -122,7 +121,7 @@ namespace OmniCore.Client.Platform
         public IObservable<IBlePeripheral> Locate()
         {
             return BlePeripheralAdapter
-                .FindPeripherals()
+                .FindErosRadioPeripherals()
                 .FirstAsync(p => p.PeripheralUuid == PeripheralUuid)
                 .Concat(State
                     .FirstAsync(s => s == PeripheralState.Online)
@@ -141,7 +140,7 @@ namespace OmniCore.Client.Platform
             {
                 await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
                 await BlePeripheralAdapter.IsScanning.FirstAsync(s => !s).ToTask(cancellationToken);
-                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Connect requested");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect requested");
                 Device.Connect(new ConnectionConfig()
                     {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = autoConnect});
             }
@@ -152,10 +151,10 @@ namespace OmniCore.Client.Platform
             var which = await Task.WhenAny(connectedTask, failedTask);
             if (which == failedTask)
             {
-                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Connect failed");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect failed");
                 throw new OmniCorePeripheralException(FailureType.ConnectionFailed, null, failedTask.Result);
             }
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Connected");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connected");
         }
 
         public async Task Disconnect(CancellationToken cancellationToken)
@@ -179,22 +178,22 @@ namespace OmniCore.Client.Platform
                     return;
                 case PeripheralConnectionState.Connecting:
                 case PeripheralConnectionState.Connected:
-                    Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Cancel Connection requested");
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Cancel Connection requested");
                     Device?.CancelConnection();
                     break;
             }
 
             await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Disconnect confirmed");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Disconnect confirmed");
         }
 
         public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken)
         {
             ThrowIfNotOnLease();
 
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Read from characteristic requested");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic requested");
             var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken); 
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Read from characteristic result received");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic result received");
             return result.Data;
         }
 
@@ -202,25 +201,25 @@ namespace OmniCore.Client.Platform
         {
             ThrowIfNotOnLease();
 
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Write to characteristic requested");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic requested");
             await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Write to characteristic finished");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic finished");
         }
 
         public async Task WriteToCharacteristicWithoutResponse(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
             ThrowIfNotOnLease();
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Write to characteristic without response requested");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response requested");
             await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data).ToTask(cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Write to characteristic without response finished");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response finished");
         }
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
         {
             ThrowIfNotOnLease();
 
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Characteristic notification received");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Characteristic notification received");
             return GetCharacteristic(serviceUuid, characteristicUuid)
                 .RegisterAndNotify()
                 .Select(r => r.Data);
@@ -235,7 +234,7 @@ namespace OmniCore.Client.Platform
                 StateSubject.OnNext(PeripheralState.Unknown);
             else
                 StateSubject.OnNext(PeripheralState.Online);
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Internal reference set from adapter");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Internal reference set from adapter");
         }
 
         public void SetParametersFromScanResult(IScanResult scanResult)
@@ -244,8 +243,8 @@ namespace OmniCore.Client.Platform
 
             SetDeviceInternal(scanResult.Device);
             
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Internal reference set from scan result");
-            ServiceUuids = scanResult.AdvertisementData.ServiceUuids;
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Internal reference set from scan result");
+            PrimaryServiceUuid = scanResult.AdvertisementData.ServiceUuids[0];
 
             if (!string.IsNullOrEmpty(scanResult.AdvertisementData.LocalName))
             {
@@ -261,11 +260,11 @@ namespace OmniCore.Client.Platform
             DeviceRssiSubscription = null;
             if (Device != null && RssiAutoUpdateInterval != null)
             {
-                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Set rssi read interval");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Set rssi read interval");
                 DeviceRssiSubscription = Device.WhenReadRssiContinuously(RssiAutoUpdateInterval)
                     .Subscribe(rssi =>
                     {
-                        Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Rssi received via interval read");
+                        Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi received via interval read");
                         RssiReceivedSubject.OnNext(rssi);
                     });
             }
@@ -295,20 +294,20 @@ namespace OmniCore.Client.Platform
                         switch (status)
                         {
                             case ConnectionStatus.Disconnected:
-                                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device state changed to disconnected");
+                                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnected");
                                 ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnected);
                                 break;
                             case ConnectionStatus.Disconnecting:
-                                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device state changed to disconnecting");
+                                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnecting");
                                 ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnecting);
                                 break;
                             case ConnectionStatus.Connected:
-                                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device state changed to connected");
+                                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connected");
                                 await DiscoverServicesAndCharacteristics(CancellationToken.None);
                                 ConnectionStateSubject.OnNext(PeripheralConnectionState.Connected);
                                 break;
                             case ConnectionStatus.Connecting:
-                                Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device state changed to connecting");
+                                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connecting");
                                 ConnectionStateSubject.OnNext(PeripheralConnectionState.Connecting);
                                 break;
                         }
@@ -317,7 +316,7 @@ namespace OmniCore.Client.Platform
                     DeviceNameSubscription = Device.WhenNameUpdated().Where(s => !string.IsNullOrEmpty(s))
                         .Subscribe(s =>
                         {
-                            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Device name updated");
+                            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device name updated");
                             NameSubject.OnNext(s);
                         });
 
@@ -329,7 +328,7 @@ namespace OmniCore.Client.Platform
         private async Task DiscoverServicesAndCharacteristics(CancellationToken cancellationToken)
         {
             CharacteristicsDictionary = new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Request services and characteristics discovery");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Request services and characteristics discovery");
             await Device.DiscoverServices().ForEachAsync(service =>
             {
                 service.DiscoverCharacteristics().ForEachAsync(characteristic =>
@@ -337,7 +336,7 @@ namespace OmniCore.Client.Platform
                     CharacteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
                 }, cancellationToken);
             }, cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid?.AsMacAddress()} Services and characteristics discovery finished");
+            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
         }
 
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)

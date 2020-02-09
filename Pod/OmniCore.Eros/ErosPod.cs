@@ -13,10 +13,11 @@ using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Server;
 
 namespace OmniCore.Eros
 {
-    public class ErosPod : IPod
+    public class ErosPod : IPodEros
     {
         public PodEntity Entity { get; set; }
         public PodRunningState RunningState { get; }
@@ -25,16 +26,12 @@ namespace OmniCore.Eros
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IRepositoryService RepositoryService;
         private readonly ITaskQueue TaskQueue;
-        private readonly IRadioService RadioService;
-        private IRadio Radio;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
-            ITaskQueue taskQueue,
-            IRadioService radioService)
+            ITaskQueue taskQueue)
         {
             Container = container;
             TaskQueue = taskQueue;
-            RadioService = radioService;
             RunningState = new PodRunningState();
         }
         public Task Archive()
@@ -46,96 +43,93 @@ namespace OmniCore.Eros
         {
             throw new System.NotImplementedException();
         }
-
-        public async Task<IPodRequest> RequestPair(uint radioAddress)
+        public async Task<IPodRequest> Activate(IRadio radio, CancellationToken cancellationToken)
         {
-            return (IPodRequest) TaskQueue.Enqueue(
-                (await NewPodRequest())
-                    .WithPair(radioAddress)
-            );
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestPrime()
+        public async Task<IPodRequest> Acquire(IRadio radio, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestInsert()
+        public async Task<IPodRequest> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+        public async Task<IPodRequest> Start()
+        {
+            throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> RequestStatus(StatusRequestType requestType)
+        public async Task<IPodRequest> Status(StatusRequestType requestType)
         {
             return (IPodRequest) TaskQueue.Enqueue(
                 (await NewPodRequest())
                 .WithStatus(requestType)
-            );
+                );
         }
 
-        public Task<IPodRequest> RequestConfigureAlerts()
+        public async Task<IPodRequest> ConfigureAlerts()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestAcknowledgeAlerts()
+        public async Task<IPodRequest> AcknowledgeAlerts()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestSetBasalSchedule()
+        public async Task<IPodRequest> SetBasalSchedule()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestCancelBasal()
+        public async Task<IPodRequest> CancelBasal()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestSetTempBasal()
+        public async Task<IPodRequest> SetTempBasal()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestCancelTempBasal()
+        public async Task<IPodRequest> CancelTempBasal()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestBolus()
+        public async Task<IPodRequest> Bolus()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestCancelBolus()
+        public async Task<IPodRequest> CancelBolus()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestStartExtendedBolus()
+        public async Task<IPodRequest> StartExtendedBolus()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestCancelExtendedBolus()
+        public async Task<IPodRequest> CancelExtendedBolus()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> RequestDeactivate()
+        public async Task<IPodRequest> Deactivate()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public async Task StartMonitoring()
         {
-            Radio = await RadioService.ListRadios().FirstOrDefaultAsync(r => r.Entity.Id == Entity.Radio.Id);
-            Radio.StartMonitoring();
             await StartStateMonitoring();
             TaskQueue.Startup();
         }
-
         private async Task<ErosPodRequest> NewPodRequest()
         {
             var request = Container.Get<IPodRequest>() as ErosPodRequest;
@@ -211,6 +205,18 @@ namespace OmniCore.Eros
             }
 
             return state;
+        }
+        
+        private uint GenerateRadioAddress()
+        {
+            var random = new Random();
+            var buffer = new byte[3];
+            random.NextBytes(buffer);
+            uint address = 0x34000000;
+            address |= (uint)buffer[0] << 16;
+            address |= (uint)buffer[1] << 8;
+            address |= (uint)buffer[2];
+            return address;
         }
         public void Dispose()
         {

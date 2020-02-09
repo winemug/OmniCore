@@ -20,17 +20,18 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Extensions;
 using OmniCore.Model.Interfaces.Data;
 using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkRadio : IRadio
+    public class RileyLinkRadio : IErosRadio
     {
         public IBlePeripheral Peripheral { get; set; }
         public RadioEntity Entity { get; set; }
-        public async Task<ILease<IRadio>> Lease(CancellationToken cancellationToken)
+        public async Task<ILease<IErosRadio>> Lease(CancellationToken cancellationToken)
         {
-            return await Lease<IRadio>.NewLease(this, cancellationToken);
+            return await Lease<IErosRadio>.NewLease(this, cancellationToken);
         }
 
         public bool OnLease { get; set; }
@@ -38,6 +39,19 @@ namespace OmniCore.Radios.RileyLink
         {
             if (!OnLease)
                 throw new OmniCoreWorkflowException(FailureType.Internal, "object needs to be on lease for this operation");
+        }
+
+        public RadioType Type => RadioType.RileyLink;
+
+        public string Address => Peripheral.PeripheralUuid.AsMacAddress();
+        public string Description => Entity.UserDescription;
+        public IObservable<string> Name => Peripheral.Name;
+        public IObservable<PeripheralState> State => Peripheral.State;
+        public IObservable<PeripheralConnectionState> ConnectionState => Peripheral.ConnectionState;
+        public IObservable<int> Rssi => Peripheral.Rssi;
+        public async Task SetDescription(string description, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
 
         public bool InUse { get; set; }

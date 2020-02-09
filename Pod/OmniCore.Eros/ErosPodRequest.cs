@@ -22,10 +22,8 @@ namespace OmniCore.Eros
         private uint MessageAddress;
         private bool IsWithCriticalFollowup;
 
-        private readonly IRadioService RadioService;
-        public ErosPodRequest(IRadioService radioService)
+        public ErosPodRequest()
         {
-            RadioService = radioService;
         }
 
         protected override async Task ExecuteRequest(CancellationToken cancellationToken)
