@@ -7,7 +7,8 @@
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardMainView">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
-            <CarouselView x:Name="WizardCarousel"
+            <ContentPresenter Content="{Binding ActiveView}"/>
+            <!--<CarouselView x:Name="WizardCarousel"
                           ItemsSource="{Binding Views}"
                           VerticalOptions="StartAndExpand"
                           HorizontalOptions="CenterAndExpand">
@@ -23,7 +24,7 @@
                         </Frame>
                     </DataTemplate>
                 </CarouselView.ItemTemplate>
-            </CarouselView>
+            </CarouselView>-->
             <!--<IndicatorView ItemsSourceBy="WizardCarousel"
                            IndicatorColor="LightGray"
                            SelectedIndicatorColor="DarkGray"

@@ -51,6 +51,7 @@ namespace OmniCore.Client.Droid.Services
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
         public ICoreConfigurationService CoreConfigurationService => ServerContainer.Get<ICoreConfigurationService>();
 
+        private ISubject<CoreApiStatus> ApiStatusSubject;
         private ISubject<ICoreApi> UnexpectedStopRequestSubject;
         private CoreNotification ServiceNotification; 
 
@@ -68,6 +69,7 @@ namespace OmniCore.Client.Droid.Services
 
         public override void OnCreate()
         {
+            ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.Starting);
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
             UnexpectedStopRequestSubject = new Subject<ICoreApi>();
             ServerContainer = Initializer.AndroidServiceContainer(this, this);
@@ -84,22 +86,13 @@ namespace OmniCore.Client.Droid.Services
                 this.StartForeground(ServiceNotification.Id, ServiceNotification.NativeNotification);
                 AndroidServiceStarted = true;
 
-                var t = Task.Run(async () => await StartServices(CancellationToken.None));
-                t.Wait();
-                if (!t.IsCompletedSuccessfully)
-                {
-                    //TODO: log
-                    throw new OmniCoreWorkflowException(FailureType.ServiceStartupFailure, null, t.Exception);
-                }
+                Task.Run(async () => await StartServices(CancellationToken.None));
 
                 //TODO:
                 //var statusNotifiers = ServerContainer.GetAll<INotifyStatus>();
                 //foreach (var statusNotifier in statusNotifiers)
                 //{
                 //}
-
-
-                ServiceNotification.Update(null, "OmniCore is running in background.");
             }
 
             return StartCommandResult.Sticky;
@@ -125,11 +118,16 @@ namespace OmniCore.Client.Droid.Services
                 DeinitializeNotifications();
             base.OnDestroy();
         }
+
+        public IObservable<CoreApiStatus> ApiStatus => ApiStatusSubject.AsObservable();
+
         public async Task StartServices(CancellationToken cancellationToken)
         {
             await CoreRepositoryService.StartService(cancellationToken);
             await CorePodService.StartService(cancellationToken);
             await IntegrationService.StartService(cancellationToken);
+            ApiStatusSubject.OnNext(CoreApiStatus.Started);
+            ServiceNotification.Update(null, "OmniCore is running in background.");
         }
 
         public async Task StopServices(CancellationToken cancellationToken)

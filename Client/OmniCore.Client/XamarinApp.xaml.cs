@@ -18,7 +18,7 @@ namespace OmniCore.Client
 {
     public partial class XamarinApp : Application, IClientResolvable
     {
-        public XamarinApp(IViewPresenter viewPresenter)
+        public XamarinApp(IViewPresenter viewPresenter, ICoreClient client)
         {
             InitializeComponent();
             RegisterViews(viewPresenter);
@@ -28,6 +28,7 @@ namespace OmniCore.Client
         private void RegisterViews(IViewPresenter viewPresenter)
         {
             viewPresenter
+                .WithViewViewModel<ServicePopupView, ServicePopupViewModel>()
                 .WithViewViewModel<PodsView, PodsViewModel>()
                 .WithViewViewModel<RadiosView, RadiosViewModel>()
                 .WithViewViewModel<RadioDetailView, RadioDetailViewModel>()
