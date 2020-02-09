@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Model.Interfaces.Platform.Common
+﻿namespace OmniCore.Model.Interfaces.Base
 {
     public interface IServerResolvable : IResolvable
     {

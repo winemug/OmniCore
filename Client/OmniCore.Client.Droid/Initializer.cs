@@ -3,10 +3,11 @@ using OmniCore.Client.Droid.Platform;
 using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
-using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Radios.RileyLink;
 using OmniCore.Repository;
 using OmniCore.Services;
@@ -46,6 +47,7 @@ namespace OmniCore.Client.Droid
                 .Existing(api)
                 .Existing(notificationFunctions)
                 .Many<ICoreNotification, CoreNotification>()
+                .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
                 .WithAapsIntegrationService()

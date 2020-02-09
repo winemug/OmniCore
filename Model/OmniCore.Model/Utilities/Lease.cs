@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Utilities
 {

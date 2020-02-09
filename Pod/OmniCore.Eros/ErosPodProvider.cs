@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Eros
 {

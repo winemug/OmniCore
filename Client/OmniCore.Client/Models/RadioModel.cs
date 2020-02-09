@@ -5,8 +5,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using OmniCore.Client.Annotations;
-using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Client.Models
 {

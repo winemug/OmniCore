@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Services.ServiceEntities;
-using IUser = OmniCore.Model.Interfaces.Services.ServiceEntities.IUser;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services
 {

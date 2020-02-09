@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros

@@ -6,8 +6,10 @@ using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Wizards.NewPod;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Client;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Client
 {

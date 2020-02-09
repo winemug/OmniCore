@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Repository
 {
@@ -29,6 +29,16 @@ namespace OmniCore.Repository
         public Task Save(CancellationToken cancellationToken)
         {
             return SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
+        {
+            if (createNew)
+            {
+                Database.EnsureDeleted();
+            }
+            await Database.MigrateAsync(cancellationToken);
+            await SeedData();            
         }
 
         public readonly string ConnectionString;

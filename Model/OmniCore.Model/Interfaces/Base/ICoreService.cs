@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services.Internal;
 
-namespace OmniCore.Model.Interfaces.Platform.Common
+namespace OmniCore.Model.Interfaces.Base
 {
     public interface ICoreService : IDisposablesContainer, IServerResolvable, INotifyStatus
     {

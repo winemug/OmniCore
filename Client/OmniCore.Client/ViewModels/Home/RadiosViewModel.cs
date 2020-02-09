@@ -11,9 +11,9 @@ using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
-using OmniCore.Model.Constants;
-using OmniCore.Model.Extensions;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home

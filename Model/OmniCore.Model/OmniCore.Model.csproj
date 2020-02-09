@@ -34,9 +34,6 @@
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interfaces\Workflow" />
-  </ItemGroup>
 
   <!-- Include Nuget Package for Tizen Project building -->
 

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Server;
-using OmniCore.Model.Interfaces.Services.ServiceEntities;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
+using IUser = OmniCore.Model.Interfaces.Services.Facade.IUser;
 
-namespace OmniCore.Model.Interfaces.Platform.Common
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPodService : ICoreService
     {

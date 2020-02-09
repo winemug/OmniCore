@@ -5,7 +5,7 @@ using Android.App;
 using Android.Content;
 using Android.Support.V4.App;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Client.Droid.Platform
 {

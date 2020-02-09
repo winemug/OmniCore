@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Eros
 {

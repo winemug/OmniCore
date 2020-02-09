@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Platform.Common;
 
 namespace OmniCore.Simulation.Radios
 {

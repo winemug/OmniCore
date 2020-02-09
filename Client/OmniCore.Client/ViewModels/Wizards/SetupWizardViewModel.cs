@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.SetupWizard;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Client;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards

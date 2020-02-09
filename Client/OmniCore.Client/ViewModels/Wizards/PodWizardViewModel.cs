@@ -9,7 +9,7 @@ using System.Windows.Input;
 using OmniCore.Client.Platform;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.NewPod;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Client;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards

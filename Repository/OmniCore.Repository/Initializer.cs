@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
+using OmniCore.Services;
 
 namespace OmniCore.Repository
 {
@@ -12,7 +15,6 @@ namespace OmniCore.Repository
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IRepositoryService, RepositoryService>()
                 .One<IRepositoryContext, RepositoryContext>();
         }
     }

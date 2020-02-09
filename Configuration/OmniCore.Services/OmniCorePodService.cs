@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Server;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.ServiceEntities;
-using IUser = OmniCore.Model.Interfaces.Platform.Common.IUser;
+using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
+using IUser = OmniCore.Model.Interfaces.Services.Facade.IUser;
 
 namespace OmniCore.Services
 {

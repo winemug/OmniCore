@@ -17,11 +17,12 @@ using Microsoft.AppCenter;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Extensions;
+using OmniCore.Model.Interfaces.Base;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Utilities;
-using OmniCore.Model.Interfaces.Platform.Common;
-using OmniCore.Model.Interfaces.Platform.Server;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
+using OmniCore.Model.Utilities.Extensions;
 using Plugin.BluetoothLE;
 using Xamarin.Forms.Internals;
 

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Data;
+using OmniCore.Model.Interfaces.Base;
 
-namespace OmniCore.Model.Interfaces.Platform.Common
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IRepositoryService : ICoreService
     {

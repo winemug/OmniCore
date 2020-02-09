@@ -13,8 +13,9 @@ using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Wizards.NewPod;
-using OmniCore.Model.Constants;
-using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Facade;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
