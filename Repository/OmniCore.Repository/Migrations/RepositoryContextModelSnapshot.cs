@@ -133,9 +133,6 @@ namespace OmniCore.Repository.Migrations
                     b.Property<uint>("RadioAddress")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("RadioId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ReservoirLowReminder")
                         .HasColumnType("TEXT");
 
@@ -148,6 +145,9 @@ namespace OmniCore.Repository.Migrations
                     b.Property<Guid?>("SyncId")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("Updated")
                         .HasColumnType("TEXT");
 
@@ -157,8 +157,6 @@ namespace OmniCore.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MedicationId");
-
-                    b.HasIndex("RadioId");
 
                     b.HasIndex("UserId");
 
@@ -287,6 +285,9 @@ namespace OmniCore.Repository.Migrations
                     b.Property<string>("Options")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("PodEntityId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("ServiceUuid")
                         .HasColumnType("TEXT");
 
@@ -300,6 +301,8 @@ namespace OmniCore.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PodEntityId");
 
                     b.ToTable("Radios");
                 });
@@ -392,10 +395,6 @@ namespace OmniCore.Repository.Migrations
                         .WithMany()
                         .HasForeignKey("MedicationId");
 
-                    b.HasOne("OmniCore.Model.Entities.RadioEntity", "Radio")
-                        .WithMany()
-                        .HasForeignKey("RadioId");
-
                     b.HasOne("OmniCore.Model.Entities.UserEntity", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
@@ -413,6 +412,13 @@ namespace OmniCore.Repository.Migrations
                     b.HasOne("OmniCore.Model.Entities.PodRequestEntity", "PodRequest")
                         .WithMany("Responses")
                         .HasForeignKey("PodRequestId");
+                });
+
+            modelBuilder.Entity("OmniCore.Model.Entities.RadioEntity", b =>
+                {
+                    b.HasOne("OmniCore.Model.Entities.PodEntity", null)
+                        .WithMany("Radios")
+                        .HasForeignKey("PodEntityId");
                 });
 
             modelBuilder.Entity("OmniCore.Model.Entities.RadioEventEntity", b =>
