@@ -13,7 +13,7 @@ using Environment = Android.OS.Environment;
 
 namespace OmniCore.Client.Droid
 {
-    public class CoreApplicationFunctions : OmniCoreServiceBase, ICoreApplicationFunctions
+    public class CoreApplicationFunctions : CoreServiceBase, ICoreApplicationFunctions
     {
         public string DataPath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 

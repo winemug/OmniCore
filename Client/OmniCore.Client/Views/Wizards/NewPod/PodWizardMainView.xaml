@@ -24,11 +24,11 @@
                     </DataTemplate>
                 </CarouselView.ItemTemplate>
             </CarouselView>
-            <IndicatorView ItemsSourceBy="WizardCarousel"
+            <!--<IndicatorView ItemsSourceBy="WizardCarousel"
                            IndicatorColor="LightGray"
                            SelectedIndicatorColor="DarkGray"
                            HorizontalOptions="Center"
-                           VerticalOptions="End"/>
+                           VerticalOptions="End"/>-->
         </StackLayout>
     </ContentPage.Content>
     <Shell.TitleView>

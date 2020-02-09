@@ -7,10 +7,10 @@ using Unity;
 
 namespace OmniCore.Services
 {
-    public class OmniCoreContainer<R> : UnityContainer, ICoreContainer<R>
+    public class CoreContainer<R> : UnityContainer, ICoreContainer<R>
         where R : IResolvable
     {
-        public OmniCoreContainer()
+        public CoreContainer()
         {
             this.RegisterInstance<ICoreContainer<R>>(this);
         }

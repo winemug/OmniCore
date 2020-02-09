@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Services
 {
-    public class CoreRepositoryService : OmniCoreServiceBase, ICoreRepositoryService
+    public class CoreRepositoryService : CoreServiceBase, ICoreRepositoryService
     {
         private readonly ICoreContainer<IServerResolvable> ServerContainer;
         private readonly ICoreApplicationFunctions CoreApplicationFunctions;

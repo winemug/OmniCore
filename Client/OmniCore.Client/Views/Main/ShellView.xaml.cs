@@ -14,6 +14,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Reactive.Linq;
 using OmniCore.Model.Interfaces.Client;
+using Rg.Plugins.Popup.Services;
 
 namespace OmniCore.Client.Views.Main
 {
@@ -24,14 +25,58 @@ namespace OmniCore.Client.Views.Main
         public DataTemplate RadiosView { get; }
         public DataTemplate PodsView { get; }
 
-        public ShellView(IViewPresenter viewPresenter)
+        private readonly ICoreClient Client;
+        private IDisposable ClientConnectionSubscription;
+        private ServicePopupView ServicePopup;
+        public ShellView(IViewPresenter viewPresenter, ICoreClient client)
         {
             InitializeComponent();
+            Client = client;
             EmptyView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
             RadiosView = new DataTemplate(() => viewPresenter.GetView<RadiosView>(true));
             PodsView = new DataTemplate(() => viewPresenter.GetView<PodsView>(true));
 
             BindingContext = this;
+            ServicePopup = null;
+        }
+
+        protected override void OnAppearing()
+        {
+            ClientConnectionSubscription?.Dispose();
+            ClientConnectionSubscription = Client.ClientConnection.WhenConnectionChanged()
+                .Subscribe(api =>
+                {
+                    if (api == null)
+                    {
+                        if (ServicePopup == null)
+                        {
+                            ServicePopup = new ServicePopupView();
+                            PopupNavigation.Instance.PushAsync(ServicePopup, true);
+                        }
+                    }
+                    else
+                    {
+                        if (ServicePopup != null)
+                        {
+                            PopupNavigation.Instance.RemovePageAsync(ServicePopup, true);
+                            ServicePopup = null;
+                        }                    }
+                });
+            base.OnAppearing();
+        }
+
+        protected override void OnDisappearing()
+        {
+            ClientConnectionSubscription?.Dispose();
+            ClientConnectionSubscription = null;
+
+            if (ServicePopup != null)
+            {
+                PopupNavigation.Instance.RemovePageAsync(ServicePopup, true);
+                ServicePopup = null;
+            }
+
+            base.OnDisappearing();
         }
     }
 }

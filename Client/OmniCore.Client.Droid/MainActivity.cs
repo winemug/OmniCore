@@ -53,11 +53,12 @@ namespace OmniCore.Client.Droid
             TaskScheduler.UnobservedTaskException += (sender, args) => OnUnhandledException(args.Exception);
             AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) => OnUnhandledException(args.Exception);
 
-            base.OnCreate(savedInstanceState);
-
             Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.SetFlags("IndicatorView_Experimental");
             Xamarin.Forms.Forms.SetFlags("CarouselView_Experimental");
+
+            base.OnCreate(savedInstanceState);
+
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
             //TODO: move to service

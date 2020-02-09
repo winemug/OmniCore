@@ -15,7 +15,7 @@ using OmniCore.Services;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class AapsIntegrationServiceBase : OmniCoreServiceBase, ICoreIntegrationService
+    public class AapsIntegrationServiceBase : CoreServiceBase, ICoreIntegrationService
     {
         protected override Task OnStart(CancellationToken cancellationToken)
         {

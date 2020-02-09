@@ -13,7 +13,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Services
 {
-    public abstract class OmniCoreServiceBase : ICoreService
+    public abstract class CoreServiceBase : ICoreService
     {
         private ConcurrentDictionary<ICoreService, bool> Dependents;
 
@@ -30,7 +30,7 @@ namespace OmniCore.Services
         protected abstract Task OnResume(CancellationToken cancellationToken);
         private readonly ICoreService[] Dependencies = new ICoreService[0];
 
-        protected OmniCoreServiceBase(params ICoreService[] dependencies)
+        protected CoreServiceBase(params ICoreService[] dependencies)
         {
             Dependents = new ConcurrentDictionary<ICoreService, bool>();
             StartStopLock = new AsyncLock();

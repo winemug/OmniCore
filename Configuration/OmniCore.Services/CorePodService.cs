@@ -18,7 +18,7 @@ using IUser = OmniCore.Model.Interfaces.Services.Facade.IUser;
 
 namespace OmniCore.Services
 {
-    public class OmniCoreCorePodService : OmniCoreServiceBase, ICorePodService
+    public class CorePodService : CoreServiceBase, ICorePodService
     {
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly IErosRadioProvider[] ErosRadioProviders;
@@ -32,13 +32,13 @@ namespace OmniCore.Services
         private IDisposable AdapterDisabledSubscription;
         private ICoreNotification AdapterStatusNotification;
         
-        public OmniCoreCorePodService(
+        public CorePodService(
             ICoreContainer<IServerResolvable> container,
             IErosRadioProvider[] erosRadioProviders,
             ICoreApplicationFunctions applicationFunctions,
             IBlePeripheralAdapter blePeripheralAdapter,
             IErosPodProvider erosPodProvider,
-            IDashPodProvider dashPodProvider,
+            //IDashPodProvider dashPodProvider,
             ICoreNotificationFunctions notificationFunctions
             )
         {
@@ -47,7 +47,7 @@ namespace OmniCore.Services
             ApplicationFunctions = applicationFunctions;
             BlePeripheralAdapter = blePeripheralAdapter;
             ErosPodProvider = erosPodProvider;
-            DashPodProvider = dashPodProvider;
+            //DashPodProvider = dashPodProvider;
             NotificationFunctions = notificationFunctions;
         }
         

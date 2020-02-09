@@ -6,20 +6,6 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardCreationOptions">
     <ContentView.Content>
-            <!--<StackLayout Orientation="Vertical">
-                <StackLayout Orientation="Horizontal">
-                    <Switch IsToggled="{Binding OptionNewPod}"/>
-                    <Label Text="Initialize a new pod"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Switch IsToggled="{Binding OptionNewPod}"/>
-                    <Label Text="Initialize a new pod"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal">
-                    <Switch IsToggled="{Binding OptionExistingPod}"/>
-                    <Label Text="Continue an existing pod session"/>
-                </StackLayout>
-            </StackLayout>-->
             <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start">
                 <Grid HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
                     <Grid.RowDefinitions>

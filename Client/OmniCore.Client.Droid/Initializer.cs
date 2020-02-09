@@ -33,7 +33,7 @@ namespace OmniCore.Client.Droid
 
         public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)
         {
-            return new OmniCoreContainer<IClientResolvable>()
+            return new CoreContainer<IClientResolvable>()
                 .Existing(clientContext)
                 .One<ICoreClientConnection, AndroidServiceConnection>()
                 .One<ICoreClient, CoreClient>();
@@ -42,7 +42,7 @@ namespace OmniCore.Client.Droid
         public static ICoreContainer<IServerResolvable> AndroidServiceContainer(ICoreApi api,
             ICoreNotificationFunctions notificationFunctions)
         {
-            return new OmniCoreContainer<IServerResolvable>()
+            return new CoreContainer<IServerResolvable>()
                 .Existing(api)
                 .Existing(notificationFunctions)
                 .Many<ICoreNotification, CoreNotification>()

@@ -14,7 +14,7 @@ namespace OmniCore.Services
         {
             return container
                 .One<ICoreRepositoryService, CoreRepositoryService>()
-                .One<ICorePodService, OmniCoreCorePodService>();
+                .One<ICorePodService, CorePodService>();
         }
     }
 }
