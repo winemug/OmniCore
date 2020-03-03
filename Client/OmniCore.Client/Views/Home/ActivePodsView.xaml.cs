@@ -12,9 +12,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Home
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PodsView : IView
+    public partial class ActivePodsView : IView
     {
-        public PodsView()
+        public ActivePodsView()
         {
             InitializeComponent();
         }

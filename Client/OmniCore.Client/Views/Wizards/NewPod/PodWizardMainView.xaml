@@ -7,29 +7,35 @@
              x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardMainView">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
-            <ContentPresenter Content="{Binding ActiveView}"/>
-            <!--<CarouselView x:Name="WizardCarousel"
+            <CarouselView x:Name="WizardCarousel"
+                          IndicatorView="indicator"
                           ItemsSource="{Binding Views}"
                           VerticalOptions="StartAndExpand"
-                          HorizontalOptions="CenterAndExpand">
+                          HorizontalOptions="CenterAndExpand"
+                          Position="{Binding CarouselPosition}">
                 <CarouselView.ItemTemplate>
                     <DataTemplate>
                         <Frame HasShadow="True"
                                BorderColor="DarkGray"
                                CornerRadius="5"
                                Margin="20"
-                               HorizontalOptions="Center"
-                               VerticalOptions="CenterAndExpand">
-                            <ContentPresenter Content="{Binding }"/>
+                               HorizontalOptions="CenterAndExpand"
+                               VerticalOptions="CenterAndExpand"
+                               Content="{Binding Content}">
                         </Frame>
                     </DataTemplate>
                 </CarouselView.ItemTemplate>
-            </CarouselView>-->
-            <!--<IndicatorView ItemsSourceBy="WizardCarousel"
+            </CarouselView>
+            <IndicatorView x:Name="indicator"
                            IndicatorColor="LightGray"
                            SelectedIndicatorColor="DarkGray"
                            HorizontalOptions="Center"
-                           VerticalOptions="End"/>-->
+                           VerticalOptions="End"/>
         </StackLayout>
     </ContentPage.Content>
+    <Shell.TitleView>
+        <ContentView>
+            <Label Text="New Pod Wizard" FontSize="Large" TextColor="White" VerticalOptions="CenterAndExpand"/>
+        </ContentView>
+    </Shell.TitleView>
 </ContentPage>

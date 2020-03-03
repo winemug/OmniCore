@@ -20,7 +20,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
 {
-    public class PodsViewModel : BaseViewModel
+    public class ActivePodsViewModel : BaseViewModel
     {
         public List<IPod> Pods { get; set; }
 
@@ -32,7 +32,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         private ICorePodService CorePodService => Api.CorePodService;
 
-        public PodsViewModel(ICoreClient client) : base(client)
+        public ActivePodsViewModel(ICoreClient client) : base(client)
         {
             SelectCommand = new Command<IPod>(async pod => await SelectPod(pod));
             AddCommand = new Command(async _ => await AddPod());

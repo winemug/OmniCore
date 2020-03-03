@@ -29,7 +29,7 @@ namespace OmniCore.Client
         {
             viewPresenter
                 .WithViewViewModel<ServicePopupView, ServicePopupViewModel>()
-                .WithViewViewModel<PodsView, PodsViewModel>()
+                .WithViewViewModel<ActivePodsView, ActivePodsViewModel>()
                 .WithViewViewModel<RadiosView, RadiosViewModel>()
                 .WithViewViewModel<RadioDetailView, RadioDetailViewModel>()
                 .WithViewViewModel<RadioScanView, RadiosViewModel>()

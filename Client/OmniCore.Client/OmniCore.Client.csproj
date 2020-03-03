@@ -61,12 +61,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.1.0">
+    <PackageReference Include="Fody" Version="6.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="2.6.4" />
-    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.6.4" />
+    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
@@ -75,7 +75,7 @@
     <PackageReference Include="Rg.Plugins.Popup" Version="1.2.0.223" />
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Xamarin.Forms" Version="4.4.0.991640" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.356" />
   </ItemGroup>
 
   <ItemGroup>
@@ -86,7 +86,7 @@
     <Compile Update="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Home\PodsView.xaml.cs">
+    <Compile Update="Views\Home\ActivePodsView.xaml.cs">
       <DependentUpon>PodsView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Main\ShellView.xaml.cs">
@@ -95,8 +95,8 @@
     <Compile Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml.cs">
       <DependentUpon>PodWizardPendingActivationsWarning.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Wizards\NewPod\PodWizardActivationTypeSelection.xaml.cs">
-      <DependentUpon>PodWizardActivationTypeSelection.xaml</DependentUpon>
+    <Compile Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml.cs">
+      <DependentUpon>PodWizardPodTypeSelection.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml.cs">
       <DependentUpon>PodWizardMedicationSelection.xaml</DependentUpon>
@@ -173,7 +173,7 @@
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardAdvancedOptions.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardActivationTypeSelection.xaml">
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml">

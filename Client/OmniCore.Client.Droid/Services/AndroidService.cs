@@ -18,6 +18,7 @@ using Java.Util;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.AppCenter.Push;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.Droid;
@@ -70,7 +71,7 @@ namespace OmniCore.Client.Droid.Services
         public override void OnCreate()
         {
             ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.Starting);
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes));
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes), typeof(Push));
             UnexpectedStopRequestSubject = new Subject<ICoreApi>();
             ServerContainer = Initializer.AndroidServiceContainer(this, this);
             base.OnCreate();

@@ -19,40 +19,69 @@ namespace OmniCore.Client.ViewModels.Wizards
 {
     public class PodWizardViewModel : BaseViewModel
     {
-        public ICommand NextPageCommand { get; private set; }
-        public ContentView ActiveView { get; private set; }
+        public ICommand StartErosCommand { get; }
+        public ICommand StartDashCommand { get; }
+        public ICommand RecoverErosCommand { get; }
 
-        private PodWizardActivationTypeSelection ActivationTypeSelectionView = new PodWizardActivationTypeSelection();
+        public ICommand NextPageCommand { get; private set; }
+
+        public int CarouselPosition { get; set; }
+
+        public ObservableCollection<ContentView> Views { get; private set; }
+
+        private bool SelectedEros;
+        private bool SelectedDash;
+        private bool SelectedRecovery;
+
+        private PodWizardPodTypeSelection PodTypeSelectionView = new PodWizardPodTypeSelection();
         private PodWizardPendingActivationsWarning PendingActivationsWarningView = new PodWizardPendingActivationsWarning();
         private PodWizardAdvancedOptions Page3 = new PodWizardAdvancedOptions();
         private PodWizardIntegrationOptions Page5 = new PodWizardIntegrationOptions();
         private PodWizardMedicationSelection Page6 = new PodWizardMedicationSelection();
-        private PodWizardRadioSelection Page7 = new PodWizardRadioSelection();
+        private PodWizardRadioSelection RadioSelectionView = new PodWizardRadioSelection();
 
         public PodWizardViewModel(ICoreClient client) : base(client)
         {
             NextPageCommand = new Command(async () => { await GoToNextPage(); });
+
+            StartErosCommand = new Command(() =>
+            {
+                SelectedEros = true;
+                SelectedRecovery = false;
+                SelectedDash = false;
+                CarouselPosition += 1;
+            });
+
+            StartDashCommand  = new Command(() =>
+            {
+                SelectedEros = false;
+                SelectedRecovery = false;
+                SelectedDash = true;
+            });
+
+            RecoverErosCommand = new Command(() =>
+            {
+                SelectedEros = true;
+                SelectedRecovery = true;
+                SelectedDash = false;
+            });
+
         }
 
         protected override async Task OnPageAppearing()
         {
+            Views = new ObservableCollection<ContentView>();
             if (Parameter == null)
             {
                 var activePods = await Api.CorePodService.ActivePods(CancellationToken.None);
                 if (activePods.Any(p => p.RunningState.State <= PodState.Started))
                 {
-                    ActiveView = PendingActivationsWarningView;
+                    Views.Add(PendingActivationsWarningView);
                 }
-                else
-                {
-                    ActiveView = ActivationTypeSelectionView;
-                }
-            }
-            else
-            {
-                //
-            }
 
+                Views.Add(PodTypeSelectionView);
+                Views.Add(RadioSelectionView);
+            }
             await base.OnPageAppearing();
         }
 

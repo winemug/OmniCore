@@ -23,7 +23,9 @@ namespace OmniCore.Client.Views.Main
     {
         public DataTemplate EmptyView { get; }
         public DataTemplate RadiosView { get; }
-        public DataTemplate PodsView { get; }
+        public DataTemplate ActivePodsView { get; }
+        public DataTemplate WaitingPodsView { get; }
+        public DataTemplate ArchivedPodsView { get; }
 
         public ShellView(IViewPresenter viewPresenter)
         {
@@ -31,8 +33,9 @@ namespace OmniCore.Client.Views.Main
 
             EmptyView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
             RadiosView = new DataTemplate(() => viewPresenter.GetView<RadiosView>(true));
-            PodsView = new DataTemplate(() => viewPresenter.GetView<PodsView>(true));
-
+            ActivePodsView = new DataTemplate(() => viewPresenter.GetView<ActivePodsView>(true));
+            WaitingPodsView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
+            ArchivedPodsView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
             BindingContext = this;
         }
     }
