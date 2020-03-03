@@ -28,6 +28,7 @@ using Android.Gms.Common;
 using Firebase.Messaging;
 using Firebase.Iid;
 using Android.Util;
+using Microsoft.AppCenter.Push;
 
 namespace OmniCore.Client.Droid
 {
@@ -187,5 +188,12 @@ namespace OmniCore.Client.Droid
             ConnectRequested = false;
             DisconnectRequested = true;
         }
+
+        protected override void OnNewIntent(Android.Content.Intent intent)
+        {
+            base.OnNewIntent(intent);
+            Push.CheckLaunchedFromNotification(this, intent);
+        }
+
     }
 }

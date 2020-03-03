@@ -89,7 +89,6 @@ namespace OmniCore.Client.ViewModels.Base
                     {
                         ApiStatusSubscription?.Dispose();
                         ApiStatusSubscription = null;
-                        await ShowServicePopup();
                     }
                     else
                     {
