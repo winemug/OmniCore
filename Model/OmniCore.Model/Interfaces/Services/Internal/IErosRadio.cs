@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
     {
         void StartMonitoring();
         Task Initialize(CancellationToken cancellationToken);
-        Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken);
+        Task ExecuteRequest(IErosPodRequest request, CancellationToken cancellationToken);
         Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
     }
 }

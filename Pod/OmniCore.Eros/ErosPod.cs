@@ -135,7 +135,7 @@ namespace OmniCore.Eros
         }
         private async Task<ErosPodRequest> NewPodRequest()
         {
-            var request = Container.Get<IPodRequest>() as ErosPodRequest;
+            var request = Container.Get<IErosPodRequest>() as ErosPodRequest;
             request.Pod = this;
             request.Entity = new PodRequestEntity
             {

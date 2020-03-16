@@ -13,8 +13,14 @@ using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodRequest : ErosTask, IPodRequest
+    public class ErosPodRequest : ErosTask, IErosPodRequest
     {
+        public byte[] Message => GetRequestData();
+        public uint MessageRadioAddress { get; }
+        public int MessageSequence { get; }
+        public bool WithCriticalFollowup { get; }
+        public bool AllowAddressOverride { get; }
+
         public PodRequestEntity Entity { get; set; }
         public IPod Pod { get; set; }
 
@@ -23,9 +29,7 @@ namespace OmniCore.Eros
         private readonly List<(RequestPart part, ISubTaskProgress progress)> Parts =
             new List<(RequestPart part, ISubTaskProgress progress)>();
 
-        private uint MessageSequence;
-        private uint MessageAddress;
-        private bool IsWithCriticalFollowup;
+
         private IErosRadio RadioOverride;
 
         public ErosPodRequest()
@@ -106,12 +110,12 @@ namespace OmniCore.Eros
             }
 
             var b0 = (byte) (MessageSequence << 2);
-            if (IsWithCriticalFollowup)
+            if (WithCriticalFollowup)
                 b0 |= 0x80;
             b0 |= (byte)((messageBody.Length >> 8) & 0x03);
             var b1 = (byte)(messageBody.Length & 0xff);
 
-            var requestBody = new Bytes(MessageAddress).Append(b0).Append(b1).Append(messageBody);
+            var requestBody = new Bytes(MessageRadioAddress).Append(b0).Append(b1).Append(messageBody);
 
             return new Bytes(requestBody).Append(CrcUtil.Crc16(requestBody)).ToArray();
         }

@@ -223,12 +223,32 @@ namespace OmniCore.Radios.RileyLink
             await ConfigureRileyLink(cancellationToken);
         }
 
-        public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
+        public async Task ExecuteRequest(IErosPodRequest request, CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
             await Initialize(cancellationToken);
 
-            request.GetRequestData();
+            var conversation = RileyLinkErosConversation.ForPod(request.Pod as IErosPod);
+            conversation.Initialize(request);
+
+
+            while (!conversation.IsFinished)
+            {
+                var sendPacketData = conversation.GetPacketToSend();
+
+                var arguments = new Bytes().Append((byte) 0)
+                    .Append((byte) 0).Append((ushort) 0).Append((byte) 0)
+                    .Append((uint) 1600).Append((byte) 0)
+                    .Append((ushort) 120);
+
+                var result = await SendCommandGetResponse(
+                    cancellationToken, TimeSpan.FromMilliseconds(2000),
+                    RileyLinkCommandType.SendPacket,
+                    arguments.ToArray());
+
+                var rssi = result.Data[0];
+                conversation.ParseIncomingPacket(result.Data[1..]);
+            }
 
             await Disconnect(cancellationToken);
         }
@@ -552,6 +572,12 @@ namespace OmniCore.Radios.RileyLink
             registers.Add(Tuple.Create(RileyLinkRegister.TEST0, 0x09));
 
             return registers;
+        }
+
+        private int GetRssi(byte rssiByte)
+        {
+            int rssi = rssiByte;
+            return (rssi - 255) >> 2;
         }
     }
 }
