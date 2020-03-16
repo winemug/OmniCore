@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
 {
@@ -24,6 +26,7 @@ namespace OmniCore.Eros
 
         public ErosTask()
         {
+            Progress = new TaskProgress();
         }
 
         private bool CanCancelInternal = true;
@@ -48,6 +51,8 @@ namespace OmniCore.Eros
                 }
             }
         }
+
+        public ITaskProgress Progress { get; }
 
         public async Task Run()
         {

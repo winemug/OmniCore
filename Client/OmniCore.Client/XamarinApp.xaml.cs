@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.ViewModels.Home;
+using OmniCore.Client.ViewModels.Test;
 using OmniCore.Client.ViewModels.Wizards;
 using OmniCore.Client.Views.Base;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
+using OmniCore.Client.Views.Test;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Client;
@@ -38,7 +40,8 @@ namespace OmniCore.Client
                 .WithViewViewModel<ProgressPopupView, ProgressPopupViewModel>()
                 .WithViewViewModel<EmptyView, EmptyViewModel>()
                 .WithViewViewModel<PodWizardMainView, PodWizardViewModel>()
-                .WithViewViewModel<NavigationView, NavigationViewModel>();
+                .WithViewViewModel<NavigationView, NavigationViewModel>()
+                .WithViewViewModel<Test1View, Test1ViewModel>();
         }
     }
 }

@@ -6,6 +6,6 @@ namespace OmniCore.Model.Interfaces.Common
     {
         double? PercentageComplete { get; set; }
         ObservableCollection<(ISubTaskProgress SubTask, double? TaskWeight)> SubTasks { get; set; }
-        ISubTaskProgress AddSubTask(string subTaskName, string subTaskDescription = null, double? weight = null);
+        ISubTaskProgress AddSubProgress(string subTaskName, string subTaskDescription = null, double? weight = null);
     }
 }

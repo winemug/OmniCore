@@ -20,6 +20,7 @@ namespace OmniCore.Eros
         public void Startup()
         {
             Tasks = new ConcurrentQueue<ITask>();
+            // TODO: load here
         }
 
         public void Shutdown()

@@ -105,7 +105,7 @@ namespace OmniCore.Client.Platform
 
         public void RequestRssi()
         {
-            ThrowIfNotOnLease();
+            // ThrowIfNotOnLease();
 
             if (Device != null)
             {
@@ -228,7 +228,7 @@ namespace OmniCore.Client.Platform
 
         public void SetDevice(IDevice newDevice)
         {
-            ThrowIfNotOnLease();
+            // ThrowIfNotOnLease();
 
             SetDeviceInternal(newDevice);
             if (newDevice == null)
@@ -240,7 +240,7 @@ namespace OmniCore.Client.Platform
 
         public void SetParametersFromScanResult(IScanResult scanResult)
         {
-            ThrowIfNotOnLease();
+            // ThrowIfNotOnLease();
 
             SetDeviceInternal(scanResult.Device);
             

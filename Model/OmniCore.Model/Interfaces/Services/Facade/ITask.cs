@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 
@@ -6,6 +7,7 @@ namespace OmniCore.Model.Interfaces.Services.Facade
 {
     public interface ITask : IDisposable, IServerResolvable
     {
+        ITaskProgress Progress { get; }
         Task Run();
         bool CanCancel { get; }
         void RequestCancellation();

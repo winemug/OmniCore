@@ -226,6 +226,10 @@ namespace OmniCore.Radios.RileyLink
         public async Task ExecuteRequest(IPodRequest request, CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
+            await Initialize(cancellationToken);
+
+            request.GetRequestData();
+
             await Disconnect(cancellationToken);
         }
 

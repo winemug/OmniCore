@@ -13,6 +13,7 @@ using OmniCore.Model.Exceptions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Reactive.Linq;
+using OmniCore.Client.Views.Test;
 using OmniCore.Model.Interfaces.Client;
 using Rg.Plugins.Popup.Services;
 
@@ -27,6 +28,8 @@ namespace OmniCore.Client.Views.Main
         public DataTemplate WaitingPodsView { get; }
         public DataTemplate ArchivedPodsView { get; }
 
+        public DataTemplate Test1View { get; }
+
         public ShellView(IViewPresenter viewPresenter)
         {
             InitializeComponent();
@@ -36,6 +39,7 @@ namespace OmniCore.Client.Views.Main
             ActivePodsView = new DataTemplate(() => viewPresenter.GetView<ActivePodsView>(true));
             WaitingPodsView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
             ArchivedPodsView = new DataTemplate(() => viewPresenter.GetView<EmptyView>(true));
+            Test1View = new DataTemplate(() => viewPresenter.GetView<Test1View>(true));
             BindingContext = this;
         }
     }

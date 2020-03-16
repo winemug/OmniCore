@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Test.Test1View">
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Text="start" Command="{Binding RadioScanStartCommand}"/> 
+            <Button Text="stop" Command="{Binding RadioScanStopCommand}"/> 
+            <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="{x:Type models:RadioModel}">
+                        <Frame Padding="2">
+                            <Grid BackgroundColor="#eeeeee">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="55"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox IsChecked="{Binding IsChecked}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
+                                <Label Text="{Binding Name}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"/>
+                                <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="2"/>
+                                <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="3"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="acquire" Command="{Binding AcquireCommand}"/>
+        </StackLayout>
+
+    </ContentPage.Content>
+</ContentPage>

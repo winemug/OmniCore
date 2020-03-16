@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
@@ -16,11 +18,15 @@ namespace OmniCore.Eros
         public PodRequestEntity Entity { get; set; }
         public IPod Pod { get; set; }
 
-        private readonly List<RequestPart> Parts = new List<RequestPart>();
+        private IErosPod ErosPod => Pod as IErosPod;
+
+        private readonly List<(RequestPart part, ISubTaskProgress progress)> Parts =
+            new List<(RequestPart part, ISubTaskProgress progress)>();
 
         private uint MessageSequence;
         private uint MessageAddress;
         private bool IsWithCriticalFollowup;
+        private IErosRadio RadioOverride;
 
         public ErosPodRequest()
         {
@@ -28,30 +34,55 @@ namespace OmniCore.Eros
 
         protected override async Task ExecuteRequest(CancellationToken cancellationToken)
         {
-            // TODO: Pod.Radio
+            var radio = RadioOverride;
+            if (radio == null)
+            {
+                //TODO: radio from radioentity
+            }
+            await radio.ExecuteRequest(this, cancellationToken);
+        }
+
+        public ErosPodRequest WithAcquire(IErosRadio radio)
+        {
+            var subProgress = Progress.AddSubProgress( "Query Pod", "Searching for pod");
+                
+            return this.WithPart(new RequestPart()
+            {
+                PartType = PartType.RequestStatus,
+                PartData = new Bytes((byte)StatusRequestType.Standard)
+            }, subProgress).WithRadio(radio);
+        }
+
+        private ErosPodRequest WithRadio(IErosRadio radio)
+        {
+            RadioOverride = radio;
+            return this;
         }
 
         public ErosPodRequest WithPair(uint address)
         {
+            var subProgress = Progress.AddSubProgress( "Pair Pod", "Pairing pod");
+            
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestAssignAddress,
                 PartData = new Bytes(address)
-            });
+            }, subProgress);
         }
 
         public ErosPodRequest WithStatus(StatusRequestType requestType)
         {
+            var subProgress = Progress.AddSubProgress( "Request Status", "Querying Pod Status");
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestStatus,
                 PartData = new Bytes().Append((byte)requestType)
-            });
+            }, subProgress);
         }
 
-        private ErosPodRequest WithPart(RequestPart part)
+        private ErosPodRequest WithPart(RequestPart part, ISubTaskProgress subProgress)
         {
-            Parts.Add(part);
+            Parts.Add((part, subProgress));
             return this;
         }
 
@@ -59,7 +90,7 @@ namespace OmniCore.Eros
         {
             var messageBody = new Bytes();
 
-            foreach (var part in Parts)
+            foreach (var (part, _) in Parts)
             {
                 messageBody.Append((byte) part.PartType);
 

@@ -20,12 +20,14 @@ namespace OmniCore.Eros
         public IPodRequest ActiveRequest { get; }
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICoreRepositoryService CoreRepositoryService;
         private readonly ITaskQueue TaskQueue;
+        private readonly ICorePodService PodService;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
+            ICorePodService podService,
             ITaskQueue taskQueue)
         {
+            PodService = podService;
             Container = container;
             TaskQueue = taskQueue;
             RunningState = new PodRunningState();
@@ -46,7 +48,12 @@ namespace OmniCore.Eros
 
         public async Task<IPodRequest> Acquire(IRadio radio, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            Entity.Radios.Clear();
+
+            return (IPodRequest) TaskQueue.Enqueue(
+                (await NewPodRequest())
+                .WithAcquire(radio as IErosRadio)
+            );
         }
 
         public async Task<IPodRequest> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
@@ -130,7 +137,6 @@ namespace OmniCore.Eros
         {
             var request = Container.Get<IPodRequest>() as ErosPodRequest;
             request.Pod = this;
-
             request.Entity = new PodRequestEntity
             {
                 Pod = Entity

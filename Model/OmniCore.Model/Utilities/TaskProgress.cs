@@ -16,7 +16,7 @@ namespace OmniCore.Model.Utilities
             PercentageComplete = null;
         }
 
-        public ISubTaskProgress AddSubTask(string subTaskName, string subTaskDescription = null, double? weight = null)
+        public ISubTaskProgress AddSubProgress(string subTaskName, string subTaskDescription = null, double? weight = null)
         {
             var st = new SubTaskProgress
             {

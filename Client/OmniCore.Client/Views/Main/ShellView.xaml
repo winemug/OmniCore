@@ -30,6 +30,7 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
+        <ShellContent ContentTemplate="{Binding Test1View}" Title="Test1" Route="Test1"/>
         <Tab Title="Pods">
             <ShellContent ContentTemplate="{Binding ActivePodsView}" Title="Active" Route="ActivePods"/>
             <ShellContent ContentTemplate="{Binding WaitingPodsView}" Title="Waiting" Route="WaitingPods"/>
