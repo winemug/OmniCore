@@ -65,7 +65,7 @@ namespace OmniCore.Eros
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestStatus,
-                responseData = new Bytes((byte)StatusRequestType.Standard)
+                PartData = new Bytes((byte)StatusRequestType.Standard)
             }, subProgress).WithRadio(radio);
         }
 
@@ -82,7 +82,7 @@ namespace OmniCore.Eros
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestAssignAddress,
-                responseData = new Bytes(address)
+                PartData = new Bytes(address)
             }, subProgress);
         }
 
@@ -92,7 +92,7 @@ namespace OmniCore.Eros
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestStatus,
-                responseData = new Bytes().Append((byte)requestType)
+                PartData = new Bytes().Append((byte)requestType)
             }, subProgress);
         }
 
@@ -113,7 +113,7 @@ namespace OmniCore.Eros
                 var partBody = new Bytes();
                 if (part.RequiresNonce)
                     partBody.Append(GetNonce());
-                partBody.Append(part.responseData);
+                partBody.Append(part.PartData);
 
                 var partBodyLength = (byte) partBody.Length;
 
@@ -277,7 +277,7 @@ namespace OmniCore.Eros
                 case 0x02:
                     response.FaultResponse = new PodResponseFault();
                     response.StatusResponse = new PodResponseStatus();
-                    response.Progress = (PodProgress)responseData.Byte(i++);
+                    response.Progress = (PodProgress) responseData.Byte(i++);
 
                     var deliveryStates = ParseDeliveryStates(responseData.Byte(i++));
 
@@ -295,22 +295,25 @@ namespace OmniCore.Eros
                     response.FaultResponse.TableAccessFault = responseData.Byte(i++);
                     byte f17 = responseData.Byte(i++);
                     response.FaultResponse.InsulinStateTableCorr = (byte) (f17 >> 7);
-                    response.FaultResponse.InternalFaultVars = (byte) (f17 & 0x60) >> 6;
+                    response.FaultResponse.InternalFaultVars = (byte) ((f17 & 0x60) >> 6);
                     response.FaultResponse.FaultWhileBolus = (f17 & 0x10) > 0;
-                    response.FaultResponse.ProgressBeforeFault = (PodProgress)(f17 & 0x0F);
+                    response.FaultResponse.ProgressBeforeFault = (PodProgress) (f17 & 0x0F);
                     byte r18 = responseData.Byte(i++);
 
-                    result.Statistics.PodLowGain = (r18 & 0xC0) >> 6;
-                    result.Statistics.PodRssi = r18 & 0x3F;
+                    response.RadioResponse = new PodResponseRadio
+                    {
+                        PodLowGain = (byte) ((r18 & 0xC0) >> 6),
+                        PodRssi = (byte) ((r18 & 0xC0) >> 6)
+                    };
 
-                    fault.ProgressBeforeFault2 = (PodProgress)(responseData.Byte(i++) & 0x0F);
-                    fault.FaultInformation2LastWord = responseData.Byte(i++);
-
-                    result.Status = status;
-                    result.Fault = fault;
+                    response.FaultResponse.ProgressBeforeFault2 = (PodProgress) (responseData.Byte(i++) & 0x0F);
+                    // TODO: verify structure
+                    // response.FaultResponse.FaultInformation2W = responseData.Byte(i++);
                     break;
                 default:
-                    throw new OmniCoreException(FailureType.PodResponseUnrecognized, $"Failed to parse the information response of type {rt}");
+                    throw new OmniCoreWorkflowException(FailureType.WorkflowPodResponseUnrecognized,
+                        $"Failed to parse the information response of type {rt}");
+            }
         }
 
         private (BolusState bolusState, BasalState basalState) ParseDeliveryStates(byte deliveryStates)
