@@ -18,5 +18,6 @@ namespace OmniCore.Model.Interfaces.Services
         ICoreConfigurationService CoreConfigurationService { get; }
         ICorePodService CorePodService { get; }
         ICoreIntegrationService IntegrationService { get; }
+        ICoreAutomationService AutomationService { get; }
     }
 }

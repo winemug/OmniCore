@@ -25,10 +25,10 @@ namespace OmniCore.Client.Droid
                 .One<ICoreLoggingFunctions, CoreLoggingFunctions>();
         }
 
-        public static ICoreContainer<IServerResolvable> WithAapsIntegrationService
+        public static ICoreContainer<IServerResolvable> WithAndroidIntegrationComponents
             (this ICoreContainer<IServerResolvable> container)
         {
-            return container.One<ICoreIntegrationService, AapsIntegrationServiceBase>();
+            return container.One<IIntegrationComponent, XdripReceiver>(nameof(XdripReceiver));
         }
 
         public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)
@@ -49,13 +49,13 @@ namespace OmniCore.Client.Droid
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
-                .WithAapsIntegrationService()
 #if EMULATOR
                 .WithBleSimulator()
 #else
                 .WithCrossBleRadioAdapter()
 #endif
                 .WithEfCoreRepository()
+                .WithAndroidIntegrationComponents()
                 .WithAndroidPlatformServices();
         }
     }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json.Serialization;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Services;
 
 namespace OmniCore.Services
@@ -14,7 +16,9 @@ namespace OmniCore.Services
         {
             return container
                 .One<ICoreRepositoryService, CoreRepositoryService>()
-                .One<ICorePodService, CorePodService>();
+                .One<ICorePodService, CorePodService>()
+                .One<ICoreAutomationService, CoreAutomationService>()
+                .One<ICoreIntegrationService, CoreIntegrationService>();
         }
     }
 }
