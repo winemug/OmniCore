@@ -223,7 +223,7 @@ namespace OmniCore.Radios.RileyLink
             await ConfigureRileyLink(cancellationToken);
         }
 
-        public async Task ExecuteRequest(IErosPodRequest request, CancellationToken cancellationToken)
+        public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken)
         {
             await Connect(cancellationToken);
             await Initialize(cancellationToken);
@@ -250,7 +250,11 @@ namespace OmniCore.Radios.RileyLink
                 conversation.ParseIncomingPacket(result.Data[1..]);
             }
 
+            var response = conversation.ResponseData.ToArray();
+
             await Disconnect(cancellationToken);
+
+            return response;
         }
 
         public async Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds,

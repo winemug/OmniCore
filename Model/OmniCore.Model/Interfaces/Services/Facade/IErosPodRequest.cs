@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
@@ -11,5 +12,6 @@ namespace OmniCore.Model.Interfaces.Services.Facade
         int MessageSequence { get; }
         bool WithCriticalFollowup { get; }
         bool AllowAddressOverride { get; }
+        TransmissionPower? TransmissionPowerOverride { get; }
     }
 }

@@ -13,7 +13,8 @@ namespace OmniCore.Radios.RileyLink
         public int PacketSequence { get; private set; }
 
         private List<Bytes> RequestPacketData;
-        private Bytes ResponseData;
+        public Bytes ResponseData;
+
         private int SendPacketIndex = 0;
         private byte[] SendPacketCache = null;
         public bool IsFinished = false;
