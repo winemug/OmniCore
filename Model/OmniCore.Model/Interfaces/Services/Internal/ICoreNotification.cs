@@ -15,8 +15,8 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         void Update(string title, string message, TimeSpan? timeout = null);
         void Dismiss();
         IObservable<ICoreNotification> WhenDismissed();
-         bool IsDismissed { get; }
-         bool IsAutomaticallyDismissed  { get; }
+        bool IsDismissed { get; }
+        bool IsAutomaticallyDismissed  { get; }
         bool IsManuallyDismissed { get; }
     }
 }

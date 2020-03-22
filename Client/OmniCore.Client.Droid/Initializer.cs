@@ -25,12 +25,6 @@ namespace OmniCore.Client.Droid
                 .One<ICoreLoggingFunctions, CoreLoggingFunctions>();
         }
 
-        public static ICoreContainer<IServerResolvable> WithAndroidIntegrationComponents
-            (this ICoreContainer<IServerResolvable> container)
-        {
-            return container.One<IIntegrationComponent, XdripReceiver>(nameof(XdripReceiver));
-        }
-
         public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)
         {
             return new CoreContainer<IClientResolvable>()
@@ -55,7 +49,6 @@ namespace OmniCore.Client.Droid
                 .WithCrossBleRadioAdapter()
 #endif
                 .WithEfCoreRepository()
-                .WithAndroidIntegrationComponents()
                 .WithAndroidPlatformServices();
         }
     }

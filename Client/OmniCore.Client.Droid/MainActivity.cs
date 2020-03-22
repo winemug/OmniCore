@@ -49,7 +49,7 @@ namespace OmniCore.Client.Droid
         private IDisposable ScreenLockDisposable = null;
 #endif
 
-        private XdripReceiver XdripReceiver;
+        private GenericBroadcastReceiver XdripReceiver;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -73,33 +73,8 @@ namespace OmniCore.Client.Droid
                 this.FinishAffinity();
             }
 
-            XdripReceiver = new XdripReceiver();
-            var inf = new IntentFilter();
-            inf.AddAction("com.eveningoutpost.dexdrip.BgEstimate");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.Sender");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.BgEstimate");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.BgSlope");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.BgSlopeName");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.SensorBattery");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.Time");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.Raw");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.Noise");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.NoiseWarning");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.NoiseBlockLevel");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.NsNoiseLevel");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.SourceDesc");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.SourceInfo");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.VersionInfo");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.CalibrationInfo");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.CalibrationPluginInfo");
-            inf.AddAction("com.eveningoutpost.dexdrip.NewCalibration");
-            inf.AddAction("com.eveningoutpost.dexdrip.BgEstimateNoData");
-            inf.AddAction("com.eveningoutpost.dexdrip.StatusUpdate");
-            inf.AddAction("com.eveningoutpost.dexdrip.Snooze");
-            inf.AddAction("com.eveningoutpost.dexdrip.VehicleMode");
-            inf.AddAction("com.eveningoutpost.dexdrip.VehicleMode.Enabled");
-            inf.AddAction("com.eveningoutpost.dexdrip.Extras.Collector.NanoStatus");
-            RegisterReceiver(XdripReceiver, inf);
+            XdripReceiver = new GenericBroadcastReceiver();
+            RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
             
 
             Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
