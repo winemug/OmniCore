@@ -153,16 +153,16 @@ namespace OmniCore.Client.Droid.Services
         {
             await CoreRepositoryService.StartService(cancellationToken);
             await CorePodService.StartService(cancellationToken);
-            await AutomationService.StartService(cancellationToken);
-            await IntegrationService.StartService(cancellationToken);
+            //await AutomationService.StartService(cancellationToken);
+            //await IntegrationService.StartService(cancellationToken);
             ApiStatusSubject.OnNext(CoreApiStatus.Started);
             ServiceNotification.Update(null, "OmniCore is running in background.");
         }
 
         public async Task StopServices(CancellationToken cancellationToken)
         {
-            await IntegrationService.StopService(cancellationToken);
-            await AutomationService.StopService(cancellationToken);
+            //await IntegrationService.StopService(cancellationToken);
+            //await AutomationService.StopService(cancellationToken);
             await CorePodService.StopService(cancellationToken);
             await CoreRepositoryService.StopService(cancellationToken);
         }

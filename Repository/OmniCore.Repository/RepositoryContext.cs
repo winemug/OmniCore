@@ -73,7 +73,7 @@ namespace OmniCore.Repository
             {
                 Users.Add(new UserEntity
                 {
-                    Name = "First User",
+                    Name = "Default User",
                 });
             }
             await SaveChangesAsync();

@@ -51,8 +51,13 @@ namespace OmniCore.Eros
 
             var response = await radio.GetResponse(this, cancellationToken);
 
+
+            var context = Container.Get<IRepositoryContext>();
             var responseEntity = new PodResponseEntity();
+            context.PodResponses.Add(responseEntity);
             Entity.Responses.Add(responseEntity);
+
+            await context.Save(cancellationToken);
         }
 
         public ErosPodRequest WithAcquire(IErosRadio radio)

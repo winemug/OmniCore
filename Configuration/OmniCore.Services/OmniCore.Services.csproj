@@ -19,4 +19,8 @@
     <PackageReference Include="Unity" Version="5.11.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integration\" />
+  </ItemGroup>
+
 </Project>

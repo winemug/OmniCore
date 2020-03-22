@@ -183,7 +183,9 @@ namespace OmniCore.Services
 
         public async Task<IErosPod> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var pod = await ErosPodProvider.NewPod(user, medication, cancellationToken);
+            await pod.StartMonitoring();
+            return pod;
         }
         
         public async Task<IDashPod> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)

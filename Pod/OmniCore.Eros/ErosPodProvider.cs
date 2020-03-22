@@ -37,7 +37,22 @@ namespace OmniCore.Eros
                 .ForEach(async p => pods.Add(await GetPodInternal(p)));
             return pods;
         }
-        
+
+        public async Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken)
+        {
+            var context = Container.Get<IRepositoryContext>();
+            var entity = new PodEntity()
+            {
+                Medication = medication.Entity,
+                User = user.Entity,
+                Radios = new List<RadioEntity>()
+            };
+
+            await context.Pods.AddAsync(entity);
+            await context.Save(cancellationToken);
+            return await GetPodInternal(entity);
+        }
+
         private async Task<IErosPod> GetPodInternal(PodEntity podEntity)
         {
             using var podLock = await PodLock.LockAsync();

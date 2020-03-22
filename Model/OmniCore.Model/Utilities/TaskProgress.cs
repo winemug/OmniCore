@@ -14,6 +14,7 @@ namespace OmniCore.Model.Utilities
         public TaskProgress()
         {
             PercentageComplete = null;
+            SubTasks = new ObservableCollection<(ISubTaskProgress SubTask, double? TaskWeight)>();
         }
 
         public ISubTaskProgress AddSubProgress(string subTaskName, string subTaskDescription = null, double? weight = null)

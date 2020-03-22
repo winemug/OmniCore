@@ -9,14 +9,14 @@ using OmniCore.Repository;
 namespace OmniCore.Repository.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20200209053627_m000")]
+    [Migration("20200319034654_m000")]
     partial class m000
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.1");
+                .HasAnnotation("ProductVersion", "3.1.2");
 
             modelBuilder.Entity("OmniCore.Model.Entities.MedicationDeliveryEntity", b =>
                 {

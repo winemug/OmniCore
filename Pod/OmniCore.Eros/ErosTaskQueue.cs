@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Services.Facade;
@@ -13,20 +14,21 @@ namespace OmniCore.Eros
 {
     public class ErosTaskQueue : ITaskQueue
     {
-        private ConcurrentQueue<ITask> Tasks;
-        private Task QueueTask = Task.CompletedTask;
-        private bool IsShuttingDown = false;
+        private BlockingCollection<ITask> Tasks;
+
+        public ErosTaskQueue()
+        {
+            Tasks = new BlockingCollection<ITask>(new ConcurrentQueue<ITask>());
+        }
 
         public void Startup()
         {
-            Tasks = new ConcurrentQueue<ITask>();
             // TODO: load here
         }
 
         public void Shutdown()
         {
-            IsShuttingDown = true;
-            QueueTask.Wait();
+
         }
 
         public IEnumerable<ITask> List()
@@ -36,20 +38,18 @@ namespace OmniCore.Eros
 
         public ITask Enqueue(ITask task)
         {
-            Tasks.Enqueue(task);
-            QueueTask.ContinueWith(_ => GetNext());
+            Tasks.Add(task);
             return task;
         }
 
-        private Task GetNext()
+        private async Task ConsumeQueue()
         {
-            if (!IsShuttingDown && Tasks.TryDequeue(out var erosTask))
+            while (!Tasks.IsCompleted)
             {
-                return new Task(async () => await erosTask.Run());
-            }
-            else
-            {
-                return Task.CompletedTask;
+                if (Tasks.TryTake(out ITask task))
+                {
+                    await task.Run();
+                }
             }
         }
     }
