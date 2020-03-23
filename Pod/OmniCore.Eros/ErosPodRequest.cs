@@ -29,8 +29,8 @@ namespace OmniCore.Eros
 
         private IErosPod ErosPod => Pod as IErosPod;
 
-        private readonly List<(RequestPart part, ISubTaskProgress progress)> Parts =
-            new List<(RequestPart part, ISubTaskProgress progress)>();
+        private readonly List<(RequestPart part, ITaskProgress progress)> Parts =
+            new List<(RequestPart part, ITaskProgress progress)>();
 
         private IErosRadio RadioOverride;
 
@@ -62,7 +62,11 @@ namespace OmniCore.Eros
 
         public ErosPodRequest WithAcquire(IErosRadio radio)
         {
-            var subProgress = Progress.AddSubProgress( "Query Pod", "Searching for pod");
+            var childProgress = new TaskProgress 
+                {
+                    Name = "Query Pod", 
+                    Description = "Looking for pod"
+                };
 
             AllowAddressOverride = true;
             TransmissionPowerOverride = TransmissionPower.Lowest;
@@ -71,7 +75,7 @@ namespace OmniCore.Eros
             {
                 PartType = PartType.RequestStatus,
                 PartData = new Bytes((byte)StatusRequestType.Standard)
-            }, subProgress).WithRadio(radio);
+            }, childProgress).WithRadio(radio);
         }
 
         private ErosPodRequest WithRadio(IErosRadio radio)
@@ -82,28 +86,39 @@ namespace OmniCore.Eros
 
         public ErosPodRequest WithPair(uint address)
         {
-            var subProgress = Progress.AddSubProgress( "Pair Pod", "Pairing pod");
+            var childProgress = new TaskProgress 
+            {
+                Name = "Pair Pod", 
+                Description = "Pairing pod"
+            };
             
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestAssignAddress,
                 PartData = new Bytes(address)
-            }, subProgress);
+            }, childProgress);
         }
 
         public ErosPodRequest WithStatus(StatusRequestType requestType)
         {
-            var subProgress = Progress.AddSubProgress( "Request Status", "Querying Pod Status");
+            var childProgress = new TaskProgress 
+            {
+                Name = "Request Status", 
+                Description = "Querying Pod Status"
+            };
+
             return this.WithPart(new RequestPart()
             {
                 PartType = PartType.RequestStatus,
                 PartData = new Bytes().Append((byte)requestType)
-            }, subProgress);
+            }, childProgress);
         }
 
-        private ErosPodRequest WithPart(RequestPart part, ISubTaskProgress subProgress)
+        private ErosPodRequest WithPart(RequestPart part, ITaskProgress taskProgress)
         {
-            Parts.Add((part, subProgress));
+            this.Progress.Children.Add(taskProgress);
+
+            Parts.Add((part, taskProgress));
             return this;
         }
 

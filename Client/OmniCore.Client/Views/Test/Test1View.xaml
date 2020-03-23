@@ -8,8 +8,7 @@
              x:Class="OmniCore.Client.Views.Test.Test1View">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="start" Command="{Binding RadioScanStartCommand}"/> 
-            <Button Text="stop" Command="{Binding RadioScanStopCommand}"/> 
+            <Button Text="acquire" Command="{Binding AcquireCommand}"/>
             <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="{x:Type models:RadioModel}">
@@ -35,7 +34,6 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <Button Text="acquire" Command="{Binding AcquireCommand}"/>
         </StackLayout>
 
     </ContentPage.Content>

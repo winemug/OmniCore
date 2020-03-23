@@ -7,10 +7,13 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Home.ProgressPopupView">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <Frame BackgroundColor="#DAFAF1" BorderColor="Black" Padding="20"
+               VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+            <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <Label Text="{Binding Progress.Description}" HorizontalOptions="Center"/>
+                <ProgressBar Progress="{Binding Progress.PercentComplete}"></ProgressBar>
+                <Label Text="Do wait and see." HorizontalOptions="Center"/>
+            </StackLayout>
+        </Frame>
     </ContentPage.Content>
 </pages:PopupPage>

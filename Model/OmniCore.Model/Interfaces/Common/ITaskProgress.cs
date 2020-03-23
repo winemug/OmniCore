@@ -1,11 +1,15 @@
 ﻿using System.Collections.ObjectModel;
+using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Common
 {
     public interface ITaskProgress
     {
-        double? PercentageComplete { get; set; }
-        ObservableCollection<(ISubTaskProgress SubTask, double? TaskWeight)> SubTasks { get; set; }
-        ISubTaskProgress AddSubProgress(string subTaskName, string subTaskDescription = null, double? weight = null);
+        string Name { get; set; }
+        string Description { get; set; }
+        double? PercentComplete { get; set; }
+        double? Weight { get; set; }
+        bool InProgress { get; set; }
+        ObservableCollection<ITaskProgress> Children { get; set; }
     }
 }
