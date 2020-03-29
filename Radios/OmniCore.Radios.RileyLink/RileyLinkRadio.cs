@@ -11,6 +11,7 @@ using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 using OmniCore.Model.Entities;
@@ -81,8 +82,7 @@ namespace OmniCore.Radios.RileyLink
         private ConcurrentQueue<byte[]> Responses;
         private readonly AsyncManualResetEvent ResponseEvent;
 
-        private RadioOptions ActiveOptions;
-        private bool IsConfigured = false;
+        private RadioOptions ActiveOptions = null;
 
         private readonly ICoreContainer<IServerResolvable> Container;
 
@@ -152,7 +152,7 @@ namespace OmniCore.Radios.RileyLink
             ConnectedSubscription = Peripheral.ConnectionState.Where(s => s == PeripheralConnectionState.Connected)
                 .Subscribe( async (_) =>
                 {
-                    IsConfigured = false;
+                    ActiveOptions = null;
                     await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
                 });
 
@@ -162,7 +162,7 @@ namespace OmniCore.Radios.RileyLink
                 {
                     ResponseNotifySubscription?.Dispose();
                     ResponseNotifySubscription = null;
-                    IsConfigured = false;
+                    ActiveOptions = null;
 
                     await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
                 });
@@ -209,28 +209,38 @@ namespace OmniCore.Radios.RileyLink
             });
         }
 
-        public async Task Initialize(CancellationToken cancellationToken)
+        public RadioOptions Options
         {
-            await Connect(cancellationToken);
-
-            if (IsConfigured)
+            get
             {
-                if (GetParameters(ActiveOptions).SequenceEqual(GetParameters(Entity.Options)))
-                    return;
-                else
-                    ActiveOptions = Entity.Options;
+                if (ActiveOptions != null)
+                    return ActiveOptions;
+                return Entity.Options;
             }
-            await ConfigureRileyLink(cancellationToken);
         }
 
-        public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken)
+        public async Task Initialize(CancellationToken cancellationToken, RadioOptions options)
         {
             await Connect(cancellationToken);
-            await Initialize(cancellationToken);
 
-            var conversation = RileyLinkErosConversation.ForPod(request.Pod as IErosPod);
+            if (options == null)
+                options = Entity.Options;
+
+            if (ActiveOptions != null)
+            {
+                if (GetParameters(ActiveOptions).SequenceEqual(GetParameters(options)))
+                    return;
+            }
+            await ConfigureRileyLink(cancellationToken, options);
+        }
+        public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken,
+            RadioOptions options)
+        {
+            await Connect(cancellationToken);
+            await Initialize(cancellationToken, options);
+
+            var conversation = RileyLinkErosConversation.ForPod(request.ErosPod);
             conversation.Initialize(request);
-
 
             while (!conversation.IsFinished)
             {
@@ -286,7 +296,7 @@ namespace OmniCore.Radios.RileyLink
             ResponseNotifySubscription?.Dispose();
             ResponseNotifySubscription = null;
 
-            IsConfigured = false;
+            ActiveOptions = null;
             InUse = false;
 
             ConnectedSubscription?.Dispose();
@@ -315,7 +325,7 @@ namespace OmniCore.Radios.RileyLink
                 {
                     ResponseNotifySubscription?.Dispose();
                     ResponseNotifySubscription = null;
-                    IsConfigured = false;
+                    ActiveOptions = null;
 
                     await RecordRadioEvent(RadioEvent.Error, CancellationToken.None,
                         $"Connect failed: {e.AsDebugFriendly()}");
@@ -353,7 +363,7 @@ namespace OmniCore.Radios.RileyLink
         }
 
 
-        private async Task ConfigureRileyLink(CancellationToken cancellationToken)
+        private async Task ConfigureRileyLink(CancellationToken cancellationToken, RadioOptions options)
         {
             Activity = RadioActivity.Configuring;
             await SendCommandWithoutResponse(cancellationToken, RileyLinkCommandType.Reset);
@@ -365,7 +375,7 @@ namespace OmniCore.Radios.RileyLink
             commands.Add((RileyLinkCommandType.SetSwEncoding, new byte[] { (byte)RileyLinkSoftwareEncoding.None }));
             commands.Add((RileyLinkCommandType.SetPreamble, new byte[] { 0x55, 0x55 }));
 
-            foreach (var register in GetParameters(Entity.Options))
+            foreach (var register in GetParameters(options))
                 commands.Add((RileyLinkCommandType.UpdateRegister, new[] { (byte)register.Item1, (byte)register.Item2 })) ;
 
             var responses = await SendCommandsAndGetResponses(cancellationToken, TimeSpan.FromSeconds(15), commands);
@@ -377,7 +387,7 @@ namespace OmniCore.Radios.RileyLink
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
             
             Activity = RadioActivity.Idle;
-            IsConfigured = true;
+            ActiveOptions = options;
         }
 
         private async Task<List<(RileyLinkResponseType Type, byte[] Data)>> SendCommandsAndGetResponses(CancellationToken cancellationToken,

@@ -98,8 +98,7 @@ namespace OmniCore.Services
                 var ar = pod.ActiveRequest;
                 if (ar != null)
                 {
-                    if (ar.CanCancel)
-                        ar.RequestCancellation();
+                    ar.Cancel();
                 }
             }
         }

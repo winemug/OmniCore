@@ -13,7 +13,7 @@ namespace OmniCore.Eros
                 .One<IErosPodProvider, ErosPodProvider>()
                 .Many<ErosPod>()
                 .Many<IErosPodRequest, ErosPodRequest>()
-                .Many<ITaskQueue, ErosTaskQueue>();
+                .Many<ErosRequestQueue>();
         }
     }
 }

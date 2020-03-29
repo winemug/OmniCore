@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
@@ -15,19 +16,19 @@ using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodRequest : ErosTask, IErosPodRequest
+    public class ErosPodRequest : IErosPodRequest
     {
+        public ITaskProgress Progress { get; }
+
         public byte[] Message => GetRequestData();
         public uint MessageRadioAddress { get; private set;}
         public int MessageSequence { get; private set;}
         public bool WithCriticalFollowup { get; private set;}
         public bool AllowAddressOverride { get; private set; }
         public TransmissionPower? TransmissionPowerOverride { get; private set; }
-
         public PodRequestEntity Entity { get; set; }
-        public IPod Pod { get; set; }
-
-        private IErosPod ErosPod => Pod as IErosPod;
+        
+        public IErosPod ErosPod { get; set; }
 
         private readonly List<(RequestPart part, ITaskProgress progress)> Parts =
             new List<(RequestPart part, ITaskProgress progress)>();
@@ -35,13 +36,56 @@ namespace OmniCore.Eros
         private IErosRadio RadioOverride;
 
         private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
+        private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
+        private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
+        private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
 
         public ErosPodRequest(ICoreContainer<IServerResolvable> container)
         {
             Container = container;
+            Progress = new TaskProgress();
         }
 
-        protected override async Task ExecuteRequest(CancellationToken cancellationToken)
+        public void Cancel()
+        {
+            TaskCancellationSource.Cancel();
+        }
+
+        public IObservable<bool> WhenCanCancelChanged() => CanCancelSubject.AsObservable();
+
+        public IObservable<TaskState> WhenStateChanged() => StateSubject.AsObservable();
+
+        public IObservable<TaskResult> WhenResultReceived() => ResultSubject.AsObservable();
+
+        public async Task ExecuteRequest()
+        {
+            StateSubject.OnNext(TaskState.Running);
+            
+            try
+            {
+                await ExecuteRequestInternal(TaskCancellationSource.Token);
+            }
+            catch (OperationCanceledException oe)
+            {
+                ResultSubject.OnNext(TaskResult.Canceled);
+                ResultSubject.OnCompleted();
+            }
+            catch (Exception e)
+            {
+                ResultSubject.OnNext(TaskResult.Failed);
+                ResultSubject.OnCompleted();
+            }
+
+            StateSubject.OnNext(TaskState.Finished);
+            StateSubject.OnCompleted();
+        }
+        public void Dispose()
+        {
+            TaskCancellationSource?.Dispose();
+        }
+
+        private async Task ExecuteRequestInternal(CancellationToken cancellationToken)
         {
             var radio = RadioOverride;
             if (radio == null)
@@ -49,14 +93,16 @@ namespace OmniCore.Eros
                 //TODO: radio from radioentity
             }
 
-            var response = await radio.GetResponse(this, cancellationToken);
+            var options = radio.Options;
 
+            if (TransmissionPowerOverride.HasValue)
+                options.Amplification = TransmissionPowerOverride.Value;
+            
+            var response = await radio.GetResponse(this, cancellationToken, options);
+            var responseEntity = await ParseResponse(response);
 
             var context = Container.Get<IRepositoryContext>();
-            var responseEntity = new PodResponseEntity();
-            context.PodResponses.Add(responseEntity);
             Entity.Responses.Add(responseEntity);
-
             await context.Save(cancellationToken);
         }
 

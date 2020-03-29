@@ -9,11 +9,28 @@
     <ContentPage.Content>
         <Frame BackgroundColor="#DAFAF1" BorderColor="Black" Padding="20"
                VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-            <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                <Label Text="{Binding Progress.Description}" HorizontalOptions="Center"/>
-                <ProgressBar Progress="{Binding Progress.PercentComplete}"></ProgressBar>
-                <Label Text="Do wait and see." HorizontalOptions="Center"/>
-            </StackLayout>
+            <ScrollView>
+                <StackLayout>
+                    <Label Text="{Binding Progress.Description}" HorizontalOptions="Center"/>
+                    <ProgressBar Progress="{Binding Progress.PercentComplete}"></ProgressBar>
+                    <CollectionView x:Name="PodCollectionView" ItemsSource="{Binding Progress.Children}" SelectionMode="None" >
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="2">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0"  Text="{Binding Name}" HorizontalOptions="Center"/>
+                                        <ProgressBar Grid.Column="1" Progress="{Binding PercentComplete}"></ProgressBar>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </ScrollView>
         </Frame>
     </ContentPage.Content>
 </pages:PopupPage>

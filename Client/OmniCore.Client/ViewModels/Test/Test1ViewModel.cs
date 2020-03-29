@@ -17,13 +17,10 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Test
 {
-    public class Test1ViewModel : BaseViewModel
+    public class Test1ViewModel : TaskViewModel
     {
-
         public Command AcquireCommand { get; }
 
-        public IPodRequest ActiveRequest { get; private set; }
-       
         public ObservableCollection<RadioModel> Radios { get; set; }
         
         public Test1ViewModel(ICoreClient client) : base(client)
@@ -49,9 +46,8 @@ namespace OmniCore.Client.ViewModels.Test
             var selection = Radios.FirstOrDefault(r => r.IsChecked);
             if (selection != null)
             {
-                ActiveRequest = await pod.Acquire(selection.Radio, CancellationToken.None);
-                var progressPopup = Client.ViewPresenter.GetView<ProgressPopupView>(false, ActiveRequest);
-                await PopupNavigation.Instance.PushAsync(progressPopup, true);
+                var request = await pod.Acquire(selection.Radio, CancellationToken.None);
+                this.SetTask(request);
             }
         }
     }

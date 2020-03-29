@@ -20,16 +20,16 @@ namespace OmniCore.Eros
         public IPodRequest ActiveRequest { get; }
 
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ITaskQueue TaskQueue;
+        private readonly ErosRequestQueue RequestQueue;
         private readonly ICorePodService PodService;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
             ICorePodService podService,
-            ITaskQueue taskQueue)
+            ErosRequestQueue requestQueue)
         {
             PodService = podService;
             Container = container;
-            TaskQueue = taskQueue;
+            RequestQueue = requestQueue;
             RunningState = new PodRunningState();
         }
         public Task Archive()
@@ -50,7 +50,7 @@ namespace OmniCore.Eros
         {
             Entity.Radios.Clear();
 
-            return (IPodRequest) TaskQueue.Enqueue(
+            return RequestQueue.Enqueue(
                 (await NewPodRequest())
                 .WithAcquire(radio as IErosRadio)
             );
@@ -67,7 +67,7 @@ namespace OmniCore.Eros
 
         public async Task<IPodRequest> Status(StatusRequestType requestType)
         {
-            return (IPodRequest) TaskQueue.Enqueue(
+            return RequestQueue.Enqueue(
                 (await NewPodRequest())
                 .WithStatus(requestType)
                 );
@@ -131,12 +131,12 @@ namespace OmniCore.Eros
         public async Task StartMonitoring()
         {
             await StartStateMonitoring();
-            TaskQueue.Startup();
+            RequestQueue.Startup();
         }
         private async Task<ErosPodRequest> NewPodRequest()
         {
             var request = Container.Get<IErosPodRequest>() as ErosPodRequest;
-            request.Pod = this;
+            request.ErosPod = this;
             request.Entity = new PodRequestEntity
             {
                 Pod = Entity
@@ -222,7 +222,7 @@ namespace OmniCore.Eros
         }
         public void Dispose()
         {
-            TaskQueue.Shutdown();
+            RequestQueue.Shutdown();
         }
     }
 }
