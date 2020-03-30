@@ -311,8 +311,6 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task Connect(CancellationToken cancellationToken)
         {
-            using var _ = Peripheral.Lease(cancellationToken);
-
             using var connectionTimeout = new CancellationTokenSource(Entity.Options.RadioConnectTimeout);
             using (var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, connectionTimeout.Token))

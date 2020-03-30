@@ -102,22 +102,6 @@ namespace OmniCore.Client.Platform
                 }
             });
         }
-
-        public void RequestRssi()
-        {
-            // ThrowIfNotOnLease();
-
-            if (Device != null)
-            {
-                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi requested");
-                Device.ReadRssi().Subscribe(rssi =>
-                {
-                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi received");
-                    RssiReceivedSubject.OnNext(rssi);
-                });
-            }
-        }
-
         
         public IObservable<IBlePeripheral> Locate()
         {
@@ -131,7 +115,6 @@ namespace OmniCore.Client.Platform
 
         public async Task Connect(bool autoConnect, CancellationToken cancellationToken)
         {
-            ThrowIfNotOnLease();
             await Locate().ToTask(cancellationToken);
             using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
             {
@@ -163,8 +146,6 @@ namespace OmniCore.Client.Platform
 
         public async Task Disconnect(CancellationToken cancellationToken)
         {
-            ThrowIfNotOnLease();
-
             switch (await State.FirstAsync())
             {
                 case Model.Enumerations.PeripheralState.Offline:
@@ -183,7 +164,10 @@ namespace OmniCore.Client.Platform
                 case PeripheralConnectionState.Connecting:
                 case PeripheralConnectionState.Connected:
                     Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Cancel Connection requested");
-                    Device?.CancelConnection();
+                    using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
+                    {
+                        Device?.CancelConnection();
+                    }
                     break;
             }
 
@@ -193,36 +177,41 @@ namespace OmniCore.Client.Platform
 
         public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken)
         {
-            ThrowIfNotOnLease();
-
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic requested");
-            var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken); 
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic result received");
-            return result.Data;
+            using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
+            {
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic requested");
+                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken); 
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Read from characteristic result received");
+                return result.Data;
+            }
         }
 
         public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken)
         {
-            ThrowIfNotOnLease();
-
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic requested");
-            await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic finished");
+            using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
+            {
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic requested");
+                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic finished");
+            }
         }
 
         public async Task WriteToCharacteristicWithoutResponse(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
-            ThrowIfNotOnLease();
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response requested");
-            await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data).ToTask(cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response finished");
+            using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
+            {
+                Logging.Debug(
+                    $"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response requested");
+                await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
+                    .ToTask(cancellationToken);
+                Logging.Debug(
+                    $"BLEP: {PeripheralUuid.AsMacAddress()} Write to characteristic without response finished");
+            }
         }
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
         {
-            ThrowIfNotOnLease();
-
             Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Characteristic notification received");
             return GetCharacteristic(serviceUuid, characteristicUuid)
                 .RegisterAndNotify()
@@ -331,16 +320,19 @@ namespace OmniCore.Client.Platform
 
         private async Task DiscoverServicesAndCharacteristics(CancellationToken cancellationToken)
         {
-            CharacteristicsDictionary = new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Request services and characteristics discovery");
-            await Device.DiscoverServices().ForEachAsync(service =>
+            using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
             {
-                service.DiscoverCharacteristics().ForEachAsync(characteristic =>
+                CharacteristicsDictionary = new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Request services and characteristics discovery");
+                await Device.DiscoverServices().ForEachAsync(service =>
                 {
-                    CharacteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
+                    service.DiscoverCharacteristics().ForEachAsync(characteristic =>
+                    {
+                        CharacteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
+                    }, cancellationToken);
                 }, cancellationToken);
-            }, cancellationToken);
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
+            }
         }
 
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)
@@ -366,17 +358,17 @@ namespace OmniCore.Client.Platform
         //    var result = await nameCharacteristic.Read();
         //    return Encoding.ASCII.GetString(result.Data);
         //}
-
-        public async Task<ILease<IBlePeripheral>> Lease(CancellationToken cancellationToken)
-        {
-            return await Lease<IBlePeripheral>.NewLease(this, cancellationToken);
-        }
-
-        public bool OnLease { get; set; }
-        public void ThrowIfNotOnLease()
-        {
-            if (!OnLease)
-                throw new OmniCoreWorkflowException(FailureType.Internal, "Instance must be leased to perform the operation");
-        }
+        //
+        // public async Task<ILease<IBlePeripheral>> Lease(CancellationToken cancellationToken)
+        // {
+        //     return await Lease<IBlePeripheral>.NewLease(this, cancellationToken);
+        // }
+        //
+        // public bool OnLease { get; set; }
+        // public void ThrowIfNotOnLease()
+        // {
+        //     if (!OnLease)
+        //         throw new OmniCoreWorkflowException(FailureType.Internal, "Instance must be leased to perform the operation");
+        // }
     }
 }

@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IBlePeripheral : ILeaseable<IBlePeripheral>, IServerResolvable
+    public interface IBlePeripheral : IServerResolvable
     {
         Guid PeripheralUuid { get; }
         Guid PrimaryServiceUuid { get; }
@@ -15,7 +15,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         IObservable<PeripheralConnectionState> ConnectionState { get; }
         IObservable<int> Rssi{ get; }
         TimeSpan? RssiAutoUpdateInterval { get; set; }
-        void RequestRssi();
         IObservable<IBlePeripheral> Locate();
         Task Connect(bool autoConnect, CancellationToken cancellationToken);
         Task Disconnect(CancellationToken cancellationToken);
