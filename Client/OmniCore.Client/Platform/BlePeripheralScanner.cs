@@ -65,7 +65,7 @@ namespace OmniCore.Client.Platform
 
                 ScanSubscription?.Dispose();
                 ScanSubscription = null;
-                BluetoothLock.Dispose();
+                BluetoothLock?.Dispose();
                 BluetoothLock = null;
                 
                 ScanStateSubject.OnNext(false);
@@ -117,7 +117,7 @@ namespace OmniCore.Client.Platform
                     {
                         ScanSubscription.Dispose();
                         ScanSubscription = null;
-                        BluetoothLock.Dispose();
+                        BluetoothLock?.Dispose();
                         BluetoothLock = null;
                         ScanStateSubject.OnNext(false);
                         Logging.Debug($"BLES: Scan stopped");
