@@ -60,7 +60,7 @@ namespace OmniCore.Client.Platform
                 UpdateRssiSubscription();
             }
         }
-
+        
         public BlePeripheral(IBlePeripheralAdapter blePeripheralAdapter,
             ICoreContainer<IServerResolvable> coreContainer,
             ICoreLoggingFunctions loggingFunctions)
@@ -74,7 +74,7 @@ namespace OmniCore.Client.Platform
             ConnectionStateSubject = new ParticularBehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
             RssiReceivedSubject = new Subject<int>();
 
-            blePeripheralAdapter.WhenDiscoveryStarting().Subscribe( _ =>
+            blePeripheralAdapter.WhenScanStarted.Subscribe( _ =>
             {
 
                 if (Device != null && Device.IsConnected())
@@ -88,7 +88,7 @@ namespace OmniCore.Client.Platform
                 StateSubject.OnNext(PeripheralState.Searching);
             });
 
-            blePeripheralAdapter.WhenDiscoveryFinished().Subscribe(_ =>
+            blePeripheralAdapter.WhenScanFinished.Subscribe(_ =>
             {
                 if (Device == null)
                 {
@@ -133,29 +133,32 @@ namespace OmniCore.Client.Platform
         {
             ThrowIfNotOnLease();
             await Locate().ToTask(cancellationToken);
-            var state = await ConnectionState.FirstAsync();
-            if (state == PeripheralConnectionState.Connected)
-                return;
-
-            if (state != PeripheralConnectionState.Connecting)
+            using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
             {
-                await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
-                await BlePeripheralAdapter.IsScanning.FirstAsync(s => !s).ToTask(cancellationToken);
-                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect requested");
-                Device.Connect(new ConnectionConfig()
-                    {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = autoConnect});
-            }
+                var state = await ConnectionState.FirstAsync();
+                if (state == PeripheralConnectionState.Connected)
+                    return;
 
-            var connectedTask = ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Connected).ToTask(cancellationToken);
-            var failedTask = Device.WhenConnectionFailed().ToTask(cancellationToken);
+                if (state != PeripheralConnectionState.Connecting)
+                {
+                    await ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Disconnected).ToTask(cancellationToken);
 
-            var which = await Task.WhenAny(connectedTask, failedTask);
-            if (which == failedTask)
-            {
-                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect failed");
-                throw new OmniCorePeripheralException(FailureType.ConnectionFailed, null, failedTask.Result);
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect requested");
+                    Device.Connect(new ConnectionConfig()
+                        {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = autoConnect});
+                }
+
+                var connectedTask = ConnectionState.FirstAsync(s => s == PeripheralConnectionState.Connected).ToTask(cancellationToken);
+                var failedTask = Device.WhenConnectionFailed().ToTask(cancellationToken);
+
+                var which = await Task.WhenAny(connectedTask, failedTask);
+                if (which == failedTask)
+                {
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connect failed");
+                    throw new OmniCorePeripheralException(FailureType.ConnectionFailed, null, failedTask.Result);
+                }
+                Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connected");
             }
-            Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connected");
         }
 
         public async Task Disconnect(CancellationToken cancellationToken)

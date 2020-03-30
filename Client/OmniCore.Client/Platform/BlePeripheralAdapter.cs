@@ -31,18 +31,19 @@ namespace OmniCore.Client.Platform
     {
         private AsyncLock AdapterManagementLock;
         private ConcurrentDictionary<Guid, IBlePeripheral> PeripheralCache;
-        private IDisposable BluetoothWakeLockDisposable;
-        private IObservable<IScanResult> ConnectableScanObservable;
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreNotificationFunctions NotificationFunctions;
         private readonly ICoreLoggingFunctions Logging;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
         private readonly IErosRadioProvider[] ErosRadioProviders;
-        private readonly ISubject<IBlePeripheralAdapter> ScanStartingSubject;
-        private readonly ISubject<IBlePeripheralAdapter> ScanFinishedSubject;
-        private readonly ISubject<bool> ScanningStateSubject;
         private readonly List<Guid> ErosRadioServiceUuids;
+
+        private readonly AsyncLock PeripheralConnectionLockProvider;
+        private readonly BlePeripheralScanner Scanner;
+        
+        public IObservable<IBlePeripheralAdapter> WhenScanStarted { get; }
+        public IObservable<IBlePeripheralAdapter> WhenScanFinished { get; }
 
         public BlePeripheralAdapter(ICoreContainer<IServerResolvable> container,
             ICoreApplicationFunctions applicationFunctions,
@@ -58,9 +59,6 @@ namespace OmniCore.Client.Platform
             
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new ConcurrentDictionary<Guid, IBlePeripheral>();
-            ScanStartingSubject = new Subject<IBlePeripheralAdapter>();
-            ScanFinishedSubject = new Subject<IBlePeripheralAdapter>();
-            ScanningStateSubject = new BehaviorSubject<bool>(false);
             
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread =
                 CrossBleAdapter.AndroidConfiguration.IsMainThreadSuggested;
@@ -71,41 +69,11 @@ namespace OmniCore.Client.Platform
             ErosRadioServiceUuids = erosRadioProviders
                 .Select(rp => rp.ServiceUuid).ToList();
 
-            ResetConnectableObservable();
+            PeripheralConnectionLockProvider = new AsyncLock();
+            Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, loggingFunctions, applicationFunctions);
+            WhenScanStarted = Scanner.WhenScanStateChanged.Where(s => s).Select(s => this);
+            WhenScanFinished = Scanner.WhenScanStateChanged.Where(s => !s).Select(s => this);
         }
-
-        private void ResetConnectableObservable()
-        {
-            ConnectableScanObservable = Observable.Create<IScanResult>(observer =>
-                {
-                    Logging.Debug($"BLE: Scan starting");
-                    BluetoothWakeLockDisposable = ApplicationFunctions.BluetoothKeepAwake();
-                    ScanStartingSubject.OnNext(this);
-                    observer.OnCompleted();
-                    ScanningStateSubject.OnNext(true);
-                    return Disposable.Empty;
-                }).Concat(CrossBleAdapter.Current
-                    .Scan(new ScanConfig
-                            {
-                                ScanType = BleScanType.LowLatency,
-                                AndroidUseScanBatching = false,
-                                ServiceUuids = ErosRadioServiceUuids
-                            }))
-                .Finally(() =>
-                {
-                    ResetConnectableObservable();
-                    Logging.Debug($"BLE: Scan finished");
-                    ScanFinishedSubject.OnNext(this);
-                    BluetoothWakeLockDisposable.Dispose();
-                    ScanningStateSubject.OnNext(false);
-                })
-                .Publish()
-                .RefCount();
-        }
-
-        public IObservable<IBlePeripheralAdapter> WhenDiscoveryStarting() => ScanStartingSubject.AsObservable();
-        public IObservable<IBlePeripheralAdapter> WhenDiscoveryFinished() => ScanFinishedSubject.AsObservable();
-        public IObservable<bool> IsScanning => ScanningStateSubject.AsObservable();
 
         public IObservable<IBlePeripheralAdapter> WhenAdapterDisabled()
         {
@@ -187,23 +155,23 @@ namespace OmniCore.Client.Platform
             return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn;
         }
 
-        public async Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
+        public async Task<IDisposable> PeripheralConnectionLock(CancellationToken cancellationToken)
         {
-            using var adapterManagementLock = await AdapterManagementLock.LockAsync(cancellationToken);
-            
-            if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff)
-                return true;
-            
-            Logging.Debug($"BLE: Trying to disable adapter");
-            CrossBleAdapter.Current.SetAdapterState(false);
-            Logging.Debug($"BLE: Waiting for adapter to get disabled");
-            await CrossBleAdapter.Current.WhenStatusChanged()
-                .Where(s => s == AdapterStatus.PoweredOff)
-                .FirstAsync()
-                .ToTask(cancellationToken);
+            var lockDisposable = await PeripheralConnectionLockProvider.LockAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+                
+            await TryEnsureAdapterEnabled(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            Logging.Debug($"BLE: Adapter disabled successfully");
-            return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff;
+            Scanner.Pause();
+            var bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
+                
+            return Disposable.Create(() =>
+            {
+                bluetoothLock.Dispose();
+                Scanner.Resume();
+                lockDisposable.Dispose();
+            });
         }
 
         public IObservable<IBlePeripheral> FindErosRadioPeripherals()
@@ -215,55 +183,56 @@ namespace OmniCore.Client.Platform
 
                     var observedPeripheralUuids = new HashSet<Guid>();
 
-                    IDisposable bluetoothLock = null;
                     IDisposable scanSubscription = null;
 
                     try
                     {
-                        await TryEnsureAdapterEnabled(cancellationToken);
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
-
                         Logging.Debug($"BLE: Request connected devices");
-                        var connectedDevices = await CrossBleAdapter.Current
-                            .GetConnectedDevices().ToTask(cancellationToken);
-                        Logging.Debug($"BLE: Received connected devices");
-
-                        foreach (var connectedDevice in connectedDevices)
+                        using (var ppc= await PeripheralConnectionLock(cts.Token))
                         {
-                            var service= await connectedDevice.DiscoverServices()
-                                .FirstOrDefaultAsync(s => ErosRadioServiceUuids.Contains(s.Uuid));
+                            var connectedDevices = await CrossBleAdapter.Current
+                                .GetConnectedDevices().ToTask(cancellationToken);
+                            Logging.Debug($"BLE: Received connected devices");
 
-                            if (service != null)
+                            foreach (var connectedDevice in connectedDevices)
                             {
-                                var peripheral = GetPeripheral(connectedDevice.Uuid, service.Uuid);
-                                ((BlePeripheral) peripheral).SetDevice(connectedDevice);
+                                var service= await connectedDevice.DiscoverServices()
+                                    .FirstOrDefaultAsync(s => ErosRadioServiceUuids.Contains(s.Uuid));
 
-                                Logging.Debug(
-                                    $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
-                                observer.OnNext(peripheral);
-                                observedPeripheralUuids.Add(peripheral.PeripheralUuid);
-                            }
-                            cancellationToken.ThrowIfCancellationRequested();
-                        }
-
-                        Logging.Debug($"BLE: Connecting to scan observable");
-                        scanSubscription = ConnectableScanObservable
-                            .Subscribe(async (scanResult) =>
-                            {
-                                var peripheral = GetPeripheral(scanResult.Device.Uuid,
-                                    scanResult.AdvertisementData.ServiceUuids[0]) as BlePeripheral;
-                                
-                                peripheral.SetParametersFromScanResult(scanResult);
-
-                                if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
+                                if (service != null)
                                 {
-                                    Logging.Debug($"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying found peripheral");
+                                    var peripheral = GetPeripheral(connectedDevice.Uuid, service.Uuid);
+                                    ((BlePeripheral) peripheral).SetDevice(connectedDevice);
+
+                                    Logging.Debug(
+                                        $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
                                     observer.OnNext(peripheral);
                                     observedPeripheralUuids.Add(peripheral.PeripheralUuid);
                                 }
-                            });
+                                cancellationToken.ThrowIfCancellationRequested();
+                            }
+                        }
+
+                        Logging.Debug($"BLE: Connecting to scan observable");
+
+                        using (var pcc = await PeripheralConnectionLock(cts.Token))
+                        {
+                            scanSubscription = Scanner.Scan()
+                                .Subscribe(async (scanResult) =>
+                                {
+                                    var peripheral = GetPeripheral(scanResult.Device.Uuid,
+                                        scanResult.AdvertisementData.ServiceUuids[0]) as BlePeripheral;
+                                
+                                    peripheral.SetParametersFromScanResult(scanResult);
+
+                                    if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
+                                    {
+                                        Logging.Debug($"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying found peripheral");
+                                        observer.OnNext(peripheral);
+                                        observedPeripheralUuids.Add(peripheral.PeripheralUuid);
+                                    }
+                                });
+                        }
                     }
                     catch (Exception e)
                     {
@@ -271,7 +240,6 @@ namespace OmniCore.Client.Platform
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();
-                        bluetoothLock?.Dispose();
                         observer.OnError(e);
                     }
 
@@ -281,7 +249,6 @@ namespace OmniCore.Client.Platform
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();
-                        bluetoothLock?.Dispose();
                     });
                 }
             );
@@ -297,5 +264,6 @@ namespace OmniCore.Client.Platform
                 return p;
             });
         }
+       
     }
 }
