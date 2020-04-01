@@ -30,7 +30,8 @@ namespace OmniCore.Client.Platform
     public class BlePeripheralAdapter : IBlePeripheralAdapter
     {
         private AsyncLock AdapterManagementLock;
-        private ConcurrentDictionary<Guid, IBlePeripheral> PeripheralCache;
+        private ConcurrentDictionary<Guid, BlePeripheral> PeripheralCache;
+        private ConcurrentDictionary<Guid, IDevice> DeviceCache;
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreNotificationFunctions NotificationFunctions;
@@ -58,7 +59,8 @@ namespace OmniCore.Client.Platform
             ErosRadioProviders = erosRadioProviders;
             
             AdapterManagementLock = new AsyncLock();
-            PeripheralCache = new ConcurrentDictionary<Guid, IBlePeripheral>();
+            PeripheralCache = new ConcurrentDictionary<Guid, BlePeripheral>();
+            DeviceCache = new ConcurrentDictionary<Guid, IDevice>();
             
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread =
                 CrossBleAdapter.AndroidConfiguration.IsMainThreadSuggested;
@@ -201,36 +203,55 @@ namespace OmniCore.Client.Platform
 
                                 if (service != null)
                                 {
+                                    DeviceCache[connectedDevice.Uuid] = connectedDevice;
                                     var peripheral = GetPeripheral(connectedDevice.Uuid, service.Uuid);
-                                    ((BlePeripheral) peripheral).SetDevice(connectedDevice);
-
+                                    peripheral.UpdateSubscriptions(connectedDevice);
+                                    
                                     Logging.Debug(
                                         $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
-                                    observer.OnNext(peripheral);
                                     observedPeripheralUuids.Add(peripheral.PeripheralUuid);
+                                    observer.OnNext(peripheral);
                                 }
                                 cancellationToken.ThrowIfCancellationRequested();
                             }
-                        }
 
-                        Logging.Debug($"BLE: Connecting to scan observable");
+                            var searchStart = DateTimeOffset.UtcNow;
+                            var connectedPeripheralUuids = connectedDevices.Select(c => c.Uuid);
+                            foreach (var peripheralUuid in DeviceCache.Keys.ToList())
+                            {
+                                if (!connectedPeripheralUuids.Any(cuuid => cuuid == peripheralUuid))
+                                    DeviceCache[peripheralUuid] = null;
+                                
+                                var peripheral = GetPeripheral(peripheralUuid, ErosRadioServiceUuids[0]);
+                                peripheral.DiscoveryState = (PeripheralDiscoveryState.Searching, searchStart);
+                            }
 
-                        using (var pcc = await PeripheralConnectionLock(cts.Token))
-                        {
+                            Logging.Debug($"BLE: Connecting to scan observable");
                             scanSubscription = Scanner.Scan()
                                 .Subscribe(async (scanResult) =>
                                 {
+                                    DeviceCache[scanResult.Device.Uuid] = scanResult.Device;
                                     var peripheral = GetPeripheral(scanResult.Device.Uuid,
                                         scanResult.AdvertisementData.ServiceUuids[0]) as BlePeripheral;
-                                
-                                    peripheral.SetParametersFromScanResult(scanResult);
 
+                                    peripheral.UpdateSubscriptions(scanResult.Device);
+                                    
+                                    if (string.IsNullOrEmpty(peripheral.Name))
+                                        peripheral.Name = scanResult.AdvertisementData.LocalName;
+
+                                    if (!string.IsNullOrEmpty(scanResult.Device.Name))
+                                        peripheral.Name = scanResult.Device.Name;
+
+                                    peripheral.Rssi = (scanResult.Rssi, DateTimeOffset.UtcNow);
+                                    peripheral.DiscoveryState = (PeripheralDiscoveryState.Discovered, DateTimeOffset.UtcNow);
+                                    
                                     if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
                                     {
-                                        Logging.Debug($"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying found peripheral");
-                                        observer.OnNext(peripheral);
+                                        Logging.Debug($"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Reporting found peripheral");
                                         observedPeripheralUuids.Add(peripheral.PeripheralUuid);
+                                        observer.OnNext(peripheral);
                                     }
+                                    
                                 });
                         }
                     }
@@ -240,6 +261,14 @@ namespace OmniCore.Client.Platform
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();
+                        var dateFinished = DateTimeOffset.UtcNow;
+                        foreach (var peripheral in PeripheralCache.Values.ToList())
+                        {
+                            if (peripheral.DiscoveryState.State == PeripheralDiscoveryState.Searching)
+                            {
+                                peripheral.DiscoveryState = (PeripheralDiscoveryState.NotFound, dateFinished);
+                            }
+                        }
                         observer.OnError(e);
                     }
 
@@ -249,12 +278,20 @@ namespace OmniCore.Client.Platform
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();
+                        var dateFinished = DateTimeOffset.UtcNow;
+                        foreach (var peripheral in PeripheralCache.Values.ToList())
+                        {
+                            if (peripheral.DiscoveryState.State == PeripheralDiscoveryState.Searching)
+                            {
+                                peripheral.DiscoveryState = (PeripheralDiscoveryState.NotFound, dateFinished);
+                            }
+                        }
                     });
                 }
             );
         }
 
-        public IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
+        private BlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
         {
             return PeripheralCache.GetOrAdd(peripheralUuid, _ =>
             {
@@ -264,6 +301,20 @@ namespace OmniCore.Client.Platform
                 return p;
             });
         }
-       
+
+        public IDevice GetNativeDeviceFromCache(Guid peripheralUuid)
+        {
+            return DeviceCache[peripheralUuid];
+        }
+        
+        public async Task<IDevice> GetNativeDevice(Guid peripheralUuid, CancellationToken cancellationToken)
+        {
+            if (!DeviceCache.TryGetValue(peripheralUuid, out IDevice nativeDevice) || nativeDevice == null)
+            {
+                await FindErosRadioPeripherals()
+                    .FirstAsync(p => p.PeripheralUuid == peripheralUuid).ToTask(cancellationToken);
+            }
+            return DeviceCache[peripheralUuid];
+        }
     }
 }

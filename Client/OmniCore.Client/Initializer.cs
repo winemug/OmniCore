@@ -19,7 +19,8 @@ namespace OmniCore.Client
         {
             return container
                 .One<IBlePeripheralAdapter, BlePeripheralAdapter>()
-                .Many<IBlePeripheral, BlePeripheral>();
+                .Many<IBlePeripheral, BlePeripheral>()
+                .Many<IBlePeripheralConnection, BlePeripheralConnection>();
         }
 
         public static ICoreContainer<IClientResolvable> WithXamarinForms

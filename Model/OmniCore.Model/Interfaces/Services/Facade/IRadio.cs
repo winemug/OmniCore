@@ -11,10 +11,9 @@ namespace OmniCore.Model.Interfaces.Services.Facade
         string Address { get; }
         string Description { get; }
         IObservable<string> Name { get; }
-        IObservable<PeripheralState> State { get; }
+        IObservable<PeripheralDiscoveryState> DiscoveryState { get; }
         IObservable<PeripheralConnectionState> ConnectionState { get; }
         IObservable<int> Rssi{ get; }
-
         Task SetDescription(string description, CancellationToken cancellationToken);
         
         Task Identify(CancellationToken cancellationToken);

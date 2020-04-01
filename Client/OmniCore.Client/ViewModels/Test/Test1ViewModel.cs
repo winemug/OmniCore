@@ -47,6 +47,7 @@ namespace OmniCore.Client.ViewModels.Test
             if (selection != null)
             {
                 var request = await pod.Acquire(selection.Radio, CancellationToken.None);
+                await request.ExecuteRequest();
                 this.SetTask(request);
             }
         }

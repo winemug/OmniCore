@@ -10,17 +10,26 @@ namespace OmniCore.Model.Interfaces.Services.Internal
     {
         Guid PeripheralUuid { get; }
         Guid PrimaryServiceUuid { get; }
-        IObservable<string> Name { get; }
-        IObservable<PeripheralState> State { get; }
-        IObservable<PeripheralConnectionState> ConnectionState { get; }
-        IObservable<int> Rssi{ get; }
-        TimeSpan? RssiAutoUpdateInterval { get; set; }
-        IObservable<IBlePeripheral> Locate();
-        Task Connect(bool autoConnect, CancellationToken cancellationToken);
-        Task Disconnect(CancellationToken cancellationToken);
-        Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken);
-        Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken);
-        IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid ServiceUuid, Guid CharacteristicUuid);
-        Task WriteToCharacteristicWithoutResponse(Guid ServiceUuid, Guid CharacteristicUuid, byte[] data, CancellationToken cancellationToken);
+        string Name { get; set; }
+        (int Rssi, DateTimeOffset Date)? Rssi { get; }
+        (PeripheralDiscoveryState State, DateTimeOffset Date)
+            DiscoveryState { get; }
+
+        (PeripheralConnectionState State, DateTimeOffset Date)
+            ConnectionState { get; }
+        
+        IObservable<string> WhenNameUpdated();
+        IObservable<int> WhenRssiReceived();
+        Task<int> ReadRssi(CancellationToken cancellationToken);
+        Task Discover(CancellationToken cancellationToken);
+        IObservable<PeripheralDiscoveryState> WhenDiscoveryStateChanged();
+        IObservable<PeripheralConnectionState> WhenConnectionStateChanged();
+        Task<IBlePeripheralConnection> GetConnection(
+            bool autoConnect,
+            bool stayConnected,
+            TimeSpan discoveryTimeout,
+            TimeSpan connectTimeout,
+            TimeSpan characteristicDiscoveryTimeout,
+            CancellationToken cancellationToken);
     }
 }

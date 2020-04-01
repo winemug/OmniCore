@@ -58,7 +58,7 @@ namespace OmniCore.Radios.RileyLink
             {
                 re = new RadioEntity
                 {
-                    DeviceName = await peripheral.Name.FirstAsync(),
+                    DeviceName = peripheral.Name,
                     DeviceUuid = peripheral.PeripheralUuid,
                     ServiceUuid = peripheral.PrimaryServiceUuid
                 };

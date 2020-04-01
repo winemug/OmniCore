@@ -29,7 +29,7 @@ namespace OmniCore.Client.Models
 
             radio.Name.Subscribe(s => Name = s);
             radio.Rssi.Subscribe(rssi => Rssi = $"{rssi} db");
-            radio.State.Subscribe(state => DiscoveryState = state.ToString());
+            radio.DiscoveryState.Subscribe(state => DiscoveryState = state.ToString());
             radio.ConnectionState.Subscribe(state => ConnectionState = state.ToString());
         }
 

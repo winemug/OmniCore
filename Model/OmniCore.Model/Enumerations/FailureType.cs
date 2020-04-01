@@ -10,6 +10,7 @@ namespace OmniCore.Model.Enumerations
         AdapterNotEnabled,
 
         PeripheralGeneralError,
+        PeripheralOffline,
 
         PlatformGeneralError,
 
@@ -36,6 +37,6 @@ namespace OmniCore.Model.Enumerations
         ServiceStopFailure,
         ServiceConnectionFailed,
         Internal,
-        ConnectionFailed
+        ConnectionFailed,
     }
 }

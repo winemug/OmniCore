@@ -42,7 +42,6 @@ namespace OmniCore.Client.Platform
         
         public IObservable<IScanResult> Scan()
         {
-            Logging.Debug($"BLES: Scan requested");
             return Observable.Create<IScanResult>(observer =>
             {
                 AddScanSubscription();
@@ -60,18 +59,19 @@ namespace OmniCore.Client.Platform
         {
             lock (this)
             {
-                if (OnPause)
+                if (OnPause || ScanSubscriberCount == 0)
                     return;
 
-                ScanSubscription?.Dispose();
+                ScanSubscription.Dispose();
                 ScanSubscription = null;
-                BluetoothLock?.Dispose();
+                BluetoothLock.Dispose();
                 BluetoothLock = null;
                 
                 ScanStateSubject.OnNext(false);
 
                 OnPause = true;
                 Logging.Debug($"BLES: Scan paused");
+                Logging.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
             }
         }
 
@@ -81,12 +81,10 @@ namespace OmniCore.Client.Platform
             {
                 if (!OnPause)
                     return;
-
-                if (ScanSubscriberCount > 0)
-                {
-                    Logging.Debug($"BLES: Resuming scan");
-                    StartScan();
-                }
+                
+                Logging.Debug($"BLES: Resuming scan");
+                Logging.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
+                StartScan();
 
                 OnPause = false;
             }
@@ -96,7 +94,11 @@ namespace OmniCore.Client.Platform
             lock (this)
             {
                 var count = Interlocked.Increment(ref ScanSubscriberCount);
-                if (count == 1)
+
+                Logging.Debug($"BLES: Incoming scan subscription");
+                Logging.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
+
+                if (count == 1 && !OnPause)
                     StartScan();
             }
         }
@@ -106,14 +108,11 @@ namespace OmniCore.Client.Platform
             lock (this)
             {
                 var count = Interlocked.Decrement(ref ScanSubscriberCount);
+                Logging.Debug($"BLES: Scan subscriber removed");
+
                 if (count == 0)
                 {
-                    if (OnPause)
-                    {
-                        Logging.Debug($"BLES: Scan stopped (already on pause)");
-                        OnPause = false;
-                    }
-                    else
+                    if (!OnPause)
                     {
                         ScanSubscription.Dispose();
                         ScanSubscription = null;
@@ -122,7 +121,9 @@ namespace OmniCore.Client.Platform
                         ScanStateSubject.OnNext(false);
                         Logging.Debug($"BLES: Scan stopped");
                     }
+                    OnPause = false;
                 }
+                Logging.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
             }
         }
 

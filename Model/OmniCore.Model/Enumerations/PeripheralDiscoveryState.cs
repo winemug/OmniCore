@@ -4,11 +4,11 @@ using System.Text;
 
 namespace OmniCore.Model.Enumerations
 {
-    public enum PeripheralState
+    public enum PeripheralDiscoveryState
     {
         Unknown,
-        Offline,
+        NotFound,
         Searching,
-        Online
+        Discovered
     }
 }

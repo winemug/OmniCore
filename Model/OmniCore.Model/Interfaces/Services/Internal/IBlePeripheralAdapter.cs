@@ -11,7 +11,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         Task<bool> TryEnableAdapter(CancellationToken cancellationToken);
         Task<IDisposable> PeripheralConnectionLock(CancellationToken cancellationToken);
         IObservable<IBlePeripheral> FindErosRadioPeripherals();
-        IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid);
         IObservable<IBlePeripheralAdapter> WhenAdapterDisabled();
         IObservable<IBlePeripheralAdapter> WhenAdapterEnabled();
         IObservable<IBlePeripheralAdapter> WhenScanStarted { get; }

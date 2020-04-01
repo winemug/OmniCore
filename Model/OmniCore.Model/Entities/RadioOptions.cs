@@ -5,18 +5,23 @@ namespace OmniCore.Model.Entities
 {
     public class RadioOptions
     {
+
+        public bool AutoConnect { get; set; } = false;
         public bool KeepConnected { get; set; } = true;
+        
         public int? CommandExecutionRssiThreshold { get; set; } = null;
 
         public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(20);
         public TimeSpan RadioResponseCooldown { get; set; } = TimeSpan.FromSeconds(5);
 
-        public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(20);
-        public TimeSpan RadioConnectCooldown { get; set; } = TimeSpan.FromSeconds(5);
+        public TimeSpan RadioDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan RadioCharacteristicsDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RadioConnectionOverallTimeout { get; set; } = TimeSpan.FromSeconds(90);
+        
 
         public TimeSpan RadioDisconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public TimeSpan RadioDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
         public TimeSpan RadioDiscoveryCooldown { get; set; } = TimeSpan.FromSeconds(45);
 
         public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromMinutes(10);

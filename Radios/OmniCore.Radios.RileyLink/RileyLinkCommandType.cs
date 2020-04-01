@@ -20,6 +20,5 @@ namespace OmniCore.Radios.RileyLink
         SetSwEncoding = 11,
         SetPreamble = 12,
         ResetRadioConfig = 13,
-
     }
 }
