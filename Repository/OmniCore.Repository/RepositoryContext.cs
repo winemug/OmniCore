@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Services;
@@ -13,7 +14,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Repository
 {
-    public class RepositoryContext : DbContext, IRepositoryContext
+    public class RepositoryContext : DbContext, IRepositoryContextWriteable
     {
         public DbSet<MedicationEntity> Medications { get; set; }
         public DbSet<UserEntity> Users { get; set; }
@@ -119,11 +120,15 @@ namespace OmniCore.Repository
             #endif
         }
 
+        public static readonly ILoggerFactory DebugLoggerFactory
+            = LoggerFactory.Create(builder => { builder.AddDebug() ; });
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite(ConnectionString);
             #if DEBUG
             optionsBuilder.EnableDetailedErrors(true);
+            optionsBuilder.UseLoggerFactory(DebugLoggerFactory);
             #endif
         }
 
@@ -132,5 +137,23 @@ namespace OmniCore.Repository
             base.OnModelCreating(modelBuilder);
             modelBuilder.AddJsonFields();
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            ReaderWriterLock?.Dispose();
+            ReaderWriterLock = null;
+        }
+
+        private IDisposable ReaderWriterLock;
+        public void SetLock(IDisposable readerWriterLock, bool readOnly)
+        {
+            ReaderWriterLock = readerWriterLock;
+            if (readOnly)
+            {
+                ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            }
+        }
+
     }
 }

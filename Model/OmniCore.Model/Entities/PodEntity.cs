@@ -12,7 +12,7 @@ namespace OmniCore.Model.Entities
         public MedicationEntity Medication { get; set; }
         // public TherapyProfileEntity TherapyProfile { get; set; }
         // public BasalScheduleEntity ReferenceBasalSchedule { get; set; }
-        public ICollection<RadioEntity> Radios { get; set; }
+        public ICollection<PodRadioEntity> PodRadios { get; set; }
         //public BasalSchedule BasalSchedule { get; set; }
 
         [JsonField]

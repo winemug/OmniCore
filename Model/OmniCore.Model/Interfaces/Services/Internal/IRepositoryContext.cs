@@ -9,6 +9,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IRepositoryContext : IDisposable, IServerResolvable
     {
+        void SetLock(IDisposable readerWriterLock, bool readOnly);
         DbSet<MedicationEntity> Medications { get; }
         DbSet<UserEntity> Users { get; }
         DbSet<RadioEntity> Radios { get; }
@@ -17,7 +18,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         DbSet<PodRequestEntity> PodRequests { get; }
         DbSet<MedicationDeliveryEntity> MedicationDeliveries { get; }
         DbSet<PodResponseEntity> PodResponses { get; }
-        Task Save(CancellationToken cancellationToken);
         Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false);
     }
 }

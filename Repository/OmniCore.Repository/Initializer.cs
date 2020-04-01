@@ -14,7 +14,7 @@ namespace OmniCore.Repository
             (this ICoreContainer<IServerResolvable> container)
         {
             return container
-                .One<IRepositoryContext, RepositoryContext>();
+                .Many<IRepositoryContext, RepositoryContext>();
         }
     }
 }

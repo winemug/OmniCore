@@ -10,6 +10,7 @@ using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
@@ -40,9 +41,13 @@ namespace OmniCore.Eros
         private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
         private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
         private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
+        private readonly ICoreRepositoryService RepositoryService;
 
-        public ErosPodRequest(ICoreContainer<IServerResolvable> container)
+        public ErosPodRequest(
+            ICoreContainer<IServerResolvable> container,
+            ICoreRepositoryService repositoryService)
         {
+            RepositoryService = repositoryService;
             Container = container;
             Progress = new TaskProgress();
         }
@@ -101,7 +106,7 @@ namespace OmniCore.Eros
             var response = await radio.GetResponse(this, cancellationToken, options);
             var responseEntity = await ParseResponse(response);
 
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetWriterContext(cancellationToken);
             Entity.Responses.Add(responseEntity);
             await context.Save(cancellationToken);
         }
@@ -246,7 +251,7 @@ namespace OmniCore.Eros
                 }
             }
 
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetWriterContext(CancellationToken.None);
             await context.PodResponses.AddAsync(response);
             await context.Save(CancellationToken.None);
             return response;

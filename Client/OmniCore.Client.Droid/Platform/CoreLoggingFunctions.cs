@@ -26,7 +26,7 @@ namespace OmniCore.Mobile.Droid.Platform
         public void Debug(string message)
         {
             Log.Debug(TAG, message);
-            System.Diagnostics.Debug.WriteLine(message);
+            //System.Diagnostics.Debug.WriteLine($"{DateTime.Now} {message}");
         }
 
         public void Error(string message)

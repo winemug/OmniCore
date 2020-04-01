@@ -15,6 +15,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0-preview.1.20120.4" />
     </ItemGroup>
 
     <ItemGroup>

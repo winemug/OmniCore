@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Innofactor.EfCoreJsonValueConverter;
 
 namespace OmniCore.Model.Entities
@@ -12,5 +13,7 @@ namespace OmniCore.Model.Entities
 
         [JsonField]
         public RadioOptions Options { get; set; } = new RadioOptions();
+
+        public ICollection<PodRadioEntity> PodRadios { get; set; }
     }
 }

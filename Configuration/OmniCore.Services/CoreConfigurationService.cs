@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Enumerations;
@@ -15,9 +16,12 @@ namespace OmniCore.Services
     public class CoreConfigurationService : ICoreConfigurationService
     {
         private readonly ICoreContainer<IServerResolvable> Container;
-        public CoreConfigurationService(ICoreContainer<IServerResolvable> container)
+        private readonly ICoreRepositoryService RepositoryService;
+        public CoreConfigurationService(ICoreContainer<IServerResolvable> container,
+            ICoreRepositoryService repositoryService)
         {
             Container = container;
+            RepositoryService = repositoryService;
         }
 
         public Task<IDashConfiguration> GetDefaultDashConfiguration()
@@ -42,7 +46,7 @@ namespace OmniCore.Services
 
         public async Task<IMedication> GetDefaultMedication()
         {
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
             var entity = await context.Medications.FirstAsync(m => m.Hormone == HormoneType.Unknown);
             return new Medication() {Entity = entity};
         }
@@ -54,7 +58,7 @@ namespace OmniCore.Services
 
         public async Task<IUser> GetDefaultUser()
         {
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
             var entity = await context.Users.FirstAsync(u => !u.ManagedRemotely);
             return new User() { Entity = entity};
         }

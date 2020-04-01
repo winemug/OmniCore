@@ -141,7 +141,7 @@ namespace OmniCore.Client.Droid.Services
                 //TODO: log
                 throw new OmniCoreWorkflowException(FailureType.ServiceStopFailure, null, t.Exception);
             }
-            ServiceNotification.Dismiss();
+            ServiceNotification?.Dismiss();
             if (NotificationsInitialized)
                 DeinitializeNotifications();
             base.OnDestroy();

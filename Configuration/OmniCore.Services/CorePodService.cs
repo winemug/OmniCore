@@ -154,11 +154,12 @@ namespace OmniCore.Services
                     .FindErosRadioPeripherals()
                     .Subscribe(async peripheral =>
                         {
-                            var radio = await RadioFromPeripheral(peripheral,
-
-                                cts.Token);
+                            var radio = await RadioFromPeripheral(peripheral, cts.Token);
                             if (radio != null)
+                            {
                                 observer.OnNext(radio);
+                                radio.StartMonitoring();
+                            }
                         },
                         observer.OnCompleted, cts.Token);
 

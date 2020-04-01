@@ -21,13 +21,13 @@ namespace OmniCore.Radios.RileyLink
         private readonly Dictionary<Guid, IErosRadio> RadioDictionary;
         
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICoreRepositoryService CoreRepositoryService;
+        private readonly ICoreRepositoryService RepositoryService;
         
         public RileyLinkRadioProvider(
-            ICoreRepositoryService coreRepositoryService,
+            ICoreRepositoryService repositoryService,
             ICoreContainer<IServerResolvable> container)
         {
-            CoreRepositoryService = coreRepositoryService;
+            RepositoryService = repositoryService;
             Container = container;
             
             RadioDictionary = new Dictionary<Guid, IErosRadio>();
@@ -51,7 +51,7 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<RadioEntity> GetEntity(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetWriterContext(cancellationToken);
             var re = await context.Radios.Where(r => !r.IsDeleted &&
                                       r.DeviceUuid == peripheral.PeripheralUuid).FirstOrDefaultAsync();
             if (re == null)

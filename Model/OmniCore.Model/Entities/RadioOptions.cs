@@ -24,7 +24,7 @@ namespace OmniCore.Model.Entities
 
         public TimeSpan RadioDiscoveryCooldown { get; set; } = TimeSpan.FromSeconds(45);
 
-        public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromMinutes(10);
+        public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromSeconds(10);
 
         // shifts in complements of 326.211 Hz
         public int FrequencyShift { get; set; } = 0;

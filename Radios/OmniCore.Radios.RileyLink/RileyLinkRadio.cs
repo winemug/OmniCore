@@ -97,11 +97,14 @@ namespace OmniCore.Radios.RileyLink
 
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreLoggingFunctions Logging;
+        private readonly ICoreRepositoryService RepositoryService;
 
         public RileyLinkRadio(
             ICoreContainer<IServerResolvable> container,
-            ICoreLoggingFunctions logging)
+            ICoreLoggingFunctions logging,
+            ICoreRepositoryService repositoryService)
         {
+            RepositoryService = repositoryService;
             Container = container;
             Logging = logging;
             Responses = new ConcurrentQueue<byte[]>();
@@ -112,7 +115,7 @@ namespace OmniCore.Radios.RileyLink
         {
             Logging.Debug($"RLR: {Address} Recording radio event {eventType}");
 
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetWriterContext(cancellationToken);
             await context.RadioEvents.AddAsync(
                 new RadioEventEntity
                 {
@@ -166,11 +169,19 @@ namespace OmniCore.Radios.RileyLink
                 PeripheralRssiSubscription = Observable.Interval(Entity.Options.RssiUpdateInterval.Value)
                     .Subscribe( async _ =>
                     {
-                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                        var rssi = await Peripheral.ReadRssi(cts.Token);
-                        Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
-                        await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
-                            null, rssi);
+                        try
+                        {
+                            Logging.Debug($"RLR: {Address} Rssi request");
+                            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                            var rssi = await Peripheral.ReadRssi(cts.Token);
+                            Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
+                            await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
+                                null, rssi);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            Logging.Debug($"RLR: {Address} Rssi timed out!");
+                        }
                     });
             }
 
@@ -298,6 +309,9 @@ namespace OmniCore.Radios.RileyLink
                             }
                         }
                     });
+
+                Logging.Debug($"RLR: {Address} Requesting rssi..");
+                await Peripheral.ReadRssi(cancellationToken);
 
                 return connection;
             }

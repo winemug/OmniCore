@@ -22,11 +22,14 @@ namespace OmniCore.Eros
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ErosRequestQueue RequestQueue;
         private readonly ICorePodService PodService;
+        private readonly ICoreRepositoryService RepositoryService;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
+            ICoreRepositoryService repositoryService,
             ICorePodService podService,
             ErosRequestQueue requestQueue)
         {
+            RepositoryService = repositoryService;
             PodService = podService;
             Container = container;
             RequestQueue = requestQueue;
@@ -48,8 +51,6 @@ namespace OmniCore.Eros
 
         public async Task<IPodRequest> Acquire(IRadio radio, CancellationToken cancellationToken)
         {
-            Entity.Radios.Clear();
-
             return RequestQueue.Enqueue(
                 (await NewPodRequest())
                 .WithAcquire(radio as IErosRadio)
@@ -142,7 +143,7 @@ namespace OmniCore.Eros
                 Pod = Entity
             };
 
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetWriterContext(CancellationToken.None);
             await context.PodRequests.AddAsync(request.Entity);
             await context.Save(CancellationToken.None);
             return request;
@@ -150,7 +151,7 @@ namespace OmniCore.Eros
 
         private async Task StartStateMonitoring()
         {
-            var context = Container.Get<IRepositoryContext>();
+            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
             var responses = context.PodRequests
                 .Where(pr => pr.Pod.Id == Entity.Id)
                 .OrderByDescending(p => p.Created)

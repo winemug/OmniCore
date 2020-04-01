@@ -14,7 +14,7 @@ namespace OmniCore.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2");
+                .HasAnnotation("ProductVersion", "3.1.3");
 
             modelBuilder.Entity("OmniCore.Model.Entities.MedicationDeliveryEntity", b =>
                 {
@@ -163,6 +163,39 @@ namespace OmniCore.Repository.Migrations
                     b.ToTable("Pods");
                 });
 
+            modelBuilder.Entity("OmniCore.Model.Entities.PodRadioEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("PodId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("RadioId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("SyncId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Updated")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PodId");
+
+                    b.HasIndex("RadioId");
+
+                    b.ToTable("PodRadioEntity");
+                });
+
             modelBuilder.Entity("OmniCore.Model.Entities.PodRequestEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -285,9 +318,6 @@ namespace OmniCore.Repository.Migrations
                     b.Property<string>("Options")
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("PodEntityId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<Guid>("ServiceUuid")
                         .HasColumnType("TEXT");
 
@@ -301,8 +331,6 @@ namespace OmniCore.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PodEntityId");
 
                     b.ToTable("Radios");
                 });
@@ -400,6 +428,17 @@ namespace OmniCore.Repository.Migrations
                         .HasForeignKey("UserId");
                 });
 
+            modelBuilder.Entity("OmniCore.Model.Entities.PodRadioEntity", b =>
+                {
+                    b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
+                        .WithMany("PodRadios")
+                        .HasForeignKey("PodId");
+
+                    b.HasOne("OmniCore.Model.Entities.RadioEntity", "Radio")
+                        .WithMany("PodRadios")
+                        .HasForeignKey("RadioId");
+                });
+
             modelBuilder.Entity("OmniCore.Model.Entities.PodRequestEntity", b =>
                 {
                     b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
@@ -412,13 +451,6 @@ namespace OmniCore.Repository.Migrations
                     b.HasOne("OmniCore.Model.Entities.PodRequestEntity", "PodRequest")
                         .WithMany("Responses")
                         .HasForeignKey("PodRequestId");
-                });
-
-            modelBuilder.Entity("OmniCore.Model.Entities.RadioEntity", b =>
-                {
-                    b.HasOne("OmniCore.Model.Entities.PodEntity", null)
-                        .WithMany("Radios")
-                        .HasForeignKey("PodEntityId");
                 });
 
             modelBuilder.Entity("OmniCore.Model.Entities.RadioEventEntity", b =>

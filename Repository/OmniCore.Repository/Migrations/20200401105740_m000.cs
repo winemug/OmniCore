@@ -30,6 +30,27 @@ namespace OmniCore.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Radios",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SyncId = table.Column<Guid>(nullable: true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeviceUuid = table.Column<Guid>(nullable: false),
+                    ServiceUuid = table.Column<Guid>(nullable: false),
+                    DeviceName = table.Column<string>(nullable: true),
+                    UserDescription = table.Column<string>(nullable: true),
+                    Options = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Radios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -47,6 +68,33 @@ namespace OmniCore.Repository.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RadioEvents",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SyncId = table.Column<Guid>(nullable: true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    RadioId = table.Column<long>(nullable: true),
+                    EventType = table.Column<int>(nullable: false),
+                    Data = table.Column<byte[]>(nullable: true),
+                    Text = table.Column<string>(nullable: true),
+                    Rssi = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RadioEvents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RadioEvents_Radios_RadioId",
+                        column: x => x.RadioId,
+                        principalTable: "Radios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,6 +166,36 @@ namespace OmniCore.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PodRadioEntity",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SyncId = table.Column<Guid>(nullable: true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    PodId = table.Column<long>(nullable: true),
+                    RadioId = table.Column<long>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PodRadioEntity", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PodRadioEntity_Pods_PodId",
+                        column: x => x.PodId,
+                        principalTable: "Pods",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PodRadioEntity_Radios_RadioId",
+                        column: x => x.RadioId,
+                        principalTable: "Radios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PodRequests",
                 columns: table => new
                 {
@@ -144,34 +222,6 @@ namespace OmniCore.Repository.Migrations
                     table.ForeignKey(
                         name: "FK_PodRequests_Pods_PodId",
                         column: x => x.PodId,
-                        principalTable: "Pods",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Radios",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    DeviceUuid = table.Column<Guid>(nullable: false),
-                    ServiceUuid = table.Column<Guid>(nullable: false),
-                    DeviceName = table.Column<string>(nullable: true),
-                    UserDescription = table.Column<string>(nullable: true),
-                    Options = table.Column<string>(nullable: true),
-                    PodEntityId = table.Column<long>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Radios", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Radios_Pods_PodEntityId",
-                        column: x => x.PodEntityId,
                         principalTable: "Pods",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -206,37 +256,20 @@ namespace OmniCore.Repository.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "RadioEvents",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    RadioId = table.Column<long>(nullable: true),
-                    EventType = table.Column<int>(nullable: false),
-                    Data = table.Column<byte[]>(nullable: true),
-                    Text = table.Column<string>(nullable: true),
-                    Rssi = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RadioEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RadioEvents_Radios_RadioId",
-                        column: x => x.RadioId,
-                        principalTable: "Radios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_MedicationDeliveries_PodId",
                 table: "MedicationDeliveries",
                 column: "PodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PodRadioEntity_PodId",
+                table: "PodRadioEntity",
+                column: "PodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PodRadioEntity_RadioId",
+                table: "PodRadioEntity",
+                column: "RadioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PodRequests_PodId",
@@ -262,17 +295,15 @@ namespace OmniCore.Repository.Migrations
                 name: "IX_RadioEvents_RadioId",
                 table: "RadioEvents",
                 column: "RadioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Radios_PodEntityId",
-                table: "Radios",
-                column: "PodEntityId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "MedicationDeliveries");
+
+            migrationBuilder.DropTable(
+                name: "PodRadioEntity");
 
             migrationBuilder.DropTable(
                 name: "PodResponses");

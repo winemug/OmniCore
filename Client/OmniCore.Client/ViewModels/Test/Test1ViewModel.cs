@@ -39,17 +39,16 @@ namespace OmniCore.Client.ViewModels.Test
         private async Task Acquire()
         {
             DisposeDisposables();
-
-            var user = await Api.CoreConfigurationService.GetDefaultUser();
-            var med = await Api.CoreConfigurationService.GetDefaultMedication();
-            var pod = await Api.CorePodService.NewErosPod(user, med, CancellationToken.None);
-            var selection = Radios.FirstOrDefault(r => r.IsChecked);
-            if (selection != null)
-            {
-                var request = await pod.Acquire(selection.Radio, CancellationToken.None);
-                await request.ExecuteRequest();
-                this.SetTask(request);
-            }
+            // var user = await Api.CoreConfigurationService.GetDefaultUser();
+            // var med = await Api.CoreConfigurationService.GetDefaultMedication();
+            // var pod = await Api.CorePodService.NewErosPod(user, med, CancellationToken.None);
+            // var selection = Radios.FirstOrDefault(r => r.IsChecked);
+            // if (selection != null)
+            // {
+            //     var request = await pod.Acquire(selection.Radio, CancellationToken.None);
+            //     await request.ExecuteRequest();
+            //     this.SetTask(request);
+            // }
         }
     }
 }
