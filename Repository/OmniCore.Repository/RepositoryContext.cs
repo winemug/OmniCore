@@ -32,6 +32,12 @@ namespace OmniCore.Repository
             return SaveChangesAsync(cancellationToken);
         }
 
+        public IRepositoryContextWriteable WithExisting(Entity entity)
+        {
+            Attach(entity).State = EntityState.Unchanged;
+            return this;
+        }
+
         public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
         {
             if (createNew)

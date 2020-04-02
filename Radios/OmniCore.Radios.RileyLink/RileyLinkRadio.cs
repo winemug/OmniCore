@@ -116,7 +116,10 @@ namespace OmniCore.Radios.RileyLink
             Logging.Debug($"RLR: {Address} Recording radio event {eventType}");
 
             using var context = await RepositoryService.GetWriterContext(cancellationToken);
-            await context.RadioEvents.AddAsync(
+            
+            await context
+                .WithExisting(Entity)
+                .RadioEvents.AddAsync(
                 new RadioEventEntity
                 {
                     Radio = Entity,
