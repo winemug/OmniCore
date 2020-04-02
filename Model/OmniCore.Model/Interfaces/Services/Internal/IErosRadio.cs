@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IErosRadio : IRadio, IServerResolvable, ILeaseable<IErosRadio>, IDisposable
+    public interface IErosRadio : IRadio, IServerResolvable, IDisposable
     {
         void StartMonitoring();
         RadioOptions Options { get; }

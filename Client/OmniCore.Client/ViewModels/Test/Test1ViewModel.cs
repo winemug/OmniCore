@@ -19,13 +19,13 @@ namespace OmniCore.Client.ViewModels.Test
 {
     public class Test1ViewModel : TaskViewModel
     {
-        public Command AcquireCommand { get; }
+        public Command IdentifyCommand { get; }
 
         public ObservableCollection<RadioModel> Radios { get; set; }
         
         public Test1ViewModel(ICoreClient client) : base(client)
         {
-            AcquireCommand = new Command(async () => await Acquire());
+            IdentifyCommand = new Command(async () => await Identify());
             Radios = new ObservableCollection<RadioModel>();
         }
 
@@ -36,19 +36,11 @@ namespace OmniCore.Client.ViewModels.Test
             return base.OnPageAppearing();
         }
 
-        private async Task Acquire()
+        private async Task Identify()
         {
-            DisposeDisposables();
-            // var user = await Api.CoreConfigurationService.GetDefaultUser();
-            // var med = await Api.CoreConfigurationService.GetDefaultMedication();
-            // var pod = await Api.CorePodService.NewErosPod(user, med, CancellationToken.None);
-            // var selection = Radios.FirstOrDefault(r => r.IsChecked);
-            // if (selection != null)
-            // {
-            //     var request = await pod.Acquire(selection.Radio, CancellationToken.None);
-            //     await request.ExecuteRequest();
-            //     this.SetTask(request);
-            // }
+            foreach (var radio in Radios.Where(r => r.IsChecked))
+                await radio.Radio.Identify(CancellationToken.None);
+
         }
     }
 }

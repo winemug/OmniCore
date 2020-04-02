@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Radios.RileyLink
+﻿namespace OmniCore.Radios.RileyLink.Enumerations
 {
     public enum RileyLinkCommandType
     {
@@ -20,5 +16,6 @@ namespace OmniCore.Radios.RileyLink
         SetSwEncoding = 11,
         SetPreamble = 12,
         ResetRadioConfig = 13,
+        GetStatistics = 14
     }
 }

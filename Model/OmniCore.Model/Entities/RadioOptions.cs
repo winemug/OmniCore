@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Entities
 {
     public class RadioOptions
     {
-
         public bool AutoConnect { get; set; } = false;
         public bool KeepConnected { get; set; } = true;
         
@@ -54,5 +56,23 @@ namespace OmniCore.Model.Entities
 
         // 0x00 to 0x03
         public int RxAttenuationLevel { get; set; } = 0x00;
+
+        public bool SameAs(RadioOptions other)
+        {
+            var propertyInfos = typeof(RadioOptions)
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+            foreach (var propertyInfo in propertyInfos)
+            {
+                var getter = propertyInfo.GetGetMethod();
+                var v1 = getter.Invoke(this, null);
+                var v2 = getter.Invoke(this, null);
+
+                if (!v1.Equals(v2))
+                    return false;
+            }
+
+            return true;
+        }
     }
 }

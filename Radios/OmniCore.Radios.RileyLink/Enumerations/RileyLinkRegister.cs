@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Radios.RileyLink
+﻿namespace OmniCore.Radios.RileyLink.Enumerations
 {
     public enum RileyLinkRegister
     {
