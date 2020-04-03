@@ -13,33 +13,34 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkCommand
+    public class RileyLinkCommand<T> : IRileyLinkCommand
+        where T : IRileyLinkResponse, new()
     {
         public RileyLinkCommandType CommandType { get; set; }
         public byte[] Parameters { get; set; }
-        private IRileyLinkResponse Response;
+        private T Response;
 
-        private TaskCompletionSource<RileyLinkCommand> SendCompletedSource;
-        private ISubject<IRileyLinkResponse> ResponseSubject;
-        public bool NeedsResponse { get; private set; }
+        private TaskCompletionSource<IRileyLinkCommand> SendCompletedSource;
+        private ISubject<T> ResponseSubject;
+        public bool HasResponse { get; private set; }
 
-        public Task<RileyLinkCommand> Submit(RileyLinkConnectionHandler connectionHandler)
+        public Task SubmitNoResponse(RileyLinkConnectionHandler connectionHandler)
         {
-            NeedsResponse = false;
-            SendCompletedSource = new TaskCompletionSource<RileyLinkCommand>();
+            HasResponse = false;
+            SendCompletedSource = new TaskCompletionSource<IRileyLinkCommand>();
             connectionHandler.CommandQueue.Enqueue(this);
             return SendCompletedSource.Task;
         }
 
-        public IObservable<T> Submit<T>(RileyLinkConnectionHandler connectionHandler) where T : IRileyLinkResponse, new()
+        public IObservable<T> Submit(RileyLinkConnectionHandler connectionHandler)
         {
-            NeedsResponse = true;
+            HasResponse = true;
             Response = new T();
-            ResponseSubject = new AsyncSubject<IRileyLinkResponse>();
-            SendCompletedSource = new TaskCompletionSource<RileyLinkCommand>();
+            ResponseSubject = new AsyncSubject<T>();
+            SendCompletedSource = new TaskCompletionSource<IRileyLinkCommand>();
             connectionHandler.CommandQueue.Enqueue(this);
             connectionHandler.TriggerQueue();
-            return (IObservable<T>) ResponseSubject.AsObservable();
+            return ResponseSubject.AsObservable();
         }
 
         public void SetTransmissionResult(Exception e)

@@ -31,8 +31,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private static readonly Guid RileyLinkResponseCharacteristicUuid = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
         private readonly AsyncLock CharacteristicAccessLock;
-        public ConcurrentQueue<RileyLinkCommand> CommandQueue { get; }
-        public ConcurrentQueue<RileyLinkCommand> ResponseQueue { get; }
+        public ConcurrentQueue<IRileyLinkCommand> CommandQueue { get; }
+        public ConcurrentQueue<IRileyLinkCommand> ResponseQueue { get; }
 
         public Task QueueProcessor;
 
@@ -48,8 +48,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
             RequestedOptions = options;
 
             QueueProcessor = Task.CompletedTask;
-            CommandQueue = new ConcurrentQueue<RileyLinkCommand>();
-            ResponseQueue = new ConcurrentQueue<RileyLinkCommand>();
+            CommandQueue = new ConcurrentQueue<IRileyLinkCommand>();
+            ResponseQueue = new ConcurrentQueue<IRileyLinkCommand>();
             CharacteristicAccessLock = new AsyncLock();
 
             NewRequestEvent = new ManualResetEventSlim();
@@ -78,9 +78,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     {
                         //Logging.Debug($"RLR: {Address} Characteristic notification read: {BitConverter.ToString(commandResponse)}");
 
-                        while (ResponseQueue.TryDequeue(out RileyLinkCommand command))
+                        while (ResponseQueue.TryDequeue(out var command))
                         {
-                            if (!command.NeedsResponse)
+                            if (!command.HasResponse)
                                 continue;
 
                             command.ParseResponse(responseData);
@@ -186,7 +186,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             while (waitResult == 0)
             {
                 NewRequestEvent.Reset();
-                while (CommandQueue.TryDequeue(out RileyLinkCommand command))
+                while (CommandQueue.TryDequeue(out var command))
                 {
                     ResponseQueue.Enqueue(command);
                     await SendCommand(command, CancellationToken.None);
@@ -197,32 +197,32 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
         public IObservable<RileyLinkStateResponse> GetState()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkStateResponse>
             {
                 CommandType = RileyLinkCommandType.GetState
-            }.Submit<RileyLinkStateResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkVersionResponse> GetVersion()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkVersionResponse>
             {
                 CommandType = RileyLinkCommandType.GetVersion
-            }.Submit<RileyLinkVersionResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkPacketResponse> GetPacket(
             byte channel,
             uint timeoutMilliseconds)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkPacketResponse>
             {
                 CommandType = RileyLinkCommandType.GetPacket,
                 Parameters = new Bytes()
                     .Append(channel)
                     .Append(timeoutMilliseconds)
                     .ToArray()
-            }.Submit<RileyLinkPacketResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> SendPacket(
@@ -233,7 +233,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             byte[] data
         )
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.SendPacket,
                 Parameters = new Bytes()
@@ -243,7 +243,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .Append(preambleExtensionMilliseconds)
                     .Append(data)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkPacketResponse> SendAndListen(
@@ -257,7 +257,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 byte[] data
             )
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkPacketResponse>
             {
                 CommandType = RileyLinkCommandType.SendAndListen,
                 Parameters = new Bytes()
@@ -270,7 +270,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .Append(sendPreambleExtensionMilliseconds)
                     .Append(data)
                     .ToArray()
-            }.Submit<RileyLinkPacketResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> UpdateRegister(
@@ -278,111 +278,111 @@ namespace OmniCore.Radios.RileyLink.Protocol
             byte value
         )
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.UpdateRegister,
                 Parameters = new Bytes()
                     .Append((byte) register)
                     .Append(value)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> Noop()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.None,
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
-        public Task<RileyLinkCommand> Reset()
+        public Task Reset()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.Reset
-            }.Submit(this);
+            }.SubmitNoResponse(this);
         }
 
         public IObservable<RileyLinkResponse> Led(
             RileyLinkLed led,
             RileyLinkLedMode mode)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.Led,
                 Parameters = new Bytes()
                     .Append((byte) led)
                     .Append((byte) mode)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkRegisterValueResponse> ReadRegister(
             RileyLinkRegister register)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkRegisterValueResponse>
             {
                 CommandType = RileyLinkCommandType.ReadRegister,
                 Parameters = new Bytes()
                     .Append((byte) register)
                     .ToArray()
-            }.Submit<RileyLinkRegisterValueResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> SetModeRegisters(
             byte registerMode)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.SetModeRegisters,
                 Parameters = new Bytes()
                     .Append(registerMode)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> SetSwEncoding(
             RileyLinkSoftwareEncoding encoding)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.SetSwEncoding,
                 Parameters = new Bytes()
                     .Append((byte) encoding)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> SetPreamble(
             ushort preamble)
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.SetPreamble,
                 Parameters = new Bytes()
                     .Append(preamble)
                     .ToArray()
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkResponse> ResetRadioConfig()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkResponse>
             {
                 CommandType = RileyLinkCommandType.ResetRadioConfig
-            }.Submit<RileyLinkResponse>(this);
+            }.Submit(this);
         }
 
         public IObservable<RileyLinkStatisticsResponse> GetStatistics()
         {
-            return new RileyLinkCommand
+            return new RileyLinkCommand<RileyLinkStatisticsResponse>
             {
                 CommandType = RileyLinkCommandType.GetStatistics
-            }.Submit<RileyLinkStatisticsResponse>(this);
+            }.Submit(this);
         }
 
-        private async Task SendCommand(RileyLinkCommand command, CancellationToken cancellationToken)
+        private async Task SendCommand(IRileyLinkCommand command, CancellationToken cancellationToken)
         {
             using var responseTimeout = new CancellationTokenSource(RequestedOptions.RadioResponseTimeout);
             using var linkedCancellation =
@@ -407,7 +407,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written {BitConverter.ToString(data)}");
         }
 
-        private byte[] GetCommandData(RileyLinkCommand command)
+        private byte[] GetCommandData(IRileyLinkCommand command)
         {
             byte[] data;
             if (command.Parameters == null)
