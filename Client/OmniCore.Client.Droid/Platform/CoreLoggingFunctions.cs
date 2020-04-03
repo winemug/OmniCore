@@ -32,24 +32,24 @@ namespace OmniCore.Mobile.Droid.Platform
             if (!Directory.Exists(logPath))
                 Directory.CreateDirectory(logPath);
 
-            var configuration = new LoggingConfiguration();
-            var fileTarget = new FileTarget
-            {
-                Encoding = Encoding.UTF8,
-                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}",
-                ArchiveAboveSize = 1024 * 1024 * 16,
-                MaxArchiveFiles = 8
-            };
-            var logTarget = new AsyncTargetWrapper(fileTarget)
-            {
-                OverflowAction = AsyncTargetWrapperOverflowAction.Grow,
-                QueueLimit = 1024
-            };
-
-            configuration.AddTarget(logTarget);
-            configuration.AddRuleForAllLevels(logTarget);
-
-            Logger = LogManager.GetCurrentClassLogger();
+            // var configuration = new LoggingConfiguration();
+            // var fileTarget = new FileTarget
+            // {
+            //     Encoding = Encoding.UTF8,
+            //     Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}",
+            //     ArchiveAboveSize = 1024 * 1024 * 16,
+            //     MaxArchiveFiles = 8
+            // };
+            // var logTarget = new AsyncTargetWrapper(fileTarget)
+            // {
+            //     OverflowAction = AsyncTargetWrapperOverflowAction.Grow,
+            //     QueueLimit = 1024
+            // };
+            //
+            // configuration.AddTarget(logTarget);
+            // configuration.AddRuleForAllLevels(logTarget);
+            //
+            // Logger = LogManager.GetCurrentClassLogger();
         }
 
         public void Debug(string message, [CallerFilePath] string source = "")
