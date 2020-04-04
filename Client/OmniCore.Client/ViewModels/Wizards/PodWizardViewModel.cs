@@ -85,8 +85,9 @@ namespace OmniCore.Client.ViewModels.Wizards
             await base.OnPageAppearing();
         }
 
-        private async Task GoToNextPage()
+        private Task GoToNextPage()
         {
+            return Task.CompletedTask;
             //var nextPage = NextPageFunction?.Invoke();
             //if (nextPage != null)
             //{

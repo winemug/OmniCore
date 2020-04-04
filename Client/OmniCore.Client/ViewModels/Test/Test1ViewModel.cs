@@ -38,6 +38,7 @@ namespace OmniCore.Client.ViewModels.Test
 
         private async Task Identify()
         {
+            DisposeDisposables();
             foreach (var radio in Radios.Where(r => r.IsChecked))
                 await radio.Radio.Identify(CancellationToken.None);
 

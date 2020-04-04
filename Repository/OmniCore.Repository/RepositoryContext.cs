@@ -134,7 +134,7 @@ namespace OmniCore.Repository
             optionsBuilder.UseSqlite(ConnectionString);
             #if DEBUG
             optionsBuilder.EnableDetailedErrors(true);
-            optionsBuilder.UseLoggerFactory(DebugLoggerFactory);
+            //optionsBuilder.UseLoggerFactory(DebugLoggerFactory);
             #endif
         }
 

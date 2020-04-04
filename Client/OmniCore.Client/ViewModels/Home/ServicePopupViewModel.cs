@@ -32,7 +32,7 @@ namespace OmniCore.Client.ViewModels.Home
             page.BindingContext = this;
             ConnectionSubscription?.Dispose();
             ConnectionSubscription = Client.ClientConnection.WhenConnectionChanged()
-                .Subscribe(async api =>
+                .Subscribe(api =>
                 {
                     if (api == null)
                     {
@@ -44,7 +44,7 @@ namespace OmniCore.Client.ViewModels.Home
                     {
                         if (ApiStateSubscription == null)
                         {
-                            ApiStateSubscription = api.ApiStatus.Subscribe(async status =>
+                            ApiStateSubscription = api.ApiStatus.Subscribe(status =>
                             {
                                 if (status == CoreApiStatus.Started)
                                 {

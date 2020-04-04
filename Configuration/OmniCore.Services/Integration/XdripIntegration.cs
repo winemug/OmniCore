@@ -15,9 +15,10 @@ namespace OmniCore.Services.Integration
 
         private ICoreService ParentService;
 
-        public async Task InitializeComponent(ICoreService parentService)
+        public Task InitializeComponent(ICoreService parentService)
         {
             ParentService = parentService;
+            return Task.CompletedTask;
         }
 
         public void Dispose()

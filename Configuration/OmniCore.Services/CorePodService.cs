@@ -116,14 +116,14 @@ namespace OmniCore.Services
             }
         }
 
-        protected override async Task OnPause(CancellationToken cancellationToken)
+        protected override Task OnPause(CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return Task.CompletedTask;
         }
 
-        protected override async Task OnResume(CancellationToken cancellationToken)
+        protected override Task OnResume(CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public async Task<IList<IPod>> ActivePods(CancellationToken cancellationToken)
@@ -158,7 +158,6 @@ namespace OmniCore.Services
                             if (radio != null)
                             {
                                 observer.OnNext(radio);
-                                radio.StartMonitoring();
                             }
                         },
                         observer.OnCompleted, cts.Token);
@@ -188,7 +187,7 @@ namespace OmniCore.Services
             return pod;
         }
         
-        public async Task<IDashPod> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)
+        public Task<IDashPod> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }

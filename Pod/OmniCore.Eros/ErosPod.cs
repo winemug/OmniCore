@@ -57,11 +57,11 @@ namespace OmniCore.Eros
             );
         }
 
-        public async Task<IPodRequest> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
+        public Task<IPodRequest> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
-        public async Task<IPodRequest> Start()
+        public Task<IPodRequest> Start()
         {
             throw new NotImplementedException();
         }
@@ -74,57 +74,57 @@ namespace OmniCore.Eros
                 );
         }
 
-        public async Task<IPodRequest> ConfigureAlerts()
+        public Task<IPodRequest> ConfigureAlerts()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> AcknowledgeAlerts()
+        public Task<IPodRequest> AcknowledgeAlerts()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> SetBasalSchedule()
+        public Task<IPodRequest> SetBasalSchedule()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> CancelBasal()
+        public Task<IPodRequest> CancelBasal()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> SetTempBasal()
+        public Task<IPodRequest> SetTempBasal()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> CancelTempBasal()
+        public Task<IPodRequest> CancelTempBasal()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> Bolus()
+        public Task<IPodRequest> Bolus()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> CancelBolus()
+        public Task<IPodRequest> CancelBolus()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> StartExtendedBolus()
+        public Task<IPodRequest> StartExtendedBolus()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> CancelExtendedBolus()
+        public Task<IPodRequest> CancelExtendedBolus()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> Deactivate()
+        public Task<IPodRequest> Deactivate()
         {
             throw new NotImplementedException();
         }

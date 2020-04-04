@@ -61,7 +61,7 @@ namespace OmniCore.Client.Platform
             }
         }
 
-        private (PeripheralDiscoveryState,DateTimeOffset) _DiscoveryState =
+        private (PeripheralDiscoveryState State,DateTimeOffset Date) _DiscoveryState =
             (PeripheralDiscoveryState.Unknown, DateTimeOffset.UtcNow);
         
         public (PeripheralDiscoveryState State, DateTimeOffset Date) DiscoveryState
@@ -69,8 +69,12 @@ namespace OmniCore.Client.Platform
             get => _DiscoveryState;
             set
             {
-                _DiscoveryState = value;
-                DiscoveryStateSubject.OnNext(value.State);
+                if (value.State != _DiscoveryState.State)
+                {
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Discovery state changed to {value.State}");
+                    _DiscoveryState = value;
+                    DiscoveryStateSubject.OnNext(value.State);
+                }
             }
         }
 
@@ -82,8 +86,12 @@ namespace OmniCore.Client.Platform
             get => _ConnectionState;
             set
             {
-                _ConnectionState = value;
-                ConnectionStateSubject.OnNext(value.State);
+                if (value.State != _ConnectionState.State)
+                {
+                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connection state changed to {value.State}");
+                    _ConnectionState = value;
+                    ConnectionStateSubject.OnNext(value.State);
+                }
             }
         }
 
@@ -91,15 +99,12 @@ namespace OmniCore.Client.Platform
         public IObservable<int> WhenRssiReceived() => RssiSubject.AsObservable();
         public async Task<int> ReadRssi(CancellationToken cancellationToken)
         {
-            using var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken);
+            var device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
+            if (device == null)
             {
-                var device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
-                if (device == null)
-                {
-                    throw new OmniCorePeripheralException(FailureType.PeripheralOffline);
-                }
-                return await device.ReadRssi().FirstAsync().ToTask(cancellationToken);
+                throw new OmniCorePeripheralException(FailureType.PeripheralOffline);
             }
+            return await device.ReadRssi().FirstAsync().ToTask(cancellationToken);
         }
 
         public async Task Discover(CancellationToken cancellationToken)
@@ -164,25 +169,22 @@ namespace OmniCore.Client.Platform
             if (device == null)
                 return;
 
-            DeviceStateSubscription = device.WhenStatusChanged().Subscribe(async status =>
+            DeviceStateSubscription = device.WhenStatusChanged().Subscribe(status =>
             {
+                var now = DateTimeOffset.UtcNow;
                 switch (status)
                 {
-                    case ConnectionStatus.Disconnected:
-                        Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnected");
-                        ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnected);
-                        break;
-                    case ConnectionStatus.Disconnecting:
-                        Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnecting");
-                        ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnecting);
+                    case ConnectionStatus.Connecting:
+                        ConnectionState = (PeripheralConnectionState.Connecting, now);
                         break;
                     case ConnectionStatus.Connected:
-                        Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connected");
-                        ConnectionStateSubject.OnNext(PeripheralConnectionState.Connected);
+                        ConnectionState = (PeripheralConnectionState.Connected, now);
                         break;
-                    case ConnectionStatus.Connecting:
-                        Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connecting");
-                        ConnectionStateSubject.OnNext(PeripheralConnectionState.Connecting);
+                    case ConnectionStatus.Disconnecting:
+                        ConnectionState = (PeripheralConnectionState.Disconnecting, now);
+                        break;
+                    case ConnectionStatus.Disconnected:
+                        ConnectionState = (PeripheralConnectionState.Disconnected, now);
                         break;
                 }
             });
@@ -284,106 +286,5 @@ namespace OmniCore.Client.Platform
                 throw;
             }
         }
-
-        // private void UpdateRssiSubscription()
-        // {
-        //     DeviceRssiSubscription?.Dispose();
-        //     DeviceRssiSubscription = null;
-        //     if (InternalDevice != null && RssiAutoUpdateInterval != null)
-        //     {
-        //         Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Set rssi read interval");
-        //         DeviceRssiSubscription = InternalDevice.WhenReadRssiContinuously(RssiAutoUpdateInterval)
-        //             .Subscribe(rssi =>
-        //             {
-        //                 Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Rssi received via interval read");
-        //                 RssiReceivedSubject.OnNext(rssi);
-        //             });
-        //     }
-        // }
-
-        // private void SetDeviceInternal(IDevice newDevice)
-        // {
-        //     if (!ReferenceEquals(InternalDevice, newDevice))
-        //     {
-        //         DeviceStateSubscription?.Dispose();
-        //         DeviceNameSubscription?.Dispose();
-        //         DeviceRssiSubscription?.Dispose();
-        //
-        //         DeviceStateSubscription = null;
-        //         DeviceNameSubscription = null;
-        //         DeviceRssiSubscription = null;
-        //
-        //         InternalDevice = newDevice;
-        //        
-        //         if (InternalDevice != null)
-        //         {
-        //             if (InternalDevice.IsConnected())
-        //                 ConnectionStateSubject.OnNext(PeripheralConnectionState.Connected);
-        //             
-        //             DeviceStateSubscription = InternalDevice.WhenStatusChanged().Subscribe(async status =>
-        //             {
-        //                 switch (status)
-        //                 {
-        //                     case ConnectionStatus.Disconnected:
-        //                         Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnected");
-        //                         ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnected);
-        //                         break;
-        //                     case ConnectionStatus.Disconnecting:
-        //                         Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to disconnecting");
-        //                         ConnectionStateSubject.OnNext(PeripheralConnectionState.Disconnecting);
-        //                         break;
-        //                     case ConnectionStatus.Connected:
-        //                         Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connected");
-        //                         await DiscoverServicesAndCharacteristics(CancellationToken.None);
-        //                         ConnectionStateSubject.OnNext(PeripheralConnectionState.Connected);
-        //                         break;
-        //                     case ConnectionStatus.Connecting:
-        //                         Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device state changed to connecting");
-        //                         ConnectionStateSubject.OnNext(PeripheralConnectionState.Connecting);
-        //                         break;
-        //                 }
-        //             });
-        //
-        //             DeviceNameSubscription = InternalDevice.WhenNameUpdated().Where(s => !string.IsNullOrEmpty(s))
-        //                 .Subscribe(s =>
-        //                 {
-        //                     Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device name updated");
-        //                     NameSubject.OnNext(s);
-        //                 });
-        //
-        //             UpdateRssiSubscription();
-        //         }
-        //     }
-        // }
-
-
-
-        //public async Task<string> ReadName()
-        //{
-        //    if (BleDevice == null || !BleDevice.IsConnected())
-        //        return null;
-
-        //    Guid genericAccessUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x18,0);
-        //    Guid nameCharacteristicUuid = new Guid(0, 0,0 ,0, 0, 0, 0, 0, 0, 0x2a,0);
-        //    var nameCharacteristic = await BleDevice
-        //        .GetKnownService(genericAccessUuid)
-        //        .SelectMany(x => x.GetKnownCharacteristics(new Guid[] {nameCharacteristicUuid}))
-        //        .FirstAsync();
-
-        //    var result = await nameCharacteristic.Read();
-        //    return Encoding.ASCII.GetString(result.Data);
-        //}
-        //
-        // public async Task<ILease<IBlePeripheral>> Lease(CancellationToken cancellationToken)
-        // {
-        //     return await Lease<IBlePeripheral>.NewLease(this, cancellationToken);
-        // }
-        //
-        // public bool OnLease { get; set; }
-        // public void ThrowIfNotOnLease()
-        // {
-        //     if (!OnLease)
-        //         throw new OmniCoreWorkflowException(FailureType.Internal, "Instance must be leased to perform the operation");
-        // }
     }
 }

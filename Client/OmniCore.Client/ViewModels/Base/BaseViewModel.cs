@@ -78,11 +78,11 @@ namespace OmniCore.Client.ViewModels.Base
             page.BindingContext = this;
         }
 
-        private async void PageAppearing(object sender, EventArgs args)
+        private void PageAppearing(object sender, EventArgs args)
         {
             ClientConnectionSubscription?.Dispose();
             ClientConnectionSubscription = Client.ClientConnection.WhenConnectionChanged()
-                .Subscribe(async api =>
+                .Subscribe(api =>
                 {
                     Api = api;
                     if (api == null)

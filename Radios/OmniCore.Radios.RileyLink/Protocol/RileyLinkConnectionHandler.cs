@@ -12,8 +12,10 @@ using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
+using OmniCore.Model.Utilities.Extensions;
 using OmniCore.Radios.RileyLink.Enumerations;
 using AsyncLock = Nito.AsyncEx.AsyncLock;
 
@@ -23,6 +25,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
     {
 
         private IBlePeripheralConnection PeripheralConnection;
+        private readonly ICoreLoggingFunctions Logger;
+        private readonly IBlePeripheral Peripheral;
+        private string Header => $"RLCH: {Peripheral.PeripheralUuid.AsMacAddress()}";
         public RadioOptions ConfiguredOptions;
         public RadioOptions RequestedOptions;
 
@@ -41,9 +46,13 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
         private IDisposable NotificationSubscription;
 
-        private RileyLinkConnectionHandler(IBlePeripheralConnection peripheralConnection,
+        private RileyLinkConnectionHandler(
+            ICoreLoggingFunctions logger,
+            IBlePeripheral peripheral,
+            IBlePeripheralConnection peripheralConnection,
             RadioOptions options)
         {
+            Logger = logger;
             PeripheralConnection = peripheralConnection;
             RequestedOptions = options;
 
@@ -61,12 +70,12 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 .WhenCharacteristicNotificationReceived(RileyLinkServiceUuid, RileyLinkResponseCharacteristicUuid)
                 .Subscribe(async (_) =>
                 {
-                    // Logging.Debug($"RLR: {Address} Characteristic notification received");
+                    Logger.Debug($"{Header} Characteristic notification received");
                     using var notifyReadTimeout =
                         new CancellationTokenSource(RequestedOptions.RadioResponseTimeout);
 
                     byte[] responseData = null;
-                    using (await CharacteristicAccessLock.LockAsync(notifyReadTimeout.Token))
+                    using (var caLock = await CharacteristicAccessLock.LockAsync(notifyReadTimeout.Token))
                     {
                         responseData = await peripheralConnection.ReadFromCharacteristic(
                             RileyLinkServiceUuid,
@@ -76,13 +85,17 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
                     if (responseData  != null)
                     {
-                        //Logging.Debug($"RLR: {Address} Characteristic notification read: {BitConverter.ToString(commandResponse)}");
+                        Logger.Debug($"{Header} Characteristic notification read");
 
                         while (ResponseQueue.TryDequeue(out var command))
                         {
                             if (!command.HasResponse)
+                            {
+                                Logger.Debug($"{Header} Skipping result for command with no response");
                                 continue;
+                            }
 
+                            Logger.Debug($"{Header} Parsing response for type {command.CommandType} and notifying observers");
                             command.ParseResponse(responseData);
                         }
                     }
@@ -90,6 +103,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
         }
 
         public static async Task<RileyLinkConnectionHandler> Connect(
+            ICoreLoggingFunctions logger,
             IBlePeripheral peripheral,
             RadioOptions options,
             CancellationToken cancellationToken)
@@ -100,21 +114,21 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 connectionTimeoutOverall.Token);
             try
             {
-                // Logging.Debug($"RLR: {Address} Connecting..");
+                logger.Debug($"RLCH: {peripheral.PeripheralUuid.AsMacAddress()} Getting connection");
                 var connection = await peripheral.GetConnection(options.AutoConnect, options.KeepConnected,
                     options.RadioDiscoveryTimeout, options.RadioConnectTimeout,
                     options.RadioCharacteristicsDiscoveryTimeout,
                     linkedCancellation.Token);
 
-                // Logging.Debug($"RLR: {Address} Requesting rssi..");
-                await peripheral.ReadRssi(cancellationToken);
+                //logging.Debug($"RLR: {Address} Requesting rssi..");
+                //await peripheral.ReadRssi(cancellationToken);
 
-                return new RileyLinkConnectionHandler(connection, options);
+                return new RileyLinkConnectionHandler(logger, peripheral, connection, options);
+                
             }
             catch (Exception e)
             {
-                // Logging.Debug($"RLR: {Address} Error while connecting:\n {e.AsDebugFriendly()}");
-
+                logger.Debug($"RLCH: {peripheral.PeripheralUuid.AsMacAddress()} Error while connecting:\n {e.AsDebugFriendly()}");
                 throw new OmniCoreRadioException(FailureType.RadioGeneralError, inner: e);
                 
             }
@@ -124,10 +138,13 @@ namespace OmniCore.Radios.RileyLink.Protocol
             RadioOptions options,
             CancellationToken cancellationToken)
         {
+            Logger.Debug($"{Header} Configure requested");
             if (ConfiguredOptions != null && ConfiguredOptions.SameAs(options))
+            {
+                Logger.Debug($"{Header} Already configured");
                 return;
+            }
 
-            await Reset();
             await Noop().ToTask(cancellationToken);
 
             await SetSwEncoding(RileyLinkSoftwareEncoding.None).ToTask(cancellationToken);
@@ -141,6 +158,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             if (!state.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
 
+            Logger.Debug($"{Header} Configuration complete");
             ConfiguredOptions = options;
         }
 
@@ -148,37 +166,6 @@ namespace OmniCore.Radios.RileyLink.Protocol
         {
             NewRequestEvent.Set();
         }
-
-        //public async Task FlushRequests()
-        //{
-
-        //}
-
-        //public async Task BatchRequests()
-        //{
-        //    while (CommandQueue.TryDequeue(out RileyLinkCommand command))
-        //    {
-        //        switch (command.CommandType)
-        //        {
-        //            // interruptions
-        //            case RileyLinkCommandType.GetPacket:
-        //            case RileyLinkCommandType.SendAndListen:
-        //            // variable responses
-        //            case RileyLinkCommandType.GetVersion:
-        //            // no response
-        //            case RileyLinkCommandType.Reset:
-        //            case RileyLinkCommandType.None:
-        //                BatchQueue.Enqueue(command);
-        //                break;
-
-        //            default:
-        //                break;
-        //        }
-
-
-        //        ResponseQueue.Enqueue(command);
-        //    }
-        //}
 
         private async Task ProcessQueue()
         {
@@ -189,6 +176,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 while (CommandQueue.TryDequeue(out var command))
                 {
                     ResponseQueue.Enqueue(command);
+                    Logger.Debug($"{Header} Processing RL command {command.CommandType}");
                     await SendCommand(command, CancellationToken.None);
                 }
                 waitResult = WaitHandle.WaitAny(new [] {NewRequestEvent.WaitHandle, DisposeEvent.WaitHandle});
@@ -387,24 +375,26 @@ namespace OmniCore.Radios.RileyLink.Protocol
             using var responseTimeout = new CancellationTokenSource(RequestedOptions.RadioResponseTimeout);
             using var linkedCancellation =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, responseTimeout.Token);
-            //Debug.WriteLine($"{DateTimeOffset.Now} RL: Writing {BitConverter.ToString(data)}");
             try
             {
-                using (await CharacteristicAccessLock.LockAsync(linkedCancellation.Token))
+                using (var caLock = await CharacteristicAccessLock.LockAsync(linkedCancellation.Token))
                 {
+                    Logger.Debug($"{Header} Ble write command {command.CommandType}");
                     await PeripheralConnection.WriteToCharacteristic(
                         RileyLinkServiceUuid, RileyLinkDataCharacteristicUuid,
                         GetCommandData(command),
                         linkedCancellation.Token);
+                    Logger.Debug($"{Header} Write complete");
                 }
 
+                Logger.Debug($"{Header} Report transmission success");
                 command.SetTransmissionResult(null);
             }
             catch (Exception e)
             {
+                Logger.Debug($"{Header} Write failed, reporting failure.\n{e.AsDebugFriendly()}");
                 command.SetTransmissionResult(e);
             }
-            //Debug.WriteLine($"{DateTimeOffset.Now} RL: Written {BitConverter.ToString(data)}");
         }
 
         private byte[] GetCommandData(IRileyLinkCommand command)

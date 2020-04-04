@@ -18,6 +18,7 @@ namespace OmniCore.Client.Platform
     {
         private readonly ICoreLoggingFunctions Logging;
 
+        public IBlePeripheral Peripheral { get; set; }
         private IDisposable CommunicationDisposable;
         private bool StayConnected;
         private IDevice Device;
@@ -88,16 +89,15 @@ namespace OmniCore.Client.Platform
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
         {
-            Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Characteristic notification received");
-            var characteristic = GetCharacteristic(serviceUuid, characteristicUuid);
-
-            return Observable.Create<byte[]>(async observer =>
+            return Observable.Create<byte[]>(observer =>
             {
+                var characteristic = GetCharacteristic(serviceUuid, characteristicUuid);
                 var subscription = characteristic
                     .RegisterAndNotify()
                     .Select(r => r.Data)
                     .Subscribe(bytes =>
                     {
+                        Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Characteristic notification received");
                         observer.OnNext(bytes);
                     });
                 Subscriptions.Add(subscription);

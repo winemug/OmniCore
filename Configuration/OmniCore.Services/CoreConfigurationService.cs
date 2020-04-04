@@ -34,12 +34,12 @@ namespace OmniCore.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IErosConfiguration> GetDefaultErosConfiguration()
+        public Task<IErosConfiguration> GetDefaultErosConfiguration()
         {
             throw new NotImplementedException();
         }
 
-        public async Task SetDefaultErosConfiguration(IErosConfiguration erosConfiguration)
+        public Task SetDefaultErosConfiguration(IErosConfiguration erosConfiguration)
         {
             throw new NotImplementedException();
         }
@@ -51,7 +51,7 @@ namespace OmniCore.Services
             return new Medication() {Entity = entity};
         }
 
-        public async Task SetDefaultMedication(IMedication medication)
+        public Task SetDefaultMedication(IMedication medication)
         {
             throw new NotImplementedException();
         }
@@ -63,7 +63,7 @@ namespace OmniCore.Services
             return new User() { Entity = entity};
         }
 
-        public async Task SetDefaultUser(IUser user)
+        public Task SetDefaultUser(IUser user)
         {
             throw new NotImplementedException();
         }

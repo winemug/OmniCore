@@ -79,7 +79,7 @@ namespace OmniCore.Radios.RileyLink
                         try
                         {
                             Logging.Debug($"RLR: {Address} Rssi request");
-                            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
                             var rssi = await Peripheral.ReadRssi(cts.Token);
                             Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
                             await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
@@ -164,7 +164,7 @@ namespace OmniCore.Radios.RileyLink
         public async Task Identify(CancellationToken cancellationToken)
         {
             Logging.Debug($"RLR: {Address} Identifying device");
-            using var rlConnection = await RileyLinkConnectionHandler.Connect(Peripheral,
+            using var rlConnection = await RileyLinkConnectionHandler.Connect(Logging, Peripheral,
                 Entity.Options, cancellationToken);
 
             for (int i = 0; i < 3; i++)
@@ -181,7 +181,7 @@ namespace OmniCore.Radios.RileyLink
         public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken,
             RadioOptions options = null)
         {
-            using var rlConnection = await RileyLinkConnectionHandler.Connect(Peripheral, options, cancellationToken);
+            using var rlConnection = await RileyLinkConnectionHandler.Connect(Logging, Peripheral, options, cancellationToken);
 
             if (options == null)
                 options = Entity.Options;

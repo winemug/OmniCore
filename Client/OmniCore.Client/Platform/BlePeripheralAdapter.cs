@@ -64,9 +64,9 @@ namespace OmniCore.Client.Platform
             
             CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread =
                 CrossBleAdapter.AndroidConfiguration.IsMainThreadSuggested;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
-            CrossBleAdapter.AndroidConfiguration.RefreshServices = true;
+            CrossBleAdapter.AndroidConfiguration.RefreshServices = false;
 
             ErosRadioServiceUuids = erosRadioProviders
                 .Select(rp => rp.ServiceUuid).ToList();
@@ -228,7 +228,7 @@ namespace OmniCore.Client.Platform
 
                             Logging.Debug($"BLE: Connecting to scan observable");
                             scanSubscription = Scanner.Scan()
-                                .Subscribe(async (scanResult) =>
+                                .Subscribe(scanResult =>
                                 {
                                     DeviceCache[scanResult.Device.Uuid] = scanResult.Device;
                                     var peripheral = GetPeripheral(scanResult.Device.Uuid,

@@ -26,18 +26,21 @@ namespace OmniCore.Services
                 await ac.InitializeComponent(this);
         }
 
-        protected override async Task OnStop(CancellationToken cancellationToken)
+        protected override Task OnStop(CancellationToken cancellationToken) 
         {
             foreach (var ac in AutomationComponents)
                 ac.Dispose();
+            return Task.CompletedTask;
         }
 
-        protected override async Task OnPause(CancellationToken cancellationToken)
+        protected override Task OnPause(CancellationToken cancellationToken)
         {
+            return Task.CompletedTask;
         }
 
-        protected override async Task OnResume(CancellationToken cancellationToken)
+        protected override Task OnResume(CancellationToken cancellationToken)
         {
+            return Task.CompletedTask;
         }
     }
 }
