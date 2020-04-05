@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using OmniCore.Model.Interfaces.Common;
 using Unity;
 
@@ -39,7 +36,7 @@ namespace OmniCore.Services
         public ICoreContainer<R> Many<TI, TC>() where TC : TI
             where TI : R
         {
-            this.RegisterType<TI,TC>();
+            this.RegisterType<TI, TC>();
             return this;
         }
 
@@ -66,7 +63,7 @@ namespace OmniCore.Services
         public T[] GetAll<T>()
             where T : R
         {
-            return this.Registrations
+            return Registrations
                 .Where(r => r.MappedToType.GetInterfaces()
                     .Any(i => i == typeof(T)))
                 .Select(x => (T) ((IUnityContainer) this).Resolve(x.RegisteredType, x.Name))

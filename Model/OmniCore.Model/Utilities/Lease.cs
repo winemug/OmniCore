@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -11,19 +9,13 @@ namespace OmniCore.Model.Utilities
 {
     public class Lease<T> : ILease<T> where T : ILeaseable<T>
     {
-        private static ConcurrentDictionary<T,AsyncLock> LeaseLocks = new ConcurrentDictionary<T, AsyncLock>();
-
-        public static async Task<Lease<T>> NewLease(T instance, CancellationToken cancellationToken)
-        {
-
-            var leaseLock = LeaseLocks.GetOrAdd(instance, leaseable => new AsyncLock());
-
-            var leaseDisposable = await leaseLock.LockAsync(cancellationToken);
-
-            return new Lease<T>(instance, leaseDisposable);
-        }
+        private static readonly ConcurrentDictionary<T, AsyncLock>
+            LeaseLocks = new ConcurrentDictionary<T, AsyncLock>();
 
         private readonly IDisposable LeaseDisposable;
+
+        private bool Disposed;
+
         private Lease(T instance, IDisposable leaseDisposable)
         {
             LeaseDisposable = leaseDisposable;
@@ -31,7 +23,6 @@ namespace OmniCore.Model.Utilities
             Instance.OnLease = true;
         }
 
-        private bool Disposed = false;
         public void Dispose()
         {
             if (!Disposed)
@@ -43,5 +34,14 @@ namespace OmniCore.Model.Utilities
         }
 
         public T Instance { get; }
+
+        public static async Task<Lease<T>> NewLease(T instance, CancellationToken cancellationToken)
+        {
+            var leaseLock = LeaseLocks.GetOrAdd(instance, leaseable => new AsyncLock());
+
+            var leaseDisposable = await leaseLock.LockAsync(cancellationToken);
+
+            return new Lease<T>(instance, leaseDisposable);
+        }
     }
 }

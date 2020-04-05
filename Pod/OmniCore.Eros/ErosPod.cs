@@ -15,14 +15,10 @@ namespace OmniCore.Eros
 {
     public class ErosPod : IErosPod
     {
-        public PodEntity Entity { get; set; }
-        public PodRunningState RunningState { get; }
-        public IPodRequest ActiveRequest { get; }
-
         private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ErosRequestQueue RequestQueue;
         private readonly ICorePodService PodService;
         private readonly ICoreRepositoryService RepositoryService;
+        private readonly ErosRequestQueue RequestQueue;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
             ICoreRepositoryService repositoryService,
@@ -35,15 +31,19 @@ namespace OmniCore.Eros
             RequestQueue = requestQueue;
             RunningState = new PodRunningState();
         }
+        public PodEntity Entity { get; set; }
+        public PodRunningState RunningState { get; }
+
         public Task Archive()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<IList<IPodRequest>> GetActiveRequests()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
+
         public Task<IPodRequest> Activate(IRadio radio, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -61,6 +61,7 @@ namespace OmniCore.Eros
         {
             throw new NotImplementedException();
         }
+
         public Task<IPodRequest> Start()
         {
             throw new NotImplementedException();
@@ -71,7 +72,7 @@ namespace OmniCore.Eros
             return RequestQueue.Enqueue(
                 (await NewPodRequest())
                 .WithStatus(requestType)
-                );
+            );
         }
 
         public Task<IPodRequest> ConfigureAlerts()
@@ -134,6 +135,12 @@ namespace OmniCore.Eros
             await StartStateMonitoring();
             RequestQueue.Startup();
         }
+
+        public void Dispose()
+        {
+            RequestQueue.Shutdown();
+        }
+
         private async Task<ErosPodRequest> NewPodRequest()
         {
             var request = Container.Get<IErosPodRequest>() as ErosPodRequest;
@@ -161,17 +168,17 @@ namespace OmniCore.Eros
 
             RunningState.LastRadioContact = responses.FirstOrDefault()?.Created;
             RunningState.State = DetermineRunningState(responses);
-            
+
             RunningState.LastUpdated = DateTimeOffset.UtcNow;
         }
 
         private PodState DetermineRunningState(IOrderedQueryable<PodResponseEntity> responses)
         {
-            PodState state = PodState.Unknown;
+            var state = PodState.Unknown;
             var progress = responses
                 .FirstOrDefault(r => r.Progress.HasValue)?
                 .Progress;
-            
+
             switch (progress)
             {
                 case PodProgress.InitialState:
@@ -209,21 +216,17 @@ namespace OmniCore.Eros
 
             return state;
         }
-        
+
         private uint GenerateRadioAddress()
         {
             var random = new Random();
             var buffer = new byte[3];
             random.NextBytes(buffer);
             uint address = 0x34000000;
-            address |= (uint)buffer[0] << 16;
-            address |= (uint)buffer[1] << 8;
-            address |= (uint)buffer[2];
+            address |= (uint) buffer[0] << 16;
+            address |= (uint) buffer[1] << 8;
+            address |= buffer[2];
             return address;
-        }
-        public void Dispose()
-        {
-            RequestQueue.Shutdown();
         }
     }
 }

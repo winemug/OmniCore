@@ -11,7 +11,6 @@ namespace OmniCore.Model.Interfaces.Services.Facade
     {
         PodEntity Entity { get; set; }
         PodRunningState RunningState { get; }
-        IPodRequest ActiveRequest { get; }
         Task Archive();
         Task<IList<IPodRequest>> GetActiveRequests();
         Task<IPodRequest> Start();

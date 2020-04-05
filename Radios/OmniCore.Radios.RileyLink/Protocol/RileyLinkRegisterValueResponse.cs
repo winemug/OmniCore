@@ -1,6 +1,4 @@
-﻿using OmniCore.Radios.RileyLink.Enumerations;
-
-namespace OmniCore.Radios.RileyLink.Protocol
+﻿namespace OmniCore.Radios.RileyLink.Protocol
 {
     public class RileyLinkRegisterValueResponse : RileyLinkDefaultResponse
     {

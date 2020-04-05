@@ -8,80 +8,71 @@ namespace OmniCore.Repository.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Medications",
-                columns: table => new
+                "Medications",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     Name = table.Column<string>(nullable: true),
-                    Hormone = table.Column<int>(nullable: false),
+                    Hormone = table.Column<int>(),
                     UnitName = table.Column<string>(nullable: true),
                     UnitNameShort = table.Column<string>(nullable: true),
-                    UnitsPerMilliliter = table.Column<decimal>(nullable: false),
+                    UnitsPerMilliliter = table.Column<decimal>(),
                     ProfileCode = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Medications", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Medications", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Radios",
-                columns: table => new
+                "Radios",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    DeviceUuid = table.Column<Guid>(nullable: false),
-                    ServiceUuid = table.Column<Guid>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
+                    DeviceUuid = table.Column<Guid>(),
+                    ServiceUuid = table.Column<Guid>(),
                     DeviceName = table.Column<string>(nullable: true),
                     UserDescription = table.Column<string>(nullable: true),
                     Options = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Radios", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Radios", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
+                "Users",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    ManagedRemotely = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
+                    ManagedRemotely = table.Column<bool>(),
                     Name = table.Column<string>(nullable: true),
                     Gender = table.Column<int>(nullable: true),
                     DateOfBirth = table.Column<DateTime>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Users", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "RadioEvents",
-                columns: table => new
+                "RadioEvents",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     RadioId = table.Column<long>(nullable: true),
-                    EventType = table.Column<int>(nullable: false),
+                    EventType = table.Column<int>(),
                     Data = table.Column<byte[]>(nullable: true),
                     Text = table.Column<string>(nullable: true),
                     Rssi = table.Column<int>(nullable: true)
@@ -90,64 +81,64 @@ namespace OmniCore.Repository.Migrations
                 {
                     table.PrimaryKey("PK_RadioEvents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RadioEvents_Radios_RadioId",
-                        column: x => x.RadioId,
-                        principalTable: "Radios",
-                        principalColumn: "Id",
+                        "FK_RadioEvents_Radios_RadioId",
+                        x => x.RadioId,
+                        "Radios",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Pods",
-                columns: table => new
+                "Pods",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    Type = table.Column<int>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
+                    Type = table.Column<int>(),
                     UserId = table.Column<long>(nullable: true),
                     MedicationId = table.Column<long>(nullable: true),
                     Options = table.Column<string>(nullable: true),
                     ExpiresSoonReminder = table.Column<string>(nullable: true),
                     ReservoirLowReminder = table.Column<string>(nullable: true),
                     ExpiredReminder = table.Column<string>(nullable: true),
-                    RadioAddress = table.Column<uint>(nullable: false),
-                    Lot = table.Column<uint>(nullable: false),
-                    Serial = table.Column<uint>(nullable: false),
+                    RadioAddress = table.Column<uint>(),
+                    Lot = table.Column<uint>(),
+                    Serial = table.Column<uint>(),
                     HwRevision = table.Column<string>(nullable: true),
                     SwRevision = table.Column<string>(nullable: true),
-                    PodUtcOffset = table.Column<TimeSpan>(nullable: false)
+                    PodUtcOffset = table.Column<TimeSpan>()
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pods", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pods_Medications_MedicationId",
-                        column: x => x.MedicationId,
-                        principalTable: "Medications",
-                        principalColumn: "Id",
+                        "FK_Pods_Medications_MedicationId",
+                        x => x.MedicationId,
+                        "Medications",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Pods_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
+                        "FK_Pods_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MedicationDeliveries",
-                columns: table => new
+                "MedicationDeliveries",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     PodId = table.Column<long>(nullable: true),
                     DeliveryStart = table.Column<DateTime>(nullable: true),
                     IntendedDuration = table.Column<TimeSpan>(nullable: true),
@@ -158,23 +149,23 @@ namespace OmniCore.Repository.Migrations
                 {
                     table.PrimaryKey("PK_MedicationDeliveries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MedicationDeliveries_Pods_PodId",
-                        column: x => x.PodId,
-                        principalTable: "Pods",
-                        principalColumn: "Id",
+                        "FK_MedicationDeliveries_Pods_PodId",
+                        x => x.PodId,
+                        "Pods",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PodRadioEntity",
-                columns: table => new
+                "PodRadioEntity",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     PodId = table.Column<long>(nullable: true),
                     RadioId = table.Column<long>(nullable: true)
                 },
@@ -182,32 +173,32 @@ namespace OmniCore.Repository.Migrations
                 {
                     table.PrimaryKey("PK_PodRadioEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PodRadioEntity_Pods_PodId",
-                        column: x => x.PodId,
-                        principalTable: "Pods",
-                        principalColumn: "Id",
+                        "FK_PodRadioEntity_Pods_PodId",
+                        x => x.PodId,
+                        "Pods",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_PodRadioEntity_Radios_RadioId",
-                        column: x => x.RadioId,
-                        principalTable: "Radios",
-                        principalColumn: "Id",
+                        "FK_PodRadioEntity_Radios_RadioId",
+                        x => x.RadioId,
+                        "Radios",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PodRequests",
-                columns: table => new
+                "PodRequests",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     PodId = table.Column<long>(nullable: true),
-                    RequestStatus = table.Column<int>(nullable: false),
-                    RequestType = table.Column<int>(nullable: false),
+                    RequestStatus = table.Column<int>(),
+                    RequestType = table.Column<int>(),
                     Parameters = table.Column<string>(nullable: true),
                     StartEarliest = table.Column<DateTime>(nullable: true),
                     StartLatest = table.Column<DateTime>(nullable: true),
@@ -220,23 +211,23 @@ namespace OmniCore.Repository.Migrations
                 {
                     table.PrimaryKey("PK_PodRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PodRequests_Pods_PodId",
-                        column: x => x.PodId,
-                        principalTable: "Pods",
-                        principalColumn: "Id",
+                        "FK_PodRequests_Pods_PodId",
+                        x => x.PodId,
+                        "Pods",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PodResponses",
-                columns: table => new
+                "PodResponses",
+                table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>()
                         .Annotation("Sqlite:Autoincrement", true),
                     SyncId = table.Column<Guid>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
+                    Created = table.Column<DateTime>(),
                     Updated = table.Column<DateTime>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDeleted = table.Column<bool>(),
                     PodRequestId = table.Column<long>(nullable: true),
                     Progress = table.Column<int>(nullable: true),
                     Faulted = table.Column<bool>(nullable: true),
@@ -249,82 +240,82 @@ namespace OmniCore.Repository.Migrations
                 {
                     table.PrimaryKey("PK_PodResponses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PodResponses_PodRequests_PodRequestId",
-                        column: x => x.PodRequestId,
-                        principalTable: "PodRequests",
-                        principalColumn: "Id",
+                        "FK_PodResponses_PodRequests_PodRequestId",
+                        x => x.PodRequestId,
+                        "PodRequests",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MedicationDeliveries_PodId",
-                table: "MedicationDeliveries",
-                column: "PodId");
+                "IX_MedicationDeliveries_PodId",
+                "MedicationDeliveries",
+                "PodId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PodRadioEntity_PodId",
-                table: "PodRadioEntity",
-                column: "PodId");
+                "IX_PodRadioEntity_PodId",
+                "PodRadioEntity",
+                "PodId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PodRadioEntity_RadioId",
-                table: "PodRadioEntity",
-                column: "RadioId");
+                "IX_PodRadioEntity_RadioId",
+                "PodRadioEntity",
+                "RadioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PodRequests_PodId",
-                table: "PodRequests",
-                column: "PodId");
+                "IX_PodRequests_PodId",
+                "PodRequests",
+                "PodId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PodResponses_PodRequestId",
-                table: "PodResponses",
-                column: "PodRequestId");
+                "IX_PodResponses_PodRequestId",
+                "PodResponses",
+                "PodRequestId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pods_MedicationId",
-                table: "Pods",
-                column: "MedicationId");
+                "IX_Pods_MedicationId",
+                "Pods",
+                "MedicationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pods_UserId",
-                table: "Pods",
-                column: "UserId");
+                "IX_Pods_UserId",
+                "Pods",
+                "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RadioEvents_RadioId",
-                table: "RadioEvents",
-                column: "RadioId");
+                "IX_RadioEvents_RadioId",
+                "RadioEvents",
+                "RadioId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "MedicationDeliveries");
+                "MedicationDeliveries");
 
             migrationBuilder.DropTable(
-                name: "PodRadioEntity");
+                "PodRadioEntity");
 
             migrationBuilder.DropTable(
-                name: "PodResponses");
+                "PodResponses");
 
             migrationBuilder.DropTable(
-                name: "RadioEvents");
+                "RadioEvents");
 
             migrationBuilder.DropTable(
-                name: "PodRequests");
+                "PodRequests");
 
             migrationBuilder.DropTable(
-                name: "Radios");
+                "Radios");
 
             migrationBuilder.DropTable(
-                name: "Pods");
+                "Pods");
 
             migrationBuilder.DropTable(
-                name: "Medications");
+                "Medications");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                "Users");
         }
     }
 }

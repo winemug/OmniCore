@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
@@ -19,26 +14,26 @@ using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
 using OmniCore.Model.Utilities.Extensions;
 using OmniCore.Radios.RileyLink.Enumerations;
-using AsyncLock = Nito.AsyncEx.AsyncLock;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
     public class RileyLinkConnectionHandler : IDisposable
     {
-        private IBlePeripheralConnection PeripheralConnection;
+        private static readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
+
+        private static readonly Guid RileyLinkDataCharacteristicUuid =
+            Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
+
+        private static readonly Guid RileyLinkResponseCharacteristicUuid =
+            Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
+
         private readonly ICoreLoggingFunctions Logger;
         private readonly IBlePeripheral Peripheral;
-        private string Header => $"RLCH: {Peripheral.PeripheralUuid.AsMacAddress()}";
         public RadioOptions ConfiguredOptions;
-        public RadioOptions RequestedOptions;
-
-        private static readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
-        private static readonly Guid RileyLinkDataCharacteristicUuid = Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
-        private static readonly Guid RileyLinkResponseCharacteristicUuid = Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
-
-        public ConcurrentQueue<IRileyLinkResponse> ResponseQueue { get; }
 
         private IDisposable NotificationSubscription;
+        private IBlePeripheralConnection PeripheralConnection;
+        public RadioOptions RequestedOptions;
 
         public RileyLinkConnectionHandler(
             ICoreLoggingFunctions logger,
@@ -55,7 +50,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
             NotificationSubscription = peripheralConnection
                 .WhenCharacteristicNotificationReceived(RileyLinkServiceUuid, RileyLinkResponseCharacteristicUuid)
-                .Subscribe(async (_) =>
+                .Subscribe(async _ =>
                 {
                     Logger.Debug($"{Header} Characteristic notification received");
                     using var notifyReadTimeout =
@@ -69,10 +64,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
                         notifyReadTimeout.Token);
                     Logger.Debug($"{Header} Response data read");
 
-                    if (responseData  != null)
-                    {
+                    if (responseData != null)
                         while (ResponseQueue.TryDequeue(out var response))
-                        {
                             if (!response.SkipParse)
                             {
                                 Logger.Debug($"{Header} Parsing response");
@@ -84,12 +77,24 @@ namespace OmniCore.Radios.RileyLink.Protocol
                                 {
                                     Logger.Debug($"{Header} Error while parsing response!\n{e.AsDebugFriendly()}");
                                 }
+
                                 break;
                             }
-                        }
-                    }
                 });
         }
+
+        private string Header => $"RLCH: {Peripheral.PeripheralUuid.AsMacAddress()}";
+
+        public ConcurrentQueue<IRileyLinkResponse> ResponseQueue { get; }
+
+        public void Dispose()
+        {
+            NotificationSubscription?.Dispose();
+            NotificationSubscription = null;
+            PeripheralConnection?.Dispose();
+            PeripheralConnection = null;
+        }
+
         public async Task Configure(
             RadioOptions options,
             CancellationToken cancellationToken)
@@ -110,13 +115,14 @@ namespace OmniCore.Radios.RileyLink.Protocol
             await SetModeRegisters(RileyLinkRegisterMode.Tx, GetTxParameters(options));
 
             var response = await GetState().ToTask(cancellationToken);
-            
+
             if (!response.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
 
             Logger.Debug($"{Header} Configuration complete");
             ConfiguredOptions = options;
         }
+
         public IObservable<RileyLinkStateResponse> GetState()
         {
             return WhenResponseReceived<RileyLinkStateResponse>(
@@ -133,9 +139,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 {
                     Type = RileyLinkCommandType.GetVersion
                 });
-
         }
-        
+
         public IObservable<RileyLinkPacketResponse> GetPacket(
             byte channel,
             uint timeoutMilliseconds)
@@ -149,7 +154,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> SendPacket(
             byte channel,
             byte repeatCount,
@@ -170,17 +175,17 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkPacketResponse> SendAndListen(
-                byte sendChannel,
-                byte sendRepeatCount,
-                ushort sendRepeatDelayMilliseconds,
-                ushort sendPreambleExtensionMilliseconds,
-                byte listenChannel,
-                uint listenTimeoutMilliseconds,
-                byte listenRetryCount,
-                byte[] data
-            )
+            byte sendChannel,
+            byte sendRepeatCount,
+            ushort sendRepeatDelayMilliseconds,
+            ushort sendPreambleExtensionMilliseconds,
+            byte listenChannel,
+            uint listenTimeoutMilliseconds,
+            byte listenRetryCount,
+            byte[] data
+        )
         {
             return WhenResponseReceived<RileyLinkPacketResponse>(new RileyLinkCommand
             {
@@ -197,7 +202,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> UpdateRegister(
             RileyLinkRegister register,
             byte value
@@ -212,15 +217,15 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> Noop()
         {
             return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
             {
-                Type = RileyLinkCommandType.None,
+                Type = RileyLinkCommandType.None
             });
         }
-        
+
         public IObservable<IRileyLinkCommand> Reset()
         {
             return WhenCommandSent(new RileyLinkCommand
@@ -228,7 +233,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 Type = RileyLinkCommandType.Reset
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> Led(
             RileyLinkLed led,
             RileyLinkLedMode mode)
@@ -242,7 +247,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkRegisterValueResponse> ReadRegister(
             RileyLinkRegister register)
         {
@@ -254,14 +259,14 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> SetModeRegisters(
             RileyLinkRegisterMode registerMode,
             List<(RileyLinkRegister Register, int Value)> registers)
         {
-            var p = new Bytes((byte)registerMode);
-            foreach(var r in registers)
-                p.Append((byte) r.Register).Append((byte)r.Value);
+            var p = new Bytes((byte) registerMode);
+            foreach (var r in registers)
+                p.Append((byte) r.Register).Append((byte) r.Value);
 
             return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
             {
@@ -269,7 +274,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 Parameters = p.ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> SetSwEncoding(
             RileyLinkSoftwareEncoding encoding)
         {
@@ -281,7 +286,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> SetPreamble(
             ushort preamble)
         {
@@ -293,7 +298,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .ToArray()
             });
         }
-        
+
         public IObservable<RileyLinkDefaultResponse> ResetRadioConfig()
         {
             return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
@@ -301,7 +306,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 Type = RileyLinkCommandType.ResetRadioConfig
             });
         }
-        
+
         public IObservable<RileyLinkStatisticsResponse> GetStatistics()
         {
             return WhenResponseReceived<RileyLinkStatisticsResponse>(new RileyLinkCommand
@@ -325,9 +330,11 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     observer.OnError(e);
                     observer.OnCompleted();
                 }
+
                 return Disposable.Empty;
             });
         }
+
         private IObservable<T> WhenResponseReceived<T>(IRileyLinkCommand command)
             where T : IRileyLinkResponse, new()
         {
@@ -347,12 +354,12 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     observer.OnCompleted();
                     return Disposable.Empty;
                 }
-                
+
                 var responseSubscription = response.Observable.Subscribe(_ =>
                     {
                         observer.OnNext(response);
                         observer.OnCompleted();
-                    },exception =>
+                    }, exception =>
                     {
                         observer.OnError(exception);
                         observer.OnCompleted();
@@ -378,7 +385,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             {
                 Logger.Debug($"{Header} Write failed, reporting failure.\n{e.AsDebugFriendly()}");
                 throw;
-            }            
+            }
         }
 
         private byte[] GetCommandData(IRileyLinkCommand command)
@@ -386,25 +393,17 @@ namespace OmniCore.Radios.RileyLink.Protocol
             byte[] data;
             if (command.Parameters == null)
             {
-                data = new byte[] { 1, (byte) command.Type };
+                data = new byte[] {1, (byte) command.Type};
             }
             else
             {
                 data = new byte[command.Parameters.Length + 2];
-                data[0] = (byte)(command.Parameters.Length + 1);
+                data[0] = (byte) (command.Parameters.Length + 1);
                 data[1] = (byte) command.Type;
                 Buffer.BlockCopy(command.Parameters, 0, data, 2, command.Parameters.Length);
             }
+
             return data;
-        }
-
-        public void Dispose()
-        {
-            NotificationSubscription?.Dispose();
-            NotificationSubscription = null;
-            PeripheralConnection?.Dispose();
-            PeripheralConnection = null;
-
         }
 
         private List<(RileyLinkRegister Register, int Value)> GetRxParameters(RadioOptions configuration)
@@ -415,7 +414,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             registers.Add((RileyLinkRegister.SYNC1, 0xA5));
             registers.Add((RileyLinkRegister.PKTLEN, 0x50));
 
-            var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
+            var frequency = (int) (433910000 / (24000000 / Math.Pow(2, 16)));
             frequency += configuration.RxFrequencyShift;
             registers.Add((RileyLinkRegister.FREQ0, frequency & 0xff));
             registers.Add((RileyLinkRegister.FREQ1, (frequency >> 8) & 0xff));
@@ -458,15 +457,15 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private List<(RileyLinkRegister Register, int Value)> GetTxParameters(RadioOptions configuration)
         {
             var registers = new List<(RileyLinkRegister Register, int Value)>();
-            
-            var frequency = (int)(433910000 / (24000000 / Math.Pow(2, 16)));
+
+            var frequency = (int) (433910000 / (24000000 / Math.Pow(2, 16)));
             frequency += configuration.TxFrequencyShift;
             registers.Add((RileyLinkRegister.FREQ0, frequency & 0xff));
             registers.Add((RileyLinkRegister.FREQ1, (frequency >> 8) & 0xff));
             registers.Add((RileyLinkRegister.FREQ2, (frequency >> 16) & 0xff));
 
             registers.Add((RileyLinkRegister.DEVIATN, 0x44));
-            
+
             var pktctrl1 = configuration.PqeThreshold << 5;
             pktctrl1 &= 0xE0;
 
@@ -526,9 +525,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             registers.Add((RileyLinkRegister.PATABLE0, amplification));
             return registers;
         }
-        
     }
 }

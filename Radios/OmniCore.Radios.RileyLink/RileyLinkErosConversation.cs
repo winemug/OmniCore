@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Utilities;
@@ -10,31 +8,19 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkErosConversation
     {
-        public int PacketSequence { get; private set; }
-
-        private List<Bytes> RequestPacketData;
-        public Bytes ResponseData;
-
-        private int SendPacketIndex = 0;
-        private byte[] SendPacketCache = null;
-        public bool IsFinished = false;
+        private static readonly Dictionary<long, RileyLinkErosConversation> ConversationCache =
+            new Dictionary<long, RileyLinkErosConversation>();
 
         private readonly IErosPod Pod;
+        public bool IsFinished;
 
         private IErosPodRequest Request;
 
-        private static Dictionary<long, RileyLinkErosConversation> ConversationCache =
-            new Dictionary<long, RileyLinkErosConversation>();
+        private List<Bytes> RequestPacketData;
+        public Bytes ResponseData;
+        private byte[] SendPacketCache;
 
-        public static RileyLinkErosConversation ForPod(IErosPod erosPod)
-        {
-            if (!ConversationCache.ContainsKey(erosPod.Entity.Id))
-            {
-                ConversationCache.Add(erosPod.Entity.Id, new RileyLinkErosConversation(erosPod));
-            }
-
-            return ConversationCache[erosPod.Entity.Id];
-        }
+        private int SendPacketIndex;
 
         private RileyLinkErosConversation(IErosPod pod)
         {
@@ -42,12 +28,22 @@ namespace OmniCore.Radios.RileyLink
             Pod = pod;
         }
 
+        public int PacketSequence { get; private set; }
+
+        public static RileyLinkErosConversation ForPod(IErosPod erosPod)
+        {
+            if (!ConversationCache.ContainsKey(erosPod.Entity.Id))
+                ConversationCache.Add(erosPod.Entity.Id, new RileyLinkErosConversation(erosPod));
+
+            return ConversationCache[erosPod.Entity.Id];
+        }
+
         public void Initialize(IErosPodRequest request)
         {
             Request = request;
             var requestData = new Bytes(request.Message);
             RequestPacketData = new List<Bytes>();
-            int index = 0;
+            var index = 0;
             while (index < requestData.Length)
             {
                 var packetBodyLength = Math.Min(31, requestData.Length - index);
@@ -63,27 +59,21 @@ namespace OmniCore.Radios.RileyLink
             {
                 RadioPacket rpSend;
                 if (SendPacketIndex == 0)
-                {
-                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.PDM, RequestPacketData[0]);
-                }
+                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.PDM,
+                        RequestPacketData[0]);
                 else if (SendPacketIndex < RequestPacketData.Count)
-                {
                     rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.CON,
                         RequestPacketData[SendPacketIndex]);
-                }
                 else if (IsFinished)
-                {
                     rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.ACK,
-                        new Bytes((uint)0));
-                }
+                        new Bytes((uint) 0));
                 else
-                {
                     rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.ACK,
                         new Bytes(Request.MessageRadioAddress));
-                }
 
                 SendPacketCache = rpSend.GetPacketData();
             }
+
             return SendPacketCache;
         }
 
@@ -93,10 +83,9 @@ namespace OmniCore.Radios.RileyLink
             {
                 if (incomingPacketData == null || incomingPacketData.Length == 0)
                     return true;
-                else
-                    return false;
+                return false;
             }
-            
+
             var incomingRadioPacket = RadioPacket.FromIncoming(incomingPacketData);
             if (!incomingRadioPacket.IsValid)
                 return false;
@@ -148,8 +137,8 @@ namespace OmniCore.Radios.RileyLink
 
         private (bool IsValid, bool IsComplete) EvaluateResponse(Bytes data)
         {
-            bool isValid = true;
-            bool isComplete = false;
+            var isValid = true;
+            var isComplete = false;
 
             if (data.Length >= 4)
             {
@@ -170,16 +159,12 @@ namespace OmniCore.Radios.RileyLink
                 else if (data.Length == responseExpectedLength)
                 {
                     var crc = data.Word(data.Length - 2);
-                    var crcCalculated = CrcUtil.Crc16(data, data.Length -2);
+                    var crcCalculated = CrcUtil.Crc16(data, data.Length - 2);
 
                     if (crc == crcCalculated)
-                    {
                         isComplete = true;
-                    }
                     else
-                    {
                         isValid = false;
-                    }
                 }
             }
 
@@ -187,15 +172,8 @@ namespace OmniCore.Radios.RileyLink
         }
     }
 
-    class RadioPacket
+    internal class RadioPacket
     {
-        public int? Sequence { get; set; }
-        public uint? Address { get; set; }
-        public PacketType? Type { get; set; }
-        public Bytes Data { get; set; }
-        public byte? Crc { get; set; }
-        public bool IsValid { get; set; }
-
         private RadioPacket()
         {
             IsValid = false;
@@ -209,6 +187,13 @@ namespace OmniCore.Radios.RileyLink
             Data = data;
         }
 
+        public int? Sequence { get; set; }
+        public uint? Address { get; set; }
+        public PacketType? Type { get; set; }
+        public Bytes Data { get; set; }
+        public byte? Crc { get; set; }
+        public bool IsValid { get; set; }
+
         public byte[] GetPacketData()
         {
             if (!Address.HasValue || !Sequence.HasValue || !Type.HasValue)
@@ -216,7 +201,7 @@ namespace OmniCore.Radios.RileyLink
 
             var packetData = new Bytes(Address.Value);
             var d4 = ((int) Type.Value << 5) | (Sequence.Value & 0b00011111);
-            packetData.Append((byte)d4);
+            packetData.Append((byte) d4);
             if (Data != null)
                 packetData.Append(Data);
             Crc = CrcUtil.Crc8(packetData);
@@ -234,10 +219,7 @@ namespace OmniCore.Radios.RileyLink
 
             var incoming = ManchesterEncoding.Decode(new Bytes(incomingData));
 
-            if (incoming.Length >= 4)
-            {
-                address = incoming.DWord(0);
-            }
+            if (incoming.Length >= 4) address = incoming.DWord(0);
 
             if (incoming.Length >= 5)
             {
@@ -246,17 +228,11 @@ namespace OmniCore.Radios.RileyLink
                 sequence = d4 & 0b00011111;
             }
 
-            if (incoming.Length >= 6)
-            {
-                crc = incoming[incoming.Length - 1];
-            }
+            if (incoming.Length >= 6) crc = incoming[incoming.Length - 1];
 
-            if (incoming.Length >= 7)
-            {
-                data = incoming.Sub(5, incoming.Length - 1);
-            }
+            if (incoming.Length >= 7) data = incoming.Sub(5, incoming.Length - 1);
 
-            bool isValid = true;
+            var isValid = true;
             if (crc.HasValue)
             {
                 var computedCrc = CrcUtil.Crc8(incoming, incoming.Length);
@@ -264,7 +240,9 @@ namespace OmniCore.Radios.RileyLink
                     isValid = false;
             }
             else
+            {
                 isValid = false;
+            }
 
             switch (type)
             {
@@ -304,13 +282,13 @@ namespace OmniCore.Radios.RileyLink
         }
     }
 
-    static class ManchesterEncoding
+    internal static class ManchesterEncoding
     {
         private static readonly ushort[] Encoded;
-        private static Dictionary<ushort, byte> Decoded;
+        private static readonly Dictionary<ushort, byte> Decoded;
 
-        private static byte[] Noise;
-        private static Random Rnd;
+        private static readonly byte[] Noise;
+        private static readonly Random Rnd;
 
         static ManchesterEncoding()
         {
@@ -321,23 +299,21 @@ namespace OmniCore.Radios.RileyLink
             var encoding1 = new ushort[8];
             var mask = new byte[8];
 
-            for (int b = 0; b < 8; b++)
+            for (var b = 0; b < 8; b++)
             {
                 mask[b] = (byte) (1 << b);
                 encoding0[b] = (ushort) (2 << (b * 2));
                 encoding1[b] = (ushort) (1 << (b * 2));
             }
 
-            for (int dec = 0; dec < 256; dec++)
+            for (var dec = 0; dec < 256; dec++)
             {
                 ushort enc = 0;
-                for (int b = 0; b < 8; b++)
-                {
+                for (var b = 0; b < 8; b++)
                     if ((dec & mask[b]) == 0)
                         enc |= encoding0[b];
                     else
                         enc |= encoding1[b];
-                }
 
                 var ebHi = (byte) ((enc & 0xFF00) >> 8);
                 var ebLo = (byte) (enc & 0x00FF);
@@ -347,10 +323,10 @@ namespace OmniCore.Radios.RileyLink
 
             Rnd = new Random();
             Noise = new byte[256 + 160];
-            for (int i = 0; i < Noise.Length; i++)
+            for (var i = 0; i < Noise.Length; i++)
             {
                 byte noise = 0;
-                for (int j = 0; j < 4; j++)
+                for (var j = 0; j < 4; j++)
                 {
                     noise = (byte) (noise << 2);
                     if (Rnd.Next() % 2 == 0)
@@ -366,9 +342,8 @@ namespace OmniCore.Radios.RileyLink
         public static Bytes Encode(Bytes toEncode)
         {
             var encoded = new Bytes();
-            int noiseIndex = Rnd.Next(0, 256);
-            for (int i = 0; i < 40; i++)
-            {
+            var noiseIndex = Rnd.Next(0, 256);
+            for (var i = 0; i < 40; i++)
                 if (i < toEncode.Length)
                 {
                     var byteToEncode = toEncode[i];
@@ -377,9 +352,8 @@ namespace OmniCore.Radios.RileyLink
                 else
                 {
                     encoded.Append(Noise[noiseIndex + i * 2]);
-                    encoded.Append(Noise[noiseIndex + (i * 2 + 1)]);
+                    encoded.Append(Noise[noiseIndex + i * 2 + 1]);
                 }
-            }
 
             return encoded;
         }
@@ -387,17 +361,13 @@ namespace OmniCore.Radios.RileyLink
         public static Bytes Decode(Bytes toDecode)
         {
             var decoded = new Bytes();
-            for (int i = 0; i < toDecode.Length; i += 2)
+            for (var i = 0; i < toDecode.Length; i += 2)
             {
                 var wordToDecode = toDecode.Word(i);
                 if (Decoded.ContainsKey(wordToDecode))
-                {
                     decoded.Append(Decoded[wordToDecode]);
-                }
                 else
-                {
                     break;
-                }
             }
 
             return decoded;

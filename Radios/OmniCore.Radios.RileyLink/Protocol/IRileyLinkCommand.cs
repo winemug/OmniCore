@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reactive.Subjects;
-using OmniCore.Radios.RileyLink.Enumerations;
+﻿using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {

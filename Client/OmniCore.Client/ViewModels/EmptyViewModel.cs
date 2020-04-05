@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Client.Views.Base;
-using OmniCore.Model.Interfaces.Client;
+﻿using OmniCore.Model.Interfaces.Client;
 
 namespace OmniCore.Client.ViewModels.Base
 {

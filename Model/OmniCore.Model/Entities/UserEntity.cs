@@ -10,5 +10,4 @@ namespace OmniCore.Model.Entities
         public Genotype? Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
     }
-
 }

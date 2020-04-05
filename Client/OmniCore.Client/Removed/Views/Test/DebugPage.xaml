@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <forms:ContentPage xmlns:forms="http://xamarin.com/schemas/2014/forms">
 
 </forms:ContentPage>
@@ -12,7 +13,9 @@
     <ContentPage.Content>
         <StackLayout>
             <Button Text="Add Existing" Clicked="ExistingClicked"/>
-            --><!--<Button Text="Radio Connection Test" Clicked="RadioConnectionTest_Clicked"/>--><!--
+            -->
+<!--<Button Text="Radio Connection Test" Clicked="RadioConnectionTest_Clicked"/>-->
+<!--
             <Button Text="Exit Application" Clicked="ExitApp_Clicked"/>
         </StackLayout>
     </ContentPage.Content>

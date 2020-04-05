@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Base;
-using OmniCore.Client.ViewModels.Home;
-using OmniCore.Client.Views.Base;
-using OmniCore.Client.Views.Home;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
-using Xamarin.Forms;
 
 namespace OmniCore.Client.Platform
 {
@@ -48,10 +38,7 @@ namespace OmniCore.Client.Platform
         {
             ClientContainer.One<TView>();
 
-            ViewDictionary.Add(typeof(TView), (viaShell, parameter) =>
-            {
-                return ClientContainer.Get<TView>();
-            });
+            ViewDictionary.Add(typeof(TView), (viaShell, parameter) => { return ClientContainer.Get<TView>(); });
             return this;
         }
 

@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
@@ -7,26 +8,26 @@
              mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Home.RadioScanView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Peripherals}" SelectionMode="None" >
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Peripherals}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="{x:Type models:RadioModel}">
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="55"/>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="55" />
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="30" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
-                            <CheckBox IsChecked="{Binding IsChecked}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
-                            <Label Text="{Binding Name}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"/>
-                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="2"/>
-                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="3"/>
+                            <CheckBox IsChecked="{Binding IsChecked}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />
+                            <Label Text="{Binding Name}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" />
+                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="2" />
+                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="3" />
                         </Grid>
                     </Frame>
                 </DataTemplate>

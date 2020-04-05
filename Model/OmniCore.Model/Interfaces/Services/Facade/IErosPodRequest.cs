@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OmniCore.Model.Enumerations;
+﻿using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Client.Views.Wizards.SetupWizard;
 using OmniCore.Model.Interfaces.Client;
 using Xamarin.Forms;
 

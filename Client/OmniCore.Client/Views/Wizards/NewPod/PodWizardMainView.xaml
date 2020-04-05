@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
@@ -21,8 +22,7 @@
                                Margin="20"
                                HorizontalOptions="CenterAndExpand"
                                VerticalOptions="CenterAndExpand"
-                               Content="{Binding Content}">
-                        </Frame>
+                               Content="{Binding Content}" />
                     </DataTemplate>
                 </CarouselView.ItemTemplate>
             </CarouselView>
@@ -30,12 +30,12 @@
                            IndicatorColor="LightGray"
                            SelectedIndicatorColor="DarkGray"
                            HorizontalOptions="Center"
-                           VerticalOptions="End"/>
+                           VerticalOptions="End" />
         </StackLayout>
     </ContentPage.Content>
     <Shell.TitleView>
         <ContentView>
-            <Label Text="New Pod Wizard" FontSize="Large" TextColor="White" VerticalOptions="CenterAndExpand"/>
+            <Label Text="New Pod Wizard" FontSize="Large" TextColor="White" VerticalOptions="CenterAndExpand" />
         </ContentView>
     </Shell.TitleView>
 </ContentPage>

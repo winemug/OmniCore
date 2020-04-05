@@ -4,6 +4,6 @@
     {
         Scheduled,
         Running,
-        Finished,
+        Finished
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
 {
-    public class SubscriberCommand : Xamarin.Forms.Command
+    public class SubscriberCommand : Command
     {
         public SubscriberCommand(Action<object> execute) : base(execute)
         {

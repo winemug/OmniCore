@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Services;
+﻿using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Internal;
-using OmniCore.Services;
 
 namespace OmniCore.Repository
 {

@@ -17,4 +17,3 @@ namespace OmniCore.Eros
         }
     }
 }
-

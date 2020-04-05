@@ -12,20 +12,14 @@ namespace OmniCore.Model.Utilities.Extensions
             task.ConfigureAwait(continueOnCapturedContext);
             task.Start();
             task.Wait(cancellationToken);
-            if (task.IsCanceled)
-            {
-                throw new OperationCanceledException();
-            }
+            if (task.IsCanceled) throw new OperationCanceledException();
 
             if (task.IsFaulted)
             {
-                if (task.Exception != null)
-                {
-                    throw task.Exception;
-                }
+                if (task.Exception != null) throw task.Exception;
                 throw new InvalidOperationException();
             }
-            
+
             return task.Result;
         }
     }

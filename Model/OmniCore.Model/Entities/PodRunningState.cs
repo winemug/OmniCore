@@ -7,7 +7,7 @@ namespace OmniCore.Model.Entities
     {
         public DateTimeOffset? LastUpdated { get; set; }
         public DateTimeOffset? LastRadioContact { get; set; }
-        
+
         public PodState State { get; set; }
         public DateTimeOffset? ActivationStart { get; set; }
         public DateTimeOffset? InsertionStart { get; set; }
@@ -16,7 +16,7 @@ namespace OmniCore.Model.Entities
         public DateTimeOffset? Stopped { get; set; }
         public DateTimeOffset? MarkedAsMalfunctioning { get; set; }
         public DateTimeOffset? Faulted { get; set; }
-        
+
         public decimal DeliveredUnits { get; set; }
         public decimal ReservoirUnits { get; set; }
         public BasalState BasalState { get; set; }
@@ -37,6 +37,6 @@ namespace OmniCore.Model.Entities
         public TimeSpan? ExtendedBolusDuration { get; set; }
         public decimal? ExtendedBolusAmount { get; set; }
         public decimal? ExtendedBolusDelivered { get; set; }
-        public decimal? ExtendedBolusRemaining { get; set; }     
+        public decimal? ExtendedBolusRemaining { get; set; }
     }
 }

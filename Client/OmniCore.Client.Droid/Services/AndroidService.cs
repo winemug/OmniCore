@@ -1,71 +1,119 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using Acr.Logging;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Provider;
-using Android.Runtime;
-using Android.Service.Autofill;
-using Java.Lang;
-using Java.Util;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Push;
-using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
-using OmniCore.Client.Droid;
 using OmniCore.Client.Droid.Platform;
-using OmniCore.Client.Droid.Services;
-using OmniCore.Eros;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
-using OmniCore.Radios.RileyLink;
-using OmniCore.Services;
-using Unity;
-using Enum = Java.Lang.Enum;
-using Notification = Android.App.Notification;
+using Debug = System.Diagnostics.Debug;
 
 namespace OmniCore.Client.Droid.Services
 {
-    [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.Api", Icon="@mipmap/ic_launcher")]
+    [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.Api",
+        Icon = "@mipmap/ic_launcher")]
     public class AndroidService : Service, ICoreApi, ICoreNotificationFunctions
     {
-        private bool AndroidServiceStarted = false;
+        private bool AndroidServiceStarted;
+
+        private ISubject<CoreApiStatus> ApiStatusSubject;
+
+        private Dictionary<NotificationCategory, NotificationChannel> NotificationChannelDictionary;
+        private int NotificationIdCounter;
+
+        private bool NotificationsInitialized;
+        private CoreNotification ServiceNotification;
+        private ISubject<ICoreApi> UnexpectedStopRequestSubject;
 
         public ICoreContainer<IServerResolvable> ServerContainer { get; private set; }
         public ICoreLoggingFunctions LoggingFunctions => ServerContainer.Get<ICoreLoggingFunctions>();
         public ICoreApplicationFunctions ApplicationFunctions => ServerContainer.Get<ICoreApplicationFunctions>();
-        public ICoreRepositoryService CoreRepositoryService => ServerContainer.Get<ICoreRepositoryService>();
-        public ICorePodService CorePodService => ServerContainer.Get<ICorePodService>();
+        public ICoreRepositoryService RepositoryService => ServerContainer.Get<ICoreRepositoryService>();
+        public ICorePodService PodService => ServerContainer.Get<ICorePodService>();
         public ICoreNotificationFunctions NotificationFunctions => ServerContainer.Get<ICoreNotificationFunctions>();
         public ICoreIntegrationService IntegrationService => ServerContainer.Get<ICoreIntegrationService>();
         public ICoreAutomationService AutomationService => ServerContainer.Get<ICoreAutomationService>();
-        public ICoreConfigurationService CoreConfigurationService => ServerContainer.Get<ICoreConfigurationService>();
+        public ICoreConfigurationService ConfigurationService => ServerContainer.Get<ICoreConfigurationService>();
 
-        private ISubject<CoreApiStatus> ApiStatusSubject;
-        private ISubject<ICoreApi> UnexpectedStopRequestSubject;
-        private CoreNotification ServiceNotification; 
+        public IObservable<CoreApiStatus> ApiStatus => ApiStatusSubject.AsObservable();
+
+        public async Task StartServices(CancellationToken cancellationToken)
+        {
+            await RepositoryService.StartService(cancellationToken);
+            await PodService.StartService(cancellationToken);
+            //await AutomationService.StartService(cancellationToken);
+            //await IntegrationService.StartService(cancellationToken);
+            ApiStatusSubject.OnNext(CoreApiStatus.Started);
+            ServiceNotification.Update(null, "OmniCore is running in background.");
+        }
+
+        public async Task StopServices(CancellationToken cancellationToken)
+        {
+            //await IntegrationService.StopService(cancellationToken);
+            //await AutomationService.StopService(cancellationToken);
+            await PodService.StopService(cancellationToken);
+            await RepositoryService.StopService(cancellationToken);
+        }
+
+        public ICoreNotification CreateNotification(NotificationCategory category, string title, string message,
+            TimeSpan? timeout = null, bool autoDismiss = true)
+        {
+            if (!NotificationsInitialized)
+            {
+                InitializeNotifications();
+                NotificationsInitialized = true;
+            }
+
+            var notification = ServerContainer.Get<ICoreNotification>() as CoreNotification;
+            if (notification == null)
+            {
+                //TODO: throw?
+            }
+
+            var notificationId = Interlocked.Increment(ref NotificationIdCounter);
+            notification.CreateInternal(this, notificationId, category, title, message,
+                timeout, autoDismiss);
+            return notification;
+        }
+
+        public void ClearNotifications()
+        {
+            var notificationManager = (NotificationManager)
+                GetSystemService(NotificationService);
+            notificationManager.CancelAll();
+        }
+
+        public IObservable<ICoreNotification> WhenNotificationAdded()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ICoreNotification> WhenNotificationDismissed()
+        {
+            throw new NotImplementedException();
+        }
 
         public override IBinder OnBind(Intent intent)
         {
             if (!AndroidServiceStarted)
             {
-                if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.O)
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                     StartForegroundService(intent);
                 else
                     StartService(intent);
             }
+
             return new AndroidServiceBinder(this);
         }
 
@@ -74,31 +122,27 @@ namespace OmniCore.Client.Droid.Services
             ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.Starting);
 
             if (!AppCenter.Configured)
-            {
                 Push.PushNotificationReceived += (sender, e) =>
                 {
                     // Add the notification message and title to the message
-                    var summary =  $"Push notification received:" +
-                                   $"\n\tNotification title: {e.Title}" +
-                                   $"\n\tMessage: {e.Message}";
-    
+                    var summary = "Push notification received:" +
+                                  $"\n\tNotification title: {e.Title}" +
+                                  $"\n\tMessage: {e.Message}";
+
                     // If there is custom data associated with the notification,
                     // print the entries
                     if (e.CustomData != null)
                     {
                         summary += "\n\tCustom data:\n";
-                        foreach (var key in e.CustomData.Keys)
-                        {
-                            summary += $"\t\t{key} : {e.CustomData[key]}\n";
-                        }
+                        foreach (var key in e.CustomData.Keys) summary += $"\t\t{key} : {e.CustomData[key]}\n";
                     }
 
                     // Send the notification summary to debug output
-                    System.Diagnostics.Debug.WriteLine(summary);
+                    Debug.WriteLine(summary);
                 };
-            }
 
-            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes), typeof(Push));
+            AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes),
+                typeof(Push));
             UnexpectedStopRequestSubject = new Subject<ICoreApi>();
             ServerContainer = Initializer.AndroidServiceContainer(this, this);
             base.OnCreate();
@@ -108,10 +152,11 @@ namespace OmniCore.Client.Droid.Services
         {
             if (!AndroidServiceStarted)
             {
-                ServiceNotification = NotificationFunctions.CreateNotification(NotificationCategory.ApplicationInformation,
-                    "OmniCore Android Service","OmniCore is starting...")
+                ServiceNotification = NotificationFunctions.CreateNotification(
+                        NotificationCategory.ApplicationInformation,
+                        "OmniCore Android Service", "OmniCore is starting...")
                     as CoreNotification;
-                this.StartForeground(ServiceNotification.Id, ServiceNotification.NativeNotification);
+                StartForeground(ServiceNotification.Id, ServiceNotification.NativeNotification);
                 AndroidServiceStarted = true;
 
                 Task.Run(async () => await StartServices(CancellationToken.None));
@@ -137,43 +182,18 @@ namespace OmniCore.Client.Droid.Services
             var t = Task.Run(async () => await StopServices(CancellationToken.None));
             t.Wait();
             if (!t.IsCompletedSuccessfully)
-            {
                 //TODO: log
                 throw new OmniCoreWorkflowException(FailureType.ServiceStopFailure, null, t.Exception);
-            }
             ServiceNotification?.Dismiss();
             if (NotificationsInitialized)
                 DeinitializeNotifications();
             base.OnDestroy();
         }
 
-        public IObservable<CoreApiStatus> ApiStatus => ApiStatusSubject.AsObservable();
-
-        public async Task StartServices(CancellationToken cancellationToken)
-        {
-            await CoreRepositoryService.StartService(cancellationToken);
-            await CorePodService.StartService(cancellationToken);
-            //await AutomationService.StartService(cancellationToken);
-            //await IntegrationService.StartService(cancellationToken);
-            ApiStatusSubject.OnNext(CoreApiStatus.Started);
-            ServiceNotification.Update(null, "OmniCore is running in background.");
-        }
-
-        public async Task StopServices(CancellationToken cancellationToken)
-        {
-            //await IntegrationService.StopService(cancellationToken);
-            //await AutomationService.StopService(cancellationToken);
-            await CorePodService.StopService(cancellationToken);
-            await CoreRepositoryService.StopService(cancellationToken);
-        }
-        
         public void UnexpectedStopRequested()
         {
             UnexpectedStopRequestSubject.OnNext(this);
         }
-
-        private Dictionary<NotificationCategory,NotificationChannel> NotificationChannelDictionary;
-        private int NotificationIdCounter;
 
         private void InitializeNotifications()
         {
@@ -223,7 +243,7 @@ namespace OmniCore.Client.Droid.Services
         private void CreateNotificationChannel(NotificationCategory category, string title, string description,
             NotificationImportance importance)
         {
-            var notificationManager = (NotificationManager) GetSystemService(Context.NotificationService);
+            var notificationManager = (NotificationManager) GetSystemService(NotificationService);
             var channel = new NotificationChannel(category.ToString("G"), title, importance)
             {
                 Description = description
@@ -235,48 +255,7 @@ namespace OmniCore.Client.Droid.Services
 
         private void DeinitializeNotifications()
         {
-            foreach (var notificationChannel in NotificationChannelDictionary.Values)
-            {
-                notificationChannel.Dispose();
-            }
-        }
-
-        private bool NotificationsInitialized = false;
-        public ICoreNotification CreateNotification(NotificationCategory category, string title, string message,
-            TimeSpan? timeout = null, bool autoDismiss = true)
-        {
-            if (!NotificationsInitialized)
-            {
-                InitializeNotifications();
-                NotificationsInitialized = true;
-            }
-
-            var notification = ServerContainer.Get<ICoreNotification>() as CoreNotification;
-            if (notification == null)
-            {
-                //TODO: throw?
-            }
-            var notificationId = Interlocked.Increment(ref NotificationIdCounter);
-            notification.CreateInternal(this, notificationId, category, title, message,
-                timeout, autoDismiss);
-            return notification;
-        }
-
-        public void ClearNotifications()
-        {
-            var notificationManager = (NotificationManager)
-                GetSystemService(Context.NotificationService);
-            notificationManager.CancelAll();
-        }
-
-        public IObservable<ICoreNotification> WhenNotificationAdded()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IObservable<ICoreNotification> WhenNotificationDismissed()
-        {
-            throw new NotImplementedException();
+            foreach (var notificationChannel in NotificationChannelDictionary.Values) notificationChannel.Dispose();
         }
     }
 }

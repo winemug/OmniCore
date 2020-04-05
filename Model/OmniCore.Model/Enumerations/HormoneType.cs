@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Enumerations
+﻿namespace OmniCore.Model.Enumerations
 {
     public enum HormoneType
     {
@@ -11,7 +7,8 @@ namespace OmniCore.Model.Enumerations
         Glucagon,
         Estrogen,
         Testosterone,
-        Somatotropin,
+
+        Somatotropin
         // a long list here
     }
 }

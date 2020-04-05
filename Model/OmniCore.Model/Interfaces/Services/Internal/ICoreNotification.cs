@@ -12,11 +12,11 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         string Message { get; }
         TimeSpan? Timeout { get; }
         bool AutoDismiss { get; }
+        bool IsDismissed { get; }
+        bool IsAutomaticallyDismissed { get; }
+        bool IsManuallyDismissed { get; }
         void Update(string title, string message, TimeSpan? timeout = null);
         void Dismiss();
         IObservable<ICoreNotification> WhenDismissed();
-        bool IsDismissed { get; }
-        bool IsAutomaticallyDismissed  { get; }
-        bool IsManuallyDismissed { get; }
     }
 }

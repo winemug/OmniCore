@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +29,7 @@ namespace OmniCore.Eros
             PodDictionary = new ConcurrentDictionary<long, IErosPod>();
             PodLock = new AsyncLock();
         }
+
         public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
         {
             using var context = await RepositoryService.GetContextReadOnly(cancellationToken);
@@ -46,14 +46,14 @@ namespace OmniCore.Eros
         public async Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
             using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
-            var entity = new PodEntity()
+            var entity = new PodEntity
             {
                 Medication = medication.Entity,
                 User = user.Entity,
                 PodRadios = new List<PodRadioEntity>()
             };
 
-            await context.Pods.AddAsync(entity);
+            await context.Pods.AddAsync(entity, cancellationToken);
             await context.Save(cancellationToken);
             return await GetPodInternal(entity);
         }

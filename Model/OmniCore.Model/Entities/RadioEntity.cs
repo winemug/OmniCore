@@ -11,8 +11,7 @@ namespace OmniCore.Model.Entities
         public string DeviceName { get; set; }
         public string UserDescription { get; set; }
 
-        [JsonField]
-        public RadioOptions Options { get; set; } = new RadioOptions();
+        [JsonField] public RadioOptions Options { get; set; } = new RadioOptions();
 
         public ICollection<PodRadioEntity> PodRadios { get; set; }
     }

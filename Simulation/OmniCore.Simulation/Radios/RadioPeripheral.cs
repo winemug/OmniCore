@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using OmniCore.Model.Enumerations;
-
-namespace OmniCore.Simulation.Radios
+﻿namespace OmniCore.Simulation.Radios
 {
 //    public class RadioPeripheral : IBlePeripheral
 //    {
@@ -30,7 +22,7 @@ namespace OmniCore.Simulation.Radios
 //        public TimeSpan? RssiUpdateTimeSpan { get; set; }
 //        public int? Rssi { get; set; }
 //        public DateTimeOffset? RssiDate { get; }
-        
+
 //        public State State { get; }
 //        public DateTimeOffset? ConnectionStateDate { get; }
 //        public DateTimeOffset? DisconnectDate { get; }

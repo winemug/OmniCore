@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Common
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Enumerations
+﻿namespace OmniCore.Model.Enumerations
 {
     public enum PodState
     {
@@ -15,6 +11,6 @@ namespace OmniCore.Model.Enumerations
         Started,
         Stopped,
         Faulted,
-        Expired,
+        Expired
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -19,29 +17,19 @@ namespace OmniCore.Eros
 {
     public class ErosPodRequest : IErosPodRequest
     {
-        public ITaskProgress Progress { get; }
+        private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
 
-        public byte[] Message => GetRequestData();
-        public uint MessageRadioAddress { get; private set;}
-        public int MessageSequence { get; private set;}
-        public bool WithCriticalFollowup { get; private set;}
-        public bool AllowAddressOverride { get; private set; }
-        public TransmissionPower? TransmissionPowerOverride { get; private set; }
-        public PodRequestEntity Entity { get; set; }
-        
-        public IErosPod ErosPod { get; set; }
+        private readonly ICoreContainer<IServerResolvable> Container;
 
         private readonly List<(RequestPart part, ITaskProgress progress)> Parts =
             new List<(RequestPart part, ITaskProgress progress)>();
 
-        private IErosRadio RadioOverride;
-
-        private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
-        private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
-        private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
-        private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
         private readonly ICoreRepositoryService RepositoryService;
+        private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
+        private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
+        private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
+
+        private IErosRadio RadioOverride;
 
         public ErosPodRequest(
             ICoreContainer<IServerResolvable> container,
@@ -52,32 +40,54 @@ namespace OmniCore.Eros
             Progress = new TaskProgress();
         }
 
+        public PodRequestEntity Entity { get; set; }
+        public ITaskProgress Progress { get; }
+
+        public byte[] Message => GetRequestData();
+        public uint MessageRadioAddress { get; private set; }
+        public int MessageSequence { get; private set; }
+        public bool WithCriticalFollowup { get; private set; }
+        public bool AllowAddressOverride { get; private set; }
+        public TransmissionPower? TransmissionPowerOverride { get; private set; }
+
+        public IErosPod ErosPod { get; set; }
+
         public void Cancel()
         {
             TaskCancellationSource.Cancel();
         }
 
-        public IObservable<bool> WhenCanCancelChanged() => CanCancelSubject.AsObservable();
+        public IObservable<bool> WhenCanCancelChanged()
+        {
+            return CanCancelSubject.AsObservable();
+        }
 
-        public IObservable<TaskState> WhenStateChanged() => StateSubject.AsObservable();
+        public IObservable<TaskState> WhenStateChanged()
+        {
+            return StateSubject.AsObservable();
+        }
 
-        public IObservable<TaskResult> WhenResultReceived() => ResultSubject.AsObservable();
+        public IObservable<TaskResult> WhenResultReceived()
+        {
+            return ResultSubject.AsObservable();
+        }
 
         public async Task ExecuteRequest()
         {
             StateSubject.OnNext(TaskState.Running);
-            
+
             try
             {
                 await ExecuteRequestInternal(TaskCancellationSource.Token);
             }
-            catch (OperationCanceledException oe)
+            catch (OperationCanceledException)
             {
                 ResultSubject.OnNext(TaskResult.Canceled);
                 ResultSubject.OnCompleted();
             }
             catch (Exception e)
             {
+                ResultSubject.OnError(e);
                 ResultSubject.OnNext(TaskResult.Failed);
                 ResultSubject.OnCompleted();
             }
@@ -85,6 +95,7 @@ namespace OmniCore.Eros
             StateSubject.OnNext(TaskState.Finished);
             StateSubject.OnCompleted();
         }
+
         public void Dispose()
         {
             TaskCancellationSource?.Dispose();
@@ -102,7 +113,7 @@ namespace OmniCore.Eros
 
             if (TransmissionPowerOverride.HasValue)
                 options.Amplification = TransmissionPowerOverride.Value;
-            
+
             var response = await radio.GetResponse(this, cancellationToken, options);
             var responseEntity = await ParseResponse(response);
 
@@ -113,19 +124,19 @@ namespace OmniCore.Eros
 
         public ErosPodRequest WithAcquire(IErosRadio radio)
         {
-            var childProgress = new TaskProgress 
-                {
-                    Name = "Query Pod", 
-                    Description = "Looking for pod"
-                };
+            var childProgress = new TaskProgress
+            {
+                Name = "Query Pod",
+                Description = "Looking for pod"
+            };
 
             AllowAddressOverride = true;
             TransmissionPowerOverride = TransmissionPower.Lowest;
 
-            return this.WithPart(new RequestPart()
+            return WithPart(new RequestPart
             {
                 PartType = PartType.RequestStatus,
-                PartData = new Bytes((byte)StatusRequestType.Standard)
+                PartData = new Bytes((byte) StatusRequestType.Standard)
             }, childProgress).WithRadio(radio);
         }
 
@@ -137,13 +148,13 @@ namespace OmniCore.Eros
 
         public ErosPodRequest WithPair(uint address)
         {
-            var childProgress = new TaskProgress 
+            var childProgress = new TaskProgress
             {
-                Name = "Pair Pod", 
+                Name = "Pair Pod",
                 Description = "Pairing pod"
             };
-            
-            return this.WithPart(new RequestPart()
+
+            return WithPart(new RequestPart
             {
                 PartType = PartType.RequestAssignAddress,
                 PartData = new Bytes(address)
@@ -152,22 +163,22 @@ namespace OmniCore.Eros
 
         public ErosPodRequest WithStatus(StatusRequestType requestType)
         {
-            var childProgress = new TaskProgress 
+            var childProgress = new TaskProgress
             {
-                Name = "Request Status", 
+                Name = "Request Status",
                 Description = "Querying Pod Status"
             };
 
-            return this.WithPart(new RequestPart()
+            return WithPart(new RequestPart
             {
                 PartType = PartType.RequestStatus,
-                PartData = new Bytes().Append((byte)requestType)
+                PartData = new Bytes().Append((byte) requestType)
             }, childProgress);
         }
 
         private ErosPodRequest WithPart(RequestPart part, ITaskProgress taskProgress)
         {
-            this.Progress.Children.Add(taskProgress);
+            Progress.Children.Add(taskProgress);
 
             Parts.Add((part, taskProgress));
             return this;
@@ -195,8 +206,8 @@ namespace OmniCore.Eros
             var b0 = (byte) (MessageSequence << 2);
             if (WithCriticalFollowup)
                 b0 |= 0x80;
-            b0 |= (byte)((messageBody.Length >> 8) & 0x03);
-            var b1 = (byte)(messageBody.Length & 0xff);
+            b0 |= (byte) ((messageBody.Length >> 8) & 0x03);
+            var b1 = (byte) (messageBody.Length & 0xff);
 
             var requestBody = new Bytes(MessageRadioAddress).Append(b0).Append(b1).Append(messageBody);
 
@@ -213,7 +224,7 @@ namespace OmniCore.Eros
         {
             var response = new PodResponseEntity
             {
-                PodRequest = this.Entity
+                PodRequest = Entity
             };
 
             var responseBytes = new Bytes(responseData);
@@ -221,7 +232,7 @@ namespace OmniCore.Eros
             var responseRadioAddress = responseBytes.DWord(0);
 
             var responseParts = new List<(byte, Bytes)>();
-            int idx = 6;
+            var idx = 6;
             while (idx < responseBytes.Length - 2)
             {
                 var responsePartCode = responseBytes[idx];
@@ -231,8 +242,7 @@ namespace OmniCore.Eros
             }
 
             foreach (var (responsePartCode, responseresponseData) in responseParts)
-            {
-                switch ((PartType)responsePartCode)
+                switch ((PartType) responsePartCode)
                 {
                     case PartType.ResponseVersionInfo:
                         ParseVersionResponse(responseresponseData, response);
@@ -247,9 +257,9 @@ namespace OmniCore.Eros
                         ParseStatusResponse(responseresponseData, response);
                         break;
                     default:
-                        throw new OmniCoreWorkflowException(FailureType.WorkflowPodResponseUnrecognized, $"Unknown response type {responsePartCode}");
+                        throw new OmniCoreWorkflowException(FailureType.WorkflowPodResponseUnrecognized,
+                            $"Unknown response type {responsePartCode}");
                 }
-            }
 
             using var context = await RepositoryService.GetContextReadWrite(CancellationToken.None);
             await context.PodResponses.AddAsync(response);
@@ -261,8 +271,8 @@ namespace OmniCore.Eros
         {
             response.VersionResponse = new PodResponseVersion();
 
-            bool lengthyResponse = false;
-            int i = 0;
+            var lengthyResponse = false;
+            var i = 0;
             if (responseData.Length == 27)
             {
                 response.VersionResponse.VersionUnk2b = responseData.ByteBuffer[new Range(i, i + 7)];
@@ -282,7 +292,7 @@ namespace OmniCore.Eros
 
             i++;
 
-            response.Progress = (PodProgress)(responseData.Byte(i++) & 0x0F);
+            response.Progress = (PodProgress) (responseData.Byte(i++) & 0x0F);
 
 
             response.VersionResponse.Lot = responseData.DWord(i);
@@ -297,6 +307,7 @@ namespace OmniCore.Eros
                     PodRssi = (byte) (rb & 0b00111111)
                 };
             }
+
             response.VersionResponse.RadioAddress = responseData.DWord(i);
         }
 
@@ -304,26 +315,26 @@ namespace OmniCore.Eros
         {
             response.StatusResponse = new PodResponseStatus();
             var s0 = responseData[0];
-            uint s1 = responseData.DWord(1);
-            uint s2 = responseData.DWord(5);
+            var s1 = responseData.DWord(1);
+            var s2 = responseData.DWord(5);
 
-            var deliveryStates = ParseDeliveryStates((byte)(s0 >> 4));
+            var deliveryStates = ParseDeliveryStates((byte) (s0 >> 4));
             response.StatusResponse.BolusState = deliveryStates.bolusState;
             response.StatusResponse.BasalState = deliveryStates.basalState;
-            response.Progress = (PodProgress)(s0 & 0xF);
+            response.Progress = (PodProgress) (s0 & 0xF);
 
-            response.StatusResponse.MessageSequence = (int)(s1 & 0x00007800) >> 11;
-            response.StatusResponse.Delivered = (int)(s1 & 0x0FFF8000) >> 15;
+            response.StatusResponse.MessageSequence = (int) (s1 & 0x00007800) >> 11;
+            response.StatusResponse.Delivered = (int) (s1 & 0x0FFF8000) >> 15;
             response.StatusResponse.NotDelivered = (int) s1 & 0x000007FF;
-            response.StatusResponse.Faulted = ((s2 >> 31) != 0);
-            response.StatusResponse.AlertMask = (byte)((s2 >> 23) & 0xFF);
-            response.StatusResponse.ActiveMinutes = (int)(s2 & 0x007FFC00) >> 10;
-            response.StatusResponse.Reservoir = (int)s2 & 0x000003FF;
+            response.StatusResponse.Faulted = s2 >> 31 != 0;
+            response.StatusResponse.AlertMask = (byte) ((s2 >> 23) & 0xFF);
+            response.StatusResponse.ActiveMinutes = (int) (s2 & 0x007FFC00) >> 10;
+            response.StatusResponse.Reservoir = (int) s2 & 0x000003FF;
         }
 
         private void ParseInformationResponse(Bytes responseData, PodResponseEntity response)
         {
-            int i = 0;
+            var i = 0;
             var rt = responseData.Byte(i++);
             switch (rt)
             {
@@ -364,12 +375,12 @@ namespace OmniCore.Eros
                     i += 6;
                     response.StatusResponse.AlertMask = responseData.Byte(i++);
                     response.FaultResponse.TableAccessFault = responseData.Byte(i++);
-                    byte f17 = responseData.Byte(i++);
+                    var f17 = responseData.Byte(i++);
                     response.FaultResponse.InsulinStateTableCorr = (byte) (f17 >> 7);
                     response.FaultResponse.InternalFaultVars = (byte) ((f17 & 0x60) >> 6);
                     response.FaultResponse.FaultWhileBolus = (f17 & 0x10) > 0;
                     response.FaultResponse.ProgressBeforeFault = (PodProgress) (f17 & 0x0F);
-                    byte r18 = responseData.Byte(i++);
+                    var r18 = responseData.Byte(i++);
 
                     response.RadioResponse = new PodResponseRadio
                     {

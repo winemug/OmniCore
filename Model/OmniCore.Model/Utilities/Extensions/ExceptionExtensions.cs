@@ -15,13 +15,13 @@ namespace OmniCore.Model.Utilities.Extensions
             exceptionsList.WithException(exception, new List<Exception>());
             readable.AppendLine();
 
-            int x = 0;
+            var x = 0;
             foreach (var exceptionList in exceptionsList)
             {
                 x++;
                 readable.AppendLine($"***\t({x})\tThrown exceptions (inside out):");
                 exceptionList.Reverse();
-                int y = 0;
+                var y = 0;
                 foreach (var exceptionEntry in exceptionList)
                 {
                     y++;
@@ -30,11 +30,12 @@ namespace OmniCore.Model.Utilities.Extensions
                     readable.AppendLine();
                 }
             }
-           
+
             return readable.ToString();
         }
 
-        private static List<List<Exception>> WithException(this List<List<Exception>> list, Exception exception, List<Exception> referenceEntry)
+        private static List<List<Exception>> WithException(this List<List<Exception>> list, Exception exception,
+            List<Exception> referenceEntry)
         {
             switch (exception)
             {

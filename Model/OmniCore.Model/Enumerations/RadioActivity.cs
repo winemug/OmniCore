@@ -10,6 +10,6 @@
         SendingRequest,
         ReceivingResponse,
         EndingConversation,
-        Listening,
+        Listening
     }
 }

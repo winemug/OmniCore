@@ -1,18 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Android.Util;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
-using OmniCore.Services;
-using LogLevel = Microsoft.AppCenter.LogLevel;
 
 namespace OmniCore.Mobile.Droid.Platform
 {
@@ -50,38 +41,37 @@ namespace OmniCore.Mobile.Droid.Platform
 
         public void Debug(string message, [CallerFilePath] string source = "")
         {
-            
             Log.Debug(Tag, $"{source} {message}");
         }
 
         public void Error(string message, [CallerFilePath] string source = "")
         {
-            Log.Error(Tag , $"{source} {message}");
+            Log.Error(Tag, $"{source} {message}");
         }
 
         public void Error(string message, Exception e, [CallerFilePath] string source = "")
         {
-            Log.Error(Tag , $"{source} {message}\n{e.AsDebugFriendly()}");
+            Log.Error(Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
         public void Information(string message, [CallerFilePath] string source = "")
         {
-            Log.Info(Tag , $"{source} {message}");
+            Log.Info(Tag, $"{source} {message}");
         }
 
         public void Verbose(string message, [CallerFilePath] string source = "")
         {
-            Log.Verbose(Tag , $"{source} {message}");
+            Log.Verbose(Tag, $"{source} {message}");
         }
 
         public void Warning(string message, [CallerFilePath] string source = "")
         {
-            Log.Warn(Tag , $"{source} {message}");
+            Log.Warn(Tag, $"{source} {message}");
         }
 
         public void Warning(string message, Exception e, [CallerFilePath] string source = "")
         {
-            Log.Error(Tag , $"{source} {message}\n{e.AsDebugFriendly()}");
+            Log.Error(Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
     }
 }

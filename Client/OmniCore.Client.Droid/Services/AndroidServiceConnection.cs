@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading;
-using System.Threading.Tasks;
 using Android.Content;
 using Android.OS;
-using Javax.Security.Auth;
-using Nito.AsyncEx;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Services;
+using Object = Java.Lang.Object;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class AndroidServiceConnection : Java.Lang.Object, IServiceConnection, ICoreClientConnection
+    public class AndroidServiceConnection : Object, IServiceConnection, ICoreClientConnection
     {
         private AndroidServiceBinder Binder;
-        private ISubject<ICoreApi> CoreServicesSubject;
+        private readonly ISubject<ICoreApi> CoreServicesSubject;
 
         public AndroidServiceConnection()
         {
             CoreServicesSubject = new BehaviorSubject<ICoreApi>(null);
+        }
+
+        public IObservable<ICoreApi> WhenConnectionChanged()
+        {
+            return CoreServicesSubject.AsObservable();
         }
 
         public void OnServiceConnected(ComponentName name, IBinder service)
@@ -36,11 +34,6 @@ namespace OmniCore.Client.Droid.Services
         {
             Binder = null;
             CoreServicesSubject.OnNext(null);
-        }
-
-        public IObservable<ICoreApi> WhenConnectionChanged()
-        {
-            return CoreServicesSubject.AsObservable();
         }
     }
 }

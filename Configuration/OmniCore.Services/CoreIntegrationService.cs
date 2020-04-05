@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -11,9 +8,9 @@ namespace OmniCore.Services
 {
     public class CoreIntegrationService : CoreServiceBase, ICoreIntegrationService
     {
-        private readonly IIntegrationComponent[] IntegrationComponents;
-        private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreConfigurationService ConfigurationService;
+        private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly IIntegrationComponent[] IntegrationComponents;
         private readonly ICoreLoggingFunctions Logging;
 
         public CoreIntegrationService(ICoreContainer<IServerResolvable> container,
@@ -30,10 +27,7 @@ namespace OmniCore.Services
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
             Logging.Debug("Starting integration service");
-            foreach (var ic in IntegrationComponents)
-            {
-                await ic.InitializeComponent(this);
-            }
+            foreach (var ic in IntegrationComponents) await ic.InitializeComponent(this);
             Logging.Debug("Integration service started");
         }
 

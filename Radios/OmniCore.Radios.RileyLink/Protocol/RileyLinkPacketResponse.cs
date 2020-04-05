@@ -1,5 +1,4 @@
 ﻿using System;
-using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
@@ -7,9 +6,10 @@ namespace OmniCore.Radios.RileyLink.Protocol
     {
         public int Rssi { get; private set; }
         public byte[] PacketData { get; private set; }
+
         protected override void ParseInternal(byte[] responseData)
         {
-            Rssi = (((int) responseData[0]) - 255) >> 2;
+            Rssi = (responseData[0] - 255) >> 2;
             PacketData = responseData[1..];
         }
 

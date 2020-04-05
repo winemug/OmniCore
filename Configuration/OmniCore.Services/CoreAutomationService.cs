@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -14,6 +11,7 @@ namespace OmniCore.Services
         private readonly IAutomationComponent[] AutomationComponents;
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreLoggingFunctions Logging;
+
         public CoreAutomationService(
             ICoreContainer<IServerResolvable> container,
             IAutomationComponent[] automationComponents,
@@ -32,7 +30,7 @@ namespace OmniCore.Services
             Logging.Debug("Automation service started");
         }
 
-        protected override Task OnStop(CancellationToken cancellationToken) 
+        protected override Task OnStop(CancellationToken cancellationToken)
         {
             foreach (var ac in AutomationComponents)
                 ac.Dispose();

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Entities
+﻿namespace OmniCore.Model.Entities
 {
     public class PodRadioEntity : Entity
     {

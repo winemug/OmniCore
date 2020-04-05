@@ -17,38 +17,25 @@ namespace OmniCore.Client.Platform
     public class BlePeripheralConnection : IBlePeripheralConnection
     {
         private readonly ICoreLoggingFunctions Logging;
-
-        public IBlePeripheral Peripheral { get; set; }
-        private IDisposable CommunicationDisposable;
-        private bool StayConnected;
-        private IDevice Device;
         private Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> CharacteristicsDictionary;
+        private IDisposable CommunicationDisposable;
+        private IDevice Device;
+        private bool StayConnected;
         private List<IDisposable> Subscriptions;
-        
+
         public BlePeripheralConnection(
             ICoreLoggingFunctions logging)
         {
             Logging = logging;
         }
 
-        public void Initialize(
-            IDevice device,
-            Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> characteristicsDictionary,
-            IDisposable communicationDisposable,
-            bool stayConnected)
-        {
-            Device = device;
-            CharacteristicsDictionary = characteristicsDictionary;
-            CommunicationDisposable = communicationDisposable;
-            StayConnected = stayConnected;
-            Subscriptions = new List<IDisposable>();
-        }
-        
+        public IBlePeripheral Peripheral { get; set; }
+
         public void Dispose()
         {
-            foreach(var subscription in Subscriptions)
+            foreach (var subscription in Subscriptions)
                 subscription.Dispose();
-            
+
             Subscriptions.Clear();
 
             if (!StayConnected)
@@ -69,18 +56,19 @@ namespace OmniCore.Client.Platform
 
             CommunicationDisposable?.Dispose();
             CommunicationDisposable = null;
-
         }
 
-        public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid, CancellationToken cancellationToken)
+        public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid,
+            CancellationToken cancellationToken)
         {
             Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
-            var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken); 
+            var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken);
             Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
             return result.Data;
         }
 
-        public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data, CancellationToken cancellationToken)
+        public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data,
+            CancellationToken cancellationToken)
         {
             Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
             await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
@@ -120,12 +108,26 @@ namespace OmniCore.Client.Platform
                 });
             });
         }
-        
+
+        public void Initialize(
+            IDevice device,
+            Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> characteristicsDictionary,
+            IDisposable communicationDisposable,
+            bool stayConnected)
+        {
+            Device = device;
+            CharacteristicsDictionary = characteristicsDictionary;
+            CommunicationDisposable = communicationDisposable;
+            StayConnected = stayConnected;
+            Subscriptions = new List<IDisposable>();
+        }
+
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)
         {
             var characteristic = CharacteristicsDictionary[(serviceUuid, characteristicUuid)];
             if (characteristic == null)
-                throw new OmniCorePeripheralException(FailureType.PeripheralGeneralError, "Characteristic not found on peripheral");
+                throw new OmniCorePeripheralException(FailureType.PeripheralGeneralError,
+                    "Characteristic not found on peripheral");
             return characteristic;
         }
     }

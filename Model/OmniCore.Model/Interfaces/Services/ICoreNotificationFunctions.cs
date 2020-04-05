@@ -8,6 +8,7 @@ namespace OmniCore.Model.Interfaces.Services
     {
         ICoreNotification CreateNotification(NotificationCategory category, string title, string message,
             TimeSpan? timeout = null, bool autoDismiss = true);
+
         void ClearNotifications();
         IObservable<ICoreNotification> WhenNotificationAdded();
         IObservable<ICoreNotification> WhenNotificationDismissed();

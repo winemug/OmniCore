@@ -4,11 +4,11 @@
     {
         Lowest,
         VeryLow,
-		Low,
-		BelowNormal,
-		Normal,
-		AboveNormal,
-		High,
+        Low,
+        BelowNormal,
+        Normal,
+        AboveNormal,
+        High,
         VeryHigh,
         Highest
     }

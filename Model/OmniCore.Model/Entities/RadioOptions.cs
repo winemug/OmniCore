@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using OmniCore.Model.Enumerations;
 
@@ -10,7 +8,7 @@ namespace OmniCore.Model.Entities
     {
         public bool AutoConnect { get; set; } = false;
         public bool KeepConnected { get; set; } = true;
-        
+
         public int? CommandExecutionRssiThreshold { get; set; } = null;
 
         public TimeSpan RadioResponseTimeout { get; set; } = TimeSpan.FromSeconds(20);
@@ -20,7 +18,7 @@ namespace OmniCore.Model.Entities
         public TimeSpan RadioConnectTimeout { get; set; } = TimeSpan.FromSeconds(30);
         public TimeSpan RadioCharacteristicsDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
         public TimeSpan RadioConnectionOverallTimeout { get; set; } = TimeSpan.FromSeconds(90);
-        
+
 
         public TimeSpan RadioDisconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
@@ -30,7 +28,7 @@ namespace OmniCore.Model.Entities
 
         // shifts in complements of 326.211 Hz
         public int RxFrequencyShift { get; set; } = 0;
-        
+
         public int TxFrequencyShift { get; set; } = 0;
 
         public TransmissionPower Amplification { get; set; } = TransmissionPower.Normal;

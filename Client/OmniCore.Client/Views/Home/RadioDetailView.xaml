@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
@@ -10,32 +11,32 @@
         <ScrollView x:DataType="{x:Type home:RadioDetailViewModel}">
             <StackLayout Orientation="Vertical">
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Name: "/>
-                    <Label Text="{Binding Radio.Name}"/>
+                    <Label Text="Name: " />
+                    <Label Text="{Binding Radio.Name}" />
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Address: "/>
-                    <Label Text="{Binding Radio.MacAddress}"/>
+                    <Label Text="Address: " />
+                    <Label Text="{Binding Radio.MacAddress}" />
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Discovery State: "/>
-                    <Label Text="{Binding Radio.DiscoveryState}"/>
+                    <Label Text="Discovery State: " />
+                    <Label Text="{Binding Radio.DiscoveryState}" />
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Connection State: "/>
-                    <Label Text="{Binding Radio.ConnectionState}"/>
+                    <Label Text="Connection State: " />
+                    <Label Text="{Binding Radio.ConnectionState}" />
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Rssi: "/>
-                    <Label Text="{Binding Radio.Rssi}"/>
+                    <Label Text="Rssi: " />
+                    <Label Text="{Binding Radio.Rssi}" />
                 </StackLayout>
                 <StackLayout Orientation="Horizontal">
-                    <Label Text="Radio Activity: "/>
-                    <Label Text="{Binding Radio.Activity}"/>
+                    <Label Text="Radio Activity: " />
+                    <Label Text="{Binding Radio.Activity}" />
                 </StackLayout>
-                <Button Text="Test 1" Command="{Binding Test1Command}"/>
+                <Button Text="Test 1" Command="{Binding Test1Command}" />
                 <Label Text=""
-                       VerticalOptions="CenterAndExpand" 
+                       VerticalOptions="CenterAndExpand"
                        HorizontalOptions="CenterAndExpand" />
             </StackLayout>
         </ScrollView>

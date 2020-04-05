@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using OmniCore.Model.Entities;
+﻿using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade

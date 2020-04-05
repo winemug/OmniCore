@@ -1,5 +1,4 @@
 ﻿using OmniCore.Model.Utilities;
-using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {

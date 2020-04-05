@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
-using IUser = OmniCore.Model.Interfaces.Services.Facade.IUser;
 
 namespace OmniCore.Model.Interfaces.Services
 {

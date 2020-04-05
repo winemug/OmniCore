@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Utilities
 {
     public class TaskProgress : ITaskProgress
     {
+        public TaskProgress()
+        {
+            Children = new ObservableCollection<ITaskProgress>();
+        }
+
         public string Name { get; set; }
         public string Description { get; set; }
         public double? PercentComplete { get; set; }
@@ -15,10 +17,5 @@ namespace OmniCore.Model.Utilities
         public bool InProgress { get; set; }
 
         public ObservableCollection<ITaskProgress> Children { get; set; }
-
-        public TaskProgress()
-        {
-            Children = new ObservableCollection<ITaskProgress>();
-        }
     }
 }

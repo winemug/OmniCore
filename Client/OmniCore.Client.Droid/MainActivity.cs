@@ -2,33 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using Android;
-using Android.App;
-using Android.Content.PM;
-using Android.Runtime;
-using Android.OS;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
-using OmniCore.Client.Droid;
-using Plugin.BluetoothLE;
-using Permission = Android.Content.PM.Permission;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Android;
+using Android.App;
 using Android.Content;
+using Android.Content.PM;
+using Android.OS;
+using Android.Runtime;
+using Android.Support.V4.App;
+using Android.Support.V4.Content;
+using Microsoft.AppCenter.Push;
 using OmniCore.Client.Droid.Services;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Utilities.Extensions;
-using OmniCore.Services;
-using Application = Xamarin.Forms.Application;
+using Rg.Plugins.Popup;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 using Debug = System.Diagnostics.Debug;
-using Android.Gms.Common;
-using Firebase.Messaging;
-using Firebase.Iid;
-using Android.Util;
-using Microsoft.AppCenter.Push;
 
 namespace OmniCore.Client.Droid
 {
@@ -36,20 +30,22 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, ICoreClientContext
+    public class MainActivity : FormsAppCompatActivity, ICoreClientContext
     {
         private ICoreContainer<IClientResolvable> ClientContainer;
+        private bool ConnectRequested;
+        private bool DisconnectRequested;
 
-        private IServiceConnection ServiceConnection => (IServiceConnection) ClientContainer.Get<ICoreClientConnection>();
-        private bool ConnectRequested = false;
-        private bool DisconnectRequested = false;
+        private ISubject<bool> PermissionResultSubject;
 
 #if DEBUG
-        private IDisposable ScreenLockDisposable = null;
+        private IDisposable ScreenLockDisposable;
 #endif
 
         private GenericBroadcastReceiver XdripReceiver;
+
+        private IServiceConnection ServiceConnection =>
+            (IServiceConnection) ClientContainer.Get<ICoreClientConnection>();
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -60,58 +56,46 @@ namespace OmniCore.Client.Droid
             TaskScheduler.UnobservedTaskException += (sender, args) => OnUnhandledException(args.Exception);
             AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) => OnUnhandledException(args.Exception);
 
-            Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental",
+            Forms.SetFlags("CollectionView_Experimental",
                 "IndicatorView_Experimental", "CarouselView_Experimental");
-            
+
             base.OnCreate(savedInstanceState);
 
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            Forms.Init(this, savedInstanceState);
 
             //TODO: move to service
-            if (!CheckPermissions().Wait())
-            {
-                this.FinishAffinity();
-            }
+            if (!CheckPermissions().Wait()) FinishAffinity();
 
             XdripReceiver = new GenericBroadcastReceiver();
             RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
-            
 
-            Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
+
+            Popup.Init(this, savedInstanceState);
 
             ClientContainer = Initializer.AndroidClientContainer(this)
                 .WithXamarinForms();
 
             LoadXamarinApplication();
-
         }
 
         public override void OnBackPressed()
         {
-            if (Rg.Plugins.Popup.Popup.SendBackPressed(base.OnBackPressed))
+            if (Popup.SendBackPressed(base.OnBackPressed))
             {
                 // Do something if there are some pages in the `PopupStack`
-            }
-            else
-            {
-                // Do something if there are not any pages in the `PopupStack`
             }
         }
 
         private void OnUnhandledException(object exceptionObject)
         {
             if (exceptionObject != null && exceptionObject is Exception e)
-            {
                 Debug.WriteLine(e.AsDebugFriendly());
-            }
             else
-            {
                 Debug.WriteLine($"****** Unknown exception object {exceptionObject}");
-            }
         }
 
-        private ISubject<bool> PermissionResultSubject;
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions,
+            [GeneratedEnum] Permission[] grantResults)
         {
             PermissionResultSubject.OnNext(grantResults.All(r => r == Permission.Granted));
             PermissionResultSubject.OnCompleted();
@@ -120,20 +104,18 @@ namespace OmniCore.Client.Droid
 
         private IObservable<bool> CheckPermissions()
         {
-            var permissions = new List<string>()
+            var permissions = new List<string>
             {
                 Manifest.Permission.AccessCoarseLocation,
                 Manifest.Permission.BluetoothPrivileged,
                 Manifest.Permission.ReadExternalStorage,
-                Manifest.Permission.WriteExternalStorage,
+                Manifest.Permission.WriteExternalStorage
             };
 
             foreach (var permission in permissions.ToArray())
-            {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.AccessCoarseLocation) ==
                     (int) Permission.Granted)
                     permissions.Remove(permission);
-            }
 
             if (permissions.Count > 0)
             {
@@ -141,6 +123,7 @@ namespace OmniCore.Client.Droid
                 ActivityCompat.RequestPermissions(this, permissions.ToArray(), 34);
                 return PermissionResultSubject.AsObservable();
             }
+
             return Observable.Return(true);
         }
 
@@ -172,13 +155,13 @@ namespace OmniCore.Client.Droid
         {
             LoadApplication(ClientContainer.Get<XamarinApp>());
         }
-        
+
         private void ConnectToAndroidService()
         {
             if (ConnectRequested)
                 return;
-            
-            var intent = new Intent(this, typeof(Services.AndroidService));
+
+            var intent = new Intent(this, typeof(AndroidService));
             if (!BindService(intent, ServiceConnection, Bind.AutoCreate))
                 throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
             ConnectRequested = true;
@@ -189,17 +172,16 @@ namespace OmniCore.Client.Droid
         {
             if (DisconnectRequested)
                 return;
-            
+
             base.UnbindService(ServiceConnection);
             ConnectRequested = false;
             DisconnectRequested = true;
         }
 
-        protected override void OnNewIntent(Android.Content.Intent intent)
+        protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
             Push.CheckLaunchedFromNotification(this, intent);
         }
-
     }
 }

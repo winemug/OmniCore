@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive.Subjects;
-using System.Text;
 
 namespace OmniCore.Model.Utilities
 {
     public class ParticularBehaviorSubject<T> : ISubject<T>
     {
-        private BehaviorSubject<T> EncapsulatedBehaviorSubject;
-
         private T CurrentValue;
+        private readonly BehaviorSubject<T> EncapsulatedBehaviorSubject;
 
         public ParticularBehaviorSubject(T value)
         {
             CurrentValue = value;
             EncapsulatedBehaviorSubject = new BehaviorSubject<T>(value);
         }
+
         public void OnCompleted()
         {
             EncapsulatedBehaviorSubject.OnCompleted();

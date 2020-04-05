@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
+
+<Shell xmlns="http://xamarin.com/schemas/2014/forms"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:d="http://xamarin.com/schemas/2014/forms/design"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,9 +20,9 @@
                 <Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
                 <Setter Property="Shell.UnselectedColor" Value="#95FFFFFF" />
                 <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource NavigationPrimary}" />
-                <Setter Property="Shell.TabBarForegroundColor" Value="White"/>
-                <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF"/>
-                <Setter Property="Shell.TabBarTitleColor" Value="White"/>
+                <Setter Property="Shell.TabBarForegroundColor" Value="White" />
+                <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF" />
+                <Setter Property="Shell.TabBarTitleColor" Value="White" />
             </Style>
             <Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
         </ResourceDictionary>
@@ -30,33 +31,32 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
-        <ShellContent ContentTemplate="{Binding Test1View}" Title="Test1" Route="Test1"/>
+        <ShellContent ContentTemplate="{Binding Test1View}" Title="Test1" Route="Test1" />
         <Tab Title="Pods">
-            <ShellContent ContentTemplate="{Binding ActivePodsView}" Title="Active" Route="ActivePods"/>
-            <ShellContent ContentTemplate="{Binding WaitingPodsView}" Title="Waiting" Route="WaitingPods"/>
-            <ShellContent ContentTemplate="{Binding ArchivedPodsView}" Title="Archived" Route="ArchivedPods"/>
+            <ShellContent ContentTemplate="{Binding ActivePodsView}" Title="Active" Route="ActivePods" />
+            <ShellContent ContentTemplate="{Binding WaitingPodsView}" Title="Waiting" Route="WaitingPods" />
+            <ShellContent ContentTemplate="{Binding ArchivedPodsView}" Title="Archived" Route="ArchivedPods" />
         </Tab>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activities" Route="Activities"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activities" Route="Activities" />
     </FlyoutItem>
 
     <FlyoutItem Title="Data" FlyoutDisplayOptions="AsSingleItem">
         <Tab Title="Statistics">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radio"/>
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods" />
+            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radio" />
         </Tab>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Archive"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup &amp; Restore"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Archive" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup &amp; Restore" />
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Automation"/>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Integration"/>
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Automation" />
+        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Integration" />
     </FlyoutItem>
 
 </Shell>
-

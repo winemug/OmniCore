@@ -1,17 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
-using OmniCore.Client.Platform;
 using OmniCore.Client.Views.Home;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Client;
@@ -23,22 +13,13 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public abstract class BaseViewModel : IViewModel
     {
-#pragma warning disable CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
-        public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
-
-        protected ICoreApi Api { get; set; }
-        protected ICoreClient Client { get; }
+        private IDisposable ApiStatusSubscription;
 
         private IDisposable ClientConnectionSubscription;
-        private IDisposable ApiStatusSubscription;
 
         private ServicePopupView ServicePopup;
 
-        public IView View { get; protected set; }
-        public object Parameter { get; protected set; }
-
-        private bool ViaShell = false;
+        private bool ViaShell;
 
         public BaseViewModel(ICoreClient client)
         {
@@ -46,21 +27,20 @@ namespace OmniCore.Client.ViewModels.Base
             ServicePopup = null;
         }
 
-        protected virtual Task OnPageAppearing()
-        {
-            return Task.CompletedTask;
-        }
+        protected ICoreApi Api { get; set; }
+        protected ICoreClient Client { get; }
 
-        protected virtual Task OnPageDisappearing()
-        {
-            return Task.CompletedTask;
-        }
+        public IView View { get; protected set; }
+#pragma warning disable CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067 // The event 'BaseViewModel.PropertyChanged' is never used
+        public object Parameter { get; protected set; }
 
-        public IList<IDisposable> Disposables { get; } = new List<IDisposable>(); 
+        public IList<IDisposable> Disposables { get; } = new List<IDisposable>();
 
         public void DisposeDisposables()
         {
-            foreach(var disposable in Disposables)
+            foreach (var disposable in Disposables)
                 disposable.Dispose();
 
             Disposables.Clear();
@@ -76,6 +56,16 @@ namespace OmniCore.Client.ViewModels.Base
             page.Appearing += PageAppearing;
             page.Disappearing += PageDisappearing;
             page.BindingContext = this;
+        }
+
+        protected virtual Task OnPageAppearing()
+        {
+            return Task.CompletedTask;
+        }
+
+        protected virtual Task OnPageDisappearing()
+        {
+            return Task.CompletedTask;
         }
 
         private void PageAppearing(object sender, EventArgs args)
@@ -134,7 +124,7 @@ namespace OmniCore.Client.ViewModels.Base
             if (ServicePopup == null)
             {
                 ServicePopup = Client.ViewPresenter.GetView<ServicePopupView>(false);
-                await PopupNavigation.Instance.PushAsync(ServicePopup, true);
+                await PopupNavigation.Instance.PushAsync(ServicePopup);
             }
         }
 
@@ -142,9 +132,9 @@ namespace OmniCore.Client.ViewModels.Base
         {
             if (ServicePopup != null)
             {
-                await PopupNavigation.Instance.RemovePageAsync(ServicePopup, true);
+                await PopupNavigation.Instance.RemovePageAsync(ServicePopup);
                 ServicePopup = null;
-            }                    
+            }
         }
     }
 }

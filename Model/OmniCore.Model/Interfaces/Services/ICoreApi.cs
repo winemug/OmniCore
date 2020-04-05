@@ -9,15 +9,15 @@ namespace OmniCore.Model.Interfaces.Services
     public interface ICoreApi : IServerResolvable, IClientResolvable
     {
         IObservable<CoreApiStatus> ApiStatus { get; }
-        Task StartServices(CancellationToken cancellationToken);
-        Task StopServices(CancellationToken cancellationToken);
         ICoreLoggingFunctions LoggingFunctions { get; }
         ICoreApplicationFunctions ApplicationFunctions { get; }
         ICoreNotificationFunctions NotificationFunctions { get; }
-        ICoreRepositoryService CoreRepositoryService { get; }
-        ICoreConfigurationService CoreConfigurationService { get; }
-        ICorePodService CorePodService { get; }
+        ICoreRepositoryService RepositoryService { get; }
+        ICoreConfigurationService ConfigurationService { get; }
+        ICorePodService PodService { get; }
         ICoreIntegrationService IntegrationService { get; }
         ICoreAutomationService AutomationService { get; }
+        Task StartServices(CancellationToken cancellationToken);
+        Task StopServices(CancellationToken cancellationToken);
     }
 }

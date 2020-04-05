@@ -1,32 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-               xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
-               mc:Ignorable="d"
+             xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
+             mc:Ignorable="d"
              x:Class="OmniCore.Client.Views.Home.RadiosView">
     <ContentPage.Content>
-        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None" >
+        <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="{x:Type models:RadioModel}">
                     <Frame Padding="2">
                         <Grid BackgroundColor="#eeeeee">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="55"/>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="55" />
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="30" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
-                            <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="0"/>
-                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1"/>
-                            <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}" CommandParameter="{Binding }"/>
-                            <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;" Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}" CommandParameter="{Binding }"/>
+                            <Label Text="{Binding Name, TargetNullValue='???'}" Grid.Row="0" Grid.Column="0"
+                                   Grid.ColumnSpan="3" />
+                            <Label Text="{Binding MacAddress}" Grid.Row="1" Grid.Column="0" />
+                            <Label Text="{Binding Rssi}" Grid.Row="1" Grid.Column="1" />
+                            <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" FontSize="Small" Text="?"
+                                    Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.BlinkCommand}"
+                                    CommandParameter="{Binding }" />
+                            <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" FontSize="Small" Text="&gt;"
+                                    Command="{Binding Source={x:Reference RadioCollectionView}, Path=BindingContext.SelectCommand}"
+                                    CommandParameter="{Binding }" />
                         </Grid>
                     </Frame>
                 </DataTemplate>
@@ -35,8 +41,9 @@
     </ContentPage.Content>
     <Shell.TitleView>
         <ContentView>
-            <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
-                         Command="{Binding AddCommand}"/>
+            <ImageButton Source="ic_action_add_circle_outline.png" BackgroundColor="Transparent"
+                         HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                         Command="{Binding AddCommand}" />
         </ContentView>
     </Shell.TitleView>
 </ContentPage>

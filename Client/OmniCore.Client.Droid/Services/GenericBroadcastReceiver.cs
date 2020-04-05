@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Android.App;
+﻿using System.Diagnostics;
 using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using Java.Time.Temporal;
-using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Client.Droid.Services
 {
@@ -38,11 +26,11 @@ namespace OmniCore.Client.Droid.Services
             var sensorBattery = intent.GetIntExtra(EXTRA_SENSOR_BATTERY, int.MinValue);
 
             var dataSource = intent.GetStringExtra(XDRIP_DATA_SOURCE_DESCRIPTION);
-            var versionInfo = intent.GetStringExtra(XDRIP_VERSION_INFO); 
+            var versionInfo = intent.GetStringExtra(XDRIP_VERSION_INFO);
             var calibrationInfo = intent.GetStringExtra(XDRIP_CALIBRATION_INFO);
             var noiseBlockLevel = intent.GetIntExtra(EXTRA_NOISE_BLOCK_LEVEL, int.MinValue);
 
-            System.Diagnostics.Debug.WriteLine(
+            Debug.WriteLine(
                 $"Xdrip broadcast: {intent.Action} - {timeStamp}, {bg}, {noise}, {bgSlope}, {bgSlopeName}, {sensorBattery}, {dataSource}, {versionInfo}, {calibrationInfo}, {noiseBlockLevel}");
         }
     }

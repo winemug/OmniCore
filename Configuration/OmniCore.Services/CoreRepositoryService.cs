@@ -10,10 +10,10 @@ namespace OmniCore.Services
 {
     public class CoreRepositoryService : CoreServiceBase, ICoreRepositoryService
     {
-        private readonly ICoreContainer<IServerResolvable> ServerContainer;
-        private readonly ICoreApplicationFunctions CoreApplicationFunctions;
         private readonly AsyncReaderWriterLock ContextLock;
+        private readonly ICoreApplicationFunctions CoreApplicationFunctions;
         private readonly ICoreLoggingFunctions Logging;
+        private readonly ICoreContainer<IServerResolvable> ServerContainer;
 
 
         public CoreRepositoryService(ICoreContainer<IServerResolvable> serverContainer,
@@ -26,33 +26,6 @@ namespace OmniCore.Services
             ContextLock = new AsyncReaderWriterLock();
         }
 
-        protected override async Task OnStart(CancellationToken cancellationToken)
-        {
-            Logging.Debug("Starting repository service");
-            using var context = await GetContextReadWrite(cancellationToken);
-            #if DEBUG
-            await context.InitializeDatabase(cancellationToken, true);
-            #else
-            await context.InitializeDatabase(cancellationToken, false);
-            #endif
-            Logging.Debug("Repository service started");
-        }
-
-        protected override Task OnStop(CancellationToken cancellationToken)
-        {
-            //throw new NotImplementedException();
-            return Task.CompletedTask;
-        }
-
-        protected override Task OnPause(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Task OnResume(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
         public Task Import(string importPath, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -82,6 +55,34 @@ namespace OmniCore.Services
             var context = ServerContainer.Get<IRepositoryContextReadWrite>();
             context.SetLock(writerLock, true);
             return context;
+        }
+
+        protected override async Task OnStart(CancellationToken cancellationToken)
+        {
+            Logging.Debug("Starting repository service");
+            using var context = await GetContextReadWrite(cancellationToken);
+#if DEBUG
+            await context.InitializeDatabase(cancellationToken, true);
+#else
+            await context.InitializeDatabase(cancellationToken, false);
+#endif
+            Logging.Debug("Repository service started");
+        }
+
+        protected override Task OnStop(CancellationToken cancellationToken)
+        {
+            //throw new NotImplementedException();
+            return Task.CompletedTask;
+        }
+
+        protected override Task OnPause(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task OnResume(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

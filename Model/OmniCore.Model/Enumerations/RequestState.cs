@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Enumerations
+﻿namespace OmniCore.Model.Enumerations
 {
     public enum RequestState
     {
@@ -19,7 +15,7 @@ namespace OmniCore.Model.Enumerations
         Executed,
         Canceled,
         Failed,
-        
+
         Aborted,
         AbortedWhileExecuting
     }

@@ -14,7 +14,7 @@ namespace OmniCore.Model.Interfaces.Services
 
         Task<IMedication> GetDefaultMedication();
         Task SetDefaultMedication(IMedication medication);
-        
+
         Task<IUser> GetDefaultUser();
         Task SetDefaultUser(IUser user);
     }

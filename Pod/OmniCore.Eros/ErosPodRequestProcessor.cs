@@ -1,14 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using OmniCore.Model.Enumerations;
-using OmniCore.Model.Exceptions;
-
-namespace OmniCore.Eros
+﻿namespace OmniCore.Eros
 {
     public class ErosPodRequestProcessor
     {

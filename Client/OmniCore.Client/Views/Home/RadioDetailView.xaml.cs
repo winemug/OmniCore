@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Home;
-using OmniCore.Model.Interfaces.Client;
-using Xamarin.Forms;
+﻿using OmniCore.Model.Interfaces.Client;
 using Xamarin.Forms.Xaml;
 
 namespace OmniCore.Client.Views.Home

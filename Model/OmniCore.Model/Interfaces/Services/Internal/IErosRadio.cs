@@ -9,8 +9,9 @@ namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IErosRadio : IRadio, IServerResolvable, IDisposable
     {
-        void StartMonitoring();
         RadioOptions Options { get; }
+        void StartMonitoring();
+
         Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken, RadioOptions options);
         // Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
     }
