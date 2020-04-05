@@ -51,11 +51,11 @@ namespace OmniCore.Services
 
         public override async Task OnBeforeStopRequest()
         {
-            foreach (var pod in await ActivePods(CancellationToken.None))
-            {
-                var ar = pod.ActiveRequest;
-                if (ar != null) ar.Cancel();
-            }
+            // foreach (var pod in await ActivePods(CancellationToken.None))
+            // {
+            //     var ar = pod.ActiveRequest;
+            //     if (ar != null) ar.Cancel();
+            // }
         }
 
         public async Task<IList<IPod>> ActivePods(CancellationToken cancellationToken)
