@@ -3,7 +3,7 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkStatisticsResponse : RileyLinkResponse
+    public class RileyLinkStatisticsResponse : RileyLinkDefaultResponse
     {
         public uint UptimeMilliseconds { get; private set; }
         public ushort RxOverflowCount { get; private set; }
@@ -13,7 +13,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
         public ushort CrcFailureCount { get; private set; }
         public ushort SpiSyncFailureCount { get; private set; }
 
-        protected override void ParseResponse(byte[] responseData)
+        protected override void ParseInternal(byte[] responseData)
         {
             if (responseData.Length == 20)
             {

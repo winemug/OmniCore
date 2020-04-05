@@ -61,10 +61,9 @@ namespace OmniCore.Client.Platform
             AdapterManagementLock = new AsyncLock();
             PeripheralCache = new ConcurrentDictionary<Guid, BlePeripheral>();
             DeviceCache = new ConcurrentDictionary<Guid, IDevice>();
-            
-            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread =
-                CrossBleAdapter.AndroidConfiguration.IsMainThreadSuggested;
-            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = false;
+
+            CrossBleAdapter.AndroidConfiguration.ShouldInvokeOnMainThread = false;
+            CrossBleAdapter.AndroidConfiguration.UseInternalSyncQueue = true;
             CrossBleAdapter.AndroidConfiguration.UseNewScanner = true;
             CrossBleAdapter.AndroidConfiguration.RefreshServices = false;
 

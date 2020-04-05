@@ -38,5 +38,9 @@ namespace OmniCore.Model.Enumerations
         ServiceConnectionFailed,
         Internal,
         ConnectionFailed,
+        RadioResponseInterrupted,
+        RadioResponseNoData,
+        RadioResponseParameterError,
+        RadioResponseUnknownCommand
     }
 }

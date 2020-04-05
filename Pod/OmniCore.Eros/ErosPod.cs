@@ -44,7 +44,7 @@ namespace OmniCore.Eros
         {
             throw new System.NotImplementedException();
         }
-        public async Task<IPodRequest> Activate(IRadio radio, CancellationToken cancellationToken)
+        public Task<IPodRequest> Activate(IRadio radio, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +143,7 @@ namespace OmniCore.Eros
                 Pod = Entity
             };
 
-            using var context = await RepositoryService.GetWriterContext(CancellationToken.None);
+            using var context = await RepositoryService.GetContextReadWrite(CancellationToken.None);
             await context.PodRequests.AddAsync(request.Entity);
             await context.Save(CancellationToken.None);
             return request;
@@ -151,7 +151,7 @@ namespace OmniCore.Eros
 
         private async Task StartStateMonitoring()
         {
-            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
+            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
             var responses = context.PodRequests
                 .Where(pr => pr.Pod.Id == Entity.Id)
                 .OrderByDescending(p => p.Created)

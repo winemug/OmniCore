@@ -14,7 +14,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Repository
 {
-    public class RepositoryContext : DbContext, IRepositoryContextWriteable
+    public class RepositoryContext : DbContext, IRepositoryContextReadWrite
     {
         public DbSet<MedicationEntity> Medications { get; set; }
         public DbSet<UserEntity> Users { get; set; }
@@ -27,16 +27,8 @@ namespace OmniCore.Repository
 
         public DbSet<PodResponseEntity> PodResponses { get; set; }
 
-        public Task Save(CancellationToken cancellationToken)
-        {
-            return SaveChangesAsync(cancellationToken);
-        }
-
-        public IRepositoryContextWriteable WithExisting(Entity entity)
-        {
-            Attach(entity).State = EntityState.Unchanged;
-            return this;
-        }
+        private readonly string ConnectionString;
+        private IDisposable ReaderWriterLock;
 
         public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
         {
@@ -48,7 +40,6 @@ namespace OmniCore.Repository
             await SeedData();            
         }
 
-        public readonly string ConnectionString;
 
         // for migrations tool
         public RepositoryContext()
@@ -62,7 +53,7 @@ namespace OmniCore.Repository
             ConnectionString = $"Data Source={path}";
         }
 
-        public async Task SeedData()
+        private async Task SeedData()
         {
             if (!Medications.Any())
             {
@@ -84,50 +75,10 @@ namespace OmniCore.Repository
                 });
             }
             await SaveChangesAsync();
-            
-            #if DEBUG
-
-            // if (!Radios.Any())
-            // {
-            //     Radios.Add(new RadioEntity
-            //     {
-            //         DeviceUuid = Guid.Parse("00000000-0000-0000-0000-886b0ff93ba7"),
-            //         UserDescription = "greenie",
-            //         Options = new RadioOptions
-            //         {
-            //             RssiUpdateInterval = TimeSpan.FromSeconds(20),
-            //             RadioDiscoveryCooldown =  TimeSpan.FromSeconds(5),
-            //             RadioDiscoveryTimeout = TimeSpan.FromSeconds(30)
-            //         }
-            //     });
-            //     
-            //     Radios.Add(new RadioEntity
-            //     {
-            //         DeviceUuid = Guid.Parse("00000000-0000-0000-0000-000780393D00"),
-            //         UserDescription = "eddie"
-            //     });
-            //     
-            //     await SaveChangesAsync();
-            // }
-            //
-            // if (!Pods.Any())
-            // {
-            //     Pods.Add(new PodEntity
-            //     {
-            //         Lot = 1,
-            //         Serial = 1,
-            //         RadioAddress = 0x11121212,
-            //         Radio = Radios.First(),
-            //         User = Users.First()
-            //     });
-            //     await SaveChangesAsync();
-            // }
-            
-            #endif
         }
 
-        public static readonly ILoggerFactory DebugLoggerFactory
-            = LoggerFactory.Create(builder => { builder.AddDebug() ; });
+        //public static readonly ILoggerFactory DebugLoggerFactory
+        //    = LoggerFactory.Create(builder => { builder.AddDebug() ; });
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -151,15 +102,22 @@ namespace OmniCore.Repository
             ReaderWriterLock = null;
         }
 
-        private IDisposable ReaderWriterLock;
-        public void SetLock(IDisposable readerWriterLock, bool readOnly)
+        public IRepositoryContextReadWrite WithExisting(Entity entity)
         {
-            ReaderWriterLock = readerWriterLock;
-            if (readOnly)
-            {
-                ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-            }
+            Attach(entity).State = EntityState.Unchanged;
+            return this;
+        }
+        
+        public Task Save(CancellationToken cancellationToken)
+        {
+            return SaveChangesAsync(cancellationToken);
         }
 
+        public void SetLock(IDisposable readerWriterLock, bool tracking)
+        {
+            ReaderWriterLock = readerWriterLock;
+            ChangeTracker.QueryTrackingBehavior = tracking ?
+                QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking;
+        }
     }
 }

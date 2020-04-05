@@ -4,10 +4,10 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkStateResponse : RileyLinkResponse
+    public class RileyLinkStateResponse : RileyLinkDefaultResponse
     {
         public bool StateOk { get; private set; }
-        protected override void ParseResponse(byte[] responseData)
+        protected override void ParseInternal(byte[] responseData)
         {
             StateOk = (responseData.Length == 2) &&
                       (responseData[0] == 'O') &&

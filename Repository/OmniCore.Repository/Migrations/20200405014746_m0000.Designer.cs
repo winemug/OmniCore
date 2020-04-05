@@ -9,8 +9,8 @@ using OmniCore.Repository;
 namespace OmniCore.Repository.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20200401105740_m000")]
-    partial class m000
+    [Migration("20200405014746_m0000")]
+    partial class m0000
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -32,7 +32,7 @@ namespace OmniCore.Eros
         }
         public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
         {
-            using var context = await RepositoryService.GetReaderContext(cancellationToken);
+            using var context = await RepositoryService.GetContextReadOnly(cancellationToken);
             var pods = new List<IErosPod>();
             context.Pods.Where(p => !p.IsDeleted)
                 .Include(p => p.Medication)
@@ -45,7 +45,7 @@ namespace OmniCore.Eros
 
         public async Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
-            using var context = await RepositoryService.GetWriterContext(cancellationToken);
+            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
             var entity = new PodEntity()
             {
                 Medication = medication.Entity,

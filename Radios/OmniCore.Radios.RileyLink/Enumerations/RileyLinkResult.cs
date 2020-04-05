@@ -1,6 +1,6 @@
 ﻿namespace OmniCore.Radios.RileyLink.Enumerations
 {
-    public enum RileyLinkResponseType
+    public enum RileyLinkResult
     {
         Timeout = 0xaa,
         Interrupted = 0xbb,

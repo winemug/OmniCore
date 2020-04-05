@@ -10,7 +10,7 @@ namespace OmniCore.Model.Interfaces.Services
         Task Restore(string backupPath, CancellationToken cancellationToken);
         Task Backup(string backupPath, CancellationToken cancellationToken);
 
-        Task<IRepositoryContext> GetReaderContext(CancellationToken cancellationToken);
-        Task<IRepositoryContextWriteable> GetWriterContext(CancellationToken cancellationToken);
+        Task<IRepositoryContextReadOnly> GetContextReadOnly(CancellationToken cancellationToken);
+        Task<IRepositoryContextReadWrite> GetContextReadWrite(CancellationToken cancellationToken);
     }
 }

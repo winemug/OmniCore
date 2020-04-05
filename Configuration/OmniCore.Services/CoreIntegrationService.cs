@@ -14,10 +14,14 @@ namespace OmniCore.Services
         private readonly IIntegrationComponent[] IntegrationComponents;
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreConfigurationService ConfigurationService;
+        private readonly ICoreLoggingFunctions Logging;
+
         public CoreIntegrationService(ICoreContainer<IServerResolvable> container,
             ICoreConfigurationService configurationService,
-            IIntegrationComponent[] integrationComponents)
+            IIntegrationComponent[] integrationComponents,
+            ICoreLoggingFunctions logging)
         {
+            Logging = logging;
             Container = container;
             ConfigurationService = configurationService;
             IntegrationComponents = integrationComponents;
@@ -25,10 +29,12 @@ namespace OmniCore.Services
 
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
+            Logging.Debug("Starting integration service");
             foreach (var ic in IntegrationComponents)
             {
                 await ic.InitializeComponent(this);
             }
+            Logging.Debug("Integration service started");
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)

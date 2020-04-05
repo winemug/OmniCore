@@ -7,7 +7,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
 {
     public interface IRileyLinkResponse
     {
-        RileyLinkResponseType ResponseType { get; }
+        RileyLinkResult Result { get; }
         void Parse(byte[] responseData);
+        bool SkipParse { get; set; }
+        IObservable<IRileyLinkResponse> Observable { get; }
     }
 }

@@ -106,7 +106,7 @@ namespace OmniCore.Eros
             var response = await radio.GetResponse(this, cancellationToken, options);
             var responseEntity = await ParseResponse(response);
 
-            using var context = await RepositoryService.GetWriterContext(cancellationToken);
+            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
             Entity.Responses.Add(responseEntity);
             await context.Save(cancellationToken);
         }
@@ -251,7 +251,7 @@ namespace OmniCore.Eros
                 }
             }
 
-            using var context = await RepositoryService.GetWriterContext(CancellationToken.None);
+            using var context = await RepositoryService.GetContextReadWrite(CancellationToken.None);
             await context.PodResponses.AddAsync(response);
             await context.Save(CancellationToken.None);
             return response;

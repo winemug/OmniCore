@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OmniCore.Repository.Migrations
 {
-    public partial class m000 : Migration
+    public partial class m0000 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

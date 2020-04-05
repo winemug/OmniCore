@@ -9,10 +9,6 @@ using System.Threading.Tasks;
 using Android.Util;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
-using NLog.Targets.Wrappers;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
 using OmniCore.Services;
@@ -22,7 +18,7 @@ namespace OmniCore.Mobile.Droid.Platform
 {
     public class CoreLoggingFunctions : ICoreLoggingFunctions
     {
-        private readonly Logger Logger;
+        private const string Tag = "OmniCoreLog";
 
         public CoreLoggingFunctions(ICoreApplicationFunctions applicationFunctions)
         {
@@ -55,31 +51,37 @@ namespace OmniCore.Mobile.Droid.Platform
         public void Debug(string message, [CallerFilePath] string source = "")
         {
             
-            Log.Debug("OmniCore", message);
+            Log.Debug(Tag, $"{source} {message}");
         }
 
         public void Error(string message, [CallerFilePath] string source = "")
         {
+            Log.Error(Tag , $"{source} {message}");
         }
 
         public void Error(string message, Exception e, [CallerFilePath] string source = "")
         {
+            Log.Error(Tag , $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
         public void Information(string message, [CallerFilePath] string source = "")
         {
+            Log.Info(Tag , $"{source} {message}");
         }
 
         public void Verbose(string message, [CallerFilePath] string source = "")
         {
+            Log.Verbose(Tag , $"{source} {message}");
         }
 
         public void Warning(string message, [CallerFilePath] string source = "")
         {
+            Log.Warn(Tag , $"{source} {message}");
         }
 
         public void Warning(string message, Exception e, [CallerFilePath] string source = "")
         {
+            Log.Error(Tag , $"{source} {message}\n{e.AsDebugFriendly()}");
         }
     }
 }

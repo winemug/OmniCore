@@ -7,9 +7,9 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IRepositoryContext : IDisposable, IServerResolvable
+    public interface IRepositoryContextReadOnly : IDisposable, IServerResolvable
     {
-        void SetLock(IDisposable readerWriterLock, bool readOnly);
+        void SetLock(IDisposable readerWriterLock, bool tracking);
         DbSet<MedicationEntity> Medications { get; }
         DbSet<UserEntity> Users { get; }
         DbSet<RadioEntity> Radios { get; }

@@ -13,10 +13,14 @@ namespace OmniCore.Services
         private readonly ICoreContainer<IServerResolvable> ServerContainer;
         private readonly ICoreApplicationFunctions CoreApplicationFunctions;
         private readonly AsyncReaderWriterLock ContextLock;
+        private readonly ICoreLoggingFunctions Logging;
+
 
         public CoreRepositoryService(ICoreContainer<IServerResolvable> serverContainer,
-            ICoreApplicationFunctions coreApplicationFunctions)
+            ICoreApplicationFunctions coreApplicationFunctions,
+            ICoreLoggingFunctions logging)
         {
+            Logging = logging;
             ServerContainer = serverContainer;
             CoreApplicationFunctions = coreApplicationFunctions;
             ContextLock = new AsyncReaderWriterLock();
@@ -24,12 +28,14 @@ namespace OmniCore.Services
 
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
-            using var context = await GetWriterContext(cancellationToken);
+            Logging.Debug("Starting repository service");
+            using var context = await GetContextReadWrite(cancellationToken);
             #if DEBUG
             await context.InitializeDatabase(cancellationToken, true);
             #else
             await context.InitializeDatabase(cancellationToken, false);
             #endif
+            Logging.Debug("Repository service started");
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)
@@ -62,20 +68,20 @@ namespace OmniCore.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IRepositoryContext> GetReaderContext(CancellationToken cancellationToken)
+        public async Task<IRepositoryContextReadOnly> GetContextReadOnly(CancellationToken cancellationToken)
         {
-            var rwLock = await ContextLock.ReaderLockAsync(cancellationToken);
-            var context = ServerContainer.Get<IRepositoryContext>();
-            context.SetLock(rwLock, true);
+            var readerLock = await ContextLock.ReaderLockAsync(cancellationToken);
+            var context = ServerContainer.Get<IRepositoryContextReadOnly>();
+            context.SetLock(readerLock, false);
             return context;
         }
 
-        public async Task<IRepositoryContextWriteable> GetWriterContext(CancellationToken cancellationToken)
+        public async Task<IRepositoryContextReadWrite> GetContextReadWrite(CancellationToken cancellationToken)
         {
-            var rwLock = await ContextLock.WriterLockAsync(cancellationToken);
-            var context = ServerContainer.Get<IRepositoryContext>();
-            context.SetLock(rwLock, false);
-            return (IRepositoryContextWriteable)context;
+            var writerLock = await ContextLock.WriterLockAsync(cancellationToken);
+            var context = ServerContainer.Get<IRepositoryContextReadWrite>();
+            context.SetLock(writerLock, true);
+            return context;
         }
     }
 }

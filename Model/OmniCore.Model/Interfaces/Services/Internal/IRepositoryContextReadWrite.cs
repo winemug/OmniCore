@@ -8,9 +8,9 @@ using OmniCore.Model.Entities;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IRepositoryContextWriteable : IRepositoryContext
+    public interface IRepositoryContextReadWrite : IRepositoryContextReadOnly
     {
         Task Save(CancellationToken cancellationToken);
-        IRepositoryContextWriteable WithExisting(Entity entity);
+        IRepositoryContextReadWrite WithExisting(Entity entity);
     }
 }

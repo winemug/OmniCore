@@ -51,7 +51,7 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<RadioEntity> GetEntity(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            using var context = await RepositoryService.GetWriterContext(cancellationToken);
+            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
             var re = await context.Radios.Where(r => !r.IsDeleted &&
                                       r.DeviceUuid == peripheral.PeripheralUuid).FirstOrDefaultAsync();
             if (re == null)

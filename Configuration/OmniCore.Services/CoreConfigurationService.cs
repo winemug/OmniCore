@@ -17,9 +17,13 @@ namespace OmniCore.Services
     {
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreRepositoryService RepositoryService;
+        private readonly ICoreLoggingFunctions Logging;
+
         public CoreConfigurationService(ICoreContainer<IServerResolvable> container,
-            ICoreRepositoryService repositoryService)
+            ICoreRepositoryService repositoryService,
+            ICoreLoggingFunctions logging)
         {
+            Logging = logging;
             Container = container;
             RepositoryService = repositoryService;
         }
@@ -46,7 +50,7 @@ namespace OmniCore.Services
 
         public async Task<IMedication> GetDefaultMedication()
         {
-            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
+            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
             var entity = await context.Medications.FirstAsync(m => m.Hormone == HormoneType.Unknown);
             return new Medication() {Entity = entity};
         }
@@ -58,7 +62,7 @@ namespace OmniCore.Services
 
         public async Task<IUser> GetDefaultUser()
         {
-            using var context = await RepositoryService.GetReaderContext(CancellationToken.None);
+            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
             var entity = await context.Users.FirstAsync(u => !u.ManagedRemotely);
             return new User() { Entity = entity};
         }

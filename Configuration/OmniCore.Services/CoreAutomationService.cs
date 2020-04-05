@@ -13,17 +13,23 @@ namespace OmniCore.Services
     {
         private readonly IAutomationComponent[] AutomationComponents;
         private readonly ICoreContainer<IServerResolvable> Container;
-        public CoreAutomationService(ICoreContainer<IServerResolvable> container,
-            IAutomationComponent[] automationComponents)
+        private readonly ICoreLoggingFunctions Logging;
+        public CoreAutomationService(
+            ICoreContainer<IServerResolvable> container,
+            IAutomationComponent[] automationComponents,
+            ICoreLoggingFunctions logging)
         {
+            Logging = logging;
             Container = container;
             AutomationComponents = automationComponents;
         }
 
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
+            Logging.Debug("Starting automation service");
             foreach (var ac in AutomationComponents)
                 await ac.InitializeComponent(this);
+            Logging.Debug("Automation service started");
         }
 
         protected override Task OnStop(CancellationToken cancellationToken) 

@@ -29,7 +29,9 @@ namespace OmniCore.Model.Entities
         public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromSeconds(10);
 
         // shifts in complements of 326.211 Hz
-        public int FrequencyShift { get; set; } = 0;
+        public int RxFrequencyShift { get; set; } = 0;
+        
+        public int TxFrequencyShift { get; set; } = 0;
 
         public TransmissionPower Amplification { get; set; } = TransmissionPower.Normal;
 

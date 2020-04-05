@@ -164,8 +164,7 @@ namespace OmniCore.Radios.RileyLink
         public async Task Identify(CancellationToken cancellationToken)
         {
             Logging.Debug($"RLR: {Address} Identifying device");
-            using var rlConnection = await RileyLinkConnectionHandler.Connect(Logging, Peripheral,
-                Entity.Options, cancellationToken);
+            using var rlConnection = await GetRileyLinkHandler(Entity.Options, cancellationToken);
 
             for (int i = 0; i < 3; i++)
             {
@@ -176,17 +175,13 @@ namespace OmniCore.Radios.RileyLink
             }
         }
 
-
-
         public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken,
             RadioOptions options = null)
         {
-            using var rlConnection = await RileyLinkConnectionHandler.Connect(Logging, Peripheral, options, cancellationToken);
+            using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
 
             if (options == null)
                 options = Entity.Options;
-
-            await rlConnection.Configure(options, cancellationToken);
 
             //Logging.Debug($"RLR: {Address} Starting conversation with pod id: {request.ErosPod.Entity.Id}");
             //var conversation = RileyLinkErosConversation.ForPod(request.ErosPod);
@@ -227,12 +222,39 @@ namespace OmniCore.Radios.RileyLink
             DisconnectedSubscription = null;
         }
 
+        public async Task<RileyLinkConnectionHandler> GetRileyLinkHandler(
+            RadioOptions options,
+            CancellationToken cancellationToken)
+        {
+            IBlePeripheralConnection peripheralConnection = null;
+            
+            using var connectionTimeoutOverall = new CancellationTokenSource(options.RadioConnectionOverallTimeout);
+            using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+                connectionTimeoutOverall.Token);
+            try
+            {
+                Logging.Debug($"RLR: {Address} Opening connection");
+                peripheralConnection = await Peripheral.GetConnection(options.AutoConnect, options.KeepConnected,
+                    options.RadioDiscoveryTimeout, options.RadioConnectTimeout,
+                    options.RadioCharacteristicsDiscoveryTimeout,
+                    linkedCancellation.Token);
+
+                return new RileyLinkConnectionHandler(Logging, Peripheral, peripheralConnection, options);
+                
+            }
+            catch (Exception e)
+            {
+                peripheralConnection?.Dispose();
+                Logging.Debug($"RLR: {Address} Error while connecting:\n {e.AsDebugFriendly()}");
+                throw new OmniCoreRadioException(FailureType.RadioGeneralError, inner: e);
+            }
+        }
         private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken,
             string text = null, byte[] data = null, int? rssi = null)
         {
             Logging.Debug($"RLR: {Address} Recording radio event {eventType}");
 
-            using var context = await RepositoryService.GetWriterContext(cancellationToken);
+            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
             
             await context
                 .WithExisting(Entity)

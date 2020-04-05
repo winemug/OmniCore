@@ -3,11 +3,11 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkVersionResponse : RileyLinkResponse
+    public class RileyLinkVersionResponse : RileyLinkDefaultResponse
     {
         public string VersionString { get; private set; }
 
-        protected override void ParseResponse(byte[] responseData)
+        protected override void ParseInternal(byte[] responseData)
         {
             VersionString = Encoding.ASCII.GetString(responseData);
         }

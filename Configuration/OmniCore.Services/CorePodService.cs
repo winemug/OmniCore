@@ -27,6 +27,8 @@ namespace OmniCore.Services
         private readonly IErosPodProvider ErosPodProvider;
         private readonly IDashPodProvider DashPodProvider;
         private readonly ICoreNotificationFunctions NotificationFunctions;
+        private readonly ICoreLoggingFunctions Logging;
+
         
         private IDisposable AdapterEnabledSubscription;
         private IDisposable AdapterDisabledSubscription;
@@ -39,9 +41,11 @@ namespace OmniCore.Services
             IBlePeripheralAdapter blePeripheralAdapter,
             IErosPodProvider erosPodProvider,
             //IDashPodProvider dashPodProvider,
-            ICoreNotificationFunctions notificationFunctions
+            ICoreNotificationFunctions notificationFunctions,
+            ICoreLoggingFunctions logging
             )
         {
+            Logging = logging;
             Container = container;
             ErosRadioProviders = erosRadioProviders;
             ApplicationFunctions = applicationFunctions;
@@ -53,6 +57,7 @@ namespace OmniCore.Services
         
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
+            Logging.Debug("Starting pod service");
             await BlePeripheralAdapter.TryEnsureAdapterEnabled(cancellationToken);
 
             AdapterEnabledSubscription = BlePeripheralAdapter.WhenAdapterEnabled().Subscribe(_ => 
@@ -89,6 +94,7 @@ namespace OmniCore.Services
                 await pod.StartMonitoring();
                 cancellationToken.ThrowIfCancellationRequested();
             }
+            Logging.Debug("Pod service started");
         }
 
         public override async Task OnBeforeStopRequest()
