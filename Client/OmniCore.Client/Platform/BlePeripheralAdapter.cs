@@ -166,10 +166,13 @@ namespace OmniCore.Client.Platform
 
             Scanner.Pause();
             var bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
-                
-            return Disposable.Create(() =>
+
+            await Task.Delay(500);
+
+            return Disposable.Create(async () =>
             {
                 bluetoothLock.Dispose();
+                await Task.Delay(500);
                 Scanner.Resume();
                 lockDisposable.Dispose();
             });
