@@ -46,15 +46,26 @@ namespace OmniCore.Client.Platform
         
         public void Dispose()
         {
-            if (!StayConnected)
-            {
-                Device.CancelConnection();
-            }
-            
             foreach(var subscription in Subscriptions)
                 subscription.Dispose();
             
             Subscriptions.Clear();
+
+            if (!StayConnected)
+            {
+                Device.CancelConnection();
+                try
+                {
+                    Logging.Debug("Closing peripheral connection");
+                    Device.WhenStatusChanged().FirstAsync(s => s == ConnectionStatus.Disconnected)
+                        .Timeout(TimeSpan.FromSeconds(3)).Wait();
+                    Logging.Debug("Peripheral connection closed");
+                }
+                catch (Exception e)
+                {
+                    Logging.Warning("Failed to close connection, ignoring error.", e);
+                }
+            }
 
             CommunicationDisposable?.Dispose();
             CommunicationDisposable = null;
