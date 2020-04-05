@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Services;
@@ -14,10 +15,14 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheralScanner
     {
+        private static TimeSpan ScanFrequencyWindow = TimeSpan.FromSeconds(30);
+        private static int WindowedScanCountLimit = 5;
+
         private readonly List<Guid> ServiceIdFilter;
         private readonly ICoreLoggingFunctions Logging;
         private readonly ISubject<IScanResult> ScanResultSubject;
         private readonly ICoreApplicationFunctions ApplicationFunctions;
+        private readonly SortedDictionary<DateTimeOffset, TimeSpan> ScanRecords;
         
         private int ScanSubscriberCount = 0;
         private IDisposable ScanSubscription;
@@ -38,6 +43,7 @@ namespace OmniCore.Client.Platform
             ApplicationFunctions = applicationFunctions;
             ScanResultSubject = new ReplaySubject<IScanResult>(TimeSpan.FromSeconds(10));
             ScanStateSubject = new BehaviorSubject<bool>(false);
+            ScanRecords = new SortedDictionary<DateTimeOffset, TimeSpan>();
         }
         
         public IObservable<IScanResult> Scan()
@@ -132,18 +138,60 @@ namespace OmniCore.Client.Platform
             ScanStateSubject.OnNext(true);
             
             BluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
-            Logging.Debug($"BLES: Scan started");
-            ScanSubscription = CrossBleAdapter.Current
-                .Scan(new ScanConfig
-                {
-                    ScanType = BleScanType.LowLatency,
-                    AndroidUseScanBatching = false,
-                    ServiceUuids = ServiceIdFilter
-                })
+            Logging.Debug($"BLES: Scan start requested");
+
+            ScanSubscription = SafeScanner()
                 .Subscribe(result =>
                 {
                     ScanResultSubject.OnNext(result);
                 });
         }
+
+        private IObservable<IScanResult> SafeScanner()
+        {
+            return Observable.Timer(GetNewScanWaitPenalty())
+                .FirstAsync()
+                .Select<long, IObservable<IScanResult>>(x =>
+                    Observable.Create<IScanResult>(observer =>
+                    {
+                        var scanStart = DateTimeOffset.UtcNow;
+                        ScanRecords[scanStart] = TimeSpan.Zero;
+
+                        Logging.Debug($"BLES: Scan started");
+                        var actualScan = CrossBleAdapter.Current
+                            .Scan(new ScanConfig
+                            {
+                                ScanType = BleScanType.LowLatency,
+                                AndroidUseScanBatching = false,
+                                ServiceUuids = ServiceIdFilter
+                            })
+                            .Subscribe(result => { ScanResultSubject.OnNext(result); });
+
+                        return Disposable.Create(() =>
+                        {
+                            ScanRecords[scanStart] = DateTimeOffset.UtcNow - scanStart;
+                            actualScan.Dispose();
+                        });
+                    })).Switch();
+        }
+
+        private TimeSpan GetNewScanWaitPenalty()
+        {
+            var penalty = TimeSpan.Zero;
+            var windowStart = DateTimeOffset.UtcNow - ScanFrequencyWindow;
+            var count = ScanRecords.Count(sr => sr.Key >= windowStart);
+            if (count >= WindowedScanCountLimit)
+            {
+                var penaltyScan = ScanRecords.TakeLast(WindowedScanCountLimit).First();
+                var penaltyWindowEnd = penaltyScan.Key + penaltyScan.Value;
+                var penaltyEnd = penaltyWindowEnd + ScanFrequencyWindow;
+
+                penalty = penaltyEnd - DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
+                Logging.Debug($"BLES: Postponing scan for {penalty.TotalSeconds:F0} seconds");
+
+            }
+            return penalty;
+        }
+
   }
 }
