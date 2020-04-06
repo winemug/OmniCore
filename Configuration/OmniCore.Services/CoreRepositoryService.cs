@@ -61,11 +61,11 @@ namespace OmniCore.Services
         {
             Logging.Debug("Starting repository service");
             using var context = await GetContextReadWrite(cancellationToken);
-#if DEBUG
-            await context.InitializeDatabase(cancellationToken, true);
-#else
+// #if DEBUG
+//             await context.InitializeDatabase(cancellationToken, true);
+// #else
             await context.InitializeDatabase(cancellationToken, false);
-#endif
+//#endif
             Logging.Debug("Repository service started");
         }
 

@@ -17,7 +17,6 @@ using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
-using Debug = System.Diagnostics.Debug;
 
 namespace OmniCore.Client.Droid.Services
 {
@@ -138,7 +137,7 @@ namespace OmniCore.Client.Droid.Services
                     }
 
                     // Send the notification summary to debug output
-                    Debug.WriteLine(summary);
+                    LoggingFunctions.Debug(summary);
                 };
 
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes),

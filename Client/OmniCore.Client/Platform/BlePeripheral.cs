@@ -31,7 +31,7 @@ namespace OmniCore.Client.Platform
         private readonly ISubject<int> RssiSubject;
 
         private (PeripheralConnectionState State, DateTimeOffset Date) _ConnectionState =
-            (PeripheralConnectionState.Disconnected, DateTimeOffset.UtcNow);
+            (PeripheralConnectionState.NotConnected, DateTimeOffset.UtcNow);
 
         private (PeripheralDiscoveryState State, DateTimeOffset Date) _DiscoveryState =
             (PeripheralDiscoveryState.Unknown, DateTimeOffset.UtcNow);
@@ -59,7 +59,7 @@ namespace OmniCore.Client.Platform
             PeripheralCommunicationLockProvider = new AsyncLock();
             DiscoveryStateSubject = new BehaviorSubject<PeripheralDiscoveryState>(PeripheralDiscoveryState.Unknown);
             ConnectionStateSubject =
-                new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.Disconnected);
+                new BehaviorSubject<PeripheralConnectionState>(PeripheralConnectionState.NotConnected);
             NameSubject = new Subject<string>();
             RssiSubject = new Subject<int>();
         }
@@ -112,7 +112,7 @@ namespace OmniCore.Client.Platform
             get => _ConnectionState;
             set
             {
-                if (value.State != _ConnectionState.State)
+                if (value.State != _ConnectionState.State && (value.State != PeripheralConnectionState.Disconnected || _ConnectionState.State != PeripheralConnectionState.NotConnected))
                 {
                     Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connection state changed to {value.State}");
                     _ConnectionState = value;
@@ -170,7 +170,7 @@ namespace OmniCore.Client.Platform
 
             try
             {
-                using var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken);
+                using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
                 {
                     using var discoveryTimeoutSource = new CancellationTokenSource(discoveryTimeout);
                     using var discoveryCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(

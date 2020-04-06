@@ -20,7 +20,7 @@ namespace OmniCore.Client.ViewModels.Home
 
         protected override Task OnPageAppearing()
         {
-            Radio = new RadioModel((IRadio) Parameter);
+            Radio = new RadioModel((IErosRadio) Parameter);
             return Task.CompletedTask;
         }
     }

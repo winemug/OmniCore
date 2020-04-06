@@ -8,21 +8,23 @@ using Android;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Gms.Common.Apis;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Microsoft.AppCenter.Push;
 using OmniCore.Client.Droid.Services;
+using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
 using Rg.Plugins.Popup;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Debug = System.Diagnostics.Debug;
 
 namespace OmniCore.Client.Droid
 {
@@ -89,9 +91,9 @@ namespace OmniCore.Client.Droid
         private void OnUnhandledException(object exceptionObject)
         {
             if (exceptionObject != null && exceptionObject is Exception e)
-                Debug.WriteLine(e.AsDebugFriendly());
+                CoreLoggingFunctions.FatalError("Unhandled Exception", e);
             else
-                Debug.WriteLine($"****** Unknown exception object {exceptionObject}");
+                CoreLoggingFunctions.FatalError($"Unhandled Exception - Unknown exception object {exceptionObject}");
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions,

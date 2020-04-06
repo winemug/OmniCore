@@ -6,11 +6,17 @@ namespace OmniCore.Model.Utilities.Extensions
 {
     public static class CoreTaskExtensions
     {
+        public static T WaitAndGetResult<T>(this Task<T> task,
+            bool continueOnCapturedContext = true)
+        {
+            return WaitAndGetResult(task, CancellationToken.None, continueOnCapturedContext);
+        }
+        
         public static T WaitAndGetResult<T>(this Task<T> task, CancellationToken cancellationToken,
             bool continueOnCapturedContext = true)
         {
-            task.ConfigureAwait(continueOnCapturedContext);
-            task.Start();
+            //task.ConfigureAwait(continueOnCapturedContext);
+            //task.Start();
             task.Wait(cancellationToken);
             if (task.IsCanceled) throw new OperationCanceledException();
 

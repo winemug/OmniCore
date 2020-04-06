@@ -9,7 +9,6 @@ namespace OmniCore.Model.Entities
     {
         public PodType Type { get; set; }
         public UserEntity User { get; set; }
-
         public MedicationEntity Medication { get; set; }
 
         // public TherapyProfileEntity TherapyProfile { get; set; }

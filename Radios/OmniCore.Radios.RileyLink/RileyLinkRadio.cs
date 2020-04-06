@@ -40,6 +40,7 @@ namespace OmniCore.Radios.RileyLink
         }
 
         public IBlePeripheral Peripheral { get; set; }
+        public IErosRadioProvider Provider { get; set; }
         public RadioEntity Entity { get; set; }
 
         public RadioType Type => RadioType.RileyLink;
@@ -51,30 +52,15 @@ namespace OmniCore.Radios.RileyLink
         public IObservable<int> Rssi => Peripheral.WhenRssiReceived();
         public RadioOptions Options => Entity.Options;
 
+        private bool IsMonitoring;
         public void StartMonitoring()
         {
+            if (IsMonitoring)
+                return;
+
+            IsMonitoring = true;
+
             Logging.Debug($"RLR: {Address} Start monitoring");
-
-            PeripheralRssiSubscription?.Dispose();
-
-            if (Entity.Options.RssiUpdateInterval.HasValue)
-                PeripheralRssiSubscription = Observable.Interval(Entity.Options.RssiUpdateInterval.Value)
-                    .Subscribe(async _ =>
-                    {
-                        try
-                        {
-                            Logging.Debug($"RLR: {Address} Rssi request");
-                            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-                            var rssi = await Peripheral.ReadRssi(cts.Token);
-                            Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
-                            await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
-                                null, rssi);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            Logging.Debug($"RLR: {Address} Rssi timed out!");
-                        }
-                    });
 
             ConnectedSubscription?.Dispose();
             ConnectedSubscription = Peripheral.WhenConnectionStateChanged()
@@ -83,6 +69,26 @@ namespace OmniCore.Radios.RileyLink
                 {
                     Logging.Debug($"RLR: {Address} Connected");
                     await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
+
+                    PeripheralRssiSubscription?.Dispose();
+                    if (Entity.Options.RssiUpdateInterval.HasValue)
+                        PeripheralRssiSubscription = Observable.Interval(Entity.Options.RssiUpdateInterval.Value)
+                            .Subscribe(async _ =>
+                            {
+                                try
+                                {
+                                    Logging.Debug($"RLR: {Address} Rssi request");
+                                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                                    var rssi = await Peripheral.ReadRssi(cts.Token);
+                                    Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
+                                    await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
+                                        null, rssi);
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    Logging.Debug($"RLR: {Address} Rssi timed out!");
+                                }
+                            });
                 });
 
             DisconnectedSubscription?.Dispose();
@@ -92,6 +98,8 @@ namespace OmniCore.Radios.RileyLink
                 {
                     Logging.Debug($"RLR: {Address} Disconnected");
                     await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
+                    PeripheralRssiSubscription?.Dispose();
+                    PeripheralRssiSubscription = null;
                 });
 
             PeripheralLocateSubscription?.Dispose();
@@ -146,6 +154,25 @@ namespace OmniCore.Radios.RileyLink
                 });
         }
 
+        public void StopMonitoring()
+        {
+            PeripheralRssiSubscription?.Dispose();
+            PeripheralRssiSubscription = null;
+
+            PeripheralStateSubscription?.Dispose();
+            PeripheralStateSubscription = null;
+
+            ConnectedSubscription?.Dispose();
+            ConnectedSubscription = null;
+
+            ConnectionFailedSubscription?.Dispose();
+            ConnectionFailedSubscription = null;
+
+            DisconnectedSubscription?.Dispose();
+            DisconnectedSubscription = null;
+            IsMonitoring = false;
+        }
+
         public async Task Identify(CancellationToken cancellationToken)
         {
             Logging.Debug($"RLR: {Address} Identifying device");
@@ -190,20 +217,7 @@ namespace OmniCore.Radios.RileyLink
 
         public void Dispose()
         {
-            PeripheralRssiSubscription?.Dispose();
-            PeripheralRssiSubscription = null;
-
-            PeripheralStateSubscription?.Dispose();
-            PeripheralStateSubscription = null;
-
-            ConnectedSubscription?.Dispose();
-            ConnectedSubscription = null;
-
-            ConnectionFailedSubscription?.Dispose();
-            ConnectionFailedSubscription = null;
-
-            DisconnectedSubscription?.Dispose();
-            DisconnectedSubscription = null;
+            StopMonitoring();
         }
 
         public async Task<RileyLinkConnectionHandler> GetRileyLinkHandler(

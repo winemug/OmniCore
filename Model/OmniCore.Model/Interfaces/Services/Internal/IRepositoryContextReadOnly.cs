@@ -18,6 +18,5 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         DbSet<MedicationDeliveryEntity> MedicationDeliveries { get; }
         DbSet<PodResponseEntity> PodResponses { get; }
         void SetLock(IDisposable readerWriterLock, bool tracking);
-        Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false);
     }
 }

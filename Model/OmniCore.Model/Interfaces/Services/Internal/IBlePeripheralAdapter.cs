@@ -7,6 +7,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IBlePeripheralAdapter : IServerResolvable
     {
+        IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid);
         IObservable<IBlePeripheralAdapter> WhenScanStarted { get; }
         IObservable<IBlePeripheralAdapter> WhenScanFinished { get; }
         Task TryEnsureAdapterEnabled(CancellationToken cancellationToken);

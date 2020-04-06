@@ -62,6 +62,8 @@ namespace OmniCore.Client.Platform
             Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, loggingFunctions, applicationFunctions);
             WhenScanStarted = Scanner.WhenScanStateChanged.Where(s => s).Select(s => this);
             WhenScanFinished = Scanner.WhenScanStateChanged.Where(s => !s).Select(s => this);
+
+            InternalObservable = CreateObservable();
         }
 
         public IObservable<IBlePeripheralAdapter> WhenScanStarted { get; }
@@ -163,7 +165,9 @@ namespace OmniCore.Client.Platform
             });
         }
 
-        public IObservable<IBlePeripheral> FindErosRadioPeripherals()
+        private IObservable<IBlePeripheral> InternalObservable;
+        public IObservable<IBlePeripheral> FindErosRadioPeripherals() => InternalObservable;
+        private IObservable<IBlePeripheral> CreateObservable()
         {
             return Observable.Create<IBlePeripheral>(async observer =>
                 {
@@ -191,7 +195,7 @@ namespace OmniCore.Client.Platform
                                 if (service != null)
                                 {
                                     DeviceCache[connectedDevice.Uuid] = connectedDevice;
-                                    var peripheral = GetPeripheral(connectedDevice.Uuid, service.Uuid);
+                                    var peripheral = GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
                                     peripheral.UpdateSubscriptions(connectedDevice);
 
                                     Logging.Debug(
@@ -210,7 +214,7 @@ namespace OmniCore.Client.Platform
                                 if (!connectedPeripheralUuids.Any(cuuid => cuuid == peripheralUuid))
                                     DeviceCache[peripheralUuid] = null;
 
-                                var peripheral = GetPeripheral(peripheralUuid, ErosRadioServiceUuids[0]);
+                                var peripheral = GetPeripheralInternal(peripheralUuid, ErosRadioServiceUuids[0]);
                                 peripheral.DiscoveryState = (PeripheralDiscoveryState.Searching, searchStart);
                             }
 
@@ -219,7 +223,7 @@ namespace OmniCore.Client.Platform
                                 .Subscribe(scanResult =>
                                 {
                                     DeviceCache[scanResult.Device.Uuid] = scanResult.Device;
-                                    var peripheral = GetPeripheral(scanResult.Device.Uuid,
+                                    var peripheral = GetPeripheralInternal(scanResult.Device.Uuid,
                                         scanResult.AdvertisementData.ServiceUuids[0]);
 
                                     peripheral.UpdateSubscriptions(scanResult.Device);
@@ -269,10 +273,15 @@ namespace OmniCore.Client.Platform
                                 peripheral.DiscoveryState = (PeripheralDiscoveryState.NotFound, dateFinished);
                     });
                 }
-            );
+            ).Publish().RefCount(TimeSpan.FromSeconds(10));
         }
 
-        private BlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
+        public IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
+        {
+            return GetPeripheralInternal(peripheralUuid, primaryServiceUuid);
+        }
+        
+        private BlePeripheral GetPeripheralInternal(Guid peripheralUuid, Guid primaryServiceUuid)
         {
             return PeripheralCache.GetOrAdd(peripheralUuid, _ =>
             {

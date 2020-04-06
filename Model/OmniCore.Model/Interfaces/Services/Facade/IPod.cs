@@ -26,6 +26,5 @@ namespace OmniCore.Model.Interfaces.Services.Facade
         Task<IPodRequest> StartExtendedBolus();
         Task<IPodRequest> CancelExtendedBolus();
         Task<IPodRequest> Deactivate();
-        Task StartMonitoring();
     }
 }

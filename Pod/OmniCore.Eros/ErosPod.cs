@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
+using IErosRadio = OmniCore.Model.Interfaces.Services.Facade.IErosRadio;
 
 namespace OmniCore.Eros
 {
@@ -19,6 +22,7 @@ namespace OmniCore.Eros
         private readonly ICorePodService PodService;
         private readonly ICoreRepositoryService RepositoryService;
         private readonly ErosRequestQueue RequestQueue;
+        private readonly ISubject<IEnumerable<IErosRadio>> RadiosUpdatedSubject;
 
         public ErosPod(ICoreContainer<IServerResolvable> container,
             ICoreRepositoryService repositoryService,
@@ -30,6 +34,7 @@ namespace OmniCore.Eros
             Container = container;
             RequestQueue = requestQueue;
             RunningState = new PodRunningState();
+            RadiosUpdatedSubject = new Subject<IEnumerable<IErosRadio>>();
         }
         public PodEntity Entity { get; set; }
         public PodRunningState RunningState { get; }
@@ -44,16 +49,45 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> Activate(IRadio radio, CancellationToken cancellationToken)
+        public IObservable<IEnumerable<IErosRadio>> WhenRadiosUpdated() => RadiosUpdatedSubject.AsObservable();
+
+        public async Task UpdateRadioList(IEnumerable<IErosRadio> radios, CancellationToken cancellationToken)
+        {
+            using (var context = 
+                await RepositoryService.GetContextReadWrite(cancellationToken))
+            {
+                context.WithExisting(Entity)
+                    .WithExisting(Entity.Medication)
+                    .WithExisting(Entity.User)
+                    .WithExisting(Entity.PodRadios);
+
+                Entity.PodRadios.Clear();
+
+                foreach (var radio in radios)
+                {
+                    Entity.PodRadios.Add(new PodRadioEntity
+                    {
+                        Pod = Entity,
+                        Radio = radio.Entity
+                    });
+                }
+                context.Save(cancellationToken);
+            }
+
+            //TODO
+            RadiosUpdatedSubject.OnNext(radios);
+        }
+
+        public Task<IPodRequest> Activate(IErosRadio radio, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> Acquire(IRadio radio, CancellationToken cancellationToken)
+        public async Task<IPodRequest> Acquire(IErosRadio radio, CancellationToken cancellationToken)
         {
             return RequestQueue.Enqueue(
                 (await NewPodRequest())
-                .WithAcquire(radio as IErosRadio)
+                .WithAcquire(radio)
             );
         }
 
@@ -130,10 +164,14 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public async Task StartMonitoring()
+        public void StartMonitoring()
         {
-            await StartStateMonitoring();
-            RequestQueue.Startup();
+            //StartStateMonitoring();
+            //RequestQueue.Startup();
+            PodService.ListErosRadios().Where(r =>
+                    Entity.PodRadios.Select(pr => pr.Radio.DeviceUuid)
+                    .Contains(r.Entity.DeviceUuid))
+                .Subscribe(radio => { radio.StartMonitoring(); });
         }
 
         public void Dispose()

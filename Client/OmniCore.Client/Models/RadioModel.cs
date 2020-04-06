@@ -8,9 +8,9 @@ namespace OmniCore.Client.Models
 {
     public class RadioModel : INotifyPropertyChanged
     {
-        public readonly IRadio Radio;
+        public readonly IErosRadio Radio;
 
-        public RadioModel(IRadio radio)
+        public RadioModel(IErosRadio radio)
         {
             Radio = radio;
 

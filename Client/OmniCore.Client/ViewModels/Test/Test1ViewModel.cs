@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces.Services.Facade;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Test
@@ -31,12 +33,13 @@ namespace OmniCore.Client.ViewModels.Test
 
         private async Task Identify()
         {
-            var radio = Radios.First(r => r.IsChecked).Radio;
             var user = await Api.ConfigurationService.GetDefaultUser();
             var med = await Api.ConfigurationService.GetDefaultMedication();
             var pod = await Api.PodService.NewErosPod(user, med, CancellationToken.None);
 
-            await pod.Acquire(radio, CancellationToken.None);
+            await pod.UpdateRadioList(Radios
+                    .Where(r => r.IsChecked)
+                    .Select(r => r.Radio), CancellationToken.None);
         }
     }
 }

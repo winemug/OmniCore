@@ -54,6 +54,16 @@ namespace OmniCore.Mobile.Droid.Platform
             Log.Error(Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
+        public static void FatalError(string message, [CallerFilePath] string source = "")
+        {
+            Log.Error(Tag, $"{source} {message}");
+        }
+
+        public static void FatalError(string message, Exception e, [CallerFilePath] string source = "")
+        {
+            Log.Error(Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
+        }
+
         public void Information(string message, [CallerFilePath] string source = "")
         {
             Log.Info(Tag, $"{source} {message}");

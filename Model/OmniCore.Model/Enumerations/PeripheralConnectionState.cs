@@ -2,6 +2,7 @@
 {
     public enum PeripheralConnectionState
     {
+        NotConnected,
         Connecting,
         Connected,
         Disconnecting,

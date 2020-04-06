@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -55,9 +56,18 @@ namespace OmniCore.Repository
             ReaderWriterLock = null;
         }
 
-        public IRepositoryContextReadWrite WithExisting(Entity entity)
+        public IRepositoryContextReadWrite WithExisting(params IEntity[] entities)
         {
-            Attach(entity).State = EntityState.Unchanged;
+            foreach(var entity in entities)
+                Attach(entity).State = EntityState.Unchanged;
+            return this;
+        }
+
+        public IRepositoryContextReadWrite WithExisting<T>(ICollection<T> entities)
+            where T : IEntity
+        {
+            foreach (var entity in entities)
+                Attach(entity).State = EntityState.Unchanged;
             return this;
         }
 
@@ -80,7 +90,7 @@ namespace OmniCore.Repository
                 {
                     Hormone = HormoneType.Unknown,
                     Name = "Unspecified",
-                    UnitName = "microliters",
+                    UnitName = "microLiters",
                     UnitNameShort = "µL",
                     UnitsPerMilliliter = 1000
                 });

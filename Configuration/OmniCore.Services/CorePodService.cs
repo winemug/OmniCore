@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
+using OmniCore.Model.Utilities;
 
 namespace OmniCore.Services
 {
@@ -49,16 +53,16 @@ namespace OmniCore.Services
             NotificationFunctions = notificationFunctions;
         }
 
-        public override async Task OnBeforeStopRequest()
-        {
-            // foreach (var pod in await ActivePods(CancellationToken.None))
-            // {
-            //     var ar = pod.ActiveRequest;
-            //     if (ar != null) ar.Cancel();
-            // }
-        }
+        // public override async Task OnBeforeStopRequest()
+        // {
+        //     // foreach (var pod in await ActivePods(CancellationToken.None))
+        //     // {
+        //     //     var ar = pod.ActiveRequest;
+        //     //     if (ar != null) ar.Cancel();
+        //     // }
+        // }
 
-        public async Task<IList<IPod>> ActivePods(CancellationToken cancellationToken)
+        public async Task<IEnumerable<IPod>> ActivePods(CancellationToken cancellationToken)
         {
             var erosPods = await ErosPodProvider.ActivePods(cancellationToken);
             // var dashPods = DashPodProvider.ActivePods(cancellationToken);
@@ -67,7 +71,7 @@ namespace OmniCore.Services
             return list;
         }
 
-        public Task<IList<IPod>> ArchivedPods(CancellationToken cancellationToken)
+        public Task<IEnumerable<IPod>> ArchivedPods(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +106,6 @@ namespace OmniCore.Services
         public async Task<IErosPod> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
             var pod = await ErosPodProvider.NewPod(user, medication, cancellationToken);
-            await pod.StartMonitoring();
             return pod;
         }
 
@@ -144,24 +147,25 @@ namespace OmniCore.Services
                 }
             });
 
-            foreach (var pod in await ActivePods(cancellationToken))
+            var activePods = await ErosPodProvider.ActivePods(cancellationToken);
+            foreach (var erosPod in activePods)
             {
-                await pod.StartMonitoring();
-                cancellationToken.ThrowIfCancellationRequested();
+                ErosPodProvider.StartMonitoring(erosPod);
             }
 
             Logging.Debug("Pod service started");
         }
 
-        protected override async Task OnStop(CancellationToken cancellationToken)
+        protected override Task OnStop(CancellationToken cancellationToken)
         {
             AdapterEnabledSubscription.Dispose();
             AdapterEnabledSubscription = null;
 
             AdapterDisabledSubscription.Dispose();
             AdapterDisabledSubscription = null;
-
-            foreach (var pod in await ActivePods(cancellationToken)) pod.Dispose();
+            ErosPodProvider.Dispose();
+            
+            return Task.CompletedTask;
         }
 
         protected override Task OnPause(CancellationToken cancellationToken)
@@ -174,12 +178,10 @@ namespace OmniCore.Services
             return Task.CompletedTask;
         }
 
-        private Task<IErosRadio> RadioFromPeripheral(IBlePeripheral peripheral, CancellationToken cancellationToken)
+        public Task<IErosRadio> RadioFromPeripheral(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            foreach (var radioProvider in ErosRadioProviders)
-                if (peripheral.PrimaryServiceUuid == radioProvider.ServiceUuid)
-                    return radioProvider.GetRadio(peripheral, cancellationToken);
-            return null;
+            return ErosRadioProviders.First(rp => rp.ServiceUuid == peripheral.PrimaryServiceUuid)
+                .GetRadio(peripheral, cancellationToken);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace OmniCore.Client.ViewModels.Home
             return Task.CompletedTask;
         }
 
-        private async Task SelectRadio(IRadio radio)
+        private async Task SelectRadio(IErosRadio radio)
         {
             await Shell.Current.Navigation.PushAsync(Client.ViewPresenter.GetView<RadioDetailView>(false, radio));
         }

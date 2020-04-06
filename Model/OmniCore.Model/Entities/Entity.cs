@@ -1,8 +1,9 @@
 ﻿using System;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Entities
 {
-    public class Entity
+    public class Entity : IEntity
     {
         public long Id { get; set; }
         public Guid? SyncId { get; set; } = Guid.NewGuid();
