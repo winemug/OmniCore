@@ -10,7 +10,5 @@ namespace OmniCore.Model.Interfaces.Services.Internal
     {
         Guid ServiceUuid { get; }
         Task<IErosRadio> GetRadio(IBlePeripheral peripheral, CancellationToken cancellationToken);
-        void StartMonitoring(IErosRadio radio);
-        void StopMonitoring(IErosRadio radio);
     }
 }

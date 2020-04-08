@@ -164,16 +164,6 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public void StartMonitoring()
-        {
-            //StartStateMonitoring();
-            //RequestQueue.Startup();
-            PodService.ListErosRadios().Where(r =>
-                    Entity.PodRadios.Select(pr => pr.Radio.DeviceUuid)
-                    .Contains(r.Entity.DeviceUuid))
-                .Subscribe(radio => { radio.StartMonitoring(); });
-        }
-
         public void Dispose()
         {
             RequestQueue.Shutdown();

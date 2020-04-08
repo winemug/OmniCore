@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
@@ -21,13 +26,8 @@ namespace OmniCore.Radios.RileyLink
         private readonly ICoreLoggingFunctions Logging;
         private readonly ICoreRepositoryService RepositoryService;
 
-
-        private IDisposable ConnectedSubscription;
-        private IDisposable ConnectionFailedSubscription;
-        private IDisposable DisconnectedSubscription;
-        private IDisposable PeripheralLocateSubscription;
-        private IDisposable PeripheralRssiSubscription;
-        private IDisposable PeripheralStateSubscription;
+        private IDisposable HealthCheckSubscription;
+        private CancellationTokenSource HealthCheckCancellationTokenSource;
 
         public RileyLinkRadio(
             ICoreContainer<IServerResolvable> container,
@@ -39,9 +39,53 @@ namespace OmniCore.Radios.RileyLink
             Logging = logging;
         }
 
-        public IBlePeripheral Peripheral { get; set; }
-        public IErosRadioProvider Provider { get; set; }
-        public RadioEntity Entity { get; set; }
+        public void Initialize(RadioEntity entity, IErosRadioProvider provider, IBlePeripheral peripheral)
+        {
+            Entity = entity;
+            Provider = provider;
+            Peripheral = peripheral;
+
+            //TODO: auto disposables
+
+            Peripheral.WhenConnectionStateChanged()
+                .Subscribe(async connectionState =>
+                {
+                    switch (connectionState)
+                    {
+                        case PeripheralConnectionState.Connected:
+                            Logging.Debug($"RLR: {Address} Connected");
+                            await RecordRadioEvent(RadioEvent.Connect);
+                            break;
+                        case PeripheralConnectionState.Disconnected:
+                            Logging.Debug($"RLR: {Address} Disconnected");
+                            await RecordRadioEvent(RadioEvent.Disconnect);
+                            break;
+                    }
+                });
+
+            Peripheral.WhenDiscoveryStateChanged()
+                .Subscribe(async discoveryState =>
+                {
+                    switch (discoveryState)
+                    {
+                        case PeripheralDiscoveryState.Discovered:
+                            await RecordRadioEvent(RadioEvent.Online);
+                            break;
+                    }
+                });
+
+            Peripheral.WhenRssiReceived()
+                .Subscribe(async rssi => { await RecordRadioEvent(RadioEvent.RssiReceived, rssi: rssi); });
+
+            Peripheral.WhenNameUpdated()
+                .Subscribe(async name => { await UpdateRadioName(name); });
+
+            ResumeHealthChecks(true);
+        }
+
+        public IBlePeripheral Peripheral { get; private set; }
+        public IErosRadioProvider Provider { get; private set; }
+        public RadioEntity Entity { get; private set; }
 
         public RadioType Type => RadioType.RileyLink;
         public string Address => Peripheral.PeripheralUuid.AsMacAddress();
@@ -52,175 +96,180 @@ namespace OmniCore.Radios.RileyLink
         public IObservable<int> Rssi => Peripheral.WhenRssiReceived();
         public RadioOptions Options => Entity.Options;
 
-        private bool IsMonitoring;
-        public void StartMonitoring()
+        private async Task PauseHealthChecks()
         {
-            if (IsMonitoring)
-                return;
+            lock (this)
+            {
+                HealthCheckSubscription?.Dispose();
+                HealthCheckSubscription = null;
 
-            IsMonitoring = true;
-
-            Logging.Debug($"RLR: {Address} Start monitoring");
-
-            ConnectedSubscription?.Dispose();
-            ConnectedSubscription = Peripheral.WhenConnectionStateChanged()
-                .FirstAsync(s => s == PeripheralConnectionState.Connected)
-                .Subscribe(async _ =>
+                if (HealthCheckCancellationTokenSource != null)
                 {
-                    Logging.Debug($"RLR: {Address} Connected");
-                    await RecordRadioEvent(RadioEvent.Connect, CancellationToken.None);
-
-                    PeripheralRssiSubscription?.Dispose();
-                    if (Entity.Options.RssiUpdateInterval.HasValue)
-                        PeripheralRssiSubscription = Observable.Interval(Entity.Options.RssiUpdateInterval.Value)
-                            .Subscribe(async _ =>
-                            {
-                                try
-                                {
-                                    Logging.Debug($"RLR: {Address} Rssi request");
-                                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-                                    var rssi = await Peripheral.ReadRssi(cts.Token);
-                                    Logging.Debug($"RLR: {Address} Rssi received: {rssi}");
-                                    await RecordRadioEvent(RadioEvent.RssiReceived, CancellationToken.None, null,
-                                        null, rssi);
-                                }
-                                catch (OperationCanceledException)
-                                {
-                                    Logging.Debug($"RLR: {Address} Rssi timed out!");
-                                }
-                            });
-                });
-
-            DisconnectedSubscription?.Dispose();
-            DisconnectedSubscription = Peripheral.WhenConnectionStateChanged()
-                .FirstAsync(s => s == PeripheralConnectionState.Disconnected)
-                .Subscribe(async _ =>
-                {
-                    Logging.Debug($"RLR: {Address} Disconnected");
-                    await RecordRadioEvent(RadioEvent.Disconnect, CancellationToken.None);
-                    PeripheralRssiSubscription?.Dispose();
-                    PeripheralRssiSubscription = null;
-                });
-
-            PeripheralLocateSubscription?.Dispose();
-            PeripheralLocateSubscription = null;
-
-            PeripheralStateSubscription?.Dispose();
-            PeripheralStateSubscription = Peripheral.WhenDiscoveryStateChanged()
-                .Subscribe(async state =>
-                {
-                    switch (state)
-                    {
-                        case PeripheralDiscoveryState.Unknown:
-                            Logging.Debug($"RLR: {Address} Peripheral state unknown");
-                            var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
-                            await Peripheral.Discover(cts.Token);
-                            break;
-                        case PeripheralDiscoveryState.NotFound:
-                            Logging.Debug($"RLR: {Address} Peripheral not found in last scan");
-                            await RecordRadioEvent(RadioEvent.Offline, CancellationToken.None);
-                            PeripheralLocateSubscription = Observable.Interval(Entity.Options.RadioDiscoveryCooldown)
-                                .Subscribe(async _ =>
-                                {
-                                    var cts = new CancellationTokenSource(Entity.Options.RadioDiscoveryTimeout);
-                                    await Peripheral.Discover(cts.Token);
-                                });
-                            break;
-                        case PeripheralDiscoveryState.Searching:
-                            Logging.Debug($"RLR: {Address} Looking for peripheral");
-                            break;
-                        case PeripheralDiscoveryState.Discovered:
-                            if (PeripheralLocateSubscription != null)
-                            {
-                                PeripheralLocateSubscription.Dispose();
-                                PeripheralLocateSubscription = null;
-                            }
-
-                            Logging.Debug($"RLR: {Address} Peripheral is online");
-                            await RecordRadioEvent(RadioEvent.Online, CancellationToken.None);
-
-                            //if (Entity.Options.KeepConnected)
-                            //{
-                            //    Logging.Debug($"RLR: {Address} Connecting to peripheral due to KeepConnected setting");
-                            //    try
-                            //    {
-                            //    }
-                            //    catch (OperationCanceledException e)
-                            //    {
-                            //    }
-                            //}
-                            break;
-                    }
-                });
+                    HealthCheckCancellationTokenSource.Cancel();
+                    HealthCheckCancellationTokenSource.Dispose();
+                    HealthCheckCancellationTokenSource = null;
+                }
+            }
         }
 
-        public void StopMonitoring()
+        private void ResumeHealthChecks(bool wasInGoodHealth)
         {
-            PeripheralRssiSubscription?.Dispose();
-            PeripheralRssiSubscription = null;
+            ResumeHealthChecks(wasInGoodHealth
+                ? Entity.Options.RadioHealthCheckIntervalGood
+                : Entity.Options.RadioHealthCheckIntervalBad);
+        }
 
-            PeripheralStateSubscription?.Dispose();
-            PeripheralStateSubscription = null;
+        private void ResumeHealthChecks(TimeSpan interval)
+        {
+            lock (this)
+            {
+                HealthCheckCancellationTokenSource?.Dispose();
+                HealthCheckCancellationTokenSource = new CancellationTokenSource();
 
-            ConnectedSubscription?.Dispose();
-            ConnectedSubscription = null;
+                HealthCheckSubscription?.Dispose();
+                HealthCheckSubscription = Scheduler.Default.Schedule(
+                    interval,
+                    async () =>
+                    {
+                        var nextInterval = Entity.Options.RadioHealthCheckIntervalGood;
+                        try
+                        {
+                            Logging.Debug($"RLR: {Address} Starting healthcheck canceled");
+                            nextInterval = await PerformHealthChecks(HealthCheckCancellationTokenSource.Token);
+                            Logging.Debug($"RLR: {Address} Healthcheck finished");
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            Logging.Debug($"RLR: {Address} Healthcheck canceled");
+                        }
+                        catch (Exception e)
+                        {
+                            Logging.Warning($"RLR: {Address} Healthcheck failed", e);
+                            nextInterval = Entity.Options.RadioHealthCheckIntervalGood;
+                        }
 
-            ConnectionFailedSubscription?.Dispose();
-            ConnectionFailedSubscription = null;
+                        ResumeHealthChecks(nextInterval);
+                    });
+            }
+        }
 
-            DisconnectedSubscription?.Dispose();
-            DisconnectedSubscription = null;
-            IsMonitoring = false;
+        private async Task<TimeSpan> PerformHealthChecks(CancellationToken cancellationToken)
+        {
+            var discoveryAge = DateTimeOffset.UtcNow - Peripheral.DiscoveryState.Date;
+            if (Peripheral.DiscoveryState.State == PeripheralDiscoveryState.NotFound &&
+                discoveryAge < Options.RadioDiscoveryCooldown)
+            {
+                Logging.Debug("RLR: {Address} Healthcheck postponed due discovery cooldown");
+                return Options.RadioDiscoveryCooldown - discoveryAge + TimeSpan.FromSeconds(5);
+            }
+
+            if (Peripheral.DiscoveryState.State == PeripheralDiscoveryState.Searching)
+            {
+                Logging.Debug("RLR: {Address} Healthcheck postponed due existing discovery");
+                return Options.RadioDiscoveryTimeout - discoveryAge + TimeSpan.FromSeconds(5);
+            }
+
+            if (Peripheral.DiscoveryState.State != PeripheralDiscoveryState.Discovered)
+            {
+                Logging.Debug("RLR: {Address} Healthcheck running discovery");
+                await Peripheral.Discover(cancellationToken);
+            }
+
+            if (Peripheral.ConnectionState.State == PeripheralConnectionState.Connecting)
+            {
+                Logging.Debug("RLR: {Address} Healthcheck postponed b/c peripheral is connecting");
+                return Options.RadioConnectionOverallTimeout + TimeSpan.FromSeconds(5);
+            }
+
+            if (Peripheral.ConnectionState.State == PeripheralConnectionState.Disconnecting)
+            {
+                Logging.Debug("RLR: {Address} Healthcheck postponed b/c peripheral is disconnecting");
+                return Options.RadioDisconnectTimeout + TimeSpan.FromSeconds(5);
+            }
+
+            using var rlConnection = await GetRileyLinkHandler(Entity.Options, cancellationToken);
+            Logging.Debug("RLR: {Address} Healthcheck RL writing ignored command");
+            await rlConnection.Noop().ToTask(cancellationToken);
+            Logging.Debug("RLR: {Address} Healthcheck RL state request");
+            var state = await rlConnection.GetState().ToTask(cancellationToken);
+            if (!state.StateOk)
+                throw new OmniCoreRadioException(FailureType.RadioErrorResponse);
+            Logging.Debug("RLR: {Address} Healthcheck RL state OK");
+
+            var rssi = await Peripheral.ReadRssi(cancellationToken);
+            Logging.Debug($"RLR: {Address} Healthcheck RSSI: {rssi}");
+            return Entity.Options.RadioHealthCheckIntervalGood;
         }
 
         public async Task Identify(CancellationToken cancellationToken)
         {
-            Logging.Debug($"RLR: {Address} Identifying device");
-            var options = Entity.Options;
-            //options.KeepConnected = false;
-            //options.AutoConnect = false;
+            await PauseHealthChecks();
 
-            using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
+            try
+            {
+                Logging.Debug($"RLR: {Address} Identifying device");
+                var options = Entity.Options;
+                //options.KeepConnected = false;
+                //options.AutoConnect = false;
 
-            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On);
-            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off);
+                using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
+
+                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On);
+                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off);
+                ResumeHealthChecks(true);
+            }
+            catch (Exception e)
+            {
+                ResumeHealthChecks(false);
+                throw;
+            }
         }
 
         public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken,
             RadioOptions options = null)
         {
-            using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
+            await PauseHealthChecks();
+            try
+            {
+                if (options == null)
+                    options = Entity.Options;
 
-            if (options == null)
-                options = Entity.Options;
+                using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
 
-            //Logging.Debug($"RLR: {Address} Starting conversation with pod id: {request.ErosPod.Entity.Id}");
-            //var conversation = RileyLinkErosConversation.ForPod(request.ErosPod);
-            //conversation.Initialize(request);
+                //Logging.Debug($"RLR: {Address} Starting conversation with pod id: {request.ErosPod.Entity.Id}");
+                //var conversation = RileyLinkErosConversation.ForPod(request.ErosPod);
+                //conversation.Initialize(request);
 
-            //while (!conversation.IsFinished)
-            //{
-            //    var sendPacketData = conversation.GetPacketToSend();
+                //while (!conversation.IsFinished)
+                //{
+                //    var sendPacketData = conversation.GetPacketToSend();
 
-            //    //TODO
+                //    //TODO
 
-            //    var rssi = GetRssi(result.Data[0]);
-            //    conversation.ParseIncomingPacket(result.Data[1..]);
-            //}
+                //    var rssi = GetRssi(result.Data[0]);
+                //    conversation.ParseIncomingPacket(result.Data[1..]);
+                //}
 
-            //var response = conversation.ResponseData.ToArray();
-            //Logging.Debug($"RLR: {Address} Conversation ended.");
-            //return response;
+                //var response = conversation.ResponseData.ToArray();
+                //Logging.Debug($"RLR: {Address} Conversation ended.");
+                ResumeHealthChecks(true);
+
+                //return response;
+            }
+            catch (Exception e)
+            {
+                ResumeHealthChecks(false);
+                throw;
+            }
             return null;
         }
 
 
         public void Dispose()
         {
-            StopMonitoring();
         }
 
-        public async Task<RileyLinkConnectionHandler> GetRileyLinkHandler(
+        private async Task<RileyLinkConnectionHandler> GetRileyLinkHandler(
             RadioOptions options,
             CancellationToken cancellationToken)
         {
@@ -247,25 +296,62 @@ namespace OmniCore.Radios.RileyLink
             }
         }
 
-        private async Task RecordRadioEvent(RadioEvent eventType, CancellationToken cancellationToken,
+        private async Task RecordRadioEvent(RadioEvent eventType,
             string text = null, byte[] data = null, int? rssi = null)
         {
-            Logging.Debug($"RLR: {Address} Recording radio event {eventType}");
+            //TODO: don't write to db just yet
 
-            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
+            //     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            //     try
+            //     {
+            //         using var context = await RepositoryService.GetContextReadWrite(cts.Token);
+            //
+            //         await context
+            //             .WithExisting(Entity)
+            //             .RadioEvents.AddAsync(
+            //                 new RadioEventEntity
+            //                 {
+            //                     Radio = Entity,
+            //                     EventType = eventType,
+            //                     Text = text,
+            //                     Data = data,
+            //                     Rssi = rssi
+            //                 }, cts.Token);
+            //         await context.Save(cts.Token);
+            //     }
+            //     catch (OperationCanceledException)
+            //     {
+            //         Logging.Warning("RLR: Timed out writing radio event to database");
+            //     }
+            //     catch (Exception e)
+            //     {
+            //         Logging.Warning("RLR: Error writing radio event to database", e);
+            //     }
+            //
+            // }
+        }
 
-            await context
-                .WithExisting(Entity)
-                .RadioEvents.AddAsync(
-                    new RadioEventEntity
-                    {
-                        Radio = Entity,
-                        EventType = eventType,
-                        Text = text,
-                        Data = data,
-                        Rssi = rssi
-                    }, cancellationToken);
-            await context.Save(cancellationToken);
+        private async Task UpdateRadioName(string name)
+        {
+            if (Entity.DeviceName == name)
+                return;
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try
+            {
+                using var context = await RepositoryService.GetContextReadWrite(cts.Token);
+                context.WithExisting(Entity);
+                Entity.DeviceName = name;
+                await context.Save(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Logging.Warning("RLR: Timed out while updating radio name in database");
+            }
+            catch (Exception e)
+            {
+                Logging.Warning("RLR: Error writing to database", e);
+            }
         }
     }
 }

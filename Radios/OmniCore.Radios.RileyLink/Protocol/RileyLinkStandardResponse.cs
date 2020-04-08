@@ -7,9 +7,9 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkDefaultResponse : IRileyLinkResponse
+    public class RileyLinkStandardResponse : IRileyLinkResponse
     {
-        private readonly ISubject<RileyLinkDefaultResponse> ResponseSubject = new Subject<RileyLinkDefaultResponse>();
+        private readonly ISubject<RileyLinkStandardResponse> ResponseSubject = new Subject<RileyLinkStandardResponse>();
         public RileyLinkResult Result { get; set; }
 
         public void Parse(byte[] responseData)

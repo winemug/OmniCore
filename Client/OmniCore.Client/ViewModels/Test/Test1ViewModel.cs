@@ -24,11 +24,18 @@ namespace OmniCore.Client.ViewModels.Test
 
         public ObservableCollection<RadioModel> Radios { get; set; }
 
-        protected override Task OnPageAppearing()
+        private IDisposable ScanSub = null;
+        protected override async Task OnPageAppearing()
         {
-            Disposables.Add(Api.PodService.ListErosRadios().Subscribe(
-                radio => { Radios.Add(new RadioModel(radio)); }));
-            return base.OnPageAppearing();
+            ScanSub?.Dispose();
+            ScanSub = Api.PodService.ListErosRadios().Subscribe(
+                radio => { Radios.Add(new RadioModel(radio)); });
+        }
+
+        protected override async Task OnPageDisappearing()
+        {
+            ScanSub?.Dispose();
+            ScanSub = null;
         }
 
         private async Task Identify()

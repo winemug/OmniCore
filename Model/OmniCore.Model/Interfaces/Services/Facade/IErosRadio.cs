@@ -10,7 +10,6 @@ namespace OmniCore.Model.Interfaces.Services.Facade
 {
     public interface IErosRadio : IServerResolvable, IDisposable
     {
-        void StartMonitoring();
         IErosRadioProvider Provider { get; }
         RadioEntity Entity { get; }
         RadioType Type { get; }

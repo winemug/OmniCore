@@ -1,6 +1,6 @@
 ﻿namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkRegisterValueResponse : RileyLinkDefaultResponse
+    public class RileyLinkRegisterValueResponse : RileyLinkStandardResponse
     {
         public byte Value { get; private set; }
 

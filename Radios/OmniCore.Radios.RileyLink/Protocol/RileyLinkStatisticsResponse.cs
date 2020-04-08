@@ -2,7 +2,7 @@
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkStatisticsResponse : RileyLinkDefaultResponse
+    public class RileyLinkStatisticsResponse : RileyLinkStandardResponse
     {
         public uint UptimeMilliseconds { get; private set; }
         public ushort RxOverflowCount { get; private set; }

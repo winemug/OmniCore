@@ -30,11 +30,6 @@ namespace OmniCore.Eros
             PodDictionary = new ConcurrentDictionary<long, IErosPod>();
         }
 
-        public void StartMonitoring(IErosPod pod)
-        {
-            ((ErosPod)pod).StartMonitoring();
-        }
-
         public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
         {
             using var context = await RepositoryService.GetContextReadOnly(cancellationToken);

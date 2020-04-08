@@ -6,6 +6,9 @@ namespace OmniCore.Model.Entities
 {
     public class RadioOptions
     {
+        
+        // TODO: separate ble options from radio specifics
+        
         public bool AutoConnect { get; set; } = false;
         public bool KeepConnected { get; set; } = true;
 
@@ -21,10 +24,10 @@ namespace OmniCore.Model.Entities
 
 
         public TimeSpan RadioDisconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
         public TimeSpan RadioDiscoveryCooldown { get; set; } = TimeSpan.FromSeconds(45);
 
-        public TimeSpan? RssiUpdateInterval { get; set; } = TimeSpan.FromSeconds(10);
+        public TimeSpan RadioHealthCheckIntervalGood { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RadioHealthCheckIntervalBad { get; set; } = TimeSpan.FromSeconds(5);
 
         // shifts in complements of 326.211 Hz
         public int RxFrequencyShift { get; set; } = 0;

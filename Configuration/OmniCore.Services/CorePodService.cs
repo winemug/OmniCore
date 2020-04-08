@@ -147,11 +147,8 @@ namespace OmniCore.Services
                 }
             });
 
-            var activePods = await ErosPodProvider.ActivePods(cancellationToken);
-            foreach (var erosPod in activePods)
-            {
-                ErosPodProvider.StartMonitoring(erosPod);
-            }
+            // force get active pods to start them
+            await ErosPodProvider.ActivePods(cancellationToken);
 
             Logging.Debug("Pod service started");
         }

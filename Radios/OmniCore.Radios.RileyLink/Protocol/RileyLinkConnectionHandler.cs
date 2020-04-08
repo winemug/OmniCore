@@ -155,7 +155,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> SendPacket(
+        public IObservable<RileyLinkStandardResponse> SendPacket(
             byte channel,
             byte repeatCount,
             ushort delayMilliseconds,
@@ -163,7 +163,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             byte[] data
         )
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SendPacket,
                 Parameters = new Bytes()
@@ -203,12 +203,12 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> UpdateRegister(
+        public IObservable<RileyLinkStandardResponse> UpdateRegister(
             RileyLinkRegister register,
             byte value
         )
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.UpdateRegister,
                 Parameters = new Bytes()
@@ -218,9 +218,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> Noop()
+        public IObservable<IRileyLinkCommand> Noop()
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenCommandSent(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.None
             });
@@ -234,11 +234,11 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> Led(
+        public IObservable<RileyLinkStandardResponse> Led(
             RileyLinkLed led,
             RileyLinkLedMode mode)
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.Led,
                 Parameters = new Bytes()
@@ -260,7 +260,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> SetModeRegisters(
+        public IObservable<RileyLinkStandardResponse> SetModeRegisters(
             RileyLinkRegisterMode registerMode,
             List<(RileyLinkRegister Register, int Value)> registers)
         {
@@ -268,17 +268,17 @@ namespace OmniCore.Radios.RileyLink.Protocol
             foreach (var r in registers)
                 p.Append((byte) r.Register).Append((byte) r.Value);
 
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetModeRegisters,
                 Parameters = p.ToArray()
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> SetSwEncoding(
+        public IObservable<RileyLinkStandardResponse> SetSwEncoding(
             RileyLinkSoftwareEncoding encoding)
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetSwEncoding,
                 Parameters = new Bytes()
@@ -287,10 +287,10 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> SetPreamble(
+        public IObservable<RileyLinkStandardResponse> SetPreamble(
             ushort preamble)
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetPreamble,
                 Parameters = new Bytes()
@@ -299,9 +299,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
             });
         }
 
-        public IObservable<RileyLinkDefaultResponse> ResetRadioConfig()
+        public IObservable<RileyLinkStandardResponse> ResetRadioConfig()
         {
-            return WhenResponseReceived<RileyLinkDefaultResponse>(new RileyLinkCommand
+            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.ResetRadioConfig
             });

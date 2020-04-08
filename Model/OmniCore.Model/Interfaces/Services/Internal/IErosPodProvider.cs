@@ -10,7 +10,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IErosPodProvider : IServerResolvable, IDisposable
     {
-        void StartMonitoring(IErosPod pod);
         Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken);
         Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken);
     }

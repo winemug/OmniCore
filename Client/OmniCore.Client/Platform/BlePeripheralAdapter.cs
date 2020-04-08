@@ -145,23 +145,34 @@ namespace OmniCore.Client.Platform
 
         public async Task<IDisposable> PeripheralConnectionLock(CancellationToken cancellationToken)
         {
-            var lockDisposable = await PeripheralConnectionLockProvider.LockAsync(cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
+            IDisposable bluetoothLock = null;
+            IDisposable lockDisposable = null;
+            try
+            {
+                lockDisposable = await PeripheralConnectionLockProvider.LockAsync(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
 
-            await TryEnsureAdapterEnabled(cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
+                await TryEnsureAdapterEnabled(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
 
-            Scanner.Pause();
-            var bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
+                Scanner.Pause();
+                bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
 
-            await Task.Delay(500, cancellationToken);
+                await Task.Delay(500, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                bluetoothLock?.Dispose();
+                Scanner.Resume();
+                lockDisposable?.Dispose();
+            }
 
             return Disposable.Create(async () =>
             {
-                bluetoothLock.Dispose();
-                await Task.Delay(500, cancellationToken);
+                bluetoothLock?.Dispose();
+                await Task.Delay(500);
                 Scanner.Resume();
-                lockDisposable.Dispose();
+                lockDisposable?.Dispose();
             });
         }
 
@@ -273,7 +284,7 @@ namespace OmniCore.Client.Platform
                                 peripheral.DiscoveryState = (PeripheralDiscoveryState.NotFound, dateFinished);
                     });
                 }
-            ).Publish().RefCount(TimeSpan.FromSeconds(10));
+            );
         }
 
         public IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
