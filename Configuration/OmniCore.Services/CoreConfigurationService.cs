@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
@@ -25,46 +26,68 @@ namespace OmniCore.Services
             RepositoryService = repositoryService;
         }
 
-        public Task<IDashConfiguration> GetDefaultDashConfiguration()
+        public Task<IDashConfiguration> GetDefaultDashConfiguration(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task SetDefaultDashConfiguration(IDashConfiguration dashConfiguration)
+        public Task SetDefaultDashConfiguration(IDashConfiguration dashConfiguration, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IErosConfiguration> GetDefaultErosConfiguration()
+        public Task<IErosConfiguration> GetDefaultErosConfiguration(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task SetDefaultErosConfiguration(IErosConfiguration erosConfiguration)
+        public Task SetDefaultErosConfiguration(IErosConfiguration erosConfiguration, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IMedication> GetDefaultMedication()
+        public async Task<IMedication> GetDefaultMedication(CancellationToken cancellationToken)
         {
-            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
-            var entity = await context.Medications.FirstAsync(m => m.Hormone == HormoneType.Unknown);
-            return new Medication {Entity = entity};
+            try
+            {
+                using var context = await RepositoryService.GetContextReadOnly(cancellationToken);
+                var entity = await context.Medications.FirstAsync(m => m.Hormone == HormoneType.Unknown);
+                return new Medication {Entity = entity};
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new OmniCoreRepositoryException(FailureType.RepositoryGeneralError, "Failed to read default medication", e);
+            }
         }
 
-        public Task SetDefaultMedication(IMedication medication)
+        public Task SetDefaultMedication(IMedication medication, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IUser> GetDefaultUser()
+        public async Task<IUser> GetDefaultUser(CancellationToken cancellationToken)
         {
-            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
-            var entity = await context.Users.FirstAsync(u => !u.ManagedRemotely);
-            return new User {Entity = entity};
+            try
+            {
+                using var context = await RepositoryService.GetContextReadOnly(cancellationToken);
+                var entity = await context.Users.FirstAsync(u => !u.ManagedRemotely);
+                return new User {Entity = entity};
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new OmniCoreRepositoryException(FailureType.RepositoryGeneralError, "Failed to read default user", e);
+            }
         }
 
-        public Task SetDefaultUser(IUser user)
+        public Task SetDefaultUser(IUser user, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

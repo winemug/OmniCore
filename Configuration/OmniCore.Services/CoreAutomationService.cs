@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -26,14 +27,38 @@ namespace OmniCore.Services
         {
             Logging.Debug("Starting automation service");
             foreach (var ac in AutomationComponents)
-                await ac.InitializeComponent(this);
+            {
+                try
+                {
+                    await ac.InitializeComponent(this);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logging.Warning($"Failed to initialize automation component {ac.GetType()}", e);
+                }
+            }
             Logging.Debug("Automation service started");
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)
         {
             foreach (var ac in AutomationComponents)
-                ac.Dispose();
+                try
+                {
+                    ac.Dispose();
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logging.Warning($"Failed to dispose automation component {ac.GetType()}", e);
+                }
             return Task.CompletedTask;
         }
 

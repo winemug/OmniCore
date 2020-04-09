@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -27,14 +28,38 @@ namespace OmniCore.Services
         protected override async Task OnStart(CancellationToken cancellationToken)
         {
             Logging.Debug("Starting integration service");
-            foreach (var ic in IntegrationComponents) await ic.InitializeComponent(this);
+            foreach (var ic in IntegrationComponents)
+                try
+                {
+                    await ic.InitializeComponent(this);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logging.Warning($"Failed to initialize integration component {ic.GetType()}", e);
+                }
+
             Logging.Debug("Integration service started");
         }
 
         protected override Task OnStop(CancellationToken cancellationToken)
         {
             foreach (var ic in IntegrationComponents)
-                ic.Dispose();
+                try
+                {
+                    ic.Dispose();
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logging.Warning($"Failed to dispose integration component {ic.GetType()}", e);
+                }
             return Task.CompletedTask;
         }
 
