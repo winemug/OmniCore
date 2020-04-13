@@ -27,21 +27,27 @@ namespace OmniCore.Client.ViewModels.Test
         private IDisposable ScanSub = null;
         protected override async Task OnPageAppearing()
         {
-            ScanSub?.Dispose();
-            ScanSub = Api.PodService.ListErosRadios().Subscribe(
-                radio => { Radios.Add(new RadioModel(radio)); });
+            await Task.Run(() =>
+            {
+                ScanSub?.Dispose();
+                ScanSub = Api.PodService.ListErosRadios().Subscribe(
+                    radio => { Radios.Add(new RadioModel(radio)); });
+            });
         }
 
         protected override async Task OnPageDisappearing()
         {
-            ScanSub?.Dispose();
-            ScanSub = null;
+            await Task.Run(() =>
+            {
+                ScanSub?.Dispose();
+                ScanSub = null;
+            });
         }
 
         private async Task Identify()
         {
-            var user = await Api.ConfigurationService.GetDefaultUser();
-            var med = await Api.ConfigurationService.GetDefaultMedication();
+            var user = await Api.ConfigurationService.GetDefaultUser(CancellationToken.None);
+            var med = await Api.ConfigurationService.GetDefaultMedication(CancellationToken.None);
             var pod = await Api.PodService.NewErosPod(user, med, CancellationToken.None);
 
             await pod.UpdateRadioList(Radios

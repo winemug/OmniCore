@@ -15,7 +15,6 @@ namespace OmniCore.Client.Droid
     {
         public SynchronizationContext UiSynchronizationContext => Application.SynchronizationContext;
         public string DataPath => Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-
         public string StoragePath
         {
             get

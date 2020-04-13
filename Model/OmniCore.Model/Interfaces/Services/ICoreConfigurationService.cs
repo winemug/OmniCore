@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Facade;
 
@@ -18,5 +19,8 @@ namespace OmniCore.Model.Interfaces.Services
 
         Task<IUser> GetDefaultUser(CancellationToken cancellationToken);
         Task SetDefaultUser(IUser user, CancellationToken cancellationToken);
+
+        Task<BlePeripheralOptions> GetBlePeripheralOptions(CancellationToken cancellationToken);
+        Task SetBlePeripheralOptions(BlePeripheralOptions blePeripheralOptions, CancellationToken cancellationToken);
     }
 }

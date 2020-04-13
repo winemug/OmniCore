@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Common;
 
@@ -27,11 +28,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         IObservable<PeripheralConnectionState> WhenConnectionStateChanged();
 
         Task<IBlePeripheralConnection> GetConnection(
-            bool autoConnect,
-            bool stayConnected,
-            TimeSpan discoveryTimeout,
-            TimeSpan connectTimeout,
-            TimeSpan characteristicDiscoveryTimeout,
+            BlePeripheralOptions peripheralOptions,
             CancellationToken cancellationToken);
     }
 }

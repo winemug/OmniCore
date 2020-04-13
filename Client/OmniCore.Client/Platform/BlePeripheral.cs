@@ -7,6 +7,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
@@ -155,11 +156,7 @@ namespace OmniCore.Client.Platform
         }
 
         public async Task<IBlePeripheralConnection> GetConnection(
-            bool autoConnect,
-            bool stayConnected,
-            TimeSpan discoveryTimeout,
-            TimeSpan connectTimeout,
-            TimeSpan characteristicDiscoveryTimeout,
+            BlePeripheralOptions peripheralOptions,
             CancellationToken cancellationToken)
         {
             IDevice device = null;
@@ -172,7 +169,7 @@ namespace OmniCore.Client.Platform
             {
                 using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
                 {
-                    using var discoveryTimeoutSource = new CancellationTokenSource(discoveryTimeout);
+                    using var discoveryTimeoutSource = new CancellationTokenSource(peripheralOptions.PeripheralDiscoveryTimeout);
                     using var discoveryCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                         discoveryTimeoutSource.Token,
                         cancellationToken);
@@ -186,7 +183,7 @@ namespace OmniCore.Client.Platform
 
                     if (!device.IsConnected())
                     {
-                        using var connectTimeoutSource = new CancellationTokenSource(connectTimeout);
+                        using var connectTimeoutSource = new CancellationTokenSource(peripheralOptions.PeripheralConnectTimeout);
                         using var connectCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                             connectTimeoutSource.Token,
                             cancellationToken);
@@ -197,7 +194,7 @@ namespace OmniCore.Client.Platform
                             device.WhenConnected().FirstAsync().ToTask(connectCancellationSource.Token);
 
                         device.Connect(new ConnectionConfig
-                            {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = autoConnect});
+                            {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = peripheralOptions.PeripheralAutoConnect});
 
                         var which = await Task.WhenAny(exceptionTask, connectionTask);
                         if (which.IsCanceled)
@@ -211,7 +208,7 @@ namespace OmniCore.Client.Platform
                         }
                     }
 
-                    using var characteristicTimeoutSource = new CancellationTokenSource(characteristicDiscoveryTimeout);
+                    using var characteristicTimeoutSource = new CancellationTokenSource(peripheralOptions.CharacteristicsDiscoveryTimeout);
                     using var characteristicCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                         characteristicTimeoutSource.Token,
                         cancellationToken);
@@ -239,7 +236,7 @@ namespace OmniCore.Client.Platform
                         lockDisposable.Dispose();
                     });
 
-                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, stayConnected);
+                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, peripheralOptions.PeripheralAutoConnect);
                     return blepc;
                 }
             }

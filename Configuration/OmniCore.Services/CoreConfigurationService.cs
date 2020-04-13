@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
@@ -88,6 +89,16 @@ namespace OmniCore.Services
         }
 
         public Task SetDefaultUser(IUser user, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<BlePeripheralOptions> GetBlePeripheralOptions(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new BlePeripheralOptions());
+        }
+
+        public async Task SetBlePeripheralOptions(BlePeripheralOptions blePeripheralOptions, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

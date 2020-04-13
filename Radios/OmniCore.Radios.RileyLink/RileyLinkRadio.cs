@@ -25,6 +25,7 @@ namespace OmniCore.Radios.RileyLink
         private readonly ICoreContainer<IServerResolvable> Container;
         private readonly ICoreLoggingFunctions Logging;
         private readonly ICoreRepositoryService RepositoryService;
+        private readonly ICoreConfigurationService ConfigurationService;
 
         private IDisposable HealthCheckSubscription;
         private CancellationTokenSource HealthCheckCancellationTokenSource;
@@ -32,8 +33,10 @@ namespace OmniCore.Radios.RileyLink
         public RileyLinkRadio(
             ICoreContainer<IServerResolvable> container,
             ICoreLoggingFunctions logging,
-            ICoreRepositoryService repositoryService)
+            ICoreRepositoryService repositoryService,
+            ICoreConfigurationService configurationService)
         {
+            ConfigurationService = configurationService;
             RepositoryService = repositoryService;
             Container = container;
             Logging = logging;
@@ -155,18 +158,22 @@ namespace OmniCore.Radios.RileyLink
 
         private async Task<TimeSpan> PerformHealthChecks(CancellationToken cancellationToken)
         {
+            var jitter = TimeSpan.FromSeconds(new Random().NextDouble() * 5).Add(TimeSpan.FromSeconds(5));
+            var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
             var discoveryAge = DateTimeOffset.UtcNow - Peripheral.DiscoveryState.Date;
+            var discoveryWindow = peripheralOptions.PeripheralDiscoveryCooldown +
+                                   peripheralOptions.PeripheralDiscoveryTimeout;
             if (Peripheral.DiscoveryState.State == PeripheralDiscoveryState.NotFound &&
-                discoveryAge < Options.RadioDiscoveryCooldown)
+                discoveryAge < discoveryWindow)
             {
                 Logging.Debug("RLR: {Address} Healthcheck postponed due discovery cooldown");
-                return Options.RadioDiscoveryCooldown - discoveryAge + TimeSpan.FromSeconds(5);
+                return discoveryWindow - discoveryAge + jitter;
             }
 
             if (Peripheral.DiscoveryState.State == PeripheralDiscoveryState.Searching)
             {
                 Logging.Debug("RLR: {Address} Healthcheck postponed due existing discovery");
-                return Options.RadioDiscoveryTimeout - discoveryAge + TimeSpan.FromSeconds(5);
+                return peripheralOptions.PeripheralDiscoveryTimeout - discoveryAge + jitter;
             }
 
             if (Peripheral.DiscoveryState.State != PeripheralDiscoveryState.Discovered)
@@ -175,29 +182,33 @@ namespace OmniCore.Radios.RileyLink
                 await Peripheral.Discover(cancellationToken);
             }
 
+            var connectionStateAge = DateTimeOffset.UtcNow - Peripheral.ConnectionState.Date;
             if (Peripheral.ConnectionState.State == PeripheralConnectionState.Connecting)
             {
                 Logging.Debug("RLR: {Address} Healthcheck postponed b/c peripheral is connecting");
-                return Options.RadioConnectionOverallTimeout + TimeSpan.FromSeconds(5);
+                return peripheralOptions.PeripheralConnectTimeout +  peripheralOptions.CharacteristicsDiscoveryTimeout
+                                                                  + jitter - connectionStateAge;
             }
 
             if (Peripheral.ConnectionState.State == PeripheralConnectionState.Disconnecting)
             {
                 Logging.Debug("RLR: {Address} Healthcheck postponed b/c peripheral is disconnecting");
-                return Options.RadioDisconnectTimeout + TimeSpan.FromSeconds(5);
+                return peripheralOptions.PeripheralConnectTimeout + jitter - connectionStateAge;
             }
 
+            var rssi = await Peripheral.ReadRssi(cancellationToken);
+            Logging.Debug($"RLR: {Address} Healthcheck RSSI: {rssi}");
+
             using var rlConnection = await GetRileyLinkHandler(Entity.Options, cancellationToken);
-            Logging.Debug("RLR: {Address} Healthcheck RL writing ignored command");
+            Logging.Debug("RLR: {Address} Healthcheck RL write test");
             await rlConnection.Noop().ToTask(cancellationToken);
+            
             Logging.Debug("RLR: {Address} Healthcheck RL state request");
             var state = await rlConnection.GetState().ToTask(cancellationToken);
             if (!state.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse);
             Logging.Debug("RLR: {Address} Healthcheck RL state OK");
 
-            var rssi = await Peripheral.ReadRssi(cancellationToken);
-            Logging.Debug($"RLR: {Address} Healthcheck RSSI: {rssi}");
             return Entity.Options.RadioHealthCheckIntervalGood;
         }
 
@@ -270,23 +281,26 @@ namespace OmniCore.Radios.RileyLink
         }
 
         private async Task<RileyLinkConnectionHandler> GetRileyLinkHandler(
-            RadioOptions options,
+            RadioOptions radioOptions,
             CancellationToken cancellationToken)
         {
             IBlePeripheralConnection peripheralConnection = null;
 
-            using var connectionTimeoutOverall = new CancellationTokenSource(options.RadioConnectionOverallTimeout);
+            var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
+            
+            using var connectionTimeoutOverall = new CancellationTokenSource(peripheralOptions.PeripheralConnectTimeout
+                + peripheralOptions.CharacteristicsDiscoveryTimeout + peripheralOptions.PeripheralDiscoveryTimeout);
+            
             using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                 connectionTimeoutOverall.Token);
             try
             {
                 Logging.Debug($"RLR: {Address} Opening connection");
-                peripheralConnection = await Peripheral.GetConnection(options.AutoConnect, options.KeepConnected,
-                    options.RadioDiscoveryTimeout, options.RadioConnectTimeout,
-                    options.RadioCharacteristicsDiscoveryTimeout,
+                peripheralConnection = await Peripheral.GetConnection(peripheralOptions,
                     linkedCancellation.Token);
 
-                return new RileyLinkConnectionHandler(Logging, Peripheral, peripheralConnection, options);
+                return new RileyLinkConnectionHandler(Logging, Peripheral, ConfigurationService,
+                    peripheralConnection);
             }
             catch (Exception e)
             {

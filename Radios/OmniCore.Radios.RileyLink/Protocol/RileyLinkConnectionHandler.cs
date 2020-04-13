@@ -27,25 +27,25 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private static readonly Guid RileyLinkResponseCharacteristicUuid =
             Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
+        private readonly ICoreConfigurationService ConfigurationService;
         private readonly ICoreLoggingFunctions Logger;
         private readonly IBlePeripheral Peripheral;
-        public RadioOptions ConfiguredOptions;
+        private RadioOptions ConfiguredOptions;
 
         private IDisposable NotificationSubscription;
         private IBlePeripheralConnection PeripheralConnection;
-        public RadioOptions RequestedOptions;
 
         public RileyLinkConnectionHandler(
             ICoreLoggingFunctions logger,
             IBlePeripheral peripheral,
-            IBlePeripheralConnection peripheralConnection,
-            RadioOptions options)
+            ICoreConfigurationService configurationService,
+            IBlePeripheralConnection peripheralConnection)
         {
+            ConfigurationService = configurationService;
             Peripheral = peripheral;
             Logger = logger;
             PeripheralConnection = peripheralConnection;
-            RequestedOptions = options;
-
+            
             ResponseQueue = new ConcurrentQueue<IRileyLinkResponse>();
 
             NotificationSubscription = peripheralConnection
@@ -53,8 +53,10 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 .Subscribe(async _ =>
                 {
                     Logger.Debug($"{Header} Characteristic notification received");
+
+                    var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
                     using var notifyReadTimeout =
-                        new CancellationTokenSource(RequestedOptions.RadioResponseTimeout);
+                        new CancellationTokenSource(peripheralOptions.CharacteristicResponseTimeout);
 
                     Logger.Debug($"{Header} Reading incoming response data");
                     byte[] responseData = null;
@@ -371,7 +373,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
         private async Task SendCommand(IRileyLinkCommand command)
         {
-            using var timeout = new CancellationTokenSource(RequestedOptions.RadioResponseTimeout);
+            var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
+            using var timeout = new CancellationTokenSource(peripheralOptions.CharacteristicResponseTimeout);
             try
             {
                 Logger.Debug($"{Header} Sending command {command.Type}");
