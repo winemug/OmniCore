@@ -14,36 +14,23 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class ActivePodsViewModel : BaseViewModel
     {
+        public List<IPod> Pods { get; set; }
+        public ICommand SelectCommand { get; set; }
+        public ICommand AddCommand =>
+            new Command(async () =>
+            {
+                await Client.PushView<PodWizardMainView>();
+            });
+
         public ActivePodsViewModel(ICoreClient client) : base(client)
         {
-            SelectCommand = new Command<IPod>(async pod => await SelectPod(pod));
-            AddCommand = new Command(async _ => await AddPod());
-        }
-
-        public List<IPod> Pods { get; set; }
-
-        public ICommand SelectCommand { get; set; }
-
-        public ICommand AddCommand { get; set; }
-
-        private ICoreApplicationFunctions ApplicationFunctions => Api.ApplicationFunctions;
-
-        private ICorePodService CorePodService => Api.PodService;
-
-        protected override async Task OnPageAppearing()
-        {
-            Pods = new List<IPod>();
-            foreach (var pod in await CorePodService.ActivePods(CancellationToken.None)) Pods.Add(pod);
-        }
-
-        private async Task AddPod()
-        {
-            await Shell.Current.Navigation.PushAsync(Client.ViewPresenter.GetView<PodWizardMainView>(false));
-        }
-
-        private Task SelectPod(IPod pod)
-        {
-            throw new NotImplementedException();
+            WhenPageAppears().Subscribe(async _ =>
+            {
+                Pods = new List<IPod>();
+                var api= await client.GetApi(CancellationToken.None);
+                foreach (var pod in await api.PodService.ActivePods(CancellationToken.None))
+                    Pods.Add(pod);
+            });
         }
     }
 }

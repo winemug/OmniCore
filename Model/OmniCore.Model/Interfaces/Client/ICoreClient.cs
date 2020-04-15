@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Client
 {
     public interface ICoreClient : ICoreClientFunctions
     {
-        ICoreContainer<IClientResolvable> ClientContainer { get; }
-        IViewPresenter ViewPresenter { get; }
-        ICoreClientConnection ClientConnection { get; }
-        SynchronizationContext SynchronizationContext { get; }
-        IDisposable DisplayKeepAwake();
+        T GetView<T>(bool viaShell, object parameter = null)
+            where T : IView;
+
+        Task<ICoreApi> GetApi(CancellationToken cancellationToken);
+        Task PushView<T>() where T : IView;
+        Task PushView<T>(object parameter) where T : IView;
     }
 }

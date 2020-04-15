@@ -22,12 +22,11 @@ namespace OmniCore.Client.Droid
                 .One<ICoreLoggingFunctions, CoreLoggingFunctions>();
         }
 
-        public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICoreClientContext clientContext)
+        public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICorePlatformClient platformClient)
         {
             return new CoreContainer<IClientResolvable>()
-                .Existing(clientContext)
-                .One<ICoreClientConnection, AndroidServiceConnection>()
-                .One<ICoreClient, CoreClient>();
+                .Existing(platformClient)
+                .One<ICoreClientConnection, AndroidServiceConnection>();
         }
 
         public static ICoreContainer<IServerResolvable> AndroidServiceContainer(ICoreApi api,

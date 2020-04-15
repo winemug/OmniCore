@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.Models;
@@ -15,33 +16,24 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class RadiosViewModel : BaseViewModel
     {
-        public RadiosViewModel(ICoreClient client) : base(client)
+        public ObservableCollection<RadioModel> Radios { get; } = new ObservableCollection<RadioModel>();
+        public ICommand SelectCommand => new Command<RadioModel>(async rm => 
+            await Client.PushView<RadioDetailView>(rm));
+        public ICommand AddCommand => new Command(async _ =>
         {
-            SelectCommand = new Command<RadioModel>(async rm => await SelectRadio(rm.Radio));
-            AddCommand = new Command(async _ =>
+            await Client.PushView<RadioScanView>();
+        });
+        
+        public RadiosViewModel(ICoreClient client,
+            ICorePlatformClient platformClient) : base(client)
+        {
+            WhenPageAppears().Subscribe(async _ =>
             {
-                await Shell.Current.Navigation.PushAsync(Client.ViewPresenter.GetView<RadioScanView>(false));
+                var api = await client.GetApi(CancellationToken.None);
+                api.PodService.ListErosRadios()
+                    .ObserveOn(platformClient.SynchronizationContext)
+                    .Subscribe(radio => { Radios.Add(new RadioModel(radio)); });
             });
-        }
-
-        public ObservableCollection<RadioModel> Radios { get; set; }
-        public ICommand SelectCommand { get; set; }
-        public ICommand AddCommand { get; set; }
-
-        protected override Task OnPageAppearing()
-        {
-            Radios = new ObservableCollection<RadioModel>();
-            Api.PodService.ListErosRadios()
-                .ObserveOn(Client.SynchronizationContext)
-                .Subscribe(radio => { Radios.Add(new RadioModel(radio)); })
-                .AutoDispose(this);
-
-            return Task.CompletedTask;
-        }
-
-        private async Task SelectRadio(IErosRadio radio)
-        {
-            await Shell.Current.Navigation.PushAsync(Client.ViewPresenter.GetView<RadioDetailView>(false, radio));
         }
     }
 }

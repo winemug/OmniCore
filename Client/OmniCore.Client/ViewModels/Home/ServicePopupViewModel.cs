@@ -3,58 +3,46 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using OmniCore.Client.Annotations;
+using OmniCore.Client.ViewModels.Base;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Client;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
 {
-    public class ServicePopupViewModel : IViewModel
+    public class ServicePopupViewModel : BaseViewModel
     {
-        private readonly ICoreClient Client;
-        private IDisposable ApiStateSubscription;
-        private IDisposable ConnectionSubscription;
 
-        public ServicePopupViewModel(ICoreClient client)
-        {
-            Client = client;
-            Disposables = new List<IDisposable>();
-        }
-        public IList<IDisposable> Disposables { get; }
-
-        public void DisposeDisposables()
+        public ServicePopupViewModel(ICoreClient client) : base(client)
         {
         }
-
-        public object Parameter { get; private set; }
-
-        public void SetParameters(IView view, bool viaShell, object parameter)
+        public void Initialize(IView view, bool viaShell, object parameter)
         {
-            Parameter = parameter;
-            var page = (Page) view;
-            page.BindingContext = this;
-            ConnectionSubscription?.Dispose();
-            ConnectionSubscription = Client.ClientConnection.WhenConnectionChanged()
-                .Subscribe(api =>
-                {
-                    if (api == null)
-                    {
-                        ApiStateSubscription?.Dispose();
-                        ApiStateSubscription = null;
-                        // 
-                    }
-                    else
-                    {
-                        if (ApiStateSubscription == null)
-                            ApiStateSubscription = api.ApiStatus.Subscribe(status =>
-                            {
-                                if (status == CoreApiStatus.Started)
-                                {
-                                    //
-                                }
-                            });
-                    }
-                });
+            // Parameter = parameter;
+            // var page = (Page) view;
+            // page.BindingContext = this;
+            // ConnectionSubscription?.Dispose();
+            // ConnectionSubscription = Client.ClientConnection.WhenConnectionChanged()
+            //     .Subscribe(api =>
+            //     {
+            //         if (api == null)
+            //         {
+            //             ApiStateSubscription?.Dispose();
+            //             ApiStateSubscription = null;
+            //             // 
+            //         }
+            //         else
+            //         {
+            //             if (ApiStateSubscription == null)
+            //                 ApiStateSubscription = api.ApiStatus.Subscribe(status =>
+            //                 {
+            //                     if (status == CoreApiStatus.Started)
+            //                     {
+            //                         //
+            //                     }
+            //                 });
+            //         }
+            //     });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

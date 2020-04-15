@@ -14,45 +14,34 @@ namespace OmniCore.Client.ViewModels.Test
 {
     public class Test1ViewModel : TaskViewModel
     {
-        public Test1ViewModel(ICoreClient client) : base(client)
+        public ObservableCollection<RadioModel> Radios => new ObservableCollection<RadioModel>();
+        public Command IdentifyCommand => new Command(async () =>
         {
-            IdentifyCommand = new Command(async () => await Identify());
-            Radios = new ObservableCollection<RadioModel>();
-        }
+            var api = await Client.GetApi(CancellationToken.None);
+            var user = await api.ConfigurationService.GetDefaultUser(CancellationToken.None);
+            var med = await api.ConfigurationService.GetDefaultMedication(CancellationToken.None);
+            var pod = await api.PodService.NewErosPod(user, med, CancellationToken.None);
 
-        public Command IdentifyCommand { get; }
-
-        public ObservableCollection<RadioModel> Radios { get; set; }
+            await pod.UpdateRadioList(Radios
+                .Where(r => r.IsChecked)
+                .Select(r => r.Radio), CancellationToken.None);
+        });
 
         private IDisposable ScanSub = null;
-        protected override async Task OnPageAppearing()
+        public Test1ViewModel(ICoreClient client) : base(client)
         {
-            await Task.Run(() =>
+            WhenPageAppears().Subscribe(async _ =>
             {
+                var api = await Client.GetApi(CancellationToken.None);
                 ScanSub?.Dispose();
-                ScanSub = Api.PodService.ListErosRadios().Subscribe(
+                ScanSub = api.PodService.ListErosRadios().Subscribe(
                     radio => { Radios.Add(new RadioModel(radio)); });
             });
-        }
-
-        protected override async Task OnPageDisappearing()
-        {
-            await Task.Run(() =>
+            WhenPageDisappears().Subscribe(_ =>
             {
                 ScanSub?.Dispose();
                 ScanSub = null;
             });
-        }
-
-        private async Task Identify()
-        {
-            var user = await Api.ConfigurationService.GetDefaultUser(CancellationToken.None);
-            var med = await Api.ConfigurationService.GetDefaultMedication(CancellationToken.None);
-            var pod = await Api.PodService.NewErosPod(user, med, CancellationToken.None);
-
-            await pod.UpdateRadioList(Radios
-                    .Where(r => r.IsChecked)
-                    .Select(r => r.Radio), CancellationToken.None);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using Android;
 using Android.App;
@@ -20,8 +21,6 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Utilities.Extensions;
 using Rg.Plugins.Popup;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
@@ -32,25 +31,22 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainActivity : FormsAppCompatActivity, ICoreClientContext
+    public class MainActivity : FormsAppCompatActivity, ICorePlatformClient
     {
         private ICoreContainer<IClientResolvable> ClientContainer;
         private bool ConnectRequested;
         private bool DisconnectRequested;
 
         private ISubject<bool> PermissionResultSubject;
-
-#if DEBUG
-        private IDisposable ScreenLockDisposable;
-#endif
-
-        private GenericBroadcastReceiver XdripReceiver;
+        
+        // private GenericBroadcastReceiver XdripReceiver;
 
         private IServiceConnection ServiceConnection =>
             (IServiceConnection) ClientContainer.Get<ICoreClientConnection>();
-
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SynchronizationContext = SynchronizationContext.Current;
+            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
@@ -68,16 +64,15 @@ namespace OmniCore.Client.Droid
             //TODO: move to service
             if (!CheckPermissions().Wait()) FinishAffinity();
 
-            XdripReceiver = new GenericBroadcastReceiver();
-            RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
-
+            // XdripReceiver = new GenericBroadcastReceiver();
+            // RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
 
             Popup.Init(this, savedInstanceState);
 
             ClientContainer = Initializer.AndroidClientContainer(this)
-                .WithXamarinForms();
+                .WithXamarinFormsClient();
 
-            LoadXamarinApplication();
+            LoadApplication(ClientContainer.Get<ICoreClient>() as Xamarin.Forms.Application);
         }
 
         public override void OnBackPressed()
@@ -128,36 +123,11 @@ namespace OmniCore.Client.Droid
 
             return Observable.Return(true);
         }
-
-        protected override void OnResume()
+        public async Task StartServiceConnection(Type concreteType, ICoreClientConnection connection)
         {
-#if DEBUG
-            ScreenLockDisposable = ClientContainer.Get<ICoreClient>().DisplayKeepAwake();
-#endif
-            ConnectToAndroidService();
-            base.OnResume();
-        }
 
-        protected override void OnPause()
-        {
-#if DEBUG
-            ScreenLockDisposable?.Dispose();
-            ScreenLockDisposable = null;
-#endif
-            base.OnPause();
         }
-
-        protected override void OnStop()
-        {
-            base.OnStop();
-            DisconnectFromAndroidService();
-        }
-
-        private void LoadXamarinApplication()
-        {
-            LoadApplication(ClientContainer.Get<XamarinApp>());
-        }
-
+        
         private void ConnectToAndroidService()
         {
             if (ConnectRequested)
@@ -185,5 +155,28 @@ namespace OmniCore.Client.Droid
             base.OnNewIntent(intent);
             Push.CheckLaunchedFromNotification(this, intent);
         }
+
+        public async Task AttachToService(Type concreteType, ICoreClientConnection connection)
+        {
+            var serviceConnection = connection as IServiceConnection;
+            if (serviceConnection == null)
+            {
+                throw new OmniCoreWorkflowException(FailureType.PlatformGeneralError,
+                    "Client connection  is not of expected type for the Android platform");
+            }
+            await Task.Run(() =>
+            {
+                var intent = new Intent(this, concreteType);
+                if (!BindService(intent, connection as IServiceConnection, Bind.AutoCreate))
+                    throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
+            });
+        }
+
+        public async Task DetachFromService(ICoreClientConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SynchronizationContext SynchronizationContext { get; private set; }
     }
 }

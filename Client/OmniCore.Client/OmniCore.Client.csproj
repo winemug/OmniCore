@@ -89,9 +89,6 @@
     <Compile Update="Views\Home\ActivePodsView.xaml.cs">
       <DependentUpon>PodsView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Main\ShellView.xaml.cs">
-      <DependentUpon>ShellView.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml.cs">
       <DependentUpon>PodWizardPendingActivationsWarning.xaml</DependentUpon>
     </Compile>
@@ -104,8 +101,8 @@
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
       <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="XamarinApp.xaml.cs">
-      <DependentUpon>XamarinApp.xaml</DependentUpon>
+    <Compile Update="XamarinClient.xaml.cs">
+      <DependentUpon>XamarinClient.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -123,12 +120,6 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Home\ServicePopupView.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Main\NavigationView.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\Main\ShellView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">

@@ -16,12 +16,11 @@ namespace OmniCore.Client
                 .Many<IBlePeripheralConnection, BlePeripheralConnection>();
         }
 
-        public static ICoreContainer<IClientResolvable> WithXamarinForms
+        public static ICoreContainer<IClientResolvable> WithXamarinFormsClient
             (this ICoreContainer<IClientResolvable> container)
         {
             return container
-                .One<IViewPresenter, ViewPresenter>()
-                .One<XamarinApp>();
+                .One<ICoreClient, XamarinClient>();
         }
     }
 }

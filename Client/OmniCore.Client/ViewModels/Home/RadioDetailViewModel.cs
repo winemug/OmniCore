@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
@@ -13,15 +14,12 @@ namespace OmniCore.Client.ViewModels.Home
         public RadioDetailViewModel(ICoreClient client) : base(client)
         {
             Test1Command = new Command(() => { });
+            WhenParameterSet().Subscribe(p =>
+            {
+                Radio = new RadioModel((IErosRadio) p);
+            });
         }
-
         public RadioModel Radio { get; set; }
         public ICommand Test1Command { get; set; }
-
-        protected override Task OnPageAppearing()
-        {
-            Radio = new RadioModel((IErosRadio) Parameter);
-            return Task.CompletedTask;
-        }
     }
 }

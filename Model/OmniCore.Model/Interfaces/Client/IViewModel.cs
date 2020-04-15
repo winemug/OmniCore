@@ -1,11 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Client
 {
-    public interface IViewModel : INotifyPropertyChanged, IDisposablesContainer, IClientResolvable
+    public interface IViewModel : INotifyPropertyChanged, IDisposable, IClientResolvable
     {
-        object Parameter { get; }
-        void SetParameters(IView view, bool viaShell, object parameter);
+        void Initialize(IView view, bool viaShell, object parameter);
     }
 }

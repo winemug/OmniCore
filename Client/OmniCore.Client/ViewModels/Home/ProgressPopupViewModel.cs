@@ -10,12 +10,5 @@ namespace OmniCore.Client.ViewModels.Home
         public ProgressPopupViewModel(ICoreClient client) : base(client)
         {
         }
-
-        public ITaskProgress Progress => (ITaskProgress) Parameter;
-
-        protected override Task OnPageAppearing()
-        {
-            return base.OnPageAppearing();
-        }
     }
 }
