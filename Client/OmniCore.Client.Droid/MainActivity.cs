@@ -120,43 +120,15 @@ namespace OmniCore.Client.Droid
                 ActivityCompat.RequestPermissions(this, permissions.ToArray(), 34);
                 return PermissionResultSubject.AsObservable();
             }
-
             return Observable.Return(true);
         }
-        public async Task StartServiceConnection(Type concreteType, ICoreClientConnection connection)
-        {
-
-        }
-        
-        private void ConnectToAndroidService()
-        {
-            if (ConnectRequested)
-                return;
-
-            var intent = new Intent(this, typeof(AndroidService));
-            if (!BindService(intent, ServiceConnection, Bind.AutoCreate))
-                throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
-            ConnectRequested = true;
-            DisconnectRequested = false;
-        }
-
-        private void DisconnectFromAndroidService()
-        {
-            if (DisconnectRequested)
-                return;
-
-            base.UnbindService(ServiceConnection);
-            ConnectRequested = false;
-            DisconnectRequested = true;
-        }
-
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
             Push.CheckLaunchedFromNotification(this, intent);
         }
 
-        public async Task AttachToService(Type concreteType, ICoreClientConnection connection)
+        public Task AttachToService(Type concreteType, ICoreClientConnection connection)
         {
             var serviceConnection = connection as IServiceConnection;
             if (serviceConnection == null)
@@ -164,7 +136,7 @@ namespace OmniCore.Client.Droid
                 throw new OmniCoreWorkflowException(FailureType.PlatformGeneralError,
                     "Client connection  is not of expected type for the Android platform");
             }
-            await Task.Run(() =>
+            return Device.InvokeOnMainThreadAsync(() =>
             {
                 var intent = new Intent(this, concreteType);
                 if (!BindService(intent, connection as IServiceConnection, Bind.AutoCreate))
@@ -172,9 +144,16 @@ namespace OmniCore.Client.Droid
             });
         }
 
-        public async Task DetachFromService(ICoreClientConnection connection)
+        public Task DetachFromService(ICoreClientConnection connection)
         {
-            throw new NotImplementedException();
+            var serviceConnection = connection as IServiceConnection;
+            if (serviceConnection == null)
+            {
+                throw new OmniCoreWorkflowException(FailureType.PlatformGeneralError,
+                    "Client connection  is not of expected type for the Android platform");
+            }
+           
+            return Device.InvokeOnMainThreadAsync(() => { base.UnbindService(serviceConnection); });
         }
 
         public SynchronizationContext SynchronizationContext { get; private set; }
