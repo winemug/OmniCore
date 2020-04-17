@@ -24,14 +24,14 @@ namespace OmniCore.Client.ViewModels.Home
             await Client.PushView<RadioScanView>();
         });
         
-        public RadiosViewModel(ICoreClient client,
-            ICorePlatformClient platformClient) : base(client)
+        public RadiosViewModel(IClient client,
+            IClientFunctions clientFunctions) : base(client)
         {
             WhenPageAppears().Subscribe(async _ =>
             {
                 var api = await client.GetApi(CancellationToken.None);
                 api.PodService.ListErosRadios()
-                    .ObserveOn(platformClient.SynchronizationContext)
+                    .ObserveOn(await Device.GetMainThreadSynchronizationContextAsync())
                     .Subscribe(radio => { Radios.Add(new RadioModel(radio)); });
             });
         }

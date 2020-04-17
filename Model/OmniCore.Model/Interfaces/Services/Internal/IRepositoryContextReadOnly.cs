@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IRepositoryContextReadOnly : IDisposable, IServerResolvable
+    public interface IRepositoryContextReadOnly : IDisposable, IServiceInstance
     {
         DbSet<MedicationEntity> Medications { get; }
         DbSet<UserEntity> Users { get; }

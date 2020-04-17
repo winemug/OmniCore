@@ -15,7 +15,7 @@ namespace OmniCore.Client.ViewModels.Base
         public DataTemplate ArchivedPodsView { get; }
         public DataTemplate Test1View { get; }
         
-        public ShellViewModel(ICoreClient client) : base(client)
+        public ShellViewModel(IClient client) : base(client)
         {
             EmptyView = new DataTemplate(() => client.GetView<EmptyView>(true));
             RadiosView = new DataTemplate(() => client.GetView<RadiosView>(true));

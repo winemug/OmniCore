@@ -5,8 +5,8 @@ namespace OmniCore.Repository
 {
     public static class Initializer
     {
-        public static ICoreContainer<IServerResolvable> WithEfCoreRepository
-            (this ICoreContainer<IServerResolvable> container)
+        public static IContainer<IServiceInstance> WithEfCoreRepository
+            (this IContainer<IServiceInstance> container)
         {
             return container
                 .Many<IRepositoryContextReadOnly, RepositoryContext>()

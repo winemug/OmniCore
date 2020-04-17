@@ -20,13 +20,13 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheralAdapter : IBlePeripheralAdapter
     {
-        private readonly ICoreApplicationFunctions ApplicationFunctions;
+        private readonly ICommonFunctions CommonFunctions;
 
-        private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly IContainer<IServiceInstance> Container;
         private readonly IErosRadioProvider[] ErosRadioProviders;
         private readonly List<Guid> ErosRadioServiceUuids;
-        private readonly ICoreLoggingFunctions Logging;
-        private readonly ICoreNotificationFunctions NotificationFunctions;
+        private readonly ILogger Logger;
+        private readonly IServiceFunctions ServiceFunctions;
 
         private readonly AsyncLock PeripheralConnectionLockProvider;
         private readonly BlePeripheralScanner Scanner;
@@ -34,16 +34,16 @@ namespace OmniCore.Client.Platform
         private readonly ConcurrentDictionary<Guid, IDevice> DeviceCache;
         private readonly ConcurrentDictionary<Guid, BlePeripheral> PeripheralCache;
 
-        public BlePeripheralAdapter(ICoreContainer<IServerResolvable> container,
-            ICoreApplicationFunctions applicationFunctions,
-            ICoreNotificationFunctions notificationFunctions,
-            ICoreLoggingFunctions loggingFunctions,
+        public BlePeripheralAdapter(IContainer<IServiceInstance> container,
+            ICommonFunctions commonFunctions,
+            IServiceFunctions serviceFunctions,
+            ILogger logger,
             IErosRadioProvider[] erosRadioProviders)
         {
             Container = container;
-            ApplicationFunctions = applicationFunctions;
-            NotificationFunctions = notificationFunctions;
-            Logging = loggingFunctions;
+            CommonFunctions = commonFunctions;
+            ServiceFunctions = serviceFunctions;
+            Logger = logger;
             ErosRadioProviders = erosRadioProviders;
 
             AdapterManagementLock = new AsyncLock();
@@ -59,7 +59,7 @@ namespace OmniCore.Client.Platform
                 .Select(rp => rp.ServiceUuid).ToList();
 
             PeripheralConnectionLockProvider = new AsyncLock();
-            Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, loggingFunctions, applicationFunctions);
+            Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, logger, commonFunctions);
             WhenScanStarted = Scanner.WhenScanStateChanged.Where(s => s).Select(s => this);
             WhenScanFinished = Scanner.WhenScanStateChanged.Where(s => !s).Select(s => this);
 
@@ -75,7 +75,7 @@ namespace OmniCore.Client.Platform
             {
                 if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOff)
                 {
-                    Logging.Debug("BLE: Adapter disabled");
+                    Logger.Debug("BLE: Adapter disabled");
                     observer.OnNext(this);
                 }
 
@@ -83,7 +83,7 @@ namespace OmniCore.Client.Platform
                     .Where(s => s == AdapterStatus.PoweredOff)
                     .Subscribe(_ =>
                     {
-                        Logging.Debug("BLE: Adapter disabled");
+                        Logger.Debug("BLE: Adapter disabled");
                         observer.OnNext(this);
                     });
             });
@@ -95,7 +95,7 @@ namespace OmniCore.Client.Platform
             {
                 if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn)
                 {
-                    Logging.Debug("BLE: Adapter enabled");
+                    Logger.Debug("BLE: Adapter enabled");
                     observer.OnNext(this);
                 }
 
@@ -103,7 +103,7 @@ namespace OmniCore.Client.Platform
                     .Where(s => s == AdapterStatus.PoweredOn)
                     .Subscribe(_ =>
                     {
-                        Logging.Debug("BLE: Adapter enabled");
+                        Logger.Debug("BLE: Adapter enabled");
                         observer.OnNext(this);
                     });
             });
@@ -130,16 +130,16 @@ namespace OmniCore.Client.Platform
             using var adapterManagementLock = await AdapterManagementLock.LockAsync(cancellationToken);
             if (CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn) return true;
 
-            Logging.Debug("BLE: Trying to enable adapter");
+            Logger.Debug("BLE: Trying to enable adapter");
             CrossBleAdapter.Current.SetAdapterState(true);
-            Logging.Debug("BLE: Waiting for adapter to get enabled");
+            Logger.Debug("BLE: Waiting for adapter to get enabled");
 
             await CrossBleAdapter.Current.WhenStatusChanged()
                 .Where(s => s == AdapterStatus.PoweredOn)
                 .FirstAsync()
                 .ToTask(cancellationToken);
 
-            Logging.Debug("BLE: Adapter enabled successfully");
+            Logger.Debug("BLE: Adapter enabled successfully");
             return CrossBleAdapter.Current.Status == AdapterStatus.PoweredOn;
         }
 
@@ -156,7 +156,7 @@ namespace OmniCore.Client.Platform
                 cancellationToken.ThrowIfCancellationRequested();
 
                 Scanner.Pause();
-                bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
+                bluetoothLock = CommonFunctions.BluetoothLock();
 
                 await Task.Delay(500, cancellationToken);
             }
@@ -191,12 +191,12 @@ namespace OmniCore.Client.Platform
 
                     try
                     {
-                        Logging.Debug("BLE: Request connected devices");
+                        Logger.Debug("BLE: Request connected devices");
                         using (var ppc = await PeripheralConnectionLock(cts.Token))
                         {
                             var connectedDevices = await CrossBleAdapter.Current
                                 .GetConnectedDevices().ToTask(cancellationToken);
-                            Logging.Debug("BLE: Received connected devices");
+                            Logger.Debug("BLE: Received connected devices");
 
                             foreach (var connectedDevice in connectedDevices)
                             {
@@ -209,7 +209,7 @@ namespace OmniCore.Client.Platform
                                     var peripheral = GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
                                     peripheral.UpdateSubscriptions(connectedDevice);
 
-                                    Logging.Debug(
+                                    Logger.Debug(
                                         $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
                                     observedPeripheralUuids.Add(peripheral.PeripheralUuid);
                                     observer.OnNext(peripheral);
@@ -229,7 +229,7 @@ namespace OmniCore.Client.Platform
                                 peripheral.DiscoveryState = (PeripheralDiscoveryState.Searching, searchStart);
                             }
 
-                            Logging.Debug("BLE: Connecting to scan observable");
+                            Logger.Debug("BLE: Connecting to scan observable");
                             scanSubscription = Scanner.Scan()
                                 .Subscribe(scanResult =>
                                 {
@@ -251,7 +251,7 @@ namespace OmniCore.Client.Platform
 
                                     if (!observedPeripheralUuids.Contains(peripheral.PeripheralUuid))
                                     {
-                                        Logging.Debug(
+                                        Logger.Debug(
                                             $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Reporting found peripheral");
                                         observedPeripheralUuids.Add(peripheral.PeripheralUuid);
                                         observer.OnNext(peripheral);
@@ -261,7 +261,7 @@ namespace OmniCore.Client.Platform
                     }
                     catch (Exception e)
                     {
-                        Logging.Debug($"BLE: Error during scan: \n {e.AsDebugFriendly()}");
+                        Logger.Debug($"BLE: Error during scan: \n {e.AsDebugFriendly()}");
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();
@@ -274,7 +274,7 @@ namespace OmniCore.Client.Platform
 
                     return Disposable.Create(() =>
                     {
-                        Logging.Debug("BLE: Disconnecting from scan observable");
+                        Logger.Debug("BLE: Disconnecting from scan observable");
                         cts.Cancel();
                         cts.Dispose();
                         scanSubscription?.Dispose();

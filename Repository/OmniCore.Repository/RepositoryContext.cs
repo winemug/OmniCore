@@ -11,8 +11,10 @@ using Microsoft.Extensions.Logging;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
+using ILogger = OmniCore.Model.Interfaces.Services.ILogger;
 
 namespace OmniCore.Repository
 {
@@ -20,7 +22,7 @@ namespace OmniCore.Repository
     {
         private readonly string ConnectionString;
         private IDisposable ReaderWriterLock;
-        private ICoreLoggingFunctions Logging;
+        private ILogger Logger;
 
         // for migrations tool
         public RepositoryContext()
@@ -29,10 +31,10 @@ namespace OmniCore.Repository
         }
 
         public RepositoryContext(
-            ICoreApplicationFunctions applicationFunctions,
-            ICoreLoggingFunctions logging)
+            ICommonFunctions commonFunctions,
+            ILogger logger)
         {
-            var path = Path.Combine(applicationFunctions.DataPath, "oc.db3");
+            var path = Path.Combine(commonFunctions.DataPath, "oc.db3");
             ConnectionString = $"Data Source={path}";
         }
 
@@ -49,17 +51,17 @@ namespace OmniCore.Repository
 
         public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
         {
-            Logging.Debug("Initializing database");
+            Logger.Debug("Initializing database");
             if (createNew)
             {
-                Logging.Debug("Deleting existing database");
+                Logger.Debug("Deleting existing database");
                 Database.EnsureDeleted();
             }
-            Logging.Debug("Migrating database structure");
+            Logger.Debug("Migrating database structure");
             await Database.MigrateAsync(cancellationToken);
-            Logging.Debug("Seeding default data");
+            Logger.Debug("Seeding default data");
             await SeedData();
-            Logging.Debug("Database initialization complete.");
+            Logger.Debug("Database initialization complete.");
         }
 
         public override void Dispose()
@@ -92,7 +94,7 @@ namespace OmniCore.Repository
             }
             catch (OperationCanceledException)
             {
-                Logging.Warning("Save operation canceled");
+                Logger.Warning("Save operation canceled");
                 throw;
             }
             catch (Exception e)

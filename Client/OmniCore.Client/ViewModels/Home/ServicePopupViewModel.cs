@@ -13,7 +13,7 @@ namespace OmniCore.Client.ViewModels.Home
     public class ServicePopupViewModel : BaseViewModel
     {
 
-        public ServicePopupViewModel(ICoreClient client) : base(client)
+        public ServicePopupViewModel(IClient client) : base(client)
         {
         }
         public void Initialize(IView view, bool viaShell, object parameter)

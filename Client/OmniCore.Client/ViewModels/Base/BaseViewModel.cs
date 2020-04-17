@@ -16,7 +16,7 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public abstract class BaseViewModel : IViewModel
     {
-        protected ICoreClient Client { get; }
+        protected IClient Client { get; }
         private ISubject<IView> ViewSubject;
         private ISubject<object> ParameterSubject;
         protected IObservable<object> WhenParameterSet() => ParameterSubject.AsObservable();
@@ -37,7 +37,7 @@ namespace OmniCore.Client.ViewModels.Base
                 .Switch();
 
 
-        protected BaseViewModel(ICoreClient client)
+        protected BaseViewModel(IClient client)
         {
             Client = client;
             ViewSubject = new AsyncSubject<IView>();

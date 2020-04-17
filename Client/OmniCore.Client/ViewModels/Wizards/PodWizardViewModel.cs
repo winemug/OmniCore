@@ -48,7 +48,7 @@ namespace OmniCore.Client.ViewModels.Wizards
         private bool SelectedEros;
         private bool SelectedRecovery;
 
-        public PodWizardViewModel(ICoreClient client) : base(client)
+        public PodWizardViewModel(IClient client) : base(client)
         {
             WhenPageAppears().Subscribe(async _ =>
             {

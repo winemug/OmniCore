@@ -22,7 +22,7 @@ namespace OmniCore.Client.ViewModels.Home
                 await Client.PushView<PodWizardMainView>();
             });
 
-        public ActivePodsViewModel(ICoreClient client) : base(client)
+        public ActivePodsViewModel(IClient client) : base(client)
         {
             WhenPageAppears().Subscribe(async _ =>
             {

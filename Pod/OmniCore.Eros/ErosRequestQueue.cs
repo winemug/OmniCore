@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Eros
 {
-    public class ErosRequestQueue : IServerResolvable
+    public class ErosRequestQueue : IServiceInstance
     {
         private readonly BlockingCollection<ErosPodRequest> RequestQueue;
 

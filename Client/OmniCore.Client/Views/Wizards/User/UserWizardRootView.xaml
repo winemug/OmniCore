@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Client.Views.Wizards.NewUser.NewUserWizardRootView">
+    <ContentPage.Content>
+        <StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Switch IsToggled="True"/>
+                <Label Text="Create and manage a user profile on this device"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Switch IsToggled="False"/>
+                <Label Text="Manage or monitor a user profile on another device"/>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

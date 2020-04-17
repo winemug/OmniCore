@@ -7,15 +7,15 @@ namespace OmniCore.Services
 {
     public static class Initializer
     {
-        public static ICoreContainer<IServerResolvable> WithDefaultServices
-            (this ICoreContainer<IServerResolvable> container)
+        public static IContainer<IServiceInstance> WithDefaultServices
+            (this IContainer<IServiceInstance> container)
         {
             return container
-                .One<ICoreRepositoryService, CoreRepositoryService>()
-                .One<ICoreConfigurationService, CoreConfigurationService>()
-                .One<ICorePodService, CorePodService>()
-                .One<ICoreAutomationService, CoreAutomationService>()
-                .One<ICoreIntegrationService, CoreIntegrationService>()
+                .One<IRepositoryService, RepositoryService>()
+                .One<IConfigurationService, ConfigurationService>()
+                .One<IPodService, PodService>()
+                .One<IAutomationService, AutomationService>()
+                .One<IIntegrationService, IntegrationService>()
                 .One<IIntegrationComponent, MqttIntegration>(nameof(MqttIntegration))
                 .One<IIntegrationComponent, XdripIntegration>(nameof(XdripIntegration));
         }

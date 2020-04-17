@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface ITherapySession : IServerResolvable
+    public interface ITherapySession : IServiceInstance
     {
     }
 }

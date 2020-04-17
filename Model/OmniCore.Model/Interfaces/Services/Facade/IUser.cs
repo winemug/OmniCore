@@ -3,7 +3,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface IUser : IServerResolvable
+    public interface IUser : IServiceInstance
     {
         UserEntity Entity { get; }
     }

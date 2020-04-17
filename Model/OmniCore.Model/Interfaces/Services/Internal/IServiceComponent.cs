@@ -7,6 +7,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         string ComponentName { get; }
         string ComponentDescription { get; }
         bool ComponentEnabled { get; set; }
-        Task InitializeComponent(ICoreService parentService);
+        Task InitializeComponent(IService parentService);
     }
 }

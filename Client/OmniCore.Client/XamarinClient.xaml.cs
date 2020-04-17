@@ -17,6 +17,7 @@ using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Test;
 using OmniCore.Client.Views.Wizards.NewPod;
+using OmniCore.Client.Views.Wizards.SetupWizard;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -24,43 +25,47 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client
 {
-    public partial class XamarinClient : ICoreClient
+    public partial class XamarinClient : IClient
     {
-        private readonly ICoreContainer<IClientResolvable> Container;
-        private readonly ICorePlatformClient PlatformClient;
+        private readonly IContainer<IClientInstance> Container;
+        private readonly IClientFunctions ClientFunctions;
+        private readonly ICommonFunctions CommonFunctions;
 
         private readonly Dictionary<Type, Func<bool, object, IView>> ViewDictionary;
-        private readonly ICoreClientConnection ApiConnection;
-        private readonly ICoreLoggingFunctions Logging;
+        private readonly IClientConnection ApiConnection;
+        private readonly ILogger Logger;
         private readonly NavigationPage MainNavigation;
         
         public XamarinClient(
-            ICoreContainer<IClientResolvable> container,
-            ICoreClientConnection apiConnection,
-            ICoreLoggingFunctions logging)
+            IContainer<IClientInstance> container,
+            IClientConnection apiConnection,
+            ILogger logger,
+            ICommonFunctions commonFunctions)
         {
-            Logging = logging;
+            CommonFunctions = commonFunctions;
+            Logger = logger;
             Container = container;
             ApiConnection = apiConnection;
             ViewDictionary = new Dictionary<Type, Func<bool, object, IView>>();
             RegisterViews();
             InitializeComponent();
+
             MainPage = new NavigationPage(GetView<SplashView>(false));
 
+            Device.GetMainThreadSynchronizationContextAsync();
             ApiConnection.WhenConnected().Subscribe(async api =>
             {
-                Logging.Debug("Service connected.");
+                Logger.Debug("Service connected.");
                 await MainNavigation.PushAsync(GetView<ShellView>(false), true);
             }, async e =>
             {
-                Logging.Error("Service connection failed.", e);
+                Logger.Error("Service connection failed.", e);
                 await MainNavigation.PopAsync(true);
             });
             
             ApiConnection.WhenDisconnected().Subscribe(async _ =>
             {
-                Logging.Debug("Service disconnected.");
-                await ApiConnection.Connect();
+                Logger.Debug("Service disconnected.");
             });
         }
       
@@ -70,7 +75,7 @@ namespace OmniCore.Client
             return (T) ViewDictionary[typeof(T)](viaShell, parameter);
         }
 
-        public Task<ICoreApi> GetApi(CancellationToken cancellationToken) => 
+        public Task<IApi> GetApi(CancellationToken cancellationToken) => 
             ApiConnection.WhenConnected().ToTask(cancellationToken);
 
 
@@ -101,6 +106,7 @@ namespace OmniCore.Client
             RegisterViewViewModel<ProgressPopupView, ProgressPopupViewModel>();
             RegisterViewViewModel<EmptyView, EmptyViewModel>();
             RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
+            RegisterViewViewModel<SetupWizardRootView, SetupWizardViewModel>();
             RegisterViewViewModel<Test1View, Test1ViewModel>();
         }
         

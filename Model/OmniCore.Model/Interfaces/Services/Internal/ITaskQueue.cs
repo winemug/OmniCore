@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface ITaskQueue : IServerResolvable
+    public interface ITaskQueue : IServiceInstance
     {
         void Startup();
         void Shutdown();

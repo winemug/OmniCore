@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface INotifyStatus : IServerResolvable
+    public interface INotifyStatus : IServiceInstance
     {
         NotifyStatusFlag StatusFlag { get; }
         string StatusMessage { get; }

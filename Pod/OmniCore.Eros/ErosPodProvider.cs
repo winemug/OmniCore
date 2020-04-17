@@ -17,13 +17,13 @@ namespace OmniCore.Eros
 {
     public class ErosPodProvider : IErosPodProvider
     {
-        private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly IContainer<IServiceInstance> Container;
         private readonly ConcurrentDictionary<long, IErosPod> PodDictionary;
-        private readonly ICoreRepositoryService RepositoryService;
+        private readonly IRepositoryService RepositoryService;
 
         public ErosPodProvider(
-            ICoreContainer<IServerResolvable> container,
-            ICoreRepositoryService repositoryService)
+            IContainer<IServiceInstance> container,
+            IRepositoryService repositoryService)
         {
             RepositoryService = repositoryService;
             Container = container;

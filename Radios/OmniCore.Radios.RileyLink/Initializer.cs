@@ -5,8 +5,8 @@ namespace OmniCore.Radios.RileyLink
 {
     public static class Initializer
     {
-        public static ICoreContainer<IServerResolvable> WithRileyLinkRadio
-            (this ICoreContainer<IServerResolvable> container)
+        public static IContainer<IServiceInstance> WithRileyLinkRadio
+            (this IContainer<IServiceInstance> container)
         {
             return container
                 .One<IErosRadioProvider, RileyLinkRadioProvider>(nameof(RileyLinkRadioProvider))

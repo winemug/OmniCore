@@ -11,7 +11,7 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class RadioDetailViewModel : BaseViewModel
     {
-        public RadioDetailViewModel(ICoreClient client) : base(client)
+        public RadioDetailViewModel(IClient client) : base(client)
         {
             Test1Command = new Command(() => { });
             WhenParameterSet().Subscribe(p =>

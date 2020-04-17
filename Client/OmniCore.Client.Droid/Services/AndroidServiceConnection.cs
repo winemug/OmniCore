@@ -12,29 +12,29 @@ using Object = Java.Lang.Object;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class AndroidServiceConnection : Object, IServiceConnection, ICoreClientConnection
+    public class AndroidServiceConnection : Object, IServiceConnection, IClientConnection
     {
         private AndroidServiceBinder Binder;
-        private readonly ISubject<ICoreApi> ApiSubject;
-        private readonly ICorePlatformClient PlatformClient;
+        private readonly ISubject<IApi> ApiSubject;
+        private readonly IClientFunctions ClientFunctions;
 
-        public AndroidServiceConnection(ICorePlatformClient platformClient)
+        public AndroidServiceConnection(IClientFunctions clientFunctions)
         {
-            PlatformClient = platformClient;
-            ApiSubject = new BehaviorSubject<ICoreApi>(null);
+            ClientFunctions = clientFunctions;
+            ApiSubject = new BehaviorSubject<IApi>(null);
         }
 
-        public IObservable<ICoreClientConnection> WhenDisconnected() =>
+        public IObservable<IClientConnection> WhenDisconnected() =>
             ApiSubject.FirstAsync(api => api == null).Select(x => this);
         
-        public IObservable<ICoreApi> WhenConnected() => ApiSubject.FirstAsync(api => api != null);
+        public IObservable<IApi> WhenConnected() => ApiSubject.FirstAsync(api => api != null);
         public Task Connect()
         {
-            return PlatformClient.AttachToService(typeof(AndroidService), this);
+            return ClientFunctions.AttachToService(typeof(AndroidService), this);
         }
         public Task Disconnect()
         {
-            return PlatformClient.DetachFromService(this);
+            return ClientFunctions.DetachFromService(this);
         }
 
         public void OnServiceConnected(ComponentName name, IBinder service)

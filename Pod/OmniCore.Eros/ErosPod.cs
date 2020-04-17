@@ -18,15 +18,15 @@ namespace OmniCore.Eros
 {
     public class ErosPod : IErosPod
     {
-        private readonly ICoreContainer<IServerResolvable> Container;
-        private readonly ICorePodService PodService;
-        private readonly ICoreRepositoryService RepositoryService;
+        private readonly IContainer<IServiceInstance> Container;
+        private readonly IPodService PodService;
+        private readonly IRepositoryService RepositoryService;
         private readonly ErosRequestQueue RequestQueue;
         private readonly ISubject<IEnumerable<IErosRadio>> RadiosUpdatedSubject;
 
-        public ErosPod(ICoreContainer<IServerResolvable> container,
-            ICoreRepositoryService repositoryService,
-            ICorePodService podService,
+        public ErosPod(IContainer<IServiceInstance> container,
+            IRepositoryService repositoryService,
+            IPodService podService,
             ErosRequestQueue requestQueue)
         {
             RepositoryService = repositoryService;

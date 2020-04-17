@@ -5,6 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 
@@ -14,8 +15,8 @@ namespace OmniCore.Client.Platform
     {
         private static readonly TimeSpan ScanFrequencyWindow = TimeSpan.FromSeconds(30);
         private static readonly int WindowedScanCountLimit = 5;
-        private readonly ICoreApplicationFunctions ApplicationFunctions;
-        private readonly ICoreLoggingFunctions Logging;
+        private readonly ICommonFunctions CommonFunctions;
+        private readonly ILogger Logger;
         private readonly SortedDictionary<DateTimeOffset, TimeSpan> ScanRecords;
         private readonly ISubject<IScanResult> ScanResultSubject;
 
@@ -31,12 +32,12 @@ namespace OmniCore.Client.Platform
 
         public BlePeripheralScanner(
             List<Guid> serviceIdFilter,
-            ICoreLoggingFunctions logging,
-            ICoreApplicationFunctions applicationFunctions)
+            ILogger logger,
+            ICommonFunctions commonFunctions)
         {
             ServiceIdFilter = serviceIdFilter;
-            Logging = logging;
-            ApplicationFunctions = applicationFunctions;
+            Logger = logger;
+            CommonFunctions = commonFunctions;
             ScanResultSubject = new ReplaySubject<IScanResult>(TimeSpan.FromSeconds(10));
             ScanStateSubject = new BehaviorSubject<bool>(false);
             ScanRecords = new SortedDictionary<DateTimeOffset, TimeSpan>();
@@ -74,8 +75,8 @@ namespace OmniCore.Client.Platform
                 ScanStateSubject.OnNext(false);
 
                 OnPause = true;
-                Logging.Debug("BLES: Scan paused");
-                Logging.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
+                Logger.Debug("BLES: Scan paused");
+                Logger.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
             }
         }
 
@@ -86,8 +87,8 @@ namespace OmniCore.Client.Platform
                 if (!OnPause)
                     return;
 
-                Logging.Debug("BLES: Resuming scan");
-                Logging.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
+                Logger.Debug("BLES: Resuming scan");
+                Logger.Debug($"BLES: Total listening: {ScanSubscriberCount} Paused: {OnPause}");
                 StartScan();
 
                 OnPause = false;
@@ -100,8 +101,8 @@ namespace OmniCore.Client.Platform
             {
                 var count = Interlocked.Increment(ref ScanSubscriberCount);
 
-                Logging.Debug("BLES: Incoming scan subscription");
-                Logging.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
+                Logger.Debug("BLES: Incoming scan subscription");
+                Logger.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
 
                 if (count == 1 && !OnPause)
                     StartScan();
@@ -113,7 +114,7 @@ namespace OmniCore.Client.Platform
             lock (this)
             {
                 var count = Interlocked.Decrement(ref ScanSubscriberCount);
-                Logging.Debug("BLES: Scan subscriber removed");
+                Logger.Debug("BLES: Scan subscriber removed");
 
                 if (count == 0)
                 {
@@ -124,13 +125,13 @@ namespace OmniCore.Client.Platform
                         BluetoothLock?.Dispose();
                         BluetoothLock = null;
                         ScanStateSubject.OnNext(false);
-                        Logging.Debug("BLES: Scan stopped");
+                        Logger.Debug("BLES: Scan stopped");
                     }
 
                     OnPause = false;
                 }
 
-                Logging.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
+                Logger.Debug($"BLES: Total listening: {count} Paused: {OnPause}");
             }
         }
 
@@ -138,8 +139,8 @@ namespace OmniCore.Client.Platform
         {
             ScanStateSubject.OnNext(true);
 
-            BluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
-            Logging.Debug("BLES: Scan start requested");
+            BluetoothLock = CommonFunctions.BluetoothLock();
+            Logger.Debug("BLES: Scan start requested");
 
             ScanSubscription = SafeScanner()
                 .Subscribe(result => { ScanResultSubject.OnNext(result); });
@@ -155,7 +156,7 @@ namespace OmniCore.Client.Platform
                         var scanStart = DateTimeOffset.UtcNow;
                         ScanRecords[scanStart] = TimeSpan.Zero;
 
-                        Logging.Debug("BLES: Scan started");
+                        Logger.Debug("BLES: Scan started");
                         var actualScan = CrossBleAdapter.Current
                             .Scan(new ScanConfig
                             {
@@ -185,7 +186,7 @@ namespace OmniCore.Client.Platform
                 var penaltyEnd = penaltyWindowEnd + ScanFrequencyWindow;
 
                 penalty = penaltyEnd - DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
-                Logging.Debug($"BLES: Postponing scan for {penalty.TotalSeconds:F0} seconds");
+                Logger.Debug($"BLES: Postponing scan for {penalty.TotalSeconds:F0} seconds");
             }
 
             return penalty;

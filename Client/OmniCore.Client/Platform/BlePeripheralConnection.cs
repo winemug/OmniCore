@@ -16,7 +16,7 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheralConnection : IBlePeripheralConnection
     {
-        private readonly ICoreLoggingFunctions Logging;
+        private readonly ILogger Logger;
         private Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> CharacteristicsDictionary;
         private IDisposable CommunicationDisposable;
         private IDevice Device;
@@ -24,9 +24,9 @@ namespace OmniCore.Client.Platform
         private List<IDisposable> Subscriptions;
 
         public BlePeripheralConnection(
-            ICoreLoggingFunctions logging)
+            ILogger logger)
         {
-            Logging = logging;
+            Logger = logger;
         }
 
         public IBlePeripheral Peripheral { get; set; }
@@ -43,14 +43,14 @@ namespace OmniCore.Client.Platform
                 Device.CancelConnection();
                 try
                 {
-                    Logging.Debug("Closing peripheral connection");
+                    Logger.Debug("Closing peripheral connection");
                     Device.WhenStatusChanged().FirstAsync(s => s == ConnectionStatus.Disconnected)
                         .Timeout(TimeSpan.FromSeconds(3)).Wait();
-                    Logging.Debug("Peripheral connection closed");
+                    Logger.Debug("Peripheral connection closed");
                 }
                 catch (Exception e)
                 {
-                    Logging.Warning("Failed to close connection, ignoring error.", e);
+                    Logger.Warning("Failed to close connection, ignoring error.", e);
                 }
             }
 
@@ -61,28 +61,28 @@ namespace OmniCore.Client.Platform
         public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid,
             CancellationToken cancellationToken)
         {
-            Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
+            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
             var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken);
-            Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
+            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
             return result.Data;
         }
 
         public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
-            Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
+            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
             await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
-            Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
+            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
         }
 
         public async Task WriteToCharacteristicWithoutResponse(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
-            Logging.Debug(
+            Logger.Debug(
                 $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response requested");
             await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
                 .ToTask(cancellationToken);
-            Logging.Debug(
+            Logger.Debug(
                 $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response finished");
         }
 
@@ -96,7 +96,7 @@ namespace OmniCore.Client.Platform
                     .Select(r => r.Data)
                     .Subscribe(bytes =>
                     {
-                        Logging.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Characteristic notification received");
+                        Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Characteristic notification received");
                         observer.OnNext(bytes);
                     });
                 Subscriptions.Add(subscription);

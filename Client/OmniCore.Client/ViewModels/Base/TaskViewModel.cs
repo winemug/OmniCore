@@ -6,7 +6,7 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class TaskViewModel : BaseViewModel
     {
-        public TaskViewModel(ICoreClient client) : base(client)
+        public TaskViewModel(IClient client) : base(client)
         {
         }
 

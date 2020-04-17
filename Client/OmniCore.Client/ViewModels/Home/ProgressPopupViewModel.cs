@@ -7,7 +7,7 @@ namespace OmniCore.Client.ViewModels.Home
 {
     public class ProgressPopupViewModel : BaseViewModel
     {
-        public ProgressPopupViewModel(ICoreClient client) : base(client)
+        public ProgressPopupViewModel(IClient client) : base(client)
         {
         }
     }

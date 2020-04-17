@@ -4,7 +4,7 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class EmptyViewModel : BaseViewModel
     {
-        public EmptyViewModel(ICoreClient client) : base(client)
+        public EmptyViewModel(IClient client) : base(client)
         {
         }
     }

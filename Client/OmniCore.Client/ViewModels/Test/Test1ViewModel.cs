@@ -28,7 +28,7 @@ namespace OmniCore.Client.ViewModels.Test
         });
 
         private IDisposable ScanSub = null;
-        public Test1ViewModel(ICoreClient client) : base(client)
+        public Test1ViewModel(IClient client) : base(client)
         {
             WhenPageAppears().Subscribe(async _ =>
             {

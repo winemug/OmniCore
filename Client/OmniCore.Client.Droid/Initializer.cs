@@ -14,28 +14,18 @@ namespace OmniCore.Client.Droid
 {
     public static class Initializer
     {
-        public static ICoreContainer<IServerResolvable> WithAndroidPlatformServices
-            (this ICoreContainer<IServerResolvable> container)
+        public static IContainer<IClientInstance> AndroidClientContainer(IClientFunctions client)
         {
-            return container
-                .One<ICoreApplicationFunctions, CoreApplicationFunctions>()
-                .One<ICoreLoggingFunctions, CoreLoggingFunctions>();
+            return new Container<IClientInstance>()
+                .Existing(client)
+                .One<IClientConnection, AndroidServiceConnection>();
         }
 
-        public static ICoreContainer<IClientResolvable> AndroidClientContainer(ICorePlatformClient platformClient)
+        public static IContainer<IServiceInstance> AndroidServiceContainer(IServiceFunctions service)
         {
-            return new CoreContainer<IClientResolvable>()
-                .Existing(platformClient)
-                .One<ICoreClientConnection, AndroidServiceConnection>();
-        }
-
-        public static ICoreContainer<IServerResolvable> AndroidServiceContainer(ICoreApi api,
-            ICoreNotificationFunctions notificationFunctions)
-        {
-            return new CoreContainer<IServerResolvable>()
-                .Existing(api)
-                .Existing(notificationFunctions)
-                .Many<ICoreNotification, CoreNotification>()
+            return new Container<IServiceInstance>()
+                .Existing(service)
+                .One<ICommonFunctions, CommonFunctions>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
@@ -44,8 +34,7 @@ namespace OmniCore.Client.Droid
 #else
                 .WithCrossBleRadioAdapter()
 #endif
-                .WithEfCoreRepository()
-                .WithAndroidPlatformServices();
+                .WithEfCoreRepository();
         }
     }
 }

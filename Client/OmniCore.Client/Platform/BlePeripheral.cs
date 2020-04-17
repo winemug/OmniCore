@@ -20,13 +20,13 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheral : IBlePeripheral
     {
-        private readonly ICoreApplicationFunctions ApplicationFunctions;
+        private readonly ICommonFunctions CommonFunctions;
 
         private readonly BlePeripheralAdapter BlePeripheralAdapter;
         private readonly ISubject<PeripheralConnectionState> ConnectionStateSubject;
-        private readonly ICoreContainer<IServerResolvable> Container;
+        private readonly IContainer<IServiceInstance> Container;
         private readonly ISubject<PeripheralDiscoveryState> DiscoveryStateSubject;
-        private readonly ICoreLoggingFunctions Logging;
+        private readonly ILogger Logger;
         private readonly ISubject<string> NameSubject;
         private readonly AsyncLock PeripheralCommunicationLockProvider;
         private readonly ISubject<int> RssiSubject;
@@ -49,14 +49,14 @@ namespace OmniCore.Client.Platform
 
         public BlePeripheral(
             IBlePeripheralAdapter blePeripheralAdapter,
-            ICoreLoggingFunctions loggingFunctions,
-            ICoreApplicationFunctions applicationFunctions,
-            ICoreContainer<IServerResolvable> container)
+            ILogger logger,
+            ICommonFunctions commonFunctions,
+            IContainer<IServiceInstance> container)
         {
             Container = container;
             BlePeripheralAdapter = (BlePeripheralAdapter) blePeripheralAdapter;
-            Logging = loggingFunctions;
-            ApplicationFunctions = applicationFunctions;
+            Logger = logger;
+            CommonFunctions = commonFunctions;
             PeripheralCommunicationLockProvider = new AsyncLock();
             DiscoveryStateSubject = new BehaviorSubject<PeripheralDiscoveryState>(PeripheralDiscoveryState.Unknown);
             ConnectionStateSubject =
@@ -101,7 +101,7 @@ namespace OmniCore.Client.Platform
             {
                 if (value.State != _DiscoveryState.State)
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Discovery state changed to {value.State}");
+                    Logger.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Discovery state changed to {value.State}");
                     _DiscoveryState = value;
                     DiscoveryStateSubject.OnNext(value.State);
                 }
@@ -115,7 +115,7 @@ namespace OmniCore.Client.Platform
             {
                 if (value.State != _ConnectionState.State && (value.State != PeripheralConnectionState.Disconnected || _ConnectionState.State != PeripheralConnectionState.NotConnected))
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connection state changed to {value.State}");
+                    Logger.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Connection state changed to {value.State}");
                     _ConnectionState = value;
                     ConnectionStateSubject.OnNext(value.State);
                 }
@@ -163,7 +163,7 @@ namespace OmniCore.Client.Platform
 
             var lockDisposable = await PeripheralCommunicationLockProvider.LockAsync(cancellationToken);
             await BlePeripheralAdapter.TryEnsureAdapterEnabled(cancellationToken);
-            var bluetoothLock = ApplicationFunctions.BluetoothKeepAwake();
+            var bluetoothLock = CommonFunctions.BluetoothLock();
 
             try
             {
@@ -202,7 +202,7 @@ namespace OmniCore.Client.Platform
 
                         if (which == exceptionTask)
                         {
-                            Logging.Debug(
+                            Logger.Debug(
                                 $"BLEP: {PeripheralUuid.AsMacAddress()} Connect failed. Err:\n {exceptionTask.Result.AsDebugFriendly()}");
                             throw exceptionTask.Result;
                         }
@@ -215,7 +215,7 @@ namespace OmniCore.Client.Platform
 
                     var characteristicsDictionary =
                         new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
-                    Logging.Debug(
+                    Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Request services and characteristics discovery");
                     await device.DiscoverServices().ForEachAsync(
                         service =>
@@ -226,7 +226,7 @@ namespace OmniCore.Client.Platform
                                     characteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
                                 }, characteristicCancellationSource.Token);
                         }, characteristicCancellationSource.Token);
-                    Logging.Debug(
+                    Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
 
                     var blepc = (BlePeripheralConnection) Container.Get<IBlePeripheralConnection>();
@@ -289,7 +289,7 @@ namespace OmniCore.Client.Platform
             DeviceNameSubscription = device.WhenNameUpdated().Where(s => !string.IsNullOrEmpty(s))
                 .Subscribe(s =>
                 {
-                    Logging.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device name updated");
+                    Logger.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device name updated");
                     Name = s;
                 });
         }

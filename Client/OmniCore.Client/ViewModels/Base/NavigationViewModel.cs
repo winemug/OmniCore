@@ -20,7 +20,7 @@ namespace OmniCore.Client.ViewModels.Base
         //protected NavigationViewModel(ICoreClient client) : base(client)
         //{
         //}
-        protected NavigationViewModel(ICoreClient client) : base(client)
+        protected NavigationViewModel(IClient client) : base(client)
         {
         }
 

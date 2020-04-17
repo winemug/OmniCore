@@ -13,7 +13,7 @@ namespace OmniCore.Services.Integration
 
         public bool ComponentEnabled { get; set; }
 
-        public Task InitializeComponent(ICoreService parentService)
+        public Task InitializeComponent(IService parentService)
         {
             throw new NotImplementedException();
         }

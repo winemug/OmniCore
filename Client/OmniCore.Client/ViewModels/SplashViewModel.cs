@@ -5,7 +5,7 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class SplashViewModel : BaseViewModel
     {
-        public SplashViewModel(ICoreClient client) : base(client)
+        public SplashViewModel(IClient client) : base(client)
         {
         }
     }

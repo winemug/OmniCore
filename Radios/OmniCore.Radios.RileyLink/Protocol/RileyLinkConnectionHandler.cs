@@ -27,8 +27,8 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private static readonly Guid RileyLinkResponseCharacteristicUuid =
             Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
 
-        private readonly ICoreConfigurationService ConfigurationService;
-        private readonly ICoreLoggingFunctions Logger;
+        private readonly IConfigurationService ConfigurationService;
+        private readonly ILogger Logger;
         private readonly IBlePeripheral Peripheral;
         private RadioOptions ConfiguredOptions;
 
@@ -36,9 +36,9 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private IBlePeripheralConnection PeripheralConnection;
 
         public RileyLinkConnectionHandler(
-            ICoreLoggingFunctions logger,
+            ILogger logger,
             IBlePeripheral peripheral,
-            ICoreConfigurationService configurationService,
+            IConfigurationService configurationService,
             IBlePeripheralConnection peripheralConnection)
         {
             ConfigurationService = configurationService;

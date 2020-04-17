@@ -123,22 +123,22 @@
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.530" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Platform\CoreNotification.cs" />
+    <Compile Include="Platform\Logger.cs" />
     <Compile Include="Services\AndroidService.cs" />
     <Compile Include="Services\AndroidServiceBinder.cs" />
     <Compile Include="Services\AndroidServiceConnection.cs" />
     <Compile Include="Initializer.cs" />
-    <Compile Include="Platform\BluetoothWakeLock.cs" />
-    <Compile Include="Platform\CoreApplicationFunctions.cs" />
-    <Compile Include="Platform\CoreLoggingFunctions.cs" />
-    <Compile Include="Platform\KeepAwakeLock.cs" />
+    <Compile Include="Platform\BluetoothLock.cs" />
+    <Compile Include="Platform\CommonFunctions.cs" />
+    <Compile Include="Platform\DisplayLock.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Platform\BackgroundTask.cs" />
+    <Compile Include="Services\Api.cs" />
     <Compile Include="Services\FirebaseRegistration.cs" />
-    <Compile Include="Services\GenericBroadcastReceiver.cs" />
+    <Compile Include="Services\BroadcastReceiver.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidEnvironment Include="env.conf" />

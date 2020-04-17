@@ -6,15 +6,12 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards
 {
-    public class SetupWizardViewModel : NavigationViewModel
+    public class SetupWizardViewModel : BaseViewModel
     {
-        public SetupWizardViewModel(ICoreClient client) : base(client)
+        public bool RunInBackground { get; set; }
+        public bool CreateUserProfile { get; set; }
+        public SetupWizardViewModel(IClient client) : base(client)
         {
-        }
-
-        public override Task<Page> GetNextPage()
-        {
-            throw new NotImplementedException();
         }
     }
 }

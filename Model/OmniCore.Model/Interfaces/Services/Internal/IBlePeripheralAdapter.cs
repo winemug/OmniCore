@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IBlePeripheralAdapter : IServerResolvable
+    public interface IBlePeripheralAdapter : IServiceInstance
     {
         IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid);
         IObservable<IBlePeripheralAdapter> WhenScanStarted { get; }
