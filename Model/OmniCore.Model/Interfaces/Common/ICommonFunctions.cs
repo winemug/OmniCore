@@ -13,7 +13,6 @@ namespace OmniCore.Model.Interfaces.Common
         void StorePreferences((string Key, string Value)[] preferences);
         (string Key, string Value)[] ReadPreferences((string Key, string DefaultValue)[] preferences);
 
-        Task<bool> IsPermissionGranted(string permission);
         void Exit();
 
     }

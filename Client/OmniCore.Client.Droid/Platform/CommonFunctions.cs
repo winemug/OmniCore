@@ -66,11 +66,6 @@ namespace OmniCore.Client.Droid
             return preferencesResult;
         }
 
-        public async Task<bool> IsPermissionGranted(string permission)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Exit()
         {
             if (Application.Context is Activity activity)

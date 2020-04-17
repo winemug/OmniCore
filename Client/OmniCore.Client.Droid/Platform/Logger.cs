@@ -40,47 +40,47 @@ namespace OmniCore.Client.Droid.Platform
 
         public void Debug(string message, [CallerFilePath] string source = "")
         {
-            Log.Debug(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Debug(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public void Error(string message, [CallerFilePath] string source = "")
         {
-            Log.Error(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Error(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public void Error(string message, Exception e, [CallerFilePath] string source = "")
         {
-            Log.Error(LoggingConstants.ClientTag, $"{source} {message}\n{e.AsDebugFriendly()}");
+            Log.Error(LoggingConstants.Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
         public static void FatalError(string message, [CallerFilePath] string source = "")
         {
-            Log.Error(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Error(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public static void FatalError(string message, Exception e, [CallerFilePath] string source = "")
         {
-            Log.Error(LoggingConstants.ClientTag, $"{source} {message}\n{e.AsDebugFriendly()}");
+            Log.Error(LoggingConstants.Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
         public void Information(string message, [CallerFilePath] string source = "")
         {
-            Log.Info(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Info(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public void Verbose(string message, [CallerFilePath] string source = "")
         {
-            Log.Verbose(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Verbose(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public void Warning(string message, [CallerFilePath] string source = "")
         {
-            Log.Warn(LoggingConstants.ClientTag, $"{source} {message}");
+            Log.Warn(LoggingConstants.Tag, $"{source} {message}");
         }
 
         public void Warning(string message, Exception e, [CallerFilePath] string source = "")
         {
-            Log.Error(LoggingConstants.ClientTag, $"{source} {message}\n{e.AsDebugFriendly()}");
+            Log.Error(LoggingConstants.Tag, $"{source} {message}\n{e.AsDebugFriendly()}");
         }
 
     }

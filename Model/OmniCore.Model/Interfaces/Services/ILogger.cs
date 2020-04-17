@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface ILogger
+    public interface ILogger : IClientInstance, IServiceInstance
     {
         void Verbose(string message, string source = "");
         void Debug(string message, string source = "");

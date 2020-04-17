@@ -18,6 +18,7 @@ namespace OmniCore.Client.Droid
         {
             return new Container<IClientInstance>()
                 .Existing(client)
+                .One<ILogger, Logger>()
                 .One<IClientConnection, AndroidServiceConnection>();
         }
 
@@ -26,6 +27,7 @@ namespace OmniCore.Client.Droid
             return new Container<IServiceInstance>()
                 .Existing(service)
                 .One<ICommonFunctions, CommonFunctions>()
+                .One<ILogger, Logger>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()

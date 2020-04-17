@@ -181,7 +181,7 @@ namespace OmniCore.Client.Droid
 
         private void LogError(string logText)
         {
-            Logger.Error(LoggingConstants.ClientTag, logText);
+            Logger.Error(LoggingConstants.Tag, logText);
         }
 
         public override void OnBackPressed()
