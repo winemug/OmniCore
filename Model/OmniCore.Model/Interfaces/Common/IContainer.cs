@@ -1,4 +1,6 @@
-﻿namespace OmniCore.Model.Interfaces.Common
+﻿using System.Threading.Tasks;
+
+namespace OmniCore.Model.Interfaces.Common
 {
     public interface IContainer<in TInstance> : IServiceInstance, IClientInstance
         where TInstance : IInstance
@@ -10,6 +12,6 @@
         IContainer<TInstance> One<TI, TC>(string discriminator) where TC : TI where TI : TInstance;
         IContainer<TInstance> Existing<T>(T instance) where T : TInstance;
         T Get<T>() where T : TInstance;
-        T[] GetAll<T>() where T : TInstance;
+        Task<T> GetAsync<T>() where T : TInstance;
     }
 }

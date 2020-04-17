@@ -42,13 +42,6 @@ namespace OmniCore.Client.Droid
 
         private IContainer<IClientInstance> Container;
         private int NextPermissionRequestId = 0;
-
-        public MainActivity()
-        {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
-            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
-        }
         
         public Task AttachToService(Type concreteType, IClientConnection connection)
         {
@@ -105,14 +98,16 @@ namespace OmniCore.Client.Droid
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-           
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
+            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
            
             Forms.SetFlags("CollectionView_Experimental",
                 "IndicatorView_Experimental", "CarouselView_Experimental");
 
-            base.OnCreate(savedInstanceState);
             Forms.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
@@ -122,6 +117,7 @@ namespace OmniCore.Client.Droid
             Container = Initializer.AndroidClientContainer(this)
                 .WithXamarinFormsClient();
 
+            base.OnCreate(savedInstanceState);
             LoadApplication(Container.Get<IClient>() as Xamarin.Forms.Application);
         }
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)

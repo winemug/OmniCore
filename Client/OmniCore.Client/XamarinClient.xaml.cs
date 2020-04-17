@@ -25,7 +25,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client
 {
-    public partial class XamarinClient : IClient
+    public partial class XamarinClient : IClient, IInitializable
     {
         private readonly IContainer<IClientInstance> Container;
         private readonly IClientFunctions ClientFunctions;
@@ -49,11 +49,15 @@ namespace OmniCore.Client
             ViewDictionary = new Dictionary<Type, Func<bool, object, IView>>();
             RegisterViews();
             InitializeComponent();
+        }
 
+        public async Task Initialize()
+        {
             MainPage = new NavigationPage(GetView<SplashView>(false));
 
-            Device.GetMainThreadSynchronizationContextAsync();
-            ApiConnection.WhenConnected().Subscribe(async api =>
+            var context = await Device.GetMainThreadSynchronizationContextAsync();
+            ApiConnection.WhenConnected().SubscribeOn(context)
+                .Subscribe(async api =>
             {
                 Logger.Debug("Service connected.");
                 await MainNavigation.PushAsync(GetView<ShellView>(false), true);
@@ -63,12 +67,14 @@ namespace OmniCore.Client
                 await MainNavigation.PopAsync(true);
             });
             
-            ApiConnection.WhenDisconnected().Subscribe(async _ =>
+            ApiConnection.WhenDisconnected().SubscribeOn(context)
+                .Subscribe(async _ =>
             {
                 Logger.Debug("Service disconnected.");
             });
+
+            await ApiConnection.Connect();
         }
-      
         public T GetView<T>(bool viaShell, object parameter = null)
             where T : IView
         {

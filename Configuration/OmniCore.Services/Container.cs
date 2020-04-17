@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
+using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Interfaces.Common;
 using Unity;
 
@@ -57,17 +59,35 @@ namespace OmniCore.Services
         public T Get<T>()
             where T : R
         {
-            return this.Resolve<T>();
+            var o = this.Resolve<T>();
+            var ii = o as IInitializable;
+            ii?.Initialize().WaitAndUnwrapException();
+            return o;
         }
 
         public T[] GetAll<T>()
             where T : R
         {
-            return Registrations
+            var r= Registrations
                 .Where(r => r.MappedToType.GetInterfaces()
                     .Any(i => i == typeof(T)))
                 .Select(x => (T) ((IUnityContainer) this).Resolve(x.RegisteredType, x.Name))
                 .ToArray();
+            foreach (var o in r)
+            {
+                var ii = o as IInitializable;
+                ii?.Initialize().WaitAndUnwrapException();
+            }
+            return r;
+        }
+
+        public async Task<T> GetAsync<T>() where T : R
+        {
+            var o = this.Resolve<T>();
+            var ii = o as IInitializable;
+            if (ii != null)
+                await ii.Initialize();
+            return o;
         }
     }
 }
