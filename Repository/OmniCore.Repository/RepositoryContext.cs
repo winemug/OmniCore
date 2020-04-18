@@ -123,12 +123,6 @@ namespace OmniCore.Repository
                         UnitNameShort = "µL",
                         UnitsPerMilliliter = 1000
                     });
-
-                if (!Users.Any())
-                    Users.Add(new UserEntity
-                    {
-                        Name = "Default User"
-                    });
                 await SaveChangesAsync();
             }
             catch (Exception e)
