@@ -206,7 +206,7 @@ namespace OmniCore.Client.Platform
                                 if (service != null)
                                 {
                                     DeviceCache[connectedDevice.Uuid] = connectedDevice;
-                                    var peripheral = GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
+                                    var peripheral = await GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
                                     peripheral.UpdateSubscriptions(connectedDevice);
 
                                     Logger.Debug(
@@ -225,16 +225,16 @@ namespace OmniCore.Client.Platform
                                 if (!connectedPeripheralUuids.Any(cuuid => cuuid == peripheralUuid))
                                     DeviceCache[peripheralUuid] = null;
 
-                                var peripheral = GetPeripheralInternal(peripheralUuid, ErosRadioServiceUuids[0]);
+                                var peripheral = await GetPeripheralInternal(peripheralUuid, ErosRadioServiceUuids[0]);
                                 peripheral.DiscoveryState = (PeripheralDiscoveryState.Searching, searchStart);
                             }
 
                             Logger.Debug("BLE: Connecting to scan observable");
                             scanSubscription = Scanner.Scan()
-                                .Subscribe(scanResult =>
+                                .Subscribe(async scanResult =>
                                 {
                                     DeviceCache[scanResult.Device.Uuid] = scanResult.Device;
-                                    var peripheral = GetPeripheralInternal(scanResult.Device.Uuid,
+                                    var peripheral = await GetPeripheralInternal(scanResult.Device.Uuid,
                                         scanResult.AdvertisementData.ServiceUuids[0]);
 
                                     peripheral.UpdateSubscriptions(scanResult.Device);
@@ -287,16 +287,16 @@ namespace OmniCore.Client.Platform
             );
         }
 
-        public IBlePeripheral GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
+        public async Task<IBlePeripheral> GetPeripheral(Guid peripheralUuid, Guid primaryServiceUuid)
         {
-            return GetPeripheralInternal(peripheralUuid, primaryServiceUuid);
+            return await GetPeripheralInternal(peripheralUuid, primaryServiceUuid);
         }
         
-        private BlePeripheral GetPeripheralInternal(Guid peripheralUuid, Guid primaryServiceUuid)
+        private async Task<BlePeripheral> GetPeripheralInternal(Guid peripheralUuid, Guid primaryServiceUuid)
         {
+            var p = (BlePeripheral) await Container.Get<IBlePeripheral>();
             return PeripheralCache.GetOrAdd(peripheralUuid, _ =>
             {
-                var p = (BlePeripheral) Container.Get<IBlePeripheral>();
                 p.PeripheralUuid = peripheralUuid;
                 p.PrimaryServiceUuid = primaryServiceUuid;
                 return p;

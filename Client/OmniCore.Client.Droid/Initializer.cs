@@ -20,6 +20,7 @@ namespace OmniCore.Client.Droid
                 .Existing(client)
                 .One<ICommonFunctions, CommonFunctions>()
                 .One<ILogger, Logger>()
+                .One<IPlatformConfiguration, PlatformConfiguration>()
                 .One<IClientConnection, AndroidServiceConnection>();
         }
 
@@ -29,6 +30,7 @@ namespace OmniCore.Client.Droid
                 .Existing(service)
                 .One<ICommonFunctions, CommonFunctions>()
                 .One<ILogger, Logger>()
+                .One<IPlatformConfiguration, PlatformConfiguration>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()

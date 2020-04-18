@@ -8,6 +8,7 @@ using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Wizards
@@ -59,7 +60,7 @@ namespace OmniCore.Client.ViewModels.Wizards
 
                 Views.Add(PodTypeSelectionView);
                 Views.Add(RadioSelectionView);
-            });
+            }).AutoDispose(this);
         }
     }
 }

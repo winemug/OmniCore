@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Android;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -16,6 +17,7 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Java.Util.Logging;
 using Microsoft.AppCenter.Push;
+using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
@@ -71,12 +73,6 @@ namespace OmniCore.Client.Droid
             return Device.InvokeOnMainThreadAsync(() => { base.UnbindService(serviceConnection); });
         }
 
-        public async Task<bool> IsPermissionGranted(string permission)
-        {
-            return await Device.InvokeOnMainThreadAsync(() => ContextCompat.CheckSelfPermission(this, permission) ==
-                                                              (int) Permission.Granted);
-        }
-
         public IObservable<(string Permission, bool IsGranted)> RequestPermissions(params string[] permissions)
         {
             var requestId = Interlocked.Increment(ref NextPermissionRequestId);
@@ -89,19 +85,20 @@ namespace OmniCore.Client.Droid
             return permissionSubject.AsObservable();
         }
 
-        public ILogger Logger { get; } = new Platform.Logger();
+        public async Task<bool> PermissionGranted(string permission)
+        {
+            return await Device.InvokeOnMainThreadAsync(() => ContextCompat.CheckSelfPermission(this, permission) ==
+                                                              (int) Permission.Granted);
+        }
 
         public void Exit()
         {
             FinishAffinity();
         }
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
-            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
-            
+           
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
            
@@ -116,11 +113,17 @@ namespace OmniCore.Client.Droid
 
             Container = Initializer.AndroidClientContainer(this)
                 .WithXamarinFormsClient();
+            
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
 
             base.OnCreate(savedInstanceState);
-            LoadApplication(Container.Get<IClient>() as Xamarin.Forms.Application);
+
+            var client = await Container.Get<IClient>();
+            LoadApplication(client as Xamarin.Forms.Application);
         }
-        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private async void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var sb = new StringBuilder()
                 .AppendLine("Caught unhandled exception in application domain")
@@ -143,10 +146,10 @@ namespace OmniCore.Client.Droid
                     sb.AppendLine($"Exception: {eo.AsDebugFriendly()}");
                 }
             }
-            LogError(sb.ToString());
+            await LogError(sb.ToString());
         }
 
-        private void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private async void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
             var sb = new StringBuilder()
                 .AppendLine("Task scheduled caught an unhandled exception!")
@@ -155,10 +158,10 @@ namespace OmniCore.Client.Droid
                 sb.AppendLine("Exception: NULL");
             else
                 sb.AppendLine($"Exception: {e.Exception.AsDebugFriendly()}");
-            LogError(sb.ToString());
+            await LogError(sb.ToString());
         }
 
-        private void AndroidEnvironmentOnUnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+        private async void AndroidEnvironmentOnUnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
         {
             var sb = new StringBuilder()
                 .AppendLine("Android environment caught an unhandled exception!")
@@ -172,12 +175,13 @@ namespace OmniCore.Client.Droid
                 sb.AppendLine("Exception: NULL");
             else
                 sb.AppendLine($"Exception: {e.Exception.AsDebugFriendly()}");
-            LogError(sb.ToString());
+            await LogError(sb.ToString());
         }
 
-        private void LogError(string logText)
+        private async Task LogError(string logText)
         {
-            Logger.Error(LoggingConstants.Tag, logText);
+            var logger = await Container.Get<ILogger>();
+            logger.Error(LoggingConstants.Tag, logText);
         }
 
         public override void OnBackPressed()

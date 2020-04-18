@@ -8,9 +8,8 @@ namespace OmniCore.Model.Interfaces.Client
 {
     public interface IClient : IClientInstance
     {
-        T GetView<T>(bool viaShell, object parameter = null)
+        Task<T> GetView<T>(bool viaShell, object parameter = null)
             where T : IView;
-
         Task<IApi> GetApi(CancellationToken cancellationToken);
         Task PushView<T>() where T : IView;
         Task PushView<T>(object parameter) where T : IView;

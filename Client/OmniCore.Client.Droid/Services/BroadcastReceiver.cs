@@ -36,7 +36,7 @@ namespace OmniCore.Client.Droid.Services
                 $"Xdrip broadcast: {intent.Action} - {timeStamp}, {bg}, {noise}, {bgSlope}, {bgSlopeName}, {sensorBattery}, {dataSource}, {versionInfo}, {calibrationInfo}, {noiseBlockLevel}");
         }
 
-        public async Task Subscribe()
+        public Task Subscribe()
         {
             throw new System.NotImplementedException();
         }

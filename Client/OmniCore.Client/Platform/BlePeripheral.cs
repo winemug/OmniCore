@@ -229,7 +229,7 @@ namespace OmniCore.Client.Platform
                     Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
 
-                    var blepc = (BlePeripheralConnection) Container.Get<IBlePeripheralConnection>();
+                    var blepc = (BlePeripheralConnection) await Container.Get<IBlePeripheralConnection>();
                     var communicationDisposable = Disposable.Create(() =>
                     {
                         bluetoothLock.Dispose();

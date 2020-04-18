@@ -8,7 +8,7 @@
             <Label Text="Permissions used by this app:"/>
             
             <StackLayout Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding LocationPermissionGranted}" IsEnabled="False"/>
+                <CheckBox IsChecked="{Binding BluetoothPermissionGranted}" IsEnabled="False"/>
                 <Label Text="Location access"/>
             </StackLayout>
             <StackLayout>
@@ -17,13 +17,15 @@
             </StackLayout>
 
             <StackLayout Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding ExternalStoragePermissionsGranted}" IsEnabled="False"/>
+                <CheckBox IsChecked="{Binding StoragePermissionsGranted}" IsEnabled="False"/>
                 <Label Text="Access to external storage"/>
             </StackLayout>
             <StackLayout>
                 <Label Text=""/>
                 <Label Text="Storage permission is required for importing and exporting data." />
             </StackLayout>
+            <Button Text="Continue" Command="{Binding ContinueCommand}"/>
+            <Button Text="Exit" Command="{Binding ExitCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

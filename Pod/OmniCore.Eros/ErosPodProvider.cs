@@ -33,14 +33,17 @@ namespace OmniCore.Eros
         public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
         {
             using var context = await RepositoryService.GetContextReadOnly(cancellationToken);
-            return context.Pods.Where(p => !p.IsDeleted)
+            var list = new List<IErosPod>();
+            await context.Pods.Where(p => !p.IsDeleted)
                 .Include(p => p.Medication)
                 .Include(p => p.PodRadios)
                 .ThenInclude(pr => pr.Radio)
                 .Include(p => p.User)
-                .ToList()
-                .Select(GetPodInternal)
-                .ToList();
+                .ForEachAsync(async entity =>
+                {
+                    list.Add(await GetPodInternal(entity));
+                }, cancellationToken: cancellationToken);
+            return list;
         }
 
         public async Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken)
@@ -56,14 +59,14 @@ namespace OmniCore.Eros
 
             await context.Pods.AddAsync(entity, cancellationToken);
             await context.Save(cancellationToken);
-            return GetPodInternal(entity);
+            return await GetPodInternal(entity);
         }
 
-        private IErosPod GetPodInternal(PodEntity podEntity)
+        private async Task<IErosPod> GetPodInternal(PodEntity podEntity)
         {
+            var pod = await Container.Get<ErosPod>();
             return PodDictionary.GetOrAdd(podEntity.Id, id =>
             {
-                var pod = Container.Get<ErosPod>();
                 pod.Entity = podEntity;
                 return pod;
             });

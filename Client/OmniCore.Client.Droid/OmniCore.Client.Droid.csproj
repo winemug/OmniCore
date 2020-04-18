@@ -124,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Platform\Logger.cs" />
+    <Compile Include="Platform\PlatformConfiguration.cs" />
     <Compile Include="Services\AndroidService.cs" />
     <Compile Include="Services\AndroidServiceBinder.cs" />
     <Compile Include="Services\AndroidServiceConnection.cs" />

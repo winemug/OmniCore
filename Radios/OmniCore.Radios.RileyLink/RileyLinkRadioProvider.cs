@@ -37,12 +37,14 @@ namespace OmniCore.Radios.RileyLink
         public async Task<IErosRadio> GetRadio(IBlePeripheral peripheral,
             CancellationToken cancellationToken)
         {
+            if (RadioDictionary.ContainsKey(peripheral.PeripheralUuid))
+                return RadioDictionary[peripheral.PeripheralUuid];
+                
+            var radio = await Container.Get<RileyLinkRadio>();
+            var entity = await GetEntity(peripheral, cancellationToken);
             return RadioDictionary.GetOrAdd(peripheral.PeripheralUuid, uuid =>
             {
-                var radio = Container.Get<RileyLinkRadio>();
-                var entity = GetEntity(peripheral, cancellationToken)
-                    .WaitAndUnwrapException(cancellationToken);
-                 radio.Initialize(entity, this, peripheral);
+                radio.Initialize(entity, this, peripheral);
                 return radio;
             });
         }

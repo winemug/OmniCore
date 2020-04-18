@@ -17,10 +17,13 @@ using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Test;
 using OmniCore.Client.Views.Wizards.NewPod;
+using OmniCore.Client.Views.Wizards.NewUser;
+using OmniCore.Client.Views.Wizards.Permissions;
 using OmniCore.Client.Views.Wizards.SetupWizard;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
 namespace OmniCore.Client
@@ -30,37 +33,39 @@ namespace OmniCore.Client
         private readonly IContainer<IClientInstance> Container;
         private readonly IClientFunctions ClientFunctions;
         private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformConfiguration PlatformConfiguration;
 
-        private readonly Dictionary<Type, Func<bool, object, IView>> ViewDictionary;
+        private readonly Dictionary<Type, Func<bool, object, Task<IView>>> ViewDictionary;
         private readonly IClientConnection ApiConnection;
         private readonly ILogger Logger;
-        private readonly NavigationPage MainNavigation;
+
+        private NavigationPage MainNavigation;
         
         public XamarinClient(
             IContainer<IClientInstance> container,
             IClientConnection apiConnection,
             ILogger logger,
-            ICommonFunctions commonFunctions)
+            ICommonFunctions commonFunctions,
+            IPlatformConfiguration platformConfiguration)
         {
             CommonFunctions = commonFunctions;
+            PlatformConfiguration = platformConfiguration;
             Logger = logger;
             Container = container;
             ApiConnection = apiConnection;
-            ViewDictionary = new Dictionary<Type, Func<bool, object, IView>>();
+            ViewDictionary = new Dictionary<Type, Func<bool, object, Task<IView>>>();
             RegisterViews();
             InitializeComponent();
         }
 
         public async Task Initialize()
         {
-            MainPage = new NavigationPage(GetView<SplashView>(false));
-
             var context = await Device.GetMainThreadSynchronizationContextAsync();
             ApiConnection.WhenConnected().SubscribeOn(context)
                 .Subscribe(async api =>
             {
                 Logger.Debug("Service connected.");
-                await MainNavigation.PushAsync(GetView<ShellView>(false), true);
+                await MainNavigation.PushAsync(await GetView<ShellView>(false), true);
             }, async e =>
             {
                 Logger.Error("Service connection failed.", e);
@@ -73,26 +78,30 @@ namespace OmniCore.Client
                 Logger.Debug("Service disconnected.");
             });
 
-            await ApiConnection.Connect();
-        }
-        public T GetView<T>(bool viaShell, object parameter = null)
-            where T : IView
-        {
-            return (T) ViewDictionary[typeof(T)](viaShell, parameter);
-        }
+            MainNavigation = new NavigationPage(await GetView<SplashView>(false));
+            MainPage = MainNavigation;
 
+            if (PlatformConfiguration.TermsAccepted)
+            {
+                await ApiConnection.Connect();
+            }
+            else
+            {
+                await MainNavigation.PushAsync(await GetView<SetupWizardRootView>(false), true);
+            }
+        }
         public Task<IApi> GetApi(CancellationToken cancellationToken) => 
             ApiConnection.WhenConnected().ToTask(cancellationToken);
 
 
-        public Task PushView<T>() where T : IView
+        public async Task PushView<T>() where T : IView
         {
-            return PushView(GetView<T>(false));
+            await PushView(await GetView<T>(false));
         }
         
-        public Task PushView<T>(object parameter) where T : IView
+        public async Task PushView<T>(object parameter) where T : IView
         {
-            return PushView(GetView<T>(false, parameter));
+            await PushView(await GetView<T>(false, parameter));
         }
 
         private async Task PushView(IView view)
@@ -102,20 +111,35 @@ namespace OmniCore.Client
 
         private void RegisterViews()
         {
+            // main views
+            RegisterViewViewModel<EmptyView, EmptyViewModel>();
             RegisterViewViewModel<SplashView, SplashViewModel>();
             RegisterViewViewModel<ShellView, ShellViewModel>();
             RegisterViewViewModel<ServicePopupView, ServicePopupViewModel>();
+            
+            // home
             RegisterViewViewModel<ActivePodsView, ActivePodsViewModel>();
             RegisterViewViewModel<RadiosView, RadiosViewModel>();
             RegisterViewViewModel<RadioDetailView, RadioDetailViewModel>();
             RegisterViewViewModel<RadioScanView, RadiosViewModel>();
             RegisterViewViewModel<ProgressPopupView, ProgressPopupViewModel>();
-            RegisterViewViewModel<EmptyView, EmptyViewModel>();
-            RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
+
+            // wizards (of oz)
             RegisterViewViewModel<SetupWizardRootView, SetupWizardViewModel>();
+            RegisterViewViewModel<PermissionsWizardRootView, PermissionsWizardViewModel>();
+            RegisterViewViewModel<UserWizardRootView, UserWizardViewModel>();
+            RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
+            
+            // test views
             RegisterViewViewModel<Test1View, Test1ViewModel>();
         }
-        
+
+        public async Task<T> GetView<T>(bool viaShell, object parameter = null)
+            where T : IView
+        {
+            return (T) await ViewDictionary[typeof(T)](viaShell, parameter);
+        }
+
         private void RegisterViewViewModel<TView, TViewModel>()
             where TView : IView
             where TViewModel : IViewModel
@@ -123,10 +147,10 @@ namespace OmniCore.Client
             Container.One<TView>();
             Container.One<TViewModel>();
 
-            ViewDictionary.Add(typeof(TView), (viaShell, parameter) =>
+            ViewDictionary.Add(typeof(TView), async (viaShell, parameter) =>
             {
-                var view = Container.Get<TView>();
-                var viewModel = Container.Get<TViewModel>();
+                var view = await Container.Get<TView>();
+                var viewModel = await Container.Get<TViewModel>();
                 viewModel.Initialize(view, viaShell, parameter);
                 return view;
             });

@@ -11,7 +11,6 @@ namespace OmniCore.Model.Interfaces.Common
         IContainer<TInstance> One<TI, TC>() where TC : TI where TI : TInstance;
         IContainer<TInstance> One<TI, TC>(string discriminator) where TC : TI where TI : TInstance;
         IContainer<TInstance> Existing<T>(T instance) where T : TInstance;
-        T Get<T>() where T : TInstance;
-        Task<T> GetAsync<T>() where T : TInstance;
+        Task<T> Get<T>() where T : TInstance;
     }
 }

@@ -29,6 +29,8 @@ namespace OmniCore.Client.Droid.Services
 
         private IContainer<IServiceInstance> Container;
         private IApi Api;
+        private IPlatformConfiguration PlatformConfiguration;
+        
         private const int ServiceNotificationId = 34;
 
         public ILogger Logger { get; } = new Logger();
@@ -46,11 +48,12 @@ namespace OmniCore.Client.Droid.Services
             return new AndroidServiceBinder(Api);
         }
 
-        public override void OnCreate()
+        public override async void OnCreate()
         {
             InitializeNotifications();
             Container = Initializer.AndroidServiceContainer(this);
-            Api = Container.Get<IApi>();
+            Api = await Container.Get<IApi>();
+            PlatformConfiguration = await Container.Get<IPlatformConfiguration>();
             
             if (!AppCenter.Configured)
                 Push.PushNotificationReceived += (sender, e) =>
@@ -79,6 +82,9 @@ namespace OmniCore.Client.Droid.Services
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
+            if (!PlatformConfiguration.ServiceEnabled)
+                return StartCommandResult.NotSticky;
+            
             if (!AndroidServiceStarted)
             {
                 var serviceNotification = SetNotification(

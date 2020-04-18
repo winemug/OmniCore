@@ -56,16 +56,17 @@ namespace OmniCore.Services
             return this;
         }
 
-        public T Get<T>()
+        public async Task<T> Get<T>()
             where T : R
         {
             var o = this.Resolve<T>();
             var ii = o as IInitializable;
-            ii?.Initialize().WaitAndUnwrapException();
+            if (ii != null)
+                await ii?.Initialize();
             return o;
         }
 
-        public T[] GetAll<T>()
+        public async Task<T[]> GetAll<T>()
             where T : R
         {
             var r= Registrations
@@ -76,18 +77,10 @@ namespace OmniCore.Services
             foreach (var o in r)
             {
                 var ii = o as IInitializable;
-                ii?.Initialize().WaitAndUnwrapException();
+                if (ii != null)
+                    await ii.Initialize();
             }
             return r;
-        }
-
-        public async Task<T> GetAsync<T>() where T : R
-        {
-            var o = this.Resolve<T>();
-            var ii = o as IInitializable;
-            if (ii != null)
-                await ii.Initialize();
-            return o;
         }
     }
 }

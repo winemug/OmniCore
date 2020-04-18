@@ -10,9 +10,6 @@ namespace OmniCore.Model.Interfaces.Common
         string DataPath { get; }
         string StoragePath { get; }
         IDisposable BluetoothLock();
-        void StorePreferences((string Key, string Value)[] preferences);
-        (string Key, string Value)[] ReadPreferences((string Key, string DefaultValue)[] preferences);
-
         void Exit();
 
     }

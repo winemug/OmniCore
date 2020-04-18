@@ -44,7 +44,7 @@ namespace OmniCore.Services
         public async Task<IRepositoryContextReadOnly> GetContextReadOnly(CancellationToken cancellationToken)
         {
             var readerLock = await ContextLock.ReaderLockAsync(cancellationToken);
-            var context = ServerContainer.Get<IRepositoryContextReadOnly>();
+            var context = await ServerContainer.Get<IRepositoryContextReadOnly>();
             context.SetLock(readerLock, false);
             return context;
         }
@@ -52,7 +52,7 @@ namespace OmniCore.Services
         public async Task<IRepositoryContextReadWrite> GetContextReadWrite(CancellationToken cancellationToken)
         {
             var writerLock = await ContextLock.WriterLockAsync(cancellationToken);
-            var context = ServerContainer.Get<IRepositoryContextReadWrite>();
+            var context = await ServerContainer.Get<IRepositoryContextReadWrite>();
             context.SetLock(writerLock, true);
             return context;
         }

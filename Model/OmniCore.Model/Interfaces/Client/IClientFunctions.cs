@@ -11,7 +11,6 @@ namespace OmniCore.Model.Interfaces.Client
         Task AttachToService(Type concreteType, IClientConnection connection);
         Task DetachFromService(IClientConnection connection);
         IObservable<(string Permission, bool IsGranted)> RequestPermissions(params string[] permissions);
-        
-        ILogger Logger { get; }
+        Task<bool> PermissionGranted(string permission);
     }
 }
