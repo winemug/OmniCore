@@ -9,7 +9,6 @@ namespace OmniCore.Client.Droid.Services
         {
             Api = api;
         }
-
         public IApi Api { get; }
     }
 }

@@ -19,9 +19,12 @@ using Android.Support.V4.Content;
 using Java.Util.Logging;
 using Microsoft.AppCenter.Push;
 using Nito.AsyncEx.Synchronous;
+using OmniCore.Client.Droid.Platform;
+using OmniCore.Client.Droid.Services;
 using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -37,7 +40,7 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainActivity : FormsAppCompatActivity, IClientFunctions
+    public class MainActivity : FormsAppCompatActivity, IClientFunctions, IActivityContext
     {
         private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
         private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
@@ -53,6 +56,8 @@ namespace OmniCore.Client.Droid
 
         private IContainer<IClientInstance> Container;
         private int NextPermissionRequestId = 0;
+
+        private ForegroundTaskServiceConnection ForegroundTaskServiceConnection;
         
         public Task AttachToService(Type concreteType, IClientConnection connection)
         {
@@ -146,7 +151,6 @@ namespace OmniCore.Client.Droid
 
         protected override async void OnCreate(Bundle savedInstanceState)
         {
-           
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
            
@@ -166,6 +170,8 @@ namespace OmniCore.Client.Droid
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
 
+            ForegroundTaskServiceConnection = new ForegroundTaskServiceConnection();
+            
             base.OnCreate(savedInstanceState);
 
             var client = await Container.Get<IClient>();
@@ -260,6 +266,43 @@ namespace OmniCore.Client.Droid
                 subject.OnCompleted();
             }
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        public IForegroundTask CreateForegroundTask()
+        {
+            return new ForegroundTask(this);
+            // return Device.InvokeOnMainThreadAsync(() =>
+            // {
+            //     var intent = new Intent(this, concreteType);
+            //     if (!BindService(intent, connection as IServiceConnection, Bind.AutoCreate))
+            //         throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
+            // });
+        }
+
+        public Task<IForegroundTaskService> GetForegroundTaskService(CancellationToken cancellationToken)
+        {
+            if (!ForegroundTaskServiceConnection.IsConnected)
+            {
+                Device.InvokeOnMainThreadAsync(() =>
+                {
+                    var intent = new Intent(this, typeof(ForegroundTaskService));
+                    if (!BindService(intent, ForegroundTaskServiceConnection, Bind.AutoCreate))
+                        throw new Exception("Failed to connect to local service");
+                });
+            }
+            return ForegroundTaskServiceConnection.WhenConnected().ToTask(cancellationToken);
+        }
+
+        protected override async void OnPause()
+        {
+            await Device.InvokeOnMainThreadAsync(() =>
+            {
+                if (ForegroundTaskServiceConnection.IsConnected)
+                {
+                    var intent = new Intent(this, typeof(ForegroundTaskService));
+                    UnbindService(ForegroundTaskServiceConnection);
+                }
+            });
         }
     }
 }

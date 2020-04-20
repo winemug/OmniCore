@@ -123,6 +123,7 @@
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IActivityContext.cs" />
     <Compile Include="Platform\Logger.cs" />
     <Compile Include="Platform\PlatformConfiguration.cs" />
     <Compile Include="Services\AndroidService.cs" />
@@ -140,6 +141,9 @@
     <Compile Include="Services\Api.cs" />
     <Compile Include="Services\FirebaseRegistration.cs" />
     <Compile Include="Services\BroadcastReceiver.cs" />
+    <Compile Include="Services\ForegroundTaskServiceBinder.cs" />
+    <Compile Include="Services\ForegroundTaskService.cs" />
+    <Compile Include="Services\ForegroundTaskServiceConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidEnvironment Include="env.conf" />

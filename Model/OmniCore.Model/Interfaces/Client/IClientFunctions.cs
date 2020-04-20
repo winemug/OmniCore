@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Client
 {
@@ -18,5 +19,6 @@ namespace OmniCore.Model.Interfaces.Client
 
         Task<bool> RequestBluetoothPermission();
         Task<bool> RequestStoragePermission();
+        IForegroundTask CreateForegroundTask();
     }
 }
