@@ -12,5 +12,11 @@ namespace OmniCore.Model.Interfaces.Client
         Task DetachFromService(IClientConnection connection);
         IObservable<(string Permission, bool IsGranted)> RequestPermissions(params string[] permissions);
         Task<bool> PermissionGranted(string permission);
+        
+        Task<bool> BluetoothPermissionGranted();
+        Task<bool> StoragePermissionGranted();
+
+        Task<bool> RequestBluetoothPermission();
+        Task<bool> RequestStoragePermission();
     }
 }

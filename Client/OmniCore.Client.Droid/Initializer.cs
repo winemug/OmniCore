@@ -28,6 +28,7 @@ namespace OmniCore.Client.Droid
         {
             return new Container<IServiceInstance>()
                 .Existing(service)
+                .One<IApi, Api>()
                 .One<ICommonFunctions, CommonFunctions>()
                 .One<ILogger, Logger>()
                 .One<IPlatformConfiguration, PlatformConfiguration>()

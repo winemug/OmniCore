@@ -13,6 +13,7 @@ using OmniCore.Client.ViewModels.Test;
 using OmniCore.Client.ViewModels.Wizards;
 using OmniCore.Client.Views;
 using OmniCore.Client.Views.Base;
+using OmniCore.Client.Views.Dialogs;
 using OmniCore.Client.Views.Home;
 using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Test;
@@ -81,18 +82,35 @@ namespace OmniCore.Client
             MainNavigation = new NavigationPage(await GetView<SplashView>(false));
             MainPage = MainNavigation;
 
-            if (PlatformConfiguration.TermsAccepted)
+            while (!PlatformConfiguration.TermsAccepted)
             {
-                await ApiConnection.Connect();
+                if (!await ShowDialog<TermsDialogView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
             }
-            else
+
+            while (!await ClientFunctions.BluetoothPermissionGranted() ||
+                   !await ClientFunctions.StoragePermissionGranted())
             {
-                await MainNavigation.PushAsync(await GetView<SetupWizardRootView>(false), true);
+                if (!await ShowDialog<PermissionsDialogView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
             }
+
+            while (!PlatformConfiguration.DefaultUserSetUp)
+            {
+                if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
+            }
+            
+            await ApiConnection.Connect();
         }
         public Task<IApi> GetApi(CancellationToken cancellationToken) => 
             ApiConnection.WhenConnected().ToTask(cancellationToken);
-
 
         public async Task PushView<T>() where T : IView
         {
@@ -104,6 +122,37 @@ namespace OmniCore.Client
             await PushView(await GetView<T>(false, parameter));
         }
 
+        private async Task<bool> ShowDialog<T>(CancellationToken cancellationToken) where T : IView
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            cancellationToken.Register(() =>
+            {
+                tcs.TrySetCanceled();
+            });
+            
+            var confirm = new Func<Task>(() =>
+            {
+                tcs.TrySetResult(true);
+                return Task.CompletedTask;
+            });
+            
+            var cancel = new Func<Task>(() =>
+            {
+                tcs.TrySetResult(false);
+                return Task.CompletedTask;
+            });
+            
+            var view = await GetView<T>(false, (confirm, cancel));
+            await MainNavigation.PushAsync(view as Page);
+            try
+            {
+                return await tcs.Task.ConfigureAwait(true);
+            }
+            finally
+            {
+                await MainNavigation.PopAsync();
+            }
+        }
         private async Task PushView(IView view)
         {
             await MainNavigation.PushAsync((Page) view);

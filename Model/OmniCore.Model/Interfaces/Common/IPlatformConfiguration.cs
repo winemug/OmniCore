@@ -9,11 +9,6 @@ namespace OmniCore.Model.Interfaces.Common
     {
         bool ServiceEnabled { get; set; }
         bool TermsAccepted { get; set; }
-
-        Task<bool> BluetoothPermissionGranted();
-        Task<bool> StoragePermissionGranted();
-
-        Task<bool> RequestBluetoothPermission();
-        Task<bool> RequestStoragePermission();
+        bool DefaultUserSetUp { get; set; }
     }
 }

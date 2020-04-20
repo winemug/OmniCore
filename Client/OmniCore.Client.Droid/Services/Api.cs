@@ -21,7 +21,6 @@ namespace OmniCore.Client.Droid.Services
         private readonly ISubject<CoreApiStatus> ApiStatusSubject;
         private readonly IServiceFunctions ServiceFunctions;
 
-
         public Api(
             IServiceFunctions serviceFunctions,
             IRepositoryService repositoryService,

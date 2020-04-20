@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Client.Views.Dialogs.PermissionsDialogView">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Permissions used by this app:"/>
+            
+            <StackLayout Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding BluetoothPermissionGranted}" IsEnabled="False"/>
+                <Label Text="Location access"/>
+            </StackLayout>
+            <StackLayout>
+                <Label Text="Location permission is required to utilize the Bluetooth Low Energy (BLE) technology."/>
+                <Label Text="OmniCore uses BLE for direct communication with Omnipod Dash and for indirect communication with Omnipod Eros via RileyLink." />
+            </StackLayout>
+
+            <StackLayout Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding StoragePermissionsGranted}" IsEnabled="False"/>
+                <Label Text="Access to external storage"/>
+            </StackLayout>
+            <StackLayout>
+                <Label Text=""/>
+                <Label Text="Storage permission is required for importing and exporting data." />
+            </StackLayout>
+            <Button Text="Confirm" Command="{Binding ConfirmCommand}" IsEnabled="{Binding ConfirmEnabled}"/>
+            <Button Text="Cancel" Command="{Binding CancelCommand}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

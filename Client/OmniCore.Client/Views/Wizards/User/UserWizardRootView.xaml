@@ -13,6 +13,8 @@
                 <Switch IsToggled="False"/>
                 <Label Text="Manage or monitor a user profile on another device"/>
             </StackLayout>
+            <Button Text="Continue" Command="{Binding ContinueCommand}"/>
+            <Button Text="Exit" Command="{Binding CancelCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

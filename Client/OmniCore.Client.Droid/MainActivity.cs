@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,14 @@ namespace OmniCore.Client.Droid
         Name = "OmniCore.MainActivity")]
     public class MainActivity : FormsAppCompatActivity, IClientFunctions
     {
+        private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
+        private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
+
+        private const string Bluetooth = "android.permission.BLUETOOTH";
+        private const string BluetoothAdmin = "android.permission.BLUETOOTH_ADMIN";
+        private const string BluetoothPrivileged = "android.permission.BLUETOOTH_PRIVILEGED";
+        private const string AccessCoarseLocation = "android.permission.ACCESS_COARSE_LOCATION";
+
         private readonly ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>
             PermissionRequestsDictionary =
                 new ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>();
@@ -94,6 +103,45 @@ namespace OmniCore.Client.Droid
         public void Exit()
         {
             FinishAffinity();
+        }
+
+        public async Task<bool> BluetoothPermissionGranted()
+        {
+            return await HasAllPermissions(Bluetooth,
+                BluetoothAdmin, BluetoothPrivileged, AccessCoarseLocation);
+        }
+
+        public async Task<bool> StoragePermissionGranted()
+        {
+            return await HasAllPermissions(ReadExternalStorage,
+                WriteExternalStorage);
+        }
+
+        public async Task<bool> RequestBluetoothPermission()
+        {
+            return await RequestPermissions(Bluetooth,
+                    BluetoothAdmin, BluetoothPrivileged, AccessCoarseLocation)
+                .All(pr => pr.IsGranted)
+                .ToTask();
+        }
+
+        public async Task<bool> RequestStoragePermission()
+        {
+            return await RequestPermissions(ReadExternalStorage,
+                    WriteExternalStorage)
+                .All(pr => pr.IsGranted)
+                .ToTask();
+        }
+
+        
+        private async Task<bool> HasAllPermissions(params string[] permissions)
+        {
+            foreach (var permission in permissions)
+            {
+                if (!await PermissionGranted(permission))
+                    return false;
+            }
+            return true;
         }
 
         protected override async void OnCreate(Bundle savedInstanceState)

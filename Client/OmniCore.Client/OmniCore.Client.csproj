@@ -53,11 +53,25 @@
     <Compile Remove="Removed\Views\Test\DebugPage.xaml.cs" />
     <Compile Remove="Removed\Views\Test\TestPage.xaml.cs" />
     <Compile Remove="Removed\Views\Users\NewUser.xaml.cs" />
+    <Compile Update="Views\Dialogs\TermsDialogView.xaml.cs">
+      <DependentUpon>TermsDialogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Dialogs\PermissionsDialogView.xaml.cs">
+      <DependentUpon>PermissionsDialogView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="Removed\Views\Help\AboutPage.xaml" />
     <EmbeddedResource Remove="Removed\Views\Pods\OverviewPage.xaml" />
+    <EmbeddedResource Update="Views\Dialogs\TermsDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Dialogs\PermissionsDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -71,11 +85,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.3.0.19" />
-    <PackageReference Include="PropertyChanged.Fody" Version="3.2.7" />
-    <PackageReference Include="Rg.Plugins.Popup" Version="1.2.0.223" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="2.0.0.2" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.530" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
   </ItemGroup>
 
   <ItemGroup>
