@@ -129,7 +129,7 @@
     <Compile Include="Services\AndroidService.cs" />
     <Compile Include="Services\AndroidServiceBinder.cs" />
     <Compile Include="Services\AndroidServiceConnection.cs" />
-    <Compile Include="Initializer.cs" />
+    <Compile Include="AndroidContainer.cs" />
     <Compile Include="Platform\BluetoothLock.cs" />
     <Compile Include="Platform\CommonFunctions.cs" />
     <Compile Include="Platform\DisplayLock.cs" />

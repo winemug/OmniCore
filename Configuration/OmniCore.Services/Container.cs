@@ -6,58 +6,50 @@ using Unity;
 
 namespace OmniCore.Services
 {
-    public class Container<R> : UnityContainer, IContainer<R>
-        where R : IInstance
+    public class Container : UnityContainer, IContainer
     {
         public Container()
         {
-            this.RegisterInstance<IContainer<R>>(this);
+            this.RegisterInstance<IContainer>(this);
         }
 
-        public IContainer<R> Many<T>()
-            where T : R
+        public IContainer Many<T>()
         {
             this.RegisterType<T>();
             return this;
         }
 
-        public IContainer<R> One<T>()
-            where T : R
+        public IContainer One<T>()
         {
             this.RegisterSingleton<T>();
             return this;
         }
 
-        public IContainer<R> Existing<T>(T instance)
-            where T : R
+        public IContainer Existing<T>(T instance)
         {
             this.RegisterInstance(instance);
             return this;
         }
 
-        public IContainer<R> Many<TI, TC>() where TC : TI
-            where TI : R
+        public IContainer Many<TI, TC>() where TC : TI
         {
             this.RegisterType<TI, TC>();
             return this;
         }
 
-        public IContainer<R> One<TI, TC>() where TC : TI
-            where TI : R
+        public IContainer One<TI, TC>() where TC : TI
         {
             this.RegisterSingleton<TI, TC>();
             return this;
         }
 
-        public IContainer<R> One<TI, TC>(string discriminator) where TC : TI
-            where TI : R
+        public IContainer One<TI, TC>(string discriminator) where TC : TI
         {
             this.RegisterSingleton<TI, TC>(discriminator);
             return this;
         }
 
         public async Task<T> Get<T>()
-            where T : R
         {
             var o = this.Resolve<T>();
             var ii = o as IInitializable;
@@ -67,7 +59,6 @@ namespace OmniCore.Services
         }
 
         public async Task<T[]> GetAll<T>()
-            where T : R
         {
             var r= Registrations
                 .Where(r => r.MappedToType.GetInterfaces()

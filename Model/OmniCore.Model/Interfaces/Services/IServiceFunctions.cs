@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IServiceFunctions : IServiceInstance
+    public interface IServiceFunctions 
     {
         ILogger Logger { get; }
     }

@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IBackgroundTask : IDisposable, IServiceInstance
+    public interface IBackgroundTask : IDisposable
     {
         bool IsScheduled { get; }
         DateTimeOffset ScheduledTime { get; }

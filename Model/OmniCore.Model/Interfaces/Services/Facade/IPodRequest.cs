@@ -3,7 +3,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface IPodRequest : ITask, IServiceInstance
+    public interface IPodRequest : ITask
     {
         Task ExecuteRequest();
         // IPodRequest WithoutAutoRescheduling(TimeSpan rescheduleWindow);

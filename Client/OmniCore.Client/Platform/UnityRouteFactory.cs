@@ -4,13 +4,13 @@ using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base
 {
-    public class UnityRouteFactory : RouteFactory, IClientInstance
+    public class UnityRouteFactory : RouteFactory
     {
-        private readonly IContainer<IClientInstance> Container;
+        private readonly IContainer Container;
 
         private Type ViewType;
 
-        public UnityRouteFactory(IContainer<IClientInstance> clientContainer)
+        public UnityRouteFactory(IContainer clientContainer)
         {
             Container = clientContainer;
         }

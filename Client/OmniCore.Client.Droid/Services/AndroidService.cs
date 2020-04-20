@@ -27,7 +27,6 @@ namespace OmniCore.Client.Droid.Services
 
         private Dictionary<NotificationCategory, NotificationChannel> NotificationChannelDictionary;
 
-        private IContainer<IServiceInstance> Container;
         private IApi Api;
         private IPlatformConfiguration PlatformConfiguration;
         
@@ -51,9 +50,8 @@ namespace OmniCore.Client.Droid.Services
         public override async void OnCreate()
         {
             InitializeNotifications();
-            Container = Initializer.AndroidServiceContainer(this);
-            Api = await Container.Get<IApi>();
-            PlatformConfiguration = await Container.Get<IPlatformConfiguration>();
+            Api = await AndroidContainer.Instance.Get<IApi>();
+            PlatformConfiguration = await AndroidContainer.Instance.Get<IPlatformConfiguration>();
             
             if (!AppCenter.Configured)
                 Push.PushNotificationReceived += (sender, e) =>

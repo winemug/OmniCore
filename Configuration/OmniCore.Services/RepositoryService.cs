@@ -13,10 +13,10 @@ namespace OmniCore.Services
         private readonly AsyncReaderWriterLock ContextLock;
         private readonly ICommonFunctions CommonFunctions;
         private readonly ILogger Logger;
-        private readonly IContainer<IServiceInstance> ServerContainer;
+        private readonly IContainer ServerContainer;
 
 
-        public RepositoryService(IContainer<IServiceInstance> serverContainer,
+        public RepositoryService(IContainer serverContainer,
             ICommonFunctions commonFunctions,
             ILogger logger)
         {

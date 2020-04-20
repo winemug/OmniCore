@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IApi : IServiceInstance
+    public interface IApi 
     {
         IObservable<CoreApiStatus> ApiStatus { get; }
         IConfigurationService ConfigurationService { get; }

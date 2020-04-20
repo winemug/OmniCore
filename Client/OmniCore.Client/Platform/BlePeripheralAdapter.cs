@@ -22,7 +22,7 @@ namespace OmniCore.Client.Platform
     {
         private readonly ICommonFunctions CommonFunctions;
 
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly IErosRadioProvider[] ErosRadioProviders;
         private readonly List<Guid> ErosRadioServiceUuids;
         private readonly ILogger Logger;
@@ -34,7 +34,7 @@ namespace OmniCore.Client.Platform
         private readonly ConcurrentDictionary<Guid, IDevice> DeviceCache;
         private readonly ConcurrentDictionary<Guid, BlePeripheral> PeripheralCache;
 
-        public BlePeripheralAdapter(IContainer<IServiceInstance> container,
+        public BlePeripheralAdapter(IContainer container,
             ICommonFunctions commonFunctions,
             IServiceFunctions serviceFunctions,
             ILogger logger,

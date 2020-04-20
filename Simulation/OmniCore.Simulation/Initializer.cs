@@ -4,8 +4,8 @@ namespace OmniCore.Simulation
 {
     public static class Initializer
     {
-        public static IContainer<IServiceInstance> WithBleSimulator
-            (this IContainer<IServiceInstance> container)
+        public static IContainer WithBleSimulator
+            (this IContainer container)
         {
             return container;
         }

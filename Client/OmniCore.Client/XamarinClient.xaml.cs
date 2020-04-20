@@ -31,7 +31,7 @@ namespace OmniCore.Client
 {
     public partial class XamarinClient : IClient, IInitializable
     {
-        private readonly IContainer<IClientInstance> Container;
+        private readonly IContainer Container;
         private readonly IClientFunctions ClientFunctions;
         private readonly ICommonFunctions CommonFunctions;
         private readonly IPlatformConfiguration PlatformConfiguration;
@@ -43,7 +43,7 @@ namespace OmniCore.Client
         private NavigationPage MainNavigation;
         
         public XamarinClient(
-            IContainer<IClientInstance> container,
+            IContainer container,
             IClientConnection apiConnection,
             ILogger logger,
             ICommonFunctions commonFunctions,
@@ -174,8 +174,6 @@ namespace OmniCore.Client
             RegisterViewViewModel<ProgressPopupView, ProgressPopupViewModel>();
 
             // wizards (of oz)
-            RegisterViewViewModel<SetupWizardRootView, SetupWizardViewModel>();
-            RegisterViewViewModel<PermissionsWizardRootView, PermissionsWizardViewModel>();
             RegisterViewViewModel<UserWizardRootView, UserWizardViewModel>();
             RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
             

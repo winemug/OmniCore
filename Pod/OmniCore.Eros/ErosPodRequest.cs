@@ -19,7 +19,7 @@ namespace OmniCore.Eros
     {
         private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
 
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
 
         private readonly List<(RequestPart part, ITaskProgress progress)> Parts =
             new List<(RequestPart part, ITaskProgress progress)>();
@@ -32,7 +32,7 @@ namespace OmniCore.Eros
         private IErosRadio RadioOverride;
 
         public ErosPodRequest(
-            IContainer<IServiceInstance> container,
+            IContainer container,
             IRepositoryService repositoryService)
         {
             RepositoryService = repositoryService;

@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface IErosRadio : IServiceInstance, IDisposable
+    public interface IErosRadio: IDisposable
     {
         IErosRadioProvider Provider { get; }
         RadioEntity Entity { get; }

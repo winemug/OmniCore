@@ -89,8 +89,9 @@ namespace OmniCore.Client.Droid.Services
             }
             return StartCommandResult.NotSticky;
         }
-        public async Task ExecuteTask(Action<Task> foregroundTask, CancellationToken cancellationToken)
+        public async Task ExecuteTask(IForegroundTask foregroundTask, CancellationToken cancellationToken)
         {
+            throw new NotImplementedException();
         }
     }
 }

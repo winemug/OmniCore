@@ -3,7 +3,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IAutomationComponent : IDisposable, IServiceComponent, IServiceInstance
+    public interface IAutomationComponent : IDisposable, IServiceComponent
     {
     }
 }

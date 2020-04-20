@@ -20,7 +20,7 @@ namespace OmniCore.Services
     {
         private readonly ICommonFunctions CommonFunctions;
         private readonly IBlePeripheralAdapter BlePeripheralAdapter;
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         //private readonly IDashPodProvider DashPodProvider;
         private readonly IErosPodProvider ErosPodProvider;
         private readonly IErosRadioProvider[] ErosRadioProviders;
@@ -30,7 +30,7 @@ namespace OmniCore.Services
         private IDisposable AdapterEnabledSubscription;
 
         public PodService(
-            IContainer<IServiceInstance> container,
+            IContainer container,
             IErosRadioProvider[] erosRadioProviders,
             ICommonFunctions commonFunctions,
             IBlePeripheralAdapter blePeripheralAdapter,

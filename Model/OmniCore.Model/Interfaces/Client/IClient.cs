@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Client
 {
-    public interface IClient : IClientInstance
+    public interface IClient 
     {
         Task<T> GetView<T>(bool viaShell, object parameter = null)
             where T : IView;

@@ -54,7 +54,7 @@ namespace OmniCore.Client.Droid
             PermissionRequestsDictionary =
                 new ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>();
 
-        private IContainer<IClientInstance> Container;
+        private IContainer Container;
         private int NextPermissionRequestId = 0;
 
         private ForegroundTaskServiceConnection ForegroundTaskServiceConnection;
@@ -162,9 +162,6 @@ namespace OmniCore.Client.Droid
 
             // XdripReceiver = new GenericBroadcastReceiver();
             // RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
-
-            Container = Initializer.AndroidClientContainer(this)
-                .WithXamarinFormsClient();
             
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
@@ -266,17 +263,6 @@ namespace OmniCore.Client.Droid
                 subject.OnCompleted();
             }
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
-        public IForegroundTask CreateForegroundTask()
-        {
-            return new ForegroundTask(this);
-            // return Device.InvokeOnMainThreadAsync(() =>
-            // {
-            //     var intent = new Intent(this, concreteType);
-            //     if (!BindService(intent, connection as IServiceConnection, Bind.AutoCreate))
-            //         throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
-            // });
         }
 
         public Task<IForegroundTaskService> GetForegroundTaskService(CancellationToken cancellationToken)

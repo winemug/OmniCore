@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface ITaskSchedule : IServiceInstance
+    public interface ITaskSchedule 
     {
         ITask RelatedTask { get; set; }
         TimeSpan? ExecuteRelativeEarliest { get; set; }

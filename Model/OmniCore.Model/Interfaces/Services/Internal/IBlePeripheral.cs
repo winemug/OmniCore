@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IBlePeripheral : IServiceInstance
+    public interface IBlePeripheral 
     {
         Guid PeripheralUuid { get; }
         Guid PrimaryServiceUuid { get; }

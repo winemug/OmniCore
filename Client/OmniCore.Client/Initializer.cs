@@ -7,8 +7,8 @@ namespace OmniCore.Client
 {
     public static class Initializer
     {
-        public static IContainer<IServiceInstance> WithCrossBleRadioAdapter
-            (this IContainer<IServiceInstance> container)
+        public static IContainer WithCrossBleRadioAdapter
+            (this IContainer container)
         {
             return container
                 .One<IBlePeripheralAdapter, BlePeripheralAdapter>()
@@ -16,8 +16,8 @@ namespace OmniCore.Client
                 .Many<IBlePeripheralConnection, BlePeripheralConnection>();
         }
 
-        public static IContainer<IClientInstance> WithXamarinFormsClient
-            (this IContainer<IClientInstance> container)
+        public static IContainer WithXamarinFormsClient
+            (this IContainer container)
         {
             return container
                 .One<IClient, XamarinClient>();

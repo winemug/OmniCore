@@ -2,15 +2,14 @@
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface IContainer<in TInstance> : IServiceInstance, IClientInstance
-        where TInstance : IInstance
+    public interface IContainer
     {
-        IContainer<TInstance> Many<T>() where T : TInstance;
-        IContainer<TInstance> Many<TI, TC>() where TC : TI where TI : TInstance;
-        IContainer<TInstance> One<T>() where T : TInstance;
-        IContainer<TInstance> One<TI, TC>() where TC : TI where TI : TInstance;
-        IContainer<TInstance> One<TI, TC>(string discriminator) where TC : TI where TI : TInstance;
-        IContainer<TInstance> Existing<T>(T instance) where T : TInstance;
-        Task<T> Get<T>() where T : TInstance;
+        IContainer Many<T>();
+        IContainer Many<TI, TC>() where TC : TI;
+        IContainer One<T>();
+        IContainer One<TI, TC>() where TC : TI;
+        IContainer One<TI, TC>(string discriminator) where TC : TI;
+        IContainer Existing<T>(T instance);
+        Task<T> Get<T>();
     }
 }

@@ -7,8 +7,8 @@ namespace OmniCore.Services
 {
     public static class Initializer
     {
-        public static IContainer<IServiceInstance> WithDefaultServices
-            (this IContainer<IServiceInstance> container)
+        public static IContainer WithDefaultServices
+            (this IContainer container)
         {
             return container
                 .One<IRepositoryService, RepositoryService>()

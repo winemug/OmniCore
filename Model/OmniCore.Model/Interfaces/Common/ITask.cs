@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface ITask : IDisposable, IServiceInstance
+    public interface ITask : IDisposable
     {
         ITaskProgress Progress { get; }
         void Cancel();

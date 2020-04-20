@@ -12,26 +12,19 @@ using OmniCore.Services;
 
 namespace OmniCore.Client.Droid
 {
-    public static class Initializer
+    public static class AndroidContainer
     {
-        public static IContainer<IClientInstance> AndroidClientContainer(IClientFunctions client)
+        public static IContainer Instance { get; }
+        static AndroidContainer()
         {
-            return new Container<IClientInstance>()
-                .Existing(client)
+            Instance = new OmniCore.Services.Container();
+            Instance
+                .Existing(Instance)
                 .One<ICommonFunctions, CommonFunctions>()
                 .One<ILogger, Logger>()
                 .One<IPlatformConfiguration, PlatformConfiguration>()
-                .One<IClientConnection, AndroidServiceConnection>();
-        }
-
-        public static IContainer<IServiceInstance> AndroidServiceContainer(IServiceFunctions service)
-        {
-            return new Container<IServiceInstance>()
-                .Existing(service)
+                .One<IClientConnection, AndroidServiceConnection>()
                 .One<IApi, Api>()
-                .One<ICommonFunctions, CommonFunctions>()
-                .One<ILogger, Logger>()
-                .One<IPlatformConfiguration, PlatformConfiguration>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
@@ -40,7 +33,8 @@ namespace OmniCore.Client.Droid
 #else
                 .WithCrossBleRadioAdapter()
 #endif
-                .WithEfCoreRepository();
+                .WithEfCoreRepository()
+                .WithXamarinFormsClient();
         }
     }
 }

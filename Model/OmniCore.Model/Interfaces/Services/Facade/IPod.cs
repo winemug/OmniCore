@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Facade
 {
-    public interface IPod : IServiceInstance, IDisposable
+    public interface IPod: IDisposable
     {
         PodEntity Entity { get; set; }
         PodRunningState RunningState { get; }

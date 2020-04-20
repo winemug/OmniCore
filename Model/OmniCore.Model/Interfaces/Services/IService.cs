@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IService : IServiceInstance, INotifyStatus
+    public interface IService : INotifyStatus
     {
         bool IsStarted { get; }
         bool IsPaused { get; }

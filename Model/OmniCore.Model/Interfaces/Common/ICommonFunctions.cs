@@ -4,7 +4,7 @@ using OmniCore.Model.Interfaces.Client;
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface ICommonFunctions : IClientInstance, IServiceInstance
+    public interface ICommonFunctions 
     {
         Version Version { get; }
         string DataPath { get; }

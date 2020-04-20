@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IBlePeripheralConnection : IServiceInstance, IDisposable
+    public interface IBlePeripheralConnection: IDisposable
     {
         Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid,
             CancellationToken cancellationToken);

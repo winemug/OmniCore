@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Client
 {
-    public interface IView : IClientInstance
+    public interface IView
     {
     }
 }

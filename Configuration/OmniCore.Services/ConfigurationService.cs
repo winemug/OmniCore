@@ -14,11 +14,11 @@ namespace OmniCore.Services
 {
     public class ConfigurationService : IConfigurationService
     {
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly ILogger Logger;
         private readonly IRepositoryService RepositoryService;
 
-        public ConfigurationService(IContainer<IServiceInstance> container,
+        public ConfigurationService(IContainer container,
             IRepositoryService repositoryService,
             ILogger logger)
         {

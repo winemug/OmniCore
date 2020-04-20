@@ -10,11 +10,11 @@ namespace OmniCore.Services
     public class AutomationService : ServiceBase, IAutomationService
     {
         private readonly IAutomationComponent[] AutomationComponents;
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly ILogger Logger;
 
         public AutomationService(
-            IContainer<IServiceInstance> container,
+            IContainer container,
             IAutomationComponent[] automationComponents,
             ILogger logger)
         {

@@ -24,7 +24,7 @@ namespace OmniCore.Client.Platform
 
         private readonly BlePeripheralAdapter BlePeripheralAdapter;
         private readonly ISubject<PeripheralConnectionState> ConnectionStateSubject;
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly ISubject<PeripheralDiscoveryState> DiscoveryStateSubject;
         private readonly ILogger Logger;
         private readonly ISubject<string> NameSubject;
@@ -51,7 +51,7 @@ namespace OmniCore.Client.Platform
             IBlePeripheralAdapter blePeripheralAdapter,
             ILogger logger,
             ICommonFunctions commonFunctions,
-            IContainer<IServiceInstance> container)
+            IContainer container)
         {
             Container = container;
             BlePeripheralAdapter = (BlePeripheralAdapter) blePeripheralAdapter;

@@ -6,7 +6,7 @@ using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IConfigurationService : IServiceInstance
+    public interface IConfigurationService 
     {
         Task<IDashConfiguration> GetDefaultDashConfiguration(CancellationToken cancellationToken);
         Task SetDefaultDashConfiguration(IDashConfiguration dashConfiguration, CancellationToken cancellationToken);

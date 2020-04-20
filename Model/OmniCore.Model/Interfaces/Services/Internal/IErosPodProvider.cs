@@ -8,7 +8,7 @@ using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IErosPodProvider : IServiceInstance, IDisposable
+    public interface IErosPodProvider: IDisposable
     {
         Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken);
         Task<IErosPod> NewPod(IUser user, IMedication medication, CancellationToken cancellationToken);

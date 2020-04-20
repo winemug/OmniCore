@@ -2,7 +2,7 @@
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IDegradationProfile : IServiceInstance
+    public interface IDegradationProfile 
     {
     }
 }

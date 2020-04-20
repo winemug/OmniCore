@@ -10,11 +10,11 @@ namespace OmniCore.Services
     public class IntegrationService : ServiceBase, IIntegrationService
     {
         private readonly IConfigurationService ConfigurationService;
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly IIntegrationComponent[] IntegrationComponents;
         private readonly ILogger Logger;
 
-        public IntegrationService(IContainer<IServiceInstance> container,
+        public IntegrationService(IContainer container,
             IConfigurationService configurationService,
             IIntegrationComponent[] integrationComponents,
             ILogger logger)

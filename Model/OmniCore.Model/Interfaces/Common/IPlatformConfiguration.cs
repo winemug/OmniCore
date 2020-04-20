@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Common
 {
-    public interface IPlatformConfiguration : IClientInstance, IServiceInstance
+    public interface IPlatformConfiguration 
     {
         bool ServiceEnabled { get; set; }
         bool TermsAccepted { get; set; }

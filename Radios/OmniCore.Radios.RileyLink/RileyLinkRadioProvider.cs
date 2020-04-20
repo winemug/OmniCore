@@ -18,13 +18,13 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadioProvider : IErosRadioProvider
     {
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly ConcurrentDictionary<Guid, IErosRadio> RadioDictionary;
         private readonly IRepositoryService RepositoryService;
 
         public RileyLinkRadioProvider(
             IRepositoryService repositoryService,
-            IContainer<IServiceInstance> container)
+            IContainer container)
         {
             RepositoryService = repositoryService;
             Container = container;

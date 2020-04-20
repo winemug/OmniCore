@@ -22,7 +22,7 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IErosRadio
     {
-        private readonly IContainer<IServiceInstance> Container;
+        private readonly IContainer Container;
         private readonly ILogger Logger;
         private readonly IRepositoryService RepositoryService;
         private readonly IConfigurationService ConfigurationService;
@@ -31,7 +31,7 @@ namespace OmniCore.Radios.RileyLink
         private CancellationTokenSource HealthCheckCancellationTokenSource;
 
         public RileyLinkRadio(
-            IContainer<IServiceInstance> container,
+            IContainer container,
             ILogger logger,
             IRepositoryService repositoryService,
             IConfigurationService configurationService)

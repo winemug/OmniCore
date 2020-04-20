@@ -7,7 +7,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Client
 {
-    public interface IClientFunctions : IClientInstance
+    public interface IClientFunctions 
     {
         Task AttachToService(Type concreteType, IClientConnection connection);
         Task DetachFromService(IClientConnection connection);
@@ -19,6 +19,5 @@ namespace OmniCore.Model.Interfaces.Client
 
         Task<bool> RequestBluetoothPermission();
         Task<bool> RequestStoragePermission();
-        IForegroundTask CreateForegroundTask();
     }
 }

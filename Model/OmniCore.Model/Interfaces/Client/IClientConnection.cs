@@ -5,7 +5,7 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces.Client
 {
-    public interface IClientConnection : IClientInstance
+    public interface IClientConnection 
     {
         IObservable<IClientConnection> WhenDisconnected();
         IObservable<IApi> WhenConnected();
