@@ -1,6 +1,6 @@
 ﻿using OmniCore.Model.Entities;
 
-namespace OmniCore.Model.Interfaces.Services.Facade
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IMedication
     {

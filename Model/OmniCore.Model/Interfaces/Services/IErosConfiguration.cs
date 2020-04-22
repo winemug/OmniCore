@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Model.Interfaces.Services.Facade
+﻿namespace OmniCore.Model.Interfaces.Services
 {
     public interface IErosConfiguration
     {

@@ -236,7 +236,7 @@ namespace OmniCore.Radios.RileyLink
             }
         }
 
-        public async Task<byte[]> GetResponse(IErosPodRequest request, CancellationToken cancellationToken,
+        public async Task<byte[]> GetResponse(IPodRequest request, CancellationToken cancellationToken,
             RadioOptions options = null)
         {
             await PauseHealthChecks();
@@ -313,36 +313,33 @@ namespace OmniCore.Radios.RileyLink
         private async Task RecordRadioEvent(RadioEvent eventType,
             string text = null, byte[] data = null, int? rssi = null)
         {
-            //TODO: don't write to db just yet
-
-            //     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            //     try
-            //     {
-            //         using var context = await RepositoryService.GetContextReadWrite(cts.Token);
-            //
-            //         await context
-            //             .WithExisting(Entity)
-            //             .RadioEvents.AddAsync(
-            //                 new RadioEventEntity
-            //                 {
-            //                     Radio = Entity,
-            //                     EventType = eventType,
-            //                     Text = text,
-            //                     Data = data,
-            //                     Rssi = rssi
-            //                 }, cts.Token);
-            //         await context.Save(cts.Token);
-            //     }
-            //     catch (OperationCanceledException)
-            //     {
-            //         Logging.Warning("RLR: Timed out writing radio event to database");
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         Logging.Warning("RLR: Error writing radio event to database", e);
-            //     }
-            //
-            // }
+             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+             try
+             {
+                 using var context = await RepositoryService.GetContextReadWrite(cts.Token);
+        
+                 await context
+                     .WithExisting(Entity)
+                     .RadioEvents.AddAsync(
+                         new RadioEventEntity
+                         {
+                             Radio = Entity,
+                             EventType = eventType,
+                             Text = text,
+                             Data = data,
+                             Rssi = rssi
+                         }, cts.Token);
+                 await context.Save(cts.Token);
+             }
+             catch (OperationCanceledException)
+             {
+                 Logger.Warning("RLR: Timed out writing radio event to database");
+             }
+             catch (Exception e)
+             {
+                 Logger.Warning("RLR: Error writing radio event to database", e);
+             }
+        
         }
 
         private async Task UpdateRadioName(string name)

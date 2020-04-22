@@ -1,4 +1,5 @@
 ﻿using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 
@@ -11,9 +12,11 @@ namespace OmniCore.Eros
         {
             return container
                 .One<IErosPodProvider, ErosPodProvider>()
-                .Many<ErosPod>()
                 .Many<IErosPodRequest, ErosPodRequest>()
-                .Many<ErosRequestQueue>();
+                .Many<IErosPodResponse, ErosPodResponse>()
+                .Many<IErosPod, ErosPod>()
+                .Many<IPodTask, ErosPodTask>();
+            //.Many<ErosRequestQueue>();
         }
     }
 }

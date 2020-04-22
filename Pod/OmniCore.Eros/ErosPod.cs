@@ -12,7 +12,7 @@ using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
-using IErosRadio = OmniCore.Model.Interfaces.Services.Facade.IErosRadio;
+using IErosRadio = OmniCore.Model.Interfaces.Services.IErosRadio;
 
 namespace OmniCore.Eros
 {
@@ -21,18 +21,15 @@ namespace OmniCore.Eros
         private readonly IContainer Container;
         private readonly IPodService PodService;
         private readonly IRepositoryService RepositoryService;
-        private readonly ErosRequestQueue RequestQueue;
         private readonly ISubject<IEnumerable<IErosRadio>> RadiosUpdatedSubject;
 
         public ErosPod(IContainer container,
             IRepositoryService repositoryService,
-            IPodService podService,
-            ErosRequestQueue requestQueue)
+            IPodService podService)
         {
             RepositoryService = repositoryService;
             PodService = podService;
             Container = container;
-            RequestQueue = requestQueue;
             RunningState = new PodRunningState();
             RadiosUpdatedSubject = new Subject<IEnumerable<IErosRadio>>();
         }
@@ -44,7 +41,7 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public Task<IList<IPodRequest>> GetActiveRequests()
+        public Task<IList<IPodTask>> GetActiveRequests()
         {
             throw new NotImplementedException();
         }
@@ -71,117 +68,110 @@ namespace OmniCore.Eros
                         Radio = radio.Entity
                     });
                 }
-                context.Save(cancellationToken);
+                await context.Save(cancellationToken);
             }
 
             //TODO
             RadiosUpdatedSubject.OnNext(radios);
         }
 
-        public Task<IPodRequest> Activate(IErosRadio radio, CancellationToken cancellationToken)
+        public Task<IPodTask> Activate(IErosRadio radio, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IPodRequest> Acquire(IErosRadio radio, CancellationToken cancellationToken)
+        public async Task<IPodTask> Acquire(IErosRadio radio, CancellationToken cancellationToken)
         {
-            return RequestQueue.Enqueue(
-                (await NewPodRequest())
-                .WithAcquireRequest(radio)
-            );
+            var request = (await Container.Get<IErosPodRequest>())
+                .WithPod(this)
+                .WithAcquireRequest();
+
+            var task = (await Container.Get<IPodTask>())
+                .WithRequest(request);
+
+            return task;
         }
 
-        public Task<IPodRequest> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodRequest> Start()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IPodRequest> Status(StatusRequestType requestType)
-        {
-            return RequestQueue.Enqueue(
-                (await NewPodRequest())
-                .WithStatusRequest(requestType)
-            );
-        }
-
-        public Task<IPodRequest> ConfigureAlerts()
+        public Task<IPodTask> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> AcknowledgeAlerts()
+        public Task<IPodTask> Start()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> SetBasalSchedule()
+        public async Task<IPodTask> Status(StatusRequestType requestType)
+        {
+            var request = (await Container.Get<IErosPodRequest>())
+                .WithPod(this)
+                .WithStatusRequest(requestType);
+
+            var task = (await Container.Get<IPodTask>())
+                .WithRequest(request);
+
+            return task;
+        }
+
+        public Task<IPodTask> ConfigureAlerts()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> CancelBasal()
+        public Task<IPodTask> AcknowledgeAlerts()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> SetTempBasal()
+        public Task<IPodTask> SetBasalSchedule()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> CancelTempBasal()
+        public Task<IPodTask> CancelBasal()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> Bolus()
+        public Task<IPodTask> SetTempBasal()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> CancelBolus()
+        public Task<IPodTask> CancelTempBasal()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> StartExtendedBolus()
+        public Task<IPodTask> Bolus()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> CancelExtendedBolus()
+        public Task<IPodTask> CancelBolus()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IPodRequest> Deactivate()
+        public Task<IPodTask> StartExtendedBolus()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IPodTask> CancelExtendedBolus()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IPodTask> Deactivate()
         {
             throw new NotImplementedException();
         }
 
         public void Dispose()
         {
-            RequestQueue.Shutdown();
-        }
-
-        private async Task<IErosPodRequest> NewPodRequest()
-        {
-            var pre = new PodRequestEntity
-            {
-                Pod = Entity
-            };
-            
-            using var context = await RepositoryService.GetContextReadWrite(CancellationToken.None);
-            await context.PodRequests.AddAsync(pre);
-            await context.Save(CancellationToken.None);
-
-            var request = await Container.Get<IErosPodRequest>();
-            return request.WithPod(this).WithEntity(pre);
+            // RequestQueue.Shutdown();
         }
 
         private async Task StartStateMonitoring()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace OmniCore.Model.Utilities
@@ -40,6 +41,22 @@ namespace OmniCore.Model.Utilities
         public Bytes(Bytes b1, Bytes b2) : this()
         {
             Append(b1).Append(b2);
+        }
+
+        public Bytes(string hexString) : this()
+        {
+            if (hexString.Length % 2 != 0)
+                throw new ArgumentException();
+
+            hexString = hexString.ToUpperInvariant();
+
+            var bytes = new byte[hexString.Length / 2];
+            for (int i = 0; i < hexString.Length / 2 ; i += 1)
+            {
+                bytes[i] = byte.Parse(hexString.Substring(i*2, 2), NumberStyles.HexNumber); 
+            }
+
+            Append(bytes);
         }
 
         public int Length { get; private set; }

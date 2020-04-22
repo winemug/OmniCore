@@ -1,59 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
 
 namespace OmniCore.Radios.RileyLink
 {
-    public class RileyLinkErosConversation
+    public class PacketRadioConversation
     {
-        private static readonly Dictionary<long, RileyLinkErosConversation> ConversationCache =
-            new Dictionary<long, RileyLinkErosConversation>();
-
-        private readonly IErosPod Pod;
-        public bool IsFinished;
+        private static readonly Dictionary<long, PacketRadioConversation> ConversationCache =
+            new Dictionary<long, PacketRadioConversation>();
 
         private IErosPodRequest Request;
+        private Bytes ResponseData;
 
+        public bool IsFinished { get; private set; }
+        public int PacketSequence { get; private set; }
+       
         private List<Bytes> RequestPacketData;
-        public Bytes ResponseData;
         private byte[] SendPacketCache;
 
         private int SendPacketIndex;
 
-        private RileyLinkErosConversation(IErosPod pod)
+        private PacketRadioConversation()
         {
-            PacketSequence = 0;
-            Pod = pod;
         }
 
-        public int PacketSequence { get; private set; }
-
-        public static RileyLinkErosConversation ForPod(IErosPod erosPod)
+        public static PacketRadioConversation ForRequest(IErosPodRequest request)
         {
-            if (!ConversationCache.ContainsKey(erosPod.Entity.Id))
-                ConversationCache.Add(erosPod.Entity.Id, new RileyLinkErosConversation(erosPod));
+            if (!ConversationCache.ContainsKey(request.Pod.Entity.Id))
+                ConversationCache.Add(request.Pod.Entity.Id, new PacketRadioConversation());
 
-            return ConversationCache[erosPod.Entity.Id];
-        }
+            var instance = ConversationCache[request.Pod.Entity.Id];
 
-        public void Initialize(IErosPodRequest request)
-        {
-            Request = request;
+            instance.Request = request;
+            instance.ResponseData = new Bytes();
+
             var requestData = new Bytes(request.Message);
-            RequestPacketData = new List<Bytes>();
+            instance.RequestPacketData = new List<Bytes>();
             var index = 0;
             while (index < requestData.Length)
             {
                 var packetBodyLength = Math.Min(31, requestData.Length - index);
-                RequestPacketData.Add(requestData.Sub(index, index + packetBodyLength));
+                instance.RequestPacketData.Add(requestData.Sub(index, index + packetBodyLength));
+                index += packetBodyLength;
             }
 
-            ResponseData = new Bytes();
+            instance.IsFinished = false;
+            return instance;
         }
-
-        public byte[] GetPacketToSend()
+        public byte[] GetPacketToSend(bool encode)
         {
             if (SendPacketCache == null)
             {
@@ -71,13 +69,13 @@ namespace OmniCore.Radios.RileyLink
                     rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.ACK,
                         new Bytes(Request.MessageAddress));
 
-                SendPacketCache = rpSend.GetPacketData();
+                SendPacketCache = rpSend.GetPacketData(encode);
             }
 
             return SendPacketCache;
         }
 
-        public bool ParseIncomingPacket(byte[] incomingPacketData)
+        public bool ParseIncomingPacket(byte[] incomingPacketData, bool encoded)
         {
             if (IsFinished)
             {
@@ -86,7 +84,7 @@ namespace OmniCore.Radios.RileyLink
                 return false;
             }
 
-            var incomingRadioPacket = RadioPacket.FromIncoming(incomingPacketData);
+            var incomingRadioPacket = RadioPacket.FromIncoming(incomingPacketData, encoded);
             if (!incomingRadioPacket.IsValid)
                 return false;
 
@@ -172,7 +170,7 @@ namespace OmniCore.Radios.RileyLink
         }
     }
 
-    internal class RadioPacket
+    public class RadioPacket
     {
         private RadioPacket()
         {
@@ -194,7 +192,7 @@ namespace OmniCore.Radios.RileyLink
         public byte? Crc { get; set; }
         public bool IsValid { get; set; }
 
-        public byte[] GetPacketData()
+        public byte[] GetPacketData(bool encode)
         {
             if (!Address.HasValue || !Sequence.HasValue || !Type.HasValue)
                 return null;
@@ -206,10 +204,13 @@ namespace OmniCore.Radios.RileyLink
                 packetData.Append(Data);
             Crc = CrcUtil.Crc8(packetData);
             packetData.Append(Crc.Value);
-            return ManchesterEncoding.Encode(packetData).ToArray();
+            if (encode)
+                return ManchesterEncoding.Encode(packetData).ToArray();
+            else
+                return packetData.ToArray();
         }
 
-        public static RadioPacket FromIncoming(byte[] incomingData)
+        public static RadioPacket FromIncoming(byte[] incomingData, bool encoded)
         {
             int? sequence = null;
             uint? address = null;
@@ -217,7 +218,8 @@ namespace OmniCore.Radios.RileyLink
             Bytes data = null;
             byte? crc = null;
 
-            var incoming = ManchesterEncoding.Decode(new Bytes(incomingData));
+            var incoming = encoded ? ManchesterEncoding.Decode(new Bytes(incomingData))
+                : new Bytes(incomingData);
 
             if (incoming.Length >= 4) address = incoming.DWord(0);
 

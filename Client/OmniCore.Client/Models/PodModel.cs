@@ -1,4 +1,5 @@
-﻿using OmniCore.Model.Interfaces.Services.Facade;
+﻿using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Client.Models
 {

@@ -1,11 +1,9 @@
-﻿using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Common;
-
-namespace OmniCore.Model.Interfaces.Services.Facade
+﻿namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPodRequest
     {
-        Task ExecuteRequest();
+        IPod Pod { get; }
+        // Task ExecuteRequest();
         // IPodRequest WithoutAutoRescheduling(TimeSpan rescheduleWindow);
         // IPodRequest ScheduleStart(DateTimeOffset earliestStart, bool rescheduleOnRetry);
         // IPodRequest ScheduleRelative(IPodRequest otherRequest, bool onlyIfSuccessful, TimeSpan? );

@@ -1,11 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using OmniCore.Model.Entities;
+﻿using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 
-namespace OmniCore.Model.Interfaces.Services.Facade
+namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IErosPodRequest : IPodRequest
     {
+        IErosPod ErosPod { get; }
         IErosPodRequest WithPod(IErosPod pod);
         IErosPodRequest WithEntity(PodRequestEntity entity);
         IErosPodRequest WithMessageAddress(uint messageAddress);

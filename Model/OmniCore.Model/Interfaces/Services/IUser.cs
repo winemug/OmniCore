@@ -1,7 +1,6 @@
 ﻿using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Common;
 
-namespace OmniCore.Model.Interfaces.Services.Facade
+namespace OmniCore.Model.Interfaces.Services
 {
     public interface IUser 
     {
