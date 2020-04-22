@@ -87,7 +87,7 @@ namespace OmniCore.Eros
         {
             return RequestQueue.Enqueue(
                 (await NewPodRequest())
-                .WithAcquire(radio)
+                .WithAcquireRequest(radio)
             );
         }
 
@@ -105,7 +105,7 @@ namespace OmniCore.Eros
         {
             return RequestQueue.Enqueue(
                 (await NewPodRequest())
-                .WithStatus(requestType)
+                .WithStatusRequest(requestType)
             );
         }
 
@@ -169,19 +169,19 @@ namespace OmniCore.Eros
             RequestQueue.Shutdown();
         }
 
-        private async Task<ErosPodRequest> NewPodRequest()
+        private async Task<IErosPodRequest> NewPodRequest()
         {
-            var request = await Container.Get<IErosPodRequest>() as ErosPodRequest;
-            request.ErosPod = this;
-            request.Entity = new PodRequestEntity
+            var pre = new PodRequestEntity
             {
                 Pod = Entity
             };
-
+            
             using var context = await RepositoryService.GetContextReadWrite(CancellationToken.None);
-            await context.PodRequests.AddAsync(request.Entity);
+            await context.PodRequests.AddAsync(pre);
             await context.Save(CancellationToken.None);
-            return request;
+
+            var request = await Container.Get<IErosPodRequest>();
+            return request.WithPod(this).WithEntity(pre);
         }
 
         private async Task StartStateMonitoring()

@@ -6,7 +6,7 @@ namespace OmniCore.Model.Interfaces.Services.Facade
 {
     public interface ITask : IDisposable
     {
-        ITaskProgress Progress { get; }
+        ITaskProgress TaskProgress { get; }
         void Cancel();
         IObservable<bool> WhenCanCancelChanged();
         IObservable<TaskState> WhenStateChanged();

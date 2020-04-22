@@ -4,18 +4,19 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Eros
 {
     public class ErosRequestQueue 
     {
-        private readonly BlockingCollection<ErosPodRequest> RequestQueue;
+        private readonly BlockingCollection<IErosPodRequest> RequestQueue;
 
-        private readonly ISubject<ErosPodRequest> RequestSubject;
+        private readonly ISubject<IErosPodRequest> RequestSubject;
 
         public ErosRequestQueue()
         {
-            RequestQueue = new BlockingCollection<ErosPodRequest>(new ConcurrentQueue<ErosPodRequest>());
+            RequestQueue = new BlockingCollection<IErosPodRequest>(new ConcurrentQueue<IErosPodRequest>());
         }
 
         public void Startup()
@@ -28,7 +29,7 @@ namespace OmniCore.Eros
             RequestQueue.CompleteAdding();
         }
 
-        public ErosPodRequest Enqueue(ErosPodRequest request)
+        public IErosPodRequest Enqueue(IErosPodRequest request)
         {
             if (RequestQueue.IsAddingCompleted)
                 throw new OmniCoreWorkflowException(FailureType.Internal,

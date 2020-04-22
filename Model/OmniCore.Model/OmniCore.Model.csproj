@@ -36,6 +36,7 @@
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Unity.Abstractions" Version="5.11.5" />
   </ItemGroup>
 
   <!-- Include Nuget Package for Tizen Project building -->

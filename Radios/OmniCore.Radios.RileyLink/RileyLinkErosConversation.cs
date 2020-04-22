@@ -59,17 +59,17 @@ namespace OmniCore.Radios.RileyLink
             {
                 RadioPacket rpSend;
                 if (SendPacketIndex == 0)
-                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.PDM,
+                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.PDM,
                         RequestPacketData[0]);
                 else if (SendPacketIndex < RequestPacketData.Count)
-                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.CON,
+                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.CON,
                         RequestPacketData[SendPacketIndex]);
                 else if (IsFinished)
-                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.ACK,
+                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.ACK,
                         new Bytes((uint) 0));
                 else
-                    rpSend = new RadioPacket(Request.MessageRadioAddress, PacketSequence, PacketType.ACK,
-                        new Bytes(Request.MessageRadioAddress));
+                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.ACK,
+                        new Bytes(Request.MessageAddress));
 
                 SendPacketCache = rpSend.GetPacketData();
             }
@@ -143,7 +143,7 @@ namespace OmniCore.Radios.RileyLink
             if (data.Length >= 4)
             {
                 var radioAddress = data.DWord(0);
-                if (!Request.AllowAddressOverride && radioAddress != Request.MessageRadioAddress)
+                if (!Request.AllowAddressOverride && radioAddress != Request.MessageAddress)
                     isValid = false;
             }
 

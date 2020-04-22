@@ -18,40 +18,118 @@ namespace OmniCore.Eros
     public class ErosPodRequest : IErosPodRequest
     {
         private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
-
-        private readonly IContainer Container;
-
         private readonly List<(RequestPart part, ITaskProgress progress)> Parts =
             new List<(RequestPart part, ITaskProgress progress)>();
-
-        private readonly IRepositoryService RepositoryService;
         private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
         private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
         private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
+        private readonly IRepositoryService RepositoryService;
 
+        private IErosPod ErosPod;
         private IErosRadio RadioOverride;
+        private PodRequestEntity Entity;
+        private int MessageSequence;
+        private bool CriticalFollowup;
+        private TransmissionPower? TransmissionPowerOverride;
+
+        public byte[] Message => GetRequestData();
+        public uint MessageAddress { get; private set; }
+        public bool AllowAddressOverride { get; private set; }
 
         public ErosPodRequest(
-            IContainer container,
             IRepositoryService repositoryService)
         {
             RepositoryService = repositoryService;
-            Container = container;
-            Progress = new TaskProgress();
         }
 
-        public PodRequestEntity Entity { get; set; }
-        public ITaskProgress Progress { get; }
+        public IErosPodRequest WithPod(IErosPod pod)
+        {
+            ErosPod = pod;
+            return this;
+        }
 
-        public byte[] Message => GetRequestData();
-        public uint MessageRadioAddress { get; private set; }
-        public int MessageSequence { get; private set; }
-        public bool WithCriticalFollowup { get; private set; }
-        public bool AllowAddressOverride { get; private set; }
-        public TransmissionPower? TransmissionPowerOverride { get; private set; }
+        public IErosPodRequest WithEntity(PodRequestEntity entity)
+        {
+            Entity = entity;
+            return this;
+        }
+        public IErosPodRequest WithMessageAddress(uint messageAddress)
+        {
+            MessageAddress = messageAddress;
+            return this;
+        }
 
-        public IErosPod ErosPod { get; set; }
+        public IErosPodRequest WithMessageSequence(int messageSequence)
+        {
+            MessageSequence = messageSequence;
+            return this;
+        }
 
+        public IErosPodRequest WithCriticalFollowup()
+        {
+            CriticalFollowup = true;
+            return this;
+        }
+
+        public IErosPodRequest WithAllowAddressOverride()
+        {
+            AllowAddressOverride = true;
+            return this;
+        }
+
+        public IErosPodRequest WithTransmissionPower(TransmissionPower transmissionPower)
+        {
+            TransmissionPowerOverride = transmissionPower;
+            return this;
+        }
+
+        public IErosPodRequest WithStatusRequest(StatusRequestType requestType)
+        {
+            var childProgress = new TaskProgress
+            {
+                Name = "Request Status",
+                Description = "Querying Pod Status"
+            };
+
+            return WithPart(new RequestPart
+            {
+                PartType = PartType.RequestStatus,
+                PartData = new Bytes().Append((byte) requestType)
+            }, childProgress);
+        }
+
+        public IErosPodRequest WithAcquireRequest(IErosRadio radio)
+        {
+            var childProgress = new TaskProgress
+            {
+                Name = "Query Pod",
+                Description = "Looking for pod"
+            };
+
+            AllowAddressOverride = true;
+            TransmissionPowerOverride = TransmissionPower.Lowest;
+
+            return WithPart(new RequestPart
+            {
+                PartType = PartType.RequestStatus,
+                PartData = new Bytes((byte) StatusRequestType.Standard)
+            }, childProgress).WithRadio(radio);
+        }
+
+        public IErosPodRequest WithPairRequest(uint radioAddress, IErosRadio radio)
+        {
+            var childProgress = new TaskProgress
+            {
+                Name = "Pair Pod",
+                Description = "Pairing pod"
+            };
+
+            return WithPart(new RequestPart
+            {
+                PartType = PartType.RequestAssignAddress,
+                PartData = new Bytes(radioAddress)
+            }, childProgress);
+        }
         public void Cancel()
         {
             TaskCancellationSource.Cancel();
@@ -75,7 +153,6 @@ namespace OmniCore.Eros
         public async Task ExecuteRequest()
         {
             StateSubject.OnNext(TaskState.Running);
-
             try
             {
                 await ExecuteRequestInternal(TaskCancellationSource.Token);
@@ -122,64 +199,15 @@ namespace OmniCore.Eros
             await context.Save(cancellationToken);
         }
 
-        public ErosPodRequest WithAcquire(IErosRadio radio)
-        {
-            var childProgress = new TaskProgress
-            {
-                Name = "Query Pod",
-                Description = "Looking for pod"
-            };
-
-            AllowAddressOverride = true;
-            TransmissionPowerOverride = TransmissionPower.Lowest;
-
-            return WithPart(new RequestPart
-            {
-                PartType = PartType.RequestStatus,
-                PartData = new Bytes((byte) StatusRequestType.Standard)
-            }, childProgress).WithRadio(radio);
-        }
-
         private ErosPodRequest WithRadio(IErosRadio radio)
         {
             RadioOverride = radio;
             return this;
         }
 
-        public ErosPodRequest WithPair(uint address)
-        {
-            var childProgress = new TaskProgress
-            {
-                Name = "Pair Pod",
-                Description = "Pairing pod"
-            };
-
-            return WithPart(new RequestPart
-            {
-                PartType = PartType.RequestAssignAddress,
-                PartData = new Bytes(address)
-            }, childProgress);
-        }
-
-        public ErosPodRequest WithStatus(StatusRequestType requestType)
-        {
-            var childProgress = new TaskProgress
-            {
-                Name = "Request Status",
-                Description = "Querying Pod Status"
-            };
-
-            return WithPart(new RequestPart
-            {
-                PartType = PartType.RequestStatus,
-                PartData = new Bytes().Append((byte) requestType)
-            }, childProgress);
-        }
-
         private ErosPodRequest WithPart(RequestPart part, ITaskProgress taskProgress)
         {
             Progress.Children.Add(taskProgress);
-
             Parts.Add((part, taskProgress));
             return this;
         }
@@ -204,12 +232,12 @@ namespace OmniCore.Eros
             }
 
             var b0 = (byte) (MessageSequence << 2);
-            if (WithCriticalFollowup)
+            if (CriticalFollowup)
                 b0 |= 0x80;
             b0 |= (byte) ((messageBody.Length >> 8) & 0x03);
             var b1 = (byte) (messageBody.Length & 0xff);
 
-            var requestBody = new Bytes(MessageRadioAddress).Append(b0).Append(b1).Append(messageBody);
+            var requestBody = new Bytes(MessageAddress).Append(b0).Append(b1).Append(messageBody);
 
             return new Bytes(requestBody).Append(CrcUtil.Crc16(requestBody)).ToArray();
         }
