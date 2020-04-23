@@ -18,7 +18,7 @@ namespace OmniCore.Client.ViewModels.Home
         public ICommand AddCommand =>
             new Command(async () =>
             {
-                await Client.PushView<PodWizardMainView>();
+                await Client.NavigateTo<PodWizardMainView>();
             });
 
         public ActivePodsViewModel(IClient client) : base(client)

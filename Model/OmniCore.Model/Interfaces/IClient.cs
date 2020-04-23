@@ -9,7 +9,7 @@ namespace OmniCore.Model.Interfaces
         Task<T> GetView<T>(bool viaShell, object parameter = null)
             where T : IView;
         Task<IServiceApi> GetServiceApi(CancellationToken cancellationToken);
-        Task PushView<T>() where T : IView;
-        Task PushView<T>(object parameter) where T : IView;
+        Task NavigateTo<T>() where T : IView;
+        Task NavigateTo<T>(object parameter) where T : IView;
     }
 }

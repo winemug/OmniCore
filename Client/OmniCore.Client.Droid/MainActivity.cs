@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -38,14 +39,12 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainPlatformUserActivity : FormsAppCompatActivity, IPlatformUserActivity
+    public class MainActivity : FormsAppCompatActivity, IPlatformUserActivity
     {
         private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
         private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
 
         private const string Bluetooth = "android.permission.BLUETOOTH";
-        private const string BluetoothAdmin = "android.permission.BLUETOOTH_ADMIN";
-        private const string BluetoothPrivileged = "android.permission.BLUETOOTH_PRIVILEGED";
         private const string AccessCoarseLocation = "android.permission.ACCESS_COARSE_LOCATION";
 
         private readonly ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>
@@ -74,8 +73,7 @@ namespace OmniCore.Client.Droid
         }
         public async Task<bool> BluetoothPermissionGranted()
         {
-            return await HasAllPermissions(Bluetooth,
-                BluetoothAdmin, BluetoothPrivileged, AccessCoarseLocation);
+            return await HasAllPermissions(Bluetooth, AccessCoarseLocation);
         }
 
         public async Task<bool> StoragePermissionGranted()
@@ -86,8 +84,7 @@ namespace OmniCore.Client.Droid
 
         public async Task<bool> RequestBluetoothPermission()
         {
-            return await RequestPermissions(Bluetooth,
-                    BluetoothAdmin, BluetoothPrivileged, AccessCoarseLocation)
+            return await RequestPermissions(Bluetooth, AccessCoarseLocation)
                 .All(pr => pr.IsGranted)
                 .ToTask();
         }
@@ -113,8 +110,6 @@ namespace OmniCore.Client.Droid
 
         protected override async void OnCreate(Bundle savedInstanceState)
         {
-            AndroidContainer.Instance.Existing<IPlatformUserActivity>(this);
-            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
            
@@ -124,17 +119,18 @@ namespace OmniCore.Client.Droid
             Forms.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
+            base.OnCreate(savedInstanceState);
+
             // XdripReceiver = new GenericBroadcastReceiver();
             // RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
             
+            AndroidContainer.Instance.Existing<IPlatformUserActivity>(this);
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
 
             ForegroundTaskServiceConnection = new ForegroundTaskServiceConnection();
             
-            base.OnCreate(savedInstanceState);
-
             var client = await AndroidContainer.Instance.Get<IClient>();
             LoadApplication(client as Xamarin.Forms.Application);
         }
@@ -205,6 +201,7 @@ namespace OmniCore.Client.Droid
             {
                 // Do something if there are some pages in the `PopupStack`
             }
+            base.OnBackPressed();
         }
 
         protected override void OnNewIntent(Intent intent)
@@ -243,16 +240,16 @@ namespace OmniCore.Client.Droid
             return ForegroundTaskServiceConnection.WhenConnected().ToTask(cancellationToken);
         }
 
-        protected override async void OnPause()
-        {
-            await Device.InvokeOnMainThreadAsync(() =>
-            {
-                if (ForegroundTaskServiceConnection.IsConnected)
-                {
-                    var intent = new Intent(this, typeof(ForegroundTaskService));
-                    UnbindService(ForegroundTaskServiceConnection);
-                }
-            });
-        }
+        // protected override async void OnPause()
+        // {
+        //     await Device.InvokeOnMainThreadAsync(() =>
+        //     {
+        //         if (ForegroundTaskServiceConnection.IsConnected)
+        //         {
+        //             var intent = new Intent(this, typeof(ForegroundTaskService));
+        //             UnbindService(ForegroundTaskServiceConnection);
+        //         }
+        //     });
+        // }
     }
 }

@@ -17,10 +17,10 @@ namespace OmniCore.Client.ViewModels.Home
     {
         public ObservableCollection<RadioModel> Radios { get; } = new ObservableCollection<RadioModel>();
         public ICommand SelectCommand => new Command<RadioModel>(async rm => 
-            await Client.PushView<RadioDetailView>(rm));
+            await Client.NavigateTo<RadioDetailView>(rm));
         public ICommand AddCommand => new Command(async _ =>
         {
-            await Client.PushView<RadioScanView>();
+            await Client.NavigateTo<RadioScanView>();
         });
         
         public RadiosViewModel(IClient client) : base(client)

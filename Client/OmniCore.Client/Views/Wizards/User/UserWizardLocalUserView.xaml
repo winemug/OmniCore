@@ -1,16 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="OmniCore.Client.Views.Wizards.User.UserWizardLocalUserView">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Name"/>
-            <Editor Text="{Binding Username}"/>
-            <Label Text="Gender"/>
-            <Picker />
-            <Label Text="Date of birth"/>
-            <DatePicker />
-        </StackLayout>
-    </ContentPage.Content>
-</ContentPage>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                 x:Class="OmniCore.Client.Views.Wizards.User.UserWizardLocalUserView">
+    <StackLayout>
+        <Label Text="Name"/>
+        <Editor Text="{Binding Username}"/>
+        <Label Text="Gender"/>
+        <Picker />
+        <Label Text="Date of birth"/>
+        <DatePicker />
+    </StackLayout>
+</pages:PopupPage>

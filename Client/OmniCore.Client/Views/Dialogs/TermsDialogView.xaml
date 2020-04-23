@@ -1,26 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="OmniCore.Client.Views.Dialogs.TermsDialogView">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to OmniCore."/>
-            <Label Text="This software is currently in development. Would that be a problem?"/>
-            <StackLayout Orientation="Horizontal">
-                <Switch IsToggled="{Binding IsMaybe}"/>
-                <Label Text="Maybe"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Switch IsToggled="{Binding IsPossibly}"/>
-                <Label Text="Possibly"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Switch IsToggled="{Binding IsUnlikely}"/>
-                <Label Text="Unlikely"/>
-            </StackLayout>
-            <Button Text="Continue" Command="{Binding DialogOkCommand}"/>
-            <Button Text="Cancel" Command="{Binding DialogCancelCommand}"/>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                  xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                  CloseWhenBackgroundIsClicked="False"
+                  SystemPadding="0"
+                  x:Class="OmniCore.Client.Views.Dialogs.TermsDialogView">
+    <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="5"
+                 Opacity="1" BackgroundColor="White">
+        <Label Text="Welcome to OmniCore."/>
+        <Label Text="This software is currently in development. Would that be a problem?"/>
+        <StackLayout Orientation="Horizontal">
+            <Switch IsToggled="{Binding IsMaybe}"/>
+            <Label Text="Maybe"/>
         </StackLayout>
-    </ContentPage.Content>
-</ContentPage>
+        <StackLayout Orientation="Horizontal">
+            <Switch IsToggled="{Binding IsPossibly}"/>
+            <Label Text="Possibly"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal">
+            <Switch IsToggled="{Binding IsUnlikely}"/>
+            <Label Text="Unlikely"/>
+        </StackLayout>
+        <Button Text="Continue" Command="{Binding DialogOkCommand}" IsEnabled="{Binding DialogOkEnabled}"/>
+        <Button Text="Cancel" Command="{Binding DialogCancelCommand}"/>
+    </StackLayout>
+</pages:PopupPage>

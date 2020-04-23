@@ -20,13 +20,13 @@ using OmniCore.Client.Views.Main;
 using OmniCore.Client.Views.Test;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Client.Views.Wizards.NewUser;
-using OmniCore.Client.Views.Wizards.Permissions;
-using OmniCore.Client.Views.Wizards.SetupWizard;
+using OmniCore.Client.Views.Wizards.User;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Utilities.Extensions;
-using Xamarin.Forms;
+using Rg.Plugins.Popup.Pages;
+using Rg.Plugins.Popup.Services;
+
 
 namespace OmniCore.Client
 {
@@ -40,8 +40,6 @@ namespace OmniCore.Client
 
         private readonly Dictionary<Type, Func<bool, object, Task<IView>>> ViewDictionary;
         private readonly ILogger Logger;
-
-        private NavigationPage MainNavigation;
         
         public XamarinClient(
             IContainer container,
@@ -64,8 +62,7 @@ namespace OmniCore.Client
 
         public async Task Initialize()
         {
-            MainNavigation = new NavigationPage(await GetView<SplashView>(false));
-            MainPage = MainNavigation;
+            MainPage = await GetView<SplashView>(false);
         }
         public Task<IServiceApi> GetServiceApi(CancellationToken cancellationToken)
         {
@@ -75,14 +72,14 @@ namespace OmniCore.Client
                 .ToTask(cancellationToken);
         }
 
-        public async Task PushView<T>() where T : IView
+        public async Task NavigateTo<T>() where T : IView
         {
-            await PushView(await GetView<T>(false));
+            throw new NotImplementedException();
         }
-        
-        public async Task PushView<T>(object parameter) where T : IView
+
+        public async Task NavigateTo<T>(object parameter) where T : IView
         {
-            await PushView(await GetView<T>(false, parameter));
+            throw new NotImplementedException();
         }
 
         private async Task<bool> ShowDialog<T>(CancellationToken cancellationToken) where T : IView
@@ -106,19 +103,17 @@ namespace OmniCore.Client
             });
             
             var view = await GetView<T>(false, (confirm, cancel));
-            await MainNavigation.PushAsync(view as Page);
+
+            await PopupNavigation.Instance.PushAsync(view as PopupPage, true);
+
             try
             {
                 return await tcs.Task;
             }
             finally
             {
-                await MainNavigation.PopAsync();
+                await PopupNavigation.Instance.PopAsync(true);
             }
-        }
-        private async Task PushView(IView view)
-        {
-            await MainNavigation.PushAsync((Page) view);
         }
 
         private void RegisterViews()
@@ -142,6 +137,8 @@ namespace OmniCore.Client
             
             // wizards (of oz)
             RegisterViewViewModel<UserWizardRootView, UserWizardViewModel>();
+            RegisterViewViewModel<UserWizardLocalUserView, UserWizardViewModel>();
+            
             RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
             
             // test views
@@ -197,7 +194,6 @@ namespace OmniCore.Client
                     PlatformFunctions.Exit();
                 }
             }
-            await MainNavigation.PushAsync(await GetView<ShellView>(false), true);
         }
 
         protected override void OnSleep()

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Windows.Input;
-using OmniCore.Client.Views.Wizards.Permissions;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;

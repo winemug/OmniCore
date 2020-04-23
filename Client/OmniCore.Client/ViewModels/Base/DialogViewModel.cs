@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
+using Rg.Plugins.Popup.Pages;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Base
@@ -35,7 +36,6 @@ namespace OmniCore.Client.ViewModels.Base
                     DialogCancelCommand = new Command(async () => await CancelAction());
                 
             }).AutoDispose(this);
-          
         }
     }
 }
