@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Client;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces
 {
-    public interface ICommonFunctions 
+    public interface IPlatformFunctions 
     {
         Version Version { get; }
         string DataPath { get; }

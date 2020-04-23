@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {

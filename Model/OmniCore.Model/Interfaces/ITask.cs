@@ -1,8 +1,7 @@
 ﻿using System;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
 
-namespace OmniCore.Model.Interfaces.Services.Facade
+namespace OmniCore.Model.Interfaces
 {
     public interface ITask : IDisposable
     {

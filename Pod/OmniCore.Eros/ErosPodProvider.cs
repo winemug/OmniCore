@@ -8,9 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Nito.AsyncEx;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Eros

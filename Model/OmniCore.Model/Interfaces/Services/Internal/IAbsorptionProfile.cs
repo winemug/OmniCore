@@ -1,6 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Common;
-
-namespace OmniCore.Model.Interfaces.Services.Internal
+﻿namespace OmniCore.Model.Interfaces.Services.Internal
 {
     public interface IAbsorptionProfile 
     {

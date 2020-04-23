@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities.Extensions;
@@ -20,7 +20,7 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheralAdapter : IBlePeripheralAdapter
     {
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
 
         private readonly IContainer Container;
         private readonly IErosRadioProvider[] ErosRadioProviders;
@@ -34,12 +34,12 @@ namespace OmniCore.Client.Platform
         private readonly ConcurrentDictionary<Guid, BlePeripheral> PeripheralCache;
 
         public BlePeripheralAdapter(IContainer container,
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             ILogger logger,
             IErosRadioProvider[] erosRadioProviders)
         {
             Container = container;
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
             Logger = logger;
             ErosRadioProviders = erosRadioProviders;
 
@@ -56,7 +56,7 @@ namespace OmniCore.Client.Platform
                 .Select(rp => rp.ServiceUuid).ToList();
 
             PeripheralConnectionLockProvider = new AsyncLock();
-            Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, logger, commonFunctions);
+            Scanner = new BlePeripheralScanner(ErosRadioServiceUuids, logger, platformFunctions);
             WhenScanStarted = Scanner.WhenScanStateChanged.Where(s => s).Select(s => this);
             WhenScanFinished = Scanner.WhenScanStateChanged.Where(s => !s).Select(s => this);
 
@@ -153,7 +153,7 @@ namespace OmniCore.Client.Platform
                 cancellationToken.ThrowIfCancellationRequested();
 
                 Scanner.Pause();
-                bluetoothLock = CommonFunctions.BluetoothLock();
+                bluetoothLock = PlatformFunctions.BluetoothLock();
 
                 await Task.Delay(500, cancellationToken);
             }

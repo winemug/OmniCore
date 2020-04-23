@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 
@@ -11,18 +11,18 @@ namespace OmniCore.Services
     public class RepositoryService : ServiceBase, IRepositoryService
     {
         private readonly AsyncReaderWriterLock ContextLock;
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
         private readonly ILogger Logger;
         private readonly IContainer ServerContainer;
 
 
         public RepositoryService(IContainer serverContainer,
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             ILogger logger)
         {
             Logger = logger;
             ServerContainer = serverContainer;
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
             ContextLock = new AsyncReaderWriterLock();
         }
 

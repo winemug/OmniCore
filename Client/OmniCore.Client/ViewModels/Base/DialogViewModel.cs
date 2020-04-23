@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 

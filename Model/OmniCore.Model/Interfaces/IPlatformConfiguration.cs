@@ -1,9 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Services;
-
-namespace OmniCore.Model.Interfaces.Common
+﻿namespace OmniCore.Model.Interfaces
 {
     public interface IPlatformConfiguration 
     {

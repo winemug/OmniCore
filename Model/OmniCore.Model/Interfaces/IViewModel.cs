@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using OmniCore.Model.Interfaces.Common;
 
-namespace OmniCore.Model.Interfaces.Client
+namespace OmniCore.Model.Interfaces
 {
     public interface IViewModel : INotifyPropertyChanged, IDisposable
     {

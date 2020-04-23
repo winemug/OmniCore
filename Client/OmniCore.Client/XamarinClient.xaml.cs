@@ -23,8 +23,7 @@ using OmniCore.Client.Views.Wizards.NewUser;
 using OmniCore.Client.Views.Wizards.Permissions;
 using OmniCore.Client.Views.Wizards.SetupWizard;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
@@ -34,11 +33,10 @@ namespace OmniCore.Client
     public partial class XamarinClient : IClient, IInitializable
     {
         private readonly IContainer Container;
-        private readonly IClientFunctions ClientFunctions;
-        private readonly ICommonFunctions CommonFunctions;
-        private readonly IActivityContext ActivityContext;
+        private readonly IPlatformFunctions PlatformFunctions;
+        private readonly IPlatformUserActivity PlatformUserActivity;
         private readonly IPlatformConfiguration PlatformConfiguration;
-        private readonly IApi Api;
+        private readonly IServiceApi ServiceApi;
 
         private readonly Dictionary<Type, Func<bool, object, Task<IView>>> ViewDictionary;
         private readonly ILogger Logger;
@@ -48,16 +46,16 @@ namespace OmniCore.Client
         public XamarinClient(
             IContainer container,
             ILogger logger,
-            ICommonFunctions commonFunctions,
-            IActivityContext activityContext,
-            IApi api,
+            IPlatformFunctions platformFunctions,
+            IPlatformUserActivity platformUserActivity,
+            IServiceApi serviceApi,
             IPlatformConfiguration platformConfiguration)
         {
             Container = container;
             Logger = logger;
-            CommonFunctions = commonFunctions;
-            ActivityContext = activityContext;
-            Api = api;
+            PlatformFunctions = platformFunctions;
+            PlatformUserActivity = platformUserActivity;
+            ServiceApi = serviceApi;
             PlatformConfiguration = platformConfiguration;
             ViewDictionary = new Dictionary<Type, Func<bool, object, Task<IView>>>();
             RegisterViews();
@@ -69,11 +67,11 @@ namespace OmniCore.Client
             MainNavigation = new NavigationPage(await GetView<SplashView>(false));
             MainPage = MainNavigation;
         }
-        public Task<IApi> GetApi(CancellationToken cancellationToken)
+        public Task<IServiceApi> GetServiceApi(CancellationToken cancellationToken)
         {
-            return Api
+            return ServiceApi
                 .ApiStatus.FirstAsync(s => s == CoreApiStatus.Started)
-                .Select(_ => Api)
+                .Select(_ => ServiceApi)
                 .ToTask(cancellationToken);
         }
 
@@ -111,7 +109,7 @@ namespace OmniCore.Client
             await MainNavigation.PushAsync(view as Page);
             try
             {
-                return await tcs.Task.ConfigureAwait(true);
+                return await tcs.Task;
             }
             finally
             {
@@ -179,16 +177,16 @@ namespace OmniCore.Client
             {
                 if (!await ShowDialog<TermsDialogView>(CancellationToken.None))
                 {
-                    CommonFunctions.Exit();
+                    PlatformFunctions.Exit();
                 }
             }
             
-            while (!await ActivityContext.BluetoothPermissionGranted() ||
-                   !await ActivityContext.StoragePermissionGranted())
+            while (!await PlatformUserActivity.BluetoothPermissionGranted() ||
+                   !await PlatformUserActivity.StoragePermissionGranted())
             {
                 if (!await ShowDialog<PermissionsDialogView>(CancellationToken.None))
                 {
-                    CommonFunctions.Exit();
+                    PlatformFunctions.Exit();
                 }
             }
             
@@ -196,7 +194,7 @@ namespace OmniCore.Client
             {
                 if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
                 {
-                    CommonFunctions.Exit();
+                    PlatformFunctions.Exit();
                 }
             }
             await MainNavigation.PushAsync(await GetView<ShellView>(false), true);

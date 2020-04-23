@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Model.Utilities
 {

@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Client;
+﻿using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Client.ViewModels.Base
 {

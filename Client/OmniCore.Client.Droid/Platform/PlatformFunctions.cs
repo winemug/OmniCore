@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Services;
 using Environment = System.Environment;
 
 namespace OmniCore.Client.Droid
 {
-    public class CommonFunctions : ICommonFunctions
+    public class PlatformFunctions : IPlatformFunctions
     {
         public string DataPath => Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         public string StoragePath

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Android.Content;
-using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Client.Droid.Services
 {

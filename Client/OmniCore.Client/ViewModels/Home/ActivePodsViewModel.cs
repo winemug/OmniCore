@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.NewPod;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home
@@ -27,7 +26,7 @@ namespace OmniCore.Client.ViewModels.Home
             WhenPageAppears().Subscribe(async _ =>
             {
                 Pods = new List<IPod>();
-                var api= await client.GetApi(CancellationToken.None);
+                var api= await client.GetServiceApi(CancellationToken.None);
                 foreach (var pod in await api.PodService.ActivePods(CancellationToken.None))
                     Pods.Add(pod);
             });

@@ -1,6 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Client.ViewModels.Base
 {

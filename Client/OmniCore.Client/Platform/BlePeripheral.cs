@@ -10,7 +10,7 @@ using Nito.AsyncEx;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities.Extensions;
@@ -20,7 +20,7 @@ namespace OmniCore.Client.Platform
 {
     public class BlePeripheral : IBlePeripheral
     {
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
 
         private readonly BlePeripheralAdapter BlePeripheralAdapter;
         private readonly ISubject<PeripheralConnectionState> ConnectionStateSubject;
@@ -50,13 +50,13 @@ namespace OmniCore.Client.Platform
         public BlePeripheral(
             IBlePeripheralAdapter blePeripheralAdapter,
             ILogger logger,
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             IContainer container)
         {
             Container = container;
             BlePeripheralAdapter = (BlePeripheralAdapter) blePeripheralAdapter;
             Logger = logger;
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
             PeripheralCommunicationLockProvider = new AsyncLock();
             DiscoveryStateSubject = new BehaviorSubject<PeripheralDiscoveryState>(PeripheralDiscoveryState.Unknown);
             ConnectionStateSubject =
@@ -163,7 +163,7 @@ namespace OmniCore.Client.Platform
 
             var lockDisposable = await PeripheralCommunicationLockProvider.LockAsync(cancellationToken);
             await BlePeripheralAdapter.TryEnsureAdapterEnabled(cancellationToken);
-            var bluetoothLock = CommonFunctions.BluetoothLock();
+            var bluetoothLock = PlatformFunctions.BluetoothLock();
 
             try
             {

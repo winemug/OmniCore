@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
 
@@ -18,7 +17,7 @@ namespace OmniCore.Services
 {
     public class PodService : ServiceBase, IPodService
     {
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
         private readonly IBlePeripheralAdapter BlePeripheralAdapter;
         private readonly IContainer Container;
         //private readonly IDashPodProvider DashPodProvider;
@@ -31,7 +30,7 @@ namespace OmniCore.Services
         public PodService(
             IContainer container,
             IErosRadioProvider[] erosRadioProviders,
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             IBlePeripheralAdapter blePeripheralAdapter,
             IErosPodProvider erosPodProvider,
             //IDashPodProvider dashPodProvider,
@@ -41,7 +40,7 @@ namespace OmniCore.Services
             Logger = logger;
             Container = container;
             ErosRadioProviders = erosRadioProviders;
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
             BlePeripheralAdapter = blePeripheralAdapter;
             ErosPodProvider = erosPodProvider;
             //DashPodProvider = dashPodProvider;

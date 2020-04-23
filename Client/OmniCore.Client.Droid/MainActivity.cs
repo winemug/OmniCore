@@ -25,8 +25,6 @@ using OmniCore.Model.Constants;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
 using Rg.Plugins.Popup;
@@ -40,7 +38,7 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainActivity : FormsAppCompatActivity, IActivityContext
+    public class MainPlatformUserActivity : FormsAppCompatActivity, IPlatformUserActivity
     {
         private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
         private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
@@ -55,37 +53,8 @@ namespace OmniCore.Client.Droid
                 new ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>();
 
         private int NextPermissionRequestId = 0;
-
         private ForegroundTaskServiceConnection ForegroundTaskServiceConnection;
         
-        public Task AttachToService(Type concreteType, IClientConnection connection)
-        {
-            var serviceConnection = connection as IServiceConnection;
-            if (serviceConnection == null)
-            {
-                throw new OmniCoreWorkflowException(FailureType.PlatformGeneralError,
-                    "Client connection  is not of expected type for the Android platform");
-            }
-            return Device.InvokeOnMainThreadAsync(() =>
-            {
-                var intent = new Intent(this, concreteType);
-                if (!BindService(intent, connection as IServiceConnection, Bind.AutoCreate))
-                    throw new OmniCoreUserInterfaceException(FailureType.ServiceConnectionFailed);
-            });
-        }
-
-        public Task DetachFromService(IClientConnection connection)
-        {
-            var serviceConnection = connection as IServiceConnection;
-            if (serviceConnection == null)
-            {
-                throw new OmniCoreWorkflowException(FailureType.PlatformGeneralError,
-                    "Client connection  is not of expected type for the Android platform");
-            }
-           
-            return Device.InvokeOnMainThreadAsync(() => { base.UnbindService(serviceConnection); });
-        }
-
         public IObservable<(string Permission, bool IsGranted)> RequestPermissions(params string[] permissions)
         {
             var requestId = Interlocked.Increment(ref NextPermissionRequestId);
@@ -103,12 +72,6 @@ namespace OmniCore.Client.Droid
             return await Device.InvokeOnMainThreadAsync(() => ContextCompat.CheckSelfPermission(this, permission) ==
                                                               (int) Permission.Granted);
         }
-
-        public void Exit()
-        {
-            FinishAffinity();
-        }
-
         public async Task<bool> BluetoothPermissionGranted()
         {
             return await HasAllPermissions(Bluetooth,
@@ -150,7 +113,7 @@ namespace OmniCore.Client.Droid
 
         protected override async void OnCreate(Bundle savedInstanceState)
         {
-            AndroidContainer.Instance.Existing<IActivityContext>(this);
+            AndroidContainer.Instance.Existing<IPlatformUserActivity>(this);
             
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces
 {
     public interface ILease<T> : IDisposable
     {

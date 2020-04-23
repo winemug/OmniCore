@@ -3,8 +3,7 @@ using OmniCore.Client.Droid.Services;
 using OmniCore.Eros;
 using OmniCore.Mobile.Droid.Platform;
 using OmniCore.Model;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
@@ -23,11 +22,10 @@ namespace OmniCore.Client.Droid
             Instance = new Container(new UnityContainer());
             Instance
                 .Existing(Instance)
-                .One<ICommonFunctions, CommonFunctions>()
+                .One<IPlatformFunctions, PlatformFunctions>()
                 .One<ILogger, Logger>()
                 .One<IPlatformConfiguration, PlatformConfiguration>()
-                .One<IClientConnection, AndroidServiceConnection>()
-                .One<IApi, Api>()
+                .One<IServiceApi, ServiceApi>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()

@@ -6,8 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Test
@@ -17,7 +16,7 @@ namespace OmniCore.Client.ViewModels.Test
         public ObservableCollection<RadioModel> Radios => new ObservableCollection<RadioModel>();
         public Command IdentifyCommand => new Command(async () =>
         {
-            var api = await Client.GetApi(CancellationToken.None);
+            var api = await Client.GetServiceApi(CancellationToken.None);
             var user = await api.ConfigurationService.GetDefaultUser(CancellationToken.None);
             var med = await api.ConfigurationService.GetDefaultMedication(CancellationToken.None);
             var pod = await api.PodService.NewErosPod(user, med, CancellationToken.None);
@@ -32,7 +31,7 @@ namespace OmniCore.Client.ViewModels.Test
         {
             WhenPageAppears().Subscribe(async _ =>
             {
-                var api = await Client.GetApi(CancellationToken.None);
+                var api = await Client.GetServiceApi(CancellationToken.None);
                 ScanSub?.Dispose();
                 ScanSub = api.PodService.ListErosRadios().Subscribe(
                     radio => { Radios.Add(new RadioModel(radio)); });

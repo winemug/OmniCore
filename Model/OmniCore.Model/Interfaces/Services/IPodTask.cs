@@ -1,6 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Services.Facade;
-
-namespace OmniCore.Model.Interfaces.Services
+﻿namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPodTask : ITask
     {

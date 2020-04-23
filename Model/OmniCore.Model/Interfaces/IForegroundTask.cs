@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IForegroundTask : IDisposable
+    public interface IForegroundTask : ITask
     {
-        Task Execute(CancellationToken cancellationToken);
     }
 }

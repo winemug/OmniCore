@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using OmniCore.Client.Annotations;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home

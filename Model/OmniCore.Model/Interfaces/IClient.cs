@@ -1,16 +1,14 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
 
-namespace OmniCore.Model.Interfaces.Client
+namespace OmniCore.Model.Interfaces
 {
     public interface IClient 
     {
         Task<T> GetView<T>(bool viaShell, object parameter = null)
             where T : IView;
-        Task<IApi> GetApi(CancellationToken cancellationToken);
+        Task<IServiceApi> GetServiceApi(CancellationToken cancellationToken);
         Task PushView<T>() where T : IView;
         Task PushView<T>(object parameter) where T : IView;
     }

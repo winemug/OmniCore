@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Client;
+﻿using OmniCore.Model.Interfaces;
 using Xamarin.Forms.Xaml;
 
 namespace OmniCore.Client.Views.Home

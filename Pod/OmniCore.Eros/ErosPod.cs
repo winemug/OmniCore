@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 using IErosRadio = OmniCore.Model.Interfaces.Services.IErosRadio;
 

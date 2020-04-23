@@ -9,7 +9,7 @@ using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Client.Droid.Services
 {
-    public class Api : IApi
+    public class ServiceApi : IServiceApi
     {
         public IObservable<CoreApiStatus> ApiStatus => ApiStatusSubject.AsObservable();
         public IConfigurationService ConfigurationService { get; }
@@ -20,7 +20,7 @@ namespace OmniCore.Client.Droid.Services
 
         private readonly ISubject<CoreApiStatus> ApiStatusSubject;
 
-        public Api(
+        public ServiceApi(
             IRepositoryService repositoryService,
             IPodService podService,
             IAutomationService automationService,

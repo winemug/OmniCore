@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Client.ViewModels.Home
 {

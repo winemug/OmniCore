@@ -1,6 +1,5 @@
 ﻿using OmniCore.Client.Platform;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Client

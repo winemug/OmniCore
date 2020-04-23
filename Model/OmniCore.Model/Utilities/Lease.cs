@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Model.Utilities
 {

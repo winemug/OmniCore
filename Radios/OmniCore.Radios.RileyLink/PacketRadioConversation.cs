@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities;
 

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace OmniCore.Model.Interfaces.Common
+namespace OmniCore.Model.Interfaces
 {
     public interface ILeaseable<T>
     {

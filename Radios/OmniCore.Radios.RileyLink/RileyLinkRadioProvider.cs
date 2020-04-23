@@ -8,9 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using OmniCore.Model.Interfaces.Services.Internal;
 using OmniCore.Model.Utilities.Extensions;
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.Views.Base

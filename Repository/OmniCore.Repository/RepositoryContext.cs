@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
 using ILogger = OmniCore.Model.Interfaces.Services.ILogger;
@@ -31,10 +31,10 @@ namespace OmniCore.Repository
         }
 
         public RepositoryContext(
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             ILogger logger)
         {
-            var path = Path.Combine(commonFunctions.DataPath, "oc.db3");
+            var path = Path.Combine(platformFunctions.DataPath, "oc.db3");
             ConnectionString = $"Data Source={path}";
         }
 

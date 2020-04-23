@@ -1,8 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
-using OmniCore.Model.Interfaces.Common;
-using OmniCore.Model.Interfaces.Services.Facade;
 
 namespace OmniCore.Model.Interfaces.Services
 {

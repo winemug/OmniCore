@@ -1,4 +1,4 @@
-﻿using OmniCore.Model.Interfaces.Common;
+﻿using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Simulation
 {

@@ -6,7 +6,6 @@ using Android.Gms.Tasks;
 using Android.OS;
 using Java.Sql;
 using OmniCore.Model.Interfaces;
-using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Services;
 using Object = Java.Lang.Object;
 

@@ -5,7 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using Plugin.BluetoothLE;
 
@@ -15,7 +15,7 @@ namespace OmniCore.Client.Platform
     {
         private static readonly TimeSpan ScanFrequencyWindow = TimeSpan.FromSeconds(30);
         private static readonly int WindowedScanCountLimit = 5;
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
         private readonly ILogger Logger;
         private readonly SortedDictionary<DateTimeOffset, TimeSpan> ScanRecords;
         private readonly ISubject<IScanResult> ScanResultSubject;
@@ -33,11 +33,11 @@ namespace OmniCore.Client.Platform
         public BlePeripheralScanner(
             List<Guid> serviceIdFilter,
             ILogger logger,
-            ICommonFunctions commonFunctions)
+            IPlatformFunctions platformFunctions)
         {
             ServiceIdFilter = serviceIdFilter;
             Logger = logger;
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
             ScanResultSubject = new ReplaySubject<IScanResult>(TimeSpan.FromSeconds(10));
             ScanStateSubject = new BehaviorSubject<bool>(false);
             ScanRecords = new SortedDictionary<DateTimeOffset, TimeSpan>();
@@ -139,7 +139,7 @@ namespace OmniCore.Client.Platform
         {
             ScanStateSubject.OnNext(true);
 
-            BluetoothLock = CommonFunctions.BluetoothLock();
+            BluetoothLock = PlatformFunctions.BluetoothLock();
             Logger.Debug("BLES: Scan start requested");
 
             ScanSubscription = SafeScanner()

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using Unity;
 
 namespace OmniCore.Model.Utilities

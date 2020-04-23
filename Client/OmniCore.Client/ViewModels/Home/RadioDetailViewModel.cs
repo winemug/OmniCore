@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Facade;
 using Xamarin.Forms;
 
 namespace OmniCore.Client.ViewModels.Home

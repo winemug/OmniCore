@@ -7,8 +7,7 @@ using System.Windows.Input;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Home;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Services.Facade;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
@@ -24,12 +23,11 @@ namespace OmniCore.Client.ViewModels.Home
             await Client.PushView<RadioScanView>();
         });
         
-        public RadiosViewModel(IClient client,
-            IClientFunctions clientFunctions) : base(client)
+        public RadiosViewModel(IClient client) : base(client)
         {
             WhenPageAppears().Subscribe(async _ =>
             {
-                var api = await client.GetApi(CancellationToken.None);
+                var api = await client.GetServiceApi(CancellationToken.None);
                 api.PodService.ListErosRadios()
                     .ObserveOn(await Device.GetMainThreadSynchronizationContextAsync())
                     .Subscribe(radio => { Radios.Add(new RadioModel(radio)); });

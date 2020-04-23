@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Common;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {

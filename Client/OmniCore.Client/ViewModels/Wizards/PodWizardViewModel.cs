@@ -7,7 +7,7 @@ using System.Windows.Input;
 using OmniCore.Client.ViewModels.Base;
 using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
@@ -53,7 +53,7 @@ namespace OmniCore.Client.ViewModels.Wizards
         {
             WhenPageAppears().Subscribe(async _ =>
             {
-                var api = await Client.GetApi(CancellationToken.None);
+                var api = await Client.GetServiceApi(CancellationToken.None);
                 var activePods = await api.PodService.ActivePods(CancellationToken.None);
                 if (activePods.Any(p => p.RunningState.State <= PodState.Started))
                     Views.Add(PendingActivationsWarningView);

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using OmniCore.Client.Annotations;
 using OmniCore.Client.Views.Home;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Client;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Utilities.Extensions;
 using Rg.Plugins.Popup.Services;

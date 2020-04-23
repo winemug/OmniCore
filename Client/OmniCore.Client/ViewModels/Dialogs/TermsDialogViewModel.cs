@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using OmniCore.Client.Views.Wizards.Permissions;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
 
@@ -15,14 +14,14 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
         public bool IsUnlikely { get; set; }
         public bool DialogOkEnabled { get; set; }
 
-        private readonly ICommonFunctions CommonFunctions;
+        private readonly IPlatformFunctions PlatformFunctions;
 
         public TermsDialogViewModel(
             IClient client,
-            ICommonFunctions commonFunctions,
+            IPlatformFunctions platformFunctions,
             IPlatformConfiguration platformConfiguration) : base(client)
         {
-            CommonFunctions = commonFunctions;
+            PlatformFunctions = platformFunctions;
 
             DialogOkCommand = new Command(async () =>
             {

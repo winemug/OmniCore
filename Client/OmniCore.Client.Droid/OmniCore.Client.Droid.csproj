@@ -125,19 +125,16 @@
   <ItemGroup>
     <Compile Include="Platform\Logger.cs" />
     <Compile Include="Platform\PlatformConfiguration.cs" />
-    <Compile Include="Services\AndroidService.cs" />
-    <Compile Include="Services\AndroidServiceBinder.cs" />
-    <Compile Include="Services\AndroidServiceConnection.cs" />
     <Compile Include="AndroidContainer.cs" />
     <Compile Include="Platform\BluetoothLock.cs" />
-    <Compile Include="Platform\CommonFunctions.cs" />
+    <Compile Include="Platform\PlatformFunctions.cs" />
     <Compile Include="Platform\DisplayLock.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Platform\RemoteRequestPublisher.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Platform\BackgroundTask.cs" />
-    <Compile Include="Services\Api.cs" />
+    <Compile Include="Services\ServiceApi.cs" />
     <Compile Include="Services\FirebaseRegistration.cs" />
     <Compile Include="Services\BroadcastReceiver.cs" />
     <Compile Include="Services\ForegroundTaskServiceBinder.cs" />

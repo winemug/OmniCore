@@ -1,6 +1,4 @@
 ﻿using System;
-using OmniCore.Model.Interfaces.Client;
-using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Model.Interfaces.Services
