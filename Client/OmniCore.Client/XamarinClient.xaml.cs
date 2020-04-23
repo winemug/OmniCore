@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Acr.Logging;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Client.ViewModels.Base.Dialogs;
 using OmniCore.Client.ViewModels.Home;
 using OmniCore.Client.ViewModels.Test;
 using OmniCore.Client.ViewModels.Wizards;
@@ -21,6 +22,7 @@ using OmniCore.Client.Views.Wizards.NewPod;
 using OmniCore.Client.Views.Wizards.NewUser;
 using OmniCore.Client.Views.Wizards.Permissions;
 using OmniCore.Client.Views.Wizards.SetupWizard;
+using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces.Client;
 using OmniCore.Model.Interfaces.Common;
 using OmniCore.Model.Interfaces.Services;
@@ -34,26 +36,29 @@ namespace OmniCore.Client
         private readonly IContainer Container;
         private readonly IClientFunctions ClientFunctions;
         private readonly ICommonFunctions CommonFunctions;
+        private readonly IActivityContext ActivityContext;
         private readonly IPlatformConfiguration PlatformConfiguration;
+        private readonly IApi Api;
 
         private readonly Dictionary<Type, Func<bool, object, Task<IView>>> ViewDictionary;
-        private readonly IClientConnection ApiConnection;
         private readonly ILogger Logger;
 
         private NavigationPage MainNavigation;
         
         public XamarinClient(
             IContainer container,
-            IClientConnection apiConnection,
             ILogger logger,
             ICommonFunctions commonFunctions,
+            IActivityContext activityContext,
+            IApi api,
             IPlatformConfiguration platformConfiguration)
         {
-            CommonFunctions = commonFunctions;
-            PlatformConfiguration = platformConfiguration;
-            Logger = logger;
             Container = container;
-            ApiConnection = apiConnection;
+            Logger = logger;
+            CommonFunctions = commonFunctions;
+            ActivityContext = activityContext;
+            Api = api;
+            PlatformConfiguration = platformConfiguration;
             ViewDictionary = new Dictionary<Type, Func<bool, object, Task<IView>>>();
             RegisterViews();
             InitializeComponent();
@@ -61,56 +66,16 @@ namespace OmniCore.Client
 
         public async Task Initialize()
         {
-            var context = await Device.GetMainThreadSynchronizationContextAsync();
-            ApiConnection.WhenConnected().SubscribeOn(context)
-                .Subscribe(async api =>
-            {
-                Logger.Debug("Service connected.");
-                await MainNavigation.PushAsync(await GetView<ShellView>(false), true);
-            }, async e =>
-            {
-                Logger.Error("Service connection failed.", e);
-                await MainNavigation.PopAsync(true);
-            });
-            
-            ApiConnection.WhenDisconnected().SubscribeOn(context)
-                .Subscribe(async _ =>
-            {
-                Logger.Debug("Service disconnected.");
-            });
-
             MainNavigation = new NavigationPage(await GetView<SplashView>(false));
             MainPage = MainNavigation;
-
-            while (!PlatformConfiguration.TermsAccepted)
-            {
-                if (!await ShowDialog<TermsDialogView>(CancellationToken.None))
-                {
-                    CommonFunctions.Exit();
-                }
-            }
-
-            while (!await ClientFunctions.BluetoothPermissionGranted() ||
-                   !await ClientFunctions.StoragePermissionGranted())
-            {
-                if (!await ShowDialog<PermissionsDialogView>(CancellationToken.None))
-                {
-                    CommonFunctions.Exit();
-                }
-            }
-
-            while (!PlatformConfiguration.DefaultUserSetUp)
-            {
-                if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
-                {
-                    CommonFunctions.Exit();
-                }
-            }
-            
-            await ApiConnection.Connect();
         }
-        public Task<IApi> GetApi(CancellationToken cancellationToken) => 
-            ApiConnection.WhenConnected().ToTask(cancellationToken);
+        public Task<IApi> GetApi(CancellationToken cancellationToken)
+        {
+            return Api
+                .ApiStatus.FirstAsync(s => s == CoreApiStatus.Started)
+                .Select(_ => Api)
+                .ToTask(cancellationToken);
+        }
 
         public async Task PushView<T>() where T : IView
         {
@@ -173,6 +138,10 @@ namespace OmniCore.Client
             RegisterViewViewModel<RadioScanView, RadiosViewModel>();
             RegisterViewViewModel<ProgressPopupView, ProgressPopupViewModel>();
 
+            // setup stuff
+            RegisterViewViewModel<TermsDialogView, TermsDialogViewModel>();
+            RegisterViewViewModel<PermissionsDialogView, PermissionsDialogViewModel>();
+            
             // wizards (of oz)
             RegisterViewViewModel<UserWizardRootView, UserWizardViewModel>();
             RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
@@ -201,6 +170,51 @@ namespace OmniCore.Client
                 viewModel.Initialize(view, viaShell, parameter);
                 return view;
             });
+        }
+
+        protected override async void OnStart()
+        {
+            base.OnStart();
+            while (!PlatformConfiguration.TermsAccepted)
+            {
+                if (!await ShowDialog<TermsDialogView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
+            }
+            
+            while (!await ActivityContext.BluetoothPermissionGranted() ||
+                   !await ActivityContext.StoragePermissionGranted())
+            {
+                if (!await ShowDialog<PermissionsDialogView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
+            }
+            
+            while (!PlatformConfiguration.DefaultUserSetUp)
+            {
+                if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
+                {
+                    CommonFunctions.Exit();
+                }
+            }
+            await MainNavigation.PushAsync(await GetView<ShellView>(false), true);
+        }
+
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+        }
+
+        protected override void CleanUp()
+        {
+            base.CleanUp();
         }
     }
 }

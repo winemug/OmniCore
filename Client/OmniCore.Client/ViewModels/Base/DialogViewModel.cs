@@ -9,8 +9,8 @@ namespace OmniCore.Client.ViewModels.Base
 {
     public class DialogViewModel : BaseViewModel
     {
-        public ICommand ConfirmCommand { get; set; }
-        public ICommand CancelCommand { get; set; }
+        public ICommand DialogOkCommand { get; set; }
+        public ICommand DialogCancelCommand { get; set; }
         
         public bool ConfirmEnabled { get; set; }
 
@@ -28,13 +28,14 @@ namespace OmniCore.Client.ViewModels.Base
                 ConfirmAction = actions.Confirm;
                 CancelAction = actions.Cancel;
 
-                if (ConfirmCommand == null)
-                    ConfirmCommand = new Command(async () => await ConfirmAction());
+                if (DialogOkCommand == null)
+                    DialogOkCommand = new Command(async () => await ConfirmAction());
 
-                if (CancelCommand == null)
-                    CancelCommand = new Command(async () => await CancelAction());
+                if (DialogCancelCommand == null)
+                    DialogCancelCommand = new Command(async () => await CancelAction());
                 
             }).AutoDispose(this);
+          
         }
     }
 }

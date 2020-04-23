@@ -26,7 +26,6 @@ namespace OmniCore.Client.Platform
         private readonly IErosRadioProvider[] ErosRadioProviders;
         private readonly List<Guid> ErosRadioServiceUuids;
         private readonly ILogger Logger;
-        private readonly IServiceFunctions ServiceFunctions;
 
         private readonly AsyncLock PeripheralConnectionLockProvider;
         private readonly BlePeripheralScanner Scanner;
@@ -36,13 +35,11 @@ namespace OmniCore.Client.Platform
 
         public BlePeripheralAdapter(IContainer container,
             ICommonFunctions commonFunctions,
-            IServiceFunctions serviceFunctions,
             ILogger logger,
             IErosRadioProvider[] erosRadioProviders)
         {
             Container = container;
             CommonFunctions = commonFunctions;
-            ServiceFunctions = serviceFunctions;
             Logger = logger;
             ErosRadioProviders = erosRadioProviders;
 

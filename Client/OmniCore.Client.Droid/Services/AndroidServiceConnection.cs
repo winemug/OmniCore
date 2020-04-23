@@ -16,11 +16,11 @@ namespace OmniCore.Client.Droid.Services
     {
         private AndroidServiceBinder Binder;
         private readonly ISubject<IApi> ApiSubject;
-        private readonly IClientFunctions ClientFunctions;
+        private readonly IActivityContext ActivityContext;
 
-        public AndroidServiceConnection(IClientFunctions clientFunctions)
+        public AndroidServiceConnection(IActivityContext activityContext)
         {
-            ClientFunctions = clientFunctions;
+            ActivityContext = activityContext;
             ApiSubject = new BehaviorSubject<IApi>(null);
         }
 
@@ -30,11 +30,11 @@ namespace OmniCore.Client.Droid.Services
         public IObservable<IApi> WhenConnected() => ApiSubject.FirstAsync(api => api != null);
         public Task Connect()
         {
-            return ClientFunctions.AttachToService(typeof(AndroidService), this);
+            return ActivityContext.AttachToService(typeof(AndroidService), this);
         }
         public Task Disconnect()
         {
-            return ClientFunctions.DetachFromService(this);
+            return ActivityContext.DetachFromService(this);
         }
 
         public void OnServiceConnected(ComponentName name, IBinder service)

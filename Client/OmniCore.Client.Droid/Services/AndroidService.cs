@@ -21,7 +21,7 @@ namespace OmniCore.Client.Droid.Services
 {
     [Service(Exported = false, Enabled = true, DirectBootAware = true, Name = "net.balya.OmniCore.Api",
         Icon = "@mipmap/ic_launcher")]
-    public class AndroidService : Service, IServiceFunctions
+    public class AndroidService : Service
     {
         private bool AndroidServiceStarted;
 

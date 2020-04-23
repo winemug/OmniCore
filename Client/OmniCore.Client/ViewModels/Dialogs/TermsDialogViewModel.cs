@@ -13,7 +13,7 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
         public bool IsMaybe { get; set; }
         public bool IsPossibly { get; set; }
         public bool IsUnlikely { get; set; }
-        public bool ContinueEnabled => IsUnlikely;
+        public bool DialogOkEnabled { get; set; }
 
         private readonly ICommonFunctions CommonFunctions;
 
@@ -24,7 +24,7 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
         {
             CommonFunctions = commonFunctions;
 
-            ConfirmCommand = new Command(async () =>
+            DialogOkCommand = new Command(async () =>
             {
                 if (IsUnlikely)
                 {
@@ -53,6 +53,11 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
                         using var _ = SuspendPropertyFeedbackObservable();
                         IsMaybe = false;
                         IsPossibly = false;
+                        DialogOkEnabled = true;
+                    }
+                    else
+                    {
+                        DialogOkEnabled = false;
                     }
                 }).AutoDispose(this);
         }

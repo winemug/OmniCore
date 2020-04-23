@@ -25,7 +25,6 @@ namespace OmniCore.Services
         private readonly IErosPodProvider ErosPodProvider;
         private readonly IErosRadioProvider[] ErosRadioProviders;
         private readonly ILogger Logger;
-        private readonly IServiceFunctions ServiceFunctions;
         private IDisposable AdapterDisabledSubscription;
         private IDisposable AdapterEnabledSubscription;
 
@@ -36,7 +35,6 @@ namespace OmniCore.Services
             IBlePeripheralAdapter blePeripheralAdapter,
             IErosPodProvider erosPodProvider,
             //IDashPodProvider dashPodProvider,
-            IServiceFunctions serviceFunctions,
             ILogger logger
         )
         {
@@ -47,7 +45,6 @@ namespace OmniCore.Services
             BlePeripheralAdapter = blePeripheralAdapter;
             ErosPodProvider = erosPodProvider;
             //DashPodProvider = dashPodProvider;
-            ServiceFunctions = serviceFunctions;
         }
 
         // public override async Task OnBeforeStopRequest()

@@ -19,17 +19,14 @@ namespace OmniCore.Client.Droid.Services
         public IAutomationService AutomationService { get; }
 
         private readonly ISubject<CoreApiStatus> ApiStatusSubject;
-        private readonly IServiceFunctions ServiceFunctions;
 
         public Api(
-            IServiceFunctions serviceFunctions,
             IRepositoryService repositoryService,
             IPodService podService,
             IAutomationService automationService,
             IIntegrationService integrationService,
             IConfigurationService configurationService)
         {
-            ServiceFunctions = serviceFunctions;
             RepositoryService = repositoryService;
             PodService = podService;
             AutomationService = automationService;

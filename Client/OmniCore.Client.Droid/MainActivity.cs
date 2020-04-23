@@ -40,7 +40,7 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainActivity : FormsAppCompatActivity, IClientFunctions, IActivityContext
+    public class MainActivity : FormsAppCompatActivity, IActivityContext
     {
         private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
         private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
@@ -54,7 +54,6 @@ namespace OmniCore.Client.Droid
             PermissionRequestsDictionary =
                 new ConcurrentDictionary<int, ISubject<(string Permission, bool Granted)>>();
 
-        private IContainer Container;
         private int NextPermissionRequestId = 0;
 
         private ForegroundTaskServiceConnection ForegroundTaskServiceConnection;
@@ -151,6 +150,8 @@ namespace OmniCore.Client.Droid
 
         protected override async void OnCreate(Bundle savedInstanceState)
         {
+            AndroidContainer.Instance.Existing<IActivityContext>(this);
+            
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
            
@@ -171,7 +172,7 @@ namespace OmniCore.Client.Droid
             
             base.OnCreate(savedInstanceState);
 
-            var client = await Container.Get<IClient>();
+            var client = await AndroidContainer.Instance.Get<IClient>();
             LoadApplication(client as Xamarin.Forms.Application);
         }
         private async void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -231,7 +232,7 @@ namespace OmniCore.Client.Droid
 
         private async Task LogError(string logText)
         {
-            var logger = await Container.Get<ILogger>();
+            var logger = await AndroidContainer.Instance.Get<ILogger>();
             logger.Error(LoggingConstants.Tag, logText);
         }
 
