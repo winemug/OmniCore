@@ -1,4 +1,8 @@
-﻿namespace OmniCore.Radios.RileyLink.Protocol
+﻿using OmniCore.Model.Enumerations;
+using OmniCore.Model.Exceptions;
+using OmniCore.Radios.RileyLink.Enumerations;
+
+namespace OmniCore.Radios.RileyLink.Protocol
 {
     public class RileyLinkStateResponse : RileyLinkStandardResponse
     {

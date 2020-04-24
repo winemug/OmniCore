@@ -231,9 +231,9 @@ namespace OmniCore.Radios.RileyLink
             }
 
             Logger.Debug("RLR: {Address} Healthcheck RL write test");
-            for(int i=0; i<4; i++)
+            for (int i = 0; i < 8; i++)
                 await rlConnection.Noop().ToTask(cancellationToken);
-            
+
             Logger.Debug("RLR: {Address} Healthcheck RL state request");
             var state = await rlConnection.GetState().ToTask(cancellationToken);
             if (!state.StateOk)

@@ -5,6 +5,8 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx.Synchronous;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
 using OmniCore.Model.Interfaces.Services;
@@ -22,11 +24,16 @@ namespace OmniCore.Client.Platform
         private IDevice Device;
         private bool StayConnected;
         private List<IDisposable> Subscriptions;
+        private BlePeripheralOptions PeripheralOptions;
 
         public BlePeripheralConnection(
-            ILogger logger)
+            ILogger logger,
+            IConfigurationService configurationService)
         {
             Logger = logger;
+            PeripheralOptions = configurationService
+                    .GetBlePeripheralOptions(CancellationToken.None)
+                    .WaitAndUnwrapException();
         }
 
         public IBlePeripheral Peripheral { get; set; }
@@ -38,15 +45,16 @@ namespace OmniCore.Client.Platform
 
             Subscriptions.Clear();
 
-            if (!StayConnected)
+            if (!StayConnected && Device.IsConnected())
             {
-                Device.CancelConnection();
                 try
                 {
                     Logger.Debug("Closing peripheral connection");
-                    Device.WhenStatusChanged().FirstAsync(s => s == ConnectionStatus.Disconnected)
-                        .Timeout(TimeSpan.FromSeconds(3)).Wait();
-                    Logger.Debug("Peripheral connection closed");
+                    Device.CancelConnection();
+                    //TODO: fix this when ble library needs gets its notifications in order
+                    //Device.WhenStatusChanged().FirstAsync(s => s == ConnectionStatus.Disconnected)
+                    //    .Timeout(PeripheralOptions.PeripheralDisconnectTimeout).Wait();
+                    //Logger.Debug("Peripheral connection closed");
                 }
                 catch (Exception e)
                 {

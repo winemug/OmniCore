@@ -9,10 +9,10 @@ namespace OmniCore.Radios.RileyLink.Protocol
 {
     public class RileyLinkStandardResponse : IRileyLinkResponse
     {
-        private readonly ISubject<RileyLinkStandardResponse> ResponseSubject = new Subject<RileyLinkStandardResponse>();
+        protected readonly ISubject<RileyLinkStandardResponse> ResponseSubject = new Subject<RileyLinkStandardResponse>();
         public RileyLinkResult Result { get; set; }
 
-        public void Parse(byte[] responseData)
+        public virtual void Parse(byte[] responseData)
         {
             try
             {

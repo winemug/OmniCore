@@ -394,7 +394,11 @@ namespace OmniCore.Radios.RileyLink.Protocol
         private byte[] GetCommandData(IRileyLinkCommand command)
         {
             byte[] data;
-            if (command.Parameters == null)
+            if (command.Type == RileyLinkCommandType.None)
+            {
+                data = new byte[] {0};
+            }
+            else if (command.Parameters == null)
             {
                 data = new byte[] {1, (byte) command.Type};
             }
