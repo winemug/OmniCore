@@ -82,7 +82,6 @@ namespace OmniCore.Radios.RileyLink
             Peripheral.WhenNameUpdated()
                 .Subscribe(async name => { await UpdateRadioName(name); });
 
-            ResumeHealthChecks(true);
         }
 
         public IBlePeripheral Peripheral { get; private set; }
@@ -97,6 +96,11 @@ namespace OmniCore.Radios.RileyLink
         public IObservable<PeripheralConnectionState> ConnectionState => Peripheral.WhenConnectionStateChanged();
         public IObservable<int> Rssi => Peripheral.WhenRssiReceived();
         public RadioOptions Options => Entity.Options;
+
+        public void StartMonitoring()
+        {
+            ResumeHealthChecks(TimeSpan.FromSeconds(5));
+        }
 
         private async Task PauseHealthChecks()
         {
@@ -136,7 +140,7 @@ namespace OmniCore.Radios.RileyLink
                         var nextInterval = Entity.Options.RadioHealthCheckIntervalGood;
                         try
                         {
-                            Logger.Debug($"RLR: {Address} Starting healthcheck canceled");
+                            Logger.Debug($"RLR: {Address} Starting healthcheck");
                             nextInterval = await PerformHealthChecks(HealthCheckCancellationTokenSource.Token);
                             Logger.Debug($"RLR: {Address} Healthcheck finished");
                         }
@@ -179,6 +183,7 @@ namespace OmniCore.Radios.RileyLink
             {
                 Logger.Debug("RLR: {Address} Healthcheck running discovery");
                 await Peripheral.Discover(cancellationToken);
+                Logger.Debug("RLR: {Address} Healthcheck found peripheral");
             }
 
             var connectionStateAge = DateTimeOffset.UtcNow - Peripheral.ConnectionState.Date;
@@ -195,17 +200,45 @@ namespace OmniCore.Radios.RileyLink
                 return peripheralOptions.PeripheralConnectTimeout + jitter - connectionStateAge;
             }
 
-            var rssi = await Peripheral.ReadRssi(cancellationToken);
-            Logger.Debug($"RLR: {Address} Healthcheck RSSI: {rssi}");
+            var rssiRead = false;
+            if (Peripheral.ConnectionState.State == PeripheralConnectionState.Connected)
+            {
+                Logger.Debug($"RLR: {Address} Requesting RSSI on already connected peripheral");
+                var rssi = await Peripheral.ReadRssi(cancellationToken);
+                Logger.Debug($"RLR: {Address} Healthcheck RSSI received: {rssi}");
+                rssiRead = true;
+            }
+            else if (Peripheral.Rssi.HasValue)
+            {
+                Logger.Debug($"RLR: {{Address}} Last reported RSSI {Peripheral.Rssi.Value.Rssi} at {Peripheral.Rssi.Value.Date.ToLocalTime()}");
+                if (DateTimeOffset.UtcNow - Peripheral.Rssi.Value.Date > TimeSpan.FromMinutes(1))
+                {
+                    Logger.Debug($"RLR: {{Address}} RSSI is older than 1 minute, will request upon connection");
+                }
+                else
+                {
+                    rssiRead = true;
+                }
+            }
 
             using var rlConnection = await GetRileyLinkHandler(Entity.Options, cancellationToken);
+
+            if (rssiRead)
+            {
+                Logger.Debug($"RLR: {Address} Requesting RSSI");
+                var rssi = await Peripheral.ReadRssi(cancellationToken);
+                Logger.Debug($"RLR: {Address} Healthcheck RSSI received: {rssi}");
+            }
+
             Logger.Debug("RLR: {Address} Healthcheck RL write test");
-            await rlConnection.Noop().ToTask(cancellationToken);
+            for(int i=0; i<4; i++)
+                await rlConnection.Noop().ToTask(cancellationToken);
             
             Logger.Debug("RLR: {Address} Healthcheck RL state request");
             var state = await rlConnection.GetState().ToTask(cancellationToken);
             if (!state.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse);
+
             Logger.Debug("RLR: {Address} Healthcheck RL state OK");
 
             return Entity.Options.RadioHealthCheckIntervalGood;

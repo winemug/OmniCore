@@ -19,7 +19,7 @@ namespace OmniCore.Client.Droid.Services
 
         public IObservable<IForegroundTaskService> WhenConnected() =>
             ServiceInstanceSubject.AsObservable()
-                .Where(instance => instance != null);
+                .FirstAsync(instance => instance != null);
 
         public ForegroundTaskServiceConnection()
         {

@@ -2,8 +2,11 @@
 {
     public enum CoreApiStatus
     {
+        NotStarted,
         Starting,
         Started,
-        FailedToStart
+        Failed,
+        Stopping,
+        Stopped
     }
 }

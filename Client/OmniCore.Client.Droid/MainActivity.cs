@@ -39,7 +39,7 @@ namespace OmniCore.Client.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
         LaunchMode = LaunchMode.SingleTask, Exported = true, AlwaysRetainTaskState = false,
         Name = "OmniCore.MainActivity")]
-    public class MainActivity : FormsAppCompatActivity, IPlatformUserActivity
+    public class MainActivity : FormsAppCompatActivity, IUserActivity
     {
         private const string WriteExternalStorage = "android.permission.WRITE_EXTERNAL_STORAGE";
         private const string ReadExternalStorage = "android.permission.READ_EXTERNAL_STORAGE";
@@ -124,7 +124,7 @@ namespace OmniCore.Client.Droid
             // XdripReceiver = new GenericBroadcastReceiver();
             // RegisterReceiver(XdripReceiver, new IntentFilter("com.eveningoutpost.dexdrip.BgEstimate"));
             
-            AndroidContainer.Instance.Existing<IPlatformUserActivity>(this);
+            AndroidContainer.Instance.Existing<IUserActivity>(this);
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironmentOnUnhandledExceptionRaiser;
@@ -226,18 +226,29 @@ namespace OmniCore.Client.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        public Task<IForegroundTaskService> GetForegroundTaskService(CancellationToken cancellationToken)
+        public async Task StartForegroundTaskService(CancellationToken cancellationToken)
         {
             if (!ForegroundTaskServiceConnection.IsConnected)
             {
-                Device.InvokeOnMainThreadAsync(() =>
+                await Device.InvokeOnMainThreadAsync(() =>
                 {
                     var intent = new Intent(this, typeof(ForegroundTaskService));
                     if (!BindService(intent, ForegroundTaskServiceConnection, Bind.AutoCreate))
                         throw new Exception("Failed to connect to local service");
                 });
             }
-            return ForegroundTaskServiceConnection.WhenConnected().ToTask(cancellationToken);
+            await ForegroundTaskServiceConnection.WhenConnected().ToTask(cancellationToken);
+        }
+
+        public async Task StopForegroundTaskService(CancellationToken cancellationToken)
+        {
+            if (ForegroundTaskServiceConnection.IsConnected)
+            {
+                await Device.InvokeOnMainThreadAsync(() =>
+                {
+                    UnbindService(ForegroundTaskServiceConnection);
+                });
+            }
         }
 
         // protected override async void OnPause()

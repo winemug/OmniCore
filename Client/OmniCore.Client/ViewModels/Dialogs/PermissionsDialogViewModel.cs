@@ -12,15 +12,15 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
 
         public PermissionsDialogViewModel(
             IClient client,
-            IPlatformUserActivity platformUserActivity) : base(client)
+            IUserActivity userActivity) : base(client)
         {
             DialogOkCommand = new Command(async () =>
             {
                 if (!BluetoothPermissionGranted)
-                    BluetoothPermissionGranted = await platformUserActivity.RequestBluetoothPermission(); 
+                    BluetoothPermissionGranted = await userActivity.RequestBluetoothPermission(); 
                
                 if (!StoragePermissionsGranted)
-                    StoragePermissionsGranted = await platformUserActivity.RequestStoragePermission();
+                    StoragePermissionsGranted = await userActivity.RequestStoragePermission();
 
                 if (BluetoothPermissionGranted && StoragePermissionsGranted)
                     await ConfirmAction();
@@ -28,8 +28,8 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
 
             WhenPageAppears().Subscribe(async _ =>
             {
-                BluetoothPermissionGranted = await platformUserActivity.BluetoothPermissionGranted();
-                StoragePermissionsGranted = await platformUserActivity.StoragePermissionGranted();
+                BluetoothPermissionGranted = await userActivity.BluetoothPermissionGranted();
+                StoragePermissionsGranted = await userActivity.StoragePermissionGranted();
             }).AutoDispose(this);
         }
     }

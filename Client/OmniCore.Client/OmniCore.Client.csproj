@@ -59,6 +59,12 @@
     <Compile Update="Views\Dialogs\PermissionsDialogView.xaml.cs">
       <DependentUpon>PermissionsDialogView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Test\TestControlView.xaml.cs">
+      <DependentUpon>TestControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Test\TestLogView.xaml.cs">
+      <DependentUpon>TestLogView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -69,6 +75,13 @@
       <Generator></Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Dialogs\PermissionsDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ServicePopup.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Test\TestLogView.xaml">
       <SubType>Designer</SubType>
       <Generator></Generator>
     </EmbeddedResource>
@@ -133,9 +146,6 @@
     <EmbeddedResource Update="Views\Home\RadioScanView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Home\ServicePopupView.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -175,7 +185,7 @@
     <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Test\Test1View.xaml">
+    <EmbeddedResource Update="Views\Test\TestControlView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardAdvancedOptions.xaml">

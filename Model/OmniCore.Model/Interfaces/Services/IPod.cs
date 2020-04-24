@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
@@ -10,7 +11,8 @@ namespace OmniCore.Model.Interfaces.Services
     {
         PodEntity Entity { get; set; }
         PodRunningState RunningState { get; }
-        Task Archive();
+        Task Archive(CancellationToken cancellationToken);
+        IObservable<IPod> WhenPodArchived();
         Task<IList<IPodTask>> GetActiveRequests();
         Task<IPodTask> Start();
         Task<IPodTask> Status(StatusRequestType requestType);
@@ -25,5 +27,6 @@ namespace OmniCore.Model.Interfaces.Services
         Task<IPodTask> StartExtendedBolus();
         Task<IPodTask> CancelExtendedBolus();
         Task<IPodTask> Deactivate();
+        void StartMonitoring();
     }
 }

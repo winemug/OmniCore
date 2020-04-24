@@ -100,7 +100,7 @@ namespace OmniCore.Client.Droid.Platform
             return p.GetFloat(key, defaultValue);
         }
 
-        public async Task Initialize()
+        public Task Initialize()
         {
             if (!AppCenter.Configured)
                 Push.PushNotificationReceived += (sender, e) =>
@@ -124,6 +124,7 @@ namespace OmniCore.Client.Droid.Platform
 
             AppCenter.Start("android=51067176-2950-4b0e-9230-1998460d7981;", typeof(Analytics), typeof(Crashes),
                 typeof(Push));
+            return Task.CompletedTask;
         }
     }
 }

@@ -28,7 +28,6 @@ namespace OmniCore.Client.Droid.Services
         private NotificationChannel ForegroundNotificationChannel;
         private Notification ForegroundNotification;
         private NotificationManager NotificationManager;
-        private ConcurrentBag<IForegroundTask> ForegroundTasks;
         
         public override IBinder OnBind(Intent intent)
         {
@@ -44,7 +43,7 @@ namespace OmniCore.Client.Droid.Services
 
         public override bool OnUnbind(Intent intent)
         {
-            NotificationManager.CancelAll();
+            //NotificationManager.CancelAll();
             return base.OnUnbind(intent);
         }
         public override void OnCreate()
@@ -87,11 +86,11 @@ namespace OmniCore.Client.Droid.Services
                     ForegroundTaskServiceStarted = true;
                 }
             }
-            return StartCommandResult.NotSticky;
+            return StartCommandResult.Sticky;
         }
         public async Task ExecuteTask(IForegroundTask foregroundTask, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

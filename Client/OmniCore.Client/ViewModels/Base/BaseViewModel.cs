@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -24,35 +25,27 @@ namespace OmniCore.Client.ViewModels.Base
         protected IClient Client { get; }
         public CompositeDisposable CompositeDisposable { get; }
         
-        private readonly ISubject<IView> ViewSubject;
+        private readonly ISubject<Page> AppearingSubject;
+        private readonly ISubject<Page> DisappearingSubject;
+
         private readonly ISubject<object> ParameterSubject;
         private readonly ISubject<string> PropertyChangedSubject;
 
         protected BaseViewModel(IClient client)
         {
             Client = client;
-            ViewSubject = new AsyncSubject<IView>();
+            AppearingSubject = new Subject<Page>();
+            DisappearingSubject = new Subject<Page>();
             ParameterSubject = new Subject<object>();
             PropertyChangedSubject = new Subject<string>();
             CompositeDisposable = new CompositeDisposable();
         }
         
         protected IObservable<object> WhenParameterSet() => ParameterSubject.AsObservable();
-        protected IObservable<Page> WhenPageAppears() =>
-            ViewSubject.AsObservable()
-                .Cast<Page>()
-                .Select(p =>
-                    Observable.FromEvent<EventHandler, Page>(handler => { p.Appearing += handler; },
-                        handler => { p.Appearing -= handler; }))
-                .Switch();
 
-        protected IObservable<Page> WhenPageDisappears() =>
-            ViewSubject.AsObservable()
-                .Cast<Page>()
-                .Select(p =>
-                    Observable.FromEvent<EventHandler, Page>(handler => { p.Disappearing += handler; },
-                        handler => { p.Disappearing -= handler; }))
-                .Switch();
+        protected IObservable<Page> WhenPageAppears() => AppearingSubject.AsObservable();
+
+        protected IObservable<Page> WhenPageDisappears() => DisappearingSubject.AsObservable();
 
         protected IObservable<TProperty> WhenPropertyChanged<T, TProperty>(T source,
             Expression<Func<T, TProperty>> property)
@@ -74,14 +67,36 @@ namespace OmniCore.Client.ViewModels.Base
                 PropertyChangedObservableSuspended = false;
             });
         }
-        
+
+        private Page LastPage = null;
         public void Initialize(IView view, bool viaShell, object parameter)
         {
             ParameterSubject.OnNext(parameter);
-            ((Page)view).BindingContext = this;
-            ViewSubject.OnNext(view);
+
+            var page = (Page) view;
+            page.BindingContext = this;
+
+            if (LastPage != null && page != LastPage)
+            {
+                LastPage.Appearing -= PageAppearing;
+                LastPage.Disappearing -= PageDisappearing;
+            }
+
+            page.Appearing += PageAppearing;
+            page.Disappearing += PageDisappearing;
+            LastPage = page;
         }
-        
+
+        private void PageAppearing(object sender, EventArgs e)
+        {
+            AppearingSubject.OnNext((Page)sender);
+        }
+
+        private void PageDisappearing(object sender, EventArgs e)
+        {
+            DisappearingSubject.OnNext((Page)sender);
+        }
+
         public void Dispose()
         {
             OnDisposing();

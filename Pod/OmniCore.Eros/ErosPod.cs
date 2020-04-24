@@ -21,6 +21,7 @@ namespace OmniCore.Eros
         private readonly IPodService PodService;
         private readonly IRepositoryService RepositoryService;
         private readonly ISubject<IEnumerable<IErosRadio>> RadiosUpdatedSubject;
+        private readonly ISubject<IPod> PodArchivedSubject;
 
         public ErosPod(IContainer container,
             IRepositoryService repositoryService,
@@ -31,13 +32,26 @@ namespace OmniCore.Eros
             Container = container;
             RunningState = new PodRunningState();
             RadiosUpdatedSubject = new Subject<IEnumerable<IErosRadio>>();
+            PodArchivedSubject = new Subject<IPod>();
         }
         public PodEntity Entity { get; set; }
         public PodRunningState RunningState { get; }
 
-        public Task Archive()
+        public async Task Archive(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using (var context =
+                await RepositoryService.GetContextReadWrite(cancellationToken))
+            {
+                context.WithExisting(Entity)
+                    .WithExisting(Entity.Medication)
+                    .WithExisting(Entity.User)
+                    .WithExisting(Entity.PodRadios);
+
+                Entity.IsDeleted = true;
+
+                await context.Save(cancellationToken);
+            }
+            PodArchivedSubject.OnNext(this);
         }
 
         public Task<IList<IPodTask>> GetActiveRequests()
@@ -46,6 +60,8 @@ namespace OmniCore.Eros
         }
 
         public IObservable<IEnumerable<IErosRadio>> WhenRadiosUpdated() => RadiosUpdatedSubject.AsObservable();
+
+        public IObservable<IPod> WhenPodArchived() => PodArchivedSubject.AsObservable();
 
         public async Task UpdateRadioList(IEnumerable<IErosRadio> radios, CancellationToken cancellationToken)
         {
@@ -70,7 +86,6 @@ namespace OmniCore.Eros
                 await context.Save(cancellationToken);
             }
 
-            //TODO
             RadiosUpdatedSubject.OnNext(radios);
         }
 
@@ -166,6 +181,10 @@ namespace OmniCore.Eros
         public Task<IPodTask> Deactivate()
         {
             throw new NotImplementedException();
+        }
+
+        public void StartMonitoring()
+        {
         }
 
         public void Dispose()

@@ -34,7 +34,7 @@ namespace OmniCore.Client
     {
         private readonly IContainer Container;
         private readonly IPlatformFunctions PlatformFunctions;
-        private readonly IPlatformUserActivity PlatformUserActivity;
+        private readonly IUserActivity UserActivity;
         private readonly IPlatformConfiguration PlatformConfiguration;
         private readonly IServiceApi ServiceApi;
 
@@ -45,14 +45,14 @@ namespace OmniCore.Client
             IContainer container,
             ILogger logger,
             IPlatformFunctions platformFunctions,
-            IPlatformUserActivity platformUserActivity,
+            IUserActivity userActivity,
             IServiceApi serviceApi,
             IPlatformConfiguration platformConfiguration)
         {
             Container = container;
             Logger = logger;
             PlatformFunctions = platformFunctions;
-            PlatformUserActivity = platformUserActivity;
+            UserActivity = userActivity;
             ServiceApi = serviceApi;
             PlatformConfiguration = platformConfiguration;
             ViewDictionary = new Dictionary<Type, Func<bool, object, Task<IView>>>();
@@ -62,7 +62,7 @@ namespace OmniCore.Client
 
         public async Task Initialize()
         {
-            MainPage = await GetView<SplashView>(false);
+            MainPage = await GetView<ShellView>(false);
         }
         public Task<IServiceApi> GetServiceApi(CancellationToken cancellationToken)
         {
@@ -105,7 +105,6 @@ namespace OmniCore.Client
             var view = await GetView<T>(false, (confirm, cancel));
 
             await PopupNavigation.Instance.PushAsync(view as PopupPage, true);
-
             try
             {
                 return await tcs.Task;
@@ -122,7 +121,6 @@ namespace OmniCore.Client
             RegisterViewViewModel<EmptyView, EmptyViewModel>();
             RegisterViewViewModel<SplashView, SplashViewModel>();
             RegisterViewViewModel<ShellView, ShellViewModel>();
-            RegisterViewViewModel<ServicePopupView, ServicePopupViewModel>();
             
             // home
             RegisterViewViewModel<ActivePodsView, ActivePodsViewModel>();
@@ -142,7 +140,8 @@ namespace OmniCore.Client
             RegisterViewViewModel<PodWizardMainView, PodWizardViewModel>();
             
             // test views
-            RegisterViewViewModel<Test1View, Test1ViewModel>();
+            RegisterViewViewModel<TestControlView, TestControlViewModel>();
+            RegisterViewViewModel<TestLogView, TestLogViewModel>();
         }
 
         public async Task<T> GetView<T>(bool viaShell, object parameter = null)
@@ -178,22 +177,48 @@ namespace OmniCore.Client
                 }
             }
             
-            while (!await PlatformUserActivity.BluetoothPermissionGranted() ||
-                   !await PlatformUserActivity.StoragePermissionGranted())
+            while (!await UserActivity.BluetoothPermissionGranted() ||
+                   !await UserActivity.StoragePermissionGranted())
             {
                 if (!await ShowDialog<PermissionsDialogView>(CancellationToken.None))
                 {
                     PlatformFunctions.Exit();
                 }
             }
-            
-            while (!PlatformConfiguration.DefaultUserSetUp)
+
+            ServiceApi.ApiStatus.Subscribe(async status =>
             {
-                if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
+                switch (status)
                 {
-                    PlatformFunctions.Exit();
+                    case CoreApiStatus.NotStarted:
+                        await ServiceApi.StartServices(CancellationToken.None);
+                        break;
+                    case CoreApiStatus.Starting:
+                        await PopupNavigation.Instance.PushAsync(new ServicePopup(), true);
+                        break;
+                    case CoreApiStatus.Started:
+                        await PopupNavigation.Instance.PopAllAsync(true);
+                        break;
+                    case CoreApiStatus.Failed:
+                        break;
+                    case CoreApiStatus.Stopping:
+                        break;
+                    case CoreApiStatus.Stopped:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(status), status, null);
                 }
-            }
+            });
+
+
+            //TODO: user wizard
+            // while (!PlatformConfiguration.DefaultUserSetUp)
+            // {
+            //     if (!await ShowDialog<UserWizardRootView>(CancellationToken.None))
+            //     {
+            //         PlatformFunctions.Exit();
+            //     }
+            // }
         }
 
         protected override void OnSleep()

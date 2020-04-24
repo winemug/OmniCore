@@ -7,7 +7,7 @@ using Xamarin.Forms.Xaml;
 
 namespace OmniCore.Client.Views
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
+    [XamlCompilation(XamlCompilationOptions.Skip)]
     public partial class ShellView : IView
     {
         public ShellView()

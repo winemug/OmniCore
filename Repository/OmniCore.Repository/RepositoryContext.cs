@@ -34,6 +34,7 @@ namespace OmniCore.Repository
             IPlatformFunctions platformFunctions,
             ILogger logger)
         {
+            Logger = logger;
             var path = Path.Combine(platformFunctions.DataPath, "oc.db3");
             ConnectionString = $"Data Source={path}";
         }
@@ -122,6 +123,12 @@ namespace OmniCore.Repository
                         UnitName = "microLiters",
                         UnitNameShort = "µL",
                         UnitsPerMilliliter = 1000
+                    });
+                
+                if (!Users.Any())
+                    Users.Add(new UserEntity
+                    {
+                        Name = "First User"
                     });
                 await SaveChangesAsync();
             }

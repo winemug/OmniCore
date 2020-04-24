@@ -22,6 +22,6 @@ namespace OmniCore.Model.Interfaces.Services
         RadioOptions Options { get; }
         Task<byte[]> GetResponse(IPodRequest request, CancellationToken cancellationToken, RadioOptions options);
         // Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
-
+        void StartMonitoring();
     }
 }

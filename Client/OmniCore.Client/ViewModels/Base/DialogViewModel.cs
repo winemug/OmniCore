@@ -23,7 +23,7 @@ namespace OmniCore.Client.ViewModels.Base
             ConfirmAction = () => Task.CompletedTask;
             CancelAction = () => Task.CompletedTask;
             
-            WhenParameterSet().Subscribe(async p =>
+            WhenParameterSet().Subscribe(p =>
             {
                 var actions = ((Func<Task> Confirm, Func<Task> Cancel))p;
                 ConfirmAction = actions.Confirm;

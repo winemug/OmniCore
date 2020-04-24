@@ -31,32 +31,35 @@
     <!-- Your Pages -->
 
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
-        <ShellContent ContentTemplate="{Binding Test1View}" Title="Test1" Route="Test1" />
-        <Tab Title="Pods">
-            <ShellContent ContentTemplate="{Binding ActivePodsView}" Title="Active" Route="ActivePods" />
-            <ShellContent ContentTemplate="{Binding WaitingPodsView}" Title="Waiting" Route="WaitingPods" />
-            <ShellContent ContentTemplate="{Binding ArchivedPodsView}" Title="Archived" Route="ArchivedPods" />
+        <Tab Title="Test">
+            <ShellContent ContentTemplate="{Binding TestControlViewTemplate}" Title="Control"/>
+            <ShellContent ContentTemplate="{Binding TestLogViewTemplate}" Title="Log"/>
         </Tab>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Activities" Route="Activities" />
+        <Tab Title="Pods">
+            <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Active" Route="ActivePods" />
+            <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Waiting" Route="WaitingPods" />
+            <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Archived" Route="ArchivedPods" />
+        </Tab>
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Activities" Route="Activities" />
     </FlyoutItem>
 
     <FlyoutItem Title="Data" FlyoutDisplayOptions="AsSingleItem">
         <Tab Title="Statistics">
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods" />
-            <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radio" />
+            <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Pods" />
+            <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Radio" />
         </Tab>
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Metrics" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Archive" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Backup &amp; Restore" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Metrics" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Archive" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Backup &amp; Restore" />
     </FlyoutItem>
 
     <FlyoutItem Title="Configuration" FlyoutDisplayOptions="AsSingleItem">
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Users" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Medications" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Pods" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Radios" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Automation" />
-        <ShellContent ContentTemplate="{Binding EmptyView}" Title="Integration" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Users" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Medications" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Pods" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Radios" />
+        <ShellContent ContentTemplate="{Binding EmptyViewTemplate}" Title="Automation" />
+        <ShellContent ContentTemplate="{Binding SplashViewTemplate}" Title="Integration" />
     </FlyoutItem>
 
 </Shell>

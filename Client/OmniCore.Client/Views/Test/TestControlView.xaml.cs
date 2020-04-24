@@ -4,9 +4,9 @@ using Xamarin.Forms.Xaml;
 namespace OmniCore.Client.Views.Test
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class Test1View : IView
+    public partial class TestControlView : IView
     {
-        public Test1View()
+        public TestControlView()
         {
             InitializeComponent();
         }

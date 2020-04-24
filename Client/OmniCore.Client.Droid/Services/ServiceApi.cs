@@ -4,8 +4,10 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
+using OmniCore.Services.Configuration;
 
 namespace OmniCore.Client.Droid.Services
 {
@@ -19,25 +21,29 @@ namespace OmniCore.Client.Droid.Services
         public IAutomationService AutomationService { get; }
 
         private readonly ISubject<CoreApiStatus> ApiStatusSubject;
+        private readonly IUserActivity UserActivity;
 
         public ServiceApi(
             IRepositoryService repositoryService,
             IPodService podService,
             IAutomationService automationService,
             IIntegrationService integrationService,
-            IConfigurationService configurationService)
+            IConfigurationService configurationService,
+            IUserActivity userActivity)
         {
             RepositoryService = repositoryService;
             PodService = podService;
             AutomationService = automationService;
             IntegrationService = integrationService;
             ConfigurationService = configurationService;
-            ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.Starting);
+            UserActivity = userActivity;
+            ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.NotStarted);
         }
         
         public async Task StartServices(CancellationToken cancellationToken)
         {
             ApiStatusSubject.OnNext(CoreApiStatus.Starting);
+            await UserActivity.StartForegroundTaskService(cancellationToken);
             await RepositoryService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             //await AutomationService.StartService(cancellationToken);
@@ -47,10 +53,13 @@ namespace OmniCore.Client.Droid.Services
 
         public async Task StopServices(CancellationToken cancellationToken)
         {
+            ApiStatusSubject.OnNext(CoreApiStatus.Stopping);
             //await IntegrationService.StopService(cancellationToken);
             //await AutomationService.StopService(cancellationToken);
             await PodService.StopService(cancellationToken);
             await RepositoryService.StopService(cancellationToken);
+            await UserActivity.StopForegroundTaskService(cancellationToken);
+            ApiStatusSubject.OnNext(CoreApiStatus.Stopped);
         }
     }
 }

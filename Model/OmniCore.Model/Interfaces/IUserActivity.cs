@@ -5,9 +5,11 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Model.Interfaces
 {
-    public interface IPlatformUserActivity
+    public interface IUserActivity
     {
-        Task<IForegroundTaskService> GetForegroundTaskService(CancellationToken cancellationToken);
+        Task StartForegroundTaskService(CancellationToken cancellationToken);
+        Task StopForegroundTaskService(CancellationToken cancellationToken);
+
         IObservable<(string Permission, bool IsGranted)> RequestPermissions(params string[] permissions);
         Task<bool> PermissionGranted(string permission);
         
