@@ -16,5 +16,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
 
         Task WriteToCharacteristicWithoutResponse(Guid ServiceUuid, Guid CharacteristicUuid, byte[] data,
             CancellationToken cancellationToken);
+
+        
     }
 }

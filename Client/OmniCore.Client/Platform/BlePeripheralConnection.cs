@@ -129,7 +129,6 @@ namespace OmniCore.Client.Platform
             StayConnected = stayConnected;
             Subscriptions = new List<IDisposable>();
         }
-
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)
         {
             var characteristic = CharacteristicsDictionary[(serviceUuid, characteristicUuid)];

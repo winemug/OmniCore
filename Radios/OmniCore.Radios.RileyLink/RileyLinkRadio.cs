@@ -146,13 +146,21 @@ namespace OmniCore.Radios.RileyLink
                         }
                         catch (OperationCanceledException)
                         {
-                            Logger.Debug($"RLR: {Address} Healthcheck canceled");
+                            if (HealthCheckCancellationTokenSource.IsCancellationRequested)
+                            {
+                                Logger.Debug($"RLR: {Address} Healthcheck canceled");
+                            }
+                            else
+                                throw;
                         }
                         catch (Exception e)
                         {
                             Logger.Warning($"RLR: {Address} Healthcheck failed", e);
-                            nextInterval = Entity.Options.RadioHealthCheckIntervalGood;
+                            nextInterval = Entity.Options.RadioHealthCheckIntervalBad;
                         }
+#if DEBUG
+                        nextInterval = TimeSpan.FromSeconds(10);
+#endif
 
                         ResumeHealthChecks(nextInterval);
                     });

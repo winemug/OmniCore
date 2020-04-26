@@ -206,6 +206,13 @@ namespace OmniCore.Client.Platform
                                 $"BLEP: {PeripheralUuid.AsMacAddress()} Connect failed. Err:\n {exceptionTask.Result.AsDebugFriendly()}");
                             throw exceptionTask.Result;
                         }
+                        
+                        Logger.Debug(
+                            $"BLEP: {PeripheralUuid.AsMacAddress()} Requesting MTU of 512 bytes");
+                        var mtu = await device.RequestMtu(512).ToTask(cancellationToken);
+                        Logger.Debug(
+                            $"BLEP: {PeripheralUuid.AsMacAddress()} MTU set at {mtu} bytes");
+
                     }
 
                     using var characteristicTimeoutSource = new CancellationTokenSource(peripheralOptions.CharacteristicsDiscoveryTimeout);
@@ -230,6 +237,8 @@ namespace OmniCore.Client.Platform
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
 
                     var blepc = (BlePeripheralConnection) await Container.Get<IBlePeripheralConnection>();
+
+                   
                     var communicationDisposable = Disposable.Create(() =>
                     {
                         bluetoothLock.Dispose();
@@ -292,6 +301,13 @@ namespace OmniCore.Client.Platform
                     Logger.Debug($"BLEP: {PeripheralUuid.AsMacAddress()} Device name updated");
                     Name = s;
                 });
+        }
+        
+        public Task<int> RequestMtu(int size, CancellationToken cancellationToken)
+        {
+            var device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
+            if (device == null) throw new OmniCorePeripheralException(FailureType.PeripheralOffline);
+            return device.RequestMtu(size).ToTask(cancellationToken);
         }
     }
 }

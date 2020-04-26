@@ -22,6 +22,7 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         IObservable<string> WhenNameUpdated();
         IObservable<int> WhenRssiReceived();
         Task<int> ReadRssi(CancellationToken cancellationToken);
+        Task<int> RequestMtu(int size, CancellationToken cancellationToken);
         Task Discover(CancellationToken cancellationToken);
         IObservable<PeripheralDiscoveryState> WhenDiscoveryStateChanged();
         IObservable<PeripheralConnectionState> WhenConnectionStateChanged();
