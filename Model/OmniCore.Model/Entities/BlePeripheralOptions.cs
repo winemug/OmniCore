@@ -4,7 +4,7 @@ namespace OmniCore.Model.Entities
 {
     public class BlePeripheralOptions
     {
-        public bool PeripheralAutoConnect { get; set; } = true;
+        public bool PeripheralAutoConnect { get; set; } = false;
         public TimeSpan PeripheralDiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(15);
         public TimeSpan PeripheralDiscoveryCooldown { get; set; } = TimeSpan.FromSeconds(45);
 

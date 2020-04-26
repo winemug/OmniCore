@@ -164,7 +164,10 @@ namespace OmniCore.Client.Platform
                                 AndroidUseScanBatching = false,
                                 ServiceUuids = ServiceIdFilter
                             })
-                            .Subscribe(result => { ScanResultSubject.OnNext(result); });
+                            .Subscribe(result => { ScanResultSubject.OnNext(result); }, exception =>
+                            {
+                                ScanResultSubject.OnError(exception);
+                            });
 
                         return Disposable.Create(() =>
                         {

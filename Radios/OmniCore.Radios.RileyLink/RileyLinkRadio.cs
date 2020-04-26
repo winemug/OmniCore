@@ -144,19 +144,17 @@ namespace OmniCore.Radios.RileyLink
                             nextInterval = await PerformHealthChecks(HealthCheckCancellationTokenSource.Token);
                             Logger.Debug($"RLR: {Address} Healthcheck finished");
                         }
-                        catch (OperationCanceledException)
+                        catch (Exception e)
                         {
                             if (HealthCheckCancellationTokenSource.IsCancellationRequested)
                             {
                                 Logger.Debug($"RLR: {Address} Healthcheck canceled");
                             }
                             else
-                                throw;
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Warning($"RLR: {Address} Healthcheck failed", e);
-                            nextInterval = Entity.Options.RadioHealthCheckIntervalBad;
+                            {
+                                Logger.Warning($"RLR: {Address} Healthcheck failed", e);
+                                nextInterval = Entity.Options.RadioHealthCheckIntervalBad;
+                            }
                         }
 #if DEBUG
                         nextInterval = TimeSpan.FromSeconds(10);

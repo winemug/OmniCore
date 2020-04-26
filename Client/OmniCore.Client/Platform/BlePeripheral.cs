@@ -136,7 +136,15 @@ namespace OmniCore.Client.Platform
         {
             var device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
             if (device == null) throw new OmniCorePeripheralException(FailureType.PeripheralOffline);
-            return await device.ReadRssi().FirstAsync().ToTask(cancellationToken);
+            try
+            {
+                return await device.ReadRssi().FirstAsync().ToTask(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                BlePeripheralAdapter.InvalidatePeripheralState(this);                
+                throw;
+            }
         }
 
         public async Task Discover(CancellationToken cancellationToken)
@@ -236,16 +244,14 @@ namespace OmniCore.Client.Platform
                     Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
 
-                    var blepc = (BlePeripheralConnection) await Container.Get<IBlePeripheralConnection>();
-
-                   
                     var communicationDisposable = Disposable.Create(() =>
                     {
                         bluetoothLock.Dispose();
                         lockDisposable.Dispose();
                     });
 
-                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, peripheralOptions.PeripheralAutoConnect);
+                    var blepc = (BlePeripheralConnection) await Container.Get<IBlePeripheralConnection>();
+                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, this, peripheralOptions.PeripheralAutoConnect);
                     return blepc;
                 }
             }
@@ -254,6 +260,7 @@ namespace OmniCore.Client.Platform
                 device?.CancelConnection();
                 bluetoothLock?.Dispose();
                 lockDisposable?.Dispose();
+                BlePeripheralAdapter.InvalidatePeripheralState(this);
                 throw;
             }
         }
@@ -264,6 +271,9 @@ namespace OmniCore.Client.Platform
                                     && ReferenceEquals(_LastDevice, device))
                 return;
 
+            if (_LastDevice == null && device == null)
+                return;
+            
             _LastDevice = device;
 
             DeviceStateSubscription?.Dispose();
@@ -272,12 +282,16 @@ namespace OmniCore.Client.Platform
             DeviceStateSubscription = null;
             DeviceNameSubscription = null;
 
+            var now = DateTimeOffset.UtcNow;
             if (device == null)
+            {
+                ConnectionState = (PeripheralConnectionState.NotConnected, now);
+                DiscoveryState = (PeripheralDiscoveryState.Unknown, now);
                 return;
+            }
 
             DeviceStateSubscription = device.WhenStatusChanged().Subscribe(status =>
             {
-                var now = DateTimeOffset.UtcNow;
                 switch (status)
                 {
                     case ConnectionStatus.Connecting:
@@ -307,7 +321,15 @@ namespace OmniCore.Client.Platform
         {
             var device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
             if (device == null) throw new OmniCorePeripheralException(FailureType.PeripheralOffline);
-            return device.RequestMtu(size).ToTask(cancellationToken);
+            try
+            {
+                return device.RequestMtu(size).ToTask(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                BlePeripheralAdapter.InvalidatePeripheralState(this);
+                throw;
+            }
         }
     }
 }

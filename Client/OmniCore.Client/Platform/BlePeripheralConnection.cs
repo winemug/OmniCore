@@ -25,18 +25,21 @@ namespace OmniCore.Client.Platform
         private bool StayConnected;
         private List<IDisposable> Subscriptions;
         private BlePeripheralOptions PeripheralOptions;
+        private readonly IBlePeripheralAdapter PeripheralAdapter;
 
         public BlePeripheralConnection(
             ILogger logger,
-            IConfigurationService configurationService)
+            IConfigurationService configurationService,
+            IBlePeripheralAdapter peripheralAdapter)
         {
             Logger = logger;
+            PeripheralAdapter = peripheralAdapter;
             PeripheralOptions = configurationService
                     .GetBlePeripheralOptions(CancellationToken.None)
                     .WaitAndUnwrapException();
         }
 
-        public IBlePeripheral Peripheral { get; set; }
+        private IBlePeripheral Peripheral;
 
         public void Dispose()
         {
@@ -60,6 +63,7 @@ namespace OmniCore.Client.Platform
                 {
                     Logger.Warning("Failed to close connection, ignoring error.", e);
                 }
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
             }
 
             CommunicationDisposable?.Dispose();
@@ -69,29 +73,53 @@ namespace OmniCore.Client.Platform
         public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid,
             CancellationToken cancellationToken)
         {
-            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
-            var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken);
-            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
-            return result.Data;
+            try
+            {
+                Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
+                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken);
+                Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
+                return result.Data;
+            }
+            catch (Exception e)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                throw;
+            }
         }
 
         public async Task WriteToCharacteristic(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
-            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
-            await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
-            Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
+            try
+            {
+                Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
+                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
+                Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
+            }
+            catch (Exception e)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                throw;
+            }
         }
 
         public async Task WriteToCharacteristicWithoutResponse(Guid serviceUuid, Guid characteristicUuid, byte[] data,
             CancellationToken cancellationToken)
         {
-            Logger.Debug(
-                $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response requested");
-            await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
-                .ToTask(cancellationToken);
-            Logger.Debug(
-                $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response finished");
+            try
+            {
+                Logger.Debug(
+                    $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response requested");
+                await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
+                    .ToTask(cancellationToken);
+                Logger.Debug(
+                    $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response finished");
+            }
+            catch (Exception e)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                throw;
+            }
         }
 
         public IObservable<byte[]> WhenCharacteristicNotificationReceived(Guid serviceUuid, Guid characteristicUuid)
@@ -106,6 +134,10 @@ namespace OmniCore.Client.Platform
                     {
                         Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Characteristic notification received");
                         observer.OnNext(bytes);
+                    }, exception =>
+                    {
+                        PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                        observer.OnError(exception);
                     });
                 Subscriptions.Add(subscription);
 
@@ -121,12 +153,14 @@ namespace OmniCore.Client.Platform
             IDevice device,
             Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> characteristicsDictionary,
             IDisposable communicationDisposable,
+            IBlePeripheral peripheral,
             bool stayConnected)
         {
             Device = device;
             CharacteristicsDictionary = characteristicsDictionary;
             CommunicationDisposable = communicationDisposable;
             StayConnected = stayConnected;
+            Peripheral = peripheral;
             Subscriptions = new List<IDisposable>();
         }
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)

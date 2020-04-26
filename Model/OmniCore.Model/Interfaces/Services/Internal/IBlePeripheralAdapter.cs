@@ -15,5 +15,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         IObservable<IBlePeripheral> FindErosRadioPeripherals();
         IObservable<IBlePeripheralAdapter> WhenAdapterDisabled();
         IObservable<IBlePeripheralAdapter> WhenAdapterEnabled();
+        void InvalidatePeripheralState(IBlePeripheral peripheral);
     }
 }

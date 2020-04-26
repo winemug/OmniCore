@@ -189,30 +189,46 @@ namespace OmniCore.Client.Platform
                     try
                     {
                         Logger.Debug("BLE: Request connected devices");
+                        BlePeripheral connectedPeripheral = null;
+                        IEnumerable<IDevice> connectedDevices = new List<IDevice>();
                         using (var ppc = await PeripheralConnectionLock(cts.Token))
                         {
-                            var connectedDevices = await CrossBleAdapter.Current
-                                .GetConnectedDevices().ToTask(cancellationToken);
-                            Logger.Debug("BLE: Received connected devices");
-
-                            foreach (var connectedDevice in connectedDevices)
+                            try
                             {
-                                var service = await connectedDevice.DiscoverServices()
-                                    .FirstOrDefaultAsync(s => ErosRadioServiceUuids.Contains(s.Uuid));
+                                connectedDevices = await CrossBleAdapter.Current
+                                    .GetConnectedDevices().ToTask(cancellationToken);
+                                Logger.Debug("BLE: Received connected devices");
 
-                                if (service != null)
+                                foreach (var connectedDevice in connectedDevices)
                                 {
-                                    DeviceCache[connectedDevice.Uuid] = connectedDevice;
-                                    var peripheral = await GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
-                                    peripheral.UpdateSubscriptions(connectedDevice);
+                                    var service = await connectedDevice.DiscoverServices()
+                                        .FirstOrDefaultAsync(s => ErosRadioServiceUuids.Contains(s.Uuid))
+                                        .ToTask(cancellationToken);
 
-                                    Logger.Debug(
-                                        $"BLE: {peripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
-                                    observedPeripheralUuids.Add(peripheral.PeripheralUuid);
-                                    observer.OnNext(peripheral);
+                                    if (service != null)
+                                    {
+                                        DeviceCache[connectedDevice.Uuid] = connectedDevice;
+                                        connectedPeripheral =
+                                            await GetPeripheralInternal(connectedDevice.Uuid, service.Uuid);
+                                        connectedPeripheral.UpdateSubscriptions(connectedDevice);
+
+                                        Logger.Debug(
+                                            $"BLE: {connectedPeripheral.PeripheralUuid.AsMacAddress()} Notifying connected peripheral as found");
+                                        observedPeripheralUuids.Add(connectedPeripheral.PeripheralUuid);
+                                        observer.OnNext(connectedPeripheral);
+                                    }
                                 }
-
-                                cancellationToken.ThrowIfCancellationRequested();
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                if (connectedPeripheral != null)
+                                    InvalidatePeripheralState(connectedPeripheral);
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Warning("Error occured while retrieving connected devices, continuing with regular scan", e);
+                                if (connectedPeripheral != null)
+                                    InvalidatePeripheralState(connectedPeripheral);
                             }
 
                             var searchStart = DateTimeOffset.UtcNow;
@@ -311,6 +327,12 @@ namespace OmniCore.Client.Platform
                 await FindErosRadioPeripherals()
                     .FirstAsync(p => p.PeripheralUuid == peripheralUuid).ToTask(cancellationToken);
             return DeviceCache[peripheralUuid];
+        }
+
+        public void InvalidatePeripheralState(IBlePeripheral peripheral)
+        {
+            DeviceCache.TryRemove(peripheral.PeripheralUuid, out _);
+            ((BlePeripheral)peripheral).UpdateSubscriptions(null);
         }
     }
 }
