@@ -108,15 +108,15 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 return;
             }
 
-            await Noop().ToTask(cancellationToken);
+            await Noop(cancellationToken);
 
-            await SetSwEncoding(RileyLinkSoftwareEncoding.None).ToTask(cancellationToken);
-            await SetPreamble(0x5555).ToTask(cancellationToken);
+            await SetSwEncoding(RileyLinkSoftwareEncoding.None, cancellationToken);
+            await SetPreamble(0x5555, cancellationToken);
 
-            await SetModeRegisters(RileyLinkRegisterMode.Rx, GetRxParameters(options));
-            await SetModeRegisters(RileyLinkRegisterMode.Tx, GetTxParameters(options));
+            await SetModeRegisters(RileyLinkRegisterMode.Rx, GetRxParameters(options), cancellationToken);
+            await SetModeRegisters(RileyLinkRegisterMode.Tx, GetTxParameters(options), cancellationToken);
 
-            var response = await GetState().ToTask(cancellationToken);
+            var response = await GetState(cancellationToken);
 
             if (!response.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
@@ -125,47 +125,49 @@ namespace OmniCore.Radios.RileyLink.Protocol
             ConfiguredOptions = options;
         }
 
-        public IObservable<RileyLinkStateResponse> GetState()
+        public Task<RileyLinkStateResponse> GetState(CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStateResponse>(
+            return GetResponse<RileyLinkStateResponse>(
                 new RileyLinkCommand
                 {
                     Type = RileyLinkCommandType.GetState
-                });
+                }, cancellationToken);
         }
 
-        public IObservable<RileyLinkVersionResponse> GetVersion()
+        public Task<RileyLinkVersionResponse> GetVersion(CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkVersionResponse>(
+            return GetResponse<RileyLinkVersionResponse>(
                 new RileyLinkCommand
                 {
                     Type = RileyLinkCommandType.GetVersion
-                });
+                }, cancellationToken);
         }
 
-        public IObservable<RileyLinkPacketResponse> GetPacket(
+        public Task<RileyLinkPacketResponse> GetPacket(
             byte channel,
-            uint timeoutMilliseconds)
+            uint timeoutMilliseconds,
+            CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkPacketResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkPacketResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.GetPacket,
                 Parameters = new Bytes()
                     .Append(channel)
                     .Append(timeoutMilliseconds)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> SendPacket(
+        public Task<RileyLinkStandardResponse> SendPacket(
             byte channel,
             byte repeatCount,
             ushort delayMilliseconds,
             ushort preambleExtensionMilliseconds,
-            byte[] data
+            byte[] data,
+            CancellationToken cancellationToken
         )
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SendPacket,
                 Parameters = new Bytes()
@@ -175,10 +177,10 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .Append(preambleExtensionMilliseconds)
                     .Append(data)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkPacketResponse> SendAndListen(
+        public Task<RileyLinkPacketResponse> SendAndListen(
             byte sendChannel,
             byte sendRepeatCount,
             ushort sendRepeatDelayMilliseconds,
@@ -186,10 +188,11 @@ namespace OmniCore.Radios.RileyLink.Protocol
             byte listenChannel,
             uint listenTimeoutMilliseconds,
             byte listenRetryCount,
-            byte[] data
+            byte[] data,
+            CancellationToken cancellationToken
         )
         {
-            return WhenResponseReceived<RileyLinkPacketResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkPacketResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SendAndListen,
                 Parameters = new Bytes()
@@ -202,191 +205,171 @@ namespace OmniCore.Radios.RileyLink.Protocol
                     .Append(sendPreambleExtensionMilliseconds)
                     .Append(data)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> UpdateRegister(
+        public Task<RileyLinkStandardResponse> UpdateRegister(
             RileyLinkRegister register,
-            byte value
+            byte value,
+            CancellationToken cancellationToken
         )
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.UpdateRegister,
                 Parameters = new Bytes()
                     .Append((byte) register)
                     .Append(value)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<IRileyLinkCommand> Noop()
+        public Task Noop(CancellationToken cancellationToken)
         {
-            return WhenCommandSent(new RileyLinkCommand
+            return SendCommand(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.None
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<IRileyLinkCommand> Reset()
+        public Task Reset(CancellationToken cancellationToken)
         {
-            return WhenCommandSent(new RileyLinkCommand
+            return SendCommand(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.Reset
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> Led(
+        public Task<RileyLinkStandardResponse> Led(
             RileyLinkLed led,
-            RileyLinkLedMode mode)
+            RileyLinkLedMode mode,
+            CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.Led,
                 Parameters = new Bytes()
                     .Append((byte) led)
                     .Append((byte) mode)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkRegisterValueResponse> ReadRegister(
-            RileyLinkRegister register)
+        public Task<RileyLinkRegisterValueResponse> ReadRegister(
+            RileyLinkRegister register, CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkRegisterValueResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkRegisterValueResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.ReadRegister,
                 Parameters = new Bytes()
                     .Append((byte) register)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> SetModeRegisters(
+        public Task<RileyLinkStandardResponse> SetModeRegisters(
             RileyLinkRegisterMode registerMode,
-            List<(RileyLinkRegister Register, int Value)> registers)
+            List<(RileyLinkRegister Register, int Value)> registers,
+            CancellationToken cancellationToken)
         {
             var p = new Bytes((byte) registerMode);
             foreach (var r in registers)
                 p.Append((byte) r.Register).Append((byte) r.Value);
 
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetModeRegisters,
                 Parameters = p.ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> SetSwEncoding(
-            RileyLinkSoftwareEncoding encoding)
+        public Task<RileyLinkStandardResponse> SetSwEncoding(
+            RileyLinkSoftwareEncoding encoding, CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetSwEncoding,
                 Parameters = new Bytes()
                     .Append((byte) encoding)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> SetPreamble(
-            ushort preamble)
+        public Task<RileyLinkStandardResponse> SetPreamble(
+            ushort preamble, CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.SetPreamble,
                 Parameters = new Bytes()
                     .Append(preamble)
                     .ToArray()
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStandardResponse> ResetRadioConfig()
+        public Task<RileyLinkStandardResponse> ResetRadioConfig(CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStandardResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.ResetRadioConfig
-            });
+            }, cancellationToken);
         }
 
-        public IObservable<RileyLinkStatisticsResponse> GetStatistics()
+        public Task<RileyLinkStatisticsResponse> GetStatistics(CancellationToken cancellationToken)
         {
-            return WhenResponseReceived<RileyLinkStatisticsResponse>(new RileyLinkCommand
+            return GetResponse<RileyLinkStatisticsResponse>(new RileyLinkCommand
             {
                 Type = RileyLinkCommandType.GetStatistics
-            });
+            }, cancellationToken);
         }
 
-        private IObservable<IRileyLinkCommand> WhenCommandSent(IRileyLinkCommand command)
-        {
-            return Observable.Create<IRileyLinkCommand>(async observer =>
-            {
-                try
-                {
-                    await SendCommand(command);
-                    observer.OnNext(command);
-                    observer.OnCompleted();
-                }
-                catch (Exception e)
-                {
-                    observer.OnError(e);
-                    observer.OnCompleted();
-                }
-
-                return Disposable.Empty;
-            });
-        }
-
-        private IObservable<T> WhenResponseReceived<T>(IRileyLinkCommand command)
+        private async Task<T> GetResponse<T>(IRileyLinkCommand command, CancellationToken cancellationToken)
             where T : IRileyLinkResponse, new()
         {
-            return Observable.Create<T>(async observer =>
+            var response = new T();
+            ResponseQueue.Enqueue(response);
+
+            try
             {
-                var response = new T();
-                ResponseQueue.Enqueue(response);
+                await SendCommand(command, cancellationToken);
+            }
+            catch (Exception)
+            {
+                response.SkipParse = true;
+                throw;
+            }
 
-                try
-                {
-                    await SendCommand(command);
-                }
-                catch (Exception e)
-                {
-                    response.SkipParse = true;
-                    observer.OnError(e);
-                    observer.OnCompleted();
-                    return Disposable.Empty;
-                }
-
-                var responseSubscription = response.Observable.Subscribe(_ =>
-                    {
-                        observer.OnNext(response);
-                        observer.OnCompleted();
-                    }, exception =>
-                    {
-                        observer.OnError(exception);
-                        observer.OnCompleted();
-                    }
-                );
-                return responseSubscription;
-            });
+            return await response.Observable.Cast<T>().ToTask(cancellationToken);
         }
 
-        private async Task SendCommand(IRileyLinkCommand command)
+        private async Task SendCommand(IRileyLinkCommand command, CancellationToken cancellationToken)
         {
             var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
             using var timeout = new CancellationTokenSource(peripheralOptions.CharacteristicResponseTimeout);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
+
             try
             {
                 Logger.Debug($"{Header} Sending command {command.Type}");
                 await PeripheralConnection.WriteToCharacteristic(
                     RileyLinkServiceUuid, RileyLinkDataCharacteristicUuid,
                     GetCommandData(command),
-                    timeout.Token);
+                    linkedSource.Token);
                 Logger.Debug($"{Header} Write complete");
+            }
+            catch (OperationCanceledException)
+            {
+                if (timeout.Token.IsCancellationRequested)
+                {
+                    Logger.Error($"{Header} Operation timed out.");
+                    throw;
+                }
+                Logger.Warning($"{Header} Operation cancelled.");
+                throw;
             }
             catch (Exception e)
             {
-                Logger.Debug($"{Header} Write failed, reporting failure.\n{e.AsDebugFriendly()}");
+                Logger.Error($"{Header} Operation failed", e);
                 throw;
             }
         }

@@ -236,17 +236,24 @@ namespace OmniCore.Radios.RileyLink
                 Logger.Debug($"RLR: {Address} Healthcheck RSSI received: {rssi}");
             }
 
-            Logger.Debug("RLR: {Address} Healthcheck RL write test");
+            Logger.Debug($"RLR: {Address} Healthcheck RL write test");
             for (int i = 0; i < 8; i++)
-                await rlConnection.Noop().ToTask(cancellationToken);
+                await rlConnection.Noop(cancellationToken);
 
-            Logger.Debug("RLR: {Address} Healthcheck RL state request");
-            var state = await rlConnection.GetState().ToTask(cancellationToken);
+            Logger.Debug($"RLR: {Address} Healthcheck RL state request");
+            var state = await rlConnection.GetState(cancellationToken);
             if (!state.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse);
 
-            Logger.Debug("RLR: {Address} Healthcheck RL state OK");
+            Logger.Debug($"RLR: {Address} Healthcheck RL state OK");
 
+            Logger.Debug($"RLR: Signaling end of health-check");
+            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On, cancellationToken);
+            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off, cancellationToken);
+            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On, cancellationToken);
+            await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off, cancellationToken);
+            Logger.Debug($"RLR: Santa is going home");
+            
             return Entity.Options.RadioHealthCheckIntervalGood;
         }
 
@@ -263,8 +270,8 @@ namespace OmniCore.Radios.RileyLink
 
                 using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
 
-                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On);
-                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off);
+                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On, cancellationToken);
+                await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off, cancellationToken);
                 ResumeHealthChecks(true);
             }
             catch (Exception e)

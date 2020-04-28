@@ -10,6 +10,7 @@ namespace OmniCore.Model.Interfaces.Services
         IObservable<CoreApiStatus> ApiStatus { get; }
         IConfigurationService ConfigurationService { get; }
         IPodService PodService { get; }
+        IRepositoryService RepositoryService { get; }
         IIntegrationService IntegrationService { get; }
         IAutomationService AutomationService { get; }
         Task StartServices(CancellationToken cancellationToken);

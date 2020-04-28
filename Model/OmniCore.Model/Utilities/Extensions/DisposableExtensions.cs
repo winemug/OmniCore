@@ -4,9 +4,12 @@ namespace OmniCore.Model.Utilities.Extensions
 {
     public static class DisposableExtensions
     {
-        public static void AutoDispose(this IDisposable disposable, ICompositeDisposableProvider provider)
+        public static T AutoDispose<T>(this T disposable, ICompositeDisposableProvider provider)
+            where T : IDisposable
         {
             provider.CompositeDisposable.Add(disposable);
+            return disposable;
         }
+
     }
 }

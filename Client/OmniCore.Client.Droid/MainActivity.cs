@@ -251,16 +251,19 @@ namespace OmniCore.Client.Droid
             }
         }
 
-        // protected override async void OnPause()
-        // {
-        //     await Device.InvokeOnMainThreadAsync(() =>
-        //     {
-        //         if (ForegroundTaskServiceConnection.IsConnected)
-        //         {
-        //             var intent = new Intent(this, typeof(ForegroundTaskService));
-        //             UnbindService(ForegroundTaskServiceConnection);
-        //         }
-        //     });
-        // }
+        protected override void OnPause()
+        {
+            if (ForegroundTaskServiceConnection.IsConnected)
+            {
+                var intent = new Intent(this, typeof(ForegroundTaskService));
+                UnbindService(ForegroundTaskServiceConnection);
+            }
+            base.OnPause();
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+        }
     }
 }

@@ -16,16 +16,15 @@ using Plugin.BluetoothLE;
 
 namespace OmniCore.Client.Platform
 {
-    public class BlePeripheralConnection : IBlePeripheralConnection
+    public class BlePeripheralConnection : IBlePeripheralConnection, ICompositeDisposableProvider
     {
         private readonly ILogger Logger;
         private Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> CharacteristicsDictionary;
-        private IDisposable CommunicationDisposable;
         private IDevice Device;
         private bool StayConnected;
-        private List<IDisposable> Subscriptions;
         private BlePeripheralOptions PeripheralOptions;
         private readonly IBlePeripheralAdapter PeripheralAdapter;
+        private readonly CancellationTokenSource DisconnectCancellationSource;
 
         public BlePeripheralConnection(
             ILogger logger,
@@ -37,17 +36,14 @@ namespace OmniCore.Client.Platform
             PeripheralOptions = configurationService
                     .GetBlePeripheralOptions(CancellationToken.None)
                     .WaitAndUnwrapException();
+            DisconnectCancellationSource = new CancellationTokenSource()
+                .AutoDispose(this);
         }
 
         private IBlePeripheral Peripheral;
 
         public void Dispose()
         {
-            foreach (var subscription in Subscriptions)
-                subscription.Dispose();
-
-            Subscriptions.Clear();
-
             if (!StayConnected && Device.IsConnected())
             {
                 try
@@ -65,9 +61,7 @@ namespace OmniCore.Client.Platform
                 }
                 PeripheralAdapter.InvalidatePeripheralState(Peripheral);
             }
-
-            CommunicationDisposable?.Dispose();
-            CommunicationDisposable = null;
+            CompositeDisposable.Dispose();
         }
 
         public async Task<byte[]> ReadFromCharacteristic(Guid serviceUuid, Guid characteristicUuid,
@@ -75,14 +69,23 @@ namespace OmniCore.Client.Platform
         {
             try
             {
+                using var cts = CombineWithDisconnection(cancellationToken);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
-                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cancellationToken);
+                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cts.Token);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
                 return result.Data;
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
+                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
+                    : "BLE GATT Operation canceled per request");
+                throw;
             }
             catch (Exception e)
             {
                 PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation failed", e);
                 throw;
             }
         }
@@ -92,13 +95,22 @@ namespace OmniCore.Client.Platform
         {
             try
             {
+                using var cts = CombineWithDisconnection(cancellationToken);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
-                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cancellationToken);
+                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cts.Token);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
+                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
+                    : "BLE GATT Operation canceled per request");
+                throw;
             }
             catch (Exception e)
             {
                 PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation failed", e);
                 throw;
             }
         }
@@ -108,16 +120,25 @@ namespace OmniCore.Client.Platform
         {
             try
             {
+                using var cts = CombineWithDisconnection(cancellationToken);
                 Logger.Debug(
                     $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response requested");
                 await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
-                    .ToTask(cancellationToken);
+                    .ToTask(cts.Token);
                 Logger.Debug(
                     $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response finished");
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
+                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
+                    : "BLE GATT Operation canceled per request");
+                throw;
             }
             catch (Exception e)
             {
                 PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation failed", e);
                 throw;
             }
         }
@@ -127,7 +148,7 @@ namespace OmniCore.Client.Platform
             return Observable.Create<byte[]>(observer =>
             {
                 var characteristic = GetCharacteristic(serviceUuid, characteristicUuid);
-                var subscription = characteristic
+                characteristic
                     .RegisterAndNotify()
                     .Select(r => r.Data)
                     .Subscribe(bytes =>
@@ -138,14 +159,9 @@ namespace OmniCore.Client.Platform
                     {
                         PeripheralAdapter.InvalidatePeripheralState(Peripheral);
                         observer.OnError(exception);
-                    });
-                Subscriptions.Add(subscription);
+                    }).AutoDispose(this);
 
-                return Disposable.Create(() =>
-                {
-                    Subscriptions.Remove(subscription);
-                    subscription.Dispose();
-                });
+                return Disposable.Empty;
             });
         }
 
@@ -158,11 +174,18 @@ namespace OmniCore.Client.Platform
         {
             Device = device;
             CharacteristicsDictionary = characteristicsDictionary;
-            CommunicationDisposable = communicationDisposable;
             StayConnected = stayConnected;
             Peripheral = peripheral;
-            Subscriptions = new List<IDisposable>();
+            communicationDisposable.AutoDispose(this);
+
+            peripheral.WhenConnectionStateChanged()
+                .Where(s => s != PeripheralConnectionState.Connected)
+                .Subscribe(_ =>
+                {
+                    DisconnectCancellationSource.Cancel();
+                }).AutoDispose(this);
         }
+
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)
         {
             var characteristic = CharacteristicsDictionary[(serviceUuid, characteristicUuid)];
@@ -171,5 +194,12 @@ namespace OmniCore.Client.Platform
                     "Characteristic not found on peripheral");
             return characteristic;
         }
+
+        private CancellationTokenSource CombineWithDisconnection(CancellationToken cancellationToken)
+        {
+            return CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DisconnectCancellationSource.Token);
+        }
+
+        public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
     }
 }
