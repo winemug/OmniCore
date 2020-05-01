@@ -74,15 +74,5 @@ namespace OmniCore.Services
             //throw new NotImplementedException();
             return Task.CompletedTask;
         }
-
-        protected override Task OnPause(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Task OnResume(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

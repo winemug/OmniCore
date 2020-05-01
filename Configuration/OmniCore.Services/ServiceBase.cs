@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,109 +14,52 @@ namespace OmniCore.Services
 {
     public abstract class ServiceBase : IService
     {
-        private readonly IService[] Dependencies = new IService[0];
-        private readonly ISubject<INotifyStatus> ServiceStatusSubject;
-        private ConcurrentDictionary<IService, bool> Dependents;
-        private readonly AsyncLock PauseResumeLock;
-
         private readonly AsyncLock StartStopLock;
+        private readonly ISubject<INotifyStatus> ServiceStatusSubject;
+        private readonly ISubject<IService> ServiceStartedSubject;
+        private readonly ISubject<IService> ServiceStoppedSubject;
+
+        public bool IsStarted { get; private set; }
+        public bool IsStopped { get; private set; }
+        public IObservable<IService> WhenStarted() => ServiceStartedSubject.AsObservable();
+        public IObservable<IService> WhenStopped() => ServiceStoppedSubject.AsObservable();
 
         protected ServiceBase(params IService[] dependencies)
         {
-            Dependents = new ConcurrentDictionary<IService, bool>();
             StartStopLock = new AsyncLock();
-            PauseResumeLock = new AsyncLock();
             IsStarted = false;
-            if (dependencies != null)
-                Dependencies = dependencies;
-
-            foreach (var dependency in Dependencies) dependency.RegisterDependentServices(this);
+            IsStopped = true;
 
             StatusFlag = NotifyStatusFlag.OK;
             StatusMessage = "Service created";
             ServiceStatusSubject = new BehaviorSubject<INotifyStatus>(this);
+            ServiceStartedSubject = new Subject<IService>();
+            ServiceStoppedSubject = new Subject<IService>();
         }
 
-        public bool IsStarted { get; private set; }
-        public bool IsPaused { get; private set; }
-
-        public void RegisterDependentServices(IService[] dependentServices)
-        {
-            foreach (var dependentService in dependentServices)
-                Dependents[dependentService] = false;
-        }
 
         public async Task StartService(CancellationToken cancellationToken)
         {
-            using var ssl = await StartStopLock.LockAsync(cancellationToken);
+            using var _ = await StartStopLock.LockAsync(cancellationToken);
             if (!IsStarted)
             {
-                foreach (var dependency in Dependencies) await dependency.StartService(cancellationToken);
-
+                IsStopped = false;
                 await OnStart(cancellationToken);
-
                 IsStarted = true;
+                ServiceStartedSubject.OnNext(this);
             }
-        }
-
-        public virtual Task OnBeforeStopRequest()
-        {
-            return Task.CompletedTask;
         }
 
         public async Task StopService(CancellationToken cancellationToken)
         {
-            using var ssl = await StartStopLock.LockAsync(cancellationToken);
+            using var _ = await StartStopLock.LockAsync(cancellationToken);
             if (IsStarted)
             {
-                foreach (var dependent in Dependents.Keys) await dependent.StopService(cancellationToken);
-
-                await OnStop(cancellationToken);
                 IsStarted = false;
+                await OnStop(cancellationToken);
+                IsStopped = true;
+                ServiceStoppedSubject.OnNext(this);
             }
-        }
-
-        public async Task PauseService(CancellationToken cancellationToken)
-        {
-            using var ssl = await StartStopLock.LockAsync(cancellationToken);
-            if (IsStarted)
-            {
-                using var prl = await PauseResumeLock.LockAsync(cancellationToken);
-                if (!IsPaused)
-                {
-                    foreach (var dependent in Dependents.Keys) await dependent.PauseService(cancellationToken);
-                    await OnPause(cancellationToken);
-                    IsPaused = true;
-                }
-            }
-        }
-
-        public async Task ResumeService(CancellationToken cancellationToken)
-        {
-            using var ssl = await StartStopLock.LockAsync(cancellationToken);
-            if (!IsStarted)
-            {
-                await StartService(cancellationToken);
-            }
-            else
-            {
-                using var prl = await PauseResumeLock.LockAsync(cancellationToken);
-                if (IsPaused)
-                {
-                    await OnResume(cancellationToken);
-                    IsPaused = false;
-                }
-            }
-        }
-
-        public IList<IDisposable> Disposables { get; } = new List<IDisposable>();
-
-        public void DisposeDisposables()
-        {
-            foreach (var disposable in Disposables)
-                disposable.Dispose();
-
-            Disposables.Clear();
         }
 
         public NotifyStatusFlag StatusFlag { get; private set; }
@@ -128,8 +72,6 @@ namespace OmniCore.Services
 
         protected abstract Task OnStart(CancellationToken cancellationToken);
         protected abstract Task OnStop(CancellationToken cancellationToken);
-        protected abstract Task OnPause(CancellationToken cancellationToken);
-        protected abstract Task OnResume(CancellationToken cancellationToken);
 
         protected void SetStatus(NotifyStatusFlag flag, string message)
         {
@@ -141,9 +83,6 @@ namespace OmniCore.Services
         public void Dispose()
         {
             using var ssl = StartStopLock.Lock();
-            using var prl = PauseResumeLock.Lock();
-            Dependents = null;
-            DisposeDisposables();
         }
     }
 }

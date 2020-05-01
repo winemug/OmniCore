@@ -9,19 +9,19 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IErosRadio: IDisposable
     {
-        IErosRadioProvider Provider { get; }
         RadioEntity Entity { get; }
         RadioType Type { get; }
         string Address { get; }
-        string Description { get; }
         IObservable<string> Name { get; }
         IObservable<PeripheralDiscoveryState> DiscoveryState { get; }
         IObservable<PeripheralConnectionState> ConnectionState { get; }
         IObservable<int> Rssi { get; }
-        Task Identify(CancellationToken cancellationToken);
-        RadioOptions Options { get; }
+        RadioOptions DefaultOptions { get; }
+        Task SetDefaultOptions(RadioOptions options, CancellationToken cancellationToken);
+        Task SetName(string newName, CancellationToken cancellationToken);
         Task<byte[]> GetResponse(IPodRequest request, CancellationToken cancellationToken, RadioOptions options);
         // Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
-        void StartMonitoring();
+        Task Identify(CancellationToken cancellationToken);
+        Task PerformHealthCheck(CancellationToken cancellationToken);
     }
 }

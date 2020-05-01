@@ -34,13 +34,13 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
                 .Subscribe(maybe =>
                 {
                     IsUnlikely = false;
-                }).AutoDispose(this);
+                }).DisposeWith(this);
             
             WhenPropertyChanged(this, p => p.IsPossibly)
                 .Subscribe(possibly =>
                 {
                     IsUnlikely = false;
-                }).AutoDispose(this);
+                }).DisposeWith(this);
 
             WhenPropertyChanged(this, p => p.IsUnlikely)
                 .Subscribe(unlikely =>
@@ -56,7 +56,7 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
                     {
                         DialogOkEnabled = false;
                     }
-                }).AutoDispose(this);
+                }).DisposeWith(this);
         }
     }
 }

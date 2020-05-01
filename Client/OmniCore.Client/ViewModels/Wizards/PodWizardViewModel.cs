@@ -60,7 +60,7 @@ namespace OmniCore.Client.ViewModels.Wizards
 
                 Views.Add(PodTypeSelectionView);
                 Views.Add(RadioSelectionView);
-            }).AutoDispose(this);
+            }).DisposeWith(this);
         }
     }
 }

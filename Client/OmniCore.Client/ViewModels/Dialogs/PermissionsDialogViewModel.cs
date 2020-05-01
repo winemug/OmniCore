@@ -30,7 +30,7 @@ namespace OmniCore.Client.ViewModels.Base.Dialogs
             {
                 BluetoothPermissionGranted = await userActivity.BluetoothPermissionGranted();
                 StoragePermissionsGranted = await userActivity.StoragePermissionGranted();
-            }).AutoDispose(this);
+            }).DisposeWith(this);
         }
     }
 }

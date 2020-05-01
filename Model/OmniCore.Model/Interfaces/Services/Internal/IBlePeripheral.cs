@@ -28,7 +28,10 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         IObservable<PeripheralConnectionState> WhenConnectionStateChanged();
 
         Task<IBlePeripheralConnection> GetConnection(
-            BlePeripheralOptions peripheralOptions,
+            BleOptions options,
             CancellationToken cancellationToken);
+
+        //TODO:
+        // Task Pair();
     }
 }

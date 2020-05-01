@@ -85,8 +85,6 @@ namespace OmniCore.Eros
                 }
                 await context.Save(cancellationToken);
             }
-
-            RadiosUpdatedSubject.OnNext(radios);
         }
 
         public Task<IPodTask> Activate(IErosRadio radio, CancellationToken cancellationToken)

@@ -6,10 +6,8 @@ namespace OmniCore.Model.Entities
 {
     public class RadioOptions
     {
-        
-        public int? CommandExecutionRssiThreshold { get; set; } = null;
-        public TimeSpan RadioHealthCheckIntervalGood { get; set; } = TimeSpan.FromMinutes(15);
-        public TimeSpan RadioHealthCheckIntervalBad { get; set; } = TimeSpan.FromMinutes(5);
+
+        public bool UseHardwareEncoding { get; set; } = false;
 
         // shifts in complements of 326.211 Hz
         public int RxFrequencyShift { get; set; } = 0;

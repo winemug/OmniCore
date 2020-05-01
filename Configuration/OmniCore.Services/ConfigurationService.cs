@@ -92,12 +92,12 @@ namespace OmniCore.Services
             throw new NotImplementedException();
         }
 
-        public Task<BlePeripheralOptions> GetBlePeripheralOptions(CancellationToken cancellationToken)
+        public Task<BleOptions> GetBlePeripheralOptions(CancellationToken cancellationToken)
         {
-            return Task.FromResult(new BlePeripheralOptions());
+            return Task.FromResult(new BleOptions());
         }
 
-        public async Task SetBlePeripheralOptions(BlePeripheralOptions blePeripheralOptions, CancellationToken cancellationToken)
+        public async Task SetBlePeripheralOptions(BleOptions bleOptions, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

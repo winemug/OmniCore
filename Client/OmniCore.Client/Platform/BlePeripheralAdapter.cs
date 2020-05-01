@@ -230,6 +230,8 @@ namespace OmniCore.Client.Platform
                                 if (connectedPeripheral != null)
                                     InvalidatePeripheralState(connectedPeripheral);
                             }
+                            
+                            //TODO: paired peripherals
 
                             var searchStart = DateTimeOffset.UtcNow;
                             var connectedPeripheralUuids = connectedDevices.Select(c => c.Uuid);
@@ -251,13 +253,8 @@ namespace OmniCore.Client.Platform
                                         scanResult.AdvertisementData.ServiceUuids[0]);
 
                                     peripheral.UpdateSubscriptions(scanResult.Device);
-
-                                    if (string.IsNullOrEmpty(peripheral.Name))
-                                        peripheral.Name = scanResult.AdvertisementData.LocalName;
-
-                                    if (!string.IsNullOrEmpty(scanResult.Device.Name))
-                                        peripheral.Name = scanResult.Device.Name;
-
+                                    peripheral.Name = scanResult.AdvertisementData.LocalName;
+                                    peripheral.Name = scanResult.Device.Name;
                                     peripheral.Rssi = (scanResult.Rssi, DateTimeOffset.UtcNow);
                                     peripheral.DiscoveryState = (PeripheralDiscoveryState.Discovered,
                                         DateTimeOffset.UtcNow);
@@ -318,14 +315,6 @@ namespace OmniCore.Client.Platform
 
         public IDevice GetNativeDeviceFromCache(Guid peripheralUuid)
         {
-            return DeviceCache[peripheralUuid];
-        }
-
-        public async Task<IDevice> GetNativeDevice(Guid peripheralUuid, CancellationToken cancellationToken)
-        {
-            if (!DeviceCache.TryGetValue(peripheralUuid, out var nativeDevice) || nativeDevice == null)
-                await FindErosRadioPeripherals()
-                    .FirstAsync(p => p.PeripheralUuid == peripheralUuid).ToTask(cancellationToken);
             return DeviceCache[peripheralUuid];
         }
 

@@ -62,15 +62,5 @@ namespace OmniCore.Services
                 }
             return Task.CompletedTask;
         }
-
-        protected override Task OnPause(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        protected override Task OnResume(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
     }
 }

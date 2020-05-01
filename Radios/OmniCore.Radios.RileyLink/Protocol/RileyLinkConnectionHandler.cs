@@ -3,9 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
+using OmniCore.Model.Constants;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
@@ -17,75 +20,112 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkConnectionHandler : IDisposable
+    public class RileyLinkConnectionHandler : IDisposable, ICompositeDisposableProvider
     {
-        private static readonly Guid RileyLinkServiceUuid = Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
-
-        private static readonly Guid RileyLinkDataCharacteristicUuid =
-            Guid.Parse("c842e849-5028-42e2-867c-016adada9155");
-
-        private static readonly Guid RileyLinkResponseCharacteristicUuid =
-            Guid.Parse("6e6c7910-b89e-43a5-a0fe-50c5e2b81f4a");
-
         private readonly IConfigurationService ConfigurationService;
         private readonly ILogger Logger;
-        private readonly IBlePeripheral Peripheral;
         private RadioOptions ConfiguredOptions;
 
         private IDisposable NotificationSubscription;
         private IBlePeripheralConnection PeripheralConnection;
+        
+        private readonly ISubject<(byte, byte[])> ResponseDataReceivedSubject;
+        private readonly IObservable<(byte, byte[])> WhenResponseDataReceived;
+
+        private byte? SessionNotificationCounter = null;
+        private CancellationTokenSource RadioErrorCancellationSource;
 
         public RileyLinkConnectionHandler(
             ILogger logger,
-            IBlePeripheral peripheral,
-            IConfigurationService configurationService,
-            IBlePeripheralConnection peripheralConnection)
+            IConfigurationService configurationService)
         {
             ConfigurationService = configurationService;
-            Peripheral = peripheral;
             Logger = logger;
-            PeripheralConnection = peripheralConnection;
-            
             ResponseQueue = new ConcurrentQueue<IRileyLinkResponse>();
-
-            NotificationSubscription = peripheralConnection
-                .WhenCharacteristicNotificationReceived(RileyLinkServiceUuid, RileyLinkResponseCharacteristicUuid)
-                .Subscribe(async _ =>
-                {
-                    Logger.Debug($"{Header} Characteristic notification received");
-
-                    var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
-                    using var notifyReadTimeout =
-                        new CancellationTokenSource(peripheralOptions.CharacteristicResponseTimeout);
-
-                    Logger.Debug($"{Header} Reading incoming response data");
-                    byte[] responseData = null;
-                    responseData = await peripheralConnection.ReadFromCharacteristic(
-                        RileyLinkServiceUuid,
-                        RileyLinkDataCharacteristicUuid,
-                        notifyReadTimeout.Token);
-                    Logger.Debug($"{Header} Response data read");
-
-                    if (responseData != null)
-                        while (ResponseQueue.TryDequeue(out var response))
-                            if (!response.SkipParse)
-                            {
-                                Logger.Debug($"{Header} Parsing response");
-                                try
-                                {
-                                    response.Parse(responseData);
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Debug($"{Header} Error while parsing response!\n{e.AsDebugFriendly()}");
-                                }
-
-                                break;
-                            }
-                });
+            ResponseDataReceivedSubject = new Subject<(byte, byte[])>();
+            WhenResponseDataReceived = ResponseDataReceivedSubject.AsObservable()
+                .Replay(256);
         }
 
-        private string Header => $"RLCH: {Peripheral.PeripheralUuid.AsMacAddress()}";
+        public void Initialize(IBlePeripheral peripheral)
+        {
+            IDisposable notificationSubscription = null;
+            peripheral.WhenConnectionStateChanged()
+                .Where(s => s == PeripheralConnectionState.Connected)
+                .Subscribe(async _ =>
+                {
+                    RadioErrorCancellationSource = new CancellationTokenSource();
+                    
+                    byte[] responseNumberData =  await PeripheralConnection.ReadFromCharacteristic(
+                        Uuids.RileyLinkServiceUuid,
+                        Uuids.RileyLinkResponseCharacteristicUuid,
+                        CancellationToken.None);
+
+                    if (responseNumberData.Length != 1)
+                    {
+                        Logger.Error("Response number data is of incorrect length");
+                        RadioErrorCancellationSource?.Cancel();
+                    }
+
+                    var responseNumber = responseNumberData[0];
+                    notificationSubscription = GetNotificationSubscription();
+                }, exception =>
+                {
+                    RadioErrorCancellationSource?.Cancel();
+                }).DisposeWith(this);
+            
+            peripheral.WhenConnectionStateChanged()
+                .Where(s => s == PeripheralConnectionState.Disconnected)
+                .Subscribe(_ =>
+                {
+                    RadioErrorCancellationSource?.Dispose();
+                    RadioErrorCancellationSource = null;
+                    
+                    notificationSubscription?.Dispose();
+                    notificationSubscription = null;
+                }).DisposeWith(this);
+        }
+        
+        private IDisposable GetNotificationSubscription()
+        {
+            return PeripheralConnection
+                .WhenCharacteristicNotificationReceived(Uuids.RileyLinkServiceUuid, Uuids.RileyLinkResponseCharacteristicUuid)
+                .Subscribe(async _ =>
+                {
+                    try
+                    {
+                        Logger.Debug($"Characteristic notification received");
+                        byte[] responseNumberData =  await PeripheralConnection.ReadFromCharacteristic(
+                            Uuids.RileyLinkServiceUuid,
+                            Uuids.RileyLinkResponseCharacteristicUuid,
+                            CancellationToken.None);
+                        
+                        if (responseNumberData.Length != 1)
+                            throw new OmniCoreRadioException(FailureType.RadioGeneralError, "Response number data is of incorrect length");
+
+                        var responseNumber = responseNumberData[0];
+                        Logger.Debug($"Incoming response #{responseNumber}");
+
+                        byte[] responseData = await PeripheralConnection.ReadFromCharacteristic(
+                            Uuids.RileyLinkServiceUuid,
+                            Uuids.RileyLinkDataCharacteristicUuid,
+                            CancellationToken.None);
+                        Logger.Debug($"Response received");
+                        
+                        ResponseDataReceivedSubject.OnNext((responseNumber, responseData));
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"Error while processing RileyLink responses", e);
+                        ResponseDataReceivedSubject.OnError(e);
+                        RadioErrorCancellationSource?.Cancel();
+                    }
+                }, exception =>
+                {
+                    ResponseDataReceivedSubject.OnError(exception);
+                    RadioErrorCancellationSource?.Cancel();
+                });
+        }
 
         public ConcurrentQueue<IRileyLinkResponse> ResponseQueue { get; }
 
@@ -93,24 +133,27 @@ namespace OmniCore.Radios.RileyLink.Protocol
         {
             NotificationSubscription?.Dispose();
             NotificationSubscription = null;
-            PeripheralConnection?.Dispose();
-            PeripheralConnection = null;
+            
+            CompositeDisposable.Dispose();
         }
 
         public async Task Configure(
             RadioOptions options,
             CancellationToken cancellationToken)
         {
-            Logger.Debug($"{Header} Configure requested");
+            Logger.Debug($"Configure requested");
             if (ConfiguredOptions != null && ConfiguredOptions.SameAs(options))
             {
-                Logger.Debug($"{Header} Already configured");
+                Logger.Debug($"Already configured");
                 return;
             }
 
             await Noop(cancellationToken);
 
-            await SetSwEncoding(RileyLinkSoftwareEncoding.None, cancellationToken);
+            await SetSwEncoding(options.UseHardwareEncoding ?
+                RileyLinkSoftwareEncoding.Manchester : RileyLinkSoftwareEncoding.None,
+                cancellationToken);
+            
             await SetPreamble(0x5555, cancellationToken);
 
             await SetModeRegisters(RileyLinkRegisterMode.Rx, GetRxParameters(options), cancellationToken);
@@ -121,7 +164,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             if (!response.StateOk)
                 throw new OmniCoreRadioException(FailureType.RadioErrorResponse, "RL status is not 'OK'");
 
-            Logger.Debug($"{Header} Configuration complete");
+            Logger.Debug($"Configuration complete");
             ConfiguredOptions = options;
         }
 
@@ -327,8 +370,6 @@ namespace OmniCore.Radios.RileyLink.Protocol
             where T : IRileyLinkResponse, new()
         {
             var response = new T();
-            ResponseQueue.Enqueue(response);
-
             try
             {
                 await SendCommand(command, cancellationToken);
@@ -344,32 +385,23 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
         private async Task SendCommand(IRileyLinkCommand command, CancellationToken cancellationToken)
         {
-            var peripheralOptions = await ConfigurationService.GetBlePeripheralOptions(CancellationToken.None);
-            using var timeout = new CancellationTokenSource(peripheralOptions.CharacteristicResponseTimeout);
-            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
-
             try
             {
-                Logger.Debug($"{Header} Sending command {command.Type}");
+                Logger.Debug($"Sending command {command.Type}");
                 await PeripheralConnection.WriteToCharacteristic(
-                    RileyLinkServiceUuid, RileyLinkDataCharacteristicUuid,
+                    Uuids.RileyLinkServiceUuid, Uuids.RileyLinkDataCharacteristicUuid,
                     GetCommandData(command),
-                    linkedSource.Token);
-                Logger.Debug($"{Header} Write complete");
+                    cancellationToken);
+                Logger.Debug($"Write complete");
             }
-            catch (OperationCanceledException)
+            catch (TimeoutException)
             {
-                if (timeout.Token.IsCancellationRequested)
-                {
-                    Logger.Error($"{Header} Operation timed out.");
-                    throw;
-                }
-                Logger.Warning($"{Header} Operation cancelled.");
-                throw;
+                Logger.Error($"Operation timed out");
+                
             }
             catch (Exception e)
             {
-                Logger.Error($"{Header} Operation failed", e);
+                Logger.Error($"Operation failed", e);
                 throw;
             }
         }
@@ -519,5 +551,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             registers.Add((RileyLinkRegister.PATABLE0, amplification));
             return registers;
         }
+
+        public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
     }
 }

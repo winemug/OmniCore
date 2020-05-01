@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+using OmniCore.Model.Constants;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
@@ -18,8 +19,9 @@ namespace OmniCore.Radios.RileyLink
     public class RileyLinkRadioProvider : IErosRadioProvider
     {
         private readonly IContainer Container;
-        private readonly ConcurrentDictionary<Guid, IErosRadio> RadioDictionary;
+        private readonly Dictionary<Guid, IErosRadio> RadioDictionary;
         private readonly IRepositoryService RepositoryService;
+        private readonly AsyncLock RadioDictionaryLock;
 
         public RileyLinkRadioProvider(
             IRepositoryService repositoryService,
@@ -27,45 +29,25 @@ namespace OmniCore.Radios.RileyLink
         {
             RepositoryService = repositoryService;
             Container = container;
-
-            RadioDictionary = new ConcurrentDictionary<Guid, IErosRadio>();
+            RadioDictionary = new Dictionary<Guid, IErosRadio>();
+            RadioDictionaryLock = new AsyncLock();
         }
 
-        public Guid ServiceUuid => Guid.Parse("0235733b-99c5-4197-b856-69219c2a3845");
+        public Guid ServiceUuid => Uuids.RileyLinkServiceUuid;
 
-        public async Task<IErosRadio> GetRadio(IBlePeripheral peripheral,
+        public async Task<IErosRadio> GetRadio(Guid uuid,
             CancellationToken cancellationToken)
         {
-            if (RadioDictionary.ContainsKey(peripheral.PeripheralUuid))
-                return RadioDictionary[peripheral.PeripheralUuid];
-                
-            var radio = await Container.Get<RileyLinkRadio>();
-            var entity = await GetEntity(peripheral, cancellationToken);
-            return RadioDictionary.GetOrAdd(peripheral.PeripheralUuid, uuid =>
+            using (var _ = await RadioDictionaryLock.LockAsync(cancellationToken))
             {
-                radio.Initialize(entity, this, peripheral);
-                return radio;
-            });
-        }
-        private async Task<RadioEntity> GetEntity(IBlePeripheral peripheral, CancellationToken cancellationToken)
-        {
-            using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
-            var re = await context.Radios.Where(r => !r.IsDeleted &&
-                                                     r.DeviceUuid == peripheral.PeripheralUuid)
-                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if (re == null)
-            {
-                re = new RadioEntity
-                {
-                    DeviceName = peripheral.Name,
-                    DeviceUuid = peripheral.PeripheralUuid,
-                    ServiceUuid = peripheral.PrimaryServiceUuid
-                };
-                await context.Radios.AddAsync(re, cancellationToken);
-                await context.Save(cancellationToken);
-            }
 
-            return re;
+                if (!RadioDictionary.ContainsKey(uuid))
+                {
+                    var radio = await Container.Get<RileyLinkRadio>();
+                    await radio.Initialize(uuid, cancellationToken);
+                }
+                return RadioDictionary[uuid];
+            }
         }
 
         public void Dispose()

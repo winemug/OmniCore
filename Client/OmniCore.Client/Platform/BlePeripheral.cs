@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -164,7 +165,7 @@ namespace OmniCore.Client.Platform
         }
 
         public async Task<IBlePeripheralConnection> GetConnection(
-            BlePeripheralOptions peripheralOptions,
+            BleOptions options,
             CancellationToken cancellationToken)
         {
             IDevice device = null;
@@ -177,37 +178,34 @@ namespace OmniCore.Client.Platform
             {
                 using (var pcc = await BlePeripheralAdapter.PeripheralConnectionLock(cancellationToken))
                 {
-                    using var discoveryTimeoutSource = new CancellationTokenSource(peripheralOptions.PeripheralDiscoveryTimeout);
-                    using var discoveryCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
-                        discoveryTimeoutSource.Token,
-                        cancellationToken);
-
-                    device = await BlePeripheralAdapter.GetNativeDevice(PeripheralUuid,
-                        discoveryCancellationSource.Token);
+                    device = BlePeripheralAdapter.GetNativeDeviceFromCache(PeripheralUuid);
+                    if (device == null)
+                    {
+                        await BlePeripheralAdapter.FindErosRadioPeripherals()
+                            .FirstAsync(p => p.PeripheralUuid == PeripheralUuid)
+                            .Timeout(options.PeripheralDiscoveryTimeout)
+                            .ToTask(cancellationToken);
+                    }
 
                     await device.WhenStatusChanged().FirstAsync(s => s == ConnectionStatus.Connected
                                                                      || s == ConnectionStatus.Disconnected)
+                        .Timeout(options.PeripheralConnectTimeout)
                         .ToTask(cancellationToken);
 
                     if (!device.IsConnected())
                     {
-                        using var connectTimeoutSource = new CancellationTokenSource(peripheralOptions.PeripheralConnectTimeout);
-                        using var connectCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
-                            connectTimeoutSource.Token,
-                            cancellationToken);
-
                         var exceptionTask = device.WhenConnectionFailed().FirstAsync()
-                            .ToTask(connectCancellationSource.Token);
+                            .ToTask(cancellationToken);
+                        
                         var connectionTask =
-                            device.WhenConnected().FirstAsync().ToTask(connectCancellationSource.Token);
+                            device.WhenConnected().FirstAsync()
+                                .Timeout(options.PeripheralConnectTimeout)
+                                .ToTask(cancellationToken);
 
                         device.Connect(new ConnectionConfig
-                            {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = peripheralOptions.PeripheralAutoConnect});
+                            {AndroidConnectionPriority = ConnectionPriority.High, AutoConnect = options.PeripheralAutoConnect});
 
                         var which = await Task.WhenAny(exceptionTask, connectionTask);
-                        if (which.IsCanceled)
-                            throw new OperationCanceledException();
-
                         if (which == exceptionTask)
                         {
                             Logger.Debug(
@@ -223,27 +221,29 @@ namespace OmniCore.Client.Platform
 
                     }
 
-                    using var characteristicTimeoutSource = new CancellationTokenSource(peripheralOptions.CharacteristicsDiscoveryTimeout);
-                    using var characteristicCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
-                        characteristicTimeoutSource.Token,
-                        cancellationToken);
-
                     var characteristicsDictionary =
                         new Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic>();
                     Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Request services and characteristics discovery");
-                    await device.DiscoverServices().ForEachAsync(
+
+                    await device.DiscoverServices()
+                        .Timeout(options.ServicesDiscoveryTimeout)
+                        .ForEachAsync(
                         service =>
                         {
-                            service.DiscoverCharacteristics().ForEachAsync(
+                            service.DiscoverCharacteristics()
+                                .Timeout(options.CharacteristicsDiscoveryTimeout)
+                                .ForEachAsync(
                                 characteristic =>
                                 {
                                     characteristicsDictionary.Add((service.Uuid, characteristic.Uuid), characteristic);
-                                }, characteristicCancellationSource.Token);
-                        }, characteristicCancellationSource.Token);
+                                }, cancellationToken);
+                        }, cancellationToken);
+                    
                     Logger.Debug(
                         $"BLEP: {PeripheralUuid.AsMacAddress()} Services and characteristics discovery finished");
 
+                    //TODO: multiple disposable
                     var communicationDisposable = Disposable.Create(() =>
                     {
                         bluetoothLock.Dispose();
@@ -251,7 +251,7 @@ namespace OmniCore.Client.Platform
                     });
 
                     var blepc = (BlePeripheralConnection) await Container.Get<IBlePeripheralConnection>();
-                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, this, peripheralOptions.PeripheralAutoConnect);
+                    blepc.Initialize(device, characteristicsDictionary, communicationDisposable, this, options.PeripheralAutoConnect);
                     return blepc;
                 }
             }

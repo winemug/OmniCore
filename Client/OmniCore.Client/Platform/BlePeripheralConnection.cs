@@ -22,9 +22,11 @@ namespace OmniCore.Client.Platform
         private Dictionary<(Guid ServiceUuid, Guid CharacteristicUuid), IGattCharacteristic> CharacteristicsDictionary;
         private IDevice Device;
         private bool StayConnected;
-        private BlePeripheralOptions PeripheralOptions;
+        private BleOptions Options;
         private readonly IBlePeripheralAdapter PeripheralAdapter;
         private readonly CancellationTokenSource DisconnectCancellationSource;
+
+        public IBlePeripheral Peripheral { get; set; }
 
         public BlePeripheralConnection(
             ILogger logger,
@@ -33,15 +35,12 @@ namespace OmniCore.Client.Platform
         {
             Logger = logger;
             PeripheralAdapter = peripheralAdapter;
-            PeripheralOptions = configurationService
+            Options = configurationService
                     .GetBlePeripheralOptions(CancellationToken.None)
                     .WaitAndUnwrapException();
             DisconnectCancellationSource = new CancellationTokenSource()
-                .AutoDispose(this);
+                .DisposeWith(this);
         }
-
-        private IBlePeripheral Peripheral;
-
         public void Dispose()
         {
             if (!StayConnected && Device.IsConnected())
@@ -71,15 +70,22 @@ namespace OmniCore.Client.Platform
             {
                 using var cts = CombineWithDisconnection(cancellationToken);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic requested");
-                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read().ToTask(cts.Token);
+                var result = await GetCharacteristic(serviceUuid, characteristicUuid).Read()
+                    .Timeout(Options.CharacteristicReadTimeout)
+                    .ToTask(cts.Token);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Read from characteristic result received");
                 return result.Data;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (DisconnectCancellationSource.IsCancellationRequested)
             {
-                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
-                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
-                    : "BLE GATT Operation canceled per request");
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation canceled due to unexpected loss of connection.");
+                throw;
+            }
+            catch (TimeoutException)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation timed out.");
                 throw;
             }
             catch (Exception e)
@@ -97,14 +103,21 @@ namespace OmniCore.Client.Platform
             {
                 using var cts = CombineWithDisconnection(cancellationToken);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic requested");
-                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data).ToTask(cts.Token);
+                await GetCharacteristic(serviceUuid, characteristicUuid).Write(data)
+                    .Timeout(Options.CharacteristicWriteTimeout)
+                    .ToTask(cts.Token);
                 Logger.Debug($"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic finished");
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (DisconnectCancellationSource.IsCancellationRequested)
             {
-                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
-                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
-                    : "BLE GATT Operation canceled per request");
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation canceled due to unexpected loss of connection.");
+                throw;
+            }
+            catch (TimeoutException)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation timed out.");
                 throw;
             }
             catch (Exception e)
@@ -124,15 +137,21 @@ namespace OmniCore.Client.Platform
                 Logger.Debug(
                     $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response requested");
                 await GetCharacteristic(serviceUuid, characteristicUuid).WriteWithoutResponse(data)
+                    .Timeout(Options.CharacteristicWriteTimeout)
                     .ToTask(cts.Token);
                 Logger.Debug(
                     $"BLEPC: {Device.Uuid.AsMacAddress()} Write to characteristic without response finished");
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (DisconnectCancellationSource.IsCancellationRequested)
             {
-                Logger.Warning(DisconnectCancellationSource.IsCancellationRequested
-                    ? $"BLE GATT Operation canceled due to unexpected loss of connection."
-                    : "BLE GATT Operation canceled per request");
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation canceled due to unexpected loss of connection.");
+                throw;
+            }
+            catch (TimeoutException)
+            {
+                PeripheralAdapter.InvalidatePeripheralState(Peripheral);
+                Logger.Error($"BLE GATT Operation timed out.");
                 throw;
             }
             catch (Exception e)
@@ -159,7 +178,7 @@ namespace OmniCore.Client.Platform
                     {
                         PeripheralAdapter.InvalidatePeripheralState(Peripheral);
                         observer.OnError(exception);
-                    }).AutoDispose(this);
+                    }).DisposeWith(this);
 
                 return Disposable.Empty;
             });
@@ -176,14 +195,14 @@ namespace OmniCore.Client.Platform
             CharacteristicsDictionary = characteristicsDictionary;
             StayConnected = stayConnected;
             Peripheral = peripheral;
-            communicationDisposable.AutoDispose(this);
+            communicationDisposable.DisposeWith(this);
 
             peripheral.WhenConnectionStateChanged()
                 .Where(s => s != PeripheralConnectionState.Connected)
                 .Subscribe(_ =>
                 {
                     DisconnectCancellationSource.Cancel();
-                }).AutoDispose(this);
+                }).DisposeWith(this);
         }
 
         private IGattCharacteristic GetCharacteristic(Guid serviceUuid, Guid characteristicUuid)

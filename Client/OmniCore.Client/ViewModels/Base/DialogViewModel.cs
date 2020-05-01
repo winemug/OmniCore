@@ -35,7 +35,7 @@ namespace OmniCore.Client.ViewModels.Base
                 if (DialogCancelCommand == null)
                     DialogCancelCommand = new Command(async () => await CancelAction());
                 
-            }).AutoDispose(this);
+            }).DisposeWith(this);
         }
     }
 }

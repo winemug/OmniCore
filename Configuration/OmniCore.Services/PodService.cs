@@ -89,7 +89,8 @@ namespace OmniCore.Services
                     .FindErosRadioPeripherals()
                     .Subscribe(async peripheral =>
                         {
-                            var radio = await RadioFromPeripheral(peripheral, cts.Token);
+                            var radio = await GetErosRadio(peripheral.PeripheralUuid,
+                                peripheral.PrimaryServiceUuid, cts.Token);
                             if (radio != null) observer.OnNext(radio);
                         },
                         observer.OnCompleted, cts.Token);
@@ -104,9 +105,7 @@ namespace OmniCore.Services
 
         public async Task<IErosPod> NewErosPod(IUser user, IMedication medication, CancellationToken cancellationToken)
         {
-            var pod = await ErosPodProvider.NewPod(user, medication, cancellationToken);
-            await UpdateMonitoredPodList(cancellationToken);
-            return pod;
+            return await ErosPodProvider.NewPod(user, medication, cancellationToken);
         }
 
         public Task<IDashPod> NewDashPod(IUser user, IMedication medication, CancellationToken cancellationToken)
@@ -151,8 +150,8 @@ namespace OmniCore.Services
                 }
             });
 
-            await UpdateMonitoredPodList(cancellationToken);
-            await UpdateMonitoredErosRadios(cancellationToken);
+            // await UpdateMonitoredPodList(cancellationToken);
+            // await UpdateMonitoredErosRadios(cancellationToken);
 
             Logger.Debug("Pod service started");
         }
@@ -168,95 +167,84 @@ namespace OmniCore.Services
             
             return Task.CompletedTask;
         }
-
-        protected override Task OnPause(CancellationToken cancellationToken)
+        private Task<IErosRadio> GetErosRadio(Guid peripheralUuid, Guid serviceUuid, CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
-        }
-
-        protected override Task OnResume(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        private Task<IErosRadio> RadioFromPeripheral(IBlePeripheral peripheral, CancellationToken cancellationToken)
-        {
-            return ErosRadioProviders.First(rp => rp.ServiceUuid == peripheral.PrimaryServiceUuid)
-                .GetRadio(peripheral, cancellationToken);
+            return ErosRadioProviders.Single(rp => rp.ServiceUuid == serviceUuid)
+                .GetRadio(peripheralUuid, cancellationToken);
         }
 
 
-        private async Task UpdateMonitoredPodList(CancellationToken cancellationToken)
-        {
-            var activePods = await ErosPodProvider.ActivePods(cancellationToken);
+        // private async Task UpdateMonitoredPodList(CancellationToken cancellationToken)
+        // {
+        //     var activePods = await ErosPodProvider.ActivePods(cancellationToken);
+        //
+        //     var inactivePods = MonitoredPods.Keys.Except(activePods).ToList();
+        //     var newlyActivePods = activePods.Except(MonitoredPods.Keys).ToList();
+        //
+        //     foreach (var inactivePod in inactivePods)
+        //     {
+        //         MonitoredPods[inactivePod].Dispose();
+        //         MonitoredPods.Remove(inactivePod);
+        //     }
+        //
+        //     foreach (var newlyActivePod in newlyActivePods)
+        //     {
+        //         var archiveSub = newlyActivePod.WhenPodArchived().Subscribe(async _ =>
+        //         {
+        //             await UpdateMonitoredPodList(cancellationToken);
+        //         });
+        //
+        //         // if (newlyActivePod is IErosPod erosPod)
+        //         // {
+        //         //     var radioUpdSub = erosPod.WhenRadiosUpdated().Subscribe(async _ =>
+        //         //     {
+        //         //         await UpdateMonitoredErosRadios(CancellationToken.None);
+        //         //     });
+        //         //
+        //         //     MonitoredPods.Add(newlyActivePod, new CompositeDisposable { radioUpdSub, archiveSub, newlyActivePod });
+        //         // }
+        //         // else
+        //         {
+        //             MonitoredPods.Add(newlyActivePod, new CompositeDisposable { archiveSub, newlyActivePod });
+        //         }
+        //         newlyActivePod.StartMonitoring();
+        //     }
+        // }
 
-            var inactivePods = MonitoredPods.Keys.Except(activePods).ToList();
-            var newlyActivePods = activePods.Except(MonitoredPods.Keys).ToList();
-
-            foreach (var inactivePod in inactivePods)
-            {
-                MonitoredPods[inactivePod].Dispose();
-                MonitoredPods.Remove(inactivePod);
-            }
-
-            foreach (var newlyActivePod in newlyActivePods)
-            {
-                var archiveSub = newlyActivePod.WhenPodArchived().Subscribe(async _ =>
-                {
-                    await UpdateMonitoredPodList(cancellationToken);
-                });
-
-                if (newlyActivePod is IErosPod erosPod)
-                {
-                    var radioUpdSub = erosPod.WhenRadiosUpdated().Subscribe(async _ =>
-                    {
-                        await UpdateMonitoredErosRadios(CancellationToken.None);
-                    });
-
-                    MonitoredPods.Add(newlyActivePod, new CompositeDisposable { radioUpdSub, archiveSub, newlyActivePod });
-                }
-                else
-                {
-                    MonitoredPods.Add(newlyActivePod, new CompositeDisposable { archiveSub, newlyActivePod });
-                }
-                newlyActivePod.StartMonitoring();
-            }
-        }
-
-        private async Task UpdateMonitoredErosRadios(CancellationToken cancellationToken)
-        {
-            var activePods = await ErosPodProvider.ActivePods(cancellationToken);
-
-            var activeRadioEntities = activePods
-                .Select(ap => ap.Entity)
-                .SelectMany(ape => ape.PodRadios)
-                .Select(apr => apr.Radio)
-                .Distinct(new KeyEqualityComparer<RadioEntity>(r => r.Id))
-                .ToList();
-
-            var activeRadios = new List<IErosRadio>();
-            foreach (var activeRadioEntity in activeRadioEntities)
-            {
-                var peripheral = await BlePeripheralAdapter.
-                    GetPeripheral(activeRadioEntity.DeviceUuid, activeRadioEntity.ServiceUuid);
-                var radio = await RadioFromPeripheral(peripheral, cancellationToken);
-                activeRadios.Add(radio);
-            }
-
-            var inactiveRadios = MonitoredErosRadios.Except(activeRadios).ToList();
-            var newlyActiveRadios = activeRadios.Except(MonitoredErosRadios).ToList();
-
-            foreach (var inactiveRadio in inactiveRadios)
-            {
-                MonitoredErosRadios.Remove(inactiveRadio);
-                inactiveRadio.Dispose();
-            }
-
-            foreach (var newlyActiveRadio in newlyActiveRadios)
-            {
-                MonitoredErosRadios.Add(newlyActiveRadio);
-                newlyActiveRadio.StartMonitoring();
-            }
-        }
+        // private async Task UpdateMonitoredErosRadios(CancellationToken cancellationToken)
+        // {
+        //     var activePods = await ErosPodProvider.ActivePods(cancellationToken);
+        //
+        //     var activeRadioEntities = activePods
+        //         .Select(ap => ap.Entity)
+        //         .SelectMany(ape => ape.PodRadios)
+        //         .Select(apr => apr.Radio)
+        //         .Distinct(new KeyEqualityComparer<RadioEntity>(r => r.Id))
+        //         .ToList();
+        //
+        //     var activeRadios = new List<IErosRadio>();
+        //     foreach (var activeRadioEntity in activeRadioEntities)
+        //     {
+        //         var peripheral = await BlePeripheralAdapter.
+        //             GetPeripheral(activeRadioEntity.DeviceUuid, activeRadioEntity.ServiceUuid);
+        //         var radio = await RadioFromPeripheral(peripheral, cancellationToken);
+        //         activeRadios.Add(radio);
+        //     }
+        //
+        //     var inactiveRadios = MonitoredErosRadios.Except(activeRadios).ToList();
+        //     var newlyActiveRadios = activeRadios.Except(MonitoredErosRadios).ToList();
+        //
+        //     foreach (var inactiveRadio in inactiveRadios)
+        //     {
+        //         MonitoredErosRadios.Remove(inactiveRadio);
+        //         inactiveRadio.Dispose();
+        //     }
+        //
+        //     foreach (var newlyActiveRadio in newlyActiveRadios)
+        //     {
+        //         MonitoredErosRadios.Add(newlyActiveRadio);
+        //         newlyActiveRadio.StartMonitoring();
+        //     }
+        // }
     }
 }

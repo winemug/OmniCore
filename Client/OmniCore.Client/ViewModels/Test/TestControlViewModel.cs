@@ -73,12 +73,12 @@ namespace OmniCore.Client.ViewModels.Test
                     await StartScan();
                 }
 
-            }).AutoDispose(this);
+            }).DisposeWith(this);
             
             WhenPageDisappears().Subscribe(_ =>
             {
                 StopScan();
-            }).AutoDispose(this);
+            }).DisposeWith(this);
         }
 
         private async Task StartScan()
