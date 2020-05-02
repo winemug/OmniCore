@@ -53,15 +53,15 @@ namespace OmniCore.Radios.RileyLink
             PeripheralAdapter = peripheralAdapter;
         }
 
-        public async Task Initialize(Guid uuid, CancellationToken cancellationToken)
+        public async Task Initialize(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            Peripheral = await PeripheralAdapter.GetPeripheral(uuid, Uuids.RileyLinkServiceUuid);
-
+            Peripheral = peripheral;
+            
             using (var context = await RepositoryService.GetContextReadOnly(cancellationToken))
             {
                 Entity = await context.Radios.FirstOrDefaultAsync(
                     r => !r.IsDeleted &&
-                         r.DeviceUuid == uuid &&
+                         r.DeviceUuid == Peripheral.PeripheralUuid &&
                          r.ServiceUuid == Uuids.RileyLinkServiceUuid, cancellationToken);
             }
 
@@ -117,6 +117,11 @@ namespace OmniCore.Radios.RileyLink
                 .Subscribe(async name => { await UpdateEntityName(name); })
                 .DisposeWith(this);
         }
+        public async Task Initialize(Guid uuid, CancellationToken cancellationToken)
+        {
+            var peripheral = await PeripheralAdapter.GetPeripheral(uuid, Uuids.RileyLinkServiceUuid);
+            await Initialize(peripheral, cancellationToken);
+        }
 
         public async Task SetDefaultOptions(RadioOptions options, CancellationToken cancellationToken)
         {
@@ -130,74 +135,6 @@ namespace OmniCore.Radios.RileyLink
         {
             throw new NotImplementedException();
         }
-
-//         public void StartMonitoring()
-//         {
-//             ResumeHealthChecks(TimeSpan.FromSeconds(5));
-//         }
-//
-//         private async Task PauseHealthChecks()
-//         {
-//             lock (this)
-//             {
-//                 HealthCheckSubscription?.Dispose();
-//                 HealthCheckSubscription = null;
-//
-//                 if (HealthCheckCancellationTokenSource != null)
-//                 {
-//                     HealthCheckCancellationTokenSource.Cancel();
-//                     HealthCheckCancellationTokenSource.Dispose();
-//                     HealthCheckCancellationTokenSource = null;
-//                 }
-//             }
-//         }
-//
-//         private void ResumeHealthChecks(bool wasInGoodHealth)
-//         {
-//             ResumeHealthChecks(wasInGoodHealth
-//                 ? Entity.Options.RadioHealthCheckIntervalGood
-//                 : Entity.Options.RadioHealthCheckIntervalBad);
-//         }
-//
-//         private void ResumeHealthChecks(TimeSpan interval)
-//         {
-//             lock (this)
-//             {
-//                 HealthCheckCancellationTokenSource?.Dispose();
-//                 HealthCheckCancellationTokenSource = new CancellationTokenSource();
-//
-//                 HealthCheckSubscription?.Dispose();
-//                 HealthCheckSubscription = Scheduler.Default.Schedule(
-//                     interval,
-//                     async () =>
-//                     {
-//                         var nextInterval = Entity.Options.RadioHealthCheckIntervalGood;
-//                         try
-//                         {
-//                             Logger.Debug($"RLR: {Address} Starting healthcheck");
-//                             nextInterval = await PerformHealthChecks(HealthCheckCancellationTokenSource.Token);
-//                             Logger.Debug($"RLR: {Address} Healthcheck finished");
-//                         }
-//                         catch (Exception e)
-//                         {
-//                             if (HealthCheckCancellationTokenSource.IsCancellationRequested)
-//                             {
-//                                 Logger.Debug($"RLR: {Address} Healthcheck canceled");
-//                             }
-//                             else
-//                             {
-//                                 Logger.Warning($"RLR: {Address} Healthcheck failed", e);
-//                                 nextInterval = Entity.Options.RadioHealthCheckIntervalBad;
-//                             }
-//                         }
-// #if DEBUG
-//                         nextInterval = TimeSpan.FromSeconds(10);
-// #endif
-//
-//                         ResumeHealthChecks(nextInterval);
-//                     });
-//             }
-//         }
 
         public async Task PerformHealthCheck(CancellationToken cancellationToken)
         {

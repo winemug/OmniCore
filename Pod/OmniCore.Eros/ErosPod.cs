@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
+using AsyncLock = Nito.AsyncEx.AsyncLock;
 using IErosRadio = OmniCore.Model.Interfaces.Services.IErosRadio;
+using ILogger = OmniCore.Model.Interfaces.Services.ILogger;
 
 namespace OmniCore.Eros
 {
@@ -19,26 +23,47 @@ namespace OmniCore.Eros
     {
         private readonly IContainer Container;
         private readonly IPodService PodService;
+        private readonly ILogger Logger;
         private readonly IRepositoryService RepositoryService;
-        private readonly ISubject<IEnumerable<IErosRadio>> RadiosUpdatedSubject;
         private readonly ISubject<IPod> PodArchivedSubject;
+        private readonly AsyncLock ProbeStartStopLock;
+        private readonly IErosRadioProvider[] ErosRadioProviders;
+
+        private ErosRadioSelector RadioSelector;
+        public PodEntity Entity { get; private set; }
+        public PodRunningState RunningState { get; }
+        public IObservable<IPod> WhenPodArchived() => PodArchivedSubject.AsObservable();
+
+        private CancellationTokenSource StatusCheckCancellationTokenSource;
+        private IDisposable StatusCheckSubscription;
+        private IErosRadio LastGoodRadio = null;
+        
 
         public ErosPod(IContainer container,
             IRepositoryService repositoryService,
-            IPodService podService)
+            IPodService podService,
+            ILogger logger,
+            IErosRadioProvider[] erosRadioProviders)
         {
             RepositoryService = repositoryService;
             PodService = podService;
             Container = container;
             RunningState = new PodRunningState();
-            RadiosUpdatedSubject = new Subject<IEnumerable<IErosRadio>>();
             PodArchivedSubject = new Subject<IPod>();
+            ProbeStartStopLock = new AsyncLock();
+            ErosRadioProviders = erosRadioProviders;
         }
-        public PodEntity Entity { get; set; }
-        public PodRunningState RunningState { get; }
+        
+        public async Task Initialize(PodEntity podEntity, CancellationToken cancellationToken)
+        {
+            Entity = podEntity;
+            RadioSelector = await GetRadioSelector(cancellationToken);
+            await StartProbing(TimeSpan.FromSeconds(15), cancellationToken);
+        }
 
         public async Task Archive(CancellationToken cancellationToken)
         {
+            StopProbing(cancellationToken);
             using (var context =
                 await RepositoryService.GetContextReadWrite(cancellationToken))
             {
@@ -59,12 +84,9 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public IObservable<IEnumerable<IErosRadio>> WhenRadiosUpdated() => RadiosUpdatedSubject.AsObservable();
-
-        public IObservable<IPod> WhenPodArchived() => PodArchivedSubject.AsObservable();
-
         public async Task UpdateRadioList(IEnumerable<IErosRadio> radios, CancellationToken cancellationToken)
         {
+            StopProbing(cancellationToken);
             using (var context = 
                 await RepositoryService.GetContextReadWrite(cancellationToken))
             {
@@ -85,6 +107,9 @@ namespace OmniCore.Eros
                 }
                 await context.Save(cancellationToken);
             }
+
+            RadioSelector = await GetRadioSelector(cancellationToken);
+            await StartProbing(cancellationToken);
         }
 
         public Task<IPodTask> Activate(IErosRadio radio, CancellationToken cancellationToken)
@@ -105,11 +130,6 @@ namespace OmniCore.Eros
         }
 
         public Task<IPodTask> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> Start()
         {
             throw new NotImplementedException();
         }
@@ -181,16 +201,13 @@ namespace OmniCore.Eros
             throw new NotImplementedException();
         }
 
-        public void StartMonitoring()
-        {
-        }
-
         public void Dispose()
         {
             // RequestQueue.Shutdown();
+            StopProbing(CancellationToken.None);
         }
 
-        private async Task StartStateMonitoring()
+        private async Task UpdateRunningState()
         {
             using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
             var responses = context.PodRequests
@@ -261,6 +278,98 @@ namespace OmniCore.Eros
             address |= (uint) buffer[1] << 8;
             address |= buffer[2];
             return address;
+        }
+        
+        private async Task<ErosRadioSelector> GetRadioSelector(CancellationToken cancellationToken)
+        {
+            var radios = new List<IErosRadio>();
+            Entity
+                .PodRadios
+                .Select(pr => pr.Radio)
+                .ToList()
+                .ForEach(async r =>
+                {
+                    radios.Add(await 
+                        ErosRadioProviders.Single(rp => rp.ServiceUuid == r.ServiceUuid)
+                            .GetRadio(r.DeviceUuid, cancellationToken));
+                });
+
+            var selector = await Container.Get<ErosRadioSelector>();
+            await selector.Initialize(radios);
+            return selector;
+        }
+        
+                private async Task StartProbing(CancellationToken cancellationToken)
+        {
+            await StartProbing(Entity.Options.StatusCheckIntervalGood, cancellationToken);
+        }
+        
+        private async Task StartProbing(TimeSpan initialProbe, CancellationToken cancellationToken)
+        {
+            if (!Entity.IsDeleted)
+            {
+                await ScheduleProbe(TimeSpan.FromSeconds(10), cancellationToken);
+            }
+        }
+        private async Task ScheduleProbe(TimeSpan interval, CancellationToken cancellationToken)
+        {
+            using var _ = await ProbeStartStopLock.LockAsync(cancellationToken);
+            StatusCheckCancellationTokenSource?.Dispose();
+            StatusCheckCancellationTokenSource = new CancellationTokenSource();
+
+            StatusCheckSubscription?.Dispose();
+            StatusCheckSubscription = NewThreadScheduler.Default.Schedule(
+                interval,
+                async () =>
+                {
+                    var nextInterval = Entity.Options.StatusCheckIntervalGood;
+                    try
+                    {
+                        nextInterval = await PerformProbe(StatusCheckCancellationTokenSource.Token);
+                    }
+                    catch (Exception e)
+                    {
+                        if (StatusCheckCancellationTokenSource.IsCancellationRequested)
+                        {
+                            Logger.Information($"Pod probe canceled");
+                        }
+                        else
+                        {
+                            Logger.Warning($"Pod probe failed", e);
+                            nextInterval = Entity.Options.StatusCheckIntervalBad;
+                        }
+                    }
+#if DEBUG
+                    nextInterval = TimeSpan.FromSeconds(10);
+#endif
+
+                    await ScheduleProbe(nextInterval, StatusCheckCancellationTokenSource.Token);
+                });
+        }
+
+        private void StopProbing(CancellationToken cancellationToken)
+        {
+            using var _ = ProbeStartStopLock.Lock(cancellationToken);
+            StatusCheckSubscription?.Dispose();
+            StatusCheckSubscription = null;
+
+            if (StatusCheckCancellationTokenSource != null)
+            {
+                StatusCheckCancellationTokenSource.Cancel();
+                StatusCheckCancellationTokenSource.Dispose();
+                StatusCheckCancellationTokenSource = null;
+            }
+        }
+
+        private async Task<TimeSpan> PerformProbe(CancellationToken cancellationToken)
+        {
+            Logger.Information("Starting pod probe");
+
+            var radio = await RadioSelector.Select();
+            await radio.PerformHealthCheck(cancellationToken);
+            
+            Logger.Information("Pod probe ended");
+            return Entity.Options.StatusCheckIntervalGood;
         }
     }
 }

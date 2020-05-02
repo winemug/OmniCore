@@ -11,14 +11,16 @@ using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
+using AsyncLock = Nito.AsyncEx.AsyncLock;
 
 namespace OmniCore.Eros
 {
     public class ErosPodProvider : IErosPodProvider
     {
         private readonly IContainer Container;
-        private readonly ConcurrentDictionary<long, IErosPod> PodDictionary;
+        private readonly Dictionary<long, IErosPod> PodDictionary;
         private readonly IRepositoryService RepositoryService;
+        private readonly AsyncLock PodDictionaryLock;
 
         public ErosPodProvider(
             IContainer container,
@@ -26,7 +28,8 @@ namespace OmniCore.Eros
         {
             RepositoryService = repositoryService;
             Container = container;
-            PodDictionary = new ConcurrentDictionary<long, IErosPod>();
+            PodDictionaryLock = new AsyncLock();
+            PodDictionary = new Dictionary<long, IErosPod>();
         }
 
         public async Task<IList<IErosPod>> ActivePods(CancellationToken cancellationToken)
@@ -40,7 +43,7 @@ namespace OmniCore.Eros
                 .Include(p => p.User)
                 .ForEachAsync(async entity =>
                 {
-                    list.Add(await GetPodInternal(entity));
+                    list.Add(await GetPodInternal(entity, cancellationToken));
                 }, cancellationToken: cancellationToken);
             return list;
         }
@@ -58,17 +61,20 @@ namespace OmniCore.Eros
 
             await context.Pods.AddAsync(entity, cancellationToken);
             await context.Save(cancellationToken);
-            return await GetPodInternal(entity);
+            return await GetPodInternal(entity, cancellationToken);
         }
 
-        private async Task<IErosPod> GetPodInternal(PodEntity podEntity)
+        private async Task<IErosPod> GetPodInternal(PodEntity podEntity, CancellationToken cancellationToken)
         {
-            var pod = await Container.Get<ErosPod>();
-            return PodDictionary.GetOrAdd(podEntity.Id, id =>
+            using (var _ = await PodDictionaryLock.LockAsync(cancellationToken))
             {
-                pod.Entity = podEntity;
-                return pod;
-            });
+                if (!PodDictionary.ContainsKey(podEntity.Id))
+                {
+                    var pod = await Container.Get<ErosPod>();
+                    await pod.Initialize(podEntity, cancellationToken);
+                }
+                return PodDictionary[podEntity.Id];
+            }
         }
 
         public void Dispose()

@@ -9,12 +9,11 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPod: IDisposable
     {
-        PodEntity Entity { get; set; }
+        PodEntity Entity { get; }
         PodRunningState RunningState { get; }
         Task Archive(CancellationToken cancellationToken);
         IObservable<IPod> WhenPodArchived();
         Task<IList<IPodTask>> GetActiveRequests();
-        Task<IPodTask> Start();
         Task<IPodTask> Status(StatusRequestType requestType);
         Task<IPodTask> ConfigureAlerts();
         Task<IPodTask> AcknowledgeAlerts();
@@ -27,6 +26,5 @@ namespace OmniCore.Model.Interfaces.Services
         Task<IPodTask> StartExtendedBolus();
         Task<IPodTask> CancelExtendedBolus();
         Task<IPodTask> Deactivate();
-        void StartMonitoring();
     }
 }

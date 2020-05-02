@@ -49,6 +49,20 @@ namespace OmniCore.Radios.RileyLink
                 return RadioDictionary[uuid];
             }
         }
+        
+        public async Task<IErosRadio> GetRadio(IBlePeripheral peripheral,
+            CancellationToken cancellationToken)
+        {
+            using (var _ = await RadioDictionaryLock.LockAsync(cancellationToken))
+            {
+                if (!RadioDictionary.ContainsKey(peripheral.PeripheralUuid))
+                {
+                    var radio = await Container.Get<RileyLinkRadio>();
+                    await radio.Initialize(peripheral, cancellationToken);
+                }
+                return RadioDictionary[peripheral.PeripheralUuid];
+            }
+        }
 
         public void Dispose()
         {

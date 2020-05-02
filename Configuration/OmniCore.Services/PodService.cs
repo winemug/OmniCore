@@ -52,22 +52,11 @@ namespace OmniCore.Services
             MonitoredErosRadios = new List<IErosRadio>();
         }
 
-        // public override async Task OnBeforeStopRequest()
-        // {
-        //     // foreach (var pod in await ActivePods(CancellationToken.None))
-        //     // {
-        //     //     var ar = pod.ActiveRequest;
-        //     //     if (ar != null) ar.Cancel();
-        //     // }
-        // }
-
         public async Task<IEnumerable<IPod>> ActivePods(CancellationToken cancellationToken)
         {
             var erosPods = await ErosPodProvider.ActivePods(cancellationToken);
             // var dashPods = DashPodProvider.ActivePods(cancellationToken);
-            var list = new List<IPod>();
-            list.AddRange(erosPods);
-            return list;
+            return erosPods;
         }
 
         public Task<IEnumerable<IPod>> ArchivedPods(CancellationToken cancellationToken)
@@ -77,23 +66,18 @@ namespace OmniCore.Services
 
         public IObservable<IErosRadio> ListErosRadios()
         {
-            var serviceUuids = new List<Guid>();
-            foreach (var radioProvider in ErosRadioProviders)
-                serviceUuids.Add(radioProvider.ServiceUuid);
-
             return Observable.Create<IErosRadio>(observer =>
             {
                 var cts = new CancellationTokenSource();
-
                 BlePeripheralAdapter
                     .FindErosRadioPeripherals()
                     .Subscribe(async peripheral =>
-                        {
-                            var radio = await GetErosRadio(peripheral.PeripheralUuid,
-                                peripheral.PrimaryServiceUuid, cts.Token);
-                            if (radio != null) observer.OnNext(radio);
-                        },
-                        observer.OnCompleted, cts.Token);
+                    {
+                        observer.OnNext(await GetErosRadio(peripheral, cts.Token));
+                    }, () =>
+                    {
+                        observer.OnCompleted();
+                    }, cts.Token);
 
                 return Disposable.Create(() =>
                 {
@@ -167,10 +151,10 @@ namespace OmniCore.Services
             
             return Task.CompletedTask;
         }
-        private Task<IErosRadio> GetErosRadio(Guid peripheralUuid, Guid serviceUuid, CancellationToken cancellationToken)
+        private Task<IErosRadio> GetErosRadio(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            return ErosRadioProviders.Single(rp => rp.ServiceUuid == serviceUuid)
-                .GetRadio(peripheralUuid, cancellationToken);
+            return ErosRadioProviders.Single(rp => rp.ServiceUuid == peripheral.PrimaryServiceUuid)
+                .GetRadio(peripheral, cancellationToken);
         }
 
 
