@@ -11,10 +11,10 @@ namespace OmniCore.Eros
         {
             return container
                 .One<IErosPodProvider, ErosPodProvider>()
-                .Many<IErosPodRequest, ErosPodRequest>()
-                .Many<IErosPodResponse, ErosPodResponse>()
+                .Many<IErosPodRequestMessage, ErosPodRequestMessage>()
+                .Many<IErosPodResponseMessage, ErosPodResponseMessage>()
                 .Many<IErosPod, ErosPod>()
-                .Many<IPodTask, ErosPodTask>();
+                .Many<IPodRequest, ErosPodRequest>();
             //.Many<ErosRequestQueue>();
         }
     }

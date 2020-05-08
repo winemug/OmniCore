@@ -6,12 +6,12 @@ using OmniCore.Model.Interfaces.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosRadioSelector
+    public class ErosPodRadioSelector
     {
         private readonly ILogger Logger;
 
         private List<IErosRadio> Radios;
-        public ErosRadioSelector(ILogger logger)
+        public ErosPodRadioSelector(ILogger logger)
         {
             Logger = logger;
         }

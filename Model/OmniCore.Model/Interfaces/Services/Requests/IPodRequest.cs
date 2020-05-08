@@ -1,8 +1,12 @@
-﻿namespace OmniCore.Model.Interfaces.Services
+﻿using System;
+using OmniCore.Model.Enumerations;
+
+namespace OmniCore.Model.Interfaces.Services
 {
-    public interface IPodRequest
+    public interface IPodRequest : IDisposable
     {
-        IPod Pod { get; }
+        IPodRequest ForPod(IPod pod);
+        IPodRequest QueueExecution();
         // Task ExecuteRequest();
         // IPodRequest WithoutAutoRescheduling(TimeSpan rescheduleWindow);
         // IPodRequest ScheduleStart(DateTimeOffset earliestStart, bool rescheduleOnRetry);

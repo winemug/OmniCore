@@ -3,7 +3,7 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IErosPodResponse : IPodResponse
+    public interface IErosPodResponseMessage : IPodResponse
     {
         void ParseResponse(byte[] responseData);
         bool IsValid { get; }

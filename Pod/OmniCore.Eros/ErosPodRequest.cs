@@ -1,158 +1,106 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Exceptions;
+using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Internal;
-using OmniCore.Model.Utilities;
+using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodRequest : IErosPodRequest
+    public class ErosPodRequest : IPodRequest
     {
-        private readonly List<RequestPart> Parts =
-            new List<RequestPart>();
-        private readonly IRepositoryService RepositoryService;
+        private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
+        private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
+        private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
+        private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
 
-        private PodRequestEntity Entity;
-        private int MessageSequence;
-        private bool CriticalFollowup;
-        private TransmissionPower? TransmissionPowerOverride;
-
-        public IPod Pod => ErosPod;
-        public IErosPod ErosPod { get; private set; }
-
-        public byte[] Message => GetRequestData();
-        public uint MessageAddress { get; private set; }
-        public bool AllowAddressOverride { get; private set; }
-
-        public ErosPodRequest(
-            IRepositoryService repositoryService)
+        public ErosPodRequest()
         {
-            RepositoryService = repositoryService;
-        }
-        public IErosPodRequest WithPod(IErosPod pod)
-        {
-            ErosPod = pod;
-            return this;
         }
 
-        public IErosPodRequest WithEntity(PodRequestEntity entity)
+        public ITaskProgress TaskProgress { get; }
+
+        public void Cancel()
         {
-            Entity = entity;
-            return this;
-        }
-        public IErosPodRequest WithMessageAddress(uint messageAddress)
-        {
-            MessageAddress = messageAddress;
-            return this;
+            TaskCancellationSource.Cancel();
         }
 
-        public IErosPodRequest WithMessageSequence(int messageSequence)
+        public IObservable<bool> WhenCanCancelChanged()
         {
-            MessageSequence = messageSequence;
-            return this;
+            return CanCancelSubject.AsObservable();
         }
 
-        public IErosPodRequest WithCriticalFollowup()
+        public IObservable<TaskState> WhenStateChanged()
         {
-            CriticalFollowup = true;
-            return this;
+            return StateSubject.AsObservable();
         }
 
-        public IErosPodRequest WithAllowAddressOverride()
+        public IObservable<TaskResult> WhenResultReceived()
         {
-            AllowAddressOverride = true;
-            return this;
+            return ResultSubject.AsObservable();
         }
 
-        public IErosPodRequest WithTransmissionPower(TransmissionPower transmissionPower)
+        public async Task ExecuteRequest()
         {
-            TransmissionPowerOverride = transmissionPower;
-            return this;
-        }
-
-        public IErosPodRequest WithStatusRequest(StatusRequestType requestType)
-        {
-            var childProgress = new TaskProgress
+            StateSubject.OnNext(TaskState.Running);
+            try
             {
-                Name = "Request Status",
-                Description = "Querying Pod Status"
-            };
-
-            return WithPart(new RequestPart
+                //await ExecuteRequestInternal(TaskCancellationSource.Token);
+            }
+            catch (OperationCanceledException)
             {
-                PartType = PartType.RequestStatus,
-                PartData = new Bytes().Append((byte) requestType)
-            });
-        }
-
-        public IErosPodRequest WithAcquireRequest()
-        {
-            AllowAddressOverride = true;
-            TransmissionPowerOverride = TransmissionPower.Lowest;
-
-            return WithPart(new RequestPart
+                ResultSubject.OnNext(TaskResult.Canceled);
+                ResultSubject.OnCompleted();
+            }
+            catch (Exception e)
             {
-                PartType = PartType.RequestStatus,
-                PartData = new Bytes((byte) StatusRequestType.Standard)
-            });
-        }
-
-        public IErosPodRequest WithPairRequest(uint radioAddress)
-        {
-            return WithPart(new RequestPart
-            {
-                PartType = PartType.RequestAssignAddress,
-                PartData = new Bytes(radioAddress)
-            }).WithMessageAddress(0xffffffff);
-        }
-
-        private IErosPodRequest WithPart(RequestPart part)
-        {
-            Parts.Add(part);
-            return this;
-        }
-
-        public byte[] GetRequestData()
-        {
-            var messageBody = new Bytes();
-
-            foreach (var part in Parts)
-            {
-                messageBody.Append((byte) part.PartType);
-
-                var partBody = new Bytes();
-                if (part.RequiresNonce)
-                    partBody.Append(GetNonce());
-                partBody.Append(part.PartData);
-
-                var partBodyLength = (byte) partBody.Length;
-
-                messageBody.Append(partBodyLength);
-                messageBody.Append(partBody);
+                ResultSubject.OnError(e);
+                ResultSubject.OnNext(TaskResult.Failed);
+                ResultSubject.OnCompleted();
             }
 
-            var b0 = (byte) (MessageSequence << 2);
-            if (CriticalFollowup)
-                b0 |= 0x80;
-            b0 |= (byte) ((messageBody.Length >> 8) & 0x03);
-            var b1 = (byte) (messageBody.Length & 0xff);
-
-            var requestBody = new Bytes(MessageAddress).Append(b0).Append(b1).Append(messageBody);
-
-            return new Bytes(requestBody).Append(CrcUtil.Crc16(requestBody)).ToArray();
+            StateSubject.OnNext(TaskState.Finished);
+            StateSubject.OnCompleted();
         }
 
-        private uint GetNonce()
+        public void Dispose()
         {
-            //TODO:
-            return 0;
+            TaskCancellationSource?.Dispose();
         }
+
+        public IPodRequest ForPod(IPod pod)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodRequest QueueExecution()
+        {
+            throw new NotImplementedException();
+        }
+
+        // private async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        // {
+        //     var radio = RadioOverride;
+        //     if (radio == null)
+        //     {
+        //         //TODO: radio from radioentity
+        //     }
+        //
+        //     var options = radio.Options;
+        //
+        //     if (TransmissionPowerOverride.HasValue)
+        //         options.Amplification = TransmissionPowerOverride.Value;
+        //
+        //     var response = await radio.GetResponse(this, cancellationToken, options);
+        //     var responseEntity = await ParseResponse(response);
+        //
+        //     using var context = await RepositoryService.GetContextReadWrite(cancellationToken);
+        //     Entity.Responses.Add(responseEntity);
+        //     await context.Save(cancellationToken);
+        // }
     }
 }

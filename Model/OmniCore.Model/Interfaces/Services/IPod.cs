@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
+using OmniCore.Model.Interfaces.Services.Requests;
 
 namespace OmniCore.Model.Interfaces.Services
 {
@@ -13,18 +14,10 @@ namespace OmniCore.Model.Interfaces.Services
         PodRunningState RunningState { get; }
         Task Archive(CancellationToken cancellationToken);
         IObservable<IPod> WhenPodArchived();
-        Task<IList<IPodTask>> GetActiveRequests();
-        Task<IPodTask> Status(StatusRequestType requestType);
-        Task<IPodTask> ConfigureAlerts();
-        Task<IPodTask> AcknowledgeAlerts();
-        Task<IPodTask> SetBasalSchedule();
-        Task<IPodTask> CancelBasal();
-        Task<IPodTask> SetTempBasal();
-        Task<IPodTask> CancelTempBasal();
-        Task<IPodTask> Bolus();
-        Task<IPodTask> CancelBolus();
-        Task<IPodTask> StartExtendedBolus();
-        Task<IPodTask> CancelExtendedBolus();
-        Task<IPodTask> Deactivate();
+        Task<IList<IPodRequest>> GetActiveRequests();
+        Task<IPodActivationRequest> ActivationRequest();
+        Task<IPodBolusRequest> BolusRequest();
+        Task<IPodDeliveryCancellationRequest> CancellationRequest();
+        Task<IPodScheduledDeliveryRequest> ScheduledDeliveryRequest();
     }
 }

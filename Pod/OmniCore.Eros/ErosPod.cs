@@ -13,6 +13,7 @@ using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
 using OmniCore.Model.Interfaces.Services.Internal;
+using OmniCore.Model.Interfaces.Services.Requests;
 using AsyncLock = Nito.AsyncEx.AsyncLock;
 using IErosRadio = OmniCore.Model.Interfaces.Services.IErosRadio;
 using ILogger = OmniCore.Model.Interfaces.Services.ILogger;
@@ -21,6 +22,10 @@ namespace OmniCore.Eros
 {
     public class ErosPod : IErosPod
     {
+        public PodEntity Entity { get; private set; }
+        public PodRunningState RunningState { get; }
+        public IObservable<IPod> WhenPodArchived() => PodArchivedSubject.AsObservable();
+
         private readonly IContainer Container;
         private readonly IPodService PodService;
         private readonly ILogger Logger;
@@ -29,14 +34,10 @@ namespace OmniCore.Eros
         private readonly AsyncLock ProbeStartStopLock;
         private readonly IErosRadioProvider[] ErosRadioProviders;
 
-        private ErosRadioSelector RadioSelector;
-        public PodEntity Entity { get; private set; }
-        public PodRunningState RunningState { get; }
-        public IObservable<IPod> WhenPodArchived() => PodArchivedSubject.AsObservable();
-
         private CancellationTokenSource StatusCheckCancellationTokenSource;
         private IDisposable StatusCheckSubscription;
-        private IErosRadio LastGoodRadio = null;
+        private ErosPodRequestQueue RequestQueue;
+        private ErosPodRadioSelector PodRadioSelector;
         
 
         public ErosPod(IContainer container,
@@ -57,7 +58,9 @@ namespace OmniCore.Eros
         public async Task Initialize(PodEntity podEntity, CancellationToken cancellationToken)
         {
             Entity = podEntity;
-            RadioSelector = await GetRadioSelector(cancellationToken);
+            PodRadioSelector = await GetRadioSelector(cancellationToken);
+            RequestQueue = await Container.Get<ErosPodRequestQueue>();
+            await RequestQueue.Initialize(this, PodRadioSelector, cancellationToken);
             await StartProbing(TimeSpan.FromSeconds(15), cancellationToken);
         }
 
@@ -79,7 +82,7 @@ namespace OmniCore.Eros
             PodArchivedSubject.OnNext(this);
         }
 
-        public Task<IList<IPodTask>> GetActiveRequests()
+        public Task<IList<IPodRequest>> GetActiveRequests()
         {
             throw new NotImplementedException();
         }
@@ -108,97 +111,32 @@ namespace OmniCore.Eros
                 await context.Save(cancellationToken);
             }
 
-            RadioSelector = await GetRadioSelector(cancellationToken);
+            PodRadioSelector = await GetRadioSelector(cancellationToken);
             await StartProbing(cancellationToken);
         }
 
-        public Task<IPodTask> Activate(IErosRadio radio, CancellationToken cancellationToken)
+        public async Task<IPodActivationRequest> ActivationRequest()
         {
-            throw new NotImplementedException();
+            return (IPodActivationRequest) (await Container.Get<IPodActivationRequest>())
+                .ForPod(this);
         }
 
-        public async Task<IPodTask> Acquire(IErosRadio radio, CancellationToken cancellationToken)
+        public async Task<IPodBolusRequest> BolusRequest()
         {
-            var request = (await Container.Get<IErosPodRequest>())
-                .WithPod(this)
-                .WithAcquireRequest();
-
-            var task = (await Container.Get<IPodTask>())
-                .WithRequest(request);
-
-            return task;
+            return (IPodBolusRequest) (await Container.Get<IPodBolusRequest>())
+                .ForPod(this);
         }
 
-        public Task<IPodTask> VerifyIdentity(uint lotNumber, uint serialNumber, CancellationToken cancellationToken)
+        public async Task<IPodDeliveryCancellationRequest> CancellationRequest()
         {
-            throw new NotImplementedException();
+            return (IPodDeliveryCancellationRequest) (await Container.Get<IPodDeliveryCancellationRequest>())
+                .ForPod(this);
         }
 
-        public async Task<IPodTask> Status(StatusRequestType requestType)
+        public async Task<IPodScheduledDeliveryRequest> ScheduledDeliveryRequest()
         {
-            var request = (await Container.Get<IErosPodRequest>())
-                .WithPod(this)
-                .WithStatusRequest(requestType);
-
-            var task = (await Container.Get<IPodTask>())
-                .WithRequest(request);
-
-            return task;
-        }
-
-        public Task<IPodTask> ConfigureAlerts()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> AcknowledgeAlerts()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> SetBasalSchedule()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> CancelBasal()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> SetTempBasal()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> CancelTempBasal()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> Bolus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> CancelBolus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> StartExtendedBolus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> CancelExtendedBolus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPodTask> Deactivate()
-        {
-            throw new NotImplementedException();
+            return (IPodScheduledDeliveryRequest) (await Container.Get<IPodScheduledDeliveryRequest>())
+                .ForPod(this);
         }
 
         public void Dispose()
@@ -280,7 +218,7 @@ namespace OmniCore.Eros
             return address;
         }
         
-        private async Task<ErosRadioSelector> GetRadioSelector(CancellationToken cancellationToken)
+        private async Task<ErosPodRadioSelector> GetRadioSelector(CancellationToken cancellationToken)
         {
             var radios = new List<IErosRadio>();
             Entity
@@ -294,7 +232,7 @@ namespace OmniCore.Eros
                             .GetRadio(r.DeviceUuid, cancellationToken));
                 });
 
-            var selector = await Container.Get<ErosRadioSelector>();
+            var selector = await Container.Get<ErosPodRadioSelector>();
             await selector.Initialize(radios);
             return selector;
         }
@@ -365,7 +303,7 @@ namespace OmniCore.Eros
         {
             Logger.Information("Starting pod probe");
 
-            var radio = await RadioSelector.Select();
+            var radio = await PodRadioSelector.Select();
             await radio.PerformHealthCheck(cancellationToken);
             
             Logger.Information("Pod probe ended");

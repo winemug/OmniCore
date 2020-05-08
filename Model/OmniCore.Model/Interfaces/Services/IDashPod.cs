@@ -4,6 +4,6 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IDashPod : IPod
     {
-        Task<IPodTask> Activate();
+        Task<IPodRequest> Activate();
     }
 }

@@ -12,7 +12,7 @@ namespace OmniCore.Radios.RileyLink
         private static readonly Dictionary<long, PacketRadioConversation> ConversationCache =
             new Dictionary<long, PacketRadioConversation>();
 
-        private IErosPodRequest Request;
+        private IErosPodRequestMessage RequestMessage;
         private Bytes ResponseData;
 
         public bool IsFinished { get; private set; }
@@ -27,17 +27,17 @@ namespace OmniCore.Radios.RileyLink
         {
         }
 
-        public static PacketRadioConversation ForRequest(IErosPodRequest request)
+        public static PacketRadioConversation ForRequest(IErosPodRequestMessage requestMessage)
         {
-            if (!ConversationCache.ContainsKey(request.Pod.Entity.Id))
-                ConversationCache.Add(request.Pod.Entity.Id, new PacketRadioConversation());
+            if (!ConversationCache.ContainsKey(requestMessage.ErosPod.Entity.Id))
+                ConversationCache.Add(requestMessage.ErosPod.Entity.Id, new PacketRadioConversation());
 
-            var instance = ConversationCache[request.Pod.Entity.Id];
+            var instance = ConversationCache[requestMessage.ErosPod.Entity.Id];
 
-            instance.Request = request;
+            instance.RequestMessage = requestMessage;
             instance.ResponseData = new Bytes();
 
-            var requestData = new Bytes(request.Message);
+            var requestData = new Bytes(requestMessage.Data);
             instance.RequestPacketData = new List<Bytes>();
             var index = 0;
             while (index < requestData.Length)
@@ -56,17 +56,17 @@ namespace OmniCore.Radios.RileyLink
             {
                 RadioPacket rpSend;
                 if (SendPacketIndex == 0)
-                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.PDM,
+                    rpSend = new RadioPacket(RequestMessage.MessageAddress, PacketSequence, PacketType.PDM,
                         RequestPacketData[0]);
                 else if (SendPacketIndex < RequestPacketData.Count)
-                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.CON,
+                    rpSend = new RadioPacket(RequestMessage.MessageAddress, PacketSequence, PacketType.CON,
                         RequestPacketData[SendPacketIndex]);
                 else if (IsFinished)
-                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.ACK,
+                    rpSend = new RadioPacket(RequestMessage.MessageAddress, PacketSequence, PacketType.ACK,
                         new Bytes((uint) 0));
                 else
-                    rpSend = new RadioPacket(Request.MessageAddress, PacketSequence, PacketType.ACK,
-                        new Bytes(Request.MessageAddress));
+                    rpSend = new RadioPacket(RequestMessage.MessageAddress, PacketSequence, PacketType.ACK,
+                        new Bytes(RequestMessage.MessageAddress));
 
                 SendPacketCache = rpSend.GetPacketData(encode);
             }
@@ -140,7 +140,7 @@ namespace OmniCore.Radios.RileyLink
             if (data.Length >= 4)
             {
                 var radioAddress = data.DWord(0);
-                if (!Request.AllowAddressOverride && radioAddress != Request.MessageAddress)
+                if (!RequestMessage.AllowAddressOverride && radioAddress != RequestMessage.MessageAddress)
                     isValid = false;
             }
 

@@ -11,7 +11,7 @@ using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodResponse : IErosPodResponse
+    public class ErosPodResponseMessage : IErosPodResponseMessage
     {
         public PodProgress? Progress { get; private set; }
         public bool? Faulted { get; private set; }
@@ -22,7 +22,7 @@ namespace OmniCore.Eros
         public PodResponseVersion VersionResponse { get; private set; }
         public bool IsValid { get; private set; }
 
-        public ErosPodResponse()
+        public ErosPodResponseMessage()
         {
             IsValid = false;
         }

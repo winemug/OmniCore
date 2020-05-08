@@ -3,21 +3,20 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IErosPodRequest : IPodRequest
+    public interface IErosPodRequestMessage
     {
         IErosPod ErosPod { get; }
-        IErosPodRequest WithPod(IErosPod pod);
-        IErosPodRequest WithEntity(PodRequestEntity entity);
-        IErosPodRequest WithMessageAddress(uint messageAddress);
-        IErosPodRequest WithMessageSequence(int messageSequence);
-        IErosPodRequest WithCriticalFollowup();
-        IErosPodRequest WithAllowAddressOverride();
-        IErosPodRequest WithTransmissionPower(TransmissionPower transmissionPower);
-        IErosPodRequest WithStatusRequest(StatusRequestType requestType);
-        IErosPodRequest WithAcquireRequest();
-        IErosPodRequest WithPairRequest(uint radioAddress);
+        IErosPodRequestMessage WithPod(IErosPod pod);
+        IErosPodRequestMessage WithMessageAddress(uint messageAddress);
+        IErosPodRequestMessage WithAllowAddressOverride();
+        IErosPodRequestMessage WithTransmissionPower(TransmissionPower transmissionPower);
+        IErosPodRequestMessage WithPairRequest(uint radioAddress);
+        IErosPodRequestMessage WithMessageSequence(int messageNo);
+        IErosPodRequestMessage WithCriticalFollowup();
+        IErosPodRequestMessage WithStatusRequest(StatusRequestType requestType);
+        IErosPodRequestMessage WithAcquireRequest();
         
-        byte[] Message { get; }
+        byte[] Data { get; }
         uint MessageAddress { get; }
         bool AllowAddressOverride { get; }
     }

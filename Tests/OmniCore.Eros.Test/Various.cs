@@ -45,17 +45,15 @@ namespace OmniCore.Eros.Test
         [Test]
         public async Task PairRequest1()
         {
-            var podRequest = await Container.Get<IErosPodRequest>();
+            var podRequest = await Container.Get<IErosPodRequestMessage>();
             podRequest
                 .WithPairRequest(0x33131415);
-
-            Console.WriteLine(new Bytes(podRequest.Message).ToString());
         }
 
         [Test]
         public async Task Response1()
         {
-            var podResponse = await Container.Get<IErosPodResponse>();
+            var podResponse = await Container.Get<IErosPodResponseMessage>();
             var responseData = new Bytes("001122334455");
             podResponse.ParseResponse(responseData.ToArray());
             Assert.IsFalse(podResponse.IsValid);
@@ -64,7 +62,7 @@ namespace OmniCore.Eros.Test
         [Test]
         public async Task odiz()
         {
-            var podRequest = await Container.Get<IErosPodRequest>();
+            var podRequest = await Container.Get<IErosPodRequestMessage>();
             podRequest
                 .WithPod(Pod)
                 .WithPairRequest(0x33131415);
