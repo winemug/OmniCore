@@ -20,6 +20,15 @@ namespace OmniCore.Repository
 {
     public class RepositoryContext : DbContext, IRepositoryContextReadWrite
     {
+ 
+        public DbSet<MedicationEntity> Medications { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<RadioEntity> Radios { get; set; }
+        public DbSet<RadioEventEntity> RadioEvents { get; set; }
+        public DbSet<PodEntity> Pods { get; set; }
+        public DbSet<PodRequestEntity> PodRequests { get; set; }
+        public DbSet<MedicationDeliveryEntity> MedicationDeliveries { get; set; }
+        
         private readonly string ConnectionString;
         private IDisposable ReaderWriterLock;
         private ILogger Logger;
@@ -39,18 +48,7 @@ namespace OmniCore.Repository
             ConnectionString = $"Data Source={path}";
         }
 
-        public DbSet<MedicationEntity> Medications { get; set; }
-        public DbSet<UserEntity> Users { get; set; }
-        public DbSet<RadioEntity> Radios { get; set; }
-        public DbSet<RadioEventEntity> RadioEvents { get; set; }
-        public DbSet<PodEntity> Pods { get; set; }
-        public DbSet<PodRequestEntity> PodRequests { get; set; }
-
-        public DbSet<MedicationDeliveryEntity> MedicationDeliveries { get; set; }
-
-        public DbSet<PodResponseEntity> PodResponses { get; set; }
-
-        public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
+ public async Task InitializeDatabase(CancellationToken cancellationToken, bool createNew = false)
         {
             Logger.Debug("Initializing database");
             if (createNew)

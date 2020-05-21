@@ -19,9 +19,8 @@ namespace OmniCore.Model.Interfaces.Services
         RadioOptions DefaultOptions { get; }
         Task SetDefaultOptions(RadioOptions options, CancellationToken cancellationToken);
         Task SetName(string newName, CancellationToken cancellationToken);
-        Task<byte[]> GetResponse(IPodRequest request, CancellationToken cancellationToken, RadioOptions options);
-        // Task<(byte Rssi, byte[] Data)> DebugGetPacket(uint timeoutMilliseconds, CancellationToken cancellationToken);
-        Task Identify(CancellationToken cancellationToken);
         Task PerformHealthCheck(CancellationToken cancellationToken);
+        Task<IRadioConnection> GetConnection(CancellationToken cancellationToken);
+        Task<IRadioConnection> GetConnection(RadioOptions options, CancellationToken cancellationToken);
     }
 }

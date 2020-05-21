@@ -45,7 +45,7 @@ namespace OmniCore.Eros.Test
         [Test]
         public async Task PairRequest1()
         {
-            var podRequest = await Container.Get<IErosPodRequestMessage>();
+            var podRequest = await Container.Get<ErosPodRequestMessage>();
             podRequest
                 .WithPairRequest(0x33131415);
         }
@@ -53,7 +53,7 @@ namespace OmniCore.Eros.Test
         [Test]
         public async Task Response1()
         {
-            var podResponse = await Container.Get<IErosPodResponseMessage>();
+            var podResponse = await Container.Get<ErosPodResponseMessage>();
             var responseData = new Bytes("001122334455");
             podResponse.ParseResponse(responseData.ToArray());
             Assert.IsFalse(podResponse.IsValid);
@@ -62,25 +62,25 @@ namespace OmniCore.Eros.Test
         [Test]
         public async Task odiz()
         {
-            var podRequest = await Container.Get<IErosPodRequestMessage>();
+            var podRequest = await Container.Get<ErosPodRequestMessage>();
             podRequest
                 .WithPod(Pod)
                 .WithPairRequest(0x33131415);
             
-            var prc = PacketRadioConversation.ForRequest(podRequest);
-            
-            Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
-
-            prc.ParseIncomingPacket(null, false);
-            Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
-
-            prc.ParseIncomingPacket(null, false);
-            Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
-
-            var i1 = new RadioPacket(0xffffffff, 01, PacketType.ACK, null)
-                .GetPacketData(false);
-            prc.ParseIncomingPacket(i1, false);
-            Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
+            // var prc = PacketRadioConversation.ForRequest(podRequest);
+            //
+            // Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
+            //
+            // prc.ParseIncomingPacket(null, false);
+            // Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
+            //
+            // prc.ParseIncomingPacket(null, false);
+            // Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
+            //
+            // var i1 = new RadioPacket(0xffffffff, 01, PacketType.ACK, null)
+            //     .GetPacketData(false);
+            // prc.ParseIncomingPacket(i1, false);
+            // Console.WriteLine(new Bytes(prc.GetPacketToSend(false)).ToString());
             
         }
     }

@@ -20,13 +20,12 @@ using OmniCore.Radios.RileyLink.Enumerations;
 
 namespace OmniCore.Radios.RileyLink.Protocol
 {
-    public class RileyLinkConnectionHandler : IDisposable, ICompositeDisposableProvider
+    public class RileyLinkConnection : ICompositeDisposableProvider, IRadioConnection
     {
         private readonly IConfigurationService ConfigurationService;
         private readonly ILogger Logger;
         private RadioOptions ConfiguredOptions;
-
-        private IDisposable NotificationSubscription;
+        private RadioOptions RequestedOptions;
         private IBlePeripheralConnection PeripheralConnection;
         
         private readonly ISubject<(byte, byte[])> ResponseDataReceivedSubject;
@@ -34,8 +33,11 @@ namespace OmniCore.Radios.RileyLink.Protocol
 
         private byte? SessionNotificationCounter = null;
         private CancellationTokenSource RadioErrorCancellationSource;
+        private ConcurrentQueue<IRileyLinkResponse> ResponseQueue { get; }
 
-        public RileyLinkConnectionHandler(
+        public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
+
+        public RileyLinkConnection(
             ILogger logger,
             IConfigurationService configurationService)
         {
@@ -47,72 +49,50 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 .Replay(256);
         }
 
-        public void Initialize(IBlePeripheral peripheral)
+        public async Task Initialize(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
-            IDisposable notificationSubscription = null;
-            peripheral.WhenConnectionStateChanged()
-                .Where(s => s == PeripheralConnectionState.Connected)
-                .Subscribe(async _ =>
-                {
-                    RadioErrorCancellationSource = new CancellationTokenSource();
-                    
-                    byte[] responseNumberData =  await PeripheralConnection.ReadFromCharacteristic(
-                        Uuids.RileyLinkServiceUuid,
-                        Uuids.RileyLinkResponseCharacteristicUuid,
-                        CancellationToken.None);
+            RadioErrorCancellationSource = new CancellationTokenSource()
+                .DisposeWith(this);
 
-                    if (responseNumberData.Length != 1)
-                    {
-                        Logger.Error("Response number data is of incorrect length");
-                        RadioErrorCancellationSource?.Cancel();
-                    }
-
-                    var responseNumber = responseNumberData[0];
-                    notificationSubscription = GetNotificationSubscription();
-                }, exception =>
-                {
-                    RadioErrorCancellationSource?.Cancel();
-                }).DisposeWith(this);
-            
             peripheral.WhenConnectionStateChanged()
-                .Where(s => s == PeripheralConnectionState.Disconnected)
-                .Subscribe(_ =>
+                .Subscribe(state =>
                 {
-                    RadioErrorCancellationSource?.Dispose();
-                    RadioErrorCancellationSource = null;
-                    
-                    notificationSubscription?.Dispose();
-                    notificationSubscription = null;
+                    ConfiguredOptions = null;
                 }).DisposeWith(this);
-        }
-        
-        private IDisposable GetNotificationSubscription()
-        {
-            return PeripheralConnection
-                .WhenCharacteristicNotificationReceived(Uuids.RileyLinkServiceUuid, Uuids.RileyLinkResponseCharacteristicUuid)
+
+            var bleOptions = await ConfigurationService.GetBlePeripheralOptions(cancellationToken);
+            PeripheralConnection = (await peripheral.GetConnection(bleOptions, cancellationToken))
+                .DisposeWith(this);
+
+            SessionNotificationCounter = await ReadNotificationCounter(cancellationToken);
+
+            PeripheralConnection
+                .WhenCharacteristicNotificationReceived(Uuids.RileyLinkServiceUuid,
+                    Uuids.RileyLinkResponseCharacteristicUuid)
                 .Subscribe(async _ =>
                 {
                     try
                     {
                         Logger.Debug($"Characteristic notification received");
-                        byte[] responseNumberData =  await PeripheralConnection.ReadFromCharacteristic(
+                        byte[] responseNumberData = await PeripheralConnection.ReadFromCharacteristic(
                             Uuids.RileyLinkServiceUuid,
                             Uuids.RileyLinkResponseCharacteristicUuid,
                             CancellationToken.None);
-                        
-                        if (responseNumberData.Length != 1)
-                            throw new OmniCoreRadioException(FailureType.RadioGeneralError, "Response number data is of incorrect length");
 
-                        var responseNumber = responseNumberData[0];
-                        Logger.Debug($"Incoming response #{responseNumber}");
+                        if (responseNumberData.Length != 1)
+                            throw new OmniCoreRadioException(FailureType.RadioGeneralError,
+                                "Response number data is of incorrect length");
+
+                        var notificationCounter = await ReadNotificationCounter(CancellationToken.None);
+                        Logger.Debug($"Incoming response #{notificationCounter}");
 
                         byte[] responseData = await PeripheralConnection.ReadFromCharacteristic(
                             Uuids.RileyLinkServiceUuid,
                             Uuids.RileyLinkDataCharacteristicUuid,
                             CancellationToken.None);
                         Logger.Debug($"Response received");
-                        
-                        ResponseDataReceivedSubject.OnNext((responseNumber, responseData));
+
+                        ResponseDataReceivedSubject.OnNext((notificationCounter, responseData));
                     }
                     catch (Exception e)
                     {
@@ -124,17 +104,28 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 {
                     ResponseDataReceivedSubject.OnError(exception);
                     RadioErrorCancellationSource?.Cancel();
-                });
+                }).DisposeWith(this);
         }
 
-        public ConcurrentQueue<IRileyLinkResponse> ResponseQueue { get; }
+        private async Task<byte> ReadNotificationCounter(CancellationToken cancellationToken)
+        {
+            byte[] counterData =  await PeripheralConnection.ReadFromCharacteristic(
+                Uuids.RileyLinkServiceUuid,
+                Uuids.RileyLinkResponseCharacteristicUuid,
+                cancellationToken);
+
+            if (counterData.Length != 1)
+            {
+                throw new OmniCoreRadioException(FailureType.RadioGeneralError, "Response number data is of incorrect length");
+            }
+
+            return counterData[0];
+        }
 
         public void Dispose()
         {
-            NotificationSubscription?.Dispose();
-            NotificationSubscription = null;
-            
             CompositeDisposable.Dispose();
+            CompositeDisposable.Clear();
         }
 
         public async Task Configure(
@@ -142,6 +133,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             CancellationToken cancellationToken)
         {
             Logger.Debug($"Configure requested");
+            RequestedOptions = options;
             if (ConfiguredOptions != null && ConfiguredOptions.SameAs(options))
             {
                 Logger.Debug($"Already configured");
@@ -168,7 +160,70 @@ namespace OmniCore.Radios.RileyLink.Protocol
             ConfiguredOptions = options;
         }
 
-        public Task<RileyLinkStateResponse> GetState(CancellationToken cancellationToken)
+        public async Task Transceive(IRadioTransmission radioTransmission, CancellationToken cancellationToken)
+        {
+            switch (radioTransmission.Sequence)
+            {
+                case RadioTransmissionSequence.Rx:
+                    var rxResponse = await GetPacket(
+                        (byte) radioTransmission.Channel,
+                        (uint) radioTransmission.RxTimeout.Milliseconds,
+                        cancellationToken);
+                    radioTransmission.Rx = rxResponse.PacketData;
+                    radioTransmission.Rssi = rxResponse.Rssi;
+                    break;
+                case RadioTransmissionSequence.Tx:
+                    if (radioTransmission.PowerOverride.HasValue)
+                        await SetTxPower(radioTransmission.PowerOverride.Value, cancellationToken);
+                    else
+                        await SetTxPower(RequestedOptions.Amplification, cancellationToken);
+
+                    await SendPacket(
+                        (byte) radioTransmission.Channel,
+                        4,
+                        10,
+                        70,
+                        radioTransmission.Tx,
+                        cancellationToken);
+                    break;
+                case RadioTransmissionSequence.TxRx:
+                    if (radioTransmission.PowerOverride.HasValue)
+                        await SetTxPower(radioTransmission.PowerOverride.Value, cancellationToken);
+                    else
+                        await SetTxPower(RequestedOptions.Amplification, cancellationToken);
+
+                    var txrxResponse = await SendAndListen(
+                        (byte) radioTransmission.Channel,
+                        4,
+                        10,
+                        70,
+                        (byte) radioTransmission.Channel,
+                        (uint) radioTransmission.RxTimeout.Milliseconds,
+                        0,
+                        radioTransmission.Tx,
+                        cancellationToken);
+                    radioTransmission.Rx = txrxResponse.PacketData;
+                    radioTransmission.Rssi = txrxResponse.Rssi;
+                    break;
+            }
+        }
+
+        private async Task SetTxPower(TransmissionPower txPower, CancellationToken cancellationToken)
+        {
+            if (ConfiguredOptions.Amplification != txPower)
+            {
+                var paValue = GetPaRegisterValue(txPower);
+                await UpdateRegister(RileyLinkRegister.PATABLE0, paValue, cancellationToken);
+                ConfiguredOptions.Amplification = txPower;
+            }
+        }
+
+        public Task FlashLights(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        private Task<RileyLinkStateResponse> GetState(CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkStateResponse>(
                 new RileyLinkCommand
@@ -177,7 +232,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 }, cancellationToken);
         }
 
-        public Task<RileyLinkVersionResponse> GetVersion(CancellationToken cancellationToken)
+        private Task<RileyLinkVersionResponse> GetVersion(CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkVersionResponse>(
                 new RileyLinkCommand
@@ -186,7 +241,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
                 }, cancellationToken);
         }
 
-        public Task<RileyLinkPacketResponse> GetPacket(
+        private Task<RileyLinkPacketResponse> GetPacket(
             byte channel,
             uint timeoutMilliseconds,
             CancellationToken cancellationToken)
@@ -201,7 +256,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> SendPacket(
+        private Task<RileyLinkStandardResponse> SendPacket(
             byte channel,
             byte repeatCount,
             ushort delayMilliseconds,
@@ -223,7 +278,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkPacketResponse> SendAndListen(
+        private Task<RileyLinkPacketResponse> SendAndListen(
             byte sendChannel,
             byte sendRepeatCount,
             ushort sendRepeatDelayMilliseconds,
@@ -251,7 +306,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> UpdateRegister(
+        private Task<RileyLinkStandardResponse> UpdateRegister(
             RileyLinkRegister register,
             byte value,
             CancellationToken cancellationToken
@@ -267,7 +322,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task Noop(CancellationToken cancellationToken)
+        private Task Noop(CancellationToken cancellationToken)
         {
             return SendCommand(new RileyLinkCommand
             {
@@ -275,7 +330,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task Reset(CancellationToken cancellationToken)
+        private Task Reset(CancellationToken cancellationToken)
         {
             return SendCommand(new RileyLinkCommand
             {
@@ -283,7 +338,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> Led(
+        private Task<RileyLinkStandardResponse> Led(
             RileyLinkLed led,
             RileyLinkLedMode mode,
             CancellationToken cancellationToken)
@@ -298,7 +353,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkRegisterValueResponse> ReadRegister(
+        private Task<RileyLinkRegisterValueResponse> ReadRegister(
             RileyLinkRegister register, CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkRegisterValueResponse>(new RileyLinkCommand
@@ -310,7 +365,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> SetModeRegisters(
+        private Task<RileyLinkStandardResponse> SetModeRegisters(
             RileyLinkRegisterMode registerMode,
             List<(RileyLinkRegister Register, int Value)> registers,
             CancellationToken cancellationToken)
@@ -326,7 +381,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> SetSwEncoding(
+        private Task<RileyLinkStandardResponse> SetSwEncoding(
             RileyLinkSoftwareEncoding encoding, CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
@@ -338,7 +393,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> SetPreamble(
+        private Task<RileyLinkStandardResponse> SetPreamble(
             ushort preamble, CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
@@ -350,7 +405,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStandardResponse> ResetRadioConfig(CancellationToken cancellationToken)
+        private Task<RileyLinkStandardResponse> ResetRadioConfig(CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkStandardResponse>(new RileyLinkCommand
             {
@@ -358,7 +413,7 @@ namespace OmniCore.Radios.RileyLink.Protocol
             }, cancellationToken);
         }
 
-        public Task<RileyLinkStatisticsResponse> GetStatistics(CancellationToken cancellationToken)
+        private Task<RileyLinkStatisticsResponse> GetStatistics(CancellationToken cancellationToken)
         {
             return GetResponse<RileyLinkStatisticsResponse>(new RileyLinkCommand
             {
@@ -520,38 +575,33 @@ namespace OmniCore.Radios.RileyLink.Protocol
             registers.Add((RileyLinkRegister.TEST0, 0x09));
 
             registers.Add((RileyLinkRegister.FREND0, 0x00));
-            int amplification;
-            switch (configuration.Amplification)
-            {
-                case TransmissionPower.Lowest:
-                    amplification = 0x0E;
-                    break;
-                case TransmissionPower.VeryLow:
-                    amplification = 0x1D;
-                    break;
-                case TransmissionPower.Low:
-                    amplification = 0x34;
-                    break;
-                case TransmissionPower.BelowNormal:
-                    amplification = 0x2C;
-                    break;
-                case TransmissionPower.Normal:
-                    amplification = 0x60;
-                    break;
-                case TransmissionPower.High:
-                    amplification = 0x84;
-                    break;
-                case TransmissionPower.VeryHigh:
-                    amplification = 0xC8;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            int amplification = GetPaRegisterValue(configuration.Amplification);
 
             registers.Add((RileyLinkRegister.PATABLE0, amplification));
             return registers;
         }
 
-        public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
+        private byte GetPaRegisterValue(TransmissionPower power)
+        {
+            switch (power)
+            {
+                case TransmissionPower.Lowest:
+                    return 0x0E;
+                case TransmissionPower.VeryLow:
+                    return 0x1D;
+                case TransmissionPower.Low:
+                    return 0x34;
+                case TransmissionPower.BelowNormal:
+                    return 0x2C;
+                case TransmissionPower.Normal:
+                    return 0x60;
+                case TransmissionPower.High:
+                    return 0x84;
+                case TransmissionPower.VeryHigh:
+                    return 0xC8;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }

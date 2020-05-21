@@ -7,17 +7,20 @@ using OmniCore.Model.Entities;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
+using OmniCore.Model.Interfaces.Services.Requests;
 using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodRequest : IPodRequest
+    public abstract class ErosPodRequest : IPodRequest
     {
         private readonly ISubject<bool> CanCancelSubject = new BehaviorSubject<bool>(true);
         private readonly ISubject<TaskResult> ResultSubject = new AsyncSubject<TaskResult>();
         private readonly ISubject<TaskState> StateSubject = new BehaviorSubject<TaskState>(TaskState.Scheduled);
         private readonly CancellationTokenSource TaskCancellationSource = new CancellationTokenSource();
 
+        protected ErosPod Pod;
+        
         public ErosPodRequest()
         {
         }
@@ -49,7 +52,7 @@ namespace OmniCore.Eros
             StateSubject.OnNext(TaskState.Running);
             try
             {
-                //await ExecuteRequestInternal(TaskCancellationSource.Token);
+                await ExecuteRequestInternal(TaskCancellationSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -74,13 +77,16 @@ namespace OmniCore.Eros
 
         public IPodRequest ForPod(IPod pod)
         {
-            throw new NotImplementedException();
+            Pod = pod as ErosPod;
+            return this;
         }
 
         public IPodRequest QueueExecution()
         {
             throw new NotImplementedException();
         }
+
+        protected abstract Task ExecuteRequestInternal(CancellationToken cancellationToken);
 
         // private async Task ExecuteRequestInternal(CancellationToken cancellationToken)
         // {
@@ -102,5 +108,126 @@ namespace OmniCore.Eros
         //     Entity.Responses.Add(responseEntity);
         //     await context.Save(cancellationToken);
         // }
+    }
+
+    public class ErosPodActivationRequest : ErosPodRequest, IPodActivationRequest
+    {
+        public IPodActivationRequest WithRadio(IErosRadio radio)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodActivationRequest WithNewRadioAddress(uint radioAddress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodActivationRequest WithPairAndPrime()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodActivationRequest WithInjectAndStart(IDeliverySchedule deliverySchedule)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodActivationRequest WithDeactivate()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ErosPodScheduledDeliveryRequest : ErosPodRequest, IPodScheduledDeliveryRequest
+    {
+        public IPodScheduledDeliveryRequest WithDeliverySchedule(IDeliverySchedule schedule)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodScheduledDeliveryRequest WithTimeOffset(DateTimeOffset timeOffset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodScheduledDeliveryRequest WithTemporaryRate(decimal hourlyRateUnits, TimeSpan duration)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodScheduledDeliveryRequest WithScheduledRate()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ErosPodBolusRequest : ErosPodRequest, IPodBolusRequest
+    {
+        public decimal ImmediateBolusUnits { get; }
+        public bool ExtendedBolus { get; }
+        public bool ExtendedBolusTotalUnits { get; }
+        public TimeSpan ExtendedBolusTotalDuration { get; }
+        public IPodBolusRequest WithImmediateBolus(decimal immediateBolusUnits)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodBolusRequest WithExtendedBolus(decimal extendedBolusTotalUnits, TimeSpan extendedBolusDuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ErosPodDeliveryCancellationRequest : ErosPodRequest, IPodDeliveryCancellationRequest
+    {
+        public bool StopBolusDelivery { get; }
+        public bool StopExtendedBolusDelivery { get; }
+        public bool StopBasalDelivery { get; }
+        public IPodDeliveryCancellationRequest WithCancelImmediateBolus()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodDeliveryCancellationRequest WithCancelExtendedBolus()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodDeliveryCancellationRequest WithStopBasalDelivery()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPodDeliveryCancellationRequest CancelAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ErosPodAlarmRequest : ErosPodRequest, IPodAlarmRequest
+    {
+        protected override async Task ExecuteRequestInternal(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

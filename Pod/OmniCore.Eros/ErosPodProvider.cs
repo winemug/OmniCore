@@ -72,6 +72,7 @@ namespace OmniCore.Eros
                 {
                     var pod = await Container.Get<ErosPod>();
                     await pod.Initialize(podEntity, cancellationToken);
+                    PodDictionary[podEntity.Id] = pod;
                 }
                 return PodDictionary[podEntity.Id];
             }

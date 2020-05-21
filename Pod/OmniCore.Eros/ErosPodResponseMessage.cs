@@ -11,15 +11,15 @@ using OmniCore.Services;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodResponseMessage : IErosPodResponseMessage
+    public class ErosPodResponseMessage
     {
         public PodProgress? Progress { get; private set; }
         public bool? Faulted { get; private set; }
         public uint RadioAddress { get; private set; }
-        public PodResponseFault FaultResponse { get; private set; }
-        public PodResponseRadio RadioResponse { get; private set; }
-        public PodResponseStatus StatusResponse { get; private set; }
-        public PodResponseVersion VersionResponse { get; private set; }
+        public ErosPodResponseFault FaultResponse { get; private set; }
+        public ErosPodResponseRadio RadioResponse { get; private set; }
+        public ErosPodResponseStatus StatusResponse { get; private set; }
+        public ErosPodResponseVersion VersionResponse { get; private set; }
         public bool IsValid { get; private set; }
 
         public ErosPodResponseMessage()
@@ -72,7 +72,7 @@ namespace OmniCore.Eros
 
         private void ParseVersionResponse(Bytes responseData)
         {
-            VersionResponse = new PodResponseVersion();
+            VersionResponse = new ErosPodResponseVersion();
 
             var lengthyResponse = false;
             var i = 0;
@@ -104,7 +104,7 @@ namespace OmniCore.Eros
             if (!lengthyResponse)
             {
                 var rb = responseData.Byte(i++);
-                RadioResponse = new PodResponseRadio
+                RadioResponse = new ErosPodResponseRadio
                 {
                     PodLowGain = (byte) (rb >> 6),
                     PodRssi = (byte) (rb & 0b00111111)
@@ -116,7 +116,7 @@ namespace OmniCore.Eros
 
         private void ParseStatusResponse(Bytes responseData)
         {
-            StatusResponse = new PodResponseStatus();
+            StatusResponse = new ErosPodResponseStatus();
             var s0 = responseData[0];
             var s1 = responseData.DWord(1);
             var s2 = responseData.DWord(5);
@@ -160,8 +160,8 @@ namespace OmniCore.Eros
                 //    result.AlertStates = alrs;
                 //    break;
                 case 0x02:
-                    FaultResponse = new PodResponseFault();
-                    StatusResponse = new PodResponseStatus();
+                    FaultResponse = new ErosPodResponseFault();
+                    StatusResponse = new ErosPodResponseStatus();
                     Progress = (PodProgress) responseData.Byte(i++);
 
                     var deliveryStates = ParseDeliveryStates(responseData.Byte(i++));
@@ -186,7 +186,7 @@ namespace OmniCore.Eros
                     FaultResponse.ProgressBeforeFault = (PodProgress) (f17 & 0x0F);
                     var r18 = responseData.Byte(i++);
 
-                    RadioResponse = new PodResponseRadio
+                    RadioResponse = new ErosPodResponseRadio
                     {
                         PodLowGain = (byte) ((r18 & 0xC0) >> 6),
                         PodRssi = (byte) ((r18 & 0xC0) >> 6)
@@ -220,5 +220,47 @@ namespace OmniCore.Eros
             return (bolusState, basalState);
         }
 
+    }
+    
+    public class ErosPodResponseFault
+    {
+        public byte FaultCode { get; set; }
+        public int FaultTimeMinutes { get; set; }
+        public byte TableAccessFault { get; set; }
+        public byte InsulinStateTableCorr { get; set; }
+        public byte InternalFaultVars { get; set; }
+        public bool FaultWhileBolus { get; set; }
+        public PodProgress ProgressBeforeFault { get; set; }
+        public PodProgress ProgressBeforeFault2 { get; set; }
+        public byte[] FaultInformation2W { get; set; }
+    }
+    
+    public class ErosPodResponseRadio
+    {
+        public byte PodLowGain { get; set; }
+        public byte PodRssi { get; set; }
+    }
+    
+    public class ErosPodResponseStatus
+    {
+        public bool Faulted { get; set; }
+        public BasalState BasalState { get; set; }
+        public BolusState BolusState { get; set; }
+        public int NotDelivered { get; set; }
+        public int Delivered { get; set; }
+        public int Reservoir { get; set; }
+        public int MessageSequence { get; set; }
+        public int ActiveMinutes { get; set; }
+        public byte AlertMask { get; set; }
+    }
+    
+    public class ErosPodResponseVersion
+    {
+        public string VersionPm { get; set; }
+        public string VersionPi { get; set; }
+        public byte[] VersionUnk2b { get; set; }
+        public uint Lot { get; set; }
+        public uint Serial { get; set; }
+        public uint RadioAddress { get; set; }
     }
 }

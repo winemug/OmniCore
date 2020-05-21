@@ -33,6 +33,7 @@
     <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem" Route="Home">
         <Tab Title="Test">
             <ShellContent ContentTemplate="{Binding TestControlViewTemplate}" Title="Control"/>
+            <ShellContent ContentTemplate="{Binding TestDetailViewTemplate}" Title="Detail"/>
             <ShellContent ContentTemplate="{Binding TestLogViewTemplate}" Title="Log"/>
         </Tab>
         <Tab Title="Pods">

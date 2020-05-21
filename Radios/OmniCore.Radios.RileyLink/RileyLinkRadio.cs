@@ -36,27 +36,32 @@ namespace OmniCore.Radios.RileyLink
         private readonly IRepositoryService RepositoryService;
         private readonly IConfigurationService ConfigurationService;
         private readonly IBlePeripheralAdapter PeripheralAdapter;
+        private readonly RileyLinkConnection RileyLinkConnection;
+        private readonly AsyncLock RileyLinkConnectionLock;
 
         private IBlePeripheral Peripheral;
-
+        
         public RileyLinkRadio(
             IContainer container,
             ILogger logger,
             IRepositoryService repositoryService,
             IConfigurationService configurationService,
-            IBlePeripheralAdapter peripheralAdapter)
+            IBlePeripheralAdapter peripheralAdapter,
+            RileyLinkConnection rileyLinkConnection)
         {
             Container = container;
             Logger = logger;
             RepositoryService = repositoryService;
             ConfigurationService = configurationService;
             PeripheralAdapter = peripheralAdapter;
+            RileyLinkConnection = rileyLinkConnection;
+            RileyLinkConnectionLock = new AsyncLock();
         }
 
         public async Task Initialize(IBlePeripheral peripheral, CancellationToken cancellationToken)
         {
             Peripheral = peripheral;
-            
+
             using (var context = await RepositoryService.GetContextReadOnly(cancellationToken))
             {
                 Entity = await context.Radios.FirstOrDefaultAsync(
@@ -229,62 +234,27 @@ namespace OmniCore.Radios.RileyLink
             // return Entity.Options.RadioHealthCheckIntervalGood;
         }
 
-        public async Task Identify(CancellationToken cancellationToken)
+        public Task<IRadioConnection> GetConnection(CancellationToken cancellationToken)
         {
+            return GetConnection(DefaultOptions, cancellationToken);
+        }
+
+        public async Task<IRadioConnection> GetConnection(RadioOptions options, CancellationToken cancellationToken)
+        {
+            var connectionLock = await RileyLinkConnectionLock.LockAsync(cancellationToken);
             try
             {
-                Logger.Debug($"RLR: {Address} Identifying device");
-                // var options = Entity.Options;
-                //options.KeepConnected = false;
-                //options.AutoConnect = false;
-
-                // using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
-                //
-                // await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.On, cancellationToken);
-                // await rlConnection.Led(RileyLinkLed.Blue, RileyLinkLedMode.Off, cancellationToken);
+                await RileyLinkConnection.Initialize(Peripheral, cancellationToken);
+                await RileyLinkConnection.Configure(options, cancellationToken);
+                connectionLock.DisposeWith(RileyLinkConnection);
+                return RileyLinkConnection;
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                connectionLock.Dispose();
                 throw;
             }
         }
-
-        public async Task<byte[]> GetResponse(IPodRequest request, CancellationToken cancellationToken,
-            RadioOptions options = null)
-        {
-            try
-            {
-                if (options == null)
-                    options = Entity.Options;
-
-                //using var rlConnection = await GetRileyLinkHandler(options, cancellationToken);
-
-                //Logging.Debug($"RLR: {Address} Starting conversation with pod id: {request.ErosPod.Entity.Id}");
-                //var conversation = RileyLinkErosConversation.ForPod(request.ErosPod);
-                //conversation.Initialize(request);
-
-                //while (!conversation.IsFinished)
-                //{
-                //    var sendPacketData = conversation.GetPacketToSend();
-
-                //    //TODO
-
-                //    var rssi = GetRssi(result.Data[0]);
-                //    conversation.ParseIncomingPacket(result.Data[1..]);
-                //}
-
-                //var response = conversation.ResponseData.ToArray();
-                //Logging.Debug($"RLR: {Address} Conversation ended.");
-
-                //return response;
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-            return null;
-        }
-
 
         public void Dispose()
         {

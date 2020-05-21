@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OmniCore.Client.Models;
 using OmniCore.Client.ViewModels.Base;
+using OmniCore.Model.Entities;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Utilities.Extensions;
 using Xamarin.Forms;
@@ -26,6 +27,8 @@ namespace OmniCore.Client.ViewModels.Test
                 var med = await api.ConfigurationService.GetDefaultMedication(CancellationToken.None);
                 var pod = await api.PodService.NewErosPod(user, med, CancellationToken.None);
 
+                await pod.AsPaired(889134427, 45680, 971521, CancellationToken.None);
+                
                 await pod.UpdateRadioList(Radios
                     .Where(r => r.IsChecked)
                     .Select(r => r.Radio), CancellationToken.None);

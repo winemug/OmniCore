@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Interfaces;
 using OmniCore.Model.Interfaces.Services;
-using OmniCore.Model.Interfaces.Services.Internal;
-using OmniCore.Services.Configuration;
 
-namespace OmniCore.Client.Droid.Services
+namespace OmniCore.Services
 {
     public class ServiceApi : IServiceApi
     {
@@ -21,7 +19,7 @@ namespace OmniCore.Client.Droid.Services
         public IAutomationService AutomationService { get; }
 
         private readonly ISubject<CoreApiStatus> ApiStatusSubject;
-        private readonly IUserActivity UserActivity;
+        private readonly ILogger Logger;
 
         public ServiceApi(
             IRepositoryService repositoryService,
@@ -29,37 +27,39 @@ namespace OmniCore.Client.Droid.Services
             IAutomationService automationService,
             IIntegrationService integrationService,
             IConfigurationService configurationService,
-            IUserActivity userActivity)
+            ILogger logger)
         {
             RepositoryService = repositoryService;
             PodService = podService;
             AutomationService = automationService;
             IntegrationService = integrationService;
             ConfigurationService = configurationService;
-            UserActivity = userActivity;
+            Logger = logger;
             ApiStatusSubject = new BehaviorSubject<CoreApiStatus>(CoreApiStatus.NotStarted);
         }
         
         public async Task StartServices(CancellationToken cancellationToken)
         {
+            Logger.Information("Starting OmniCore services");
             ApiStatusSubject.OnNext(CoreApiStatus.Starting);
-            await UserActivity.StartForegroundTaskService(cancellationToken);
             await RepositoryService.StartService(cancellationToken);
             await PodService.StartService(cancellationToken);
             //await AutomationService.StartService(cancellationToken);
             //await IntegrationService.StartService(cancellationToken);
             ApiStatusSubject.OnNext(CoreApiStatus.Started);
+            Logger.Information("All services started");
         }
 
         public async Task StopServices(CancellationToken cancellationToken)
         {
+            Logger.Information("Stopping OmniCore services");
             ApiStatusSubject.OnNext(CoreApiStatus.Stopping);
             //await IntegrationService.StopService(cancellationToken);
             //await AutomationService.StopService(cancellationToken);
             await PodService.StopService(cancellationToken);
             await RepositoryService.StopService(cancellationToken);
-            await UserActivity.StopForegroundTaskService(cancellationToken);
             ApiStatusSubject.OnNext(CoreApiStatus.Stopped);
+            Logger.Information("Services stopped");
         }
     }
 }

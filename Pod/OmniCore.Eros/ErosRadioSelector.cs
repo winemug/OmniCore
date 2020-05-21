@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 using OmniCore.Model.Exceptions;
@@ -21,7 +22,7 @@ namespace OmniCore.Eros
             Radios = radios;
         }
 
-        public async Task<IErosRadio> Select()
+        public async Task<IErosRadio> Select(CancellationToken cancellationToken)
         {
             if (Radios == null || Radios.Count == 0)
                 throw new OmniCoreWorkflowException(FailureType.Internal, "No radios available");

@@ -12,6 +12,7 @@ namespace OmniCore.Client.ViewModels.Base
     {
         public DataTemplate EmptyViewTemplate { get; }
         public DataTemplate TestControlViewTemplate { get; }
+        public DataTemplate TestDetailViewTemplate { get; }
         public DataTemplate TestLogViewTemplate { get; }
         public DataTemplate SplashViewTemplate { get;  }
 
@@ -20,6 +21,8 @@ namespace OmniCore.Client.ViewModels.Base
             EmptyViewTemplate = new DataTemplate(() => client.GetView<EmptyView>(true)
                 .WaitAndUnwrapException());
             TestControlViewTemplate = new DataTemplate(() => client.GetView<TestControlView>(true)
+                .WaitAndUnwrapException());
+            TestDetailViewTemplate = new DataTemplate(() => client.GetView<TestDetailView>(true)
                 .WaitAndUnwrapException());
             TestLogViewTemplate = new DataTemplate(() => client.GetView<TestLogView>(true)
                 .WaitAndUnwrapException());

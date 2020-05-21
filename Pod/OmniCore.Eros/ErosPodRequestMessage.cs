@@ -13,7 +13,7 @@ using OmniCore.Model.Utilities;
 
 namespace OmniCore.Eros
 {
-    public class ErosPodRequestMessage : IErosPodRequestMessage
+    public class ErosPodRequestMessage
     {
         private readonly List<RequestPart> Parts =
             new List<RequestPart>();
@@ -32,34 +32,34 @@ namespace OmniCore.Eros
         {
             RepositoryService = repositoryService;
         }
-        public IErosPodRequestMessage WithPod(IErosPod pod)
+        public ErosPodRequestMessage WithPod(IErosPod pod)
         {
             ErosPod = pod;
             return this;
         }
-        public IErosPodRequestMessage WithMessageAddress(uint messageAddress)
+        public ErosPodRequestMessage WithMessageAddress(uint messageAddress)
         {
             MessageAddress = messageAddress;
             return this;
         }
-        public IErosPodRequestMessage WithAllowAddressOverride()
+        public ErosPodRequestMessage WithAllowAddressOverride()
         {
             AllowAddressOverride = true;
             return this;
         }
 
-        public IErosPodRequestMessage WithTransmissionPower(TransmissionPower transmissionPower)
+        public ErosPodRequestMessage WithTransmissionPower(TransmissionPower transmissionPower)
         {
             TransmissionPowerOverride = transmissionPower;
             return this;
         }
 
-        public IErosPodRequestMessage WithCriticalFollowup()
+        public ErosPodRequestMessage WithCriticalFollowup()
         {
             throw new NotImplementedException();
         }
 
-        public IErosPodRequestMessage WithStatusRequest(StatusRequestType requestType)
+        public ErosPodRequestMessage WithStatusRequest(StatusRequestType requestType)
         {
             var childProgress = new TaskProgress
             {
@@ -74,7 +74,7 @@ namespace OmniCore.Eros
             });
         }
 
-        public IErosPodRequestMessage WithAcquireRequest()
+        public ErosPodRequestMessage WithAcquireRequest()
         {
             AllowAddressOverride = true;
             TransmissionPowerOverride = TransmissionPower.Lowest;
@@ -88,7 +88,7 @@ namespace OmniCore.Eros
 
         public byte[] Data { get; }
 
-        public IErosPodRequestMessage WithPairRequest(uint radioAddress)
+        public ErosPodRequestMessage WithPairRequest(uint radioAddress)
         {
             return WithPart(new RequestPart
             {
@@ -97,12 +97,12 @@ namespace OmniCore.Eros
             }).WithMessageAddress(0xffffffff);
         }
 
-        public IErosPodRequestMessage WithMessageSequence(int messageNo)
+        public ErosPodRequestMessage WithMessageSequence(int messageNo)
         {
             throw new NotImplementedException();
         }
 
-        private IErosPodRequestMessage WithPart(RequestPart part)
+        private ErosPodRequestMessage WithPart(RequestPart part)
         {
             Parts.Add(part);
             return this;

@@ -65,6 +65,9 @@
     <Compile Update="Views\Test\TestLogView.xaml.cs">
       <DependentUpon>TestLogView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Test\TestDetailView.xaml.cs">
+      <DependentUpon>TestDetailView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -85,6 +88,10 @@
       <SubType>Designer</SubType>
       <Generator></Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\Test\TestDetailView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -102,7 +109,7 @@
     <PackageReference Include="Rg.Plugins.Popup" Version="2.0.0.2" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
+    <PackageReference Include="Xamarin.Forms" Version="4.6.0.772" />
   </ItemGroup>
 
   <ItemGroup>

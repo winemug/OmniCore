@@ -17,7 +17,8 @@ namespace OmniCore.Services
                 .One<IAutomationService, AutomationService>()
                 .One<IIntegrationService, IntegrationService>()
                 .One<IIntegrationComponent, MqttIntegration>(nameof(MqttIntegration))
-                .One<IIntegrationComponent, XdripIntegration>(nameof(XdripIntegration));
+                .One<IIntegrationComponent, XdripIntegration>(nameof(XdripIntegration))
+                .One<IServiceApi, ServiceApi>();
         }
     }
 }

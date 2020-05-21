@@ -37,7 +37,7 @@ namespace OmniCore.Eros
         private CancellationTokenSource StatusCheckCancellationTokenSource;
         private IDisposable StatusCheckSubscription;
         private ErosPodRequestQueue RequestQueue;
-        private ErosPodRadioSelector PodRadioSelector;
+        public ErosPodRadioSelector RadioSelector;
         
 
         public ErosPod(IContainer container,
@@ -58,9 +58,9 @@ namespace OmniCore.Eros
         public async Task Initialize(PodEntity podEntity, CancellationToken cancellationToken)
         {
             Entity = podEntity;
-            PodRadioSelector = await GetRadioSelector(cancellationToken);
+            RadioSelector = await GetRadioSelector(cancellationToken);
             RequestQueue = await Container.Get<ErosPodRequestQueue>();
-            await RequestQueue.Initialize(this, PodRadioSelector, cancellationToken);
+            await RequestQueue.Initialize(this, RadioSelector, cancellationToken);
             await StartProbing(TimeSpan.FromSeconds(15), cancellationToken);
         }
 
@@ -111,8 +111,24 @@ namespace OmniCore.Eros
                 await context.Save(cancellationToken);
             }
 
-            PodRadioSelector = await GetRadioSelector(cancellationToken);
+            RadioSelector = await GetRadioSelector(cancellationToken);
             await StartProbing(cancellationToken);
+        }
+
+        public async Task AsPaired(uint radioAddress, uint lotNumber, uint serialNumber,
+            CancellationToken cancellationToken)
+        {
+            using var context =
+                await RepositoryService.GetContextReadWrite(cancellationToken);
+            context.WithExisting(Entity)
+                .WithExisting(Entity.Medication)
+                .WithExisting(Entity.User)
+                .WithExisting(Entity.PodRadios);
+
+            Entity.RadioAddress = radioAddress;
+            Entity.Lot = lotNumber;
+            Entity.Serial = serialNumber;
+            await context.Save(cancellationToken);
         }
 
         public async Task<IPodActivationRequest> ActivationRequest()
@@ -145,66 +161,66 @@ namespace OmniCore.Eros
             StopProbing(CancellationToken.None);
         }
 
-        private async Task UpdateRunningState()
-        {
-            using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
-            var responses = context.PodRequests
-                .Where(pr => pr.Pod.Id == Entity.Id)
-                .OrderByDescending(p => p.Created)
-                .Include(pr => pr.Responses)
-                .SelectMany(pr => pr.Responses)
-                .OrderByDescending(r => r.Created);
-
-            RunningState.LastRadioContact = responses.FirstOrDefault()?.Created;
-            RunningState.State = DetermineRunningState(responses);
-
-            RunningState.LastUpdated = DateTimeOffset.UtcNow;
-        }
-
-        private PodState DetermineRunningState(IOrderedQueryable<PodResponseEntity> responses)
-        {
-            var state = PodState.Unknown;
-            var progress = responses
-                .FirstOrDefault(r => r.Progress.HasValue)?
-                .Progress;
-
-            switch (progress)
-            {
-                case PodProgress.InitialState:
-                case PodProgress.TankPowerActivated:
-                case PodProgress.TankFillCompleted:
-                    state = PodState.Pairing;
-                    break;
-                case PodProgress.PairingSuccess:
-                    state = PodState.Paired;
-                    break;
-                case PodProgress.Purging:
-                    state = PodState.Priming;
-                    break;
-                case PodProgress.ReadyForInjection:
-                    state = PodState.Primed;
-                    break;
-                case PodProgress.BasalScheduleSet:
-                case PodProgress.Priming:
-                    state = PodState.Starting;
-                    break;
-                case PodProgress.Running:
-                case PodProgress.RunningLow:
-                    state = PodState.Started;
-                    break;
-                case PodProgress.ErrorShuttingDown:
-                    state = PodState.Faulted;
-                    break;
-                case PodProgress.AlertExpiredShuttingDown:
-                    state = PodState.Expired;
-                    break;
-                case PodProgress.Inactive:
-                    state = PodState.Stopped;
-                    break;
-            }
-
-            return state;
-        }
+        // private async Task UpdateRunningState()
+        // {
+        //     using var context = await RepositoryService.GetContextReadOnly(CancellationToken.None);
+        //     var responses = context.PodRequests
+        //         .Where(pr => pr.Pod.Id == Entity.Id)
+        //         .OrderByDescending(p => p.Created)
+        //         .Include(pr => pr.Responses)
+        //         .SelectMany(pr => pr.Responses)
+        //         .OrderByDescending(r => r.Created);
+        //
+        //     RunningState.LastRadioContact = responses.FirstOrDefault()?.Created;
+        //     RunningState.State = DetermineRunningState(responses);
+        //
+        //     RunningState.LastUpdated = DateTimeOffset.UtcNow;
+        // }
+        //
+        // private PodState DetermineRunningState(IOrderedQueryable<PodResponseEntity> responses)
+        // {
+        //     var state = PodState.Unknown;
+        //     var progress = responses
+        //         .FirstOrDefault(r => r.Progress.HasValue)?
+        //         .Progress;
+        //
+        //     switch (progress)
+        //     {
+        //         case PodProgress.InitialState:
+        //         case PodProgress.TankPowerActivated:
+        //         case PodProgress.TankFillCompleted:
+        //             state = PodState.Pairing;
+        //             break;
+        //         case PodProgress.PairingSuccess:
+        //             state = PodState.Paired;
+        //             break;
+        //         case PodProgress.Purging:
+        //             state = PodState.Priming;
+        //             break;
+        //         case PodProgress.ReadyForInjection:
+        //             state = PodState.Primed;
+        //             break;
+        //         case PodProgress.BasalScheduleSet:
+        //         case PodProgress.Priming:
+        //             state = PodState.Starting;
+        //             break;
+        //         case PodProgress.Running:
+        //         case PodProgress.RunningLow:
+        //             state = PodState.Started;
+        //             break;
+        //         case PodProgress.ErrorShuttingDown:
+        //             state = PodState.Faulted;
+        //             break;
+        //         case PodProgress.AlertExpiredShuttingDown:
+        //             state = PodState.Expired;
+        //             break;
+        //         case PodProgress.Inactive:
+        //             state = PodState.Stopped;
+        //             break;
+        //     }
+        //
+        //     return state;
+        // }
 
         private uint GenerateRadioAddress()
         {
@@ -303,7 +319,7 @@ namespace OmniCore.Eros
         {
             Logger.Information("Starting pod probe");
 
-            var radio = await PodRadioSelector.Select();
+            var radio = await RadioSelector.Select(cancellationToken);
             await radio.PerformHealthCheck(cancellationToken);
             
             Logger.Information("Pod probe ended");

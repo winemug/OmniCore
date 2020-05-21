@@ -25,15 +25,10 @@ namespace OmniCore.Client.Droid
                 .One<IPlatformFunctions, PlatformFunctions>()
                 .One<ILogger, Logger>()
                 .One<IPlatformConfiguration, PlatformConfiguration>()
-                .One<IServiceApi, ServiceApi>()
                 .WithDefaultServices()
                 .WithOmnipodEros()
                 .WithRileyLinkRadio()
-#if EMULATOR
-                .WithBleSimulator()
-#else
                 .WithCrossBleRadioAdapter()
-#endif
                 .WithEfCoreRepository()
                 .WithXamarinFormsClient();
         }

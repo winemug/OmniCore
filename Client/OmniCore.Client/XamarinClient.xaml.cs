@@ -141,6 +141,7 @@ namespace OmniCore.Client
             
             // test views
             RegisterViewViewModel<TestControlView, TestControlViewModel>();
+            RegisterViewViewModel<TestDetailView, TestDetailViewModel>();
             RegisterViewViewModel<TestLogView, TestLogViewModel>();
         }
 

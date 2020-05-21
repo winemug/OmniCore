@@ -9,14 +9,14 @@ using OmniCore.Repository;
 namespace OmniCore.Repository.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20200405014746_m0000")]
-    partial class m0000
+    [Migration("20200521134540_m000")]
+    partial class m000
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.3");
+                .HasAnnotation("ProductVersion", "3.1.4");
 
             modelBuilder.Entity("OmniCore.Model.Entities.MedicationDeliveryEntity", b =>
                 {
@@ -253,52 +253,6 @@ namespace OmniCore.Repository.Migrations
                     b.ToTable("PodRequests");
                 });
 
-            modelBuilder.Entity("OmniCore.Model.Entities.PodResponseEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FaultResponse")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool?>("Faulted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("PodRequestId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("Progress")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RadioResponse")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StatusResponse")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("SyncId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("VersionResponse")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PodRequestId");
-
-                    b.ToTable("PodResponses");
-                });
-
             modelBuilder.Entity("OmniCore.Model.Entities.RadioEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -446,13 +400,6 @@ namespace OmniCore.Repository.Migrations
                     b.HasOne("OmniCore.Model.Entities.PodEntity", "Pod")
                         .WithMany()
                         .HasForeignKey("PodId");
-                });
-
-            modelBuilder.Entity("OmniCore.Model.Entities.PodResponseEntity", b =>
-                {
-                    b.HasOne("OmniCore.Model.Entities.PodRequestEntity", "PodRequest")
-                        .WithMany("Responses")
-                        .HasForeignKey("PodRequestId");
                 });
 
             modelBuilder.Entity("OmniCore.Model.Entities.RadioEventEntity", b =>

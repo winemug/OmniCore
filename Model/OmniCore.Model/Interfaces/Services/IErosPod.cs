@@ -9,5 +9,6 @@ namespace OmniCore.Model.Interfaces.Services
     public interface IErosPod : IPod
     {
         Task UpdateRadioList(IEnumerable<IErosRadio> radios, CancellationToken cancellationToken);
+        Task AsPaired(uint radioAddress, uint lotNumber, uint serialNumber, CancellationToken cancellationToken);
     }
 }

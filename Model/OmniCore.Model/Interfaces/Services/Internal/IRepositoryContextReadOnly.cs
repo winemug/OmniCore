@@ -15,7 +15,6 @@ namespace OmniCore.Model.Interfaces.Services.Internal
         DbSet<PodEntity> Pods { get; }
         DbSet<PodRequestEntity> PodRequests { get; }
         DbSet<MedicationDeliveryEntity> MedicationDeliveries { get; }
-        DbSet<PodResponseEntity> PodResponses { get; }
         void SetLock(IDisposable readerWriterLock, bool tracking);
     }
 }
