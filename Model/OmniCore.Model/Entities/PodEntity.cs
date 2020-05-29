@@ -32,5 +32,9 @@ namespace OmniCore.Model.Entities
         public string SwRevision { get; set; }
 
         public TimeSpan PodUtcOffset { get; set; }
+        
+        public int NextMessageSequence { get; set; }
+        
+        public int NextPacketSequence { get; set; }
     }
 }

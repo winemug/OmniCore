@@ -160,52 +160,57 @@ namespace OmniCore.Radios.RileyLink.Protocol
             ConfiguredOptions = options;
         }
 
-        public async Task Transceive(IRadioTransmission radioTransmission, CancellationToken cancellationToken)
+        public async Task Transceive(IPacketRadioTransmission packetRadioTransmission, CancellationToken cancellationToken)
         {
-            switch (radioTransmission.Sequence)
+            switch (packetRadioTransmission.Sequence)
             {
                 case RadioTransmissionSequence.Rx:
                     var rxResponse = await GetPacket(
-                        (byte) radioTransmission.Channel,
-                        (uint) radioTransmission.RxTimeout.Milliseconds,
+                        (byte) packetRadioTransmission.Channel,
+                        (uint) packetRadioTransmission.RxTimeout.Milliseconds,
                         cancellationToken);
-                    radioTransmission.Rx = rxResponse.PacketData;
-                    radioTransmission.Rssi = rxResponse.Rssi;
+                    packetRadioTransmission.Rx = rxResponse.PacketData;
+                    packetRadioTransmission.Rssi = rxResponse.Rssi;
                     break;
                 case RadioTransmissionSequence.Tx:
-                    if (radioTransmission.PowerOverride.HasValue)
-                        await SetTxPower(radioTransmission.PowerOverride.Value, cancellationToken);
+                    if (packetRadioTransmission.PowerOverride.HasValue)
+                        await SetTxPower(packetRadioTransmission.PowerOverride.Value, cancellationToken);
                     else
                         await SetTxPower(RequestedOptions.Amplification, cancellationToken);
 
                     await SendPacket(
-                        (byte) radioTransmission.Channel,
+                        (byte) packetRadioTransmission.Channel,
                         4,
                         10,
                         70,
-                        radioTransmission.Tx,
+                        packetRadioTransmission.Tx,
                         cancellationToken);
                     break;
                 case RadioTransmissionSequence.TxRx:
-                    if (radioTransmission.PowerOverride.HasValue)
-                        await SetTxPower(radioTransmission.PowerOverride.Value, cancellationToken);
+                    if (packetRadioTransmission.PowerOverride.HasValue)
+                        await SetTxPower(packetRadioTransmission.PowerOverride.Value, cancellationToken);
                     else
                         await SetTxPower(RequestedOptions.Amplification, cancellationToken);
 
                     var txrxResponse = await SendAndListen(
-                        (byte) radioTransmission.Channel,
+                        (byte) packetRadioTransmission.Channel,
                         4,
                         10,
                         70,
-                        (byte) radioTransmission.Channel,
-                        (uint) radioTransmission.RxTimeout.Milliseconds,
+                        (byte) packetRadioTransmission.Channel,
+                        (uint) packetRadioTransmission.RxTimeout.Milliseconds,
                         0,
-                        radioTransmission.Tx,
+                        packetRadioTransmission.Tx,
                         cancellationToken);
-                    radioTransmission.Rx = txrxResponse.PacketData;
-                    radioTransmission.Rssi = txrxResponse.Rssi;
+                    packetRadioTransmission.Rx = txrxResponse.PacketData;
+                    packetRadioTransmission.Rssi = txrxResponse.Rssi;
                     break;
             }
+        }
+
+        public async Task Transceive(IMessageRadioTransmission messageRadioTransmission, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
 
         private async Task SetTxPower(TransmissionPower txPower, CancellationToken cancellationToken)

@@ -20,12 +20,13 @@ namespace OmniCore.Eros
         private readonly IRepositoryService RepositoryService;
 
         private PodRequestEntity Entity;
-        private TransmissionPower? TransmissionPowerOverride;
 
         public IPod Pod => ErosPod;
         public IErosPod ErosPod { get; private set; }
         public uint MessageAddress { get; private set; }
-        public bool AllowAddressOverride { get; private set; }
+
+        private int MessageSequence;
+        private bool CriticalFollowUp = false;
 
         public ErosPodRequestMessage(
             IRepositoryService repositoryService)
@@ -42,21 +43,10 @@ namespace OmniCore.Eros
             MessageAddress = messageAddress;
             return this;
         }
-        public ErosPodRequestMessage WithAllowAddressOverride()
-        {
-            AllowAddressOverride = true;
-            return this;
-        }
-
-        public ErosPodRequestMessage WithTransmissionPower(TransmissionPower transmissionPower)
-        {
-            TransmissionPowerOverride = transmissionPower;
-            return this;
-        }
-
         public ErosPodRequestMessage WithCriticalFollowup()
         {
-            throw new NotImplementedException();
+            CriticalFollowUp = true;
+            return this;
         }
 
         public ErosPodRequestMessage WithStatusRequest(StatusRequestType requestType)
@@ -76,17 +66,12 @@ namespace OmniCore.Eros
 
         public ErosPodRequestMessage WithAcquireRequest()
         {
-            AllowAddressOverride = true;
-            TransmissionPowerOverride = TransmissionPower.Lowest;
-
             return WithPart(new RequestPart
             {
                 PartType = PartType.RequestStatus,
                 PartData = new Bytes((byte) StatusRequestType.Standard)
             });
         }
-
-        public byte[] Data { get; }
 
         public ErosPodRequestMessage WithPairRequest(uint radioAddress)
         {
@@ -97,9 +82,10 @@ namespace OmniCore.Eros
             }).WithMessageAddress(0xffffffff);
         }
 
-        public ErosPodRequestMessage WithMessageSequence(int messageNo)
+        public ErosPodRequestMessage WithMessageSequence(int messageSequence)
         {
-            throw new NotImplementedException();
+            MessageSequence = messageSequence;
+            return this;
         }
 
         private ErosPodRequestMessage WithPart(RequestPart part)
@@ -108,7 +94,7 @@ namespace OmniCore.Eros
             return this;
         }
 
-        public byte[] GetRequestData(uint messageSequence, bool willFollowupWithCriticalRequest)
+        public byte[] GetRequestData()
         {
             var messageBody = new Bytes();
 
@@ -127,8 +113,8 @@ namespace OmniCore.Eros
                 messageBody.Append(partBody);
             }
 
-            var b0 = (byte) (messageSequence << 2);
-            if (willFollowupWithCriticalRequest)
+            var b0 = (byte) (MessageSequence << 2);
+            if (CriticalFollowUp)
                 b0 |= 0x80;
             b0 |= (byte) ((messageBody.Length >> 8) & 0x03);
             var b1 = (byte) (messageBody.Length & 0xff);

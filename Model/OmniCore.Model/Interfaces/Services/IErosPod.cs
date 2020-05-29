@@ -10,5 +10,6 @@ namespace OmniCore.Model.Interfaces.Services
     {
         Task UpdateRadioList(IEnumerable<IErosRadio> radios, CancellationToken cancellationToken);
         Task AsPaired(uint radioAddress, uint lotNumber, uint serialNumber, CancellationToken cancellationToken);
+        Task<IPodRequest> DebugAction(CancellationToken cancellationToken);
     }
 }

@@ -21,6 +21,7 @@ namespace OmniCore.Radios.RileyLink
 {
     public class RileyLinkRadio : IErosRadio, ICompositeDisposableProvider
     {
+        public bool HasProperOmnipodInterface => false;
         public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
         public RadioEntity Entity { get; private set; }
         public RadioType Type => RadioType.RileyLink;

@@ -5,7 +5,7 @@ using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services.Internal
 {
-    public interface IRadioTransmission
+    public interface IPacketRadioTransmission
     {
         RadioTransmissionSequence Sequence { get; }
         byte[] Tx { get; set; }

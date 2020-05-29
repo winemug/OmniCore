@@ -10,8 +10,8 @@ namespace OmniCore.Client.Console.Platform
 {
     public class WinBlePeripheral : IBlePeripheral
     {
-        public Guid PeripheralUuid { get; }
-        public Guid PrimaryServiceUuid { get; }
+        public Guid PeripheralUuid { get; set; }
+        public Guid PrimaryServiceUuid { get; set; }
         public string Name { get; set; }
         public (int Rssi, DateTimeOffset Date)? Rssi { get; }
         public (PeripheralDiscoveryState State, DateTimeOffset Date) DiscoveryState { get; }
@@ -42,12 +42,12 @@ namespace OmniCore.Client.Console.Platform
 
         public IObservable<PeripheralDiscoveryState> WhenDiscoveryStateChanged()
         {
-            throw new NotImplementedException();
+            return Observable.Never<PeripheralDiscoveryState>();
         }
 
         public IObservable<PeripheralConnectionState> WhenConnectionStateChanged()
         {
-            throw new NotImplementedException();
+            return Observable.Never<PeripheralConnectionState>();
         }
 
         public async Task<IBlePeripheralConnection> GetConnection(BleOptions options, CancellationToken cancellationToken)

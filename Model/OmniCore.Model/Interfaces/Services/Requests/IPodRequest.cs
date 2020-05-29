@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using OmniCore.Model.Enumerations;
 
 namespace OmniCore.Model.Interfaces.Services
 {
     public interface IPodRequest : IDisposable
     {
-        IPodRequest ForPod(IPod pod);
-        IPodRequest QueueExecution();
+        Task<IPodRequest> Submit(CancellationToken cancellationToken);
         // Task ExecuteRequest();
         // IPodRequest WithoutAutoRescheduling(TimeSpan rescheduleWindow);
         // IPodRequest ScheduleStart(DateTimeOffset earliestStart, bool rescheduleOnRetry);

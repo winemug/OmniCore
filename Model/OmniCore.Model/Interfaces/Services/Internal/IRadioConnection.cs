@@ -8,7 +8,8 @@ namespace OmniCore.Model.Interfaces.Services.Internal
     public interface IRadioConnection
     {
         Task Configure(RadioOptions options, CancellationToken cancellationToken);
-        Task Transceive(IRadioTransmission radioTransmission, CancellationToken cancellationToken);
+        Task Transceive(IPacketRadioTransmission packetRadioTransmission, CancellationToken cancellationToken);
+        Task Transceive(IMessageRadioTransmission messageRadioTransmission, CancellationToken cancellationToken);
         Task FlashLights(CancellationToken cancellationToken);
     }
 }

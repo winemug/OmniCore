@@ -8,13 +8,17 @@ namespace OmniCore.Model.Entities
     {
         public PodEntity Pod { get; set; }
         public RequestType RequestType { get; set; }
-        public string Parameters { get; set; }
+        public string RequestParameters { get; set; }
+        
+        public TaskState State { get; set; }
+        public TaskResult Result { get; set; }
+        
+        public DateTime? ScheduledStartEarliest { get; set; }
+        public DateTime? ScheduledStartLatest { get; set; }
 
-        public RequestState RequestStatus { get; set; }
-        public DateTime? StartEarliest { get; set; }
-        public DateTime? StartLatest { get; set; }
         public DateTime? Started { get; set; }
-        public DateTime? ResultReceived { get; set; }
+        public DateTime? Ended { get; set; }
+
         public FailureType? FailureType { get; set; }
         public string ErrorText { get; set; }
     }

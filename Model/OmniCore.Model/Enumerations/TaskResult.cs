@@ -2,10 +2,11 @@
 {
     public enum TaskResult
     {
-        Canceled,
+        Pending,
+        Succeeded,
         Failed,
+        Canceled,
         Expired,
         Redundant,
-        Succeeded
     }
 }

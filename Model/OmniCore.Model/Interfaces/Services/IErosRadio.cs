@@ -9,6 +9,7 @@ namespace OmniCore.Model.Interfaces.Services
 {
     public interface IErosRadio: IDisposable
     {
+        bool HasProperOmnipodInterface { get; }
         RadioEntity Entity { get; }
         RadioType Type { get; }
         string Address { get; }

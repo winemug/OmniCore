@@ -45,6 +45,7 @@ namespace OmniCore.Radios.RileyLink
                 {
                     var radio = await Container.Get<RileyLinkRadio>();
                     await radio.Initialize(uuid, cancellationToken);
+                    RadioDictionary[uuid] = radio;
                 }
                 return RadioDictionary[uuid];
             }

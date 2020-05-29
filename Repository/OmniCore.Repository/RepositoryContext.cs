@@ -20,8 +20,7 @@ namespace OmniCore.Repository
 {
     public class RepositoryContext : DbContext, IRepositoryContextReadWrite
     {
- 
-        public DbSet<MedicationEntity> Medications { get; set; }
+ public DbSet<MedicationEntity> Medications { get; set; }
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<RadioEntity> Radios { get; set; }
         public DbSet<RadioEventEntity> RadioEvents { get; set; }
