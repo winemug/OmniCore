@@ -1,67 +1,64 @@
 # OmniCore
 
-OmniCore is a platform for controlling and automating drug delivery using the Omnipod system.
+OmniCore is a hardware and software platform for controlling and automating drug delivery using Omnipod insulin pumps and Dexcom sensors.
 
-**Update 03.01.2020:**<br/>
-Dear podders
+This is the public repository for the OmniCore Mobile App, which can be used to control OmniCore Hardware.
 
-Missed the deadline due some undiscovered issues in the very last minute (Murphy's law) - that sparked a need for a thorough review and in some cases re-write. Since the next release is targeting stability and I am very picky about it, it took several sleepless nights to dissect everything apart to look for potential problems of similar nature.
+# Announcement
 
-Now the issues are fixed and consciousness cleared, I can finally write this update. It still requires some time to fit back all the screws, which isn't a lot of work but I can start earliest mid next week (around the 8th).   
+<b>We have been working hard behind closed doors on a system to address our current woes with existing products.</b>
 
-My apologies to everyone expecting the release sooner and many thanks to those who have donated to make life bearable. (it absolutely does)
+Please hold for while we're opening the doors and readying the full announcement of brand new features of the OmniCore ecosystem with more details. In the mean-time, you can address your questions to my [personal e-mail](mailto:barisk@gmail.com) and help out compiling the FAQ.
 
-**Update 29.12.2019:**<br/>
-Beta v1.0 is scheduled for release in 2019 - so happy new year!
+## Supported end devices
+Active:
+* Omnipod Eros
+* Omnipod Dash
+* Dexcom G6
 
-I'm overwhelmed with all kinds of work for the moment, so expect documentation and more information to appear in due time following the release. In the meantime, check out the updated roadmap:
-https://github.com/winemug/OmniCore/wiki/Roadmap
+Planned:
+* Libre 2
+* Dexcom G7
+* Libre 3
 
-## All thanks to
+## Features and Components
+Monitor and control pods and cgms concurrently.<br/>
+Remote access worldwide via cellular IOT networks, local access using bluetooth on your mobile phone.<br/>
+OmniCore RADD closed loop system with edge computing. (beta)<br/>
 
-[Joe](https://github.com/itsmojo) for his original work on the Omnipod,<br/>
-[Eddie](https://github.com/eurenda) for the thousand pods and thousand words,<br/>
-[Jeremy](https://github.com/jhaydraude) for his work on AndroidAPS customizations,<br/>
-[Dan](https://github.com/dexdan), [Tim], [Jeff](https://github.com/scudrunner), [Jordan](https://github.com/jordan-damron), [Theo](https://github.com/vanelsberg), [Jacob], [Rene](https://github.com/Flori3000), [Miguel], [Maite], [Yann], [Rick], [Edward], [Mark], [Mike] for donating their precious time and resources,<br/>
-[Adrian](https://github.com/AdrianLxM/) for all the insight<br/>
-[Jetbrains](https://www.jetbrains.com/?from=OmniCore) for being awesome (seriously, check out [Rider](https://www.jetbrains.com/rider/))<br/>
-and [Insulet](https://myomnipod.com/) for being a bro so far.
+### OmniCore Oyster
+A stand-alone hardware device for enabling communication to end devices over the OmniCore API.
 
-## Downloads
+* Compact design for bulk minimization.
+* Autonomous operation that doesn't require a constant connection to a mobile device or an app.
+* Reliable and fast communication with end devices, immune to errors and inconsistencies arising from dependencies.
+* Excellent stability and battery life thanks to latest generation of hardware components and the software architecture
+* Worldwide network coverage including deep indoors and in wide areas, pre-installed e-sim
+* Local connectivitiy over BLE with optional long-range modulation
+* Built-in motion sensor and GPS
+* Waterproof design, wireless charging, onboard interface for quick actions, over the air updates
+* OmniCore RADD ready
 
-Alpha builds are located in Microsoft AppCenter: https://install.appcenter.ms/users/winemug/apps/omnicore/distribution_groups/alpha%20testing
+### OmniCore Mobile App (this repository)
+An Android mobile app for interacting with the OmniCore Oyster locally over BLE or over the internet.
+* Manage user profiles and OmniCore Oyster devices
+* Register, control and monitor end devices
+* Manage and monitor OmniCore RADD
 
-Beta and other releases will be available in GitHub 
+### OmniCore RADD (Reactive Adaptive Drug Delivery)
+OmniCore's closed loop algorithm for Type I Diabetes therapy automation. A novel decision making instrument that removes guesswork out of the equation. Currently in a strict opt-in beta.
 
-AndroidAPS for OmniCore: https://github.com/winemug/AndroidAPS/releases
+* Detection of variance in insulin absorption per infusion site.
+* Detection of insulin effect based on past and current data.
+* Administration of basal insulin, independent of time-of-day.
+* Administration of meal-time insulin without the need for user interaction.
+* Overlapping administration of insulin and glucagon for shortening periods of hyperglycemia.
+* Administration of glucagon to prevent hypoglycemia.
 
-## Support
-Facebook page for announcements and feedback: https://www.facebook.com/OmniCorePdm/ (new)
 
-Support group on facebook: https://www.facebook.com/groups/2141146659318874/ (managed by community members)
+### OmniCore Web
+The web interface for providing the same set of functionality as the mobile app.
 
-Join the live discussion on slack: [invite link](https://join.slack.com/t/omnicore-pdm/shared_invite/enQtODM0MzAxMDkzNzI5LWQ5MjEwNWNhOGNlZDI1YTcxNDhmYmNjNDE3YTU2MWY3OGNkMzZlMTc5MTFhYmI5MDBjNTk5YmQ1NGRhZGNlZDM)
+### OmniCore API
+A unified open API for communicating with OmniCore Oyster via BLE and over the internet.
 
-## Contributions
-If you have the means to do so, please consider donating money, resources or time for the project, all of which I am currently struggling to afford.  
- 
-Direct donations:<br/>
-PayPal:  https://paypal.me/winemug/ <br/>
-
-Sponsorship:<br/>
-GitHub: https://github.com/winemug/
-
-If you can:
-- donate hardware such as Pods (expired or not, especially Omnipod Dash), used phones (Android or iOS), radio equipment and electronic tools
-- donate cloud resources
-- write code on .NET/Xamarin, Tizen, Android, iOS or develop a back-end<br/>
-- make things look better and more usable<br/>
-- make text read in other languages <br/>
-
-then please send an e-mail to my e-mail address below.
-
-## Contact
-[barisk@gmail.com](mailto:barisk@gmail.com)
-
-OmniCore is the follow-up project to [OmniPy](https://github.com/winemug/omnipy)<br/>
-Ramblings and otherwise: https://balya.net/<br/>
