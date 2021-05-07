@@ -53,29 +53,63 @@
     <Compile Remove="Removed\Views\Test\DebugPage.xaml.cs" />
     <Compile Remove="Removed\Views\Test\TestPage.xaml.cs" />
     <Compile Remove="Removed\Views\Users\NewUser.xaml.cs" />
+    <Compile Update="Views\Dialogs\TermsDialogView.xaml.cs">
+      <DependentUpon>TermsDialogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Dialogs\PermissionsDialogView.xaml.cs">
+      <DependentUpon>PermissionsDialogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Test\TestControlView.xaml.cs">
+      <DependentUpon>TestControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Test\TestLogView.xaml.cs">
+      <DependentUpon>TestLogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Test\TestDetailView.xaml.cs">
+      <DependentUpon>TestDetailView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="Removed\Views\Help\AboutPage.xaml" />
     <EmbeddedResource Remove="Removed\Views\Pods\OverviewPage.xaml" />
+    <EmbeddedResource Update="Views\Dialogs\TermsDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Dialogs\PermissionsDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ServicePopup.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Test\TestLogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Test\TestDetailView.xaml">
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwait.Fody" Version="3.3.1" />
-    <PackageReference Include="Fody" Version="6.3.0">
+    <PackageReference Include="Fody" Version="6.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.4.3" />
-    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.4.3" />
+    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.2.1" />
+    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.2.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.3.0.19" />
-    <PackageReference Include="PropertyChanged.Fody" Version="3.3.1" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="Unity.Abstractions" Version="5.11.6" />
-    <PackageReference Include="Xamarin.Forms" Version="4.8.0.1687" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="2.0.0.2" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Xamarin.Forms" Version="4.6.0.772" />
   </ItemGroup>
 
   <ItemGroup>
@@ -86,14 +120,23 @@
     <Compile Update="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Main\ShellView.xaml.cs">
-      <DependentUpon>ShellView.xaml</DependentUpon>
+    <Compile Update="Views\Home\ActivePodsView.xaml.cs">
+      <DependentUpon>PodsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml.cs">
+      <DependentUpon>PodWizardPendingActivationsWarning.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml.cs">
+      <DependentUpon>PodWizardPodTypeSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml.cs">
+      <DependentUpon>PodWizardMedicationSelection.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml.cs">
       <DependentUpon>SetupWizardRootView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="XamarinApp.xaml.cs">
-      <DependentUpon>XamarinApp.xaml</DependentUpon>
+    <Compile Update="XamarinClient.xaml.cs">
+      <DependentUpon>XamarinClient.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -101,10 +144,13 @@
     <EmbeddedResource Update="Views\EmptyView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\Home\ProgressPopupView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\Home\RadioDetailView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Main\ShellView.xaml">
+    <EmbeddedResource Update="Views\Home\RadioScanView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Removed\Views\Help\AboutPage.xaml">
@@ -146,61 +192,32 @@
     <EmbeddedResource Update="Removed\Views\Users\NewUser.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\Home\RadiosView.xaml">
+    <EmbeddedResource Update="Views\Test\TestControlView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardAdvancedOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPodTypeSelection.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardPendingActivationsWarning.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardIntegrationOptions.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMainView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardMedicationSelection.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Wizards\NewPod\PodWizardRadioSelection.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Wizards\SetupWizard\SetupWizardRootView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Removed\ViewModels\Users\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Removed\Platform\HistoricalResult.cs" />
-    <None Include="Removed\Platform\HistoricalResultType.cs" />
-    <None Include="Removed\Platform\RemoteRequest.cs" />
-    <None Include="Removed\Platform\RemoteRequestHandler.cs" />
-    <None Include="Removed\Platform\RemoteRequestType.cs" />
-    <None Include="Removed\Platform\RemoteResult.cs" />
-    <None Include="Removed\ViewModels\BaseViewModel.cs" />
-    <None Include="Removed\ViewModels\FlyoutViewModel.cs" />
-    <None Include="Removed\ViewModels\Help\AboutViewModel.cs" />
-    <None Include="Removed\ViewModels\MainViewModel.cs" />
-    <None Include="Removed\ViewModels\PageViewModel.cs" />
-    <None Include="Removed\ViewModels\PodsViewModel.cs" />
-    <None Include="Removed\ViewModels\Pods\ActivityViewModel.cs" />
-    <None Include="Removed\ViewModels\Pods\ConversationsViewModel.cs" />
-    <None Include="Removed\ViewModels\Pods\MaintenanceViewModel.cs" />
-    <None Include="Removed\ViewModels\Pods\OverviewViewModel.cs" />
-    <None Include="Removed\ViewModels\Pods\ResultViewModel.cs" />
-    <None Include="Removed\ViewModels\PodViewModel.cs" />
-    <None Include="Removed\ViewModels\PropertyChangedImpl.cs" />
-    <None Include="Removed\ViewModels\Settings\ApplicationSettingsViewModel.cs" />
-    <None Include="Removed\ViewModels\Settings\RadioSettingsViewModel.cs" />
-    <None Include="Removed\ViewModels\TabViewModel.cs" />
-    <None Include="Removed\ViewModels\Test\DebugViewModel.cs" />
-    <None Include="Removed\ViewModels\Test\RadioTestingViewModel.cs" />
-    <None Include="Removed\Views\Help\AboutPage.xaml.cs" />
-    <None Include="Removed\Views\PodDebugPage.xaml.cs" />
-    <None Include="Removed\Views\Pods\OverviewPage.xaml.cs">
-      <DependentUpon>OverviewPage.xaml</DependentUpon>
-    </None>
-    <None Include="Removed\Views\PodTestPage.xaml.cs" />
-    <None Include="Removed\Views\RadioTesting\PodsPage.xaml.cs" />
-    <None Include="Removed\Views\RadioTesting\RadiosPage.xaml.cs">
-      <DependentUpon>RadiosPage.xaml</DependentUpon>
-    </None>
-    <None Include="Removed\Views\RadioTesting\RadioTestPage.xaml.cs" />
-    <None Include="Removed\Views\Settings\ApplicationSettingsPage.xaml.cs">
-      <DependentUpon>ApplicationSettingsPage.xaml</DependentUpon>
-    </None>
-    <None Include="Removed\Views\Settings\PodSettingsPage.xaml.cs" />
-    <None Include="Removed\Views\Settings\RadioSettingsPage.xaml.cs" />
-    <None Include="Removed\Views\Test\DebugPage.xaml.cs" />
-    <None Include="Removed\Views\Test\TestPage.xaml.cs" />
-    <None Include="Removed\Views\Users\NewUser.xaml.cs" />
   </ItemGroup>
 </Project>

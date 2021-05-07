@@ -9,13 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Moq" Version="4.15.1" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="Unity" Version="5.11.7" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Unity" Version="5.11.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +29,6 @@
     <ProjectReference Include="..\..\Model\OmniCore.Model\OmniCore.Model.csproj" />
     <ProjectReference Include="..\..\Pod\OmniCore.Eros\OmniCore.Eros.csproj" />
     <ProjectReference Include="..\..\Radios\OmniCore.Radios.RileyLink\OmniCore.Radios.RileyLink.csproj" />
-    <ProjectReference Include="..\..\Repository\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite\OmniCore.Repository.Sqlite.csproj" />
     <ProjectReference Include="..\..\Simulation\OmniCore.Simulation\OmniCore.Simulation.csproj" />
     <ProjectReference Include="..\..\Therapy\OmniCore.Therapy\OmniCore.Therapy.csproj" />
     <ProjectReference Include="..\OmniCore.Services\OmniCore.Services.csproj" />

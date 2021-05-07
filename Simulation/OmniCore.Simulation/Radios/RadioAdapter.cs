@@ -1,37 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using OmniCore.Model.Interfaces.Platform;
-
-namespace OmniCore.Simulation.Radios
+﻿namespace OmniCore.Simulation.Radios
 {
-    public class RadioAdapter : IRadioAdapter
-    {
-        public Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+    //public class RadioAdapter : IBlePeripheralAdapter
+    //{
+    //    public Task TryEnsureAdapterEnabled(CancellationToken cancellationToken)
+    //    {
+    //        return Task.CompletedTask;
+    //    }
 
-        public async Task<bool> TryEnableAdapter(CancellationToken cancellationToken)
-        {
-            return true;
-        }
+    //    public Task<bool> TryEnableAdapter(CancellationToken cancellationToken)
+    //    {
+    //        return Task.FromResult(true);
+    //    }
 
-        public async Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
-        {
-            return false;
-        }
+    //    public Task<bool> TryDisableAdapter(CancellationToken cancellationToken)
+    //    {
+    //        return Task.FromResult(false);
+    //    }
 
-        public IObservable<IRadioPeripheralResult> FindPeripherals(Guid serviceId)
-        {
-            throw new NotImplementedException();
-        }
+    //    public IObservable<IBlePeripheral> FindPeripherals()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
 
-        public Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public Task<IRadioPeripheralResult> FindPeripheral(Guid peripheralUuid, Guid serviceUuid, CancellationToken cancellationToken)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }

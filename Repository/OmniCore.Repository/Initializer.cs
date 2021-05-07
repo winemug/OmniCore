@@ -1,15 +1,16 @@
-﻿using OmniCore.Model.Interfaces.Repositories;
-using OmniCore.Model.Interfaces.Services;
-using Unity;
+﻿using OmniCore.Model.Interfaces;
+using OmniCore.Model.Interfaces.Services.Internal;
 
 namespace OmniCore.Repository
 {
     public static class Initializer
     {
-        public static IUnityContainer WithSqliteRepository(this IUnityContainer container)
+        public static IContainer WithEfCoreRepository
+            (this IContainer container)
         {
-            container.RegisterSingleton<IRepositoryService, RepositoryService>();
-            return container;
+            return container
+                .Many<IRepositoryContextReadOnly, RepositoryContext>()
+                .Many<IRepositoryContextReadWrite, RepositoryContext>();
         }
     }
 }

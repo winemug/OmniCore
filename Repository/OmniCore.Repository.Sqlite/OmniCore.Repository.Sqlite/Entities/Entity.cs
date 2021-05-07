@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
@@ -15,6 +15,8 @@ namespace OmniCore.Repository.Sqlite.Entities
 
         [AutoIncrement, PrimaryKey]
         public long Id { get; set; }
+        
+        public Guid? SyncId { get; set; }
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset? Updated { get; set; }
         public bool IsDeleted { get; set; }

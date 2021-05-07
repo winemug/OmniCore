@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:OmniCore.Client.Models;assembly=OmniCore.Client"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Test.TestControlView">
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Text="Start Test" Command="{Binding StartTestCommand}" IsEnabled="{Binding StartTestEnabled}"/>
+            <Button Text="Stop Test" Command="{Binding StopTestCommand}" IsEnabled="{Binding StopTestEnabled}"/>
+            <Label Text="Radio Selection:"/>
+            <CollectionView x:Name="RadioCollectionView" ItemsSource="{Binding Radios}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="{x:Type models:RadioModel}">
+                        <Frame Padding="2">
+                            <Grid BackgroundColor="#eeeeee">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="30" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <CheckBox IsChecked="{Binding IsChecked}" Grid.Row="0" Grid.Column="0"/>
+                                <Label Text="{Binding MacAddress}" Grid.Row="0" Grid.Column="1" />
+                                <Label Text="{Binding Rssi}" Grid.Row="0" Grid.Column="2" />
+                                <Label Text="{Binding Name}" Grid.Row="1" Grid.Column="1"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+
+    </ContentPage.Content>
+</ContentPage>

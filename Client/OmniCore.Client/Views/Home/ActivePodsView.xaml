@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Home.ActivePodsView">
+    <ContentPage.Content>
+        <AbsoluteLayout>
+            <ScrollView>
+                <CollectionView x:Name="PodCollectionView" ItemsSource="{Binding Pods}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="2">
+                                <Grid BackgroundColor="#eeeeee">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Pod" />
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </ScrollView>
+            <BoxView BackgroundColor="#63FC3C"
+                     CornerRadius="12"
+                     AbsoluteLayout.LayoutFlags="PositionProportional"
+                     AbsoluteLayout.LayoutBounds=".95,.95,120,40" />
+            <Button Text="NEW POD" FontSize="16" FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    TextColor="#000000"
+                    Command="{Binding AddCommand}"
+                    AbsoluteLayout.LayoutFlags="PositionProportional"
+                    AbsoluteLayout.LayoutBounds=".95,.95,120,40" />
+        </AbsoluteLayout>
+    </ContentPage.Content>
+    <Shell.TitleView>
+        <ContentView>
+            <Label Text="Active Pods" FontSize="Large" TextColor="White" VerticalOptions="CenterAndExpand" />
+        </ContentView>
+    </Shell.TitleView>
+</ContentPage>

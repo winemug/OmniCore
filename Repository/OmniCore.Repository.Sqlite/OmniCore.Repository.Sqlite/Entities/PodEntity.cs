@@ -1,24 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
 {
     public class PodEntity : Entity, IPodEntity
     {
-        public Guid? UniqueId { get; set; }
         public string HwRevision { get; set; }
         public string SwRevision { get; set; }
+
         public TimeSpan PodUtcOffset { get; set; }
+        
         public bool AutoAdjustPodTime { get; set; }
         public bool DeactivateOnError { get; set; }
+        public int? ExecuteCommandRssiThreshold { get; set; }
         public PodState State { get; set; }
         public DateTimeOffset? ActivationStart { get; set; }
         public DateTimeOffset? InsertionStart { get; set; }
         public DateTimeOffset? Started { get; set; }
         public DateTimeOffset? Stopped { get; set; }
+        public DateTimeOffset? MarkedAsMalfunctioning { get; set; }
         public DateTimeOffset? Faulted { get; set; }
         public decimal DeliveredUnits { get; set; }
         public decimal ReservoirUnits { get; set; }
@@ -42,6 +45,8 @@ namespace OmniCore.Repository.Sqlite.Entities
         public decimal? ExtendedBolusDelivered { get; set; }
         public decimal? ExtendedBolusRemaining { get; set; }
         public uint RadioAddress { get; set; }
+        public uint Lot { get; set; }
+        public uint Serial { get; set; }
         public bool BeepStartBolus { get; set; }
         public bool BeepEndBolus { get; set; }
         public bool BeepStartTempBasal { get; set; }
@@ -64,16 +69,27 @@ namespace OmniCore.Repository.Sqlite.Entities
         public long? TherapyProfileId { get; set; }
 
         [Ignore]
-        public IList<IRadioEntity> Radios { get; set; }
+        public IBasalScheduleEntity ReferenceBasalSchedule { get; set; }
+        public long? ReferenceBasalScheduleId { get; set; }
+
+        [Ignore]
+        public IRadioEntity Radio { get; set; }
+        public long? RadioId { get; set; }
         
         [Ignore]
-        public IBasalScheduleAttributes BasalSchedule { get; set; }
-        [Ignore]
         public IReminderAttributes ExpiresSoonReminder { get; set; }
+        public string ExpiresSoonReminderJson { get; set; }
+
         [Ignore]
         public IReminderAttributes ReservoirLowReminder { get; set; }
+        public string ReservoirLowReminderJson { get; set; }
+
         [Ignore]
         public IReminderAttributes ExpiredReminder { get; set; }
+        public string ExpiredReminderJson { get; set; }
 
+        [Ignore]
+        public IList<(TimeSpan start, decimal hourlyRate)> BasalScheduleEntries { get; set; }
+        public string BasalScheduleEntriesJson { get; set; }
     }
 }

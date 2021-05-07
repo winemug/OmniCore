@@ -1,15 +1,12 @@
-﻿using System;
-using OmniCore.Model.Interfaces.Platform;
-using OmniCore.Simulation.Radios;
-using Unity;
+﻿using OmniCore.Model.Interfaces;
 
 namespace OmniCore.Simulation
 {
     public static class Initializer
     {
-        public static IUnityContainer WithBleSimulator(this IUnityContainer container)
+        public static IContainer WithBleSimulator
+            (this IContainer container)
         {
-            container.RegisterSingleton<IRadioAdapter, RadioAdapter>();
             return container;
         }
     }

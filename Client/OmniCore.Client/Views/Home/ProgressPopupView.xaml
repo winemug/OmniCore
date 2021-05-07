@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                 mc:Ignorable="d"
+                 x:Class="OmniCore.Client.Views.Home.ProgressPopupView">
+    <ContentPage.Content>
+        <Frame BackgroundColor="#DAFAF1" BorderColor="Black" Padding="20"
+               VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+            <ScrollView>
+                <StackLayout>
+                    <Label Text="{Binding Progress.Description}" HorizontalOptions="Center" />
+                    <ProgressBar Progress="{Binding Progress.PercentComplete}" />
+                    <CollectionView x:Name="PodCollectionView" ItemsSource="{Binding Progress.Children}"
+                                    SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="2">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Text="{Binding Name}" HorizontalOptions="Center" />
+                                        <ProgressBar Grid.Column="1" Progress="{Binding PercentComplete}" />
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </ScrollView>
+        </Frame>
+    </ContentPage.Content>
+</pages:PopupPage>

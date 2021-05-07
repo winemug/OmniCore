@@ -1,26 +1,30 @@
-﻿using OmniCore.Model.Interfaces.Data;
-using OmniCore.Model.Interfaces.Data.Repositories;
-using OmniCore.Model.Interfaces.Services;
+﻿using OmniCore.Model.Interfaces.Data.Repositories;
+using OmniCore.Model.Interfaces.Platform.Common;
+using OmniCore.Model.Interfaces.Platform.Common.Data;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Repositories;
 using OmniCore.Repository.Sqlite.Entities;
 using OmniCore.Repository.Sqlite.Repositories;
-using Unity;
 
 namespace OmniCore.Repository.Sqlite
 {
     public static class Initializer
     {
-        public static IUnityContainer WithSqliteRepositories(this IUnityContainer container)
+        public static ICoreContainer<IServerResolvable> WithSqliteRepositories
+            (this ICoreContainer<IServerResolvable> container)
         {
-            
-            container.RegisterType<IPodRepository, PodRepository>();
-            container.RegisterType<IMedicationRepository, MedicationRepository>();
-            container.RegisterType<IRadioEventRepository, RadioEventRepository>();
-            container.RegisterType<IRadioRepository, RadioRepository>();
-            container.RegisterType<ISignalStrengthRepository, SignalStrengthRepository>();
-            container.RegisterType<IUserRepository, UserRepository>();
-
-            container.RegisterSingleton<IRepositoryService, RepositoryService>();
-            return container;
+            return container
+                .Many<IPodRepository, PodRepository>()
+                .Many<IMedicationRepository, MedicationRepository>()
+                .Many<IRadioEventRepository, RadioEventRepository>()
+                .Many<IRadioRepository, RadioRepository>()
+                .Many<ISignalStrengthRepository, SignalStrengthRepository>()
+                .Many<IUserRepository, UserRepository>()
+                .Many<IMigrationHistoryRepository, MigrationHistoryRepository>()
+                .Many<IPodRequestRepository, PodRequestRepository>()
+                .Many<IMedicationDeliveryRepository, MedicationDeliveryRepository>()
+                .Many<IRepositoryMigrator, RepositoryMigrator>()
+                .One<IRepositoryService, RepositoryService>();
         }
     }
 }

@@ -16,6 +16,6 @@
         CancelBolus,
         StartExtendedBolus,
         CancelExtendedBolus,
-        Deactivate,
+        Deactivate
     }
 }

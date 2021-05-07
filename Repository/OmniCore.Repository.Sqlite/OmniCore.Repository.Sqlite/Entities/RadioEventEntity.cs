@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Model.Enumerations;
-using OmniCore.Model.Interfaces.Data.Entities;
+using OmniCore.Model.Interfaces.Platform.Common.Data.Entities;
 using SQLite;
 
 namespace OmniCore.Repository.Sqlite.Entities
@@ -10,8 +10,8 @@ namespace OmniCore.Repository.Sqlite.Entities
     public class RadioEventEntity : Entity, IRadioEventEntity
     {
         public RadioEvent EventType { get; set; }
-        public bool Success { get; set; }
         public byte[] Data { get; set; }
+        public string Text { get; set; }
 
         [Ignore]
         public IRadioEntity Radio { get; set; }

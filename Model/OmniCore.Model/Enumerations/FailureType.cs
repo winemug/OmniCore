@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Enumerations
+﻿namespace OmniCore.Model.Enumerations
 {
     public enum FailureType
     {
@@ -10,6 +6,7 @@ namespace OmniCore.Model.Enumerations
         AdapterNotEnabled,
 
         PeripheralGeneralError,
+        PeripheralOffline,
 
         PlatformGeneralError,
 
@@ -30,5 +27,16 @@ namespace OmniCore.Model.Enumerations
         WorkflowPodFaulted,
         WorkflowPodResponseUnrecognized,
         WorkflowInvalidParameter,
-   }
+
+        ServiceStartupFailure,
+        UserInterfaceInitialization,
+        ServiceStopFailure,
+        ServiceConnectionFailed,
+        Internal,
+        ConnectionFailed,
+        RadioResponseInterrupted,
+        RadioResponseNoData,
+        RadioResponseParameterError,
+        RadioResponseUnknownCommand
+    }
 }

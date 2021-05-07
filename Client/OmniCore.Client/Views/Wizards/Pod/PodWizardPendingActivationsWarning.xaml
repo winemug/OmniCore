@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OmniCore.Client.Views.Wizards.NewPod.PodWizardPendingActivationsWarning">
+    <ContentView.Content>
+        <ScrollView>
+            <StackLayout Orientation="Vertical" VerticalOptions="Start" HorizontalOptions="Start"
+                         Padding="10">
+                <Label Text="WARNING: You have at least one pod, that is not fully activated." FontSize="Large"
+                       HorizontalOptions="StartAndExpand"
+                       TextColor="Red" FontAttributes="Bold" Padding="10" />
+
+                <Label Text="Before starting a new pod, it is strongly advised to finalize pending pod activations."
+                       FontSize="Body" FontAttributes="Bold" HorizontalOptions="Center"
+                       Padding="10" />
+
+                <Label Text="Click the button below to view pod(s) waiting to be started and proceed from there."
+                       FontSize="Body" HorizontalOptions="StartAndExpand"
+                       Padding="10" />
+
+                <Button Text="Show waiting pods" HorizontalOptions="FillAndExpand" />
+
+                <Label
+                    Text="If you want to start a new pod regardless, please make sure that your radio device is not in the vicinity of the pod(s) that have not completed the activation process."
+                    FontSize="Body" HorizontalOptions="StartAndExpand"
+                    TextColor="Red" Padding="10" />
+
+                <Label Text="Click the button below to continue with a new pod."
+                       FontSize="Body" HorizontalOptions="StartAndExpand"
+                       Padding="10" />
+
+                <Button Text="Ignore Warning and Continue" HorizontalOptions="FillAndExpand"
+                        TextColor="Red" />
+            </StackLayout>
+        </ScrollView>
+    </ContentView.Content>
+</ContentView>

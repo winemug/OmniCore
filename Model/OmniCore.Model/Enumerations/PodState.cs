@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OmniCore.Model.Enumerations
+﻿namespace OmniCore.Model.Enumerations
 {
     public enum PodState
     {
         Unknown,
         Pairing,
-        PendingStart,
+        Paired,
+        Priming,
+        Primed,
         Starting,
         Started,
         Stopped,
-        Faulted
+        Faulted,
+        Expired
     }
 }

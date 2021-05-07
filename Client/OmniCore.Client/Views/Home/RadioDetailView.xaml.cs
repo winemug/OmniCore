@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Client.ViewModels.Home;
-using Xamarin.Forms;
+﻿using OmniCore.Model.Interfaces;
 using Xamarin.Forms.Xaml;
 
 namespace OmniCore.Client.Views.Home
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RadioDetailView
+    public partial class RadioDetailView : IView
     {
-        public RadioDetailView(RadioDetailViewModel viewModel) : base(viewModel)
+        public RadioDetailView()
         {
             InitializeComponent();
         }
