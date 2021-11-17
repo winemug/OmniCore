@@ -4,11 +4,18 @@ OmniCore is a hardware and software platform for controlling and automating drug
 
 This is the public repository for the OmniCore Mobile App, which can be used to control OmniCore Hardware.
 
-# Announcement
+# Tale of two updates (17.Nov.2021)
 
+**Update 1**: [OmniCore Oyster](./README.md#OmniCore-Oyster) is indefinitely delayed, until either the silicon crisis is resolved or we can pay wholesalers large sums to bring it to market as soon as humanly possible. So we will be launching **a crowd-funding campaign** to be able to launch the product as soon as humanly possible. Links will follow.
+
+**Update 2**: Instead of waiting for Oyster, we have decided to **launch [OmniCore RADD](./README.md#OmniCore-RADD) to the general public!** We are adding support for RileyLink back into OmniCore and turn it into a 'companion app' so if you own a legacy setup of [RileyLink](https://getrileylink.org), [xDrip](https://github.com/NightscoutFoundation/xDrip) and **Omnipod Eros** you will be able to see and live **RADD** for yourself. We will also add **Omnipod Dash** support to the OmniCore app in due time, if the Oyster gets further delayed.
+
+See the [FAQ](https://github.com/winemug/OmniCore/wiki/OmniCore-RADD) for more details on what RADD is and does.
+
+# Announcement
 <b>We have been working hard behind closed doors on a system to address our current woes with existing products.</b>
 
-Please hold for while we're opening the doors and readying the full announcement of brand new features of the OmniCore ecosystem with more details. In the mean-time, you can address your questions to my [personal e-mail](mailto:barisk@gmail.com) and help out compiling the FAQ.
+Please hold for while we're opening the doors and readying the full announcement of brand new features of the OmniCore ecosystem with more details.
 
 ## Supported end devices
 Active:
@@ -54,6 +61,8 @@ OmniCore's closed loop algorithm for Type I Diabetes therapy automation. A novel
 * Administration of meal-time insulin without the need for user interaction.
 * Overlapping administration of insulin and glucagon for shortening periods of hyperglycemia.
 * Administration of glucagon to prevent hypoglycemia.
+
+See also: [OmniCore RADD FAQ](https://github.com/winemug/OmniCore/wiki/OmniCore-RADD)
 
 
 ### OmniCore Web
