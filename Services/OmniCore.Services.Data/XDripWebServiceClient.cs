@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Text.Json;
 
 namespace OmniCore.Services.Data
 {
@@ -12,7 +13,15 @@ namespace OmniCore.Services.Data
             {
                 var result = await hc.GetAsync(new Uri("http://127.0.0.1:17580/sgv.json"));
                 string resultContent = await result.Content.ReadAsStringAsync();
-                Debug.WriteLine(resultContent);
+                var document = JsonDocument.Parse(resultContent);
+                foreach (var element in document.RootElement.EnumerateArray())
+                {
+                    var udate = element.GetProperty("date").GetInt64();
+                    var date = DateTimeOffset.FromUnixTimeMilliseconds(udate);
+                    var direction = element.GetProperty("direction").GetString();
+                    var type = element.GetProperty("type").GetString();
+                    Debug.WriteLine($"date: {date} dir: {direction} type: {type}");
+                }
             }
         }
     }

@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
+      <PackageReference Include="System.Text.Json" Version="6.0.0" />
       <PackageReference Include="Xamarin.Forms" Version="5.0.0.2244" />
     </ItemGroup>
 
