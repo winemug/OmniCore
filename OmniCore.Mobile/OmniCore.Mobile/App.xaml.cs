@@ -1,6 +1,7 @@
 ﻿using OmniCore.Mobile.Services;
 using OmniCore.Mobile.Views;
 using System;
+using OmniCore.Services.Data;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,6 +15,7 @@ namespace OmniCore.Mobile
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();
+            AmqpTestClient.InitializeClient();
             MainPage = new AppShell();
         }
 
