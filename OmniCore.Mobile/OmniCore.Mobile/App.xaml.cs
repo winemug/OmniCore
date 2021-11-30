@@ -16,6 +16,9 @@ namespace OmniCore.Mobile
 
             DependencyService.Register<MockDataStore>();
             AmqpTestClient.InitializeClient();
+            var xwsc = new XDripWebServiceClient();
+            xwsc.Test();
+            
             MainPage = new AppShell();
         }
 
