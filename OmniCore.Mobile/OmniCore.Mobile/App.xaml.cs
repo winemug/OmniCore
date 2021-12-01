@@ -13,17 +13,15 @@ namespace OmniCore.Mobile
         public App()
         {
             InitializeComponent();
-
             DependencyService.Register<MockDataStore>();
-            AmqpTestClient.InitializeClient();
-            var xwsc = new XDripWebServiceClient();
-            xwsc.Test();
-            
+            DependencyService.RegisterSingleton(new DataStore());
+           
             MainPage = new AppShell();
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
+            await DependencyService.Get<DataStore>().Initialize();
         }
 
         protected override void OnSleep()
