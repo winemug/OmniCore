@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Xamarin.Forms;
 
-namespace OmniCore.Services.Data
+namespace OmniCore.Services
 {
     public static class AmqpTestClient
     {

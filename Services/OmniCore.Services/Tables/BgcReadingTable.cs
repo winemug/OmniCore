@@ -2,14 +2,14 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
-namespace OmniCore.Services.Data.Tables
+namespace OmniCore.Services.Tables
 {
-    public class BgcTable : IDataTable
+    public class BgcReadingTable
     {
-        public async Task Create(SqliteConnection conn)
+        public static async Task Create(SqliteConnection conn)
         {
             await conn.ExecuteAsync(
-                @"CREATE TABLE bgc (
+                @"CREATE TABLE bgc_reading (
                     receiver_id TEXT NOT NULL,
                     date INTEGER NOT NULL,
                     direction TEXT,
@@ -19,12 +19,12 @@ namespace OmniCore.Services.Data.Tables
                 )");
         }
 
-        public async Task ResetUpdates(SqliteConnection conn)
+        public static async Task ResetUpdates(SqliteConnection conn)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task CleanupDeleted(SqliteConnection conn)
+        public static async Task CleanupDeleted(SqliteConnection conn)
         {
             throw new System.NotImplementedException();
         }

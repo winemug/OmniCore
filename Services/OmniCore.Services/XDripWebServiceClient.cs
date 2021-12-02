@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 
-namespace OmniCore.Services.Data
+namespace OmniCore.Services
 {
     public class XDripWebServiceClient
     {

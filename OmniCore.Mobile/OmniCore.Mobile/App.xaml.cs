@@ -1,7 +1,8 @@
 ﻿using OmniCore.Mobile.Services;
 using OmniCore.Mobile.Views;
 using System;
-using OmniCore.Services.Data;
+using OmniCore.Services;
+using OmniCore.Services.Interfaces;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -21,7 +22,7 @@ namespace OmniCore.Mobile
 
         protected override async void OnStart()
         {
-            await DependencyService.Get<DataStore>().Initialize();
+            await DependencyService.Get<IDataStore>().Initialize();
         }
 
         protected override void OnSleep()

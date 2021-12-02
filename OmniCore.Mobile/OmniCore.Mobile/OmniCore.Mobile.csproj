@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Services\OmniCore.Services.Data\OmniCore.Services.Data.csproj" />
+    <ProjectReference Include="..\..\Services\OmniCore.Services\OmniCore.Services.csproj" />
   </ItemGroup>
 </Project>

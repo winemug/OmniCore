@@ -12,4 +12,8 @@
       <PackageReference Include="Xamarin.Forms" Version="5.0.0.2244" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\OmniCore.Services.Interfaces\OmniCore.Services.Interfaces.csproj" />
+    </ItemGroup>
+
 </Project>
