@@ -16,4 +16,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Services\OmniCore.Services\OmniCore.Services.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Setup\StartPage.xaml.cs">
+      <DependentUpon>StartPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Setup\PlatformConfigurationPage.xaml.cs">
+      <DependentUpon>PlatformConfigurationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

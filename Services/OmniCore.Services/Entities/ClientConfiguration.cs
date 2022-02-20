@@ -11,6 +11,8 @@ namespace OmniCore.Services.Entities
         public string OsVersion { get; set; }
         public Guid? AccountId { get; set; }
         public Guid? ClientId { get; set; }
+        
+        public Guid? DefaultProfileId { get; set; }
         public string Token { get; set; }
     }
 }

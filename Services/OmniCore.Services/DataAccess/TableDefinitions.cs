@@ -46,7 +46,7 @@ CREATE TABLE bgc
 );
 
 CREATE UNIQUE INDEX bgc_reading_date ON bgc(profile_id, client_id, date);
-
+CREATE INDEX bgc_date ON bgc(profile_id, date);
 ";
             await conn.ExecuteAsync(sql);
         }
