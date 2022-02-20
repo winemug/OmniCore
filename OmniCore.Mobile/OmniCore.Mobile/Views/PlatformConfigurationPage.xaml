@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Mobile.Views.PlatformConfigurationPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="PLATFORM CONFIG REQUIRED"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="CenterAndExpand" />
+            <Button Text="Grant Permissions" Command="{Binding AskForPermissions}"
+                    IsEnabled="{Binding IsAskPermissionsEnabled}"/>
+            <Button Text="Open Settings" Command="{Binding OpenBatteryOptimizationSettings}"
+                    IsEnabled="{Binding IsOpenBatteryOptimizationsEnabled}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

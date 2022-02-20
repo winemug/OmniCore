@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class ItemsViewModel : BaseViewModel
+    public class ItemsViewModelOld : BaseViewModelOld
     {
         private Item _selectedItem;
 
@@ -17,7 +17,7 @@ namespace OmniCore.Mobile.ViewModels
         public Command AddItemCommand { get; }
         public Command<Item> ItemTapped { get; }
 
-        public ItemsViewModel()
+        public ItemsViewModelOld()
         {
             Title = "Browse";
             Items = new ObservableCollection<Item>();
@@ -78,7 +78,7 @@ namespace OmniCore.Mobile.ViewModels
                 return;
 
             // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Id}");
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModelOld.ItemId)}={item.Id}");
         }
     }
 }

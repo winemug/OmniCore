@@ -7,7 +7,7 @@ using Xamarin.Forms;
 namespace OmniCore.Mobile.ViewModels
 {
     [QueryProperty(nameof(ItemId), nameof(ItemId))]
-    public class ItemDetailViewModel : BaseViewModel
+    public class ItemDetailViewModelOld : BaseViewModelOld
     {
         private string itemId;
         private string text;

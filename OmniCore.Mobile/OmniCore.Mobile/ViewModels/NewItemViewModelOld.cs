@@ -7,12 +7,12 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class NewItemViewModel : BaseViewModel
+    public class NewItemViewModelOld : BaseViewModelOld
     {
         private string text;
         private string description;
 
-        public NewItemViewModel()
+        public NewItemViewModelOld()
         {
             SaveCommand = new Command(OnSave, ValidateSave);
             CancelCommand = new Command(OnCancel);

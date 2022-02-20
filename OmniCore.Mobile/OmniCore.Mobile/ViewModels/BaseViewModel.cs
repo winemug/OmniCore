@@ -1,54 +1,58 @@
-﻿using OmniCore.Mobile.Models;
-using OmniCore.Mobile.Services;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using OmniCore.Mobile.Annotations;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
-
-        bool isBusy = false;
-        public bool IsBusy
+        protected Page Page;
+        private bool IsModelInitialized;
+        public BaseViewModel(Page page)
         {
-            get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
+            Page = page;
+            Page.Appearing += OnAppearing;
+            Page.Disappearing += OnDisappearing;
+        }
+        
+        private async void OnAppearing(object sender, EventArgs e)
+        {
+            if (!IsModelInitialized)
+            {
+                await InitializeAsync();
+                Page.BindingContext = this;
+            }
+            await PageAppearingAsync();
         }
 
-        string title = string.Empty;
-        public string Title
+        private async void OnDisappearing(object sender, EventArgs e)
         {
-            get { return title; }
-            set { SetProperty(ref title, value); }
+            await PageDisappearingAsync();
         }
 
-        protected bool SetProperty<T>(ref T backingStore, T value,
-            [CallerMemberName] string propertyName = "",
-            Action onChanged = null)
+        protected virtual Task InitializeAsync()
         {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
-            backingStore = value;
-            onChanged?.Invoke();
-            OnPropertyChanged(propertyName);
-            return true;
+            return Task.CompletedTask;
+        }
+        protected virtual Task PageAppearingAsync()
+        {
+            return Task.CompletedTask;
         }
 
-        #region INotifyPropertyChanged
+        protected virtual Task PageDisappearingAsync()
+        {
+            return Task.CompletedTask;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            var changed = PropertyChanged;
-            if (changed == null)
-                return;
 
-            changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
     }
 }

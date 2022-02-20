@@ -5,9 +5,9 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class AboutViewModel : BaseViewModel
+    public class AboutViewModelOld : BaseViewModelOld
     {
-        public AboutViewModel()
+        public AboutViewModelOld()
         {
             Title = "About";
             OpenWebCommand = new Command(async () => await Browser.OpenAsync("https://aka.ms/xamarin-quickstart"));
