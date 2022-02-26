@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniCore.Services.Entities;
 using Xamarin.Forms;
@@ -17,7 +18,7 @@ namespace OmniCore.Services
         public ConfigurationStore ConfigurationStore { get; set; }
         
         [Unity.Dependency]
-        public DataStore DataStore { get; set; }
+        public BgcService BgcService { get; set; }
         
         private HttpClient _httpClient = new HttpClient()
         {
@@ -27,17 +28,20 @@ namespace OmniCore.Services
         private Guid _profileId;
         private Guid _clientId;
         private Task _xdwsTask;
+        private CancellationTokenSource _cts;
 
-        public async Task StartCollectionAsync(Guid profileId)
+        public async Task StartCollectionAsync()
         {
-            _profileId = profileId;
+            var cc = await ConfigurationStore.GetConfigurationAsync();
+            _clientId = cc.ClientId.Value;
+            _profileId = cc.ReceiverProfileId.Value;
+            _cts = new CancellationTokenSource();
             if (_xdwsTask != null)
                 throw new ApplicationException("Xdrip Ws Client already started");
 
-            _xdwsTask = Task.Run<Task>(async () =>
+            _xdwsTask = Task.Run(async () => 
             {
-                var cc = await ConfigurationStore.GetConfigurationAsync();
-                var latestReadingDate = await DataStore.GetLastReadingDateAsync(profileId, cc.ClientId.Value);
+                var latestReadingDate = await BgcService.GetLastReadingDateAsync(_profileId, cc.ClientId.Value);
                 bool newArrival = false;
                 bool hasGaps = false;
                 TimeSpan waitInterval = TimeSpan.FromSeconds(5);
@@ -46,10 +50,11 @@ namespace OmniCore.Services
                     if (latestReadingDate != null)
                         waitInterval = DexcomUtil.GetRefreshInterval(latestReadingDate.Value, hasGaps);
                     Debug.WriteLine($"Xdrip ws wait interval: {waitInterval}");
-                    await Task.Delay(waitInterval);
                     
-                    var readings = await GetReadingsAsync(profileId, cc.ClientId.Value);
-                    await DataStore.AddReadingsAsync(readings);
+                    await Task.Delay(waitInterval, _cts.Token);
+                    
+                    var readings = await GetReadingsAsync(_profileId, cc.ClientId.Value);
+                    await BgcService.AddReadingsAsync(readings);
                     var sortedReadings = readings.Where(r => r.Type == BgcReadingType.CGM)
                         .OrderByDescending(r => r.Date);
 
@@ -75,14 +80,26 @@ namespace OmniCore.Services
                         }
                     }
                 }
-            });
+            }, _cts.Token);
         }
 
-        public async Task StopCollection()
+        public async Task StopCollectionAsync()
         {
             if (_xdwsTask != null)
                 throw new ApplicationException("Xdrip Ws is not started");
-            await _xdwsTask;
+            _cts.Cancel(true);
+            try
+            {
+                await _xdwsTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                _cts.Dispose();
+                _cts = null;
+            }
         }
         
         private async Task<List<BgcEntry>> GetReadingsAsync(Guid profileId, Guid clientId)

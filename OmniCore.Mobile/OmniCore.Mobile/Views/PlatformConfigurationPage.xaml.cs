@@ -15,7 +15,6 @@ namespace OmniCore.Mobile.Views
         public PlatformConfigurationPage()
         {
             InitializeComponent();
-            new PlatformConfigurationViewModel(this);
         }
     }
 }

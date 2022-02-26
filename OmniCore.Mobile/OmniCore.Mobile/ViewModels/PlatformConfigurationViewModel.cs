@@ -14,14 +14,14 @@ namespace OmniCore.Mobile.ViewModels
         public Command OpenBatteryOptimizationSettings { get; }
 
         private IPlatformInfo PlatformInfo;
-        public PlatformConfigurationViewModel(Page page): base(page)
+        public PlatformConfigurationViewModel()
         {
             PlatformInfo = App.Container.Resolve<IPlatformInfo>();
             AskForPermissions = new Command(RequestPermissionsClicked);
             OpenBatteryOptimizationSettings = new Command(OpenBatteryOptimizationSettingsClicked);
         }
 
-        protected override async Task PageAppearingAsync()
+        protected override async Task PageShownAsync()
         {
             if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
             {

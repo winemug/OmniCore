@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OmniCore.Mobile.Views.StartPage"
+             Shell.NavBarIsVisible="False"
+             Shell.FlyoutItemIsVisible="False"
+             Shell.TabBarIsVisible="False"
+             BackgroundColor="Black"><!-- BackgroundColor="{AppThemeBinding Light={StaticResource LightPageBackgroundColor}, Dark={StaticResource DarkPageBackgroundColor}}" -->
+    <ContentPage.Content>
+        <Label Text="OmniCore is starting..." TextColor="{AppThemeBinding Dark={StaticResource DarkPrimaryTextColor},
+         Light={StaticResource LightPrimaryColor}}"/>
+    </ContentPage.Content>
+</ContentPage>

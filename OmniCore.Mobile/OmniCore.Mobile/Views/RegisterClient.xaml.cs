@@ -15,7 +15,6 @@ namespace OmniCore.Mobile.Views
         public RegisterClient()
         {
             InitializeComponent();
-            this.BindingContext = new RegisterClientViewModelOld();
         }
     }
 }

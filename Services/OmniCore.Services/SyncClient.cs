@@ -119,7 +119,7 @@ namespace OmniCore.Services
                             props.UserId = _userId;
                             // Debug.WriteLine($"publishing message");
                             _pubChannel.BasicPublish(_exchange, "*", false, props,
-                                entry.GetMessageBody());
+                                entry.AsMessageBody());
                             _awaitingConfirmation.TryAdd(sequenceNumber, entry);
                             Debug.WriteLine($"published message");
                         }
@@ -127,7 +127,7 @@ namespace OmniCore.Services
                         {
                             var entry = await _publishConfirmedQueue.DequeueAsync();
                             // Debug.WriteLine("got confirmed message from queue");
-                            await DataStore.SetSyncedAsync(entry, true);
+                            await entry.SetSyncedTask;
                             Debug.WriteLine($"entry updated as synced");
                         }
                         else

@@ -4,8 +4,7 @@ namespace OmniCore.Services.Interfaces
 {
     public interface ISyncableEntry
     {
-        byte[] GetMessageBody();
-        long DbRowId { get; }
-        string DbTableName { get;  }
+        byte[] AsMessageBody();
+        Task SetSyncedTask { get; set; }
     }
 }

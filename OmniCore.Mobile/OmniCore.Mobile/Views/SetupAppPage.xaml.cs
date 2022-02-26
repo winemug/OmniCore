@@ -15,7 +15,6 @@ namespace OmniCore.Mobile.Views
         public SetupAppPage()
         {
             InitializeComponent();
-            new SetupAppViewModel(this);
         }
     }
 }

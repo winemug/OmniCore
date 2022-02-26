@@ -23,12 +23,12 @@ namespace OmniCore.Services
         
         private HttpClient _httpClient = new HttpClient()
         {
-            BaseAddress = new Uri("")
+            BaseAddress = new Uri("http://192.168.1.50:8000/")
         };
 
-        public async Task AuthorizeAccount(string email, string password)
+        public async Task AuthorizeAccountAsync(string email, string password)
         {
-            await Unauthorize();
+            await UnauthorizeAsync();
             
             var j = JObject.FromObject(new
             {
@@ -49,13 +49,13 @@ namespace OmniCore.Services
             StartJwtRefreshTimer(TimeSpan.FromSeconds(refreshInterval));
         }
 
-        public async Task AuthorizeClient(ClientConfiguration cc)
+        public async Task AuthorizeClientAsync(ClientConfiguration cc)
         {
-            await Unauthorize();
+            await UnauthorizeAsync();
             var j = JObject.FromObject(new
             {
                 client_id = cc.ClientId.Value.ToString("N"),
-                token = cc.Token
+                token = cc.ClientAuthorizationToken
             }).ToString();
 
             var content = new StringContent(j, Encoding.Default, "application/json");
@@ -89,7 +89,7 @@ namespace OmniCore.Services
             }
         }
 
-        public async Task Unauthorize()
+        public async Task UnauthorizeAsync()
         {
             if (_jwtRefreshTimer != null)
             {
@@ -101,7 +101,7 @@ namespace OmniCore.Services
             _httpClient.DefaultRequestHeaders.Authorization = null;
         }
         
-        public async Task<ClientConfiguration> RegisterClient(ClientConfiguration cc)
+        public async Task<ChallengeRequest> RegisterClientAsync(ClientConfiguration cc)
         {
             var j = JObject.FromObject(new
             {
@@ -115,14 +115,32 @@ namespace OmniCore.Services
             var result = await _httpClient.PostAsync(new Uri("/client/register"), content);
             var resultContent = await result.Content.ReadAsStringAsync();
             var o = JObject.Parse(resultContent);
+            return new ChallengeRequest()
+            {
+                RequestId = Guid.Parse((string)o["request_id"]),
+            };
+        }
 
+        public async Task<ClientConfiguration> RespondToRegisterClientChallengeAsync(ClientConfiguration cc, 
+            ChallengeResponse cr)
+        {
+            var j = JObject.FromObject(new
+            {
+                request = cr.RequestId.ToString("N"),
+                response = cr.Response
+            }).ToString();
+
+            var content = new StringContent(j, Encoding.Default, "application/json");;
+            var result = await _httpClient.PostAsync(new Uri("/auth/challenge"), content);
+            var resultContent = await result.Content.ReadAsStringAsync();
+            var o = JObject.Parse(resultContent);
             cc.AccountId = Guid.Parse((string)o["account_id"]);
             cc.ClientId = Guid.Parse((string)o["client_id"]);
-            cc.Token = (string)o["token"];
+            cc.ClientAuthorizationToken = (string)o["token"];
             return cc;
         }
         
-        public async Task<EndpointResponse> GetClientEndpoint(ClientConfiguration cc)
+        public async Task<EndpointResponse> GetClientEndpointAsync(ClientConfiguration cc)
         {
             if (!_authorizedWithClientToken)
                 throw new ApplicationException("Not authorized with client token");
@@ -148,7 +166,7 @@ namespace OmniCore.Services
             };
         }
 
-        public async Task<ProfileEntry> GetDefaultProfile()
+        public async Task<ProfileEntry> GetDefaultProfileAsync()
         {
             if (!_authorizedWithClientToken && !_authorizedWithAccount)
                 throw new ApplicationException("Not authorized");

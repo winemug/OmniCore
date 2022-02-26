@@ -16,12 +16,6 @@ namespace OmniCore.Services
 {
     public class DataStore
     {
-        [Unity.Dependency]
-        public SyncClient SyncClient { get; set; }
-        
-        [Unity.Dependency]
-        public ConfigurationStore ConfigurationStore { get; set; }
-
         public string DatabasePath { get; }
         public string DatabaseVersionFilePath { get; }
         private bool _initialized = false;
@@ -86,120 +80,6 @@ namespace OmniCore.Services
             }
             
             File.WriteAllText(DatabaseVersionFilePath, DbVersion);
-        }
-
-        public async Task AddReadingsAsync(IEnumerable<BgcEntry> bgcReadings)
-        {
-            using (var conn = await GetConnectionAsync())
-            {
-                foreach (var reading in bgcReadings)
-                {
-                    // Debug.WriteLine($"Checking reading {reading.Date} {reading.Value}");
-                    try
-                    {
-                        var e = await AddBgcReadingAsync(conn, reading); 
-                        if (e != null) 
-                        {
-                            Debug.WriteLine($"Reading doesn't exist, queuing for sync.");
-                            await SyncClient.EnqueueAsync(e);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                }
-            }
-        }
-
-        public async Task<DateTimeOffset?> GetLastReadingDateAsync(Guid profileId, Guid clientId)
-        {
-            using (var conn = await GetConnectionAsync())
-            {
-                var row = await conn.QueryFirstOrDefaultAsync(
-                    "SELECT date FROM bgc WHERE deleted = 0 AND client_id = @cid AND profile_id = @pid ORDER BY date DESC",
-                    new
-                    {
-                        cid = clientId.ToString("N"),
-                        pid = profileId.ToString("N")
-                    });
-                if (row == null)
-                    return null;
-                long dt = row.date;
-                return DateTimeOffset.FromUnixTimeMilliseconds(dt);
-            }
-        }
-        public async Task EnqueueReadingsAsync()
-        {
-            var cc = await ConfigurationStore.GetConfigurationAsync();
-            using (var conn = await GetConnectionAsync())
-            {
-                var reader = await conn.ExecuteReaderAsync(
-                    "SELECT rowid, profile_id, client_id, date, type, direction, value, rssi, deleted FROM bgc " +
-                    " WHERE synced = 0 AND client_id = @cid",
-                    new
-                    {
-                        cid = cc.ClientId.Value.ToString("N")
-                    });
-                while(await reader.ReadAsync())
-                {
-                    var bgce = new BgcEntry()
-                    {
-                        DbRowId = reader.GetInt64(0),
-                        ProfileId = Guid.Parse(reader.GetString(1)),
-                        ClientId = Guid.Parse(reader.GetString(2)),
-                        Date = DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(3)),
-                        Type = (BgcReadingType?)reader.GetFieldValue<int?>(4),
-                        Direction = (BgcDirection?)reader.GetFieldValue<int?>(5),
-                        Value = reader.GetDouble(6),
-                        Rssi = reader.GetFieldValue<int?>(7),
-                        Deleted = reader.GetInt32(8) == 1,
-                    };
-                    await SyncClient.EnqueueAsync(bgce);
-                }
-            }
-        }
-        
-        private async Task<BgcEntry> AddBgcReadingAsync(SqliteConnection conn, BgcEntry bgcr)
-        {
-            var count = await conn.ExecuteScalarAsync<int>(
-                @"SELECT COUNT(*) FROM bgc WHERE profile_id = @pid AND client_id = @cid AND date = @date",
-                new
-                {
-                    pid = bgcr.ProfileId.ToString("N"),
-                    cid = bgcr.ClientId.ToString("N"),
-                    date = bgcr.Date.ToUnixTimeMilliseconds()
-                });
-            if (count > 0)
-                return null;
-            await conn.ExecuteAsync("INSERT INTO bgc(profile_id, client_id, date, " +
-                                    "type, direction, value, rssi, synced, deleted) VALUES(@pid, @cid, @date, @type, @dir, @val, @rssi, 0, 0)",
-                new
-                {
-                    pid = bgcr.ProfileId.ToString("N"),
-                    cid = bgcr.ClientId.ToString("N"),
-                    date = bgcr.Date.ToUnixTimeMilliseconds(),
-                    type = (int?)bgcr.Type,
-                    dir = (int?)bgcr.Direction,
-                    val = bgcr.Value,
-                    rssi = bgcr.Rssi
-                }
-            );
-            bgcr.DbRowId = await conn.ExecuteScalarAsync<int>("SELECT last_insert_rowid()");
-            return bgcr;
-        }
-
-        public async Task SetSyncedAsync(ISyncableEntry entry, bool b)
-        {
-            using (var conn = await GetConnectionAsync())
-            {
-                await conn.ExecuteAsync($"UPDATE {entry.DbTableName} SET synced=@synced WHERE rowid=@DbRowId", new
-                {
-                    DbRowId = entry.DbRowId,
-                    synced = b ? 1 : 0
-                });
-            }
         }
     }
 }

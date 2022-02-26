@@ -20,6 +20,9 @@ namespace OmniCore.Mobile.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) => {
+                var newExc = new ApplicationException("AndroidEnvironment_UnhandledExceptionRaiser", args.Exception);
+            };
             //App.Container.RegisterType<IPlatformInfo, PlatformInfo>(new InjectionConstructor(this));
             _platformInfo = new PlatformInfo(this, this); 
             App.Container.RegisterInstance<IPlatformInfo>(_platformInfo);

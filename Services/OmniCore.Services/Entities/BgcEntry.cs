@@ -40,21 +40,17 @@ namespace OmniCore.Services.Entities
         public double Value { get; set; }
         public bool Deleted { get; set; }
         
-        public byte[] GetMessageBody()
+        public byte[] AsMessageBody()
         {
             var msg = $"BGC::{ProfileId:N}::{Date.ToUnixTimeMilliseconds()}::{Value}::{Type}::{Direction}::{Rssi}";
             return System.Text.Encoding.UTF8.GetBytes(msg);
         }
-        public long DbRowId { get; set; }
-        public string DbTableName
-        {
-            get => "bgc";
-        }
+        public Task SetSyncedTask { get; set; }
 
         public override bool Equals(object obj)
         {
             var x = (BgcEntry)obj;
-            return this.ProfileId == x.ProfileId && this.Date == x.Date;
+            return this.ProfileId == x.ProfileId && this.Date == x.Date && this.Type == x.Type;
         }
     }
 }

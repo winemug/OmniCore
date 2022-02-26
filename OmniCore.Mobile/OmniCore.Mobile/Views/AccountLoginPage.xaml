@@ -4,10 +4,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Mobile.Views.AccountLoginPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Hello, world!"
-                   VerticalOptions="CenterAndExpand"
-                   HorizontalOptions="CenterAndExpand" />
+        <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
+            <Label Text="E-mail" FontSize="Medium"/>
+            <Entry Text="{Binding Email, Mode=TwoWay}" FontSize="Medium" />
+            <Label Text="Password" FontSize="Medium" />
+            <Entry Text="{Binding Password, Mode=TwoWay}" FontSize="Medium" IsPassword="True"/>
+            <Button VerticalOptions="Center" Text="Login" Command="{Binding LoginCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

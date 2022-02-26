@@ -12,8 +12,8 @@ namespace OmniCore.Services
     public class ConfigurationStore
     {
         private ClientConfiguration _cc;
-        
-        [Dependency]
+
+        [Unity.Dependency]
         public IPlatformInfo PlatformInfo { get; set; }
         
         private string GetPath()

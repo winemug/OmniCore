@@ -1,8 +1,10 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using OmniCore.Mobile.Annotations;
+using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
@@ -10,39 +12,52 @@ namespace OmniCore.Mobile.ViewModels
     public class BaseViewModel : INotifyPropertyChanged
     {
         protected Page Page;
-        private bool IsModelInitialized;
-        public BaseViewModel(Page page)
+
+        public bool IsShown { get; set; }
+        protected bool IsModelInitialized { get; set; }
+        
+        protected static IUnityContainer UnityContainer => App.Container;
+        public BaseViewModel()
         {
-            Page = page;
-            Page.Appearing += OnAppearing;
-            Page.Disappearing += OnDisappearing;
+            IsModelInitialized = false;
+        }
+                
+        protected virtual async Task PageShownAsync()
+        {
+        }
+
+        protected virtual async Task PageHiddenAsync()
+        {
         }
         
-        private async void OnAppearing(object sender, EventArgs e)
+        public async Task OnNavigatedToAsync(Page page)
         {
+            Page = page;
             if (!IsModelInitialized)
             {
                 await InitializeAsync();
-                Page.BindingContext = this;
+                IsModelInitialized = true;
+                page.BindingContext = this;
             }
-            await PageAppearingAsync();
+            if (!IsShown)
+            {
+                Debug.WriteLine($"*** Page is shown: {page.GetType()}");
+                IsShown = true;
+                await PageShownAsync();
+            }
         }
 
-        private async void OnDisappearing(object sender, EventArgs e)
+        public async Task OnNavigatedFromAsync()
         {
-            await PageDisappearingAsync();
+            if (IsShown)
+            {
+                Debug.WriteLine($"*** Page is hidden: {Page.GetType()}");
+                IsShown = false;
+                await PageHiddenAsync();
+            }
         }
 
         protected virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-        protected virtual Task PageAppearingAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        protected virtual Task PageDisappearingAsync()
         {
             return Task.CompletedTask;
         }
