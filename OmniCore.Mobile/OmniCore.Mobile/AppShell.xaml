@@ -2,7 +2,7 @@
 <Shell xmlns="http://xamarin.com/schemas/2014/forms" 
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:OmniCore.Mobile.Views"
-       Title="OmniCore.Mobile"
+       Title="OmniCore"
        x:Class="OmniCore.Mobile.AppShell">
 
     <!--
@@ -48,10 +48,12 @@
         content you can do so by calling 
         await Shell.Current.GoToAsync("//LoginPage");
     -->
+    
     <TabBar>
         <ShellContent Route="StartPage" ContentTemplate="{DataTemplate local:StartPage}" />
-        <ShellContent Route="PlatformConfigurationPage" ContentTemplate="{DataTemplate local:PlatformConfigurationPage}" />
-        <ShellContent Route="AccountLoginPage" ContentTemplate="{DataTemplate local:AccountLoginPage}" />
+        <!-- <ShellContent Route="PlatformConfigurationPage" ContentTemplate="{DataTemplate local:PlatformConfigurationPage}" /> -->
+        <!-- <ShellContent Route="AccountLoginPage" ContentTemplate="{DataTemplate local:AccountLoginPage}" /> -->
+        <!-- <ShellContent Route="ClientRegistrationPage" ContentTemplate="{DataTemplate local:ClientRegistrationPage}" /> -->
     </TabBar>
 
     <!-- Optional Templates 

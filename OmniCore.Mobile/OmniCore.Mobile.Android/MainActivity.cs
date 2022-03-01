@@ -13,7 +13,8 @@ using Unity.Injection;
 
 namespace OmniCore.Mobile.Droid
 {
-    [Activity(Label = "OmniCore.Mobile", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Label = "OmniCore", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true,
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         private PlatformInfo _platformInfo;

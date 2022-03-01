@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using OmniCore.Mobile.Views;
 using OmniCore.Services.Interfaces;
 using Unity;
 using Xamarin.Forms;
@@ -21,12 +22,12 @@ namespace OmniCore.Mobile.ViewModels
             OpenBatteryOptimizationSettings = new Command(OpenBatteryOptimizationSettingsClicked);
         }
 
-        protected override async Task PageShownAsync()
+        protected override async Task OnPageShownAsync()
         {
             if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
             {
                 // go back to start
-                await Shell.Current.GoToAsync($"//StartPage");
+                await NavigationService.NavigateAsync<StartPage>();
             }
         }
 

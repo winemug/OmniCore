@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OmniCore.Mobile.Views;
 using OmniCore.Services;
 using OmniCore.Services.Entities;
 using OmniCore.Services.Interfaces;
@@ -12,8 +14,7 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class StartViewModel : BaseViewModel
     {
-
-        protected override async Task PageShownAsync()
+        protected override async Task OnPageShownAsync()
         {
             var platformInfo = UnityContainer.Resolve<IPlatformInfo>();
             var configurationStore = UnityContainer.Resolve<ConfigurationStore>();
@@ -24,14 +25,14 @@ namespace OmniCore.Mobile.ViewModels
             if (!platformInfo.HasAllPermissions ||
                 !platformInfo.IsExemptFromBatteryOptimizations)
             {
-                await Shell.Current.GoToAsync("//PlatformConfigurationPage");
+                await NavigationService.NavigateAsync<PlatformConfigurationPage>();
                 return;
             }
 
             var cc = await configurationStore.GetConfigurationAsync();
             if (!cc.AccountId.HasValue || !cc.ClientId.HasValue || cc.ClientAuthorizationToken == null)
             {
-                await Shell.Current.GoToAsync("//AccountLoginPage");
+                await NavigationService.NavigateAsync<AccountLoginPage>();
                 return;
             }
             

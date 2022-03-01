@@ -126,12 +126,12 @@ namespace OmniCore.Services
         {
             var j = JObject.FromObject(new
             {
-                request = cr.RequestId.ToString("N"),
-                response = cr.Response
+                request_id = cr.RequestId.ToString("N"),
+                verification_code = cr.VerificationCode
             }).ToString();
 
             var content = new StringContent(j, Encoding.Default, "application/json");;
-            var result = await _httpClient.PostAsync(new Uri("/auth/challenge"), content);
+            var result = await _httpClient.PostAsync(new Uri("/request/verify"), content);
             var resultContent = await result.Content.ReadAsStringAsync();
             var o = JObject.Parse(resultContent);
             cc.AccountId = Guid.Parse((string)o["account_id"]);

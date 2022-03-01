@@ -25,12 +25,17 @@ namespace OmniCore.Mobile
                 return _container;
             }
         }
+
+        private NavigationService _navigationService;
+        
         public App()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            RegisterServices();
             InitializeComponent();
-            MainPage = new AppShell();
+            var shell = new AppShell();
+            _navigationService = new NavigationService(shell);
+            RegisterServices();
+            MainPage = shell;
         }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -40,7 +45,7 @@ namespace OmniCore.Mobile
 
         private void RegisterServices()
         {
-            Container.RegisterType<ViewModelBindingRegistry>(new ContainerControlledLifetimeManager());
+            Container.RegisterInstance(_navigationService);
             Container.RegisterType<BgcService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<ConfigurationStore>(new ContainerControlledLifetimeManager());
             Container.RegisterType<DataStore>(new ContainerControlledLifetimeManager());
@@ -48,10 +53,10 @@ namespace OmniCore.Mobile
             Container.RegisterType<SyncClient>(new ContainerControlledLifetimeManager());
             Container.RegisterType<ApiClient>(new ContainerControlledLifetimeManager());
             
-            var vbr = Container.Resolve<ViewModelBindingRegistry>();
-            vbr.RegisterModelBinding<StartPage, StartViewModel>();
-            vbr.RegisterModelBinding<PlatformConfigurationPage, PlatformConfigurationViewModel>();
-            vbr.RegisterModelBinding<AccountLoginPage, AccountLoginViewModel>();
+            _navigationService.Register<StartPage, StartViewModel>();
+            _navigationService.Register<PlatformConfigurationPage, PlatformConfigurationViewModel>();
+            _navigationService.Register<AccountLoginPage, AccountLoginViewModel>();
+            _navigationService.Register<ClientRegistrationPage, ClientRegistrationViewModel>();
         }
 
         protected override async void OnStart()
@@ -63,12 +68,14 @@ namespace OmniCore.Mobile
         protected override async void OnSleep()
         {
             Debug.WriteLine($"App On Sleep");
+            await _navigationService.OnSleepAsync();
             base.OnSleep();
         }
 
         protected override async void OnResume()
         {
             Debug.WriteLine($"App On Resume");
+            await _navigationService.OnResumeAsync();
             base.OnResume();
         }
 

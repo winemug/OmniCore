@@ -1,65 +1,43 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using OmniCore.Mobile.Annotations;
+using OmniCore.Mobile.Services;
 using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public class BaseViewModel : INotifyPropertyChanged, IDisposable
     {
         protected Page Page;
-
-        public bool IsShown { get; set; }
-        protected bool IsModelInitialized { get; set; }
-        
         protected static IUnityContainer UnityContainer => App.Container;
+        
+        protected NavigationService NavigationService { get; }
+
         public BaseViewModel()
         {
-            IsModelInitialized = false;
-        }
-                
-        protected virtual async Task PageShownAsync()
-        {
-        }
-
-        protected virtual async Task PageHiddenAsync()
-        {
+            NavigationService = UnityContainer.Resolve<NavigationService>();
         }
         
-        public async Task OnNavigatedToAsync(Page page)
+        public async Task BindToPageAsync(Page page)
         {
             Page = page;
-            if (!IsModelInitialized)
-            {
-                await InitializeAsync();
-                IsModelInitialized = true;
-                page.BindingContext = this;
-            }
-            if (!IsShown)
-            {
-                Debug.WriteLine($"*** Page is shown: {page.GetType()}");
-                IsShown = true;
-                await PageShownAsync();
-            }
+            await OnBeforeBindAsync();
+            page.BindingContext = this;
+        }
+        
+        public async Task NavigatedToAsync()
+        {
+            await OnPageShownAsync();
         }
 
-        public async Task OnNavigatedFromAsync()
+        public async Task NavigatedAwayAsync()
         {
-            if (IsShown)
-            {
-                Debug.WriteLine($"*** Page is hidden: {Page.GetType()}");
-                IsShown = false;
-                await PageHiddenAsync();
-            }
-        }
-
-        protected virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
+            await OnPageHiddenAsync();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -69,5 +47,27 @@ namespace OmniCore.Mobile.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public void Dispose()
+        {
+            OnDispose();
+        }
+        
+        protected virtual async Task OnPageShownAsync()
+        {
+        }
+
+        protected virtual async Task OnPageHiddenAsync()
+        {
+        }
+        
+        protected virtual async Task OnBeforeBindAsync()
+        {
+        }
+        
+        protected virtual void OnDispose()
+        {
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using OmniCore.Mobile.Views;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using OmniCore.Services;
 using Unity;
@@ -21,8 +22,17 @@ namespace OmniCore.Mobile.ViewModels
         private async void OnLoginClicked(object obj)
         {
             var apiClient = UnityContainer.Resolve<ApiClient>();
-            //await apiClient.AuthorizeAccountAsync(Email, Password);
-            await Shell.Current.GoToAsync($"//StartPage");
+            try
+            {
+                await apiClient.AuthorizeAccountAsync(Email.Trim(), Password);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                return;
+            }
+
+            await NavigationService.NavigateAsync<ClientRegistrationPage>();
         }
     }
 }
