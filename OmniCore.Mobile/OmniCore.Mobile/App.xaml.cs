@@ -57,6 +57,8 @@ namespace OmniCore.Mobile
             _navigationService.Register<PlatformConfigurationPage, PlatformConfigurationViewModel>();
             _navigationService.Register<AccountLoginPage, AccountLoginViewModel>();
             _navigationService.Register<ClientRegistrationPage, ClientRegistrationViewModel>();
+            
+            _navigationService.Register<TwoFactorAuthenticationPage>();
         }
 
         protected override async void OnStart()

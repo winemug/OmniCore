@@ -26,9 +26,10 @@ namespace OmniCore.Mobile.ViewModels
         {
             if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
             {
-                // go back to start
                 await NavigationService.NavigateAsync<StartPage>();
             }
+
+            await RaisePropertyChangedAsync();
         }
 
         private async void RequestPermissionsClicked()

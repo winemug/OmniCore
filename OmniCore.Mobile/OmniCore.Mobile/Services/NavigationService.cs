@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using OmniCore.Mobile.Annotations;
 using OmniCore.Mobile.ViewModels;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -10,7 +11,7 @@ namespace OmniCore.Mobile.Services
 {
     public class NavigationService
     {
-        private Dictionary<Type, Type> _typeDict = new Dictionary<Type, Type>();
+        [ItemCanBeNull] private Dictionary<Type, Type> _typeDict = new Dictionary<Type, Type>();
         private Dictionary<Type, BaseViewModel> _instanceDict = new Dictionary<Type, BaseViewModel>();
         private AppShell _shell = null;
         private Page _currentPage = null;
@@ -68,6 +69,12 @@ namespace OmniCore.Mobile.Services
             _typeDict.Add(typeof(TPage), typeof(TViewModel));
             Routing.RegisterRoute(typeof(TPage).Name, typeof(TPage));
         }
+        
+        public void Register<TPage>()
+        {
+            _typeDict.Add(typeof(TPage), null);
+            Routing.RegisterRoute(typeof(TPage).Name, typeof(TPage));
+        }
 
         private async void ShellOnNavigating(object sender, ShellNavigatingEventArgs e)
         {
@@ -103,10 +110,18 @@ namespace OmniCore.Mobile.Services
 
         public async Task OnResumeAsync()
         {
+            if (_currentModel == null)
+            {
+                await _currentModel.NavigatedToAsync();
+            }
         }
 
         public async Task OnSleepAsync()
         {
+            if (_currentModel == null)
+            {
+                await _currentModel.NavigatedAwayAsync();
+            }
         }
     }
 }

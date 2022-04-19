@@ -2,7 +2,10 @@
 
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="OmniCore.Mobile.Views.TwoFactorAuthenticationPage">
+             x:Class="OmniCore.Mobile.Views.TwoFactorAuthenticationPage"             
+             Shell.NavBarIsVisible="False"
+             Shell.FlyoutItemIsVisible="False"
+             Shell.TabBarIsVisible="False">
     <ContentPage.Content>
         <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
             <Label Text="Enter the 6 digit numeric code you received via e-mail." FontSize="Default"/>

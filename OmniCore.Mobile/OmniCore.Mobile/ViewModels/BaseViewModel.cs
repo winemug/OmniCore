@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OmniCore.Mobile.Annotations;
 using OmniCore.Mobile.Services;
 using Unity;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
@@ -40,6 +41,13 @@ namespace OmniCore.Mobile.ViewModels
             await OnPageHiddenAsync();
         }
 
+        public async Task RaisePropertyChangedAsync(string propertyName = null)
+        {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                OnPropertyChanged(propertyName);
+            });
+        }
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
