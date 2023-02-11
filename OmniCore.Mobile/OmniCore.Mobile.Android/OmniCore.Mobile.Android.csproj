@@ -57,11 +57,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
+    <PackageReference Include="Plugin.BLE" Version="2.1.3" />
     <PackageReference Include="Unity" Version="5.11.10" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2337" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2515" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ForegroundService.cs" />
+    <Compile Include="ForegroundServiceHelper.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="PlatformInfo.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

@@ -15,24 +15,17 @@ namespace OmniCore.Services
 {
     public class SyncClient
     {
-        [Unity.Dependency]
-        public DataStore DataStore { get; set; }
-        
         private IConnectionFactory _connectionFactory;
         private IConnection _connection;
         private IModel _subChannel;
         private IModel _pubChannel;
-        private AsyncEventingBasicConsumer _consumer;
         private string _exchange;
         private string _userId;
-        private AsyncProducerConsumerQueue<ISyncableEntry> _publishQueue = 
-            new AsyncProducerConsumerQueue<ISyncableEntry>();
-        private ConcurrentDictionary<ulong, ISyncableEntry> _awaitingConfirmation =
-            new ConcurrentDictionary<ulong, ISyncableEntry>();
-        private AsyncProducerConsumerQueue<ISyncableEntry> _publishConfirmedQueue = 
-            new AsyncProducerConsumerQueue<ISyncableEntry>();
-
-        private Task _syncTask;
+        private AsyncEventingBasicConsumer _consumer;
+        
+        private AsyncProducerConsumerQueue<ISyncableEntry> _publishQueue = new();
+        private ConcurrentDictionary<ulong, ISyncableEntry> _awaitingConfirmation = new();
+        private AsyncProducerConsumerQueue<ISyncableEntry> _publishConfirmedQueue = new();
 
         public async Task StartAsync(EndpointResponse epr)
         {
@@ -100,7 +93,7 @@ namespace OmniCore.Services
                 }
             };
             
-            _syncTask = Task.Run(async () =>
+            var _syncTask = Task.Run(async () =>
             {
                 while (true)
                 {

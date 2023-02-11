@@ -40,24 +40,28 @@ namespace OmniCore.Mobile
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Debug.WriteLine($"Unhandled exception: {e.ExceptionObject}");
+            Trace.WriteLine($"Unhandled exception: {e.ExceptionObject}");
         }
 
         private void RegisterServices()
         {
             Container.RegisterInstance(_navigationService);
+            Container.RegisterType<ICoreService, CoreService>(new ContainerControlledLifetimeManager());
+            Container.RegisterType<RadioService>(new ContainerControlledLifetimeManager());
+            Container.RegisterType<BleService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<BgcService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<ConfigurationStore>(new ContainerControlledLifetimeManager());
             Container.RegisterType<DataStore>(new ContainerControlledLifetimeManager());
             Container.RegisterType<XDripWebServiceClient>(new ContainerControlledLifetimeManager());
             Container.RegisterType<SyncClient>(new ContainerControlledLifetimeManager());
             Container.RegisterType<ApiClient>(new ContainerControlledLifetimeManager());
-            
+
             _navigationService.Register<StartPage, StartViewModel>();
             _navigationService.Register<PlatformConfigurationPage, PlatformConfigurationViewModel>();
             _navigationService.Register<AccountLoginPage, AccountLoginViewModel>();
             _navigationService.Register<ClientRegistrationPage, ClientRegistrationViewModel>();
-            
+            _navigationService.Register<BluetoothTestPage, BluetoothTestViewModel>();
+            _navigationService.Register<AmqpTestPage, AmqpTestViewModel>();
             _navigationService.Register<TwoFactorAuthenticationPage>();
         }
 

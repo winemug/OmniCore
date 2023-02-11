@@ -18,6 +18,7 @@ namespace OmniCore.Mobile.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         private PlatformInfo _platformInfo;
+        private ForegroundServiceHelper _foregroundServiceHelper;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -25,8 +26,10 @@ namespace OmniCore.Mobile.Droid
                 var newExc = new ApplicationException("AndroidEnvironment_UnhandledExceptionRaiser", args.Exception);
             };
             //App.Container.RegisterType<IPlatformInfo, PlatformInfo>(new InjectionConstructor(this));
-            _platformInfo = new PlatformInfo(this, this); 
+            _platformInfo = new PlatformInfo(this, this);
+            _foregroundServiceHelper = new ForegroundServiceHelper(this);
             App.Container.RegisterInstance<IPlatformInfo>(_platformInfo);
+            App.Container.RegisterInstance<IForegroundServiceHelper>(_foregroundServiceHelper);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OmniCore.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,6 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Unity;
 
 namespace OmniCore.Mobile.UWP
 {
@@ -28,6 +30,8 @@ namespace OmniCore.Mobile.UWP
         /// </summary>
         public App()
         {
+            OmniCore.Mobile.App.Container.RegisterInstance<IPlatformInfo>(new PlatformInfo());
+            OmniCore.Mobile.App.Container.RegisterInstance<IForegroundServiceHelper>(new ForegroundServiceHelper());
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }

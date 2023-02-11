@@ -93,9 +93,11 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ForegroundServiceHelper.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PlatformInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -149,12 +151,19 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
+    <PackageReference Include="Plugin.BLE">
+      <Version>2.1.3</Version>
+    </PackageReference>
     <PackageReference Include="Unity" Version="5.11.10" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2337" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2515" />
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.13" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Services\OmniCore.Services.Interfaces\OmniCore.Services.Interfaces.csproj">
+      <Project>{74FED32A-C7A9-45B9-A4E6-8FAF53CFE9DE}</Project>
+      <Name>OmniCore.Services.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OmniCore.Mobile\OmniCore.Mobile.csproj">
       <Project>{4B5E02A2-A183-45C7-9D48-224303F1B940}</Project>
       <Name>OmniCore.Mobile</Name>
