@@ -51,8 +51,8 @@ namespace OmniCore.Mobile.ViewModels
             _foregroundServiceHelper.StartForegroundService();
         }
 
-        private int _messageSequence = 12;
-        private int _packetSequence = 9;
+        private int _messageSequence = 6;
+        private int _packetSequence = 24;
         private async void DoClicked()
         {
             using (var conn = await _radioService.GetConnectionAsync("ema"))
@@ -69,17 +69,34 @@ namespace OmniCore.Mobile.ViewModels
                 //     }
                 // }
 
+                // var me = new MessageExchange(
+                //     new RadioMessage
+                //     {
+                //         Address = 0x34c867a2,
+                //         Sequence = _messageSequence,
+                //         WithCriticalFollowup = false,
+                //         Parts = new List<RadioMessagePart>() { new RequestStatusPart(RequestStatusType.Default) }
+                //     },
+                //     conn,
+                //     _packetSequence);
+
                 var me = new MessageExchange(
                     new RadioMessage
                     {
                         Address = 0x34c867a2,
                         Sequence = _messageSequence,
                         WithCriticalFollowup = false,
-                        Parts = { new RequestStatusPart(RequestStatusType.Default) }
+                        Parts = new List<RadioMessagePart>()
+                        {
+                            new RequestBeepConfigPart(BeepType.BipBipBip2x,
+                                false, false, 0,
+                                false, false, 0,
+                                false, false, 0)
+                        }
                     },
                     conn,
                     _packetSequence);
-                
+
                 Debug.WriteLine($"ema sending message");
                 var result = await me.RunExchangeAsync();
                 _messageSequence = result.NextMessageSequence;

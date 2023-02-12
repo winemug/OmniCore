@@ -14,6 +14,8 @@ namespace OmniCore.Services
         RequestInsulinSchedule = 0x1a,
         RequestDeactivatePod = 0x1c,
         RequestCancelDelivery = 0x1f,
+        RequestBeepConfig = 0x1e,
+
         ResponseVersionInfo = 0x01,
         ResponseDetailInfo = 0x02,
         ResponseResyncRequest = 0x06,
