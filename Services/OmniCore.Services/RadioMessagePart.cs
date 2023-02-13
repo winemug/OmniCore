@@ -1,3 +1,4 @@
+using System.Text.Json;
 using OmniCore.Services.Interfaces;
 using Xamarin.Forms;
 
@@ -8,5 +9,6 @@ namespace OmniCore.Services
         public abstract RadioMessageType Type { get; }
         public uint? Nonce { get; set; }
         public Bytes Data { get; set; }
+
     }
 }

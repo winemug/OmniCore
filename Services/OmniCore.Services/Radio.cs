@@ -32,14 +32,13 @@ namespace OmniCore.Services
         private AsyncManualResetEvent _responseCountUpdatedEvent = new(false);
         private AsyncManualResetEvent _radioReadyEvent = new(false);
         private AsyncAutoResetEvent _connectionLostEvent = new(false);
+        private Task _connectionLoopTask = null;
         
         public Radio(Guid id, string name)
         {
             Id = id;
             Name = name;
-#pragma warning disable CS4014
-            ConnectionLoop(CrossBluetoothLE.Current.Adapter, _connectionTaskCancellation.Token);
-#pragma warning restore CS4014
+            _connectionLoopTask = Task.Run(() => ConnectionLoop(CrossBluetoothLE.Current.Adapter, _connectionTaskCancellation.Token));
         }
 
         public async Task<IDisposable> LockAsync(CancellationToken cancellationToken)
@@ -51,6 +50,15 @@ namespace OmniCore.Services
         {
             _connectionTaskCancellation.Cancel();
             _connectionTaskCancellation.Dispose();
+            try
+            {
+                _connectionLoopTask.GetAwaiter().GetResult();
+            }
+            catch (TaskCanceledException) { }
+            catch(Exception ex)
+            {
+                Trace.WriteLine($"Error disposing radio: {ex}");
+            }
         }
 
         private async Task<IDevice> TryConnectForeverAsync(IAdapter adapter, CancellationToken cancellationToken)

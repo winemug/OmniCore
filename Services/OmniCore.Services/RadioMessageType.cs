@@ -18,7 +18,8 @@ namespace OmniCore.Services
 
         ResponseVersionInfo = 0x01,
         ResponseDetailInfo = 0x02,
-        ResponseResyncRequest = 0x06,
+        ResponseError = 0x06,
         ResponseStatus = 0x1d,
+        ResponseStatusExtended = 0x02,
     }
 }

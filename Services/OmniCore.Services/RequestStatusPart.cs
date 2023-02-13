@@ -15,5 +15,10 @@ public class RequestStatusPart : RadioMessagePart
 public enum RequestStatusType
 {
     Default = 0,
-    Extended = 1
+    Alerts = 1,
+    Extended = 2,
+    PulseLogRecent = 3,
+    Activation = 5,
+    PulseLogLast = 80,
+    PulseLogPrev = 81,
 }

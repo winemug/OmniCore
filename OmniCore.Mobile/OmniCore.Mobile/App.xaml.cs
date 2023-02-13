@@ -47,6 +47,7 @@ namespace OmniCore.Mobile
         {
             Container.RegisterInstance(_navigationService);
             Container.RegisterType<ICoreService, CoreService>(new ContainerControlledLifetimeManager());
+            Container.RegisterType<PodService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<RadioService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<BleService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<BgcService>(new ContainerControlledLifetimeManager());

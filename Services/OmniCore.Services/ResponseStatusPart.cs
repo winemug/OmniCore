@@ -1,3 +1,4 @@
+using System.Text.Json;
 using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
@@ -43,5 +44,10 @@ public class ResponseStatusPart : RadioMessagePart
             PulsesRemaining = null;
         else
             PulsesRemaining = pr;
+    }
+    
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
     }
 }

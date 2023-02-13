@@ -31,6 +31,7 @@ public class RequestBeepConfigPart : RadioMessagePart
 
 public enum BeepType
 {
+    NoSound=0x00, 
     Beep4x=0x01,
     BipBeep4x=0x02,
     BipBip=0x03,

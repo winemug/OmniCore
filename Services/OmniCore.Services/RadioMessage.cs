@@ -53,6 +53,9 @@ namespace OmniCore.Services
                     case RadioMessageType.ResponseStatus:
                         message.Parts.Add(new ResponseStatusPart(mpData));
                         break;
+                    case RadioMessageType.ResponseError:
+                        message.Parts.Add(new ResponseErrorPart(mpData));
+                        break;
                 }
                 bodyIdx = bodyIdx + 2 + mpLength;
             }
@@ -103,7 +106,7 @@ namespace OmniCore.Services
             var sb = new StringBuilder();
             sb.Append($"Address: {Address:X} Sequence: {Sequence} Critical: {WithCriticalFollowup}");
             foreach (var part in Parts)
-                sb.Append($" Part: {part.Type} Data: {part.Data}");
+                sb.Append($"\nPart: {part}");
             return sb.ToString();
         }
     }

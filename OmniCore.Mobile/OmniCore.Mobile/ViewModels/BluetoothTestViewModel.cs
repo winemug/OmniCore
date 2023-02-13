@@ -29,11 +29,9 @@ namespace OmniCore.Mobile.ViewModels
         
         public string RssiText { get; private set; }
 
-        private RadioConnection _rlc1;
-        private RadioConnection _rlc2;
-        private RadioConnection _rlc3;
         private ICoreService _coreService;
         private RadioService _radioService;
+        private PodService _podService;
         private IForegroundServiceHelper _foregroundServiceHelper;
 
         public BluetoothTestViewModel()
@@ -43,7 +41,13 @@ namespace OmniCore.Mobile.ViewModels
             DoCommand = new Command(DoClicked);
             _coreService = App.Container.Resolve<ICoreService>();
             _radioService = App.Container.Resolve<RadioService>();
+            _podService = App.Container.Resolve<PodService>();
             _foregroundServiceHelper = App.Container.Resolve<IForegroundServiceHelper>();
+        }
+
+        protected override async Task OnPageShownAsync()
+        {
+            _foregroundServiceHelper.StartForegroundService();
         }
 
         private void StartClicked()
@@ -51,58 +55,15 @@ namespace OmniCore.Mobile.ViewModels
             _foregroundServiceHelper.StartForegroundService();
         }
 
-        private int _messageSequence = 6;
-        private int _packetSequence = 24;
         private async void DoClicked()
         {
-            using (var conn = await _radioService.GetConnectionAsync("ema"))
+            
+            using (var radioConn = await _radioService.GetConnectionAsync("ema"))
             {
-                // Debug.WriteLine("ema getpacket loop");
-                // for(int i=0; i<10; i++)
-                // {
-                //     var packet = await conn.TryGetPacket(0, 100);
-                //     if (packet != null)
-                //         Debug.WriteLine($"ema result: {packet}");
-                //     else
-                //     {
-                //         Debug.WriteLine($"ema result: n/a");
-                //     }
-                // }
-
-                // var me = new MessageExchange(
-                //     new RadioMessage
-                //     {
-                //         Address = 0x34c867a2,
-                //         Sequence = _messageSequence,
-                //         WithCriticalFollowup = false,
-                //         Parts = new List<RadioMessagePart>() { new RequestStatusPart(RequestStatusType.Default) }
-                //     },
-                //     conn,
-                //     _packetSequence);
-
-                var me = new MessageExchange(
-                    new RadioMessage
-                    {
-                        Address = 0x34c867a2,
-                        Sequence = _messageSequence,
-                        WithCriticalFollowup = false,
-                        Parts = new List<RadioMessagePart>()
-                        {
-                            new RequestBeepConfigPart(BeepType.BipBipBip2x,
-                                false, false, 0,
-                                false, false, 0,
-                                false, false, 0)
-                        }
-                    },
-                    conn,
-                    _packetSequence);
-
-                Debug.WriteLine($"ema sending message");
-                var result = await me.RunExchangeAsync();
-                _messageSequence = result.NextMessageSequence;
-                _packetSequence = result.NextPacketSequence;
-                Debug.WriteLine($"ema next msgseq: {result.NextMessageSequence} pktseq: {result.NextPacketSequence}\n Response: {result.Response}");
-                //_packetSequence = 0;
+                using (var podConn = await _podService.GetConnectionAsync(radioConn, 0x34c867a2))
+                {
+                    await podConn.Suspend();
+                }
             }
         }
 

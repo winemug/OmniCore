@@ -45,7 +45,7 @@ namespace OmniCore.Services
             RadioConnection = radioConnection;
         }
 
-        public async Task<CommunicationResult> RunExchangeAsync(CancellationToken cancellationToken = default)
+        public async Task<CommunicationResult> RunExchangeAsync(CancellationToken cancellationToken = default, bool doFinalAck = true)
         {
             var messageBody = MessageToSend.GetBody();
             var sendPacketCount = messageBody.Length / 31 + 1;
@@ -187,24 +187,27 @@ namespace OmniCore.Services
                 receivedMessageLength += receivedPacket.Data.Length;
             }
           
-            RadioPacket finalAck = new RadioPacket(PacketAddressOut, RadioPacketType.Ack,
-                NextPacketSequence, new Bytes(new byte[] { 0, 0, 0, 0}));
-
-            var nrCount = 0;
-            while (nrCount < 3)
+            if (doFinalAck)
             {
-                Debug.WriteLine($"Final ack, nrc: {nrCount}");
-                var received = await TryExchangePackets(finalAck, false, cancellationToken);
-                if (received == null)
-                    nrCount++;
-                else
-                    nrCount = 0;
+                RadioPacket finalAck = new RadioPacket(PacketAddressOut, RadioPacketType.Ack,
+                    NextPacketSequence, new Bytes(new byte[] { 0, 0, 0, 0 }));
+
+                var nrCount = 0;
+                while (nrCount < 3)
+                {
+                    Debug.WriteLine($"Final ack, nrc: {nrCount}");
+                    var received = await TryExchangePackets(finalAck, false, cancellationToken);
+                    if (received == null)
+                        nrCount++;
+                    else
+                        nrCount = 0;
+                }
+
+                Debug.WriteLine($"Final send complete");
+                NextPacketSequence = (NextPacketSequence + 1) % 32;
             }
-            
-            Debug.WriteLine($"Final send complete");
 
             var podMessageReceived = RadioMessage.FromReceivedPackets(podResponsePackets);
-            NextPacketSequence = (NextPacketSequence + 1) % 32;
             NextMessageSequence = (receivedMessageSequence + 1) % 16;
             return new CommunicationResult
             {
