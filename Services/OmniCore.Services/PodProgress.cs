@@ -12,6 +12,9 @@ public enum PodProgress
     Inserting = 7,
     Running = 8,
     RunningLow = 9,
+    Unknown10 = 10,
+    Unknown11 = 11,
+    Unknown12 = 12,
     Faulted = 13,
     ActivationExpired = 14,
     Inactive = 15

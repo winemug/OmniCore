@@ -212,9 +212,10 @@ public class PodConnection : IDisposable
     {
         var initialPacketSequence = _pod.NextPacketSequence;
         var initialMessageSequence = _pod.NextMessageSequence;
-        
+
+        var messageToSend = ConstructMessage(critical, parts); 
         var result = await RunExchangeAsync(
-            ConstructMessage(critical, parts),
+            messageToSend,
             cancellationToken);
 
         if (result.Error != CommunicationError.NoResponse)
@@ -239,6 +240,7 @@ public class PodConnection : IDisposable
                             syncRetries
                         );
                     }
+                    _pod.ProcessResponse(result.Message);
                     return PodResponse.Error;
                 }
                 _pod.ProcessResponse(result.Message);
@@ -338,8 +340,6 @@ public class PodConnection : IDisposable
 
             if (receivedPacket == null || receivedPacket.Address != packetAddressIn)
             {
-                Trace.WriteLine($"No response");
-
                 if (sendPacketIndex == 0 && firstPacketSent < now - TimeSpan.FromSeconds(30))
                 {
                     return new ExchangeResult(CommunicationError.NoResponse);
@@ -356,7 +356,6 @@ public class PodConnection : IDisposable
             
             if (receivedPacket.Sequence != (nextPacketSequence + 1) % 32)
             {
-                Trace.WriteLine($"Received unexpected packet sequence {receivedPacket.Address.ToString("x8")}");
                 continue;
             }
             
@@ -417,7 +416,6 @@ public class PodConnection : IDisposable
             
             if (receivedPacket == null || receivedPacket.Address != packetAddressIn)
             {
-                Trace.WriteLine($"No response");
                 if (_pod.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
                 {
                     return new ExchangeResult(CommunicationError.ConnectionInterrupted);
@@ -428,7 +426,6 @@ public class PodConnection : IDisposable
             _pod.LastRadioPacketReceived = DateTimeOffset.Now;
             if (receivedPacket.Sequence != (nextPacketSequence + 1) % 32)
             {
-                Trace.WriteLine($"Received unexpected packet sequence receivd: {receivedPacket}");
                 continue;
             }
             
@@ -477,6 +474,7 @@ public class PodConnection : IDisposable
             if (received != null && received.Address == _pod.RadioAddress)
             {
                 _pod.LastRadioPacketReceived = now;
+                Debug.WriteLine($"Final ack received response");
             }
 
             if (_pod.LastRadioPacketReceived < now - TimeSpan.FromSeconds(5))

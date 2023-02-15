@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -12,17 +13,15 @@ public class Pod
 {
     public Guid Id { get; set; }
     public uint RadioAddress { get; set; }
+    
+    public int UnitsPerMilliliter { get; set; }
     public int Lot { get; set; }
     public int Serial { get; set; }
-    public bool Faulted { get; set; }
     public PodProgress Progress { get; set; }
-    
+    public bool Faulted { get; set; }
     public bool ExtendedBolusActive { get; set; }
-    
     public bool ImmediateBolusActive { get; set;}
-    
     public bool TempBasalActive { get; set;}
-    
     public bool BasalActive { get; set;}
     
     public int PulsesDelivered { get; set;}
@@ -39,7 +38,6 @@ public class Pod
     public uint? LastNonce { get; private set; }
     public int NextMessageSequence { get; set; }
     public int NextPacketSequence { get; set; }
-    
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
     
     private AsyncLock _allocationLock = new ();
@@ -69,6 +67,26 @@ public class Pod
                     throw new ArgumentOutOfRangeException();
             }
         }
+    }
+
+    private void ProcessVersionInfo(ResponseVersionInfoPart part)
+    {
+        
+    }
+
+    private void ProcessDetailInfo(ResponseDetailInfoPart part)
+    {
+        
+    }
+
+    private void ProcessStatus(ResponseStatusPart part)
+    {
+        
+    }
+
+    private void ProcessError(ResponseErrorPart part)
+    {
+        
     }
     
     public uint NextNonce()
@@ -118,5 +136,9 @@ public class Pod
         }
 
         NonceIndex = (int)(((NonceTable[0] + NonceTable[1]) & 0xF) + 2);
+    }
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
     }
 }

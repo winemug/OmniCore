@@ -46,9 +46,4 @@ public class ResponseStatusPart : MessagePart
         else
             PulsesRemaining = pr;
     }
-    
-    public override string ToString()
-    {
-        return JsonSerializer.Serialize(this);
-    }
 }

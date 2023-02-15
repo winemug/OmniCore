@@ -18,8 +18,9 @@ public class PodService
             RadioAddress = 0x34c867a2,
             Lot = 72402,
             Serial = 3210594,
-            NextMessageSequence = 2,
-            NextPacketSequence = 18
+            NextMessageSequence = 0,
+            NextPacketSequence = 0,
+            Progress = PodProgress.Running
         });
     }
     
