@@ -44,6 +44,15 @@ public class Pod
 
     public Pod()
     {
+        Id = Guid.NewGuid();
+        var r = new Random();
+        var bn0 = r.Next(13);
+        var bn1 = r.Next(16);
+        var b0 = (bn0 + 2) << 4 | bn1;
+        var b123 = new byte[3];
+        r.NextBytes(b123);
+        RadioAddress = (uint)(b0 << 24 | b123[0] << 16 | b123[1] << 8 | b123[2]);
+        
         InitializeNonceTable(0);
     }
     public async Task<IDisposable> LockAsync(CancellationToken cancellationToken)
@@ -69,12 +78,12 @@ public class Pod
         }
     }
 
-    private void ProcessVersionInfo(ResponseVersionInfoPart part)
+    private void ProcessVersionInfo(ResponseVersionPart part)
     {
         
     }
 
-    private void ProcessDetailInfo(ResponseDetailInfoPart part)
+    private void ProcessDetailInfo(ResponseInfoPart part)
     {
         
     }

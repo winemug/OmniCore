@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Services.Interfaces;
@@ -55,6 +56,33 @@ namespace OmniCore.Services
                         break;
                     case RadioMessageType.ResponseError:
                         message.Parts.Add(new ResponseErrorPart(mpData));
+                        break;
+                    case RadioMessageType.ResponseDetailInfo:
+                        var riType = (RequestStatusType)mpData[0];
+                        switch (riType)
+                        {
+                            case RequestStatusType.Alerts:
+                                message.Parts.Add(new ResponseInfoAlertsPart(mpData));
+                                break;
+                            case RequestStatusType.Extended:
+                                message.Parts.Add(new ResponseInfoExtendedPart(mpData));
+                                break;
+                            case RequestStatusType.PulseLogRecent:
+                                message.Parts.Add(new ResponseInfoPulseLogRecentPart(mpData));
+                                break;
+                            case RequestStatusType.Activation:
+                                message.Parts.Add(new ResponseInfoActivationPart(mpData));
+                                break;
+                            case RequestStatusType.PulseLogLast:
+                                message.Parts.Add(new ResponseInfoPulseLogLastPart(mpData));
+                                break;
+                            case RequestStatusType.PulseLogPrevious:
+                                message.Parts.Add(new ResponseInfoPulseLogPreviousPart(mpData));
+                                break;
+                        }
+                        break;
+                    case RadioMessageType.ResponseVersionInfo:
+                        message.Parts.Add(new ResponseVersionPart(mpData));
                         break;
                 }
                 bodyIdx = bodyIdx + 2 + mpLength;

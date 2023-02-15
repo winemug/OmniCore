@@ -3,7 +3,7 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public class ResponseVersionInfoPart : MessagePart
+public class ResponseVersionPart : MessagePart
 {
     public override bool RequiresNonce => false;
     public override RadioMessageType Type => RadioMessageType.ResponseVersionInfo;
@@ -33,7 +33,7 @@ public class ResponseVersionInfoPart : MessagePart
     public int? CannulaInsertPulseCount { get; }
     public int? MaximumLifeTimeHours { get; }
 
-    public ResponseVersionInfoPart(Bytes Data)
+    public ResponseVersionPart(Bytes Data)
     {
         if (Data.Length != 21 && Data.Length != 27)
             throw new ApplicationException();

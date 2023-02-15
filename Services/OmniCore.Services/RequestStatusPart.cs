@@ -21,5 +21,5 @@ public enum RequestStatusType
     PulseLogRecent = 3,
     Activation = 5,
     PulseLogLast = 80,
-    PulseLogPrev = 81,
+    PulseLogPrevious = 81,
 }
