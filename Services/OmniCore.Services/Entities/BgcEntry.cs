@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Threading.Tasks;
 using Dapper;
-using Newtonsoft.Json;
 using OmniCore.Services.Interfaces;
 using Xamarin.Forms;
 using JsonSerializer = System.Text.Json.JsonSerializer;
