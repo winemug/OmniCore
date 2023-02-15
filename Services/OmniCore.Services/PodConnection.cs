@@ -15,6 +15,7 @@ public class PodConnection : IDisposable
     private Pod _pod;
     private IDisposable _podLockDisposable;
     private RadioConnection _radioConnection;
+    private bool _communicationNeedsClosing;
 
     public PodConnection(Pod pod,
         RadioConnection radioConnection,
@@ -26,7 +27,20 @@ public class PodConnection : IDisposable
     }
     public void Dispose()
     {
-        _podLockDisposable?.Dispose();
+        if (_communicationNeedsClosing)
+        {
+            Task.Run(async () =>
+            {
+                await AckExchangeAsync();
+                _radioConnection.Dispose();
+                _podLockDisposable.Dispose();
+            });
+        }
+        else
+        {
+            _radioConnection.Dispose();
+            _podLockDisposable.Dispose();
+        }
     }
     
     public async Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default)
@@ -41,9 +55,6 @@ public class PodConnection : IDisposable
                 new RequestStatusPart(RequestStatusType.Default)
             }
         );
-        if (result != PodResponse.OK)
-            return result;
-        await AckExchangeAsync(cancellationToken);
         return result;
     }
 
@@ -76,9 +87,6 @@ public class PodConnection : IDisposable
             }
         );
 
-        if (result != PodResponse.OK)
-            return result;
-        await AckExchangeAsync(cancellationToken);
         return result;
     }
 
@@ -119,10 +127,6 @@ public class PodConnection : IDisposable
                     false)
             });
 
-        if (result != PodResponse.OK)
-            return result;
-
-        await AckExchangeAsync(cancellationToken);
         return result;
     }
 
@@ -159,7 +163,6 @@ public class PodConnection : IDisposable
                     false,
                     true)
             });
-        await AckExchangeAsync(cancellationToken);
         return result;
     }
     
@@ -197,7 +200,6 @@ public class PodConnection : IDisposable
                     false,
                     false)
             });
-        await AckExchangeAsync(cancellationToken);
         return result;
     }
     
@@ -214,6 +216,9 @@ public class PodConnection : IDisposable
         var result = await RunExchangeAsync(
             ConstructMessage(critical, parts),
             cancellationToken);
+
+        if (result.Error != CommunicationError.NoResponse)
+            _communicationNeedsClosing = true;
 
         switch (result.Error)
         {
@@ -306,10 +311,10 @@ public class PodConnection : IDisposable
         DateTimeOffset? firstPacketSent = null;
         DateTimeOffset? lastPacketSent = null;
 
-        var packetAddressIn = messageToSend.Address;
-        var packetAddressOut = messageToSend.Address;
-        var ackDataOutInterim = messageToSend.Address;
-        var ackDataIn = messageToSend.Address;
+        var packetAddressIn = _pod.Progress < PodProgress.Paired ? 0xFFFFFFFF : _pod.RadioAddress;
+        var packetAddressOut = _pod.Progress < PodProgress.Paired ? 0xFFFFFFFF: _pod.RadioAddress;
+        var ackDataOutInterim = _pod.RadioAddress;
+        var ackDataIn = _pod.RadioAddress;
 
         // Send
         while (sendPacketIndex < sendPacketCount)
@@ -457,11 +462,12 @@ public class PodConnection : IDisposable
     private async Task AckExchangeAsync(
         CancellationToken cancellationToken = default)
     {
+        uint ackDataOutFinal = _pod.Progress < PodProgress.Paired ? _pod.RadioAddress : 0x00000000;
         RadioPacket finalAck = new RadioPacket(
             _pod.RadioAddress,
             RadioPacketType.Ack,
             _pod.NextPacketSequence,
-            new Bytes((uint)0));
+            new Bytes(ackDataOutFinal));
 
         while (true)
         {

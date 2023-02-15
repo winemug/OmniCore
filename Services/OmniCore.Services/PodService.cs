@@ -9,8 +9,10 @@ public class PodService
 {
     private List<Pod> _pods = new();
 
-    public PodService()
+    private RadioService _radioService;
+    public PodService(RadioService radioService)
     {
+        _radioService = radioService;
         _pods.Add(new Pod()
         {
             RadioAddress = 0x34c867a2,
@@ -22,14 +24,15 @@ public class PodService
     }
     
     public async Task<PodConnection> GetConnectionAsync(
-        RadioConnection radioConnection,
         uint radioAddress,
         CancellationToken cancellationToken = default)
     {
         var pod = _pods.Where(r => r.RadioAddress == radioAddress).FirstOrDefault();
         if (pod == null)
             return null;
-        var allocationLockDisposable = await pod.LockAsync(cancellationToken);
-        return new PodConnection(pod, radioConnection, allocationLockDisposable);
+
+        var radioConnection = await _radioService.GetConnectionAsync("ema");
+        var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
+        return new PodConnection(pod, radioConnection, podAllocationLockDisposable);
     }
 }

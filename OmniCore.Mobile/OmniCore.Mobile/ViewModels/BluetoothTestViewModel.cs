@@ -57,14 +57,10 @@ namespace OmniCore.Mobile.ViewModels
 
         private async void DoClicked()
         {
-            
-            using (var radioConn = await _radioService.GetConnectionAsync("ema"))
+            using (var podConn = await _podService.GetConnectionAsync(0x34c867a2))
             {
-                using (var podConn = await _podService.GetConnectionAsync(radioConn, 0x34c867a2))
-                {
-                    var response = await podConn.UpdateStatus();
-                    Debug.WriteLine("Update Status response: {response}");
-                }
+                var response = await podConn.UpdateStatus();
+                Debug.WriteLine("Update Status response: {response}");
             }
         }
 
