@@ -10,14 +10,37 @@ namespace OmniCore.Services;
 
 public class Pod
 {
+    public Guid Id { get; set; }
     public uint RadioAddress { get; set; }
+    public int Lot { get; set; }
+    public int Serial { get; set; }
+    public bool Faulted { get; set; }
+    public PodProgress Progress { get; set; }
     
+    public bool ExtendedBolusActive { get; set; }
+    
+    public bool ImmediateBolusActive { get; set;}
+    
+    public bool TempBasalActive { get; set;}
+    
+    public bool BasalActive { get; set;}
+    
+    public int PulsesDelivered { get; set;}
+    
+    public int PulsesPending { get; set;}
+    
+    public int? PulsesRemaining { get; set;}
+    
+    public int ActiveMinutes { get; set;}
+    
+    public int UnackedAlertsMask { get; set;}
+    
+    public int LastProgrammingCommandSequence { get; set;}
     public uint? LastNonce { get; private set; }
     public int NextMessageSequence { get; set; }
     public int NextPacketSequence { get; set; }
     
-    public int Lot { get; set; }
-    public int Serial { get; set; }
+    public DateTimeOffset? LastRadioPacketReceived { get; set; }
     
     private AsyncLock _allocationLock = new ();
 
@@ -30,6 +53,24 @@ public class Pod
         return await _allocationLock.LockAsync(cancellationToken);
     }
 
+    public void ProcessResponse(RadioMessage message)
+    {
+        foreach (var part in message.Parts)
+        {
+            switch (part.Type)
+            {
+                case RadioMessageType.ResponseVersionInfo:
+                    break;
+                case RadioMessageType.ResponseDetailInfo:
+                    break;
+                case RadioMessageType.ResponseStatus:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+    
     public uint NextNonce()
     {
         if (!LastNonce.HasValue)
@@ -48,13 +89,12 @@ public class Pod
         return LastNonce.Value;
     }
 
-    public uint NextNonce(ushort syncWord, int syncMessageSequence)
+    public void SyncNonce(ushort syncWord, int syncMessageSequence)
     {
         var w = (LastNonce.Value & 0xFFFF) + (CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF) + (Lot & 0xFFFF) +
                 (Serial & 0xFFFF);
         var seed = (ushort)(((w & 0xFFFF) ^ syncWord) & 0xff);
         InitializeNonceTable(seed);
-        return NextNonce();
     }
 
     private uint[] NonceTable;

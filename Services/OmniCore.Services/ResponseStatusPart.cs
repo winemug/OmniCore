@@ -3,8 +3,9 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public class ResponseStatusPart : RadioMessagePart
+public class ResponseStatusPart : MessagePart
 {
+    public override bool RequiresNonce => false;
     public override RadioMessageType Type => RadioMessageType.ResponseStatus;
     public bool ExtendedBolusActive { get; }
     public bool ImmediateBolusActive { get; }

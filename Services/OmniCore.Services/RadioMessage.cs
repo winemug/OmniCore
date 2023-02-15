@@ -9,7 +9,7 @@ namespace OmniCore.Services
         public uint Address { get; set; }
         public int Sequence { get; set; }
         public bool WithCriticalFollowup { get; set; }
-        public List<RadioMessagePart> Parts { get; set; }
+        public List<MessagePart> Parts { get; set; }
         
         public uint? AckAddressOverride { get; set; }
         public static RadioMessage FromReceivedPackets(List<RadioPacket> receivedPackets)
@@ -31,7 +31,7 @@ namespace OmniCore.Services
             message.Sequence = (b0 >> 2) & 0b00111111;
             var bodyLength = (b0 & 0b00000011) << 8 | b1;
             int bodyIdx = 0;
-            message.Parts = new List<RadioMessagePart>();
+            message.Parts = new List<MessagePart>();
             while (bodyIdx < bodyLength)
             {
                 var mpType = (RadioMessageType)messageBody[6 + bodyIdx];
@@ -67,7 +67,7 @@ namespace OmniCore.Services
             int bodyLength = 0;
             foreach (var part in Parts)
             {
-                if (part.Nonce.HasValue)
+                if (part.RequiresNonce)
                     bodyLength += 4;
                 bodyLength += part.Data.Length + 2;
             }
@@ -83,10 +83,10 @@ namespace OmniCore.Services
             foreach (var part in Parts)
             {
                 messageBody.Append((byte)part.Type);
-                if (part.Nonce.HasValue)
+                if (part.RequiresNonce)
                 {
                     messageBody.Append((byte)(part.Data.Length + 4));
-                    messageBody.Append(part.Nonce.Value);
+                    messageBody.Append(part.Nonce);
                 }
                 else
                 {

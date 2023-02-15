@@ -62,7 +62,8 @@ namespace OmniCore.Mobile.ViewModels
             {
                 using (var podConn = await _podService.GetConnectionAsync(radioConn, 0x34c867a2))
                 {
-                    await podConn.Suspend();
+                    var response = await podConn.UpdateStatus();
+                    Debug.WriteLine("Update Status response: {response}");
                 }
             }
         }

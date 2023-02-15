@@ -2,8 +2,9 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public class RequestStatusPart : RadioMessagePart
+public class RequestStatusPart : MessagePart
 {
+    public override bool RequiresNonce => false;
     public override RadioMessageType Type => RadioMessageType.RequestStatus;
 
     public RequestStatusPart(RequestStatusType type)

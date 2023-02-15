@@ -2,8 +2,9 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public class RequestBeepConfigPart : RadioMessagePart
+public class RequestBeepConfigPart : MessagePart
 {
+    public override bool RequiresNonce => false;
     public override RadioMessageType Type => RadioMessageType.RequestBeepConfig;
 
     public RequestBeepConfigPart(BeepType beepNow,
