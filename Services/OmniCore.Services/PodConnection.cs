@@ -492,7 +492,7 @@ public class PodConnection : IDisposable
     {
         RadioPacket received = null;
         Debug.WriteLine($"SEND: {packetToSend}");
-        if (_pod.LastRadioPacketReceived.HasValue &&
+        if (!_pod.LastRadioPacketReceived.HasValue ||
             _pod.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
         {
             received = await _radioConnection.SendAndTryGetPacket(
