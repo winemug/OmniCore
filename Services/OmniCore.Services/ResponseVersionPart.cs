@@ -22,7 +22,6 @@ public class ResponseVersionPart : MessagePart
     public uint Serial { get; }
     
     public uint AssignedAddress { get; }
-
     public int? RadioLowGain { get; }
     public int? Rssi { get; }
     

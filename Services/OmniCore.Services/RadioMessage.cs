@@ -57,7 +57,7 @@ namespace OmniCore.Services
                     case RadioMessageType.ResponseError:
                         message.Parts.Add(new ResponseErrorPart(mpData));
                         break;
-                    case RadioMessageType.ResponseDetailInfo:
+                    case RadioMessageType.ResponseInfo:
                         var riType = (RequestStatusType)mpData[0];
                         switch (riType)
                         {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Nito.AsyncEx;
 using OmniCore.Services.Entities;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Tables;
@@ -17,51 +18,63 @@ namespace OmniCore.Services
     public class DataStore
     {
         public string DatabasePath { get; }
-        public string DatabaseVersionFilePath { get; }
         private bool _initialized = false;
-        private const string DbVersion = "1";
+        private const string DbVersion = "000";
+        private AsyncLock _initializeLock = new AsyncLock();
         public DataStore()
         {
             var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             DatabasePath = Path.Combine(basePath, "omnicore.db3");
-            DatabaseVersionFilePath = Path.Combine(basePath, "dbver");
         }
         
         public async Task<SqliteConnection> GetConnectionAsync()
         {
             if (!_initialized)
                 await InitializeDatabaseAsync();
-            var conn = new SqliteConnection($"Data Source={DatabasePath};Cache=Shared");
+            var conn = new SqliteConnection($"Data Source={DatabasePath}");
             await conn.OpenAsync();
             return conn;
         }
 
         public async Task InitializeDatabaseAsync()
         {
-            if (!_initialized)
+            using (var _ = await _initializeLock.LockAsync())
             {
-                if (File.Exists(DatabasePath))
+                if (!_initialized)
                 {
-                    var versionMatch = false;
-                    if (File.Exists(DatabaseVersionFilePath))
+                    if (File.Exists(DatabasePath))
                     {
-                        var dbver = File.ReadAllText(DatabaseVersionFilePath);
-                        versionMatch = dbver == DbVersion;
-                    }
+                        string storedVersion = null;
+                        try
+                        {
+                            using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
+                            {
+                                await conn.OpenAsync();
+                                var row = await conn.QueryFirstOrDefaultAsync(
+                                    "SELECT db_version FROM version");
+                                storedVersion = row.db_version;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.WriteLine($"Error retrieving db version -- reinitializing. {e}");
+                        }
 
-                    if (!versionMatch)
-                    {
-                        await MigrateDatabaseAsync();
+                        if (string.IsNullOrEmpty(storedVersion) || storedVersion != DbVersion)
+                        {
+                            await MigrateDatabaseAsync(storedVersion);
+                        }
                     }
+                    else
+                    {
+                        await CreateDatabaseAsync();
+                    }
+                    _initialized = true;
                 }
-                else
-                {
-                    await CreateDatabaseAsync();
-                }
-                _initialized = true;
             }
         }
-        private async Task MigrateDatabaseAsync()
+
+        private async Task MigrateDatabaseAsync(string existingVersion)
         {
             // initial non-migration
             await CreateDatabaseAsync();
@@ -69,17 +82,16 @@ namespace OmniCore.Services
         
         private async Task CreateDatabaseAsync()
         {
-            if (File.Exists(DatabaseVersionFilePath))
-                File.Delete(DatabaseVersionFilePath);
             if (File.Exists(DatabasePath))
                 File.Delete(DatabasePath);
             
             using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
             {
+                await conn.OpenAsync();
                 await TableDefinitions.RunCreate(conn);
+                await conn.ExecuteAsync("INSERT INTO version(db_version) VALUES(@version)",
+                    new { version = DbVersion });
             }
-            
-            File.WriteAllText(DatabaseVersionFilePath, DbVersion);
         }
     }
 }

@@ -11,8 +11,6 @@ namespace OmniCore.Services.Tables
             
             var sql = @"
 
-PRAGMA journal_mode = 'wal';
-
 DROP TABLE IF EXISTS client;
 CREATE TABLE client
 (
@@ -40,13 +38,36 @@ CREATE TABLE bgc
     type INTEGER,
     direction INTEGER,
     value REAL,
-    rssi INTEGER,
-    synced INTEGER,
-    deleted INTEGER
+    synced INTEGER DEFAULT 0 NOT NULL,
+    deleted INTEGER DEFAULT 0 NOT NULL
+);
+
+DROP TABLE IF EXISTS pod;
+CREATE TABLE pod
+(
+    id TEXT NOT NULL,
+    radio_address INTEGER NOT NULL,
+    units_per_ml INTEGER NOT NULL,
+    medication INTEGER NOT NULL,
+    lot INTEGER,
+    serial INTEGER,
+    progress INTEGER NOT NULL,
+    packet_sequence INTEGER NOT NULL,
+    message_sequence INTEGER NOT NULL,
+    entered INTEGER NOT NULL,
+    removed INTEGER,
+    synced INTEGER DEFAULT 0 NOT NULL
+);
+
+DROP TABLE IF EXISTS version;
+CREATE TABLE version
+(
+    db_version TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX bgc_reading_date ON bgc(profile_id, client_id, date);
 CREATE INDEX bgc_date ON bgc(profile_id, date);
+
 ";
             await conn.ExecuteAsync(sql);
         }

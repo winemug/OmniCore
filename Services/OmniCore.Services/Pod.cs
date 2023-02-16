@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
 using Nito.AsyncEx;
 using Xamarin.Forms;
 
@@ -13,37 +14,40 @@ public class Pod
 {
     public Guid Id { get; set; }
     public uint RadioAddress { get; set; }
-    
     public int UnitsPerMilliliter { get; set; }
-    public int Lot { get; set; }
-    public int Serial { get; set; }
+    public MedicationType Medication { get; set; }
+    public uint Lot { get; set; }
+    public uint Serial { get; set; }
     public PodProgress Progress { get; set; }
+    public int NextPacketSequence { get; set; }
+    public int NextMessageSequence { get; set; }
+    public DateTimeOffset Entered { get; set; }
+    public DateTimeOffset? Removed { get; set; }
+
+    //
+    public int PulseVolumeMicroUnits { get; set; }
+    public int MaximumLifeTimeHours { get; set; }
+    public uint? LastNonce { get; private set; }
     public bool Faulted { get; set; }
     public bool ExtendedBolusActive { get; set; }
     public bool ImmediateBolusActive { get; set;}
     public bool TempBasalActive { get; set;}
     public bool BasalActive { get; set;}
-    
     public int PulsesDelivered { get; set;}
-    
     public int PulsesPending { get; set;}
-    
     public int? PulsesRemaining { get; set;}
-    
     public int ActiveMinutes { get; set;}
-    
     public int UnackedAlertsMask { get; set;}
-    
-    public int LastProgrammingCommandSequence { get; set;}
-    public uint? LastNonce { get; private set; }
-    public int NextMessageSequence { get; set; }
-    public int NextPacketSequence { get; set; }
+
+    public List<MessagePart> ReceivedParts = new List<MessagePart>();
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
     
     private AsyncLock _allocationLock = new ();
+    private DataStore _dataStore;
 
-    public Pod()
+    public Pod(DataStore dataStore)
     {
+        _dataStore = dataStore;
         Id = Guid.NewGuid();
         var r = new Random();
         var bn0 = r.Next(13);
@@ -55,49 +59,122 @@ public class Pod
         
         InitializeNonceTable(0);
     }
+
     public async Task<IDisposable> LockAsync(CancellationToken cancellationToken)
     {
         return await _allocationLock.LockAsync(cancellationToken);
     }
 
-    public void ProcessResponse(RadioMessage message)
+    public async Task Save()
     {
-        foreach (var part in message.Parts)
+        using (var conn = await _dataStore.GetConnectionAsync())
         {
-            switch (part.Type)
-            {
-                case RadioMessageType.ResponseVersionInfo:
-                    break;
-                case RadioMessageType.ResponseDetailInfo:
-                    break;
-                case RadioMessageType.ResponseStatus:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            await conn.ExecuteAsync(
+    "UPDATE pod SET radio_address=@ra, units_per_ml=@upml, medication=@med, lot=@lot, serial=@serial, progress=@pro," +
+    " packet_sequence=@ps, message_sequence=@ms WHERE id = @id",
+    new
+    {
+        id = Id.ToString("N"),
+        ra = (int)RadioAddress,
+        upml = UnitsPerMilliliter,
+        med = (int)Medication,
+        lot = (int)Lot,
+        serial = (int)Serial,
+        pro = (int)Progress,
+        ps = NextPacketSequence,
+        ms = NextMessageSequence,
+    });
         }
     }
 
-    private void ProcessVersionInfo(ResponseVersionPart part)
+    public async Task ProcessResponseAsync(RadioMessage message)
     {
-        
-    }
-
-    private void ProcessDetailInfo(ResponseInfoPart part)
-    {
-        
+        foreach (var part in message.Parts)
+        {
+            ReceivedParts.Add(part);
+            
+            if (part is ResponseErrorPart ep)
+                ProcessError(ep);
+            if (part is ResponseStatusPart sp)
+                ProcessStatus(sp);
+            if (part is ResponseVersionPart rv)
+                ProcessVersion(rv);
+            if (part is ResponseInfoPart ri)
+                ProcessInfo(ri);
+        }
+        await Save();
     }
 
     private void ProcessStatus(ResponseStatusPart part)
     {
-        
-    }
-
-    private void ProcessError(ResponseErrorPart part)
-    {
-        
+        Progress = part.Progress;
+        Faulted = part.Faulted;
+        ExtendedBolusActive = part.ExtendedBolusActive;
+        ImmediateBolusActive = part.ImmediateBolusActive;
+        TempBasalActive = part.TempBasalActive;
+        BasalActive = part.BasalActive;
+        PulsesDelivered = part.PulsesDelivered;
+        PulsesPending = part.PulsesPending;
+        PulsesRemaining = part.PulsesRemaining;
+        ActiveMinutes = part.ActiveMinutes;
+        UnackedAlertsMask = part.UnackedAlertsMask;
     }
     
+    private void ProcessVersion(ResponseVersionPart part)
+    {
+        Lot = part.Lot;
+        Serial = part.Serial;
+        Progress = part.Progress;
+        if (part.PulseVolumeMicroUnits.HasValue)
+            PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
+        if (part.MaximumLifeTimeHours.HasValue)
+            MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
+    }
+    
+    private void ProcessError(ResponseErrorPart part)
+    {
+    }
+
+    private void ProcessInfo(ResponseInfoPart part)
+    {
+        if (part is ResponseInfoActivationPart pact)
+            ProcessInfoActivation(pact);
+        if (part is ResponseInfoAlertsPart pale)
+            ProcessInfoAlerts(pale);
+        if (part is ResponseInfoExtendedPart pext)
+            ProcessInfoExtended(pext);
+        if (part is ResponseInfoPulseLogRecentPart plr)
+            ProcessInfoPulseLogRecent(plr);
+        if (part is ResponseInfoPulseLogLastPart pll)
+            ProcessInfoPulseLogLast(pll);
+        if (part is ResponseInfoPulseLogPreviousPart plp)
+            ProcessInfoPulseLogPrevious(plp);
+    }
+    
+    private void ProcessInfoExtended(ResponseInfoExtendedPart part)
+    {
+    }
+
+    private void ProcessInfoAlerts(ResponseInfoAlertsPart part)
+    {
+    }
+
+    private void ProcessInfoActivation(ResponseInfoActivationPart part)
+    {
+    }
+
+    private void ProcessInfoPulseLogPrevious(ResponseInfoPulseLogPreviousPart part)
+    {
+    }
+
+    private void ProcessInfoPulseLogLast(ResponseInfoPulseLogLastPart part)
+    {
+    }
+
+    private void ProcessInfoPulseLogRecent(ResponseInfoPulseLogRecentPart part)
+    {
+    }
+
     public uint NextNonce()
     {
         if (!LastNonce.HasValue)

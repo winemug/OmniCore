@@ -7,9 +7,9 @@ namespace OmniCore.Services
         RequestSetDeliveryFlags = 0x08,
         RequestStatus = 0x0e,
         RequestAcknowledgeAlerts = 0x11,
-        RequestBasalSchedule = 0x13,
-        RequestTempBasalSchedule = 0x16,
-        RequestBolusSchedule = 0x17,
+        RequestBasal = 0x13,
+        RequestTempBasal = 0x16,
+        RequestBolus = 0x17,
         RequestConfigureAlerts = 0x19,
         RequestInsulinSchedule = 0x1a,
         RequestDeactivatePod = 0x1c,
@@ -17,7 +17,7 @@ namespace OmniCore.Services
         RequestBeepConfig = 0x1e,
 
         ResponseVersionInfo = 0x01,
-        ResponseDetailInfo = 0x02,
+        ResponseInfo = 0x02,
         ResponseError = 0x06,
         ResponseStatus = 0x1d,
     }

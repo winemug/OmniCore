@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using OmniCore.Services.Interfaces;
 using Plugin.BLE.Abstractions;
 using Trace = System.Diagnostics.Trace;
@@ -31,9 +32,16 @@ public class PodConnection : IDisposable
         {
             Task.Run(async () =>
             {
-                await AckExchangeAsync();
-                _radioConnection.Dispose();
-                _podLockDisposable.Dispose();
+                try
+                {
+                    await AckExchangeAsync();
+                    await _pod.Save();
+                }
+                finally
+                {
+                    _radioConnection.Dispose();
+                    _podLockDisposable.Dispose();
+                }
             });
         }
         else
@@ -240,10 +248,10 @@ public class PodConnection : IDisposable
                             syncRetries
                         );
                     }
-                    _pod.ProcessResponse(result.Message);
+                    await _pod.ProcessResponseAsync(result.Message);
                     return PodResponse.Error;
                 }
-                _pod.ProcessResponse(result.Message);
+                await _pod.ProcessResponseAsync(result.Message);
                 if (_pod.Faulted)
                     return PodResponse.Faulted;
                 return PodResponse.OK;

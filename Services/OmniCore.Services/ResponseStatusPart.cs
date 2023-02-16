@@ -22,8 +22,6 @@ public class ResponseStatusPart : MessagePart
     
     public ResponseStatusPart(Bytes data)
     {
-        Data = data;
-
         var b0 = data[0];
         ExtendedBolusActive = (b0 & 0b10000000) > 0;
         ImmediateBolusActive = (b0 & 0b01000000) > 0;

@@ -17,5 +17,6 @@ public enum PodProgress
     Unknown12 = 12,
     Faulted = 13,
     ActivationExpired = 14,
-    Inactive = 15
+    Inactive = 15,
+    None = 0xFF
 }
