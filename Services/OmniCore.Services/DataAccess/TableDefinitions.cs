@@ -8,7 +8,6 @@ namespace OmniCore.Services.Tables
     {
         public static async Task RunCreate(SqliteConnection conn)
         {
-            
             var sql = @"
 
 DROP TABLE IF EXISTS client;
@@ -21,7 +20,7 @@ CREATE TABLE client
     os_version TEXT,
     platform TEXT
 );
-                    
+
 DROP TABLE IF EXISTS profile;
 CREATE TABLE profile
 (
@@ -57,6 +56,14 @@ CREATE TABLE pod
     entered INTEGER NOT NULL,
     removed INTEGER,
     synced INTEGER DEFAULT 0 NOT NULL
+);
+
+DROP TABLE IF EXISTS radio;
+CREATE TABLE radio
+(
+    mac TEXT NOT NULL,
+    name TEXT NOT NULL,
+    type INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS version;
