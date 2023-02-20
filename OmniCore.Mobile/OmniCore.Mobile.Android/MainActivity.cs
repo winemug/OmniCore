@@ -9,6 +9,7 @@ using Android.OS;
 using OmniCore.Services.Interfaces;
 using Unity;
 using Unity.Injection;
+using Xamarin.Forms;
 
 
 namespace OmniCore.Mobile.Droid
@@ -28,8 +29,8 @@ namespace OmniCore.Mobile.Droid
             //App.Container.RegisterType<IPlatformInfo, PlatformInfo>(new InjectionConstructor(this));
             _platformInfo = new PlatformInfo(this, this);
             _foregroundServiceHelper = new ForegroundServiceHelper(this);
-            App.Container.RegisterInstance<IPlatformInfo>(_platformInfo);
-            App.Container.RegisterInstance<IForegroundServiceHelper>(_foregroundServiceHelper);
+            DependencyService.RegisterSingleton<IPlatformInfo>(_platformInfo);
+            DependencyService.RegisterSingleton<IForegroundServiceHelper>(_foregroundServiceHelper);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());

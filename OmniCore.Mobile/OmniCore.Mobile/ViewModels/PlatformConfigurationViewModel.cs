@@ -7,40 +7,39 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class PlatformConfigurationViewModel : BaseViewModel
+    public class PlatformConfigurationViewModel : DialogViewModel
     {
-        public bool IsAskPermissionsEnabled { get => !PlatformInfo.HasAllPermissions; }
-        public bool IsOpenBatteryOptimizationsEnabled { get => !PlatformInfo.IsExemptFromBatteryOptimizations; }
+        public bool IsAskPermissionsEnabled { get => !_platformInfo.HasAllPermissions; }
+        public bool IsOpenBatteryOptimizationsEnabled { get => !_platformInfo.IsExemptFromBatteryOptimizations; }
         public Command AskForPermissions { get; }
         public Command OpenBatteryOptimizationSettings { get; }
-
-        private IPlatformInfo PlatformInfo;
+        private IPlatformInfo _platformInfo;
         public PlatformConfigurationViewModel()
         {
-            PlatformInfo = App.Container.Resolve<IPlatformInfo>();
             AskForPermissions = new Command(RequestPermissionsClicked);
             OpenBatteryOptimizationSettings = new Command(OpenBatteryOptimizationSettingsClicked);
+            _platformInfo = DependencyService.Get<IPlatformInfo>();
         }
 
-        protected override async Task OnPageShownAsync()
+        protected override async ValueTask OnAppearing()
         {
-            if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
-            {
-                await NavigationService.NavigateAsync<StartPage>();
-            }
-
+            // if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
+            // {
+            //     await NavigationService.NavigateAsync<StartPage>();
+            // }
+            
             await RaisePropertyChangedAsync();
         }
 
         private async void RequestPermissionsClicked()
         {
-            await PlatformInfo.RequestMissingPermissions();
-            base.OnPropertyChanged("IsAskPermissionsEnabled");
+            await _platformInfo.RequestMissingPermissions();
+            await RaisePropertyChangedAsync();
         }
 
         private void OpenBatteryOptimizationSettingsClicked()
         {
-            PlatformInfo.OpenBatteryOptimizationSettings();
+            _platformInfo.OpenBatteryOptimizationSettings();
         }
     }
 }

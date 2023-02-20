@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using OmniCore.Mobile.Annotations;
 using OmniCore.Mobile.ViewModels;
+using Unity;
+using Unity.Lifetime;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -11,117 +13,74 @@ namespace OmniCore.Mobile.Services
 {
     public class NavigationService
     {
-        [ItemCanBeNull] private Dictionary<Type, Type> _typeDict = new Dictionary<Type, Type>();
-        private Dictionary<Type, BaseViewModel> _instanceDict = new Dictionary<Type, BaseViewModel>();
+        private Dictionary<Type, Type> _typeDict = new Dictionary<Type, Type>();
         private AppShell _shell = null;
         private Page _currentPage = null;
         private BaseViewModel _currentModel = null;
-        private BaseViewModel _nextModel = null;
+        
+        [Unity.Dependency]
+        public IUnityContainer Container { get; set; }
 
-        public NavigationService(AppShell shell)
+        public void SetShellInstance(AppShell shell)
         {
             _shell = shell;
             _shell.Navigated += ShellOnNavigated;
             _shell.Navigating += ShellOnNavigating;
         }
 
-        private BaseViewModel GetViewModelByPageType(Type pageType)
+        private BaseViewModel GetViewModel(Type tPage)
         {
-            _instanceDict.TryGetValue(pageType, out var vmInstance);
-            if (vmInstance == null)
+            _typeDict.TryGetValue(tPage, out var vmType);
+            if (vmType != null)
             {
-                _typeDict.TryGetValue(pageType, out var vmType);
-                if (vmType != null)
-                {
-                    vmInstance = Activator.CreateInstance(vmType) as BaseViewModel;
-                    _instanceDict.Add(pageType, vmInstance);
-                }
+                return Container.Resolve(vmType, null) as BaseViewModel;
             }
-            return vmInstance;            
+            return null;            
         }
         
-        public async Task NavigateAsync<TPage>(BaseViewModel viewModel = null)
+        public async Task NavigateAsync<TPage>()
         {
-            var pageType = typeof(TPage);
-            if (viewModel == null)
-            {
-                viewModel = GetViewModelByPageType(pageType);
-            }
-            else
-            {
-                _instanceDict.TryGetValue(pageType, out var oldInstance);
-                if (oldInstance != null)
-                {
-                    oldInstance.Dispose();
-                    _instanceDict.Remove(pageType);
-                }
-            }
-
-            _nextModel = viewModel;
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                await _shell.GoToAsync(typeof(TPage).Name);
-            });
-
+            await _shell.GoToAsync($"{typeof(TPage).Name}");
         }
-        public void Register<TPage, TViewModel>()
+        
+        public void Map<TPage, TViewModel>()
         {
+            Container.RegisterType<TViewModel>();
             _typeDict.Add(typeof(TPage), typeof(TViewModel));
             Routing.RegisterRoute(typeof(TPage).Name, typeof(TPage));
         }
-        
-        public void Register<TPage>()
-        {
-            _typeDict.Add(typeof(TPage), null);
-            Routing.RegisterRoute(typeof(TPage).Name, typeof(TPage));
-        }
+
 
         private async void ShellOnNavigating(object sender, ShellNavigatingEventArgs e)
         {
-            Debug.WriteLine($"*** NAVIGATING from {e.Source} to {e.Target}, current {e.Current}");
-
-            if (_currentModel != null)
-            {
-                await _currentModel.NavigatedAwayAsync();
-            }
-
-            _currentModel = null;
-            _currentPage = null;
+            Debug.WriteLine($"Shell OnNavigating Source {e.Source} Current {e.Current?.Location} Target {e.Target?.Location}");
         }
 
         private async void ShellOnNavigated(object sender, ShellNavigatedEventArgs e)
         {
-            Debug.WriteLine($"*** NAVIGATED to {e.Current} from {e.Previous} Source: {e.Source}");
+            Debug.WriteLine($"Shell OnNavigated Source: {e.Source} Current: {e.Current?.Location} Previous: {e.Previous?.Location}");
             _currentPage = _shell.CurrentPage;
-            _currentModel = _nextModel;
-            _nextModel = null;
+
             if (_currentPage != null)
             {
-                if (_currentModel == null)
-                    _currentModel = GetViewModelByPageType(_currentPage.GetType());
-
+                if (_currentModel != null)
+                    await _currentModel.DisposeAsync();
+                _currentModel = GetViewModel(_currentPage.GetType());
                 if (_currentModel != null)
                 {
-                    await _currentModel.BindToPageAsync(_currentPage);
-                    await _currentModel.NavigatedToAsync();
+                    await _currentModel.SetPage(_currentPage);
                 }
             }
         }
 
         public async Task OnResumeAsync()
         {
-            if (_currentModel == null)
-            {
-                await _currentModel.NavigatedToAsync();
-            }
+            // await _currentModel?.NavigatedToAsync();
         }
 
         public async Task OnSleepAsync()
         {
-            if (_currentModel == null)
-            {
-                await _currentModel.NavigatedAwayAsync();
-            }
+            // await _currentModel?.NavigatedAwayAsync();
         }
     }
 }

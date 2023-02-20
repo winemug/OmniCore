@@ -38,8 +38,9 @@ namespace OmniCore.Mobile.Droid
 
         public bool HasAllPermissions
         {
-            get => HasPermission(Manifest.Permission.Bluetooth) && 
-                   HasPermission(Manifest.Permission.BluetoothAdmin) &&
+            get =>
+//                    HasPermission(Manifest.Permission.Bluetooth) &&
+//                    HasPermission(Manifest.Permission.BluetoothAdmin) &&
                    HasPermission(Manifest.Permission.AccessFineLocation) &&
                    HasPermission(Manifest.Permission.AccessBackgroundLocation) &&
                    HasPermission(Manifest.Permission.WriteExternalStorage) &&
@@ -63,6 +64,11 @@ namespace OmniCore.Mobile.Droid
                     Manifest.Permission.Bluetooth,
                     Manifest.Permission.BluetoothAdmin,
                     Manifest.Permission.AccessFineLocation,
+                }))
+                return false;
+
+            if (!await RequestIfMissing(new[]
+                {
                     Manifest.Permission.AccessBackgroundLocation
                 }))
                 return false;

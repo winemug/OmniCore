@@ -29,25 +29,20 @@ namespace OmniCore.Mobile.ViewModels
         
         public string RssiText { get; private set; }
 
-        private ICoreService _coreService;
         private RadioService _radioService;
         private PodService _podService;
         private IForegroundServiceHelper _foregroundServiceHelper;
 
-        public BluetoothTestViewModel()
+        public BluetoothTestViewModel(
+            RadioService radioService,
+            PodService podService)
         {
+            _radioService = radioService;
+            _podService = podService;
+            _foregroundServiceHelper = DependencyService.Get<IForegroundServiceHelper>();
             StartCommand = new Command(StartClicked);
             StopCommand = new Command(StopClicked);
             DoCommand = new Command(DoClicked);
-            _coreService = App.Container.Resolve<ICoreService>();
-            _radioService = App.Container.Resolve<RadioService>();
-            _podService = App.Container.Resolve<PodService>();
-            _foregroundServiceHelper = App.Container.Resolve<IForegroundServiceHelper>();
-        }
-
-        protected override async Task OnPageShownAsync()
-        {
-            _foregroundServiceHelper.StartForegroundService();
         }
 
         private void StartClicked()

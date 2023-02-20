@@ -9,23 +9,21 @@ namespace OmniCore.Services;
 
 public class PodService
 {
-    private RadioService _radioService;
-    private DataStore _dataStore;
-    public PodService(RadioService radioService, DataStore dataStore)
-    {
-        _radioService = radioService;
-        _dataStore = dataStore;
-    }
+    [Unity.Dependency]
+    private RadioService RadioService { get; set; }
+
+    [Unity.Dependency]
+    private DataStore DataStore { get; set; }
 
     public async Task<Pod> GetPodAsync()
     {
         Pod pod = null;
-        using (var conn = await _dataStore.GetConnectionAsync())
+        using (var conn = await DataStore.GetConnectionAsync())
         {
             var row = await conn.QueryFirstOrDefaultAsync("SELECT * FROM pod");
             if (row == null)
             {
-                pod = new Pod(_dataStore)
+                pod = new Pod(DataStore)
                 {
                     RadioAddress = 878987447,
                     Lot = 72402,
@@ -58,7 +56,7 @@ public class PodService
             }
             else
             {
-                pod = new Pod(_dataStore)
+                pod = new Pod(DataStore)
                 {
                     Id = Guid.Parse(row.id),
                     RadioAddress = (uint)row.radio_address,
@@ -80,7 +78,7 @@ public class PodService
         Pod pod,
         CancellationToken cancellationToken = default)
     {
-        var radioConnection = await _radioService.GetConnectionAsync("ema");
+        var radioConnection = await RadioService.GetConnectionAsync("ema");
         var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
         return new PodConnection(pod, radioConnection, podAllocationLockDisposable);
     }

@@ -3,38 +3,32 @@ using OmniCore.Mobile.Views;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using OmniCore.Mobile.ViewModels;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
 using Unity;
 using Unity.Lifetime;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace OmniCore.Mobile
 {
     public partial class App : Application
     {
-        private static IUnityContainer _container;
-        public static IUnityContainer Container
-        {
-            get
-            {
-                if (_container == null)
-                    _container = new UnityContainer();
-                return _container;
-            }
-        }
-
         private NavigationService _navigationService;
-        
+        private IPlatformInfo _platformInfo;
         public App()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             InitializeComponent();
+            var container = new UnityContainer();
+            OmniCore.Mobile.Initializer.RegisterTypes(container);
+            _navigationService = container.Resolve<NavigationService>();
+            DependencyService.Get<IForegroundServiceHelper>().Service = container.Resolve<IForegroundService>(); 
+            _platformInfo = DependencyService.Get<IPlatformInfo>();
+
             var shell = new AppShell();
-            _navigationService = new NavigationService(shell);
-            RegisterServices();
+            _navigationService.SetShellInstance(shell);
             MainPage = shell;
         }
 
@@ -43,33 +37,18 @@ namespace OmniCore.Mobile
             Trace.WriteLine($"Unhandled exception: {e.ExceptionObject}");
         }
 
-        private void RegisterServices()
-        {
-            Container.RegisterInstance(_navigationService);
-            Container.RegisterType<ICoreService, CoreService>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<PodService>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<RadioService>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<BleService>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<BgcService>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<ConfigurationStore>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<DataStore>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<XDripWebServiceClient>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<SyncClient>(new ContainerControlledLifetimeManager());
-            Container.RegisterType<ApiClient>(new ContainerControlledLifetimeManager());
-
-            _navigationService.Register<StartPage, StartViewModel>();
-            _navigationService.Register<PlatformConfigurationPage, PlatformConfigurationViewModel>();
-            _navigationService.Register<AccountLoginPage, AccountLoginViewModel>();
-            _navigationService.Register<ClientRegistrationPage, ClientRegistrationViewModel>();
-            _navigationService.Register<BluetoothTestPage, BluetoothTestViewModel>();
-            _navigationService.Register<AmqpTestPage, AmqpTestViewModel>();
-            _navigationService.Register<TwoFactorAuthenticationPage>();
-        }
-
         protected override async void OnStart()
         {
             Debug.WriteLine($"App On Start");
-            base.OnStart();
+
+            if (!_platformInfo.IsExemptFromBatteryOptimizations || !_platformInfo.HasAllPermissions)
+            {
+                await _navigationService.NavigateAsync<PlatformConfigurationPage>();
+            }
+            
+            await _navigationService.NavigateAsync<BluetoothTestPage>();
+
+            // await NavigationService.NavigateAsync<AmqpTestPage>();
         }
 
         protected override async void OnSleep()

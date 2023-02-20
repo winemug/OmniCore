@@ -14,19 +14,19 @@ namespace OmniCore.Mobile.ViewModels
 {
     public class StartViewModel : BaseViewModel
     {
-        protected override async Task OnPageShownAsync()
+        protected async Task yadayada()
         {
-            var platformInfo = UnityContainer.Resolve<IPlatformInfo>();
-            if (!platformInfo.HasAllPermissions ||
-                !platformInfo.IsExemptFromBatteryOptimizations)
-            {
-                await NavigationService.NavigateAsync<PlatformConfigurationPage>();
-                return;
-            }
+            // var platformInfo = UnityContainer.Resolve<IPlatformInfo>();
+            // if (!platformInfo.HasAllPermissions ||
+            //     !platformInfo.IsExemptFromBatteryOptimizations)
+            // {
+            //     await NavigationService.NavigateAsync<PlatformConfigurationPage>();
+            //     return;
+            // }
 
             // await NavigationService.NavigateAsync<AmqpTestPage>();
             
-            await NavigationService.NavigateAsync<BluetoothTestPage>();
+            // await NavigationService.NavigateAsync<BluetoothTestPage>();
 
             // var configurationStore = UnityContainer.Resolve<ConfigurationStore>();
             // var apiClient = UnityContainer.Resolve<ApiClient>();

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Android.Content;
 using Android.OS;
 using OmniCore.Services.Interfaces;
@@ -7,6 +8,8 @@ namespace OmniCore.Mobile.Droid
     public class ForegroundServiceHelper : IForegroundServiceHelper
     {
         private Context _context;
+
+        public IForegroundService Service { get; set; }
         public ForegroundServiceHelper(Context context)
         {
             _context = context;

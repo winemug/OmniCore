@@ -24,7 +24,6 @@ namespace OmniCore.Mobile.Droid
         // private CancellationTokenSource ServiceCts = null;
 
         private IConnection Connection;
-        
 
         public ForegroundService()
         {
@@ -33,12 +32,14 @@ namespace OmniCore.Mobile.Droid
 
         private void Start()
         {
-            App.Container.Resolve<ICoreService>().Start();
+            var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
+            fsh.Service?.Start();
         }
 
         private void Stop()
         {
-            App.Container.Resolve<ICoreService>().Stop();
+            var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
+            fsh.Service?.Stop();
         }
 
         public override void OnCreate()

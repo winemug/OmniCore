@@ -16,17 +16,14 @@ using Xamarin.Forms.Internals;
 
 namespace OmniCore.Services
 {
-    public class CoreService : ICoreService
+    public class CoreService : IForegroundService
     {
         private AsyncProducerConsumerQueue<AmqpMessage> _publishQueue = new();
         private SortedList<DateTimeOffset,string> _processedMessages = new();
-        private RadioService _radioService;
         
-        public CoreService(RadioService radioService)
-        {
-            _radioService = radioService;
-        }
-
+        [Unity.Dependency]
+        public RadioService RadioService { get; set; }
+        
         private Task _coreTask;
         private CancellationTokenSource _coreCancellation;
         
@@ -34,12 +31,12 @@ namespace OmniCore.Services
         {
             // _coreCancellation = new CancellationTokenSource();
             // _coreTask = CoreTask(_coreCancellation.Token);
-            _radioService.Start();
+            RadioService.Start();
         }
 
         public void Stop()
         {
-            _radioService.Stop();
+            RadioService.Stop();
             try
             {
                 // _coreCancellation?.Cancel();
@@ -59,7 +56,7 @@ namespace OmniCore.Services
         {
             var cf = new ConnectionFactory()            
             {
-                Uri = new Uri("amqp://testere:redere@dev.balya.net/ocv"),
+                Uri = new Uri("amqp://guest:guest@192.168.1.40/ocv"),
                 DispatchConsumersAsync = true,
             };
             

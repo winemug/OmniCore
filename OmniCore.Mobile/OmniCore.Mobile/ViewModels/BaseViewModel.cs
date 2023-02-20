@@ -12,33 +12,18 @@ using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged, IDisposable
+    public class BaseViewModel : INotifyPropertyChanged, IAsyncDisposable
     {
         protected Page Page;
-        protected static IUnityContainer UnityContainer => App.Container;
         
-        protected NavigationService NavigationService { get; }
-
-        public BaseViewModel()
-        {
-            NavigationService = UnityContainer.Resolve<NavigationService>();
-        }
-        
-        public async Task BindToPageAsync(Page page)
+        public async Task SetPage(Page page)
         {
             Page = page;
-            await OnBeforeBindAsync();
+            await OnBinding();
             page.BindingContext = this;
-        }
-        
-        public async Task NavigatedToAsync()
-        {
-            await OnPageShownAsync();
-        }
-
-        public async Task NavigatedAwayAsync()
-        {
-            await OnPageHiddenAsync();
+            page.Appearing += PageOnAppearing;
+            page.Disappearing += PageOnDisappearing;
+            // page.LayoutChanged += PageOnLayoutChanged;
         }
 
         public async Task RaisePropertyChangedAsync(string propertyName = null)
@@ -56,26 +41,47 @@ namespace OmniCore.Mobile.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            OnDispose();
+            Debug.WriteLine($"Dispose async {this.GetType()}");
+            if (Page != null)
+            {
+                // Page.LayoutChanged -= PageOnLayoutChanged;
+                Page.Disappearing -= PageOnDisappearing;
+                Page.Appearing -= PageOnAppearing;
+            }
+
+            Page = null;
+        }
+
+        // private async void PageOnLayoutChanged(object sender, EventArgs e)
+        // {
+        //     Debug.WriteLine($"Page OnLayoutChanged {Page.GetType()}");
+        // }
+
+        private async void PageOnDisappearing(object sender, EventArgs e)
+        
+        {
+            Debug.WriteLine($"Page OnDisappearing {Page.GetType()}");
+            await OnDisappearing();
+        }
+
+        private async void PageOnAppearing(object sender, EventArgs e)
+        {
+            Debug.WriteLine($"Page Appearing {Page.GetType()}");
+            await OnAppearing();
+        }
+
+        protected virtual async ValueTask OnBinding()
+        {
         }
         
-        protected virtual async Task OnPageShownAsync()
+        protected virtual async ValueTask OnAppearing()
         {
         }
 
-        protected virtual async Task OnPageHiddenAsync()
+        protected virtual async ValueTask OnDisappearing()
         {
         }
-        
-        protected virtual async Task OnBeforeBindAsync()
-        {
-        }
-        
-        protected virtual void OnDispose()
-        {
-        }
-
     }
 }
