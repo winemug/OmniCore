@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
 using OmniCore.Mobile.Annotations;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
@@ -27,22 +28,30 @@ namespace OmniCore.Mobile.ViewModels
         public Command StopCommand { get; }
         public Command DoCommand { get; }
         
+        public Command CopyCommand { get; }
+        
         public string RssiText { get; private set; }
 
-        private RadioService _radioService;
-        private PodService _podService;
+        [Unity.Dependency]
+        public RadioService RadioService { get; set; }       
+        [Unity.Dependency]
+        public PodService PodService { get; set; }
+        [Unity.Dependency]
+        public DataService DataService { get; set; }
+        [Unity.Dependency]
+        public AmqpService AmqpService { get; set; }
+        
         private IForegroundServiceHelper _foregroundServiceHelper;
+        private IPlatformInfo _platformInfo;
 
-        public BluetoothTestViewModel(
-            RadioService radioService,
-            PodService podService)
+        public BluetoothTestViewModel()
         {
-            _radioService = radioService;
-            _podService = podService;
             _foregroundServiceHelper = DependencyService.Get<IForegroundServiceHelper>();
+            _platformInfo = DependencyService.Get<IPlatformInfo>();
             StartCommand = new Command(StartClicked);
             StopCommand = new Command(StopClicked);
             DoCommand = new Command(DoClicked);
+            CopyCommand = new Command(CopyClicked);
         }
 
         private void StartClicked()
@@ -50,15 +59,29 @@ namespace OmniCore.Mobile.ViewModels
             _foregroundServiceHelper.StartForegroundService();
         }
 
+        private async void CopyClicked()
+        {
+            using (var conn = await DataService.GetConnectionAsync())
+            {
+                var res1 = await conn.QueryAsync("SELECT * FROM pod");
+                var res2 = await conn.QueryAsync("SELECT * FROM pod_message");
+                Debug.WriteLine("");
+            }
+        }
+
+        private int dac = 0;
         private async void DoClicked()
         {
-            var pod = await _podService.GetPodAsync();
-            using (var podConn = await _podService.GetConnectionAsync(pod))
+            var pod = await PodService.GetPodAsync();
+            using (var podConn = await PodService.GetConnectionAsync(pod))
             {
                 Debug.WriteLine($"Update Status");
                 var response = await podConn.UpdateStatus();
             }
             Debug.WriteLine(pod);
+
+            await AmqpService.PublishMessage(new AmqpMessage() { Text = $"message #{dac}" });
+            dac++;
         }
 
         private void StopClicked()

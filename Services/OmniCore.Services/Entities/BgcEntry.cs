@@ -51,5 +51,10 @@ namespace OmniCore.Services.Entities
             var x = (BgcEntry)obj;
             return this.ProfileId == x.ProfileId && this.Date == x.Date && this.Type == x.Type;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

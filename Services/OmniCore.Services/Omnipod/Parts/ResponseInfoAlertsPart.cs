@@ -19,5 +19,6 @@ public class ResponseInfoAlertsPart : ResponseInfoPart
         Alerts[5] = data.Word(13);
         Alerts[6] = data.Word(15);
         Alerts[7] = data.Word(17);
+        Data = data;
     }
 }

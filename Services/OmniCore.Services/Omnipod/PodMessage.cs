@@ -13,12 +13,15 @@ namespace OmniCore.Services
         public List<MessagePart> Parts { get; set; }
         
         public uint? AckAddressOverride { get; set; }
+        public Bytes Body { get; set; }
         public static PodMessage FromReceivedPackets(List<PodPacket> receivedPackets)
         {
             var message = new PodMessage();
             var messageBody = new Bytes();
             foreach (var rp in receivedPackets)
                 messageBody.Append(rp.Data);
+
+            message.Body = messageBody;
             
             var crcCalc = CrcUtil.Crc16(messageBody.Sub(0, messageBody.Length - 2).ToArray());
             var messageCrc = messageBody.Word(messageBody.Length - 2);
@@ -78,6 +81,9 @@ namespace OmniCore.Services
                                 break;
                             case RequestStatusType.PulseLogPrevious:
                                 message.Parts.Add(new ResponseInfoPulseLogPreviousPart(mpData));
+                                break;
+                            default:
+                                message.Parts.Add(new MessagePart() {Data=mpData});
                                 break;
                         }
                         break;

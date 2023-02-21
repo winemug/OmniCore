@@ -7,6 +7,7 @@
         <StackLayout>
             <Button Text="Start" Command="{Binding StartCommand}"></Button>
             <Button Text="Do" Command="{Binding DoCommand}"></Button>
+            <Button Text="Copy" Command="{Binding CopyCommand}"></Button>
             <Label Text="Hello, blue world!"
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />

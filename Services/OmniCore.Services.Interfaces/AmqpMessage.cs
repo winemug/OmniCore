@@ -12,11 +12,11 @@ namespace OmniCore.Services.Interfaces
         {
             get
             {
-                return Encoding.ASCII.GetString(Body); 
+                return Encoding.UTF8.GetString(Body); 
             }
             set
             {
-                Body = Encoding.ASCII.GetBytes(value);
+                Body = Encoding.UTF8.GetBytes(value);
             }
         }
     }

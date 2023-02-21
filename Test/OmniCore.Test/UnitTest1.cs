@@ -1,4 +1,5 @@
 using Moq;
+using Nito.AsyncEx;
 using OmniCore.Mobile;
 using OmniCore.Mobile.Services;
 using OmniCore.Services;
@@ -36,5 +37,18 @@ public class Tests
             });
 
         Assert.That(p.Data.ToString(), Is.EqualTo("0104F5183840012C712C"));
+    }
+
+    [Test]
+    public async Task QueueT1()
+    {
+        var q = new AsyncProducerConsumerQueue<int>();
+        await q.EnqueueAsync(3);
+        await q.EnqueueAsync(5);
+        await q.EnqueueAsync(9);
+        while (await q.OutputAvailableAsync())
+        {
+            var z = q.DequeueAsync();
+        }
     }
 }

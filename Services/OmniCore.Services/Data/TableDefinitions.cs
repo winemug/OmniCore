@@ -9,16 +9,11 @@ namespace OmniCore.Services.Tables
         public static async Task RunCreate(SqliteConnection conn)
         {
             var sql = @"
-
 DROP TABLE IF EXISTS client;
 CREATE TABLE client
 (
     id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    sw_version TEXT,
-    hw_version TEXT,
-    os_version TEXT,
-    platform TEXT
+    name TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS profile;
@@ -41,22 +36,49 @@ CREATE TABLE bgc
     deleted INTEGER DEFAULT 0 NOT NULL
 );
 
+DROP INDEX IF EXISTS bgc_reading_date;
+CREATE UNIQUE INDEX bgc_reading_date ON bgc(profile_id, client_id, date);
+
+DROP INDEX IF EXISTS bgc_date;
+CREATE INDEX bgc_date ON bgc(profile_id, date);
+
 DROP TABLE IF EXISTS pod;
 CREATE TABLE pod
 (
     id TEXT NOT NULL,
+    profile_id TEXT NOT NULL,
+    client_id TEXT NOT NULL,
     radio_address INTEGER NOT NULL,
     units_per_ml INTEGER NOT NULL,
     medication INTEGER NOT NULL,
-    lot INTEGER,
-    serial INTEGER,
+    valid_from INTEGER NOT NULL,
+    valid_to INTEGER NOT NULL,
+    lot INTEGER NOT NULL,
+    serial INTEGER NOT NULL,
     progress INTEGER NOT NULL,
     packet_sequence INTEGER NOT NULL,
     message_sequence INTEGER NOT NULL,
-    entered INTEGER NOT NULL,
-    removed INTEGER,
+    next_record_index INTEGER DEFAULT 0 NOT NULL,
     synced INTEGER DEFAULT 0 NOT NULL
 );
+DROP INDEX IF EXISTS pod_valid_from;
+CREATE INDEX pod_valid_from ON pod(profile_id, valid_from);
+
+
+DROP TABLE IF EXISTS pod_message;
+CREATE TABLE pod_message
+(
+  pod_id TEXT NOT NULL,
+  record_index INTEGER,
+  send_start INTEGER NOT NULL,
+  send_data BLOB NOT NULL,
+  receive_end INTEGER,
+  receive_data BLOB,
+  exchange_result INTEGER NOT NULL,
+  synced INTEGER DEFAULT 0 NOT NULL
+);
+DROP INDEX IF EXISTS pod_record;
+CREATE INDEX pod_record ON pod_message(pod_id, record_index);
 
 DROP TABLE IF EXISTS radio;
 CREATE TABLE radio
@@ -72,8 +94,6 @@ CREATE TABLE version
     db_version TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX bgc_reading_date ON bgc(profile_id, client_id, date);
-CREATE INDEX bgc_date ON bgc(profile_id, date);
 
 ";
             await conn.ExecuteAsync(sql);

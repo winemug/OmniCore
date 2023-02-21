@@ -47,8 +47,5 @@ namespace OmniCore.Services
             var allocationLockDisposable = await radio.LockAsync(cancellationToken);
             return new RadioConnection(radio, allocationLockDisposable);
         }
-        
-
-        
     }
 }

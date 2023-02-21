@@ -32,51 +32,52 @@ public class ResponseVersionPart : MessagePart
     public int? CannulaInsertPulseCount { get; }
     public int? MaximumLifeTimeHours { get; }
 
-    public ResponseVersionPart(Bytes Data)
+    public ResponseVersionPart(Bytes data)
     {
-        if (Data.Length != 21 && Data.Length != 27)
+        Data = data;
+        if (data.Length != 21 && data.Length != 27)
             throw new ApplicationException();
 
-        if (Data.Length == 21)
+        if (data.Length == 21)
         {
-            HardwareVersionMajor = Data[0];
-            HardwareVersionMinor = Data[1];
-            HardwareVersionRevision = Data[2];
+            HardwareVersionMajor = data[0];
+            HardwareVersionMinor = data[1];
+            HardwareVersionRevision = data[2];
 
-            FirmwareVersionMajor = Data[3];
-            FirmwareVersionMinor = Data[4];
-            FirmwareVersionRevision = Data[5];
-            ProductId = Data[6];
-            Progress = (PodProgress)Data[7];
-            Lot = Data.DWord(8);
-            Serial = Data.DWord(12);
-            RadioLowGain = (Data[16] >> 6) & 0b00000011;
-            Rssi = Data[16] & 0b00111111;
-            AssignedAddress = Data.DWord(17);
+            FirmwareVersionMajor = data[3];
+            FirmwareVersionMinor = data[4];
+            FirmwareVersionRevision = data[5];
+            ProductId = data[6];
+            Progress = (PodProgress)data[7];
+            Lot = data.DWord(8);
+            Serial = data.DWord(12);
+            RadioLowGain = (data[16] >> 6) & 0b00000011;
+            Rssi = data[16] & 0b00111111;
+            AssignedAddress = data.DWord(17);
         }
 
-        if (Data.Length == 27)
+        if (data.Length == 27)
         {
-            PulseVolumeMicroUnits = Data.Word(0);
-            PulseRatePer125ms = Data[2];
-            PrimingPulseRatePer125ms = Data[3];
-            PrimingPulseCount = Data[4];
-            CannulaInsertPulseCount = Data[5];
-            MaximumLifeTimeHours = Data[6];
+            PulseVolumeMicroUnits = data.Word(0);
+            PulseRatePer125ms = data[2];
+            PrimingPulseRatePer125ms = data[3];
+            PrimingPulseCount = data[4];
+            CannulaInsertPulseCount = data[5];
+            MaximumLifeTimeHours = data[6];
             
-            HardwareVersionMajor = Data[7];
-            HardwareVersionMinor = Data[8];
-            HardwareVersionRevision = Data[9];
+            HardwareVersionMajor = data[7];
+            HardwareVersionMinor = data[8];
+            HardwareVersionRevision = data[9];
 
-            FirmwareVersionMajor = Data[10];
-            FirmwareVersionMinor = Data[11];
-            FirmwareVersionRevision = Data[12];
+            FirmwareVersionMajor = data[10];
+            FirmwareVersionMinor = data[11];
+            FirmwareVersionRevision = data[12];
 
-            ProductId = Data[13];
-            Progress = (PodProgress)Data[14];
-            Lot = Data.DWord(15);
-            Serial = Data.DWord(19);
-            AssignedAddress = Data.DWord(23);
+            ProductId = data[13];
+            Progress = (PodProgress)data[14];
+            Lot = data.DWord(15);
+            Serial = data.DWord(19);
+            AssignedAddress = data.DWord(23);
         }
     }
 }

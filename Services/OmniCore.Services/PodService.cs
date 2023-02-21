@@ -10,39 +10,52 @@ namespace OmniCore.Services;
 public class PodService
 {
     [Unity.Dependency]
-    private RadioService RadioService { get; set; }
+    public RadioService RadioService { get; set; }
 
     [Unity.Dependency]
-    private DataStore DataStore { get; set; }
+    public DataService DataService { get; set; }
 
+    public void Start()
+    {
+        
+    }
+
+    public void Stop()
+    {
+        
+    }
+    
     public async Task<Pod> GetPodAsync()
     {
         Pod pod = null;
-        using (var conn = await DataStore.GetConnectionAsync())
+        using (var conn = await DataService.GetConnectionAsync())
         {
             var row = await conn.QueryFirstOrDefaultAsync("SELECT * FROM pod");
             if (row == null)
             {
-                pod = new Pod(DataStore)
+                pod = new Pod(DataService)
                 {
-                    RadioAddress = 878987447,
+                    RadioAddress = 887030921,
                     Lot = 72402,
-                    Serial = 3220596,
+                    Serial = 3580572,
                     NextMessageSequence = 0,
-                    NextPacketSequence = 0,
+                    NextPacketSequence = 21,
+                    NextRecordIndex = 0,
                     UnitsPerMilliliter = 200,
                     Medication = MedicationType.Insulin,
-                    Progress = PodProgress.Running,
-                    Entered = DateTimeOffset.Now,
-                    Removed = null,
+                    Progress = PodProgress.RunningLow,
+                    ValidFrom = DateTimeOffset.Now,
+                    ValidTo = DateTimeOffset.Now + TimeSpan.FromHours(80),
                 };
                 await conn.ExecuteAsync(
-                    "INSERT INTO pod(id, radio_address, units_per_ml, medication, lot, serial, progress," +
-                    " packet_sequence, message_sequence, entered)" +
-                    " VALUES (@id, @ra, @upml, @med, @lot, @serial, @pro, @ps, @ms, @entered)",
+                    "INSERT INTO pod(id, profile_id, client_id, radio_address, units_per_ml, medication, lot, serial, progress," +
+                    " packet_sequence, message_sequence, valid_from, valid_to)" +
+                    " VALUES (@id, @profile_id, @client_id, @ra, @upml, @med, @lot, @serial, @pro, @ps, @ms, @vf, @vt)",
                     new
                     {
                         id = pod.Id.ToString("N"),
+                        profile_id = "9",
+                        client_id = "9",
                         ra = pod.RadioAddress,
                         upml = pod.UnitsPerMilliliter,
                         med = (int)pod.Medication,
@@ -51,12 +64,13 @@ public class PodService
                         pro = (int)pod.Progress,
                         ps = pod.NextPacketSequence,
                         ms = pod.NextMessageSequence,
-                        entered = pod.Entered.ToUnixTimeMilliseconds(),
+                        vf = pod.ValidFrom.ToUnixTimeMilliseconds(),
+                        vt = pod.ValidTo.ToUnixTimeMilliseconds(),
                     });
             }
             else
             {
-                pod = new Pod(DataStore)
+                pod = new Pod(DataService)
                 {
                     Id = Guid.Parse(row.id),
                     RadioAddress = (uint)row.radio_address,
@@ -67,7 +81,9 @@ public class PodService
                     Progress = (PodProgress)row.progress,
                     NextPacketSequence = (int)row.packet_sequence,
                     NextMessageSequence = (int)row.message_sequence,
-                    Entered = DateTimeOffset.FromUnixTimeMilliseconds(row.entered),
+                    NextRecordIndex = (int)row.next_record_index,
+                    ValidFrom = DateTimeOffset.FromUnixTimeMilliseconds(row.valid_from),
+                    ValidTo = DateTimeOffset.FromUnixTimeMilliseconds(row.valid_to),
                 };
             }
         }
@@ -80,6 +96,6 @@ public class PodService
     {
         var radioConnection = await RadioService.GetConnectionAsync("ema");
         var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
-        return new PodConnection(pod, radioConnection, podAllocationLockDisposable);
+        return new PodConnection(pod, radioConnection, podAllocationLockDisposable, DataService);
     }
 }

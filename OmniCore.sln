@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{01
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Services.Interfaces", "Services\OmniCore.Services.Interfaces\OmniCore.Services.Interfaces.csproj", "{74FED32A-C7A9-45B9-A4E6-8FAF53CFE9DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Test", "Test\OmniCore.Test\OmniCore.Test.csproj", "{8F92CAEA-7E7D-4656-ACE1-90D5E51A9CC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Test", "Test\OmniCore.Test\OmniCore.Test.csproj", "{8F92CAEA-7E7D-4656-ACE1-90D5E51A9CC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

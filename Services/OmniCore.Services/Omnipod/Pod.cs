@@ -19,10 +19,11 @@ public class Pod
     public uint Lot { get; set; }
     public uint Serial { get; set; }
     public PodProgress Progress { get; set; }
+    public int NextRecordIndex { get; set; }
     public int NextPacketSequence { get; set; }
     public int NextMessageSequence { get; set; }
-    public DateTimeOffset Entered { get; set; }
-    public DateTimeOffset? Removed { get; set; }
+    public DateTimeOffset ValidFrom { get; set; }
+    public DateTimeOffset ValidTo { get; set; }
 
     //
     public int PulseVolumeMicroUnits { get; set; }
@@ -43,11 +44,11 @@ public class Pod
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
     
     private AsyncLock _allocationLock = new ();
-    private DataStore _dataStore;
+    private DataService _dataService;
 
-    public Pod(DataStore dataStore)
+    public Pod(DataService dataService)
     {
-        _dataStore = dataStore;
+        _dataService = dataService;
         Id = Guid.NewGuid();
         var r = new Random();
         var bn0 = r.Next(13);
@@ -67,11 +68,11 @@ public class Pod
 
     public async Task Save()
     {
-        using (var conn = await _dataStore.GetConnectionAsync())
+        using (var conn = await _dataService.GetConnectionAsync())
         {
             await conn.ExecuteAsync(
     "UPDATE pod SET radio_address=@ra, units_per_ml=@upml, medication=@med, lot=@lot, serial=@serial, progress=@pro," +
-    " packet_sequence=@ps, message_sequence=@ms WHERE id = @id",
+    " packet_sequence=@ps, message_sequence=@ms, next_record_index=@ri WHERE id = @id",
     new
     {
         id = Id.ToString("N"),
@@ -83,6 +84,7 @@ public class Pod
         pro = (int)Progress,
         ps = NextPacketSequence,
         ms = NextMessageSequence,
+        ri = NextRecordIndex,
     });
         }
     }

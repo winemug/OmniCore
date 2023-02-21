@@ -16,10 +16,8 @@ public class MessagePart
         {
             case PodMessageType.ResponseStatus:
                 return new ResponseStatusPart(data);
-                break;
             case PodMessageType.ResponseError:
                 return new ResponseErrorPart(data);
-                break;
             case PodMessageType.ResponseInfo:
                 var riType = (RequestStatusType)data[0];
                 switch (riType)

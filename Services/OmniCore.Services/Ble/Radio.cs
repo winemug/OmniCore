@@ -83,7 +83,7 @@ namespace OmniCore.Services
                 catch (Exception e)
                 {
                     device?.Dispose();
-                    Debug.WriteLine($"{Name} connection failed, retrying.");
+                    Debug.WriteLine($"{Name} connection failed, retrying. {e}");
                     await Task.Delay(TimeSpan.FromSeconds(15));
                 }
             }

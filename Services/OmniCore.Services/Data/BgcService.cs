@@ -13,7 +13,7 @@ namespace OmniCore.Services
         [Unity.Dependency]
         public ConfigurationStore ConfigurationStore { get; set; }
         [Unity.Dependency]
-        public DataStore DataStore { get; set; }
+        public DataService DataService { get; set; }
         [Unity.Dependency]
         public SyncClient SyncClient { get; set; }
         
@@ -24,7 +24,7 @@ namespace OmniCore.Services
 
         public async Task AddReadingsAsync(IEnumerable<BgcEntry> bgcReadings)
         {
-            using (var conn = await DataStore.GetConnectionAsync())
+            using (var conn = await DataService.GetConnectionAsync())
             {
                 foreach (var reading in bgcReadings)
                 {
@@ -39,7 +39,7 @@ namespace OmniCore.Services
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine($"Error Adding Readings");
+                        Debug.WriteLine($"Error Adding Readings {e}");
                         throw;
                     }
                 }
@@ -48,7 +48,7 @@ namespace OmniCore.Services
         
         public async Task SetSyncedAsync(BgcEntry entry, long dbRowId, bool isSynced)
         {
-            using (var conn = await DataStore.GetConnectionAsync())
+            using (var conn = await DataService.GetConnectionAsync())
             {
                 await conn.ExecuteAsync($"UPDATE bgc SET synced=@synced WHERE rowid=@rowid", new
                 {
@@ -60,7 +60,7 @@ namespace OmniCore.Services
         
         public async Task<DateTimeOffset?> GetLastReadingDateAsync(Guid profileId, Guid clientId)
         {
-            using (var conn = await DataStore.GetConnectionAsync())
+            using (var conn = await DataService.GetConnectionAsync())
             {
                 var row = await conn.QueryFirstOrDefaultAsync(
                     "SELECT date FROM bgc WHERE deleted = 0 AND client_id = @cid AND profile_id = @pid ORDER BY date DESC",
@@ -116,7 +116,7 @@ namespace OmniCore.Services
         private async Task QueueAllUnsentReadingsAsync()
         {
             var cc = await ConfigurationStore.GetConfigurationAsync();
-            using (var conn = await DataStore.GetConnectionAsync())
+            using (var conn = await DataService.GetConnectionAsync())
             {
                 var reader = await conn.ExecuteReaderAsync(
                     "SELECT rowid, profile_id, client_id, date, type, direction, value, rssi, deleted FROM bgc " +

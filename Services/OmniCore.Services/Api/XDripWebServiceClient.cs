@@ -161,7 +161,7 @@ namespace OmniCore.Services
                 };
         }
 
-        private BgcReadingType? GetReadingType(string? type)
+        private BgcReadingType? GetReadingType(string type)
         {
             var t = type.ToLowerInvariant();
             if (t == "sgv")

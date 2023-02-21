@@ -42,6 +42,12 @@ CREATE TABLE pod
     medication INTEGER NOT NULL,
     valid_from INTEGER NOT NULL,
     valid_to INTEGER NOT NULL,
+    lot INTEGER NOT NULL,
+    serial INTEGER NOT NULL,
+    progress INTEGER NOT NULL,
+    packet_sequence INTEGER NOT NULL,
+    message_sequence INTEGER NOT NULL,
+    next_record_index INTEGER DEFAULT 0 NOT NULL,
     synced INTEGER DEFAULT 0 NOT NULL
 );
 DROP INDEX IF EXISTS pod_valid_from;
@@ -57,6 +63,7 @@ CREATE TABLE pod_message
   send_data BLOB NOT NULL,
   receive_end INTEGER,
   receive_data BLOB,
+  exchange_result INTEGER NOT NULL,
   synced INTEGER DEFAULT 0 NOT NULL
 );
 DROP INDEX IF EXISTS pod_record;

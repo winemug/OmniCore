@@ -24,5 +24,6 @@ public class ResponseInfoActivationPart : ResponseInfoPart
         var hour = data[15];
         var minute = data[16];
         InitializationDate = new DateTimeOffset(year + 2000, month, day, hour, minute, 0, TimeSpan.Zero);
+        Data = data;
     }
 }

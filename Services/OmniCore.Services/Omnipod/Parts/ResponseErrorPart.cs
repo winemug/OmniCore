@@ -11,6 +11,7 @@ public class ResponseErrorPart : MessagePart
     public ushort ErrorValue { get; set; }
     public ResponseErrorPart(Bytes data)
     {
+        Data = data;
         ErrorCode = data[0];
         ErrorValue = data.Word(1);
     }

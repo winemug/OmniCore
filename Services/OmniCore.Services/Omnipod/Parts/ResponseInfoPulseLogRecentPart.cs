@@ -8,5 +8,6 @@ public class ResponseInfoPulseLogRecentPart : ResponseInfoPart
     
     public ResponseInfoPulseLogRecentPart(Bytes data)
     {
+        Data = data;
     }
 }

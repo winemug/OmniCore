@@ -28,7 +28,7 @@ namespace OmniCore.Services
 
         public async Task AuthorizeAccountAsync(string email, string password)
         {
-            await UnauthorizeAsync();
+            UnauthorizeAsync();
             
             var j = JObject.FromObject(new
             {
@@ -51,7 +51,7 @@ namespace OmniCore.Services
 
         public async Task AuthorizeClientAsync(ClientConfiguration cc)
         {
-            await UnauthorizeAsync();
+            UnauthorizeAsync();
             var j = JObject.FromObject(new
             {
                 client_id = cc.ClientId.Value.ToString("N"),
@@ -89,7 +89,7 @@ namespace OmniCore.Services
             }
         }
 
-        public async Task UnauthorizeAsync()
+        public void UnauthorizeAsync()
         {
             if (_jwtRefreshTimer != null)
             {

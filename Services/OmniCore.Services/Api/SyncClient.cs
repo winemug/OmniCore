@@ -139,13 +139,13 @@ namespace OmniCore.Services
                             }
                             catch (Exception exception)
                             {
-                                Debug.WriteLine($"pub confirm failed");
+                                Debug.WriteLine($"pub confirm failed {exception}");
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine($"what except");
+                        Debug.WriteLine($"unknown exception {e}");
                     }
                 }
             });

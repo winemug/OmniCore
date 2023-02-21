@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using OmniCore.Services.Interfaces;
 using Plugin.BLE.Abstractions;
 using Trace = System.Diagnostics.Trace;
+using Dapper;
 
 namespace OmniCore.Services;
 
@@ -17,14 +18,17 @@ public class PodConnection : IDisposable
     private IDisposable _podLockDisposable;
     private RadioConnection _radioConnection;
     private bool _communicationNeedsClosing;
-
+    private DataService _dataService;
+    
     public PodConnection(Pod pod,
         RadioConnection radioConnection,
-        IDisposable podLockDisposable)
+        IDisposable podLockDisposable,
+        DataService dataService)
     {
         _pod = pod;
         _radioConnection = radioConnection;
         _podLockDisposable = podLockDisposable;
+        _dataService = dataService;
     }
     public void Dispose()
     {
@@ -338,10 +342,33 @@ public class PodConnection : IDisposable
         var initialPacketSequence = _pod.NextPacketSequence;
         var initialMessageSequence = _pod.NextMessageSequence;
 
-        var messageToSend = ConstructMessage(critical, parts); 
+        var messageToSend = ConstructMessage(critical, parts);
+
+        var sendStart = DateTimeOffset.UtcNow;
         var result = await RunExchangeAsync(
             messageToSend,
             cancellationToken);
+        var receiveEnd = DateTimeOffset.UtcNow;
+
+        using (var conn = await _dataService.GetConnectionAsync())
+        {
+            await conn.ExecuteAsync(
+                "INSERT INTO pod_message(pod_id, record_index, send_start, send_data, " +
+                "receive_end, receive_data, exchange_result) " +
+                "VALUES(@pod_id, @record_index, @send_start, @send_data, " +
+                "@receive_end, @receive_data, @exchange_result)",
+                new
+                {
+                    pod_id = _pod.Id.ToString("N"),
+                    record_index = _pod.NextRecordIndex,
+                    send_start = sendStart.ToUnixTimeMilliseconds(),
+                    send_data = messageToSend.GetBody().ToArray(),
+                    receive_end = receiveEnd.ToUnixTimeMilliseconds(),
+                    receive_data = result.Message?.Body?.ToArray(),
+                    exchange_result = (int)result.Error
+                });
+            _pod.NextRecordIndex++;
+        }
 
         if (result.Error != CommunicationError.NoResponse)
             _communicationNeedsClosing = true;

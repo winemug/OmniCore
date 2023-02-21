@@ -57,5 +57,6 @@ public class ResponseInfoExtendedPart : ResponseInfoPart
         Rssi = data[18] & 0b00111111;
         ProgressBeforeFault2 = (PodProgress)data[19];
         Unknown0 = data.Word(20);
+        Data = data;
     }
 }
