@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace OmniCore.Services.Interfaces;
+namespace OmniCore.Services.Interfaces.Core;
 
 public interface ICoreService
 {

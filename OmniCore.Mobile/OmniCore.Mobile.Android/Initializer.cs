@@ -1,6 +1,8 @@
 using Android.App;
 using Android.Content;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
+using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.Droid
@@ -9,8 +11,11 @@ namespace OmniCore.Mobile.Droid
     {
         public static void RegisterTypesForAndroid(Activity activity)
         {
-            DependencyService.RegisterSingleton<IPlatformInfo>(new PlatformInfo(activity));
-            DependencyService.RegisterSingleton<IForegroundServiceHelper>(new ForegroundServiceHelper(activity));
+            var container = new UnityContainer();
+            DependencyService.RegisterSingleton<IUnityContainer>(container);
+
+            container.RegisterInstance<IPlatformInfo>(new PlatformInfo(activity));
+            container.RegisterInstance<IForegroundServiceHelper>(new ForegroundServiceHelper(activity));
         }
     }
 }

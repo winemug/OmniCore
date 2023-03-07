@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Amqp;
 
-namespace OmniCore.Services.Interfaces;
+namespace OmniCore.Services.Interfaces.Core;
 
 public interface IAmqpService : ICoreService
 {

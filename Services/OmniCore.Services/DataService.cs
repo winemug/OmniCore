@@ -7,6 +7,7 @@ using Microsoft.Data.Sqlite;
 using Nito.AsyncEx;
 using OmniCore.Services.Data.Sql;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Core;
 
 namespace OmniCore.Services;
 

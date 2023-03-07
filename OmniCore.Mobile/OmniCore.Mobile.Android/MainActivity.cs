@@ -4,6 +4,8 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
+using Unity;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Platform = Xamarin.Essentials.Platform;
@@ -33,7 +35,7 @@ namespace OmniCore.Mobile.Droid
             [GeneratedEnum] Permission[] grantResults)
         {
             Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            DependencyService.Resolve<IPlatformInfo>().OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            DependencyService.Resolve<IUnityContainer>().Resolve<IPlatformInfo>().OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }

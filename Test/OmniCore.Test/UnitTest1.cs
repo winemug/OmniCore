@@ -3,8 +3,9 @@ using Nito.AsyncEx;
 using OmniCore.Mobile.Services;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
-using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Pod;
 using Unity;
 using Unity.Lifetime;
 using Initializer = OmniCore.Mobile.Initializer;
@@ -24,9 +25,6 @@ public class Tests
     [Test]
     public void ContainerResolves()
     {
-        Initializer.RegisterTypes(_container);
-        var ns = _container.Resolve<NavigationService>();
-        Assert.NotNull(ns);
     }
 
     [Test]

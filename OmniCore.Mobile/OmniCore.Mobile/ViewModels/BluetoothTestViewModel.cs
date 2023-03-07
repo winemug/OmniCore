@@ -2,7 +2,9 @@ using System.Diagnostics;
 using Dapper;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
@@ -14,10 +16,11 @@ namespace OmniCore.Mobile.ViewModels
 
         private int dac;
 
-        public BluetoothTestViewModel()
+        public BluetoothTestViewModel(IForegroundServiceHelper foregroundServiceHelper,
+            IPlatformInfo platformInfo)
         {
-            _foregroundServiceHelper = DependencyService.Get<IForegroundServiceHelper>();
-            _platformInfo = DependencyService.Get<IPlatformInfo>();
+            _foregroundServiceHelper = foregroundServiceHelper;
+            _platformInfo = platformInfo;
             StartCommand = new Command(StartClicked);
             StopCommand = new Command(StopClicked);
             DoCommand = new Command(DoClicked);

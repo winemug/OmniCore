@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels

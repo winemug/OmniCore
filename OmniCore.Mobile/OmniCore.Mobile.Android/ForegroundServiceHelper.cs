@@ -1,6 +1,8 @@
 using Android.Content;
 using Android.OS;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Core;
+using OmniCore.Services.Interfaces.Platform;
 
 namespace OmniCore.Mobile.Droid
 {
@@ -12,8 +14,6 @@ namespace OmniCore.Mobile.Droid
         {
             _context = context;
         }
-        public ICoreService ForegroundService { get; set; }
-
         public void StartForegroundService()
         {
             var intent = new Intent(_context, typeof(ForegroundService));

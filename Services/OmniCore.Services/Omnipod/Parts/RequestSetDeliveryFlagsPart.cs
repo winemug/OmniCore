@@ -1,4 +1,4 @@
-using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Pod;
 
 namespace OmniCore.Services;
 

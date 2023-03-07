@@ -5,8 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using OmniCore.Services.Interfaces;
-using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Pod;
+using OmniCore.Services.Interfaces.Radio;
 
 namespace OmniCore.Services;
 

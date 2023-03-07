@@ -2,6 +2,7 @@ using OmniCore.Mobile.Services;
 using OmniCore.Mobile.ViewModels;
 using OmniCore.Mobile.Views;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
 using Unity;
 using Unity.Lifetime;
 using Xamarin.Forms;
@@ -12,13 +13,9 @@ namespace OmniCore.Mobile
     {
         public static void RegisterTypesForMobileApp(IUnityContainer container)
         {
+            
             // services
             OmniCore.Services.Initializer.RegisterTypesForServices(container);
-
-            // platform specific instances
-            container.RegisterInstance(DependencyService.Resolve<IPlatformInfo>());
-            container.RegisterInstance(DependencyService.Resolve<IForegroundServiceHelper>());
-
 
             // mobile
             container.RegisterType<NavigationService>(new ContainerControlledLifetimeManager());

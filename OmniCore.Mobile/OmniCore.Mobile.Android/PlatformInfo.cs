@@ -10,6 +10,7 @@ using Android.Provider;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
 using Xamarin.Essentials;
 
 namespace OmniCore.Mobile.Droid

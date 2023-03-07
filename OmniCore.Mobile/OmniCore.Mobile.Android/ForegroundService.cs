@@ -2,7 +2,9 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Core;
 using RabbitMQ.Client;
+using Unity;
 using Xamarin.Forms;
 using Debug = System.Diagnostics.Debug;
 
@@ -23,16 +25,16 @@ namespace OmniCore.Mobile.Droid
             Debug.WriteLine("Service Constructor");
         }
 
-        private void Start()
+        private async void Start()
         {
-            var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
-            fsh.ForegroundService?.Start();
+            var coreService = DependencyService.Resolve<IUnityContainer>().Resolve<ICoreService>();
+            await coreService.Start();
         }
 
-        private void Stop()
+        private async void Stop()
         {
-            var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
-            fsh.ForegroundService?.Stop();
+            var coreService = DependencyService.Resolve<IUnityContainer>().Resolve<ICoreService>();
+            await coreService.Stop();
         }
 
         public override void OnCreate()

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using OmniCore.Mobile.Services;
 using OmniCore.Mobile.Views;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Platform;
 using Unity;
 using Xamarin.Forms;
 
@@ -17,11 +18,10 @@ namespace OmniCore.Mobile
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             InitializeComponent();
-            var container = new UnityContainer();
+            var container = DependencyService.Resolve<IUnityContainer>();
             Initializer.RegisterTypesForMobileApp(container);
             _navigationService = container.Resolve<NavigationService>();
-            DependencyService.Get<IForegroundServiceHelper>().ForegroundService = container.Resolve<ICoreService>();
-            _platformInfo = DependencyService.Get<IPlatformInfo>();
+            _platformInfo = container.Resolve<IPlatformInfo>();
 
             var shell = new AppShell();
             _navigationService.SetShellInstance(shell);

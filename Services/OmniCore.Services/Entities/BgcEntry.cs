@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Amqp;
 
 namespace OmniCore.Services.Entities;
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Services.Entities;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Amqp;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

@@ -1,8 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Services.Interfaces.Radio;
 
-namespace OmniCore.Services.Interfaces;
+namespace OmniCore.Services.Interfaces.Core;
 
 public interface IRadioService : ICoreService
 {
