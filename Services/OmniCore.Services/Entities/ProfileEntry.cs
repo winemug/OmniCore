@@ -1,11 +1,10 @@
 using System;
 
-namespace OmniCore.Services.Entities
+namespace OmniCore.Services.Entities;
+
+public class ProfileEntry
 {
-    public class ProfileEntry
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public bool IsDefault { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public bool IsDefault { get; set; }
 }

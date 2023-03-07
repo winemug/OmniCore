@@ -106,9 +106,9 @@ namespace OmniCore.Services
             var j = JObject.FromObject(new
             {
                 name = cc.Name,
-                platform = cc.Platform,
-                hw_version = cc.HardwareVersion,
-                sw_version = cc.SoftwareVersion
+                // platform = cc.Platform,
+                // hw_version = cc.HardwareVersion,
+                // sw_version = cc.SoftwareVersion
             }).ToString();
 
             var content = new StringContent(j, Encoding.Default, "application/json");;
@@ -147,7 +147,7 @@ namespace OmniCore.Services
             
             var j = JObject.FromObject(new
             {
-                sw_version = cc.SoftwareVersion
+                // sw_version = cc.SoftwareVersion
             }).ToString();
             
             var content = new StringContent(j, Encoding.Default, "application/json");;

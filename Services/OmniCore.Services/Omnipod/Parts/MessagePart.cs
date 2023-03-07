@@ -4,7 +4,7 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public class MessagePart
+public class MessagePart : IMessagePart
 {
     public virtual bool RequiresNonce { get; }
     public virtual PodMessageType Type { get; set; }

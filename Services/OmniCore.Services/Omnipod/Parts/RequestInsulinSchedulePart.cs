@@ -2,33 +2,6 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
-public enum ScheduleType
-{
-    Basal = 0,
-    TempBasal = 1,
-    Bolus = 2
-}
-
-public struct BolusEntry
-{
-    public int ImmediatePulseCount { get; set; }
-    public int ImmediatePulseInterval125ms { get; set; }
-    public int ExtendedHalfHourCount { get; set; }
-    public int ExtendedTotalPulseCount { get; set; }
-}
-
-public struct BasalRateEntry
-{ 
-    public int HalfHourCount { get; set; }
-    public int PulsesPerHour { get; set; }
-}
-
-public struct InsulinSchedule
-{
-    public int BlockCount { get; set; } // 8 bits
-    public bool AddAlternatingExtraPulse { get; set; }
-    public int PulsesPerBlock { get; set; } // 10bits
-}
 public class RequestInsulinSchedulePart : MessagePart
 {
     public override bool RequiresNonce => true;
@@ -40,6 +13,7 @@ public class RequestInsulinSchedulePart : MessagePart
     }
     public RequestInsulinSchedulePart(BasalRateEntry tempBasalEntry)
     {
+        var hhc = 0;
         var schedules = new[]
         {
             new InsulinSchedule()
@@ -60,22 +34,32 @@ public class RequestInsulinSchedulePart : MessagePart
     }
     
     private Bytes GetData(ScheduleType type,
-        byte halfHourCount, ushort initialDuration125ms, ushort initialPulseCount,
+        byte halfHourCount,
+        ushort initialDuration125ms,
+        ushort initialPulseCount,
         InsulinSchedule[] schedules
         )
     {
         var elements = new Bytes();
         foreach (var schedule in schedules)
         {
-            var b0 = ((schedule.BlockCount - 1) & 0x0f) << 4;
-            if (schedule.AddAlternatingExtraPulse)
+            var scheduleBlocksAdded = 0;
+            while (scheduleBlocksAdded < schedule.BlockCount)
             {
-                b0 |= 0x08;
-            }
+                var blockCount = schedule.BlockCount - scheduleBlocksAdded;
+                if (blockCount > 16)
+                    blockCount = 16;
+                var b0 = ((blockCount - 1) & 0x0f) << 4;
+                if (schedule.AddAlternatingExtraPulse)
+                {
+                    b0 |= 0x08;
+                }
 
-            b0 |= schedule.PulsesPerBlock >> 8;
-            var b1 = schedule.PulsesPerBlock & 0xFF;
-            elements.Append((byte)b0).Append((byte)b1);
+                b0 |= schedule.PulsesPerBlock >> 8;
+                var b1 = schedule.PulsesPerBlock & 0xFF;
+                elements.Append((byte)b0).Append((byte)b1);
+                scheduleBlocksAdded += blockCount;
+            }
         }
 
         var header = new Bytes(halfHourCount).Append(initialDuration125ms).Append(initialPulseCount);

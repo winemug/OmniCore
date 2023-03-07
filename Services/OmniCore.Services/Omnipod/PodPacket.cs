@@ -6,7 +6,7 @@ using Plugin.BLE.Abstractions.Extensions;
 
 namespace OmniCore.Services
 {
-    public class PodPacket
+    public class PodPacket : IPodPacket
     {
         public int? Rssi { get; set; }
         public uint Address { get; set; }

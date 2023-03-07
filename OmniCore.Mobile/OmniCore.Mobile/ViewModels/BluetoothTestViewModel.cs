@@ -75,8 +75,8 @@ namespace OmniCore.Mobile.ViewModels
             var pod = await PodService.GetPodAsync();
             using (var podConn = await PodService.GetConnectionAsync(pod))
             {
-                Debug.WriteLine($"Update Status");
-                var response = await podConn.UpdateStatus();
+                var response = await podConn.Deactivate();
+                Debug.WriteLine($"result: {response}");
             }
             Debug.WriteLine(pod);
 

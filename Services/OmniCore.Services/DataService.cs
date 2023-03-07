@@ -8,19 +8,18 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Nito.AsyncEx;
+using OmniCore.Services.Data.Sql;
 using OmniCore.Services.Entities;
 using OmniCore.Services.Interfaces;
-using OmniCore.Services.Tables;
 using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Services
 {
-    public class DataService
+    public class DataService : IDataService
     {
         public string DatabasePath { get; }
         private bool _initialized = false;
-        private const string DbVersion = "9";
         private AsyncLock _initializeLock = new AsyncLock();
         private Task _startupTask;
         public DataService()
@@ -62,36 +61,27 @@ namespace OmniCore.Services
             {
                 if (!_initialized)
                 {
-                    if (File.Exists(DatabasePath))
+                    using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
                     {
-                        string storedVersion = null;
+                        int storedVersion = -1;
                         try
                         {
-                            using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
-                            {
-                                await conn.OpenAsync();
-                                var row = await conn.QueryFirstOrDefaultAsync(
-                                    "SELECT db_version FROM version");
-                                storedVersion = row.db_version;
-                            }
+                            await conn.OpenAsync();
+                            var row = await conn.QueryFirstOrDefaultAsync(
+                                "SELECT db_version FROM version");
+                            storedVersion = (int)row.db_version;
                         }
                         catch (Exception e)
                         {
                             Trace.WriteLine($"Error retrieving db version -- reinitializing. {e}");
                         }
 
-                        if (string.IsNullOrEmpty(storedVersion) || storedVersion != DbVersion)
+                        if (storedVersion != DatabaseMigration.LatestVersion)
                         {
                             Trace.WriteLine($"DB migration started");
-                            await MigrateDatabaseAsync(storedVersion);
+                            await DatabaseMigration.RunMigration(conn, storedVersion);
                             Trace.WriteLine($"DB migration ended");
                         }
-                    }
-                    else
-                    {
-                        Trace.WriteLine($"DB creation started");
-                        await CreateDatabaseAsync();
-                        Trace.WriteLine($"DB creation ended");
                     }
                     _initialized = true;
                     Trace.WriteLine($"DB initialized");
@@ -126,26 +116,6 @@ namespace OmniCore.Services
                 {
                     _initialized = true;
                 }
-            }
-        }
-
-        private async Task MigrateDatabaseAsync(string existingVersion)
-        {
-            // initial non-migration
-            await CreateDatabaseAsync();
-        }
-        
-        private async Task CreateDatabaseAsync()
-        {
-            // if (File.Exists(DatabasePath))
-            //     File.Delete(DatabasePath);
-            
-            using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
-            {
-                await conn.OpenAsync();
-                await TableDefinitions.RunCreate(conn);
-                await conn.ExecuteAsync("INSERT INTO version(db_version) VALUES(@version)",
-                    new { version = DbVersion });
             }
         }
     }

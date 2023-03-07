@@ -15,7 +15,7 @@ namespace OmniCore.Services
     public class XDripWebServiceClient
     {
         [Unity.Dependency]
-        public ConfigurationStore ConfigurationStore { get; set; }
+        public ConfigurationService ConfigurationService { get; set; }
         
         [Unity.Dependency]
         public BgcService BgcService { get; set; }
@@ -32,7 +32,7 @@ namespace OmniCore.Services
 
         public async Task StartCollectionAsync()
         {
-            var cc = await ConfigurationStore.GetConfigurationAsync();
+            var cc = await ConfigurationService.GetConfigurationAsync();
             _clientId = cc.ClientId.Value;
             _profileId = cc.ReceiverProfileId.Value;
             _cts = new CancellationTokenSource();

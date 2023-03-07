@@ -8,12 +8,12 @@ public static class Initializer
 {
     public static void RegisterTypes(IUnityContainer container)
     {
-        container.RegisterType<IForegroundService, CoreService>(new ContainerControlledLifetimeManager());
-        container.RegisterType<ConfigurationStore>(new ContainerControlledLifetimeManager());
-        container.RegisterType<DataService>(new ContainerControlledLifetimeManager());
-        container.RegisterType<PodService>(new ContainerControlledLifetimeManager());
-        container.RegisterType<RadioService>(new ContainerControlledLifetimeManager());
-        container.RegisterType<AmqpService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<IForegroundService, ForegroundService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<ConfigurationService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<IDataService, DataService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<IPodService, PodService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<IRadioService, RadioService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<IAmqpService, AmqpService>(new ContainerControlledLifetimeManager());
 
         // container.RegisterType<BleService>(new ContainerControlledLifetimeManager());
         // container.RegisterType<BgcService>(new ContainerControlledLifetimeManager());

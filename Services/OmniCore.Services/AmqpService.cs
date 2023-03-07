@@ -12,7 +12,7 @@ using RabbitMQ.Client.Events;
 
 namespace OmniCore.Services;
 
-public class AmqpService
+public class AmqpService : IAmqpService
 {
     private AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
     private SortedList<DateTimeOffset,string> _processedMessages;

@@ -16,19 +16,19 @@ using Xamarin.Forms.Internals;
 
 namespace OmniCore.Services
 {
-    public class CoreService : IForegroundService
+    public class ForegroundService : IForegroundService
     {
         [Unity.Dependency]
-        public RadioService RadioService { get; set; }
+        public IRadioService RadioService { get; set; }
         
         [Unity.Dependency]
-        public AmqpService AmqpService { get; set; }
+        public IAmqpService AmqpService { get; set; }
         
         [Unity.Dependency]
-        public PodService PodService { get; set; }
+        public IPodService PodService { get; set; }
         
         [Unity.Dependency]
-        public DataService DataService { get; set; }
+        public IDataService DataService { get; set; }
         public void Start()
         {
             Debug.WriteLine("Core services starting");

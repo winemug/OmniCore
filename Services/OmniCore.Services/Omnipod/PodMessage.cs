@@ -5,16 +5,16 @@ using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services
 {
-    public class PodMessage
+    public class PodMessage : IPodMessage
     {
         public uint Address { get; set; }
         public int Sequence { get; set; }
         public bool WithCriticalFollowup { get; set; }
-        public List<MessagePart> Parts { get; set; }
+        public List<IMessagePart> Parts { get; set; }
         
         public uint? AckAddressOverride { get; set; }
         public Bytes Body { get; set; }
-        public static PodMessage FromReceivedPackets(List<PodPacket> receivedPackets)
+        public static PodMessage FromReceivedPackets(List<IPodPacket> receivedPackets)
         {
             var message = new PodMessage();
             var messageBody = new Bytes();
@@ -35,7 +35,7 @@ namespace OmniCore.Services
             message.Sequence = (b0 >> 2) & 0b00111111;
             var bodyLength = (b0 & 0b00000011) << 8 | b1;
             int bodyIdx = 0;
-            message.Parts = new List<MessagePart>();
+            message.Parts = new List<IMessagePart>();
             while (bodyIdx < bodyLength)
             {
                 var mpType = (PodMessageType)messageBody[6 + bodyIdx];

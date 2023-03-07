@@ -1,0 +1,46 @@
+<#@ template language="C#" hostspecific="True" #>
+<#@ import namespace="System.IO" #>
+
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Data.Sqlite;
+
+namespace OmniCore.Services.Data.Sql
+{ 
+    public static class DatabaseMigration
+    {
+        public static string[] MigrationScripts = 
+        {
+<#
+    var version = 0;
+    while (true)
+    {
+        try
+        {
+            var path = Host.ResolvePath($"{version:D5}.sql");
+            var contents = File.ReadAllText(path);
+            Write("@\"\n");
+            Write(contents);
+            Write("\n\",\n");
+            version++;
+        }
+        catch
+        {
+            break;
+        }
+    }
+#>
+        };
+
+        public static int LatestVersion = <#
+    Write($"{version - 1}");
+#>;
+        public static async Task RunMigration(SqliteConnection conn, int currentVersion)
+        {
+            for(int i = currentVersion + 1; i< MigrationScripts.Length; i++)
+            {
+                await conn.ExecuteAsync(MigrationScripts[i]);
+            }
+        }
+    }
+}

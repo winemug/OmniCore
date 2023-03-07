@@ -5,6 +5,7 @@ using OmniCore.Mobile.Services;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
 using Unity;
+using Unity.Lifetime;
 using Xamarin.Forms;
 
 namespace OmniCore.Test;
@@ -49,6 +50,39 @@ public class Tests
         while (await q.OutputAvailableAsync())
         {
             var z = q.DequeueAsync();
+        }
+    }
+
+    [Test]
+    public async Task TestExchange()
+    {
+        var podServiceMock = new Mock<IPodService>();
+        var radioServiceMock = new Mock<IRadioService>();
+        var dataServiceMock = new Mock<IDataService>();
+        
+        _container.RegisterInstance<IDataService>(dataServiceMock.Object, new ContainerControlledLifetimeManager());
+        _container.RegisterInstance<IPodService>(podServiceMock.Object, new ContainerControlledLifetimeManager());
+        _container.RegisterInstance<IRadioService>(radioServiceMock.Object, new ContainerControlledLifetimeManager());
+
+        var podService = podServiceMock.Object;
+        var dataService = dataServiceMock.Object;
+        var pod = new Pod(dataService)
+        {
+            Id = Guid.NewGuid(),
+            Medication = MedicationType.Insulin,
+            RadioAddress = 0x34000000,
+            UnitsPerMilliliter = 100,
+            ValidFrom = DateTimeOffset.Now,
+            Info = new PodRuntimeInformation()
+            {
+            }
+        };
+        
+        
+        
+        using (var conn = await podService.GetConnectionAsync(pod))
+        {
+            
         }
     }
 }
