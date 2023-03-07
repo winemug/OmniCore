@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using OmniCore.Services.Entities;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services;
 

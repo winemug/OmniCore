@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services.Interfaces;
 

@@ -1,4 +1,4 @@
-namespace OmniCore.Services;
+namespace OmniCore.Services.Interfaces.Definitions;
 
 public enum PodMessageType
 {

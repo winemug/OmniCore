@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services.Interfaces;
 
-public interface IAmqpService
+public interface IAmqpService : ICoreService
 {
-    void Start();
-    void Stop();
     Task PublishMessage(AmqpMessage message);
 }

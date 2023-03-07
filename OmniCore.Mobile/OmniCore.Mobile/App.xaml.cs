@@ -18,9 +18,9 @@ namespace OmniCore.Mobile
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             InitializeComponent();
             var container = new UnityContainer();
-            Initializer.RegisterTypes(container);
+            Initializer.RegisterTypesForMobileApp(container);
             _navigationService = container.Resolve<NavigationService>();
-            DependencyService.Get<IForegroundServiceHelper>().Service = container.Resolve<IForegroundService>();
+            DependencyService.Get<IForegroundServiceHelper>().ForegroundService = container.Resolve<ICoreService>();
             _platformInfo = DependencyService.Get<IPlatformInfo>();
 
             var shell = new AppShell();

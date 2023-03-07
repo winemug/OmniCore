@@ -12,7 +12,7 @@ public class RadioService : IRadioService
 {
     private List<Radio> _radios;
 
-    public void Start()
+    public async Task Start()
     {
         Debug.WriteLine("starting radios");
         _radios = new List<Radio>
@@ -23,7 +23,7 @@ public class RadioService : IRadioService
         };
     }
 
-    public void Stop()
+    public async Task Stop()
     {
         Debug.WriteLine("stopping radios");
         foreach (var radio in _radios) radio.Dispose();

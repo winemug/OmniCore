@@ -1,4 +1,6 @@
-namespace OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Definitions;
+
+namespace OmniCore.Services.Interfaces.Entities;
 
 public class ExchangeResult
 {

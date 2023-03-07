@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using OmniCore.Services.Entities;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
 using Unity;
 
 namespace OmniCore.Services;
@@ -52,5 +53,13 @@ public class ConfigurationService : IConfigurationService
         {
             await JsonSerializer.SerializeAsync(fs, cc);
         }
+    }
+
+    public async Task Start()
+    {
+    }
+
+    public async Task Stop()
+    {
     }
 }

@@ -1,4 +1,4 @@
-namespace OmniCore.Services.Interfaces;
+namespace OmniCore.Services.Interfaces.Entities;
 
 public struct InsulinSchedule
 {

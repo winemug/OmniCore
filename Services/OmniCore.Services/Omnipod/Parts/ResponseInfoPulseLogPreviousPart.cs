@@ -1,4 +1,5 @@
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services;
 

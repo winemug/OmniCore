@@ -1,3 +1,6 @@
+using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Entities;
+
 namespace OmniCore.Services.Interfaces;
 
 public interface IMessagePart

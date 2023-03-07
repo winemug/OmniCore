@@ -24,12 +24,12 @@ public class DataService : IDataService
 
     public string DatabasePath { get; }
 
-    public void Start()
+    public async Task Start()
     {
         _startupTask = Task.Run(async () => await InitializeDatabaseAsync());
     }
 
-    public void Stop()
+    public async Task Stop()
     {
         try
         {

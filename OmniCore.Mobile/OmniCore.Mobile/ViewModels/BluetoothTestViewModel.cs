@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Dapper;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels

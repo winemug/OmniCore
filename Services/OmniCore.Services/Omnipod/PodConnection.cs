@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services;
 

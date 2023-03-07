@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using OmniCore.Services.Interfaces;
 using Unity;
 
 namespace OmniCore.Services;
 
-public class ForegroundService : IForegroundService
+public class ForegroundService : ICoreService
 {
     [Dependency] public IRadioService RadioService { get; set; }
 
@@ -13,24 +14,37 @@ public class ForegroundService : IForegroundService
     [Dependency] public IPodService PodService { get; set; }
 
     [Dependency] public IDataService DataService { get; set; }
+    
+    [Dependency] public IConfigurationService ConfigurationService { get; set; }
 
-    public void Start()
+    public async Task Start()
     {
         Debug.WriteLine("Core services starting");
-        DataService.Start();
-        RadioService.Start();
-        PodService.Start();
-        AmqpService.Start();
+
+        await Task.WhenAll(
+            ConfigurationService.Start(),
+            DataService.Start()
+            );
+        await Task.WhenAll(
+            RadioService.Start(),
+            PodService.Start(),
+            AmqpService.Start()
+        );
         Debug.WriteLine("Core services started");
     }
 
-    public void Stop()
+    public async Task Stop()
     {
         Debug.WriteLine("Core services stopping");
-        AmqpService.Stop();
-        PodService.Stop();
-        RadioService.Stop();
-        DataService.Stop();
+        await Task.WhenAll(
+            RadioService.Stop(),
+            PodService.Stop(),
+            AmqpService.Stop()
+        );
+        await Task.WhenAll(
+            ConfigurationService.Stop(),
+            DataService.Stop()
+        );
         Debug.WriteLine("Core services stopped");
     }
 }

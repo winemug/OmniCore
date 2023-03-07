@@ -6,9 +6,9 @@ namespace OmniCore.Services;
 
 public static class Initializer
 {
-    public static void RegisterTypes(IUnityContainer container)
+    public static void RegisterTypesForServices(IUnityContainer container)
     {
-        container.RegisterType<IForegroundService, ForegroundService>(new ContainerControlledLifetimeManager());
+        container.RegisterType<ICoreService, ForegroundService>(new ContainerControlledLifetimeManager());
         container.RegisterType<ConfigurationService>(new ContainerControlledLifetimeManager());
         container.RegisterType<IDataService, DataService>(new ContainerControlledLifetimeManager());
         container.RegisterType<IPodService, PodService>(new ContainerControlledLifetimeManager());

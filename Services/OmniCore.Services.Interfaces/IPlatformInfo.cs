@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Android.Content.PM;
 
 namespace OmniCore.Services.Interfaces;
 
@@ -11,5 +12,6 @@ public interface IPlatformInfo
     bool HasAllPermissions { get; }
     bool IsExemptFromBatteryOptimizations { get; }
     Task<bool> RequestMissingPermissions();
+    void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults);
     void OpenBatteryOptimizationSettings();
 }

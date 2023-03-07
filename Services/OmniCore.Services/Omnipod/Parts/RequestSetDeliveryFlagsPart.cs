@@ -1,3 +1,5 @@
+using OmniCore.Services.Interfaces.Definitions;
+
 namespace OmniCore.Services;
 
 public class RequestSetDeliveryFlagsPart : MessagePart

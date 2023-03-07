@@ -12,8 +12,7 @@ namespace OmniCore.Mobile.Droid
         {
             _context = context;
         }
-
-        public IForegroundService Service { get; set; }
+        public ICoreService ForegroundService { get; set; }
 
         public void StartForegroundService()
         {

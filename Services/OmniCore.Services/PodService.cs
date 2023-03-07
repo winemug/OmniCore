@@ -12,11 +12,11 @@ public class PodService : IPodService
 
     [Dependency] public DataService DataService { get; set; }
 
-    public void Start()
+    public async Task Start()
     {
     }
 
-    public void Stop()
+    public async Task Stop()
     {
     }
 

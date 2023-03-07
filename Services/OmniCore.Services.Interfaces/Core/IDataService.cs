@@ -3,11 +3,9 @@ using Microsoft.Data.Sqlite;
 
 namespace OmniCore.Services.Interfaces;
 
-public interface IDataService
+public interface IDataService : ICoreService
 {
     string DatabasePath { get; }
-    void Start();
-    void Stop();
     Task<SqliteConnection> GetConnectionAsync();
     Task InitializeDatabaseAsync();
     Task CopyDatabase(string destinationPath);

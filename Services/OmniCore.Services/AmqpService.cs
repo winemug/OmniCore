@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -25,13 +26,13 @@ public class AmqpService : IAmqpService
         _processedMessages = new SortedList<DateTimeOffset, string>();
     }
 
-    public void Start()
+    public async Task Start()
     {
         _cts = new CancellationTokenSource();
         _amqpTask = Task.Run(async () => await AmqpTask(_cts.Token));
     }
 
-    public void Stop()
+    public async Task Stop()
     {
         try
         {

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Text;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services;
 

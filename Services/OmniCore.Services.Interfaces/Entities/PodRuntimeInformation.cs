@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using OmniCore.Services.Interfaces.Definitions;
 
-namespace OmniCore.Services.Interfaces;
+namespace OmniCore.Services.Interfaces.Entities;
 
 public class PodRuntimeInformation
 {

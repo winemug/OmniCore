@@ -1,13 +1,6 @@
 using System;
 
-namespace OmniCore.Services.Entities;
-
-public enum CgmReceiverType
-{
-    XdripWebService,
-    NightscoutWebService,
-    DexcomWebService
-}
+namespace OmniCore.Services.Interfaces.Entities;
 
 public class ClientConfiguration
 {

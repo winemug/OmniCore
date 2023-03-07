@@ -3,6 +3,8 @@ using Nito.AsyncEx;
 using OmniCore.Mobile.Services;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Definitions;
+using OmniCore.Services.Interfaces.Entities;
 using Unity;
 using Unity.Lifetime;
 using Initializer = OmniCore.Mobile.Initializer;

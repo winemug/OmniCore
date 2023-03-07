@@ -22,9 +22,9 @@ namespace OmniCore.Mobile.Droid
 
         private TaskCompletionSource<bool> _tcsPermissionsResult;
 
-        public PlatformInfo(Context context, Activity activity)
+        public PlatformInfo(Activity activity)
         {
-            _context = context;
+            _context = activity;
             _activity = activity;
             Platform = "Android";
             HardwareVersion = "1.0.0";

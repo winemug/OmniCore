@@ -26,13 +26,13 @@ namespace OmniCore.Mobile.Droid
         private void Start()
         {
             var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
-            fsh.Service?.Start();
+            fsh.ForegroundService?.Start();
         }
 
         private void Stop()
         {
             var fsh = DependencyService.Resolve<IForegroundServiceHelper>();
-            fsh.Service?.Stop();
+            fsh.ForegroundService?.Stop();
         }
 
         public override void OnCreate()

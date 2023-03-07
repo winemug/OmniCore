@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
 
-namespace OmniCore.Services;
+namespace OmniCore.Services.Interfaces;
 
 public interface IPodMessage
 {

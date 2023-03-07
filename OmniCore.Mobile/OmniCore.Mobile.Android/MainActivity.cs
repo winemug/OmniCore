@@ -15,21 +15,14 @@ namespace OmniCore.Mobile.Droid
                                ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : FormsAppCompatActivity
     {
-        private ForegroundServiceHelper _foregroundServiceHelper;
-        private PlatformInfo _platformInfo;
-
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) =>
-            {
-                var newExc = new ApplicationException("AndroidEnvironment_UnhandledExceptionRaiser", args.Exception);
-            };
-            //App.Container.RegisterType<IPlatformInfo, PlatformInfo>(new InjectionConstructor(this));
-            _platformInfo = new PlatformInfo(this, this);
-            _foregroundServiceHelper = new ForegroundServiceHelper(this);
-            DependencyService.RegisterSingleton<IPlatformInfo>(_platformInfo);
-            DependencyService.RegisterSingleton<IForegroundServiceHelper>(_foregroundServiceHelper);
+            // AndroidEnvironment.UnhandledExceptionRaiser += (sender, args) =>
+            // {
+            //     var newExc = new ApplicationException("AndroidEnvironment_UnhandledExceptionRaiser", args.Exception);
+            // };
+            Initializer.RegisterTypesForAndroid(this);
             Platform.Init(this, savedInstanceState);
             Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
@@ -40,7 +33,7 @@ namespace OmniCore.Mobile.Droid
             [GeneratedEnum] Permission[] grantResults)
         {
             Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            _platformInfo.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            DependencyService.Resolve<IPlatformInfo>().OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }

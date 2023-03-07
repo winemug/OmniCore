@@ -3,10 +3,8 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Services.Interfaces;
 
-public interface IPodService
+public interface IPodService : ICoreService
 {
-    void Start();
-    void Stop();
     Task<IPod> GetPodAsync();
 
     Task<IPodConnection> GetConnectionAsync(
