@@ -1,12 +1,8 @@
-using System.Threading.Tasks;
+namespace OmniCore.Services.Interfaces;
 
-namespace OmniCore.Services.Interfaces
+public interface IForegroundServiceHelper
 {
-    public interface IForegroundServiceHelper
-    {
-        IForegroundService Service { get; set; }
-        void StartForegroundService();
-        void StopForegroundService();
-
-    }
+    IForegroundService Service { get; set; }
+    void StartForegroundService();
+    void StopForegroundService();
 }

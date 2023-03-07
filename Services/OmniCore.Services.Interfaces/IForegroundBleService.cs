@@ -1,7 +1,5 @@
-namespace OmniCore.Services.Interfaces
+namespace OmniCore.Services.Interfaces;
+
+public interface IForegroundBleService
 {
-    public interface IForegroundBleService
-    {
-        
-    }
 }

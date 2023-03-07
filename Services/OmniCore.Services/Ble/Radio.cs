@@ -22,15 +22,15 @@ public class Radio : IRadio
     private readonly AsyncAutoResetEvent _connectionLostEvent = new(false);
 
     private readonly CancellationTokenSource _connectionTaskCancellation = new();
+    private readonly AsyncManualResetEvent _radioReadyEvent = new(false);
+
+    private readonly AsyncManualResetEvent _responseCountUpdatedEvent = new(false);
+    private readonly AsyncAutoResetEvent _rssiRequestedEvent = new(false);
     private ICharacteristic _dataCharacteristic;
 
     private IDevice _device;
     private IService _mainService;
-    private readonly AsyncManualResetEvent _radioReadyEvent = new(false);
     private ICharacteristic _responseCountCharacteristic;
-
-    private readonly AsyncManualResetEvent _responseCountUpdatedEvent = new(false);
-    private readonly AsyncAutoResetEvent _rssiRequestedEvent = new(false);
     private TaskCompletionSource<int?> _rssiSource;
 
     public Radio(Guid id, string name)

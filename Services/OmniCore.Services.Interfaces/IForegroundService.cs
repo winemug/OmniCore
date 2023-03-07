@@ -1,8 +1,7 @@
-namespace OmniCore.Services.Interfaces
+namespace OmniCore.Services.Interfaces;
+
+public interface IForegroundService
 {
-    public interface IForegroundService
-    {
-        void Start();
-        void Stop();
-    }
+    void Start();
+    void Stop();
 }

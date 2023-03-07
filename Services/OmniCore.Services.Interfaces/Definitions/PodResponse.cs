@@ -7,5 +7,5 @@ public enum PodResponse
     NoResponse,
     Interrupted,
     Error,
-    Faulted,
+    Faulted
 }

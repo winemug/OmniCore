@@ -5,8 +5,8 @@
              x:Class="OmniCore.Mobile.Views.AmqpTestPage">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="Start" Command="{Binding StartCommand}"></Button>
-            <Button Text="Stop" Command="{Binding StopCommand}"></Button>
+            <Button Text="Start" Command="{Binding StartCommand}" />
+            <Button Text="Stop" Command="{Binding StopCommand}" />
             <Label Text="Hello, amqp world!"
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />

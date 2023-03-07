@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace OmniCore.Mobile.Models
+﻿namespace OmniCore.Mobile.Models
 {
     public class Item
     {

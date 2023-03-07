@@ -1,10 +1,9 @@
-namespace OmniCore.Services
+namespace OmniCore.Services;
+
+public enum PodPacketType
 {
-    public enum PodPacketType
-    {
-        Pdm,
-        Pod,
-        Ack,
-        Con
-    }
+    Pdm,
+    Pod,
+    Ack,
+    Con
 }

@@ -4,13 +4,13 @@ namespace OmniCore.Services;
 
 public class RequestStatusPart : MessagePart
 {
-    public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestStatus;
-
     public RequestStatusPart(RequestStatusType type)
     {
         Data = new Bytes((byte)type);
     }
+
+    public override bool RequiresNonce => false;
+    public override PodMessageType Type => PodMessageType.RequestStatus;
 }
 
 public enum RequestStatusType
@@ -21,5 +21,5 @@ public enum RequestStatusType
     PulseLogRecent = 3,
     Activation = 5,
     PulseLogLast = 80,
-    PulseLogPrevious = 81,
+    PulseLogPrevious = 81
 }

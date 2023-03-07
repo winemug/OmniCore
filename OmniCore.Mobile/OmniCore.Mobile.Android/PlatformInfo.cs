@@ -6,6 +6,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Provider;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using OmniCore.Services.Interfaces;
@@ -15,9 +16,12 @@ namespace OmniCore.Mobile.Droid
 {
     public class PlatformInfo : IPlatformInfo
     {
-        private Context _context;
-        private Activity _activity;
-        
+        private readonly Activity _activity;
+        private readonly Context _context;
+        private int _requestCode;
+
+        private TaskCompletionSource<bool> _tcsPermissionsResult;
+
         public PlatformInfo(Context context, Activity activity)
         {
             _context = context;
@@ -27,28 +31,23 @@ namespace OmniCore.Mobile.Droid
             SoftwareVersion = "1.0.0";
             OsVersion = "10";
         }
+
         public string SoftwareVersion { get; }
         public string HardwareVersion { get; }
         public string OsVersion { get; }
         public string Platform { get; }
-        public bool IsExemptFromBatteryOptimizations
-        {
-            get => !IsBatteryOptimized();
-        }
 
-        public bool HasAllPermissions
-        {
-            get =>
-//                    HasPermission(Manifest.Permission.Bluetooth) &&
-//                    HasPermission(Manifest.Permission.BluetoothAdmin) &&
-                   HasPermission(Manifest.Permission.AccessFineLocation) &&
-                   HasPermission(Manifest.Permission.AccessBackgroundLocation) &&
-                   HasPermission(Manifest.Permission.WriteExternalStorage) &&
-                   HasPermission(Manifest.Permission.ReadExternalStorage) &&
-                   HasPermission(Manifest.Permission.AccessNetworkState) &&
-                   HasPermission(Manifest.Permission.Internet)
-                   ;
-        }
+        public bool IsExemptFromBatteryOptimizations => !IsBatteryOptimized();
+
+        public bool HasAllPermissions =>
+            //                    HasPermission(Manifest.Permission.Bluetooth) &&
+            //                    HasPermission(Manifest.Permission.BluetoothAdmin) &&
+            HasPermission(Manifest.Permission.AccessFineLocation) &&
+            HasPermission(Manifest.Permission.AccessBackgroundLocation) &&
+            HasPermission(Manifest.Permission.WriteExternalStorage) &&
+            HasPermission(Manifest.Permission.ReadExternalStorage) &&
+            HasPermission(Manifest.Permission.AccessNetworkState) &&
+            HasPermission(Manifest.Permission.Internet);
 
         public async Task<bool> RequestMissingPermissions()
         {
@@ -63,7 +62,7 @@ namespace OmniCore.Mobile.Droid
                 {
                     Manifest.Permission.Bluetooth,
                     Manifest.Permission.BluetoothAdmin,
-                    Manifest.Permission.AccessFineLocation,
+                    Manifest.Permission.AccessFineLocation
                 }))
                 return false;
 
@@ -79,51 +78,48 @@ namespace OmniCore.Mobile.Droid
                     Manifest.Permission.WriteExternalStorage
                 }))
                 return false;
-            
+
             return true;
         }
 
-        private TaskCompletionSource<bool> _tcsPermissionsResult;
-        private int _requestCode;
+        public void OpenBatteryOptimizationSettings()
+        {
+            var intent = new Intent();
+            intent.SetAction(Settings.ActionIgnoreBatteryOptimizationSettings);
+            _context.StartActivity(intent);
+        }
+
         private async Task<bool> RequestIfMissing(string[] permissions)
         {
             var missing = false;
             foreach (var permission in permissions)
-            {
                 if (!HasPermission(permission))
                 {
                     missing = true;
                     break;
                 }
-            }
 
             if (missing)
             {
                 _tcsPermissionsResult = new TaskCompletionSource<bool>();
                 _requestCode = new Random().Next(1, 254);
                 ActivityCompat.RequestPermissions(_activity, permissions, _requestCode);
-                
+
                 if (!await _tcsPermissionsResult.Task.ConfigureAwait(false))
                     return false;
             }
+
             return true;
         }
 
-        public void OpenBatteryOptimizationSettings()
-        {
-            Intent intent = new Intent();
-            intent.SetAction(Android.Provider.Settings.ActionIgnoreBatteryOptimizationSettings);
-            _context.StartActivity(intent);   
-        }
-
-        public void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
+        public void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             if (requestCode != _requestCode)
                 return;
 
             _tcsPermissionsResult.SetResult(grantResults.All(r => r == Permission.Granted));
         }
-        
+
         private bool HasPermission(string permissionName)
         {
             return ContextCompat.CheckSelfPermission(_context, permissionName) == (int)Permission.Granted;
@@ -131,7 +127,7 @@ namespace OmniCore.Mobile.Droid
 
         private bool IsBatteryOptimized()
         {
-            PowerManager pm = (PowerManager)_context.GetSystemService(Context.PowerService);
+            var pm = (PowerManager)_context.GetSystemService(Context.PowerService);
             return !pm.IsIgnoringBatteryOptimizations(AppInfo.PackageName);
         }
     }

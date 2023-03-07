@@ -5,33 +5,6 @@ namespace OmniCore.Services;
 
 public class ResponseVersionPart : MessagePart
 {
-    public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.ResponseVersionInfo;
-
-    public int HardwareVersionMajor { get; }
-    public int HardwareVersionMinor { get; }
-    public int HardwareVersionRevision { get; }
-
-    public int FirmwareVersionMajor { get; }
-    public int FirmwareVersionMinor { get; }
-    public int FirmwareVersionRevision { get; }
-    
-    public int ProductId { get; }
-    public PodProgress Progress { get; }
-    public uint Lot { get; }
-    public uint Serial { get; }
-    
-    public uint AssignedAddress { get; }
-    public int? RadioLowGain { get; }
-    public int? Rssi { get; }
-    
-    public int? PulseVolumeMicroUnits { get; }
-    public int? PulseRatePer125ms { get; }
-    public int? PrimingPulseRatePer125ms { get; }
-    public int? PrimingPulseCount { get; }
-    public int? CannulaInsertPulseCount { get; }
-    public int? MaximumLifeTimeHours { get; }
-
     public ResponseVersionPart(Bytes data)
     {
         Data = data;
@@ -64,7 +37,7 @@ public class ResponseVersionPart : MessagePart
             PrimingPulseCount = data[4];
             CannulaInsertPulseCount = data[5];
             MaximumLifeTimeHours = data[6];
-            
+
             HardwareVersionMajor = data[7];
             HardwareVersionMinor = data[8];
             HardwareVersionRevision = data[9];
@@ -80,4 +53,31 @@ public class ResponseVersionPart : MessagePart
             AssignedAddress = data.DWord(23);
         }
     }
+
+    public override bool RequiresNonce => false;
+    public override PodMessageType Type => PodMessageType.ResponseVersionInfo;
+
+    public int HardwareVersionMajor { get; }
+    public int HardwareVersionMinor { get; }
+    public int HardwareVersionRevision { get; }
+
+    public int FirmwareVersionMajor { get; }
+    public int FirmwareVersionMinor { get; }
+    public int FirmwareVersionRevision { get; }
+
+    public int ProductId { get; }
+    public PodProgress Progress { get; }
+    public uint Lot { get; }
+    public uint Serial { get; }
+
+    public uint AssignedAddress { get; }
+    public int? RadioLowGain { get; }
+    public int? Rssi { get; }
+
+    public int? PulseVolumeMicroUnits { get; }
+    public int? PulseRatePer125ms { get; }
+    public int? PrimingPulseRatePer125ms { get; }
+    public int? PrimingPulseCount { get; }
+    public int? CannulaInsertPulseCount { get; }
+    public int? MaximumLifeTimeHours { get; }
 }

@@ -8,9 +8,9 @@
              Shell.TabBarIsVisible="False">
     <ContentPage.Content>
         <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
-            <Label Text="Name" FontSize="Medium"/>
+            <Label Text="Name" FontSize="Medium" />
             <Entry Text="{Binding Name, Mode=TwoWay}" FontSize="Medium" />
-            <Button VerticalOptions="Center" Text="Register" Command="{Binding RegisterCommand}"/>
+            <Button VerticalOptions="Center" Text="Register" Command="{Binding RegisterCommand}" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

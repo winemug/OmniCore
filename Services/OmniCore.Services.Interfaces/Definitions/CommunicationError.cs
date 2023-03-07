@@ -8,5 +8,5 @@ public enum CommunicationError
     MessageSyncRequired,
     ProtocolError,
     UnidentifiedResponse,
-    Unknown,
+    Unknown
 }

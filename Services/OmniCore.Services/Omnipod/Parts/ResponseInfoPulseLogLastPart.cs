@@ -4,10 +4,10 @@ namespace OmniCore.Services;
 
 public class ResponseInfoPulseLogLastPart : ResponseInfoPart
 {
-    public override RequestStatusType StatusType => RequestStatusType.PulseLogLast;
-
     public ResponseInfoPulseLogLastPart(Bytes data)
     {
         Data = data;
     }
+
+    public override RequestStatusType StatusType => RequestStatusType.PulseLogLast;
 }

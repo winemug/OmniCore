@@ -1,25 +1,9 @@
-using System.Text.Json;
 using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
 
 public class ResponseStatusPart : MessagePart
 {
-    public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.ResponseStatus;
-    public bool ExtendedBolusActive { get; }
-    public bool ImmediateBolusActive { get; }
-    public bool TempBasalActive { get; }
-    public bool BasalActive { get; }
-    public PodProgress Progress { get; }
-    public int PulsesDelivered { get; }
-    public int PulsesPending { get; }
-    public int? PulsesRemaining { get; }
-    public int ActiveMinutes { get; }
-    public bool Faulted { get; }
-    public int UnackedAlertsMask { get; }
-    public int LastProgrammingCommandSequence { get; }
-    
     public ResponseStatusPart(Bytes data)
     {
         Data = data;
@@ -45,4 +29,19 @@ public class ResponseStatusPart : MessagePart
         else
             PulsesRemaining = pr;
     }
+
+    public override bool RequiresNonce => false;
+    public override PodMessageType Type => PodMessageType.ResponseStatus;
+    public bool ExtendedBolusActive { get; }
+    public bool ImmediateBolusActive { get; }
+    public bool TempBasalActive { get; }
+    public bool BasalActive { get; }
+    public PodProgress Progress { get; }
+    public int PulsesDelivered { get; }
+    public int PulsesPending { get; }
+    public int? PulsesRemaining { get; }
+    public int ActiveMinutes { get; }
+    public bool Faulted { get; }
+    public int UnackedAlertsMask { get; }
+    public int LastProgrammingCommandSequence { get; }
 }

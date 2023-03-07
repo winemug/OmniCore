@@ -1,14 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using OmniCore.Mobile.Views;
-using OmniCore.Services;
-using OmniCore.Services.Entities;
-using OmniCore.Services.Interfaces;
-using Unity;
-using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 
 namespace OmniCore.Mobile.ViewModels
 {
@@ -25,14 +15,14 @@ namespace OmniCore.Mobile.ViewModels
             // }
 
             // await NavigationService.NavigateAsync<AmqpTestPage>();
-            
+
             // await NavigationService.NavigateAsync<BluetoothTestPage>();
 
             // var configurationStore = UnityContainer.Resolve<ConfigurationStore>();
             // var apiClient = UnityContainer.Resolve<ApiClient>();
             // var syncClient = UnityContainer.Resolve<SyncClient>();
             // var bgcService = UnityContainer.Resolve<BgcService>();
-            
+
             // var cc = await configurationStore.GetConfigurationAsync();
             // if (!cc.AccountId.HasValue || !cc.ClientId.HasValue || cc.ClientAuthorizationToken == null)
             // {
@@ -70,6 +60,5 @@ namespace OmniCore.Mobile.ViewModels
             //     }
             // }
         }
-
     }
 }

@@ -1,15 +1,14 @@
-
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
-namespace OmniCore.Services.Data.Sql
-{ 
-    public static class DatabaseMigration
+namespace OmniCore.Services.Data.Sql;
+
+public static class DatabaseMigration
+{
+    public static string[] MigrationScripts =
     {
-        public static string[] MigrationScripts = 
-        {
-@"
+        @"
 BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS version;
@@ -97,16 +96,13 @@ CREATE TABLE radio
 
 COMMIT;
 
-",
-        };
+"
+    };
 
-        public static int LatestVersion = 0;
-        public static async Task RunMigration(SqliteConnection conn, int currentVersion)
-        {
-            for(int i = currentVersion + 1; i< MigrationScripts.Length; i++)
-            {
-                await conn.ExecuteAsync(MigrationScripts[i]);
-            }
-        }
+    public static int LatestVersion = 0;
+
+    public static async Task RunMigration(SqliteConnection conn, int currentVersion)
+    {
+        for (var i = currentVersion + 1; i < MigrationScripts.Length; i++) await conn.ExecuteAsync(MigrationScripts[i]);
     }
 }

@@ -14,16 +14,17 @@ namespace OmniCore.Services;
 
 public class AmqpService : IAmqpService
 {
-    private AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
-    private SortedList<DateTimeOffset,string> _processedMessages;
     private Task _amqpTask;
     private CancellationTokenSource _cts;
+    private readonly SortedList<DateTimeOffset, string> _processedMessages;
+    private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
 
     public AmqpService()
     {
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _processedMessages = new SortedList<DateTimeOffset, string>();
     }
+
     public void Start()
     {
         _cts = new CancellationTokenSource();
@@ -47,20 +48,32 @@ public class AmqpService : IAmqpService
             _cts = null;
         }
     }
-    
+
+    public async Task PublishMessage(AmqpMessage message)
+    {
+        try
+        {
+            await _publishQueue.EnqueueAsync(message);
+        }
+        catch (Exception e)
+        {
+            Trace.WriteLine($"Error enqueuing message {e}");
+            throw;
+        }
+    }
+
     private async Task AmqpTask(CancellationToken cancellationToken)
     {
-        var cf = new ConnectionFactory()            
+        var cf = new ConnectionFactory
         {
             Uri = new Uri("amqp://user0:user0@192.168.1.40/oc"),
-            DispatchConsumersAsync = true,
+            DispatchConsumersAsync = true
         };
-        
+
         IConnection connection = null;
         try
         {
             while (connection == null)
-            {
                 try
                 {
                     connection = cf.CreateConnection();
@@ -70,12 +83,11 @@ public class AmqpService : IAmqpService
                     Trace.WriteLine($"Connection failed {e}");
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 }
-            }
         }
         catch (TaskCanceledException)
         {
             return;
-        }                    
+        }
 
         var subChannel = connection.CreateModel();
         var consumer = new AsyncEventingBasicConsumer(subChannel);
@@ -83,8 +95,11 @@ public class AmqpService : IAmqpService
         {
             try
             {
-                var message = new AmqpMessage {Body = ea.Body.ToArray(),
-                    Id = ea.BasicProperties.MessageId};
+                var message = new AmqpMessage
+                {
+                    Body = ea.Body.ToArray(),
+                    Id = ea.BasicProperties.MessageId
+                };
                 await ProcessMessage(message);
                 subChannel.BasicAck(ea.DeliveryTag, false);
                 await Task.Yield();
@@ -135,18 +150,14 @@ public class AmqpService : IAmqpService
         //         await PublishMessage(message);
         //     }
         // };
-        
+
         while (true)
-        {
             try
             {
-                bool processQueue = false;
+                var processQueue = false;
                 if (pendingConfirmations.IsEmpty)
-                {
                     processQueue = await _publishQueue.OutputAvailableAsync(cancellationToken);
-                }
                 else
-                {
                     using (var queueTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
                     {
                         try
@@ -157,16 +168,15 @@ public class AmqpService : IAmqpService
                         {
                         }
                     }
-                }
 
                 if (processQueue)
                 {
                     var message = await _publishQueue.DequeueAsync(cancellationToken);
                     var sequenceNo = pubChannel.NextPublishSeqNo;
-                
+
                     try
                     {
-                        IBasicProperties properties = pubChannel.CreateBasicProperties();
+                        var properties = pubChannel.CreateBasicProperties();
                         properties.UserId = "user0";
                         pendingConfirmations.TryAdd(sequenceNo, message);
                         pubChannel.BasicPublish("eclient", "*", false,
@@ -186,17 +196,15 @@ public class AmqpService : IAmqpService
                     {
                         try
                         {
-                            Debug.WriteLine($"Starting confirmations");
+                            Debug.WriteLine("Starting confirmations");
                             pubChannel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(15));
-                            Debug.WriteLine($"Confirmation succeeded");
+                            Debug.WriteLine("Confirmation succeeded");
                         }
                         catch (Exception e)
                         {
                             Trace.WriteLine($"Error while confirming: {e}");
                             foreach (var pendingMessage in pendingConfirmations.Values)
-                            {
                                 _publishQueue.Enqueue(pendingMessage);
-                            }
                         }
 
                         pendingConfirmations.Clear();
@@ -207,30 +215,16 @@ public class AmqpService : IAmqpService
             {
                 break;
             }
-        }
 
         subChannel.Close();
         pubChannel.Close();
         connection.Close();
         connection.Dispose();
     }
-        
-    public async Task PublishMessage(AmqpMessage message)
-    {
-        try
-        {
-            await _publishQueue.EnqueueAsync(message);
-        }
-        catch (Exception e)
-        {
-            Trace.WriteLine($"Error enqueuing message {e}");
-            throw;
-        }
-    }
 
     private async Task ProcessMessage(AmqpMessage message)
     {
-        bool alreadyProcessed = false;
+        var alreadyProcessed = false;
         if (!string.IsNullOrEmpty(message.Id))
         {
             if (!_processedMessages.ContainsValue(message.Id))
@@ -244,18 +238,12 @@ public class AmqpService : IAmqpService
             }
         }
 
-        if (!alreadyProcessed)
-        {
-            Debug.WriteLine($"Incoming amqp message: {message.Text}");
-        }
+        if (!alreadyProcessed) Debug.WriteLine($"Incoming amqp message: {message.Text}");
 
         var keysToRemove = _processedMessages.Where(p =>
-            p.Key < DateTimeOffset.Now - TimeSpan.FromMinutes(15))
+                p.Key < DateTimeOffset.Now - TimeSpan.FromMinutes(15))
             .Select(p => p.Key)
             .ToArray();
-        foreach (var key in keysToRemove)
-        {
-            _processedMessages.Remove(key);
-        }
+        foreach (var key in keysToRemove) _processedMessages.Remove(key);
     }
 }

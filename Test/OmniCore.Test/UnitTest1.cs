@@ -1,18 +1,18 @@
 using Moq;
 using Nito.AsyncEx;
-using OmniCore.Mobile;
 using OmniCore.Mobile.Services;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
 using Unity;
 using Unity.Lifetime;
-using Xamarin.Forms;
+using Initializer = OmniCore.Mobile.Initializer;
 
 namespace OmniCore.Test;
 
 public class Tests
 {
     private IUnityContainer _container;
+
     [SetUp]
     public void Setup()
     {
@@ -22,7 +22,7 @@ public class Tests
     [Test]
     public void ContainerResolves()
     {
-        OmniCore.Mobile.Initializer.RegisterTypes(_container);
+        Initializer.RegisterTypes(_container);
         var ns = _container.Resolve<NavigationService>();
         Assert.NotNull(ns);
     }
@@ -31,7 +31,7 @@ public class Tests
     public void PodTest1()
     {
         var p = new RequestInsulinSchedulePart(
-            new BasalRateEntry()
+            new BasalRateEntry
             {
                 HalfHourCount = 24,
                 PulsesPerHour = 600
@@ -59,10 +59,10 @@ public class Tests
         var podServiceMock = new Mock<IPodService>();
         var radioServiceMock = new Mock<IRadioService>();
         var dataServiceMock = new Mock<IDataService>();
-        
-        _container.RegisterInstance<IDataService>(dataServiceMock.Object, new ContainerControlledLifetimeManager());
-        _container.RegisterInstance<IPodService>(podServiceMock.Object, new ContainerControlledLifetimeManager());
-        _container.RegisterInstance<IRadioService>(radioServiceMock.Object, new ContainerControlledLifetimeManager());
+
+        _container.RegisterInstance(dataServiceMock.Object, new ContainerControlledLifetimeManager());
+        _container.RegisterInstance(podServiceMock.Object, new ContainerControlledLifetimeManager());
+        _container.RegisterInstance(radioServiceMock.Object, new ContainerControlledLifetimeManager());
 
         var podService = podServiceMock.Object;
         var dataService = dataServiceMock.Object;
@@ -74,15 +74,11 @@ public class Tests
             UnitsPerMilliliter = 100,
             ValidFrom = DateTimeOffset.Now,
             Info = new PodRuntimeInformation()
-            {
-            }
         };
-        
-        
-        
+
+
         using (var conn = await podService.GetConnectionAsync(pod))
         {
-            
         }
     }
 }

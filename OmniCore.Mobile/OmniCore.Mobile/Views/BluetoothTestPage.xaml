@@ -5,13 +5,13 @@
              x:Class="OmniCore.Mobile.Views.BluetoothTestPage">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="Start" Command="{Binding StartCommand}"></Button>
-            <Button Text="Do" Command="{Binding DoCommand}"></Button>
-            <Button Text="Copy" Command="{Binding CopyCommand}"></Button>
+            <Button Text="Start" Command="{Binding StartCommand}" />
+            <Button Text="Do" Command="{Binding DoCommand}" />
+            <Button Text="Copy" Command="{Binding CopyCommand}" />
             <Label Text="Hello, blue world!"
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />
-            <Button Text="Stop" Command="{Binding StopCommand}"></Button>
+            <Button Text="Stop" Command="{Binding StopCommand}" />
             <Label Text="{Binding RssiText}" HorizontalOptions="CenterAndExpand" />
         </StackLayout>
     </ContentPage.Content>

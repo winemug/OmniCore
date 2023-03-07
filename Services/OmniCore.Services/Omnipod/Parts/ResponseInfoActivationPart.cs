@@ -5,13 +5,6 @@ namespace OmniCore.Services;
 
 public class ResponseInfoActivationPart : ResponseInfoPart
 {
-    public override RequestStatusType StatusType => RequestStatusType.Activation;
-    
-    public int FaultCode { get; }
-    public int FaultMinute { get; }
-    public uint Zero0 { get; }
-    public uint Zero1 { get; }
-    public DateTimeOffset InitializationDate { get; }
     public ResponseInfoActivationPart(Bytes data)
     {
         FaultCode = data[1];
@@ -26,4 +19,12 @@ public class ResponseInfoActivationPart : ResponseInfoPart
         InitializationDate = new DateTimeOffset(year + 2000, month, day, hour, minute, 0, TimeSpan.Zero);
         Data = data;
     }
+
+    public override RequestStatusType StatusType => RequestStatusType.Activation;
+
+    public int FaultCode { get; }
+    public int FaultMinute { get; }
+    public uint Zero0 { get; }
+    public uint Zero1 { get; }
+    public DateTimeOffset InitializationDate { get; }
 }

@@ -4,33 +4,6 @@ namespace OmniCore.Services;
 
 public class ResponseInfoExtendedPart : ResponseInfoPart
 {
-    public override RequestStatusType StatusType => RequestStatusType.Extended;
-    
-    public PodProgress Progress { get; }
-    public bool ExtendedBolusActive { get; }
-    public bool ImmediateBolusActive { get; }
-    public bool TempBasalActive { get; }
-    public bool BasalActive { get; }
-    public int PulsesDelivered { get; }
-    public int PulsesPending { get; }
-    public int FaultEventCode { get; }
-    public int FaultEventMinute { get; }
-    
-    public bool FaultPulseInformationInvalid { get; }
-    public bool FaultOcclusion { get; }
-    public bool FaultInsulinStateTable { get; }
-    public int FaultOcclusionType { get; }
-    public bool FaultDuringImmediateBolus { get; }
-    public PodProgress ProgressBeforeFault { get; }
-    public PodProgress ProgressBeforeFault2 { get; }
-    public int RadioGain { get; }
-    public int Rssi { get; }
-    public int? PulsesRemaining { get; }
-    public int ActiveMinutes { get; }
-    public int UnackedAlertsMask { get; }
-    
-    public ushort Unknown0 { get; }
-    public int LastProgrammingCommandSequence { get; }
     public ResponseInfoExtendedPart(Bytes data)
     {
         Progress = (PodProgress)data[1];
@@ -59,4 +32,32 @@ public class ResponseInfoExtendedPart : ResponseInfoPart
         Unknown0 = data.Word(20);
         Data = data;
     }
+
+    public override RequestStatusType StatusType => RequestStatusType.Extended;
+
+    public PodProgress Progress { get; }
+    public bool ExtendedBolusActive { get; }
+    public bool ImmediateBolusActive { get; }
+    public bool TempBasalActive { get; }
+    public bool BasalActive { get; }
+    public int PulsesDelivered { get; }
+    public int PulsesPending { get; }
+    public int FaultEventCode { get; }
+    public int FaultEventMinute { get; }
+
+    public bool FaultPulseInformationInvalid { get; }
+    public bool FaultOcclusion { get; }
+    public bool FaultInsulinStateTable { get; }
+    public int FaultOcclusionType { get; }
+    public bool FaultDuringImmediateBolus { get; }
+    public PodProgress ProgressBeforeFault { get; }
+    public PodProgress ProgressBeforeFault2 { get; }
+    public int RadioGain { get; }
+    public int Rssi { get; }
+    public int? PulsesRemaining { get; }
+    public int ActiveMinutes { get; }
+    public int UnackedAlertsMask { get; }
+
+    public ushort Unknown0 { get; }
+    public int LastProgrammingCommandSequence { get; }
 }

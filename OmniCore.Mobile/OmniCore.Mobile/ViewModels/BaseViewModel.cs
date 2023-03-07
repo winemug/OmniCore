@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using OmniCore.Mobile.Annotations;
-using OmniCore.Mobile.Services;
-using Unity;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -15,7 +12,22 @@ namespace OmniCore.Mobile.ViewModels
     public class BaseViewModel : INotifyPropertyChanged, IAsyncDisposable
     {
         protected Page Page;
-        
+
+        public async ValueTask DisposeAsync()
+        {
+            Debug.WriteLine($"Dispose async {GetType()}");
+            if (Page != null)
+            {
+                // Page.LayoutChanged -= PageOnLayoutChanged;
+                Page.Disappearing -= PageOnDisappearing;
+                Page.Appearing -= PageOnAppearing;
+            }
+
+            Page = null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public async Task SetPage(Page page)
         {
             Page = page;
@@ -28,30 +40,13 @@ namespace OmniCore.Mobile.ViewModels
 
         public async Task RaisePropertyChangedAsync(string propertyName = null)
         {
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
-                OnPropertyChanged(propertyName);
-            });
+            await MainThread.InvokeOnMainThreadAsync(() => { OnPropertyChanged(propertyName); });
         }
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            Debug.WriteLine($"Dispose async {this.GetType()}");
-            if (Page != null)
-            {
-                // Page.LayoutChanged -= PageOnLayoutChanged;
-                Page.Disappearing -= PageOnDisappearing;
-                Page.Appearing -= PageOnAppearing;
-            }
-
-            Page = null;
         }
 
         // private async void PageOnLayoutChanged(object sender, EventArgs e)
@@ -60,7 +55,7 @@ namespace OmniCore.Mobile.ViewModels
         // }
 
         private async void PageOnDisappearing(object sender, EventArgs e)
-        
+
         {
             Debug.WriteLine($"Page OnDisappearing {Page.GetType()}");
             await OnDisappearing();
@@ -75,7 +70,7 @@ namespace OmniCore.Mobile.ViewModels
         protected virtual async ValueTask OnBinding()
         {
         }
-        
+
         protected virtual async ValueTask OnAppearing()
         {
         }

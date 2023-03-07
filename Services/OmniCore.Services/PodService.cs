@@ -1,31 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using OmniCore.Services.Interfaces;
+using Unity;
 
 namespace OmniCore.Services;
 
 public class PodService : IPodService
 {
-    [Unity.Dependency]
-    public RadioService RadioService { get; set; }
+    [Dependency] public RadioService RadioService { get; set; }
 
-    [Unity.Dependency]
-    public DataService DataService { get; set; }
+    [Dependency] public DataService DataService { get; set; }
 
     public void Start()
     {
-        
     }
 
     public void Stop()
     {
-        
     }
-    
+
     public async Task<IPod> GetPodAsync()
     {
         Pod pod = null;
@@ -88,7 +82,7 @@ public class PodService : IPodService
         // }
         return pod;
     }
-    
+
     public async Task<IPodConnection> GetConnectionAsync(
         IPod pod,
         CancellationToken cancellationToken = default)
@@ -96,7 +90,7 @@ public class PodService : IPodService
         var radioConnection = await RadioService.GetIdealConnectionAsync(cancellationToken);
         if (radioConnection == null)
             throw new ApplicationException("No radios available");
-        
+
         var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
         return new PodConnection(pod, radioConnection, podAllocationLockDisposable, DataService);
     }

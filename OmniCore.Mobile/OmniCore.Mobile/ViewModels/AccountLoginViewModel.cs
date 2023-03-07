@@ -1,11 +1,4 @@
-﻿using OmniCore.Mobile.Views;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using OmniCore.Services;
-using Unity;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
@@ -13,6 +6,7 @@ namespace OmniCore.Mobile.ViewModels
     {
         public string Email { get; set; }
         public string Password { get; set; }
+
         public Command LoginCommand { get; }
         // public AccountLoginViewModel()
         // {

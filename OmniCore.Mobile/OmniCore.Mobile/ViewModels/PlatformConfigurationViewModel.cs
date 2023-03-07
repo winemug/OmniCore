@@ -1,19 +1,13 @@
-using System;
 using System.Threading.Tasks;
-using OmniCore.Mobile.Views;
 using OmniCore.Services.Interfaces;
-using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
     public class PlatformConfigurationViewModel : DialogViewModel
     {
-        public bool IsAskPermissionsEnabled { get => !_platformInfo.HasAllPermissions; }
-        public bool IsOpenBatteryOptimizationsEnabled { get => !_platformInfo.IsExemptFromBatteryOptimizations; }
-        public Command AskForPermissions { get; }
-        public Command OpenBatteryOptimizationSettings { get; }
-        private IPlatformInfo _platformInfo;
+        private readonly IPlatformInfo _platformInfo;
+
         public PlatformConfigurationViewModel()
         {
             AskForPermissions = new Command(RequestPermissionsClicked);
@@ -21,13 +15,18 @@ namespace OmniCore.Mobile.ViewModels
             _platformInfo = DependencyService.Get<IPlatformInfo>();
         }
 
+        public bool IsAskPermissionsEnabled => !_platformInfo.HasAllPermissions;
+        public bool IsOpenBatteryOptimizationsEnabled => !_platformInfo.IsExemptFromBatteryOptimizations;
+        public Command AskForPermissions { get; }
+        public Command OpenBatteryOptimizationSettings { get; }
+
         protected override async ValueTask OnAppearing()
         {
             // if (PlatformInfo.HasAllPermissions && PlatformInfo.IsExemptFromBatteryOptimizations)
             // {
             //     await NavigationService.NavigateAsync<StartPage>();
             // }
-            
+
             await RaisePropertyChangedAsync();
         }
 

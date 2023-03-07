@@ -1,5 +1,3 @@
-using System;
-using System.Text.Json;
 using OmniCore.Services.Interfaces;
 
 namespace OmniCore.Services;
@@ -10,6 +8,7 @@ public class MessagePart : IMessagePart
     public virtual PodMessageType Type { get; set; }
     public uint Nonce { get; set; }
     public Bytes Data { get; set; }
+
     public static MessagePart Parse(PodMessageType type, Bytes data)
     {
         switch (type)
@@ -35,10 +34,12 @@ public class MessagePart : IMessagePart
                     case RequestStatusType.PulseLogPrevious:
                         return new ResponseInfoPulseLogPreviousPart(data);
                 }
+
                 break;
             case PodMessageType.ResponseVersionInfo:
                 return new ResponseVersionPart(data);
         }
-        return new MessagePart() {Type = type, Data = data};
+
+        return new MessagePart { Type = type, Data = data };
     }
 }

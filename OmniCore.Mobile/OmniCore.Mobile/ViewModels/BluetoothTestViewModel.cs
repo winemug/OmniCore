@@ -1,48 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
-using OmniCore.Mobile.Annotations;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
-using Plugin.BLE;
-using Plugin.BLE.Abstractions;
-using Plugin.BLE.Abstractions.Contracts;
-using Plugin.BLE.Abstractions.Exceptions;
-using Plugin.BLE.Abstractions.Extensions;
-using Polly;
-using Unity;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels
 {
     public class BluetoothTestViewModel : BaseViewModel
     {
-        public Command StartCommand { get; }
-        public Command StopCommand { get; }
-        public Command DoCommand { get; }
-        
-        public Command CopyCommand { get; }
-        
-        public string RssiText { get; private set; }
-
-        [Unity.Dependency]
-        public RadioService RadioService { get; set; }       
-        [Unity.Dependency]
-        public PodService PodService { get; set; }
-        [Unity.Dependency]
-        public DataService DataService { get; set; }
-        [Unity.Dependency]
-        public AmqpService AmqpService { get; set; }
-        
-        private IForegroundServiceHelper _foregroundServiceHelper;
+        private readonly IForegroundServiceHelper _foregroundServiceHelper;
         private IPlatformInfo _platformInfo;
+
+        private int dac;
 
         public BluetoothTestViewModel()
         {
@@ -53,6 +22,22 @@ namespace OmniCore.Mobile.ViewModels
             DoCommand = new Command(DoClicked);
             CopyCommand = new Command(CopyClicked);
         }
+
+        public Command StartCommand { get; }
+        public Command StopCommand { get; }
+        public Command DoCommand { get; }
+
+        public Command CopyCommand { get; }
+
+        public string RssiText { get; private set; }
+
+        [Unity.Dependency] public RadioService RadioService { get; set; }
+
+        [Unity.Dependency] public PodService PodService { get; set; }
+
+        [Unity.Dependency] public DataService DataService { get; set; }
+
+        [Unity.Dependency] public AmqpService AmqpService { get; set; }
 
         private void StartClicked()
         {
@@ -69,7 +54,6 @@ namespace OmniCore.Mobile.ViewModels
             }
         }
 
-        private int dac = 0;
         private async void DoClicked()
         {
             var pod = await PodService.GetPodAsync();
@@ -78,9 +62,10 @@ namespace OmniCore.Mobile.ViewModels
                 var response = await podConn.Deactivate();
                 Debug.WriteLine($"result: {response}");
             }
+
             Debug.WriteLine(pod);
 
-            await AmqpService.PublishMessage(new AmqpMessage() { Text = $"message #{dac}" });
+            await AmqpService.PublishMessage(new AmqpMessage { Text = $"message #{dac}" });
             dac++;
         }
 

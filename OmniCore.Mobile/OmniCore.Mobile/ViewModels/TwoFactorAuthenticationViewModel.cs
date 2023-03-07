@@ -1,10 +1,3 @@
-using System;
-using System.Diagnostics;
-using OmniCore.Mobile.Views;
-using OmniCore.Services;
-using OmniCore.Services.Entities;
-using Unity;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace OmniCore.Mobile.ViewModels

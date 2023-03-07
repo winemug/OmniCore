@@ -13,9 +13,9 @@
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />
             <Button Text="Grant Permissions" Command="{Binding AskForPermissions}"
-                    IsEnabled="{Binding IsAskPermissionsEnabled}"/>
+                    IsEnabled="{Binding IsAskPermissionsEnabled}" />
             <Button Text="Open Settings" Command="{Binding OpenBatteryOptimizationSettings}"
-                    IsEnabled="{Binding IsOpenBatteryOptimizationsEnabled}"/>
+                    IsEnabled="{Binding IsOpenBatteryOptimizationsEnabled}" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

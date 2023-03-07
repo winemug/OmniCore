@@ -4,19 +4,17 @@ namespace OmniCore.Services;
 
 public class RequestInsulinSchedulePart : MessagePart
 {
-    public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestInsulinSchedule;
-
     public RequestInsulinSchedulePart(BasalRateEntry[] basalRateEntries)
     {
         var hhPulses = DistributeHourlyRatesToHalfHourPulses(basalRateEntries);
     }
+
     public RequestInsulinSchedulePart(BasalRateEntry tempBasalEntry)
     {
         var hhc = 0;
         var schedules = new[]
         {
-            new InsulinSchedule()
+            new InsulinSchedule
             {
                 BlockCount = tempBasalEntry.HalfHourCount,
                 AddAlternatingExtraPulse = tempBasalEntry.PulsesPerHour % 2 == 1,
@@ -29,16 +27,20 @@ public class RequestInsulinSchedulePart : MessagePart
             (ushort)(tempBasalEntry.PulsesPerHour / 2),
             schedules);
     }
+
     public RequestInsulinSchedulePart(BolusEntry bolusEntry)
     {
     }
-    
+
+    public override bool RequiresNonce => true;
+    public override PodMessageType Type => PodMessageType.RequestInsulinSchedule;
+
     private Bytes GetData(ScheduleType type,
         byte halfHourCount,
         ushort initialDuration125ms,
         ushort initialPulseCount,
         InsulinSchedule[] schedules
-        )
+    )
     {
         var elements = new Bytes();
         foreach (var schedule in schedules)
@@ -50,10 +52,7 @@ public class RequestInsulinSchedulePart : MessagePart
                 if (blockCount > 16)
                     blockCount = 16;
                 var b0 = ((blockCount - 1) & 0x0f) << 4;
-                if (schedule.AddAlternatingExtraPulse)
-                {
-                    b0 |= 0x08;
-                }
+                if (schedule.AddAlternatingExtraPulse) b0 |= 0x08;
 
                 b0 |= schedule.PulsesPerBlock >> 8;
                 var b1 = schedule.PulsesPerBlock & 0xFF;
@@ -63,41 +62,38 @@ public class RequestInsulinSchedulePart : MessagePart
         }
 
         var header = new Bytes(halfHourCount).Append(initialDuration125ms).Append(initialPulseCount);
-        int checksum = header[0] + header[1] + header[2] + header[3] + header[4];
-        
+        var checksum = header[0] + header[1] + header[2] + header[3] + header[4];
+
         // 'generated' table
-        int hh_idx = 0;
+        var hh_idx = 0;
         foreach (var schedule in schedules)
-        {
-            for (int i = 0; i < schedule.BlockCount; i++)
+            for (var i = 0; i < schedule.BlockCount; i++)
             {
-                int pw = schedule.PulsesPerBlock;
+                var pw = schedule.PulsesPerBlock;
                 if (schedule.AddAlternatingExtraPulse && hh_idx % 2 == 1)
                     pw += 1;
                 checksum += (pw >> 8) & 0xFF;
                 checksum += pw & 0xFF;
                 hh_idx++;
             }
-        }
+
         return new Bytes((byte)type).Append((ushort)checksum).Append(header).Append(elements);
     }
-    
+
     private int[] DistributeHourlyRatesToHalfHourPulses(BasalRateEntry[] entries)
     {
         var hourlyRatePer30Mins = new int[48];
         var halfHourCount = 0;
         foreach (var entry in entries)
-        {
-            for (int i = 0; i < entry.HalfHourCount; i++)
+            for (var i = 0; i < entry.HalfHourCount; i++)
             {
                 hourlyRatePer30Mins[halfHourCount] = entry.PulsesPerHour;
                 halfHourCount++;
             }
-        }
 
         var pulsesPerHalfHour = new int[halfHourCount];
         var overflow = false;
-        for (int i = 0; i < halfHourCount; i++)
+        for (var i = 0; i < halfHourCount; i++)
         {
             pulsesPerHalfHour[i] = hourlyRatePer30Mins[i] / 2;
             if (hourlyRatePer30Mins[i] % 2 == 1)
@@ -107,6 +103,7 @@ public class RequestInsulinSchedulePart : MessagePart
                 overflow = !overflow;
             }
         }
+
         return pulsesPerHalfHour;
     }
 }

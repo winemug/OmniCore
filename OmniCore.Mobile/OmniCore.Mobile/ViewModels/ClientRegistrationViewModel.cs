@@ -1,12 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using OmniCore.Mobile.Views;
-using OmniCore.Services;
-using Unity;
-using Xamarin.Essentials;
-using Xamarin.Forms;
-
 namespace OmniCore.Mobile.ViewModels
 {
     public class ClientRegistrationViewModel : BaseViewModel

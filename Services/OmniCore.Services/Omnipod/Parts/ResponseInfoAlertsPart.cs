@@ -4,10 +4,8 @@ namespace OmniCore.Services;
 
 public class ResponseInfoAlertsPart : ResponseInfoPart
 {
-    public override RequestStatusType StatusType => RequestStatusType.Alerts;
-
-    public ushort Unknown0 { get; set; }
     public ushort[] Alerts = new ushort[8];
+
     public ResponseInfoAlertsPart(Bytes data)
     {
         Unknown0 = data.Word(1);
@@ -21,4 +19,8 @@ public class ResponseInfoAlertsPart : ResponseInfoPart
         Alerts[7] = data.Word(17);
         Data = data;
     }
+
+    public override RequestStatusType StatusType => RequestStatusType.Alerts;
+
+    public ushort Unknown0 { get; set; }
 }

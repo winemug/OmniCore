@@ -1,29 +1,22 @@
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
-using Android.Content.PM;
 using Android.OS;
-using AndroidX.Core.App;
 using OmniCore.Services.Interfaces;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using Unity;
 using Xamarin.Forms;
 using Debug = System.Diagnostics.Debug;
 
 namespace OmniCore.Mobile.Droid
 {
-    [Service(ForegroundServiceType = Android.Content.PM.ForegroundService.TypeDataSync | Android.Content.PM.ForegroundService.TypeConnectedDevice)]
+    [Service(ForegroundServiceType = Android.Content.PM.ForegroundService.TypeDataSync |
+                                     Android.Content.PM.ForegroundService.TypeConnectedDevice)]
     public class ForegroundService : Service
     {
-        private bool IsStarted = false;
         // private Task ServiceTask = null;
         // private CancellationTokenSource ServiceCts = null;
 
         private IConnection Connection;
+        private bool IsStarted;
 
         public ForegroundService()
         {
@@ -52,8 +45,8 @@ namespace OmniCore.Mobile.Droid
         {
             return null;
         }
-       
-        void RegisterForegroundService()
+
+        private void RegisterForegroundService()
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
@@ -79,7 +72,7 @@ namespace OmniCore.Mobile.Droid
             // Enlist this instance of the service as a foreground service
             StartForeground(100, notification);
         }
-        
+
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
             Debug.WriteLine($"Service On Start Command action: {intent.Action}");
@@ -93,6 +86,7 @@ namespace OmniCore.Mobile.Droid
                         Start();
                         IsStarted = true;
                     }
+
                     break;
                 case "stop":
                     if (IsStarted)
@@ -102,6 +96,7 @@ namespace OmniCore.Mobile.Droid
                         StopForeground(true);
                         StopSelf();
                     }
+
                     break;
             }
 
@@ -119,6 +114,7 @@ namespace OmniCore.Mobile.Droid
                 Stop();
                 IsStarted = false;
             }
+
             var notificationManager = (NotificationManager)GetSystemService(NotificationService);
             notificationManager.Cancel(100);
             // App.Container.Resolve<IForegroundDataService>().StopRequested();

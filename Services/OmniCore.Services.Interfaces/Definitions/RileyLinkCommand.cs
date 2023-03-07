@@ -15,5 +15,5 @@ public enum RileyLinkCommand
     SetModeRegisters = 10,
     SetSwEncoding = 11,
     SetPreamble = 12,
-    RadioResetConfig = 13,
+    RadioResetConfig = 13
 }

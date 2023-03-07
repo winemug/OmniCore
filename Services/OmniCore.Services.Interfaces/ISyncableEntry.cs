@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 
-namespace OmniCore.Services.Interfaces
+namespace OmniCore.Services.Interfaces;
+
+public interface ISyncableEntry
 {
-    public interface ISyncableEntry
-    {
-        byte[] AsMessageBody();
-        Task SetSyncedTask { get; set; }
-    }
+    Task SetSyncedTask { get; set; }
+    byte[] AsMessageBody();
 }
