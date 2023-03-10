@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="OmniCore.Maui.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:OmniCore.Maui"
+    xmlns:views="clr-namespace:OmniCore.Maui.Views"
+    >
+
+    <FlyoutItem Title="Home" Route="Home" FlyoutDisplayOptions="AsSingleItem">
+        <Tab Title="Home">
+            <ShellContent Title="Default" Route="Default" ContentTemplate="{DataTemplate views:DefaultPage}"/>
+        </Tab>
+        <!-- <Tab Title="gobanak1"> -->
+        <!--     <ShellContent Title="P10" Route="P10" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!--     <ShellContent Title="P11" Route="P11" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!--     <ShellContent Title="P12" Route="P12" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!--     <ShellContent Title="P13" Route="P13" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!-- </Tab> -->
+        <!-- <Tab Title="gobanak2"> -->
+        <!--     <ShellContent Title="P2" Route="P2" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!-- </Tab> -->
+        <!-- <Tab Title="gobanak3"> -->
+        <!--     <ShellContent Title="P3" Route="P3" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+        <!-- </Tab> -->
+    </FlyoutItem>
+
+    <!-- <FlyoutItem Title="yyyyyy" Route="R" FlyoutDisplayOptions="AsSingleItem"> -->
+    <!--     <Tab Title="gadak"> -->
+    <!--         <ShellContent Title="r0" Route="r0" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+    <!--     </Tab> -->
+    <!--     <Tab Title="gadak1"> -->
+    <!--         <ShellContent Title="r1" Route="r1" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+    <!--     </Tab> -->
+    <!--     <Tab Title="gadak2"> -->
+    <!--         <ShellContent Title="r2" Route="r2" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+    <!--     </Tab> -->
+    <!--     <Tab Title="gadak3"> -->
+    <!--         <ShellContent Title="r3" Route="r3" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
+    <!--     </Tab> -->
+    <!-- </FlyoutItem> -->
+
+    <!-- <FlyoutItem Title="Settings" Route="Settings"> -->
+    <!--     <Tab> -->
+    <!--         <ShellContent Title="Application" Route="Application" Content="{DataTemplate views:BlankPage}"/> -->
+    <!--         <ShellContent Title="Permissions" Route="Permissions" Content="{DataTemplate views:BlankPage}"/> -->
+    <!--     </Tab> -->
+    <!-- </FlyoutItem> -->
+    <!-- -->
+    <!-- <FlyoutItem Title="Zamaz" Route="Zamaz"> -->
+    <!-- </FlyoutItem> -->
+
+</Shell>

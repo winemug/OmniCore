@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.3" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
+    <PackageReference Include="Plugin.BLE" Version="3.0.0-beta.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Maui.Controls">
+      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Maui.Controls.Ref.maccatalyst\7.0.59\ref\net7.0-maccatalyst13.5\Microsoft.Maui.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Android">
+      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Android.Ref.33\33.0.26\ref\net7.0\Mono.Android.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
