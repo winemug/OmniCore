@@ -3,12 +3,12 @@
     x:Class="OmniCore.Maui.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:OmniCore.Maui"
+    xmlns:views="clr-namespace:OmniCore.Maui.Views"
     Shell.FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="Test"
+        ContentTemplate="{DataTemplate views:TestPage}"
+        Route="TestPage" />
 
 </Shell>
