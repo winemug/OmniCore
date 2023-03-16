@@ -9,11 +9,11 @@ namespace OmniCore.Mobile.ViewModels
     {
         private readonly IPlatformInfo _platformInfo;
 
-        public PlatformConfigurationViewModel()
+        public PlatformConfigurationViewModel(IPlatformInfo platformInfo)
         {
             AskForPermissions = new Command(RequestPermissionsClicked);
             OpenBatteryOptimizationSettings = new Command(OpenBatteryOptimizationSettingsClicked);
-            _platformInfo = DependencyService.Get<IPlatformInfo>();
+            _platformInfo = platformInfo;
         }
 
         public bool IsAskPermissionsEnabled => !_platformInfo.HasAllPermissions;

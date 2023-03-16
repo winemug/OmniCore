@@ -2,11 +2,12 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="OmniCore.Maui.Views.DefaultPage">
+             xmlns:viewModels="clr-namespace:OmniCore.Maui.ViewModels"
+             x:Class="OmniCore.Maui.Views.BlankView"
+             x:DataType="viewModels:BlankViewModel">
     <ContentPage.Content>
         <StackLayout>
-            <Button Text="hodor" Clicked="Button_OnClicked"/>
-            <Button Text="hobar" Clicked="Button_Clicked"/>
+            <Label Text="{Binding MyBeautifulText}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

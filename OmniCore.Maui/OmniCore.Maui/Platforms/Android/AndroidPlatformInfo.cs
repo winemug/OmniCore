@@ -29,8 +29,10 @@ namespace OmniCore.Maui
 
         public async Task<bool> VerifyPermissions()
         {
-            await CheckAndRequest<BluetoothPermissions>();
-            await CheckAndRequest<ForegroundPermissions>();
+            if (await CheckAndRequest<BluetoothPermissions>() != PermissionStatus.Granted)
+                return false;
+            if (await CheckAndRequest<ForegroundPermissions>() != PermissionStatus.Granted)
+                return false;
             
             // if (!await RequestIfMissing(new[]
             //     {
@@ -69,15 +71,17 @@ namespace OmniCore.Maui
             //     return false;
             //
             //
-            // var pm = (PowerManager)_activity.GetSystemService(Context.PowerService);
-            // if (pm.IsIgnoringBatteryOptimizations(AppInfo.PackageName))
-            // {
-            //     return true;
-            // }
-            //
+            var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
+            if (pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName))
+            {
+                return true;
+            }
+
+            AppInfo.Current.ShowSettingsUI();
+
             // var intent = new Intent();
             // intent.SetAction(Settings.ActionIgnoreBatteryOptimizationSettings);
-            // _activity.StartActivity(intent);
+            // MauiApplication.Current.StartActivity(intent);
             return false;
         }
 

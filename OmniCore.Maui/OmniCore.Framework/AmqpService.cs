@@ -17,6 +17,12 @@ namespace OmniCore.Services;
 
 public class AmqpService : IAmqpService
 {
+
+    public string Dsn { get; set; }
+    public string Exchange { get; set; }
+    public string Queue { get; set; }
+    public string UserId { get; set; }
+    
     private Task _amqpTask;
     private CancellationTokenSource _cts;
     private readonly SortedList<DateTimeOffset, string> _processedMessages;
@@ -69,7 +75,7 @@ public class AmqpService : IAmqpService
     {
         var cf = new ConnectionFactory
         {
-            Uri = new Uri("amqp://user0:user0@192.168.1.40/oc"),
+            Uri = new Uri(Dsn),
             DispatchConsumersAsync = true
         };
 
@@ -112,7 +118,7 @@ public class AmqpService : IAmqpService
                 Trace.WriteLine($"Error while processing: {e}");
             }
         };
-        subChannel.BasicConsume("quser0", false, consumer);
+        subChannel.BasicConsume(Queue, false, consumer);
 
         var pendingConfirmations = new ConcurrentDictionary<ulong, AmqpMessage>();
         var pubChannel = connection.CreateModel();
@@ -144,9 +150,9 @@ public class AmqpService : IAmqpService
                     try
                     {
                         var properties = pubChannel.CreateBasicProperties();
-                        properties.UserId = "user0";
+                        properties.UserId = UserId;
                         pendingConfirmations.TryAdd(sequenceNo, message);
-                        pubChannel.BasicPublish("eclient", "*", false,
+                        pubChannel.BasicPublish(Exchange, "", false,
                             properties, message.Body);
                         Debug.WriteLine($"published message: {message.Text}");
                     }

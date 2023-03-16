@@ -7,11 +7,15 @@
     xmlns:views="clr-namespace:OmniCore.Maui.Views"
     >
 
-    <FlyoutItem Title="Home" Route="Home" FlyoutDisplayOptions="AsSingleItem">
-        <Tab Title="Home">
-            <ShellContent Title="Default" Route="Default" ContentTemplate="{DataTemplate views:DefaultPage}"/>
-        </Tab>
-        <!-- <Tab Title="gobanak1"> -->
+    <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
+        <ShellContent Title="Testere" Route="TestView" ContentTemplate="{DataTemplate views:TestView}"/>
+    </FlyoutItem>
+
+    <!-- <FlyoutItem Title="Home" Route="Home" FlyoutDisplayOptions="AsSingleItem"> -->
+    <!--     <Tab Title="Home"> -->
+    <!--          -->
+    <!--     </Tab> -->
+    <!--     ~1~ <Tab Title="gobanak1"> @1@ -->
         <!--     <ShellContent Title="P10" Route="P10" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
         <!--     <ShellContent Title="P11" Route="P11" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
         <!--     <ShellContent Title="P12" Route="P12" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
@@ -23,7 +27,7 @@
         <!-- <Tab Title="gobanak3"> -->
         <!--     <ShellContent Title="P3" Route="P3" ContentTemplate="{DataTemplate views:BlankPage}"/> -->
         <!-- </Tab> -->
-    </FlyoutItem>
+    <!-- </FlyoutItem> -->
 
     <!-- <FlyoutItem Title="yyyyyy" Route="R" FlyoutDisplayOptions="AsSingleItem"> -->
     <!--     <Tab Title="gadak"> -->

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using OmniCore.Maui.Services;
 using OmniCore.Maui.ViewModels;
+using OmniCore.Maui.Views;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Platform;
@@ -15,7 +17,6 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-            .RegisterViewModels()
 			.RegisterAppServices()
 			.ConfigureFonts(fonts =>
 			{
@@ -30,15 +31,15 @@ public static class MauiProgram
 		return builder.Build();
 	}
 
-    public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder mauiAppBuilder)
-    {
-        mauiAppBuilder.Services.AddSingleton<TestViewModel>();
-        mauiAppBuilder.Services.AddTransient<DefaultViewModel>();
-        return mauiAppBuilder;
-    }
 
     public static MauiAppBuilder RegisterAppServices(this MauiAppBuilder mauiAppBuilder)
     {
+	    var vmvMapper = new ViewModelViewMapper();
+	    
+	    vmvMapper.AddMapping<TestView, TestViewModel>(mauiAppBuilder);
+	    
+	    mauiAppBuilder.Services.AddSingleton(vmvMapper);
+	    mauiAppBuilder.Services.AddSingleton<AppShell>();
         mauiAppBuilder.Services.AddSingleton<IConfigurationStore, ConfigurationStore>();
         mauiAppBuilder.Services.AddSingleton<IDataService, DataService>();
         mauiAppBuilder.Services.AddSingleton<IPodService, PodService>();
