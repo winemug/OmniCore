@@ -10,7 +10,7 @@ namespace OmniCore.Common.Api;
 
 public class AuthResponse
 {
-    public string? token { get; set; }
+    public string? access_token { get; set; }
     public string? token_type { get; set; }
 }
 
@@ -42,15 +42,13 @@ public class EndpointResponse
     public string exchange { get; set; }
 }
 
-public class ApiClient
+public class ApiClient : IDisposable
 {
-    private bool _authorizedWithAccount;
-    private bool _authorizedWithClientToken;
     private IConfigurationStore _configurationStore;
 
-    private readonly HttpClient _httpClient = new()
+    private HttpClient _httpClient = new()
     {
-        BaseAddress = new Uri("http://192.168.1.50:8000/")
+        BaseAddress = new Uri("http://192.168.1.50:8000")
     };
 
     public ApiClient(IConfigurationStore configurationStore)
@@ -60,24 +58,19 @@ public class ApiClient
     
     public async Task AuthorizeAccountAsync(string email, string password)
     {
-        UnauthorizeAsync();
-
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("username", email), 
             new KeyValuePair<string, string>("password", password) 
         });
-        var result = await _httpClient.PostAsync(new Uri("/auth/token"), content);
+        var result = await _httpClient.PostAsync(new Uri("/auth/token", UriKind.Relative), content);
         var resultContent = await result.Content.ReadAsStringAsync();
         var ar = JsonSerializer.Deserialize<AuthResponse>(resultContent);
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ar.token);
-        _authorizedWithAccount = true;
-        _authorizedWithClientToken = false;
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ar.access_token);
     }
 
     public async Task RegisterClientAsync()
     {
-        UnauthorizeAsync();
         var cc = await _configurationStore.GetConfigurationAsync();
 
         var rr = new ClientRegisterRequest()
@@ -91,13 +84,10 @@ public class ApiClient
         var js = JsonSerializer.Serialize(rr, JsonSerializerOptions.Default);
         
         var content = new StringContent(js, Encoding.Default, "application/json");
-        var result = await _httpClient.PostAsync(new Uri("/client/register"), content);
+        var result = await _httpClient.PostAsync(new Uri("/client/register", UriKind.Relative), content);
         var resultContent = await result.Content.ReadAsStringAsync();
 
         var crr = JsonSerializer.Deserialize<ClientRegisterResponse>(resultContent); 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", crr.token);
-        _authorizedWithClientToken = true;
-        _authorizedWithAccount = false;
         cc.AccountId = Guid.Parse(crr.account_id);
         cc.ClientId = Guid.Parse(crr.client_id);
         cc.ClientAuthorizationToken = crr.token;
@@ -106,13 +96,8 @@ public class ApiClient
 
     public async Task<EndpointResponse> GetClientEndpointAsync()
     {
-        if (!_authorizedWithClientToken)
-            throw new ApplicationException("Not authorized with client token");
-
         var cc = await _configurationStore.GetConfigurationAsync();
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cc.ClientAuthorizationToken);
-        _authorizedWithClientToken = true;
-        _authorizedWithAccount = false;
         
         var er = new EndpointRequest()
         {
@@ -122,16 +107,15 @@ public class ApiClient
         var js = JsonSerializer.Serialize(er, JsonSerializerOptions.Default);
         var content = new StringContent(js, Encoding.Default,"application/json");
 
-        var result = await _httpClient.PostAsync(new Uri("/client/endpoint"), content);
+        var result = await _httpClient.PostAsync(new Uri("/client/endpoint", UriKind.Relative), content);
         var resultContent = await result.Content.ReadAsStringAsync();
         var erp = JsonSerializer.Deserialize<EndpointResponse>(resultContent);
         return erp;
     }
 
-    public void UnauthorizeAsync()
+    public void Dispose()
     {
-        _authorizedWithAccount = false;
-        _authorizedWithClientToken = false;
-        _httpClient.DefaultRequestHeaders.Authorization = null;
+        _httpClient?.Dispose();
+        _httpClient = null;
     }
 }

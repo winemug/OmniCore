@@ -42,20 +42,23 @@ namespace OmniCore.Maui.ViewModels
         private async Task ExecuteGo()
         {
             var cc = await _configurationStore.GetConfigurationAsync();
-            var ac = new ApiClient(_configurationStore);
-            if (!cc.ClientId.HasValue)
+            using (var ac = new ApiClient(_configurationStore))
             {
-                await ac.AuthorizeAccountAsync(Email, Password);
-                await ac.RegisterClientAsync();
-            }
+                if (!cc.ClientId.HasValue)
+                {
+                    Debug.WriteLine($"Client registration");
+                    await ac.AuthorizeAccountAsync(Email, Password);
+                    await ac.RegisterClientAsync();
+                }
 
-            var erp = await ac.GetClientEndpointAsync();
-            _amqpService.Dsn = erp.dsn;
-            _amqpService.Exchange = erp.exchange;
-            _amqpService.Queue = erp.queue;
-            _amqpService.UserId = erp.user_id;
+                Debug.WriteLine($"ClientId: {cc.ClientId}");
+                var erp = await ac.GetClientEndpointAsync();
+                _amqpService.Dsn = erp.dsn;
+                _amqpService.Exchange = erp.exchange;
+                _amqpService.Queue = erp.queue;
+                _amqpService.UserId = erp.user_id;
+            }
             _platformService.StartService();
         }
-
     }
 }

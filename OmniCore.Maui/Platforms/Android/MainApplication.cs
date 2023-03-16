@@ -9,7 +9,7 @@ using OmniCore.Maui.Services;
 
 namespace OmniCore.Maui;
 
-[Application]
+[Application(UsesCleartextTraffic = true)]
 public class MainApplication : MauiApplication
 {
     public MainApplication(IntPtr handle, JniHandleOwnership ownership)
