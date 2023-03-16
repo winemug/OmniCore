@@ -4,22 +4,14 @@ using OmniCore.Services.Interfaces.Platform;
 using static Microsoft.Maui.ApplicationModel.Permissions;
 using Debug = System.Diagnostics.Debug;
 
-namespace OmniCore.Maui
+namespace OmniCore.Maui.Services
 {
-    public class AndroidPlatformInfo : IPlatformInfo
+    public class PlatformInfo : IPlatformInfo
     {
-        public AndroidPlatformInfo()
-        {
-            Platform = "Android";
-            HardwareVersion = "1.0.0";
-            SoftwareVersion = "1.0.0";
-            OsVersion = "10";
-        }
-
-        public string SoftwareVersion { get; }
-        public string HardwareVersion { get; }
-        public string OsVersion { get; }
-        public string Platform { get; }
+        //public partial string SoftwareVersion { get; }
+        //public partial string HardwareVersion { get; }
+        //public partial string OsVersion { get; }
+        //public partial string Platform { get; }
 
         public async Task<bool> VerifyPermissions()
         {
@@ -78,6 +70,14 @@ namespace OmniCore.Maui
             // MauiApplication.Current.StartActivity(intent);
             return false;
         }
+
+        //public PlatformInfo()
+        //{
+        //    Platform = "Android";
+        //    HardwareVersion = "1.0.0";
+        //    SoftwareVersion = "1.0.0";
+        //    OsVersion = "10";
+        //}
 
         private async Task<PermissionStatus> CheckAndRequest<T>() where T : BasePermission, new()
         { 

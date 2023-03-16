@@ -4,6 +4,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Maui.Views.TestPage">
     <ContentPage.Content>
-        
+        <VerticalStackLayout>
+            <Label>This is a test page</Label>
+            <Button Text="Check Permissions" Command="{Binding CheckPermissionsCommand}"/>
+            <Entry Text="{Binding Email}"/>
+            <Entry Text="{Binding Password}"/>
+            <Button Text="Go" Command="{Binding ButtonCommand}"/>
+        </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

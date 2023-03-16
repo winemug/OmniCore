@@ -9,9 +9,9 @@ using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Platform;
 
-namespace OmniCore.Maui
+namespace OmniCore.Maui.Services
 {
-    public class AndroidPlatformService : IPlatformService
+    public class PlatformService : IPlatformService
     {
         public void StartService()
         {

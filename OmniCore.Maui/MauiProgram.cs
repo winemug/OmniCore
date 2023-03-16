@@ -14,10 +14,15 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        return CreateMauiApp(null, null);
+    }
+
+    public static MauiApp CreateMauiApp(IPlatformInfo platformInfo, IPlatformService platformService)
+    {
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .RegisterAppServices()
+            .RegisterAppServices(platformInfo, platformService)
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -31,7 +36,8 @@ public static class MauiProgram
         return builder.Build();
     }
 
-    public static MauiAppBuilder RegisterAppServices(this MauiAppBuilder mauiAppBuilder)
+    public static MauiAppBuilder RegisterAppServices(this MauiAppBuilder mauiAppBuilder,
+        IPlatformInfo platformInfo, IPlatformService platformService)
     {
 	    var vmvMapper = new ViewModelViewMapper();
 	    
@@ -53,8 +59,8 @@ public static class MauiProgram
         mauiAppBuilder.Services.AddTransient<IPodMessage, PodMessage>();
         mauiAppBuilder.Services.AddTransient<IPodPacket, PodPacket>();
 
-	    mauiAppBuilder.Services.AddSingleton<IPlatformInfo, AndroidPlatformInfo>();
-	    mauiAppBuilder.Services.AddSingleton<IPlatformService, AndroidPlatformService>();
+        mauiAppBuilder.Services.AddSingleton(typeof(IPlatformService), platformService);
+        mauiAppBuilder.Services.AddSingleton(typeof(IPlatformInfo), platformInfo);
 
         return mauiAppBuilder;
     }
