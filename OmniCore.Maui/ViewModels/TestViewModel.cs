@@ -15,7 +15,8 @@ namespace OmniCore.Maui.ViewModels
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        public ICommand ButtonCommand { get; set; }
+        public ICommand SchlemmCommand { get; set; }
+        public ICommand FiskCommand { get; set; }
         public ICommand CheckPermissionsCommand { get; set; }
         
         private IConfigurationStore _configurationStore;
@@ -31,7 +32,8 @@ namespace OmniCore.Maui.ViewModels
             _platformService = platformService;
             _platformInfo = platformInfo;
             _amqpService = amqpService;
-            ButtonCommand = new Command(async () => await ExecuteGo());
+            SchlemmCommand = new Command(async () => await ExecuteGo());
+            FiskCommand = new Command(async () => await ExecuteStop());
             CheckPermissionsCommand = new Command(async () => await CheckPermissions());
         }
 
@@ -50,7 +52,7 @@ namespace OmniCore.Maui.ViewModels
                     await ac.AuthorizeAccountAsync(Email, Password);
                     await ac.RegisterClientAsync();
                 }
-
+            
                 Debug.WriteLine($"ClientId: {cc.ClientId}");
                 var erp = await ac.GetClientEndpointAsync();
                 _amqpService.Dsn = erp.dsn;
@@ -58,7 +60,13 @@ namespace OmniCore.Maui.ViewModels
                 _amqpService.Queue = erp.queue;
                 _amqpService.UserId = erp.user_id;
             }
+            
             _platformService.StartService();
+        }
+
+        private async Task ExecuteStop()
+        {
+            _platformService.StopService();
         }
     }
 }

@@ -55,13 +55,9 @@ public class PodMessage : IPodMessage
         return messageBody;
     }
 
-    public static PodMessage FromReceivedPackets(List<IPodPacket> receivedPackets)
+    public static PodMessage FromBody(Bytes messageBody)
     {
         var message = new PodMessage();
-        var messageBody = new Bytes();
-        foreach (var rp in receivedPackets)
-            messageBody.Append(rp.Data);
-
         message.Body = messageBody;
 
         var crcCalc = CrcUtil.Crc16(messageBody.Sub(0, messageBody.Length - 2).ToArray());
@@ -138,6 +134,14 @@ public class PodMessage : IPodMessage
         }
 
         return message;
+
+    }
+    public static PodMessage FromReceivedPackets(List<IPodPacket> receivedPackets)
+    {
+        var messageBody = new Bytes();
+        foreach (var rp in receivedPackets)
+            messageBody.Append(rp.Data);
+        return FromBody(messageBody);
     }
 
     public override string ToString()

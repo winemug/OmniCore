@@ -28,8 +28,10 @@ public class AmqpService : IAmqpService
     private readonly SortedList<DateTimeOffset, string> _processedMessages;
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
 
-    public AmqpService()
+    private RaddProcessor _raddProcessor;
+    public AmqpService(RaddProcessor raddProcessor)
     {
+        _raddProcessor = raddProcessor;
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _processedMessages = new SortedList<DateTimeOffset, string>();
     }
@@ -102,21 +104,22 @@ public class AmqpService : IAmqpService
         var consumer = new AsyncEventingBasicConsumer(subChannel);
         consumer.Received += async (sender, ea) =>
         {
+            var message = new AmqpMessage
+            {
+                Body = ea.Body.ToArray(),
+                Id = ea.BasicProperties.MessageId
+            };
             try
             {
-                var message = new AmqpMessage
-                {
-                    Body = ea.Body.ToArray(),
-                    Id = ea.BasicProperties.MessageId
-                };
                 await ProcessMessage(message);
                 subChannel.BasicAck(ea.DeliveryTag, false);
-                await Task.Yield();
             }
             catch (Exception e)
             {
-                Trace.WriteLine($"Error while processing: {e}");
+                subChannel.BasicNack(ea.DeliveryTag, false, true);
+                Trace.WriteLine($"Message processing failed: {e}");
             }
+            await Task.Yield();
         };
         subChannel.BasicConsume(Queue, false, consumer);
 
@@ -150,6 +153,7 @@ public class AmqpService : IAmqpService
                     try
                     {
                         var properties = pubChannel.CreateBasicProperties();
+                        properties.MessageId = message.Id;
                         properties.UserId = UserId;
                         pendingConfirmations.TryAdd(sequenceNo, message);
                         pubChannel.BasicPublish(Exchange, "", false,
@@ -212,6 +216,15 @@ public class AmqpService : IAmqpService
         }
 
         if (!alreadyProcessed) Debug.WriteLine($"Incoming amqp message: {message.Text}");
+        try
+        {
+            var retMessage = await _raddProcessor.ProcessMessageAsync(message);
+            await PublishMessage(retMessage);
+        }
+        catch (Exception e)
+        {
+            Trace.WriteLine($"Radd proc error: {e}");
+        }
 
         var keysToRemove = _processedMessages.Where(p =>
                 p.Key < DateTimeOffset.Now - TimeSpan.FromMinutes(15))

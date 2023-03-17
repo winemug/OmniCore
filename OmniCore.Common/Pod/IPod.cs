@@ -17,4 +17,5 @@ public interface IPod
     Task ProcessResponseAsync(IPodMessage message);
     uint NextNonce();
     void SyncNonce(ushort syncWord, int syncMessageSequence);
+    Task LoadResponses();
 }

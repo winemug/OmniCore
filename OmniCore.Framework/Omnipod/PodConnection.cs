@@ -1,10 +1,13 @@
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
@@ -220,14 +223,14 @@ public class PodConnection : IDisposable, IPodConnection
         if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
-        var result = await SendRequestAsync(false, cancellationToken,
-            new MessagePart[]
-            {
-                new RequestStatusPart(RequestStatusType.Default)
-            });
-
-        if (result != PodResponse.OK)
-            return result;
+        // var result = await SendRequestAsync(false, cancellationToken,
+        //     new MessagePart[]
+        //     {
+        //         new RequestStatusPart(RequestStatusType.Default)
+        //     });
+        //
+        // if (result != PodResponse.OK)
+        //     return result;
 
         if (_pod.Info.TempBasalActive || _pod.Info.ImmediateBolusActive || _pod.Info.ExtendedBolusActive)
             return PodResponse.NotAllowed;
@@ -249,11 +252,11 @@ public class PodConnection : IDisposable, IPodConnection
     }
 
     public async Task<PodResponse> Bolus(
-        int bolusMilliunits,
+        int bolusPulses,
         int pulseIntervalSeconds,
         CancellationToken cancellationToken = default)
     {
-        var bolusPulses = bolusMilliunits / (_pod.UnitsPerMilliliter / 2);
+        //var bolusPulses = bolusMilliunits / (_pod.UnitsPerMilliliter / 2);
 
         if (pulseIntervalSeconds < 2 || bolusPulses < 0 || bolusPulses > 1800 / pulseIntervalSeconds)
             return PodResponse.NotAllowed;
@@ -449,6 +452,20 @@ public class PodConnection : IDisposable, IPodConnection
                     exchange_result = (int)result.Error
                 });
             _pod.Info.NextRecordIndex++;
+            
+            // await _amqpService.PublishMessage(new AmqpMessage()
+            // {
+            //     Text = JsonSerializer.Serialize(new
+            //     {
+            //         pod_id = _pod.Id.ToString("N"),
+            //         record_index = _pod.Info.NextRecordIndex,
+            //         send_start = sendStart.ToUnixTimeMilliseconds(),
+            //         send_data = messageToSend.GetBody().ToArray(),
+            //         receive_end = receiveEnd.ToUnixTimeMilliseconds(),
+            //         receive_data = result.Message?.Body?.ToArray(),
+            //         exchange_result = (int)result.Error
+            //     })
+            // });
         }
 
         if (result.Error != CommunicationError.NoResponse)

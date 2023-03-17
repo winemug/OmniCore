@@ -15,48 +15,15 @@ namespace OmniCore.Maui.Services
 
         public async Task<bool> VerifyPermissions()
         {
+            if (await CheckAndRequest<Permissions.LocationAlways>() != PermissionStatus.Granted)
+                return false;
             if (await CheckAndRequest<BluetoothPermissions>() != PermissionStatus.Granted)
                 return false;
             if (await CheckAndRequest<ForegroundPermissions>() != PermissionStatus.Granted)
                 return false;
+            if (await CheckAndRequest<NotificationPermissions>() != PermissionStatus.Granted)
+                return false;
             
-            // if (!await RequestIfMissing(new[]
-            //     {
-            //         Manifest.Permission.AccessNetworkState,
-            //         Manifest.Permission.Internet
-            //     }))
-            //     return false;
-            //
-            // if (!await RequestIfMissing(new[]
-            //     {
-            //         Manifest.Permission.Bluetooth,
-            //         Manifest.Permission.BluetoothAdmin,
-            //         Manifest.Permission.BluetoothConnect,
-            //         Manifest.Permission.BluetoothScan,
-            //     }))
-            //     return false;
-            //
-            // if (!await RequestIfMissing(new []
-            //     {
-            //         Manifest.Permission.ForegroundService,
-            //     }))
-            //     return false;
-            //
-            // if (!await RequestIfMissing(new[]
-            //     {
-            //         Manifest.Permission.ReadExternalStorage,
-            //         Manifest.Permission.WriteExternalStorage
-            //     }))
-            //     return false;
-            //
-            // if (!await RequestIfMissing(new[]
-            //     {
-            //         Manifest.Permission.AccessFineLocation,
-            //         Manifest.Permission.AccessBackgroundLocation
-            //     }))
-            //     return false;
-            //
-            //
             var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
             if (pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName))
             {
@@ -111,7 +78,16 @@ namespace OmniCore.Maui.Services
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
             new List<(string androidPermission, bool isRuntime)>
             {
-                (global::Android.Manifest.Permission.ForegroundService, false),
+                (global::Android.Manifest.Permission.ForegroundService, true),
+            }.ToArray();
+    }
+    
+    public class NotificationPermissions : Permissions.BasePlatformPermission
+    {
+        public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
+            new List<(string androidPermission, bool isRuntime)>
+            {
+                (global::Android.Manifest.Permission.PostNotifications, true),
             }.ToArray();
     }
 }

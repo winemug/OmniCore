@@ -23,7 +23,7 @@ public interface IPodConnection : IDisposable
         CancellationToken cancellationToken = default);
 
     Task<PodResponse> Bolus(
-        int bolusMilliunits,
+        int bolusPulses,
         int pulseIntervalSeconds,
         CancellationToken cancellationToken = default);
 

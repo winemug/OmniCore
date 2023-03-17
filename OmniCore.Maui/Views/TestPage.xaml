@@ -9,7 +9,8 @@
             <Button Text="Check Permissions" Command="{Binding CheckPermissionsCommand}"/>
             <Entry Text="{Binding Email}"/>
             <Entry Text="{Binding Password}"/>
-            <Button Text="Go" Command="{Binding ButtonCommand}"/>
+            <Button Text="SCHLEMM" Command="{Binding SchlemmCommand}"/>
+            <Button Text="FISK" Command="{Binding FiskCommand}"/>
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

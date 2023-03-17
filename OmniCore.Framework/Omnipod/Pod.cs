@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
 using Nito.AsyncEx;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
@@ -70,6 +71,34 @@ public class Pod : IPod
     //     }
     // }
 
+    public async Task LoadResponses()
+    {
+        Info.NextRecordIndex = 0;
+        using (var conn = await _dataService.GetConnectionAsync())
+        {
+            var rs = await conn.QueryAsync("SELECT * FROM pod_message WHERE pod_id = @pod_id" +
+                                           " ORDER BY record_index",
+                new
+                {
+                    pod_id = Id.ToString("N")
+                });
+
+            foreach (var r in rs)
+            {
+                Info.NextRecordIndex = (int)r.record_index + 1;
+                if (r.receive_data != null)
+                {
+                    var rd = (byte[]) r.receive_data;
+                    var podMessage = PodMessage.FromBody(new Bytes(rd));
+                    await ProcessResponseAsync(podMessage);
+                }
+            }
+        }
+
+        if (Info.Progress == PodProgress.Init0)
+            Info.Progress = PodProgress.Running;
+    }
+    
     public async Task ProcessResponseAsync(IPodMessage message)
     {
         foreach (var part in message.Parts)
@@ -105,9 +134,7 @@ public class Pod : IPod
 
     public void SyncNonce(ushort syncWord, int syncMessageSequence)
     {
-        var w = (Info.LastNonce.Value & 0xFFFF) + (CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF) +
-                (Info.Lot & 0xFFFF) +
-                (Info.Serial & 0xFFFF);
+        uint w = (ushort)(Info.LastNonce.Value & 0xFFFF) + (uint)(CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF) + (uint)(Info.Lot & 0xFFFF) + (uint)(Info.Serial & 0xFFFF);
         var seed = (ushort)(((w & 0xFFFF) ^ syncWord) & 0xff);
         InitializeNonceTable(seed);
     }
