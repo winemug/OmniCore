@@ -1,10 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Maui", "OmniCore.Maui\OmniCore.Maui.csproj", "{82359F07-A1C1-4783-BD0E-CCA7D5F60BCE}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33502.453
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Maui", "OmniCore.Maui\OmniCore.Maui.csproj", "{82359F07-A1C1-4783-BD0E-CCA7D5F60BCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Framework", "OmniCore.Framework\OmniCore.Framework.csproj", "{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Framework", "OmniCore.Framework\OmniCore.Framework.csproj", "{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Common", "OmniCore.Common\OmniCore.Common.csproj", "{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Common", "OmniCore.Common\OmniCore.Common.csproj", "{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Tests", "OmniCore.Tests\OmniCore.Tests.csproj", "{9753D6A5-A18D-4556-9206-6B274A0970A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,12 @@ Global
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
