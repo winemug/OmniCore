@@ -24,4 +24,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OmniCore.Common\OmniCore.Common.csproj" />
+    <ProjectReference Include="..\OmniCore.Framework\OmniCore.Framework.csproj" />
+  </ItemGroup>
+
 </Project>

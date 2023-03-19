@@ -8,6 +8,7 @@ using Nito.AsyncEx;
 using OmniCore.Services.Data.Sql;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
+using OmniCore.Services.Interfaces.Pod;
 
 namespace OmniCore.Services;
 
@@ -114,6 +115,29 @@ public class DataService : IDataService
             {
                 _initialized = true;
             }
+        }
+    }
+
+    public async Task CreatePodMessage(Guid podId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData,
+        byte[] receivedData, ExchangeResult result)
+    {
+        using (var conn = await GetConnectionAsync())
+        {
+            await conn.ExecuteAsync(
+                "INSERT INTO pod_message(pod_id, record_index, send_start, send_data, " +
+                "receive_end, receive_data, exchange_result) " +
+                "VALUES(@pod_id, @record_index, @send_start, @send_data, " +
+                "@receive_end, @receive_data, @exchange_result)",
+                new
+                {
+                    pod_id = podId.ToString("N"),
+                    record_index = recordIndex,
+                    send_start = sendStart.ToUnixTimeMilliseconds(),
+                    send_data = sentData,
+                    receive_end = receiveEnd.ToUnixTimeMilliseconds(),
+                    receive_data = receivedData,
+                    exchange_result = (int)result.Error
+                });
         }
     }
 }

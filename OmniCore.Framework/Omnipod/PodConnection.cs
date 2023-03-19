@@ -23,7 +23,8 @@ public class PodConnection : IDisposable, IPodConnection
     private readonly IDisposable _podLockDisposable;
     private readonly IRadioConnection _radioConnection;
 
-    public PodConnection(IPod pod,
+    public PodConnection(
+        IPod pod,
         IRadioConnection radioConnection,
         IDisposable podLockDisposable,
         IDataService dataService)
@@ -60,11 +61,11 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> Pair(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress >= PodProgress.Paired)
+        if (_pod.Progress >= PodProgress.Paired)
             return PodResponse.NotAllowed;
 
         PodResponse result;
-        if (_pod.Info.Progress == PodProgress.Init0)
+        if (_pod.Progress == PodProgress.Init0)
         {
             result = await SendRequestAsync(false,
                 cancellationToken,
@@ -83,7 +84,7 @@ public class PodConnection : IDisposable, IPodConnection
             new[]
             {
                 new RequestSetupPodPart(_pod.RadioAddress,
-                    _pod.Info.Lot, _pod.Info.Serial, 4,
+                    _pod.Lot, _pod.Serial, 4,
                     now.Year, now.Month, now.Day, now.Hour, now.Minute)
             }
         );
@@ -91,7 +92,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> Activate(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress != PodProgress.Paired)
+        if (_pod.Progress != PodProgress.Paired)
             return PodResponse.NotAllowed;
 
         PodResponse result;
@@ -104,7 +105,7 @@ public class PodConnection : IDisposable, IPodConnection
         );
         if (result != PodResponse.OK)
             return result;
-        if (_pod.Info.Progress != PodProgress.Paired)
+        if (_pod.Progress != PodProgress.Paired)
             return PodResponse.NotAllowed;
 
         throw new NotImplementedException();
@@ -115,7 +116,7 @@ public class PodConnection : IDisposable, IPodConnection
         BasalRateEntry[] basalRateEntries,
         CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Running)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Running)
             return PodResponse.NotAllowed;
 
         PodResponse result;
@@ -129,7 +130,7 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Running)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Running)
             return PodResponse.NotAllowed;
 
         throw new NotImplementedException();
@@ -137,7 +138,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Inactive)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
             return PodResponse.NotAllowed;
 
         return await SendRequestAsync(false,
@@ -151,7 +152,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> Beep(BeepType type, CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false,
@@ -164,7 +165,7 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         result = await SendRequestAsync(false,
@@ -183,7 +184,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> CancelTempBasal(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false, cancellationToken,
@@ -195,10 +196,10 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (!_pod.Info.TempBasalActive || _pod.Info.ImmediateBolusActive || _pod.Info.ExtendedBolusActive)
+        if (!_pod.TempBasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         return await SendRequestAsync(false, cancellationToken,
@@ -212,30 +213,31 @@ public class PodConnection : IDisposable, IPodConnection
     }
 
     public async Task<PodResponse> SetTempBasal(
-        int hourlyRateMilliunits,
+        int pulsesPerHour,
         int halfHourCount,
         CancellationToken cancellationToken = default)
     {
-        var pulsesPerHour = hourlyRateMilliunits / (_pod.UnitsPerMilliliter / 2);
+        //var pulsesPerHour = hourlyRateMilliunits / (_pod.UnitsPerMilliliter / 2);
+
         if (halfHourCount < 0 || halfHourCount > 12 || pulsesPerHour < 0 || pulsesPerHour > 1800)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
-        // var result = await SendRequestAsync(false, cancellationToken,
-        //     new MessagePart[]
-        //     {
-        //         new RequestStatusPart(RequestStatusType.Default)
-        //     });
-        //
-        // if (result != PodResponse.OK)
-        //     return result;
+        var result = await SendRequestAsync(false, cancellationToken,
+            new MessagePart[]
+            {
+                new RequestStatusPart(RequestStatusType.Default)
+            });
+        
+        if (result != PodResponse.OK)
+            return result;
 
-        if (_pod.Info.TempBasalActive || _pod.Info.ImmediateBolusActive || _pod.Info.ExtendedBolusActive)
+        if (_pod.TempBasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var bre = new BasalRateEntry
@@ -261,7 +263,7 @@ public class PodConnection : IDisposable, IPodConnection
         if (pulseIntervalSeconds < 2 || bolusPulses < 0 || bolusPulses > 1800 / pulseIntervalSeconds)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false, cancellationToken,
@@ -273,10 +275,10 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Info.ImmediateBolusActive || _pod.Info.ExtendedBolusActive)
+        if (_pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var be = new BolusEntry
@@ -294,7 +296,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> CancelBasal(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false, cancellationToken,
@@ -306,10 +308,10 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (!_pod.Info.BasalActive || _pod.Info.ImmediateBolusActive || _pod.Info.ExtendedBolusActive)
+        if (!_pod.BasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         return await SendRequestAsync(false, cancellationToken,
@@ -324,7 +326,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> CancelBolus(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false, cancellationToken,
@@ -336,10 +338,10 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (!_pod.Info.ImmediateBolusActive && !_pod.Info.ExtendedBolusActive)
+        if (!_pod.ImmediateBolusActive && !_pod.ExtendedBolusActive)
             return PodResponse.NotAllowed;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         return await SendRequestAsync(false, cancellationToken,
@@ -354,7 +356,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodResponse> Suspend(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false,
@@ -367,22 +369,22 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Info.Progress < PodProgress.Running || _pod.Info.Progress >= PodProgress.Faulted)
+        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
         return await SendRequestAsync(false, cancellationToken,
             new MessagePart[]
             {
                 new RequestCancelPart(BeepType.NoSound,
-                    _pod.Info.ImmediateBolusActive,
-                    _pod.Info.TempBasalActive,
-                    _pod.Info.BasalActive)
+                    _pod.ImmediateBolusActive,
+                    _pod.TempBasalActive,
+                    _pod.BasalActive)
             });
     }
 
     public async Task<PodResponse> Deactivate(CancellationToken cancellationToken = default)
     {
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Inactive)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
             return PodResponse.NotAllowed;
 
         var result = await SendRequestAsync(false,
@@ -395,16 +397,16 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Info.Progress < PodProgress.Paired || _pod.Info.Progress >= PodProgress.Inactive)
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
             return PodResponse.NotAllowed;
 
         result = await SendRequestAsync(false, cancellationToken,
             new MessagePart[]
             {
                 new RequestCancelPart(BeepType.NoSound,
-                    _pod.Info.ImmediateBolusActive,
-                    _pod.Info.TempBasalActive,
-                    _pod.Info.BasalActive)
+                    _pod.ImmediateBolusActive,
+                    _pod.TempBasalActive,
+                    _pod.BasalActive)
             });
         if (result != PodResponse.OK)
             return result;
@@ -423,8 +425,8 @@ public class PodConnection : IDisposable, IPodConnection
         int authRetries = 0,
         int syncRetries = 0)
     {
-        var initialPacketSequence = _pod.Info.NextPacketSequence;
-        var initialMessageSequence = _pod.Info.NextMessageSequence;
+        var initialPacketSequence = _pod.NextPacketSequence;
+        var initialMessageSequence = _pod.NextMessageSequence;
 
         var messageToSend = ConstructMessage(critical, parts);
 
@@ -434,39 +436,13 @@ public class PodConnection : IDisposable, IPodConnection
             cancellationToken);
         var receiveEnd = DateTimeOffset.UtcNow;
 
-        using (var conn = await _dataService.GetConnectionAsync())
-        {
-            await conn.ExecuteAsync(
-                "INSERT INTO pod_message(pod_id, record_index, send_start, send_data, " +
-                "receive_end, receive_data, exchange_result) " +
-                "VALUES(@pod_id, @record_index, @send_start, @send_data, " +
-                "@receive_end, @receive_data, @exchange_result)",
-                new
-                {
-                    pod_id = _pod.Id.ToString("N"),
-                    record_index = _pod.Info.NextRecordIndex,
-                    send_start = sendStart.ToUnixTimeMilliseconds(),
-                    send_data = messageToSend.GetBody().ToArray(),
-                    receive_end = receiveEnd.ToUnixTimeMilliseconds(),
-                    receive_data = result.Message?.Body?.ToArray(),
-                    exchange_result = (int)result.Error
-                });
-            _pod.Info.NextRecordIndex++;
-            
-            // await _amqpService.PublishMessage(new AmqpMessage()
-            // {
-            //     Text = JsonSerializer.Serialize(new
-            //     {
-            //         pod_id = _pod.Id.ToString("N"),
-            //         record_index = _pod.Info.NextRecordIndex,
-            //         send_start = sendStart.ToUnixTimeMilliseconds(),
-            //         send_data = messageToSend.GetBody().ToArray(),
-            //         receive_end = receiveEnd.ToUnixTimeMilliseconds(),
-            //         receive_data = result.Message?.Body?.ToArray(),
-            //         exchange_result = (int)result.Error
-            //     })
-            // });
-        }
+        var sentData = messageToSend.GetBody().ToArray();
+        var receivedData = result.Message?.Body?.ToArray();
+
+        await _dataService.CreatePodMessage(_pod.Id, _pod.NextRecordIndex,
+            sendStart, receiveEnd,
+            sentData, receivedData, result);
+        _pod.NextRecordIndex++;
 
         if (result.Error != CommunicationError.NoResponse)
             _communicationNeedsClosing = true;
@@ -478,8 +454,8 @@ public class PodConnection : IDisposable, IPodConnection
                 {
                     if (rep.ErrorCode == 0x14 && authRetries == 0)
                     {
-                        //_pod.Info.NextPacketSequence = initialPacketSequence;
-                        _pod.Info.NextMessageSequence = initialMessageSequence;
+                        //_pod.NextPacketSequence = initialPacketSequence;
+                        _pod.NextMessageSequence = initialMessageSequence;
                         _pod.SyncNonce(rep.ErrorValue, initialMessageSequence);
                         authRetries++;
                         return await SendRequestAsync(
@@ -496,13 +472,13 @@ public class PodConnection : IDisposable, IPodConnection
                 }
 
                 await _pod.ProcessResponseAsync(result.Message);
-                if (_pod.Info.Faulted)
+                if (_pod.Faulted)
                     return PodResponse.Faulted;
                 return PodResponse.OK;
             case CommunicationError.MessageSyncRequired:
                 if (syncRetries == 0)
                 {
-                    _pod.Info.NextMessageSequence = (initialMessageSequence + 2) % 16;
+                    _pod.NextMessageSequence = (initialMessageSequence + 2) % 16;
 
                     syncRetries++;
                     return await SendRequestAsync(
@@ -518,12 +494,12 @@ public class PodConnection : IDisposable, IPodConnection
             case CommunicationError.NoResponse:
                 return PodResponse.NoResponse;
             case CommunicationError.ConnectionInterrupted:
-                _pod.Info.NextMessageSequence = (initialMessageSequence + 2) % 16;
-                _pod.Info.NextPacketSequence = 0;
+                _pod.NextMessageSequence = (initialMessageSequence + 2) % 16;
+                _pod.NextPacketSequence = 0;
                 return PodResponse.Interrupted;
             case CommunicationError.ProtocolError:
-                _pod.Info.NextMessageSequence = (initialMessageSequence + 2) % 16;
-                _pod.Info.NextPacketSequence = 0;
+                _pod.NextMessageSequence = (initialMessageSequence + 2) % 16;
+                _pod.NextPacketSequence = 0;
                 return PodResponse.Error;
             case CommunicationError.UnidentifiedResponse:
                 return PodResponse.Error;
@@ -547,7 +523,7 @@ public class PodConnection : IDisposable, IPodConnection
         return new PodMessage
         {
             Address = _pod.RadioAddress,
-            Sequence = _pod.Info.NextMessageSequence,
+            Sequence = _pod.NextMessageSequence,
             WithCriticalFollowup = critical,
             Parts = msgParts
         };
@@ -563,13 +539,13 @@ public class PodConnection : IDisposable, IPodConnection
         var sendPacketIndex = 0;
         IPodPacket receivedPacket = null;
         var exchangeStarted = DateTimeOffset.Now;
-        var nextPacketSequence = _pod.Info.NextPacketSequence;
-        var nextMessageSequence = _pod.Info.NextMessageSequence;
+        var nextPacketSequence = _pod.NextPacketSequence;
+        var nextMessageSequence = _pod.NextMessageSequence;
         DateTimeOffset? firstPacketSent = null;
         DateTimeOffset? lastPacketSent = null;
 
-        var packetAddressIn = _pod.Info.Progress < PodProgress.Paired ? 0xFFFFFFFF : _pod.RadioAddress;
-        var packetAddressOut = _pod.Info.Progress < PodProgress.Paired ? 0xFFFFFFFF : _pod.RadioAddress;
+        var packetAddressIn = _pod.Progress < PodProgress.Paired ? 0xFFFFFFFF : _pod.RadioAddress;
+        var packetAddressOut = _pod.Progress < PodProgress.Paired ? 0xFFFFFFFF : _pod.RadioAddress;
         var ackDataOutInterim = _pod.RadioAddress;
         var ackDataIn = _pod.RadioAddress;
 
@@ -597,21 +573,21 @@ public class PodConnection : IDisposable, IPodConnection
             {
                 if (sendPacketIndex == 0 && firstPacketSent < now - TimeSpan.FromSeconds(30))
                     return new ExchangeResult(CommunicationError.NoResponse);
-                if (sendPacketIndex > 0 && _pod.Info.LastRadioPacketReceived < now - TimeSpan.FromSeconds(30))
+                if (sendPacketIndex > 0 && _pod.LastRadioPacketReceived < now - TimeSpan.FromSeconds(30))
                 {
-                    _pod.Info.NextPacketSequence = nextPacketSequence;
+                    _pod.NextPacketSequence = nextPacketSequence;
                     return new ExchangeResult(CommunicationError.ConnectionInterrupted);
                 }
 
                 continue;
             }
 
-            _pod.Info.LastRadioPacketReceived = now;
+            _pod.LastRadioPacketReceived = now;
 
             if (receivedPacket.Sequence != (nextPacketSequence + 1) % 32) continue;
 
             nextPacketSequence = (receivedPacket.Sequence + 1) % 32;
-            _pod.Info.NextPacketSequence = nextPacketSequence;
+            _pod.NextPacketSequence = nextPacketSequence;
 
             if (sendPacketIndex == sendPacketCount - 1)
             {
@@ -668,12 +644,12 @@ public class PodConnection : IDisposable, IPodConnection
 
             if (receivedPacket == null || receivedPacket.Address != packetAddressIn)
             {
-                if (_pod.Info.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
+                if (_pod.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
                     return new ExchangeResult(CommunicationError.ConnectionInterrupted);
                 continue;
             }
 
-            _pod.Info.LastRadioPacketReceived = DateTimeOffset.Now;
+            _pod.LastRadioPacketReceived = DateTimeOffset.Now;
             if (receivedPacket.Sequence != (nextPacketSequence + 1) % 32) continue;
 
             if (receivedPacket.Type != PodPacketType.Con)
@@ -693,22 +669,22 @@ public class PodConnection : IDisposable, IPodConnection
             receivedMessageLength += receivedPacket.Data.Length;
         }
 
-        _pod.Info.NextPacketSequence = nextPacketSequence;
+        _pod.NextPacketSequence = nextPacketSequence;
 
         var podMessageReceived = PodMessage.FromReceivedPackets(podResponsePackets);
         if (podMessageReceived == null) return new ExchangeResult(CommunicationError.UnidentifiedResponse);
-        _pod.Info.NextMessageSequence = (podMessageReceived.Sequence + 1) % 16;
+        _pod.NextMessageSequence = (podMessageReceived.Sequence + 1) % 16;
         return new ExchangeResult(podMessageReceived);
     }
 
     private async Task AckExchangeAsync(
         CancellationToken cancellationToken = default)
     {
-        var ackDataOutFinal = _pod.Info.Progress < PodProgress.Paired ? _pod.RadioAddress : 0x00000000;
+        var ackDataOutFinal = _pod.Progress < PodProgress.Paired ? _pod.RadioAddress : 0x00000000;
         var finalAck = new PodPacket(
             _pod.RadioAddress,
             PodPacketType.Ack,
-            _pod.Info.NextPacketSequence,
+            _pod.NextPacketSequence,
             new Bytes(ackDataOutFinal));
 
         while (true)
@@ -718,18 +694,18 @@ public class PodConnection : IDisposable, IPodConnection
             var now = DateTimeOffset.Now;
             if (received != null && received.Address == _pod.RadioAddress)
             {
-                _pod.Info.LastRadioPacketReceived = now;
+                _pod.LastRadioPacketReceived = now;
                 Debug.WriteLine("Final ack received response");
             }
 
-            if (_pod.Info.LastRadioPacketReceived < now - TimeSpan.FromSeconds(5))
+            if (_pod.LastRadioPacketReceived < now - TimeSpan.FromSeconds(5))
                 break;
             if (cancellationToken.IsCancellationRequested)
                 break;
         }
 
         Debug.WriteLine("Final send complete");
-        _pod.Info.NextPacketSequence = (_pod.Info.NextPacketSequence + 1) % 32;
+        _pod.NextPacketSequence = (_pod.NextPacketSequence + 1) % 32;
     }
 
     private async Task<IPodPacket> TryExchangePackets(
@@ -738,8 +714,8 @@ public class PodConnection : IDisposable, IPodConnection
     {
         IPodPacket received = null;
         Debug.WriteLine($"SEND: {packetToSend}");
-        if (!_pod.Info.LastRadioPacketReceived.HasValue ||
-            _pod.Info.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
+        if (!_pod.LastRadioPacketReceived.HasValue ||
+            _pod.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
             received = await _radioConnection.SendAndTryGetPacket(
                 0, 0, 0, 150,
                 0, 250, 0, packetToSend, cancellationToken);

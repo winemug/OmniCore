@@ -22,7 +22,6 @@ public class Pod : IPod
     public Pod(IDataService dataService)
     {
         _dataService = dataService;
-        Info = new PodRuntimeInformation();
         Id = Guid.NewGuid();
         var r = new Random();
         var bn0 = r.Next(13);
@@ -41,7 +40,34 @@ public class Pod : IPod
     public MedicationType Medication { get; set; }
     public DateTimeOffset ValidFrom { get; set; }
     public DateTimeOffset? ValidTo { get; set; }
-    public PodRuntimeInformation Info { get; set; }
+    
+    // Runtime Info
+    
+    public uint Lot { get; set; }
+    public uint Serial { get; set; }
+    public PodProgress Progress { get; set; }
+    public int NextRecordIndex { get; set; }
+    public int NextPacketSequence { get; set; }
+
+    public int NextMessageSequence { get; set; }
+
+    //
+    public int PulseVolumeMicroUnits { get; set; }
+    public int MaximumLifeTimeHours { get; set; }
+    public uint? LastNonce { get; set; }
+    public bool Faulted { get; set; }
+    public bool ExtendedBolusActive { get; set; }
+    public bool ImmediateBolusActive { get; set; }
+    public bool TempBasalActive { get; set; }
+    public bool BasalActive { get; set; }
+    public int PulsesDelivered { get; set; }
+    public int PulsesPending { get; set; }
+    public int? PulsesRemaining { get; set; }
+    public int ActiveMinutes { get; set; }
+    public int UnackedAlertsMask { get; set; }
+
+    public List<IMessagePart> ReceivedParts { get; set; }
+    public DateTimeOffset? LastRadioPacketReceived { get; set; }
 
     public async Task<IDisposable> LockAsync(CancellationToken cancellationToken)
     {
@@ -73,7 +99,7 @@ public class Pod : IPod
 
     public async Task LoadResponses()
     {
-        Info.NextRecordIndex = 0;
+        NextRecordIndex = 0;
         using (var conn = await _dataService.GetConnectionAsync())
         {
             var rs = await conn.QueryAsync("SELECT * FROM pod_message WHERE pod_id = @pod_id" +
@@ -85,7 +111,7 @@ public class Pod : IPod
 
             foreach (var r in rs)
             {
-                Info.NextRecordIndex = (int)r.record_index + 1;
+                NextRecordIndex = (int)r.record_index + 1;
                 if (r.receive_data != null)
                 {
                     var rd = (byte[]) r.receive_data;
@@ -95,8 +121,10 @@ public class Pod : IPod
             }
         }
 
-        if (Info.Progress == PodProgress.Init0)
-            Info.Progress = PodProgress.Running;
+        if (Progress == PodProgress.Init0)
+            Progress = PodProgress.Running;
+        Lot = 72402;
+        Serial = 3200578;
     }
     
     public async Task ProcessResponseAsync(IPodMessage message)
@@ -116,53 +144,53 @@ public class Pod : IPod
 
     public uint NextNonce()
     {
-        if (!Info.LastNonce.HasValue)
+        if (!LastNonce.HasValue)
         {
             var b = new byte[4];
             new Random().NextBytes(b);
-            Info.LastNonce = (uint)((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]);
+            LastNonce = (uint)((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]);
         }
         else
         {
-            Info.LastNonce = NonceTable[NonceIndex];
+            LastNonce = NonceTable[NonceIndex];
             NonceTable[NonceIndex] = GenerateNonce();
-            NonceIndex = (int)((Info.LastNonce.Value & 0x0F) + 2);
+            NonceIndex = (int)((LastNonce.Value & 0x0F) + 2);
         }
 
-        return Info.LastNonce.Value;
+        return LastNonce.Value;
     }
 
     public void SyncNonce(ushort syncWord, int syncMessageSequence)
     {
-        uint w = (ushort)(Info.LastNonce.Value & 0xFFFF) + (uint)(CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF) + (uint)(Info.Lot & 0xFFFF) + (uint)(Info.Serial & 0xFFFF);
+        uint w = (ushort)(LastNonce.Value & 0xFFFF) + (uint)(CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF) + (uint)(Lot & 0xFFFF) + (uint)(Serial & 0xFFFF);
         var seed = (ushort)(((w & 0xFFFF) ^ syncWord) & 0xff);
         InitializeNonceTable(seed);
     }
 
     private void ProcessStatus(ResponseStatusPart part)
     {
-        Info.Progress = part.Progress;
-        Info.Faulted = part.Faulted;
-        Info.ExtendedBolusActive = part.ExtendedBolusActive;
-        Info.ImmediateBolusActive = part.ImmediateBolusActive;
-        Info.TempBasalActive = part.TempBasalActive;
-        Info.BasalActive = part.BasalActive;
-        Info.PulsesDelivered = part.PulsesDelivered;
-        Info.PulsesPending = part.PulsesPending;
-        Info.PulsesRemaining = part.PulsesRemaining;
-        Info.ActiveMinutes = part.ActiveMinutes;
-        Info.UnackedAlertsMask = part.UnackedAlertsMask;
+        Progress = part.Progress;
+        Faulted = part.Faulted;
+        ExtendedBolusActive = part.ExtendedBolusActive;
+        ImmediateBolusActive = part.ImmediateBolusActive;
+        TempBasalActive = part.TempBasalActive;
+        BasalActive = part.BasalActive;
+        PulsesDelivered = part.PulsesDelivered;
+        PulsesPending = part.PulsesPending;
+        PulsesRemaining = part.PulsesRemaining;
+        ActiveMinutes = part.ActiveMinutes;
+        UnackedAlertsMask = part.UnackedAlertsMask;
     }
 
     private void ProcessVersion(ResponseVersionPart part)
     {
-        Info.Lot = part.Lot;
-        Info.Serial = part.Serial;
-        Info.Progress = part.Progress;
+        Lot = part.Lot;
+        Serial = part.Serial;
+        Progress = part.Progress;
         if (part.PulseVolumeMicroUnits.HasValue)
-            Info.PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
+            PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
         if (part.MaximumLifeTimeHours.HasValue)
-            Info.MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
+            MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
     }
 
     private void ProcessError(ResponseErrorPart part)
@@ -219,8 +247,8 @@ public class Pod : IPod
     private void InitializeNonceTable(ushort seed)
     {
         NonceTable = new uint[18];
-        NonceTable[0] = (uint)(((Info.Lot & 0xFFFF) + 0x55543DC3 + (Info.Lot >> 16) + (seed & 0xFF)) & 0xFFFFFFFF);
-        NonceTable[1] = (uint)(((Info.Serial & 0xFFFF) + 0xAAAAE44E + (Info.Serial >> 16) + (seed >> 8)) & 0xFFFFFFFF);
+        NonceTable[0] = (uint)(((Lot & 0xFFFF) + 0x55543DC3 + (Lot >> 16) + (seed & 0xFF)) & 0xFFFFFFFF);
+        NonceTable[1] = (uint)(((Serial & 0xFFFF) + 0xAAAAE44E + (Serial >> 16) + (seed >> 8)) & 0xFFFFFFFF);
         for (var i = 2; i < 18; i++) NonceTable[i] = GenerateNonce();
 
         NonceIndex = (int)(((NonceTable[0] + NonceTable[1]) & 0xF) + 2);

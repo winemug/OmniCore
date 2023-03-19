@@ -1,48 +1,12 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Android.Util;
-using OmniCore.Services.Interfaces.Configuration;
+using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 
 namespace OmniCore.Common.Api;
 
-public class AuthResponse
-{
-    public string? access_token { get; set; }
-    public string? token_type { get; set; }
-}
-
-public class ClientRegisterRequest
-{
-    public string name { get; set; }
-    public string platform { get; set; }
-    public string hw_version { get; set; }
-    public string sw_version { get; set; }
-}
-
-public class ClientRegisterResponse
-{
-    public string account_id { get; set; }
-    public string client_id { get; set; }
-    public string token { get; set; }
-}
-
-public class EndpointRequest
-{
-    public string sw_version { get; set; }
-}
-
-public class EndpointResponse
-{
-    public string user_id { get; set; }
-    public string dsn { get; set; }
-    public string queue { get; set; }
-    public string exchange { get; set; }
-}
-
-public class ApiClient : IDisposable
+public class ApiClient : IApiClient
 {
     private IConfigurationStore _configurationStore;
 
@@ -94,7 +58,7 @@ public class ApiClient : IDisposable
         await _configurationStore.SetConfigurationAsync(cc);
     }
 
-    public async Task<EndpointResponse> GetClientEndpointAsync()
+    public async Task<AmqpEndpoint> GetClientEndpointAsync()
     {
         var cc = await _configurationStore.GetConfigurationAsync();
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cc.ClientAuthorizationToken);
@@ -110,7 +74,13 @@ public class ApiClient : IDisposable
         var result = await _httpClient.PostAsync(new Uri("/client/endpoint", UriKind.Relative), content);
         var resultContent = await result.Content.ReadAsStringAsync();
         var erp = JsonSerializer.Deserialize<EndpointResponse>(resultContent);
-        return erp;
+        return new AmqpEndpoint
+        {
+            UserId = erp.user_id,
+            Dsn = erp.dsn,
+            Queue = erp.queue,
+            Exchange = erp.exchange
+        };
     }
 
     public void Dispose()
@@ -118,4 +88,38 @@ public class ApiClient : IDisposable
         _httpClient?.Dispose();
         _httpClient = null;
     }
+}
+
+class AuthResponse
+{
+    public string? access_token { get; set; }
+    public string? token_type { get; set; }
+}
+
+class ClientRegisterRequest
+{
+    public string name { get; set; }
+    public string platform { get; set; }
+    public string hw_version { get; set; }
+    public string sw_version { get; set; }
+}
+
+class ClientRegisterResponse
+{
+    public string account_id { get; set; }
+    public string client_id { get; set; }
+    public string token { get; set; }
+}
+
+class EndpointRequest
+{
+    public string sw_version { get; set; }
+}
+
+class EndpointResponse
+{
+    public string user_id { get; set; }
+    public string dsn { get; set; }
+    public string queue { get; set; }
+    public string exchange { get; set; }
 }

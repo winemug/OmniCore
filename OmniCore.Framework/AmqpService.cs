@@ -36,6 +36,14 @@ public class AmqpService : IAmqpService
         _processedMessages = new SortedList<DateTimeOffset, string>();
     }
 
+    public void SetEndpoint(AmqpEndpoint endpoint)
+    {
+        Dsn = endpoint.Dsn;
+        Exchange = endpoint.Exchange;
+        Queue = endpoint.Queue;
+        UserId = endpoint.UserId;
+    }
+    
     public async Task Start()
     {
         _cts = new CancellationTokenSource();

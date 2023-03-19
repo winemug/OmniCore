@@ -44,4 +44,9 @@ public class MessagePart : IMessagePart
 
         return new MessagePart { Type = type, Data = data };
     }
+
+    public override string ToString()
+    {
+        return $"Type: {Type:X} Data: {Data}";
+    }
 }

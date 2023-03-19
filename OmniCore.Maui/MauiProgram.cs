@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using OmniCore.Common.Api;
 using OmniCore.Maui.Services;
 using OmniCore.Maui.ViewModels;
 using OmniCore.Maui.Views;
@@ -60,6 +61,7 @@ public static class MauiProgram
         mauiAppBuilder.Services.AddTransient<IPodConnection, PodConnection>();
         mauiAppBuilder.Services.AddTransient<IPodMessage, PodMessage>();
         mauiAppBuilder.Services.AddTransient<IPodPacket, PodPacket>();
+        mauiAppBuilder.Services.AddTransient<IApiClient, ApiClient>();
 
         mauiAppBuilder.Services.AddSingleton(typeof(IPlatformService), platformService);
         mauiAppBuilder.Services.AddSingleton(typeof(IPlatformInfo), platformInfo);

@@ -13,7 +13,6 @@ public class RequestInsulinSchedulePart : MessagePart
 
     public RequestInsulinSchedulePart(BasalRateEntry tempBasalEntry)
     {
-        var hhc = 0;
         var schedules = new[]
         {
             new InsulinSchedule
@@ -32,6 +31,20 @@ public class RequestInsulinSchedulePart : MessagePart
 
     public RequestInsulinSchedulePart(BolusEntry bolusEntry)
     {
+        var schedules = new[]
+        {
+            new InsulinSchedule
+            {
+                BlockCount = 1,
+                AddAlternatingExtraPulse = false,
+                PulsesPerBlock = bolusEntry.ImmediatePulseCount
+            }
+        };
+        Data = GetData(ScheduleType.Bolus,
+            1,
+            (ushort)(bolusEntry.ImmediatePulseCount * bolusEntry.ImmediatePulseInterval125ms),
+            (ushort)(bolusEntry.ImmediatePulseCount),
+            schedules);
     }
 
     public override bool RequiresNonce => true;

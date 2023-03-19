@@ -12,30 +12,43 @@ public class RequestTempBasalPart : MessagePart
         data.Append(0).Append(0);
 
         var totalPulses10 = bre.PulsesPerHour * bre.HalfHourCount * 10 / 2;
+        var hhPulses10 = bre.PulsesPerHour * 10 / 2;
 
         var avgPulseIntervalMs = 1800000000;
         if (bre.PulsesPerHour > 0)
-            avgPulseIntervalMs = 3600 * 1000 / bre.PulsesPerHour;
+            avgPulseIntervalMs = 360000000 / bre.PulsesPerHour;
 
-        var pulses10remaining = totalPulses10;
         var pulseRecord = new Bytes();
-        while (pulses10remaining > 0)
+        if (totalPulses10 == 0)
         {
-            var pulses10record = 0;
-            if (pulses10remaining > 0xFFFF)
+            for (int i = 0; i < bre.HalfHourCount; i++)
+                pulseRecord.Append((ushort)0).Append((uint)avgPulseIntervalMs);
+        }
+        else
+        {
+            var pulses10remaining = totalPulses10;
+            while (pulses10remaining > 0)
             {
+                var pulses10record = pulses10remaining;
+                if (pulses10remaining > 0xFFFF)
+                {
+                    if (hhPulses10 > 0xFFFF)
+                        pulses10record = 0XFFFF;
+                    else
+                    {
+                        var hhCountFitting = 0xFFFF / hhPulses10;
+                        if (hhCountFitting % 2 == 0)
+                            hhCountFitting--;
+                        pulses10record = hhCountFitting * hhPulses10;
+                    }
+                }
+                pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
+                pulses10remaining -= pulses10record;
             }
-            else
-            {
-                pulses10record = pulses10remaining;
-            }
-
-            pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
-            pulses10remaining -= pulses10record;
         }
 
 
-        Data = data;
+        Data = data.Append(pulseRecord.Sub(0, 6)).Append(pulseRecord);
     }
 
     public override bool RequiresNonce => false;

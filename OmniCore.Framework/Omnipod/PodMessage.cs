@@ -120,13 +120,16 @@ public class PodMessage : IPodMessage
                             message.Parts.Add(new ResponseInfoPulseLogPreviousPart(mpData));
                             break;
                         default:
-                            message.Parts.Add(new MessagePart { Data = mpData });
+                            message.Parts.Add(new MessagePart { Data = mpData, Type=mpType });
                             break;
                     }
 
                     break;
                 case PodMessageType.ResponseVersionInfo:
                     message.Parts.Add(new ResponseVersionPart(mpData));
+                    break;
+                default:
+                    message.Parts.Add(new MessagePart { Data = mpData, Type=mpType });
                     break;
             }
 
