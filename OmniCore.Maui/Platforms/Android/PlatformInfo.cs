@@ -15,14 +15,12 @@ namespace OmniCore.Maui.Services
 
         public async Task<bool> VerifyPermissions()
         {
-            if (await CheckAndRequest<Permissions.LocationAlways>() != PermissionStatus.Granted)
-                return false;
-            if (await CheckAndRequest<BluetoothPermissions>() != PermissionStatus.Granted)
-                return false;
-            if (await CheckAndRequest<ForegroundPermissions>() != PermissionStatus.Granted)
-                return false;
-            if (await CheckAndRequest<NotificationPermissions>() != PermissionStatus.Granted)
-                return false;
+            await CheckAndRequest<Permissions.LocationAlways>();
+            await CheckAndRequest<BluetoothPermissions>();
+            await CheckAndRequest<ForegroundPermissions>();
+            await CheckAndRequest<NotificationPermissions>();
+            await CheckAndRequest<Permissions.StorageWrite>();
+            await CheckAndRequest<Permissions.StorageRead>();
             
             var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
             if (pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName))
@@ -68,8 +66,8 @@ namespace OmniCore.Maui.Services
             {
                 (global::Android.Manifest.Permission.Bluetooth, false),
                 (global::Android.Manifest.Permission.BluetoothAdmin, false),
-                (global::Android.Manifest.Permission.BluetoothConnect, true),
-                (global::Android.Manifest.Permission.BluetoothScan, true)
+                (global::Android.Manifest.Permission.BluetoothConnect, false),
+                (global::Android.Manifest.Permission.BluetoothScan, false)
             }.ToArray();
     }
     

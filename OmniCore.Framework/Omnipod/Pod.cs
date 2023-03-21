@@ -41,6 +41,12 @@ public class Pod : IPod
     public DateTimeOffset ValidFrom { get; set; }
     public DateTimeOffset? ValidTo { get; set; }
     
+    public uint? AssumedLot { get; set; }
+
+    public uint? AssumedSerial { get; set; }
+    
+    public uint? AssumedFixedBasalRate { get; set; }
+    
     // Runtime Info
     
     public uint Lot { get; set; }
@@ -116,15 +122,18 @@ public class Pod : IPod
                 {
                     var rd = (byte[]) r.receive_data;
                     var podMessage = PodMessage.FromBody(new Bytes(rd));
-                    await ProcessResponseAsync(podMessage);
+                    if (podMessage != null)
+                        await ProcessResponseAsync(podMessage);
                 }
             }
         }
 
-        if (Progress == PodProgress.Init0)
+        if (Lot == 0 && AssumedLot.HasValue)
+            Lot = AssumedLot.Value;
+        if (Serial == 0 && AssumedSerial.HasValue)
+            Serial = AssumedSerial.Value;
+        if (Progress == PodProgress.Init0 && AssumedLot.HasValue && AssumedSerial.HasValue)
             Progress = PodProgress.Running;
-        Lot = 72402;
-        Serial = 3200578;
     }
     
     public async Task ProcessResponseAsync(IPodMessage message)

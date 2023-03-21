@@ -89,23 +89,53 @@ public class Radio : IRadio
         CancellationToken cancellationToken,
         params byte[] data)
     {
-        await _radioReadyEvent.WaitAsync(cancellationToken);
-        return await ExecuteCommandInternalAsync(command, cancellationToken, data);
+        while (true)
+        {
+            try
+            {
+                await _radioReadyEvent.WaitAsync(cancellationToken);
+                return await ExecuteCommandInternalAsync(command, cancellationToken, data);
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error while bt comm: {e}");
+                _radioReadyEvent.Reset();
+                _connectionLostEvent.Set();
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
+        }
     }
 
     private async Task<IDevice> TryConnectForeverAsync(IAdapter adapter, CancellationToken cancellationToken)
     {
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            adapter = CrossBluetoothLE.Current.Adapter;
             IDevice device = null;
             try
             {
-                Debug.WriteLine($"{Name} connecting");
-                device = await adapter.ConnectToKnownDeviceAsync(Id,
-                    new ConnectParameters(false, true),
-                    cancellationToken);
-                Debug.WriteLine($"{Name} connected");
-                return device;
+                if (CrossBluetoothLE.Current.State == BluetoothState.On)
+                {
+                    using var ctt = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    var timeoutToken = ctt.Token;
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken);
+                    Debug.WriteLine($"{Name} connecting");
+                    device = await adapter.ConnectToKnownDeviceAsync(Id,
+                        new ConnectParameters(false, true),
+                        cts.Token);
+                    Debug.WriteLine($"{Name} connected");
+                    return device;
+                }
+                else
+                {
+                    Debug.WriteLine($"{Name} waiting for bluetooth");
+                    await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
+                }
             }
             catch (TaskCanceledException)
             {
@@ -397,7 +427,10 @@ public class Radio : IRadio
             {
                 retries++;
                 if (retries >= 5)
-                    throw;
+                {
+                    throw new ApplicationException("Exceeded retry count", e);
+                }
+                    
                 await Task.Delay(TimeSpan.FromMilliseconds(150), cancellationToken);
             }
     }
@@ -427,7 +460,9 @@ public class Radio : IRadio
             {
                 retries++;
                 if (retries >= 5)
+                {
                     throw new ApplicationException("Exceeded retry count", ex);
+                }
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
         }

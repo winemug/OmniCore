@@ -17,14 +17,25 @@ public class RaddProcessor
         _podService = podService;
     }
 
-    public async Task<AmqpMessage> ProcessMessageAsync(AmqpMessage message)
+    public async Task<AmqpMessage?> ProcessMessageAsync(AmqpMessage message)
     {
         var rr = JsonSerializer.Deserialize<RaddRequest>(message.Text);
-        var pod = await _podService.GetPodAsync();
+        if (rr == null)
+            return null;
+
+        if (string.IsNullOrEmpty(rr.pod_id))
+            return null;
+        
+        var pod = await _podService.GetPodAsync(Guid.Parse(rr.pod_id));
         var success = true;
         using (var podConnection = await _podService.GetConnectionAsync(pod))
         {
-            if (rr.check)
+            if (rr.next_record_index != null)
+            {
+                success = pod.NextRecordIndex == rr.next_record_index.Value;
+            }
+            
+            if (success && rr.update_status)
             {
                 var response = await podConnection.UpdateStatus();
                 success = response == PodResponse.OK;
@@ -48,13 +59,13 @@ public class RaddProcessor
                 success = response == PodResponse.OK;
             }
 
-            if (success && rr.zero_temp)
+            if (success && rr.temp_basal_ticks.HasValue && rr.temp_basal_half_hours.HasValue)
             {
-                var response = await podConnection.SetTempBasal(0, 4);
+                var response = await podConnection.SetTempBasal(rr.temp_basal_ticks.Value, rr.temp_basal_half_hours.Value);
                 success = response == PodResponse.OK;
             }
 
-            if (success && rr.bolus_ticks.HasValue && rr.bolus_ticks > 0)
+            if (success && rr.bolus_ticks is > 0)
             {
                 var response = await podConnection.Bolus((int)rr.bolus_ticks, 2);
                 success = response == PodResponse.OK;
@@ -67,7 +78,7 @@ public class RaddProcessor
             }
         }
 
-        var resp = new RaddResponse() { success = success, request_id = rr.request_id};
+        var resp = new RaddResponse() { success = success, request_id = rr.request_id, next_record_index=pod.NextRecordIndex};
         return new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
     }
 
@@ -83,13 +94,14 @@ public class RaddRequest
     // public int? medication { get; set; }
     // public int? valid_from { get; set; }
     // public int? valid_to { get; set; }
-    public string request_id { get; set; }
-    
-    public bool ping { get; set; }
+    public string? request_id { get; set; }
+    public string? pod_id { get; set; }
+    public int? next_record_index { get; set; }
     public bool beep { get; set; }
-    public bool check { get; set; }
+    public bool update_status { get; set; }
     public int? bolus_ticks { get; set; }
-    public bool zero_temp { get; set; }
+    public int? temp_basal_ticks { get; set; }
+    public int? temp_basal_half_hours { get; set; }
     public bool cancel_temp { get; set; }
     public bool cancel_bolus { get; set; }
     public bool deactivate { get; set; }
@@ -101,5 +113,6 @@ public class RaddResponse
     // public int? record_index { get; set; }
     public string request_id { get; set; }
     public bool success { get; set; }
+    public int next_record_index { get; set; }
 }
 

@@ -1,10 +1,13 @@
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Pod;
+using Plugin.BLE.Abstractions;
 
 
 namespace OmniCore.Services;
@@ -15,8 +18,29 @@ public class PodService : IPodService
     private IDataService _dataService;
     private IConfigurationStore _configurationStore;
     private IAmqpService _amqpService;
+
+    private List<IPod> _activePods = new List<IPod>();
     public async Task Start()
     {
+        var cc = await _configurationStore.GetConfigurationAsync();
+
+         using var conn = await _dataService.GetConnectionAsync();
+         var rs = await conn.QueryAsync("SELECT * FROM pod");
+         foreach (var r in rs)
+         {
+             var pod = new Pod(_dataService)
+             {
+                 Id = Guid.Parse(r.id),
+                 RadioAddress = (uint)r.radio_address,
+                 UnitsPerMilliliter = 200,
+                 Medication = MedicationType.Insulin,
+                 AssumedLot = (uint)r.assumed_lot,
+                 AssumedSerial = (uint)r.assumed_serial,
+                 AssumedFixedBasalRate = 8
+             };
+             await pod.LoadResponses();
+             _activePods.Add(pod);
+         }
     }
 
     public async Task Stop()
@@ -31,74 +55,59 @@ public class PodService : IPodService
         _configurationStore = configurationStore;
     }
 
-    private IPod _onePod;
-    public async Task<IPod> GetPodAsync()
+    // 0x1F0E89F1
+    // 72402
+    // 3570557
+    
+    public async Task ImportPodAsync(Guid id,
+        uint radioAddress, int unitsPerMilliliter,
+        MedicationType medicationType,
+        uint lot,
+        uint serial,
+        uint activeFixedBasalRateTicks
+        )
     {
-        if (_onePod == null)
+        var cc = await _configurationStore.GetConfigurationAsync();
+        var pod = new Pod(_dataService)
         {
-            using (var conn = await _dataService.GetConnectionAsync())
+            Id = id,
+            RadioAddress = radioAddress,
+            UnitsPerMilliliter = unitsPerMilliliter,
+            Medication = medicationType,
+            AssumedLot = lot,
+            AssumedSerial = serial,
+            AssumedFixedBasalRate = activeFixedBasalRateTicks,
+        };
+
+        using(var conn = await _dataService.GetConnectionAsync())
+        {
+        await conn.ExecuteAsync("INSERT INTO pod(id, profile_id, client_id," +
+                                "radio_address, units_per_ml, medication, valid_from, valid_to," +
+                                "assumed_lot, assumed_serial, assumed_fixed_basal)" +
+                                "VALUES (@id, @profileId, @clientId, @radioAddress, @unitsPerMl," +
+                                "@medication, @valid_from, @valid_to, @assumedLot, @assumedSerial, @assumedFixedBasal)",
+            new
             {
-                var row = await conn.QueryFirstOrDefaultAsync("SELECT * FROM pod WHERE ID=@pod_id",
-                    new
-                    {
-                        pod_id = Guid.Parse("5bce07ad-89a2-4369-a8a0-b02f07fcec58").ToString("N")
-                    });
-                var prr = new PodRuntimeInformation()
-                {
-                    Lot = 72402,
-                    Serial = 3200578,
-                    NextMessageSequence = 0,
-                    NextPacketSequence = 0,
-                    NextRecordIndex = 0,
-                    Progress = PodProgress.Running,
-                };
-
-                if (row == null)
-                {
-                    _onePod = new Pod(_dataService)
-                    {
-                        RadioAddress = 873437826,
-                        UnitsPerMilliliter = 200,
-                        Medication = MedicationType.Insulin,
-                        ValidFrom = DateTimeOffset.Now,
-                        ValidTo = DateTimeOffset.Now + TimeSpan.FromHours(80),
-                        Info = prr
-                    };
-                    _onePod.Id = Guid.Parse("5bce07ad-89a2-4369-a8a0-b02f07fcec58");
-
-                    var cc = await _configurationStore.GetConfigurationAsync();
-                    await conn.ExecuteAsync(
-                        "INSERT INTO pod(id, profile_id, client_id, radio_address, units_per_ml, medication, valid_from, valid_to)" +
-                        " VALUES (@id, @profile_id, @client_id, @ra, @upml, @med, @vf, @vt)",
-                        new
-                        {
-                            id = _onePod.Id.ToString("N"),
-                            profile_id = "0",
-                            client_id = cc.ClientId.Value.ToString("N"),
-                            ra = _onePod.RadioAddress,
-                            upml = _onePod.UnitsPerMilliliter,
-                            med = (int)_onePod.Medication,
-                            vf = _onePod.ValidFrom.ToUnixTimeMilliseconds(),
-                            vt = _onePod.ValidTo?.ToUnixTimeMilliseconds(),
-                        });
-                }
-                else
-                {
-                    _onePod = new Pod(_dataService)
-                    {
-                        Id = Guid.Parse(row.id),
-                        RadioAddress = (uint)row.radio_address,
-                        UnitsPerMilliliter = (int)row.units_per_ml,
-                        Medication = (MedicationType)row.medication,
-                        ValidFrom = DateTimeOffset.FromUnixTimeMilliseconds(row.valid_from),
-                        ValidTo = DateTimeOffset.FromUnixTimeMilliseconds(row.valid_to),
-                    };
-
-                    await _onePod.LoadResponses();
-                }
-            }
+                id = id.ToString("N"),
+                profileId = "0",
+                clientId = cc.ClientId.Value.ToString("N"),
+                radioAddress = radioAddress,
+                unitsPerMl = unitsPerMilliliter,
+                @medication = (int)medicationType,
+                valid_from = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                valid_to = (DateTimeOffset.Now + TimeSpan.FromHours(88)).ToUnixTimeMilliseconds(),
+                assumedLot = lot,
+                assumedSerial = serial,
+                assumedFixedBasal = activeFixedBasalRateTicks
+            });
         }
-        return _onePod;
+        
+        _activePods.Add(pod);
+    }
+    
+    public async Task<IPod?> GetPodAsync(Guid id)
+    {
+        return _activePods.FirstOrDefault(p => p.Id == id);
     }
 
     public async Task<IPodConnection> GetConnectionAsync(

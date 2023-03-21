@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Nito.AsyncEx;
@@ -14,9 +12,7 @@ namespace OmniCore.Services;
 
 public class DataService : IDataService
 {
-    private bool _initialized;
-    private readonly AsyncLock _initializeLock = new();
-    private Task _startupTask;
+    private AsyncManualResetEvent _databaseInitializedEvent = new AsyncManualResetEvent();
 
     public DataService()
     {
@@ -28,26 +24,16 @@ public class DataService : IDataService
 
     public async Task Start()
     {
-        _startupTask = Task.Run(async () => await InitializeDatabaseAsync());
+        await InitializeDatabaseAsync();
     }
 
     public async Task Stop()
     {
-        try
-        {
-            _startupTask.GetAwaiter().GetResult();
-        }
-        catch (Exception e)
-        {
-            Trace.WriteLine($"Error stopping Dataservice, startup task reports: {e}");
-            throw;
-        }
     }
 
     public async Task<SqliteConnection> GetConnectionAsync()
     {
-        if (!_initialized)
-            await InitializeDatabaseAsync();
+        await _databaseInitializedEvent.WaitAsync();
         var conn = new SqliteConnection($"Data Source={DatabasePath}");
         await conn.OpenAsync();
         return conn;
@@ -55,67 +41,57 @@ public class DataService : IDataService
 
     public async Task InitializeDatabaseAsync()
     {
-        using (var _ = await _initializeLock.LockAsync())
+        using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
         {
-            if (!_initialized)
+            var storedVersion = -1;
+            try
             {
-                using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
-                {
-                    var storedVersion = -1;
-                    try
-                    {
-                        await conn.OpenAsync();
-                        var row = await conn.QueryFirstOrDefaultAsync(
-                            "SELECT db_version FROM version");
-                        storedVersion = (int)row.db_version;
-                    }
-                    catch (Exception e)
-                    {
-                        Trace.WriteLine($"Error retrieving db version -- reinitializing. {e}");
-                    }
+                await conn.OpenAsync();
+                await conn.ExecuteAsync("PRAGMA journal_mode=WAL;");
+                var row = await conn.QueryFirstOrDefaultAsync(
+                    "SELECT db_version FROM version");
+                storedVersion = (int)row.db_version;
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"Error retrieving db version -- reinitializing. {e}");
+            }
 
-                    if (storedVersion != DatabaseMigration.LatestVersion)
-                    {
-                        Trace.WriteLine("DB migration started");
-                        await DatabaseMigration.RunMigration(conn, storedVersion);
-                        Trace.WriteLine("DB migration ended");
-                    }
-                }
-
-                _initialized = true;
-                Trace.WriteLine("DB initialized");
+            if (storedVersion != DatabaseMigration.LatestVersion)
+            {
+                Trace.WriteLine("DB migration started");
+                await DatabaseMigration.RunMigration(conn, storedVersion);
+                Trace.WriteLine("DB migration ended");
             }
         }
+        _databaseInitializedEvent.Set();
+        Trace.WriteLine("DB initialized");
     }
 
     public async Task CopyDatabase(string destinationPath)
     {
-        if (_initialized)
-        {
-            _initialized = false;
-            try
-            {
-                using (var _ = await _initializeLock.LockAsync())
-                {
-                    using (var source = File.Open(DatabasePath, FileMode.Open))
-                    {
-                        using (var dest = File.Create(destinationPath))
-                        {
-                            await source.CopyToAsync(dest);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine($"Database Copy failed {e}");
-                throw;
-            }
-            finally
-            {
-                _initialized = true;
-            }
-        }
+        // try
+        // {
+        //     using (var _ = await _initializeLock.LockAsync())
+        //     {
+        //         using (var source = File.Open(DatabasePath, FileMode.Open))
+        //         {
+        //             using (var dest = File.Create(destinationPath))
+        //             {
+        //                 await source.CopyToAsync(dest);
+        //             }
+        //         }
+        //     }
+        // }
+        // catch (Exception e)
+        // {
+        //     Trace.WriteLine($"Database Copy failed {e}");
+        //     throw;
+        // }
+        // finally
+        // {
+        //     _initialized = wasInitialized;
+        // }
     }
 
     public async Task CreatePodMessage(Guid podId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData,

@@ -227,7 +227,8 @@ public class AmqpService : IAmqpService
         try
         {
             var retMessage = await _raddProcessor.ProcessMessageAsync(message);
-            await PublishMessage(retMessage);
+            if (retMessage != null)
+                await PublishMessage(retMessage);
         }
         catch (Exception e)
         {

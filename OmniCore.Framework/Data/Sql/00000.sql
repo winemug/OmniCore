@@ -53,6 +53,9 @@ CREATE TABLE pod
     medication    INTEGER           NOT NULL,
     valid_from    INTEGER           NOT NULL,
     valid_to      INTEGER,
+    assumed_lot   INTEGER,
+    assumed_serial INTEGER,
+    assumed_fixed_basal INTEGER,
     synced        INTEGER DEFAULT 0 NOT NULL
 );
 DROP INDEX IF EXISTS pod_valid;
