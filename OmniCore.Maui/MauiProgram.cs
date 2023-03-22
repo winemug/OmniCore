@@ -51,9 +51,11 @@ public static class MauiProgram
         mauiAppBuilder.Services.AddSingleton<IPodService, PodService>();
         mauiAppBuilder.Services.AddSingleton<IRadioService, RadioService>();
         mauiAppBuilder.Services.AddSingleton<IAmqpService, AmqpService>();
+        mauiAppBuilder.Services.AddSingleton<ISyncService, SyncService>();
+        mauiAppBuilder.Services.AddSingleton<IRaddService, RaddService>();
         mauiAppBuilder.Services.AddSingleton<ICoreService, CoreService>();
         
-        mauiAppBuilder.Services.AddSingleton<RaddProcessor>();
+        mauiAppBuilder.Services.AddSingleton<RaddService>();
 
         mauiAppBuilder.Services.AddTransient<IRadio, Radio>();
         mauiAppBuilder.Services.AddTransient<IRadioConnection, RadioConnection >();

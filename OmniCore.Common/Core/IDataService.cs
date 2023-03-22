@@ -10,5 +10,5 @@ public interface IDataService : ICoreService
     Task<SqliteConnection> GetConnectionAsync();
     Task InitializeDatabaseAsync();
     Task CopyDatabase(string destinationPath);
-    Task CreatePodMessage(Guid podId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData, byte[] receivedData, ExchangeResult result);
+    Task CreatePodMessage(Guid podId, Guid clientId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData, byte[] receivedData, ExchangeResult result);
 }

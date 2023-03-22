@@ -13,11 +13,12 @@ namespace OmniCore.Services;
 public class DataService : IDataService
 {
     private AsyncManualResetEvent _databaseInitializedEvent = new AsyncManualResetEvent();
-
+    private bool _initialized;
     public DataService()
     {
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         DatabasePath = Path.Combine(basePath, "omnicore.db3");
+        _initialized = false;
     }
 
     public string DatabasePath { get; }
@@ -33,15 +34,16 @@ public class DataService : IDataService
 
     public async Task<SqliteConnection> GetConnectionAsync()
     {
-        await _databaseInitializedEvent.WaitAsync();
-        var conn = new SqliteConnection($"Data Source={DatabasePath}");
+        if (!_initialized)
+            await _databaseInitializedEvent.WaitAsync();
+        var conn = new SqliteConnection($"Data Source={DatabasePath};Cache=Shared");
         await conn.OpenAsync();
         return conn;
     }
 
     public async Task InitializeDatabaseAsync()
     {
-        using (var conn = new SqliteConnection($"Data Source={DatabasePath}"))
+        using (var conn = new SqliteConnection($"Data Source={DatabasePath};Cache=Shared"))
         {
             var storedVersion = -1;
             try
@@ -65,6 +67,7 @@ public class DataService : IDataService
             }
         }
         _databaseInitializedEvent.Set();
+        _initialized = true;
         Trace.WriteLine("DB initialized");
     }
 
@@ -94,19 +97,20 @@ public class DataService : IDataService
         // }
     }
 
-    public async Task CreatePodMessage(Guid podId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData,
+    public async Task CreatePodMessage(Guid podId, Guid clientId, int recordIndex, DateTimeOffset sendStart, DateTimeOffset receiveEnd, byte[] sentData,
         byte[] receivedData, ExchangeResult result)
     {
         using (var conn = await GetConnectionAsync())
         {
             await conn.ExecuteAsync(
-                "INSERT INTO pod_message(pod_id, record_index, send_start, send_data, " +
+                "INSERT INTO pod_message(pod_id, client_id, record_index, send_start, send_data, " +
                 "receive_end, receive_data, exchange_result) " +
-                "VALUES(@pod_id, @record_index, @send_start, @send_data, " +
+                "VALUES(@pod_id, @client_id, @record_index, @send_start, @send_data, " +
                 "@receive_end, @receive_data, @exchange_result)",
                 new
                 {
                     pod_id = podId.ToString("N"),
+                    client_id = clientId.ToString("N"),
                     record_index = recordIndex,
                     send_start = sendStart.ToUnixTimeMilliseconds(),
                     send_data = sentData,

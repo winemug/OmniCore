@@ -29,7 +29,7 @@ public enum BgcUnit
     mmolL = 1
 }
 
-public class BgcEntry : ISyncableEntry
+public class BgcEntry
 {
     public Guid ProfileId { get; set; }
     public Guid ClientId { get; set; }

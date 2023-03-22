@@ -17,14 +17,27 @@ public class PodService : IPodService
     private IRadioService _radioService;
     private IDataService _dataService;
     private IConfigurationStore _configurationStore;
-    private IAmqpService _amqpService;
-
+    private ISyncService _syncService;
+    
     private List<IPod> _activePods = new List<IPod>();
+    public PodService(IDataService dataService, IRadioService radioService,
+        IConfigurationStore configurationStore, ISyncService syncService)
+    {
+        _dataService = dataService;
+        _radioService = radioService;
+        _configurationStore = configurationStore;
+        _syncService = syncService;
+    }
+
     public async Task Start()
     {
         var cc = await _configurationStore.GetConfigurationAsync();
 
+        // await ImportPodAsync(Guid.NewGuid(), 0x1F0E89F2, 200,
+        //     MedicationType.Insulin, 72402, 3460572, 12);
+        
          using var conn = await _dataService.GetConnectionAsync();
+         
          var rs = await conn.QueryAsync("SELECT * FROM pod");
          foreach (var r in rs)
          {
@@ -34,12 +47,15 @@ public class PodService : IPodService
                  RadioAddress = (uint)r.radio_address,
                  UnitsPerMilliliter = 200,
                  Medication = MedicationType.Insulin,
+                 ValidFrom = DateTimeOffset.FromUnixTimeMilliseconds((long)r.valid_from),
+                 ValidTo = DateTimeOffset.FromUnixTimeMilliseconds((long)r.valid_to),
                  AssumedLot = (uint)r.assumed_lot,
                  AssumedSerial = (uint)r.assumed_serial,
                  AssumedFixedBasalRate = 8
              };
              await pod.LoadResponses();
-             _activePods.Add(pod);
+             if (pod.ValidTo > DateTimeOffset.Now && pod.Progress < PodProgress.Inactive)
+                _activePods.Add(pod);
          }
     }
 
@@ -47,12 +63,9 @@ public class PodService : IPodService
     {
     }
 
-    public PodService(IDataService dataService, IRadioService radioService,
-        IConfigurationStore configurationStore)
+    public async Task<List<IPod>> GetPodsAsync()
     {
-        _dataService = dataService;
-        _radioService = radioService;
-        _configurationStore = configurationStore;
+        return _activePods;
     }
 
     // 0x1F0E89F1
@@ -101,8 +114,6 @@ public class PodService : IPodService
                 assumedFixedBasal = activeFixedBasalRateTicks
             });
         }
-        
-        _activePods.Add(pod);
     }
     
     public async Task<IPod?> GetPodAsync(Guid id)
@@ -119,6 +130,6 @@ public class PodService : IPodService
             throw new ApplicationException("No radios available");
 
         var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
-        return new PodConnection(pod, radioConnection, podAllocationLockDisposable, _dataService);
+        return new PodConnection(pod, radioConnection, podAllocationLockDisposable, _dataService, _configurationStore, _syncService);
     }
 }

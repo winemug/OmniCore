@@ -8,22 +8,25 @@ namespace OmniCore.Services;
 public class CoreService : ICoreService
 {
     public IRadioService RadioService { get; set; }
-
     public IAmqpService AmqpService { get; set; }
-
     public IPodService PodService { get; set; }
-
     public IDataService DataService { get; set; }
+    public ISyncService SyncService { get; set; }
+    public IRaddService RaddService { get; set; }
 
     public CoreService(IRadioService radioService,
         IAmqpService amqpService,
         IPodService podService,
-        IDataService dataService)
+        IDataService dataService,
+        ISyncService syncService,
+        IRaddService raddService)
     {
         RadioService = radioService;
         AmqpService = amqpService;
         PodService = podService;
         DataService = dataService;
+        SyncService = syncService;
+        RaddService = raddService;
     }
 
     public async Task Start()
@@ -36,7 +39,9 @@ public class CoreService : ICoreService
         await Task.WhenAll(
             RadioService.Start(),
             PodService.Start(),
-            AmqpService.Start()
+            AmqpService.Start(),
+            SyncService.Start(),
+            RaddService.Start()
         );
         Debug.WriteLine("Core services started");
     }

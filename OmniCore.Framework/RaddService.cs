@@ -5,26 +5,52 @@ using OmniCore.Services.Interfaces.Pod;
 
 namespace OmniCore.Services;
 
-public class RaddProcessor
+public class RaddService : IRaddService
 {
     private IDataService _dataService;
     private IPodService _podService;
-    
-    public RaddProcessor(IDataService dataService,
-        IPodService podService)
+    private IAmqpService _amqpService;
+    public RaddService(
+        IDataService dataService,
+        IPodService podService,
+        IAmqpService amqpService)
     {
         _dataService = dataService;
         _podService = podService;
+        _amqpService = amqpService;
     }
 
-    public async Task<AmqpMessage?> ProcessMessageAsync(AmqpMessage message)
+    public async Task Start()
+    {
+        _amqpService.RegisterMessageProcessor(ProcessMessageAsync);
+    }
+
+    public async Task Stop()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<bool> ProcessMessageAsync(AmqpMessage message)
     {
         var rr = JsonSerializer.Deserialize<RaddRequest>(message.Text);
         if (rr == null)
-            return null;
+            return false;
 
         if (string.IsNullOrEmpty(rr.pod_id))
-            return null;
+        {
+            var pods = await _podService.GetPodsAsync();
+            var msg = new AmqpMessage
+            {
+                Text = JsonSerializer.Serialize(
+                    new
+                    {
+                        request_id = rr.request_id,
+                        pod_ids = pods.Select(p => p.Id.ToString("N")).ToList()
+                    })
+            };
+            await _amqpService.PublishMessage(msg);
+            return true;
+        }
         
         var pod = await _podService.GetPodAsync(Guid.Parse(rr.pod_id));
         var success = true;
@@ -79,9 +105,12 @@ public class RaddProcessor
         }
 
         var resp = new RaddResponse() { success = success, request_id = rr.request_id, next_record_index=pod.NextRecordIndex};
-        return new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
-    }
+        var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
+        await _amqpService.PublishMessage(respMessage);
 
+        return true;
+        
+    }
 }
 
 public class RaddRequest

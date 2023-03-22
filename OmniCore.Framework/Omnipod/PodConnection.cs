@@ -22,17 +22,23 @@ public class PodConnection : IDisposable, IPodConnection
     private readonly IPod _pod;
     private readonly IDisposable _podLockDisposable;
     private readonly IRadioConnection _radioConnection;
+    private readonly IConfigurationStore _configurationStore;
+    private readonly ISyncService _syncService;
 
     public PodConnection(
         IPod pod,
         IRadioConnection radioConnection,
         IDisposable podLockDisposable,
-        IDataService dataService)
+        IDataService dataService,
+        IConfigurationStore configurationStore,
+        ISyncService syncService)
     {
         _pod = pod;
         _radioConnection = radioConnection;
         _podLockDisposable = podLockDisposable;
         _dataService = dataService;
+        _configurationStore = configurationStore;
+        _syncService = syncService;
     }
 
     public void Dispose()
@@ -425,6 +431,9 @@ public class PodConnection : IDisposable, IPodConnection
         int authRetries = 0,
         int syncRetries = 0)
     {
+        var cc = await _configurationStore.GetConfigurationAsync();
+        var clientId = cc.ClientId.Value;
+        
         var initialPacketSequence = _pod.NextPacketSequence;
         var initialMessageSequence = _pod.NextMessageSequence;
 
@@ -439,9 +448,10 @@ public class PodConnection : IDisposable, IPodConnection
         var sentData = messageToSend.GetBody().ToArray();
         var receivedData = result.Message?.Body?.ToArray();
 
-        await _dataService.CreatePodMessage(_pod.Id, _pod.NextRecordIndex,
+        await _dataService.CreatePodMessage(_pod.Id, clientId, _pod.NextRecordIndex,
             sendStart, receiveEnd,
             sentData, receivedData, result);
+        await _syncService.SyncPodMessage(_pod.Id, _pod.NextRecordIndex);
         _pod.NextRecordIndex++;
 
         if (result.Error != CommunicationError.NoResponse)

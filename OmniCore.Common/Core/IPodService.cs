@@ -13,6 +13,7 @@ public interface IPodService : ICoreService
         uint Serial,
         uint activeFixedBasalRateTicks);
     Task<IPod> GetPodAsync(Guid id);
+    Task<List<IPod>> GetPodsAsync();
 
     Task<IPodConnection> GetConnectionAsync(
         IPod pod,

@@ -17,7 +17,6 @@ namespace OmniCore.Services;
 
 public class AmqpService : IAmqpService
 {
-
     public string Dsn { get; set; }
     public string Exchange { get; set; }
     public string Queue { get; set; }
@@ -28,12 +27,12 @@ public class AmqpService : IAmqpService
     private readonly SortedList<DateTimeOffset, string> _processedMessages;
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
 
-    private RaddProcessor _raddProcessor;
-    public AmqpService(RaddProcessor raddProcessor)
+    private ConcurrentBag<Func<AmqpMessage, Task<bool>>> _messageProcessors;
+    public AmqpService()
     {
-        _raddProcessor = raddProcessor;
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _processedMessages = new SortedList<DateTimeOffset, string>();
+        _messageProcessors = new ConcurrentBag<Func<AmqpMessage, Task<bool>>>();
     }
 
     public void SetEndpoint(AmqpEndpoint endpoint)
@@ -119,8 +118,11 @@ public class AmqpService : IAmqpService
             };
             try
             {
-                await ProcessMessage(message);
-                subChannel.BasicAck(ea.DeliveryTag, false);
+                bool success = await ProcessMessage(message);
+                if (success)
+                    subChannel.BasicAck(ea.DeliveryTag, false);
+                else
+                    subChannel.BasicNack(ea.DeliveryTag, false, true);
             }
             catch (Exception e)
             {
@@ -163,8 +165,9 @@ public class AmqpService : IAmqpService
                         var properties = pubChannel.CreateBasicProperties();
                         properties.MessageId = message.Id;
                         properties.UserId = UserId;
+                        properties.Headers = message.Headers;
                         pendingConfirmations.TryAdd(sequenceNo, message);
-                        pubChannel.BasicPublish(Exchange, "", false,
+                        pubChannel.BasicPublish(Exchange, message.Route, false,
                             properties, message.Body);
                         Debug.WriteLine($"published message: {message.Text}");
                     }
@@ -192,6 +195,12 @@ public class AmqpService : IAmqpService
                                 _publishQueue.Enqueue(pendingMessage);
                         }
 
+                        foreach (var message in pendingConfirmations.Values)
+                        {
+                            if (message.OnPublishConfirmed != null)
+                                message.OnPublishConfirmed(message);
+                        }
+
                         pendingConfirmations.Clear();
                     }
                 }
@@ -207,32 +216,31 @@ public class AmqpService : IAmqpService
         connection.Dispose();
     }
 
-    private async Task ProcessMessage(AmqpMessage message)
+    private async Task<bool> ProcessMessage(AmqpMessage message)
     {
-        var alreadyProcessed = false;
-        if (!string.IsNullOrEmpty(message.Id))
+        if (!string.IsNullOrEmpty(message.Id) && _processedMessages.ContainsValue(message.Id))
         {
-            if (!_processedMessages.ContainsValue(message.Id))
-            {
-                _processedMessages.Add(DateTimeOffset.Now, message.Id);
-            }
-            else
-            {
-                alreadyProcessed = true;
-                Debug.WriteLine($"Message with id {message.Id} already processed");
-            }
+            Debug.WriteLine($"Message with id {message.Id} already processed");
+            return true;
         }
 
-        if (!alreadyProcessed) Debug.WriteLine($"Incoming amqp message: {message.Text}");
-        try
+        Debug.WriteLine($"Incoming amqp message: {message.Text}");
+        var processed = false;
+        foreach (var pf in _messageProcessors)
         {
-            var retMessage = await _raddProcessor.ProcessMessageAsync(message);
-            if (retMessage != null)
-                await PublishMessage(retMessage);
-        }
-        catch (Exception e)
-        {
-            Trace.WriteLine($"Radd proc error: {e}");
+            try
+            {
+                processed = await pf(message);
+                if (processed)
+                {
+                    _processedMessages.Add(DateTimeOffset.Now, message.Id);
+                    break;
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.Write($"Error while processing {e}");
+            }
         }
 
         var keysToRemove = _processedMessages.Where(p =>
@@ -240,5 +248,12 @@ public class AmqpService : IAmqpService
             .Select(p => p.Key)
             .ToArray();
         foreach (var key in keysToRemove) _processedMessages.Remove(key);
+
+        return processed;
+    }
+    
+    public void RegisterMessageProcessor(Func<AmqpMessage, Task<bool>> function)
+    {
+        _messageProcessors.Add(function);
     }
 }
