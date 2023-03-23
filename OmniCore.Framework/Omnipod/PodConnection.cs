@@ -65,64 +65,210 @@ public class PodConnection : IDisposable, IPodConnection
         }
     }
 
-    public async Task<PodResponse> Pair(CancellationToken cancellationToken = default)
+    public async Task<PodResponse> PrimePodAsync(
+        DateOnly podDate,
+        TimeOnly podTime,
+        bool relaxDeliveryCrosschecks,
+        CancellationToken cancellationToken)
     {
-        if (_pod.Progress >= PodProgress.Paired)
+        if (_pod.Progress > PodProgress.Priming)
             return PodResponse.NotAllowed;
 
-        PodResponse result;
-        if (_pod.Progress == PodProgress.Init0)
+        PodResponse result = PodResponse.OK;
+        if (_pod.Progress < PodProgress.Paired)
         {
-            result = await SendRequestAsync(false,
-                cancellationToken,
-                new[]
-                {
-                    new RequestAssignAddressPart(_pod.RadioAddress)
-                }
-            );
+            result = await SetRadioAddress(cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+        }
+        
+        if (_pod.Progress == PodProgress.Paired)
+        {
+            result = await SetupPod(podDate, podTime, 4, cancellationToken);
             if (result != PodResponse.OK)
                 return result;
         }
 
-        var now = DateTimeOffset.Now;
+        if (_pod.Progress == PodProgress.Paired)
+        {
+            result = await ConfigureAlerts(new[]
+            {
+                new AlertConfiguration
+                {
+                    AlertIndex = 7,
+                    SetActive = true,
+                    AlertAfter = 5,
+                    AlertDurationMinutes = 55,
+                    BeepType = BeepType.Beep4x,
+                    BeepPattern = BeepPattern.OnceEveryFifteenMinutes
+                }
+            }, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+        }
+
+        if (relaxDeliveryCrosschecks && _pod.Progress == PodProgress.Paired)
+        {
+            result = await SetDeliveryFlags(0, 0, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+        }
+        
+        if (_pod.Progress == PodProgress.Paired)
+        {
+            result = await Bolus(52, 1, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (!_pod.ImmediateBolusActive || _pod.Progress != PodProgress.Priming
+                || _pod.Faulted)
+                return PodResponse.Error;
+            await Task.Delay(TimeSpan.FromSeconds(52));
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+        }
+
+        if (_pod.Progress == PodProgress.Priming)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(_pod.PulsesPending + 2));
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (_pod.Progress != PodProgress.Primed)
+                return PodResponse.Error;
+        }
+
+        if (_pod.Progress != PodProgress.Primed)
+            return PodResponse.Error;
+
+        return PodResponse.OK;
+    }
+
+    public async Task<PodResponse> StartPodAsync(
+        TimeOnly podTime,
+        BasalRateEntry[] basalRateEntries,
+        CancellationToken cancellationToken = default)
+    {
+        if (_pod.Progress < PodProgress.Primed)
+            return PodResponse.NotAllowed;
+        if (_pod.Progress >= PodProgress.Running)
+            return PodResponse.NotAllowed;
+
+        PodResponse result;
+        if (_pod.Progress == PodProgress.Primed)
+        {
+            result = await SetBasalSchedule(podTime, basalRateEntries, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (_pod.Progress != PodProgress.BasalSet)
+                return PodResponse.Error;
+        }
+
+        if (_pod.Progress == PodProgress.BasalSet)
+        {
+            result = await ConfigureAlerts(new[]
+            {
+                new AlertConfiguration
+                {
+                    AlertIndex = 7,
+                    SetActive = false,
+                    AlertAfter = 0,
+                    AlertDurationMinutes = 0,
+                    BeepType = BeepType.NoSound,
+                    BeepPattern = BeepPattern.Once
+                },
+                new AlertConfiguration
+                {
+                    AlertIndex = 0,
+                    SetActive = false,
+                    SetAutoOff = true,
+                    AlertAfter = 0,
+                    AlertDurationMinutes = 15,
+                    BeepType = BeepType.BipBeep4x,
+                    BeepPattern = BeepPattern.OnceEveryMinuteForFifteenMinutes
+                }
+            }, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (_pod.Faulted)
+                return PodResponse.Error;
+            
+            result = await Bolus(10, 1, cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (!_pod.ImmediateBolusActive || _pod.Progress != PodProgress.Inserting
+                                           || _pod.Faulted)
+                return PodResponse.Error;
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+        }
+        
+        if (_pod.Progress == PodProgress.Inserting)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(_pod.PulsesPending + 2));
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodResponse.OK)
+                return result;
+            if (_pod.Progress != PodProgress.Running)
+                return PodResponse.Error;
+        }
+        
+        return PodResponse.OK;
+    }
+
+    private async Task<PodResponse> SetRadioAddress(CancellationToken cancellationToken = default)
+    {
+        if (_pod.Progress >= PodProgress.Paired)
+            return PodResponse.NotAllowed;
+        
+        return await SendRequestAsync(false,
+            cancellationToken,
+            new[]
+            {
+                new RequestAssignAddressPart(_pod.RadioAddress)
+            }
+        );
+    }
+
+    private async Task<PodResponse> SetupPod(DateOnly podDate, TimeOnly podTime,
+        int packetTimeout = 0, CancellationToken cancellationToken = default)
+    {
+        if (_pod.Progress != PodProgress.Paired)
+            return PodResponse.NotAllowed;
+        
         return await SendRequestAsync(false,
             cancellationToken,
             new[]
             {
                 new RequestSetupPodPart(_pod.RadioAddress,
-                    _pod.Lot, _pod.Serial, 4,
-                    now.Year, now.Month, now.Day, now.Hour, now.Minute)
+                    _pod.Lot, _pod.Serial, packetTimeout,
+                    podDate.Year, podDate.Month, podDate.Day, podTime.Hour, podTime.Minute)
             }
         );
     }
 
-    public async Task<PodResponse> Activate(CancellationToken cancellationToken = default)
+    private async Task<PodResponse> SetDeliveryFlags(byte b16, byte b17, CancellationToken cancellationToken = default)
     {
         if (_pod.Progress != PodProgress.Paired)
             return PodResponse.NotAllowed;
-
-        PodResponse result;
-        result = await SendRequestAsync(false,
+        
+        return await SendRequestAsync(false,
             cancellationToken,
             new[]
             {
-                new RequestStatusPart(RequestStatusType.Default)
+                new RequestSetDeliveryFlagsPart(b16, b17)
             }
         );
-        if (result != PodResponse.OK)
-            return result;
-        if (_pod.Progress != PodProgress.Paired)
-            return PodResponse.NotAllowed;
-
-        throw new NotImplementedException();
     }
 
-
-    public async Task<PodResponse> Start(
+    public async Task<PodResponse> SetBasalSchedule(
+        TimeOnly podTime,
         BasalRateEntry[] basalRateEntries,
         CancellationToken cancellationToken = default)
     {
-        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Running)
+        if (_pod.Progress < PodProgress.Primed || _pod.Progress > PodProgress.RunningLow)
             return PodResponse.NotAllowed;
 
         PodResponse result;
@@ -136,12 +282,32 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Running)
-            return PodResponse.NotAllowed;
-
-        throw new NotImplementedException();
+        if (_pod.BasalActive)
+        {
+            result = await SendRequestAsync(false, cancellationToken,
+                new MessagePart[]
+                {
+                    new RequestCancelPart(BeepType.NoSound,
+                        false,
+                        false,
+                        true)
+                });
+            if (result != PodResponse.OK)
+                return result;
+            if (_pod.BasalActive)
+                return PodResponse.Error;
+        }
+        
+        return await SendRequestAsync(false,
+            cancellationToken,
+            new MessagePart[]
+            {
+                new RequestInsulinSchedulePart(basalRateEntries),
+                new RequestBasalPart(basalRateEntries)
+            }
+        );
     }
-
+    
     public async Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default)
     {
         if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
@@ -154,6 +320,37 @@ public class PodConnection : IDisposable, IPodConnection
                 new RequestStatusPart(RequestStatusType.Default)
             }
         );
+    }
+
+    public async Task<PodResponse> ConfigureAlerts(
+        AlertConfiguration[] alertConfigurations,
+        CancellationToken cancellationToken = default)
+    {
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Faulted)
+            return PodResponse.NotAllowed;
+
+        var result = await SendRequestAsync(false,
+            cancellationToken,
+            new[]
+            {
+                new RequestStatusPart(RequestStatusType.Default)
+            }
+        );
+        if (result != PodResponse.OK)
+            return result;
+
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Faulted)
+            return PodResponse.NotAllowed;
+
+        result = await SendRequestAsync(false,
+            cancellationToken,
+            new[]
+            {
+                new RequestConfigureAlertsPart(alertConfigurations)
+            }
+        );
+
+        return result;
     }
 
     public async Task<PodResponse> Beep(BeepType type, CancellationToken cancellationToken = default)
@@ -202,18 +399,18 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (!_pod.TempBasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
-            return PodResponse.NotAllowed;
-
         if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
+
+        var cancelBolus = (_pod.ImmediateBolusActive || _pod.ExtendedBolusActive);
+        var cancelTempBasal = _pod.TempBasalActive;
 
         return await SendRequestAsync(false, cancellationToken,
             new MessagePart[]
             {
                 new RequestCancelPart(BeepType.NoSound,
-                    false,
-                    true,
+                    cancelBolus,
+                    cancelTempBasal,
                     false)
             });
     }
@@ -240,11 +437,25 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.TempBasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
-            return PodResponse.NotAllowed;
-
         if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
+        
+        var cancelBolus = (_pod.ImmediateBolusActive || _pod.ExtendedBolusActive);
+        var cancelTempBasal = _pod.TempBasalActive;
+
+        if (cancelBolus || cancelTempBasal)
+        {
+            result = await SendRequestAsync(false, cancellationToken,
+                new MessagePart[]
+                {
+                    new RequestCancelPart(BeepType.NoSound,
+                        cancelBolus,
+                        cancelTempBasal,
+                        false)
+                });
+            if (result != PodResponse.OK)
+                return result;
+        }
 
         var bre = new BasalRateEntry
         {
@@ -282,8 +493,19 @@ public class PodConnection : IDisposable, IPodConnection
             return result;
 
         if (_pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
-            return PodResponse.NotAllowed;
-
+        {
+            result = await SendRequestAsync(false, cancellationToken,
+                new MessagePart[]
+                {
+                    new RequestCancelPart(BeepType.NoSound,
+                        true,
+                        false,
+                        false)
+                });
+            if (result != PodResponse.OK)
+                return result;
+        }
+            
         if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
             return PodResponse.NotAllowed;
 
@@ -297,36 +519,6 @@ public class PodConnection : IDisposable, IPodConnection
             {
                 new RequestInsulinSchedulePart(be),
                 new RequestBolusPart(be)
-            });
-    }
-
-    public async Task<PodResponse> CancelBasal(CancellationToken cancellationToken = default)
-    {
-        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
-            return PodResponse.NotAllowed;
-
-        var result = await SendRequestAsync(false, cancellationToken,
-            new MessagePart[]
-            {
-                new RequestStatusPart(RequestStatusType.Default)
-            });
-
-        if (result != PodResponse.OK)
-            return result;
-
-        if (!_pod.BasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
-            return PodResponse.NotAllowed;
-
-        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
-            return PodResponse.NotAllowed;
-
-        return await SendRequestAsync(false, cancellationToken,
-            new MessagePart[]
-            {
-                new RequestCancelPart(BeepType.NoSound,
-                    false,
-                    false,
-                    true)
             });
     }
 
@@ -360,33 +552,6 @@ public class PodConnection : IDisposable, IPodConnection
             });
     }
 
-    public async Task<PodResponse> Suspend(CancellationToken cancellationToken = default)
-    {
-        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
-            return PodResponse.NotAllowed;
-
-        var result = await SendRequestAsync(false,
-            cancellationToken,
-            new[]
-            {
-                new RequestStatusPart(RequestStatusType.Default)
-            }
-        );
-        if (result != PodResponse.OK)
-            return result;
-
-        if (_pod.Progress < PodProgress.Running || _pod.Progress >= PodProgress.Faulted)
-            return PodResponse.NotAllowed;
-
-        return await SendRequestAsync(false, cancellationToken,
-            new MessagePart[]
-            {
-                new RequestCancelPart(BeepType.NoSound,
-                    _pod.ImmediateBolusActive,
-                    _pod.TempBasalActive,
-                    _pod.BasalActive)
-            });
-    }
 
     public async Task<PodResponse> Deactivate(CancellationToken cancellationToken = default)
     {

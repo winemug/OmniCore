@@ -2,9 +2,9 @@ namespace OmniCore.Services.Interfaces.Pod;
 
 public enum PodProgress
 {
-    Init0 = 0,
-    Init1 = 1,
-    Init2 = 2,
+    NotInitialized = 0,
+    TankPowerActivated = 1,
+    TankFillCompleted = 2,
     Paired = 3,
     Priming = 4,
     Primed = 5,
@@ -17,6 +17,5 @@ public enum PodProgress
     Unknown12 = 12,
     Faulted = 13,
     ActivationExpired = 14,
-    Inactive = 15,
-    None = 0xFF
+    Inactive = 15
 }

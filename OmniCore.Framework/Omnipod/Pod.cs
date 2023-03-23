@@ -132,7 +132,7 @@ public class Pod : IPod
             Lot = AssumedLot.Value;
         if (Serial == 0 && AssumedSerial.HasValue)
             Serial = AssumedSerial.Value;
-        if (Progress == PodProgress.Init0 && AssumedLot.HasValue && AssumedSerial.HasValue)
+        if (Progress == PodProgress.NotInitialized && AssumedLot.HasValue && AssumedSerial.HasValue)
             Progress = PodProgress.Running;
     }
     
