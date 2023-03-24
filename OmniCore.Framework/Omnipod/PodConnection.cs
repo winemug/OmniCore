@@ -307,6 +307,20 @@ public class PodConnection : IDisposable, IPodConnection
             }
         );
     }
+
+    public async Task<PodResponse> AcknowledgeAlerts(CancellationToken cancellationToken = default)
+    {
+        if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
+            return PodResponse.NotAllowed;
+
+        return await SendRequestAsync(false,
+            cancellationToken,
+            new[]
+            {
+                new RequestAcknowledgeAlertsPart()
+            }
+        );
+    }
     
     public async Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default)
     {

@@ -28,7 +28,6 @@ public class SyncService : ISyncService
         var cc = await _configurationStore.GetConfigurationAsync();
         var conn = await _dataService.GetConnectionAsync();
 
-        // await conn.ExecuteAsync("UPDATE pod_message set client_id=@id", new { id=cc.ClientId.Value.ToString("N")});
         // await conn.ExecuteAsync("UPDATE pod SET synced = 0");
         // await conn.ExecuteAsync("UPDATE pod_message SET synced = 0");
         

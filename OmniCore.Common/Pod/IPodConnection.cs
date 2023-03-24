@@ -10,7 +10,7 @@ public interface IPodConnection : IDisposable
     Task<PodResponse> StartPodAsync(TimeOnly podTime, BasalRateEntry[] basalRateEntries, CancellationToken cancellationToken = default);
     Task<PodResponse> ConfigureAlerts(
         AlertConfiguration[] alertConfigurations,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
     Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default);
     Task<PodResponse> Beep(BeepType type, CancellationToken cancellationToken = default);
     Task<PodResponse> SetBasalSchedule(
@@ -28,4 +28,5 @@ public interface IPodConnection : IDisposable
         CancellationToken cancellationToken = default);
     Task<PodResponse> CancelBolus(CancellationToken cancellationToken = default);
     Task<PodResponse> Deactivate(CancellationToken cancellationToken = default);
+    Task<PodResponse> AcknowledgeAlerts(CancellationToken cancellationToken = default);
 }

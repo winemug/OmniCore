@@ -104,7 +104,11 @@ public class RaddService : IRaddService
             }
         }
 
-        var resp = new RaddResponse() { success = success, request_id = rr.request_id, next_record_index=pod.NextRecordIndex};
+        var resp = new RaddResponse()
+        {
+            success = success, request_id = rr.request_id, next_record_index=pod.NextRecordIndex,
+            minutes = pod.ActiveMinutes, remaining = pod.PulsesRemaining, delivered = pod.PulsesDelivered
+        };
         var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
         await _amqpService.PublishMessage(respMessage);
 
@@ -143,5 +147,8 @@ public class RaddResponse
     public string request_id { get; set; }
     public bool success { get; set; }
     public int next_record_index { get; set; }
+    public int? remaining { get; set; }
+    
+    public int delivered { get; set; }
+    public int minutes { get; set; }
 }
-
