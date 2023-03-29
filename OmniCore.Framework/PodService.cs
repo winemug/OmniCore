@@ -32,9 +32,6 @@ public class PodService : IPodService
     public async Task Start()
     {
         var cc = await _configurationStore.GetConfigurationAsync();
-
-        // await ImportPodAsync(Guid.NewGuid(), 0x1F0E89F2, 200,
-        //     MedicationType.Insulin, 72402, 3460572, 12);
         
          using var conn = await _dataService.GetConnectionAsync();
          
@@ -65,12 +62,8 @@ public class PodService : IPodService
 
     public async Task<List<IPod>> GetPodsAsync()
     {
-        return _activePods;
+        return _activePods.Where(p => p.Progress < PodProgress.Inactive).ToList();
     }
-
-    // 0x1F0E89F1
-    // 72402
-    // 3570557
     
     public async Task ImportPodAsync(Guid id,
         uint radioAddress, int unitsPerMilliliter,

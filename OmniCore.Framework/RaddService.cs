@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
@@ -10,14 +11,18 @@ public class RaddService : IRaddService
     private IDataService _dataService;
     private IPodService _podService;
     private IAmqpService _amqpService;
+    private IRadioService _radioService;
+    
     public RaddService(
         IDataService dataService,
         IPodService podService,
-        IAmqpService amqpService)
+        IAmqpService amqpService,
+        IRadioService radioService)
     {
         _dataService = dataService;
         _podService = podService;
         _amqpService = amqpService;
+        _radioService = radioService;
     }
 
     public async Task Start()
@@ -38,19 +43,79 @@ public class RaddService : IRaddService
 
         if (string.IsNullOrEmpty(rr.pod_id))
         {
+            if (rr.transfer_active_serial.HasValue && rr.transfer_active_lot.HasValue)
+            {
+                uint? acquired_address = null;
+                if (!rr.transfer_active_address.HasValue)
+                {
+                    using var rc = await _radioService.GetIdealConnectionAsync();
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            var packet = await rc.TryGetPacket(0, 1000);
+                            if (packet != null)
+                            {
+                                Debug.WriteLine($"Packet: {packet}");
+                                if (acquired_address.HasValue && acquired_address.Value != packet.Address)
+                                {
+                                    break;
+                                }
+                                acquired_address = packet.Address;
+                            }
+                        }
+
+                        if (acquired_address.HasValue)
+                            break;
+                    }
+
+                    if (!acquired_address.HasValue)
+                    {
+                        var msg = new AmqpMessage
+                        {
+                            Text = JsonSerializer.Serialize(
+                                new
+                                {
+                                    request_id = rr.request_id,
+                                    success = false
+                                })
+                        };
+                        await _amqpService.PublishMessage(msg);
+                        return true;
+                    }
+
+                    rr.transfer_active_address = acquired_address;
+
+                    while (true)
+                    {
+                        var packet = await rc.TryGetPacket(0, 5000);
+                        if (packet == null)
+                            break;
+                    }
+                }
+
+                var podId = Guid.NewGuid();
+                await _podService.ImportPodAsync(podId, rr.transfer_active_address.Value,
+                    200, MedicationType.Insulin,
+                    rr.transfer_active_lot.Value, rr.transfer_active_serial.Value,
+                    14);
+                
+            }
             var pods = await _podService.GetPodsAsync();
-            var msg = new AmqpMessage
+            var podsmsg = new AmqpMessage
             {
                 Text = JsonSerializer.Serialize(
                     new
                     {
                         request_id = rr.request_id,
-                        pod_ids = pods.Select(p => p.Id.ToString("N")).ToList()
+                        pod_ids = pods.Select(p => p.Id.ToString("N")).ToList(),
+                        success = true
                     })
             };
-            await _amqpService.PublishMessage(msg);
+            await _amqpService.PublishMessage(podsmsg);
             return true;
         }
+        
         
         var pod = await _podService.GetPodAsync(Guid.Parse(rr.pod_id));
         var success = true;
@@ -128,6 +193,9 @@ public class RaddRequest
     // public int? valid_from { get; set; }
     // public int? valid_to { get; set; }
     public string? request_id { get; set; }
+    public uint? transfer_active_serial { get; set; }
+    public uint? transfer_active_lot { get; set; }
+    public uint? transfer_active_address { get; set; }
     public string? pod_id { get; set; }
     public int? next_record_index { get; set; }
     public bool beep { get; set; }

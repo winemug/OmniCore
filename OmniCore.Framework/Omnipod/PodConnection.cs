@@ -282,15 +282,15 @@ public class PodConnection : IDisposable, IPodConnection
         if (result != PodResponse.OK)
             return result;
 
-        if (_pod.BasalActive)
+        if (_pod.BasalActive || _pod.TempBasalActive || _pod.ImmediateBolusActive || _pod.ExtendedBolusActive)
         {
             result = await SendRequestAsync(false, cancellationToken,
                 new MessagePart[]
                 {
                     new RequestCancelPart(BeepType.NoSound,
-                        false,
-                        false,
-                        true)
+                        _pod.ImmediateBolusActive | _pod.ExtendedBolusActive,
+                        _pod.TempBasalActive,
+                        _pod.BasalActive)
                 });
             if (result != PodResponse.OK)
                 return result;
@@ -302,8 +302,8 @@ public class PodConnection : IDisposable, IPodConnection
             cancellationToken,
             new MessagePart[]
             {
-                new RequestInsulinSchedulePart(basalRateEntries),
-                new RequestBasalPart(basalRateEntries)
+                new RequestInsulinSchedulePart(basalRateEntries, podTime),
+                new RequestBasalPart(basalRateEntries, podTime)
             }
         );
     }
@@ -585,16 +585,19 @@ public class PodConnection : IDisposable, IPodConnection
         if (_pod.Progress < PodProgress.Paired || _pod.Progress >= PodProgress.Inactive)
             return PodResponse.NotAllowed;
 
-        result = await SendRequestAsync(false, cancellationToken,
-            new MessagePart[]
-            {
-                new RequestCancelPart(BeepType.NoSound,
-                    _pod.ImmediateBolusActive,
-                    _pod.TempBasalActive,
-                    _pod.BasalActive)
-            });
-        if (result != PodResponse.OK)
-            return result;
+        if (_pod.Progress == PodProgress.Running || _pod.Progress == PodProgress.RunningLow)
+        {
+            result = await SendRequestAsync(false, cancellationToken,
+                new MessagePart[]
+                {
+                    new RequestCancelPart(BeepType.NoSound,
+                        true,
+                        true,
+                        true)
+                });
+            if (result != PodResponse.OK)
+                return result;
+        }
 
         return await SendRequestAsync(false, cancellationToken,
             new MessagePart[]

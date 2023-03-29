@@ -6,9 +6,107 @@ namespace OmniCore.Services;
 
 public class RequestInsulinSchedulePart : MessagePart
 {
-    public RequestInsulinSchedulePart(BasalRateEntry[] basalRateEntries)
+    public RequestInsulinSchedulePart(BasalRateEntry[] basalRateEntries, TimeOnly podTime)
     {
         var hhPulses = DistributeHourlyRatesToHalfHourPulses(basalRateEntries);
+        var schedules = GetConsecutiveSchedules(hhPulses);
+
+        var currentHalfHour = podTime.Hour * 2;
+        if (podTime.Minute >= 30)
+        {
+            currentHalfHour++;
+        }
+
+        var podTime125ms = podTime.Ticks * 1000 / 10 / 125;
+        var halfHour125ms = 30 * 60 * 1000 / 125;
+        var spentCurrentHH125ms = podTime125ms % halfHour125ms;
+        var toNextHH125ms = halfHour125ms - spentCurrentHH125ms;
+
+        var currentHHPulses = hhPulses[currentHalfHour];
+        var remainingHHPulses = currentHHPulses - (currentHHPulses * spentCurrentHH125ms / halfHour125ms);
+        
+        Data = GetData(ScheduleType.Basal,
+            (byte)currentHalfHour,
+            (ushort)toNextHH125ms,
+            (ushort)remainingHHPulses,
+            schedules);
+    }
+
+    private InsulinSchedule[] GetConsecutiveSchedules(int[] hhPulses)
+    {
+        List<InsulinSchedule> schedules = new();
+
+        var schedule = new InsulinSchedule
+        {
+            BlockCount = 0,
+            AddAlternatingExtraPulse = false,
+            PulsesPerBlock = hhPulses[0]
+        };
+
+        int currentBlock = 0;
+        foreach (var hhPulse in hhPulses)
+        {
+            var oldBlockCount = schedule.BlockCount;
+            var oldPulsesPerBlock = schedule.PulsesPerBlock;
+            var oldAlternatingMode = schedule.AddAlternatingExtraPulse;
+            var addNewSchedule = false;
+            if (schedule.BlockCount < 2)
+            {
+                if (schedule.PulsesPerBlock == hhPulse)
+                {
+                    schedule = new InsulinSchedule
+                    {
+                        BlockCount = oldBlockCount + 1,
+                        AddAlternatingExtraPulse = false,
+                        PulsesPerBlock = oldPulsesPerBlock
+                    };
+                }
+                else if (schedule.PulsesPerBlock == hhPulse - currentBlock % 2)
+                {
+                    schedule = new InsulinSchedule
+                    {
+                        BlockCount = oldBlockCount + 1,
+                        AddAlternatingExtraPulse = true,
+                        PulsesPerBlock = oldPulsesPerBlock
+                    };
+                }
+                else
+                {
+                    addNewSchedule = true;
+                }
+            }
+            else
+            {
+                var hhPulsesCompare = oldAlternatingMode ? hhPulse - currentBlock % 2 : hhPulse;
+                if (schedule.PulsesPerBlock == hhPulsesCompare)
+                {
+                    schedule = new InsulinSchedule
+                    {
+                        BlockCount = oldBlockCount + 1,
+                        AddAlternatingExtraPulse = oldAlternatingMode,
+                        PulsesPerBlock = oldPulsesPerBlock
+                    };
+                }
+                else
+                {
+                    addNewSchedule = true;
+                }
+            }
+
+            if (addNewSchedule)
+            {
+                schedules.Add(schedule);
+                schedule = new InsulinSchedule
+                {
+                    BlockCount = 1,
+                    AddAlternatingExtraPulse = false,
+                    PulsesPerBlock = hhPulse
+                };
+            }
+            currentBlock++;
+        }
+        schedules.Add(schedule);
+        return schedules.ToArray();
     }
 
     public RequestInsulinSchedulePart(BasalRateEntry tempBasalEntry)
