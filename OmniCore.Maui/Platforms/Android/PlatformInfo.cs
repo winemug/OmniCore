@@ -15,12 +15,9 @@ namespace OmniCore.Maui.Services
 
         public async Task<bool> VerifyPermissions()
         {
-            await CheckAndRequest<Permissions.LocationAlways>();
             await CheckAndRequest<BluetoothPermissions>();
             await CheckAndRequest<ForegroundPermissions>();
             await CheckAndRequest<NotificationPermissions>();
-            await CheckAndRequest<Permissions.StorageWrite>();
-            await CheckAndRequest<Permissions.StorageRead>();
             
             var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
             if (pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName))
@@ -46,15 +43,17 @@ namespace OmniCore.Maui.Services
 
         private async Task<PermissionStatus> CheckAndRequest<T>() where T : BasePermission, new()
         { 
-            Debug.WriteLine($"Checking permission {typeof(T)}");
+            //Debug.WriteLine($"----Permission Check Start-----");
+            //Debug.WriteLine($"Checking permission {typeof(T).Name}");
             var status = await Permissions.CheckStatusAsync<T>();
-            Debug.WriteLine($"Permission status: {status}");
+            Debug.WriteLine($"Permission {typeof(T).Name}: {status}");
             if (status != PermissionStatus.Granted)
             {
-                Debug.WriteLine($"Requesting permission");
+                //Debug.WriteLine($"Requesting permission {typeof(T).Name}");
                 status = await Permissions.RequestAsync<T>();
-                Debug.WriteLine($"Request result: {status}");
+                Debug.WriteLine($"Request {typeof(T).Name} result: {status}");
             }
+            //Debug.WriteLine($"----Permission Check End-----");
 
             return status;
         }
@@ -62,13 +61,19 @@ namespace OmniCore.Maui.Services
     public class BluetoothPermissions : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
-            new List<(string androidPermission, bool isRuntime)>
-            {
-                (global::Android.Manifest.Permission.Bluetooth, false),
-                (global::Android.Manifest.Permission.BluetoothAdmin, false),
-                (global::Android.Manifest.Permission.BluetoothConnect, false),
-                (global::Android.Manifest.Permission.BluetoothScan, false)
-            }.ToArray();
+            (Build.VERSION.SdkInt <= BuildVersionCodes.R)
+                ? new List<(string androidPermission, bool isRuntime)>
+                {
+                    (global::Android.Manifest.Permission.Bluetooth, false),
+                    (global::Android.Manifest.Permission.BluetoothAdmin, false),
+                    (global::Android.Manifest.Permission.AccessBackgroundLocation, true),
+                    (global::Android.Manifest.Permission.AccessFineLocation, true),
+                }.ToArray()
+                : new List<(string androidPermission, bool isRuntime)>
+                {
+                    (global::Android.Manifest.Permission.BluetoothConnect, true),
+                    (global::Android.Manifest.Permission.BluetoothScan, true)
+                }.ToArray();
     }
     
     public class ForegroundPermissions : Permissions.BasePlatformPermission
