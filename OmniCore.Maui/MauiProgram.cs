@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
 using OmniCore.Common.Api;
 using OmniCore.Common.Data;
 using OmniCore.Maui.Services;
@@ -25,6 +26,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
             .RegisterAppServices(platformInfo, platformService)
             .ConfigureFonts(fonts =>
             {
