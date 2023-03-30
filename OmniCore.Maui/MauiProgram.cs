@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OmniCore.Common.Api;
+using OmniCore.Common.Data;
 using OmniCore.Maui.Services;
 using OmniCore.Maui.ViewModels;
 using OmniCore.Maui.Views;
@@ -8,6 +9,7 @@ using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Platform;
 using OmniCore.Services.Interfaces.Pod;
 using OmniCore.Services.Interfaces.Radio;
+using Pod = OmniCore.Services.Pod;
 
 namespace OmniCore.Maui;
 
@@ -54,8 +56,9 @@ public static class MauiProgram
         mauiAppBuilder.Services.AddSingleton<ISyncService, SyncService>();
         mauiAppBuilder.Services.AddSingleton<IRaddService, RaddService>();
         mauiAppBuilder.Services.AddSingleton<ICoreService, CoreService>();
-        
         mauiAppBuilder.Services.AddSingleton<RaddService>();
+        mauiAppBuilder.Services.AddDbContext<OcdbContext>();
+        
 
         mauiAppBuilder.Services.AddTransient<IRadio, Radio>();
         mauiAppBuilder.Services.AddTransient<IRadioConnection, RadioConnection >();

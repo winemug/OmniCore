@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using OmniCore.Common.Data;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 
@@ -13,13 +15,14 @@ public class CoreService : ICoreService
     public IDataService DataService { get; set; }
     public ISyncService SyncService { get; set; }
     public IRaddService RaddService { get; set; }
-
+    private OcdbContext _ocdbContext { get; set; }
     public CoreService(IRadioService radioService,
         IAmqpService amqpService,
         IPodService podService,
         IDataService dataService,
         ISyncService syncService,
-        IRaddService raddService)
+        IRaddService raddService,
+        OcdbContext ocdbContext)
     {
         RadioService = radioService;
         AmqpService = amqpService;
@@ -27,15 +30,18 @@ public class CoreService : ICoreService
         DataService = dataService;
         SyncService = syncService;
         RaddService = raddService;
+        _ocdbContext = ocdbContext;
     }
 
     public async Task Start()
     {
         Debug.WriteLine("Core services starting");
 
+        await _ocdbContext.Database.MigrateAsync();
+        
         await Task.WhenAll(
             DataService.Start()
-            );
+        );
         await Task.WhenAll(
             RadioService.Start(),
             PodService.Start(),
