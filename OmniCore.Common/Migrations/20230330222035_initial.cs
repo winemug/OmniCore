@@ -21,7 +21,6 @@ namespace OmniCore.Common.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Country = table.Column<string>(type: "TEXT", nullable: true),
                     Phone = table.Column<string>(type: "TEXT", nullable: true),
-                    VerificationKey = table.Column<string>(type: "TEXT", nullable: true),
                     IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
@@ -34,23 +33,6 @@ namespace OmniCore.Common.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PodActions",
-                columns: table => new
-                {
-                    PodId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Index = table.Column<int>(type: "INTEGER", nullable: false),
-                    SendTime = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
-                    Sent = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    ReceivedTime = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    Received = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    IsSynced = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PodActions", x => new { x.PodId, x.Index });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Pods",
                 columns: table => new
                 {
@@ -59,6 +41,7 @@ namespace OmniCore.Common.Migrations
                     ClientId = table.Column<Guid>(type: "TEXT", nullable: false),
                     RadioAddress = table.Column<uint>(type: "INTEGER", nullable: false),
                     Medication = table.Column<int>(type: "INTEGER", nullable: false),
+                    UnitsPerMilliliter = table.Column<int>(type: "INTEGER", nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     Removed = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
                     LastUpdated = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
@@ -93,7 +76,6 @@ namespace OmniCore.Common.Migrations
                     ClientId = table.Column<Guid>(type: "TEXT", nullable: false),
                     AccountId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ApiToken = table.Column<string>(type: "TEXT", nullable: true),
                     Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     LastUpdated = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -107,6 +89,30 @@ namespace OmniCore.Common.Migrations
                         column: x => x.AccountId,
                         principalTable: "Accounts",
                         principalColumn: "AccountId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PodActions",
+                columns: table => new
+                {
+                    PodId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Index = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequestingClientId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SendStart = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Sent = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    ReceiveEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Received = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    IsSynced = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PodActions", x => new { x.PodId, x.Index });
+                    table.ForeignKey(
+                        name: "FK_PodActions_Pods_PodId",
+                        column: x => x.PodId,
+                        principalTable: "Pods",
+                        principalColumn: "PodId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -138,13 +144,13 @@ namespace OmniCore.Common.Migrations
                 name: "PodActions");
 
             migrationBuilder.DropTable(
-                name: "Pods");
-
-            migrationBuilder.DropTable(
                 name: "Profiles");
 
             migrationBuilder.DropTable(
                 name: "Accounts");
+
+            migrationBuilder.DropTable(
+                name: "Pods");
         }
     }
 }

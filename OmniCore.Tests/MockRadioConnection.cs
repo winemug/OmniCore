@@ -8,13 +8,13 @@ public class MockRadioConnection : IRadioConnection
 {
     private IPodMessage _receivedMessage;
     private IPodMessage _sendMessage;
-    private IPod _pod;
+    private IPodModel _podModel;
     private int _btCommDelay = 375;
 
     private List<IPodPacket> _receivedPackets;
-    public MockRadioConnection(IPod pod)
+    public MockRadioConnection(IPodModel podModel)
     {
-        _pod = pod;
+        _podModel = podModel;
         _receivedPackets = new List<IPodPacket>();
     }
     
@@ -41,7 +41,7 @@ public class MockRadioConnection : IRadioConnection
         Console.WriteLine($"Pod received packet: {packet}");
 
         IPodPacket sendPacket = null;
-        if (packet.Address == _pod.RadioAddress || packet.Address == 0xFFFFFFFF)
+        if (packet.Address == _podModel.RadioAddress || packet.Address == 0xFFFFFFFF)
         {
             _receivedPackets.Add(packet);
             _receivedMessage = PodMessage.FromReceivedPackets(_receivedPackets);

@@ -10,7 +10,6 @@ using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Platform;
 using OmniCore.Services.Interfaces.Pod;
 using OmniCore.Services.Interfaces.Radio;
-using Pod = OmniCore.Services.Pod;
 
 namespace OmniCore.Maui;
 
@@ -51,7 +50,6 @@ public static class MauiProgram
 	    mauiAppBuilder.Services.AddSingleton(vmvMapper);
 	    mauiAppBuilder.Services.AddSingleton<AppShell>();
         mauiAppBuilder.Services.AddSingleton<IConfigurationStore, ConfigurationStore>();
-        mauiAppBuilder.Services.AddSingleton<IDataService, DataService>();
         mauiAppBuilder.Services.AddSingleton<IPodService, PodService>();
         mauiAppBuilder.Services.AddSingleton<IRadioService, RadioService>();
         mauiAppBuilder.Services.AddSingleton<IAmqpService, AmqpService>();
@@ -64,7 +62,7 @@ public static class MauiProgram
 
         mauiAppBuilder.Services.AddTransient<IRadio, Radio>();
         mauiAppBuilder.Services.AddTransient<IRadioConnection, RadioConnection >();
-        mauiAppBuilder.Services.AddTransient<IPod, Pod>();
+        mauiAppBuilder.Services.AddTransient<IPodModel, PodModel>();
         mauiAppBuilder.Services.AddTransient<IPodConnection, PodConnection>();
         mauiAppBuilder.Services.AddTransient<IPodMessage, PodMessage>();
         mauiAppBuilder.Services.AddTransient<IPodPacket, PodPacket>();

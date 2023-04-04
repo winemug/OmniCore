@@ -11,7 +11,7 @@ using OmniCore.Common.Data;
 namespace OmniCore.Common.Migrations
 {
     [DbContext(typeof(OcdbContext))]
-    [Migration("20230329153427_initial")]
+    [Migration("20230330222035_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -57,9 +57,6 @@ namespace OmniCore.Common.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VerificationKey")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("AccountId");
 
                     b.HasIndex("Email")
@@ -75,9 +72,6 @@ namespace OmniCore.Common.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ApiToken")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("Created")
@@ -133,6 +127,9 @@ namespace OmniCore.Common.Migrations
                     b.Property<DateTimeOffset?>("Removed")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UnitsPerMilliliter")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("PodId");
 
                     b.ToTable("Pods");
@@ -149,13 +146,16 @@ namespace OmniCore.Common.Migrations
                     b.Property<bool>("IsSynced")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTimeOffset>("ReceiveEnd")
+                        .HasColumnType("TEXT");
+
                     b.Property<byte[]>("Received")
                         .HasColumnType("BLOB");
 
-                    b.Property<DateTimeOffset?>("ReceivedTime")
+                    b.Property<Guid>("RequestingClientId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("SendTime")
+                    b.Property<DateTimeOffset>("SendStart")
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Sent")
@@ -209,9 +209,23 @@ namespace OmniCore.Common.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OmniCore.Common.Data.PodAction", b =>
+                {
+                    b.HasOne("OmniCore.Common.Data.Pod", null)
+                        .WithMany("Actions")
+                        .HasForeignKey("PodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OmniCore.Common.Data.Account", b =>
                 {
                     b.Navigation("Clients");
+                });
+
+            modelBuilder.Entity("OmniCore.Common.Data.Pod", b =>
+                {
+                    b.Navigation("Actions");
                 });
 #pragma warning restore 612, 618
         }

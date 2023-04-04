@@ -1,5 +1,4 @@
-using System.Threading;
-using System.Threading.Tasks;
+
 using OmniCore.Services.Interfaces.Pod;
 
 namespace OmniCore.Services.Interfaces.Core;
@@ -10,12 +9,11 @@ public interface IPodService : ICoreService
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
         uint Lot,
-        uint Serial,
-        uint activeFixedBasalRateTicks);
-    Task<IPod> GetPodAsync(Guid id);
-    Task<List<IPod>> GetPodsAsync();
+        uint Serial);
+    Task<List<IPodModel>> GetPodsAsync();
+    Task<IPodModel?> GetPodAsync(Guid podId);
 
     Task<IPodConnection> GetConnectionAsync(
-        IPod pod,
+        IPodModel podModel,
         CancellationToken cancellationToken = default);
 }

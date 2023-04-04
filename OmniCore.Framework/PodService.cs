@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Nito.AsyncEx;
+using OmniCore.Common.Data;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Pod;
@@ -15,15 +19,16 @@ namespace OmniCore.Services;
 public class PodService : IPodService
 {
     private IRadioService _radioService;
-    private IDataService _dataService;
     private IConfigurationStore _configurationStore;
     private ISyncService _syncService;
-    
-    private List<IPod> _activePods = new List<IPod>();
-    public PodService(IDataService dataService, IRadioService radioService,
-        IConfigurationStore configurationStore, ISyncService syncService)
+    private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
+    private ConcurrentBag<IPodModel> _podModels;
+
+    public PodService(
+        IRadioService radioService,
+        IConfigurationStore configurationStore,
+        ISyncService syncService)
     {
-        _dataService = dataService;
         _radioService = radioService;
         _configurationStore = configurationStore;
         _syncService = syncService;
@@ -31,98 +36,90 @@ public class PodService : IPodService
 
     public async Task Start()
     {
-        var cc = await _configurationStore.GetConfigurationAsync();
-        
-         using var conn = await _dataService.GetConnectionAsync();
-         
-         var rs = await conn.QueryAsync("SELECT * FROM pod");
-         foreach (var r in rs)
-         {
-             var pod = new Pod(_dataService)
-             {
-                 Id = Guid.Parse(r.id),
-                 RadioAddress = (uint)r.radio_address,
-                 UnitsPerMilliliter = 200,
-                 Medication = MedicationType.Insulin,
-                 ValidFrom = DateTimeOffset.FromUnixTimeMilliseconds((long)r.valid_from),
-                 ValidTo = DateTimeOffset.FromUnixTimeMilliseconds((long)r.valid_to),
-                 AssumedLot = (uint)r.assumed_lot,
-                 AssumedSerial = (uint)r.assumed_serial,
-                 AssumedFixedBasalRate = 8
-             };
-             await pod.LoadResponses();
-             if (pod.ValidTo > DateTimeOffset.Now && pod.Progress < PodProgress.Inactive)
-                _activePods.Add(pod);
-         }
+        using var ocdb = new OcdbContext();
+        _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
+        _podModels = new ConcurrentBag<IPodModel>();
+        foreach (var pod in ocdb.Pods
+                     .Where(p => !p.Removed.HasValue)
+                     .Include(p => p.Actions))
+        {
+            _podLocks.TryAdd(pod.PodId, new AsyncLock());
+            _podModels.Add(new PodModel(pod));
+        }
     }
 
     public async Task Stop()
     {
+        foreach (var podLock in _podLocks.Values)
+        {
+            await podLock.LockAsync();
+        }
     }
 
-    public async Task<List<IPod>> GetPodsAsync()
+    public async Task<List<IPodModel>> GetPodsAsync()
     {
-        return _activePods.Where(p => p.Progress < PodProgress.Inactive).ToList();
+        return _podModels.ToList();
     }
     
     public async Task ImportPodAsync(Guid id,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
         uint lot,
-        uint serial,
-        uint activeFixedBasalRateTicks
+        uint serial
         )
     {
         var cc = await _configurationStore.GetConfigurationAsync();
-        var pod = new Pod(_dataService)
+        using var ocdb = new OcdbContext();
+        var pod = new Pod
         {
-            Id = id,
+            PodId = id,
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
-            AssumedLot = lot,
-            AssumedSerial = serial,
-            AssumedFixedBasalRate = activeFixedBasalRateTicks,
+            Lot = lot,
+            Serial = serial
         };
+        ocdb.Pods.Add(pod);
+        await ocdb.SaveChangesAsync();
+        var podModel = new PodModel(pod);
 
-        using(var conn = await _dataService.GetConnectionAsync())
-        {
-        await conn.ExecuteAsync("INSERT INTO pod(id, profile_id, client_id," +
-                                "radio_address, units_per_ml, medication, valid_from, valid_to," +
-                                "assumed_lot, assumed_serial, assumed_fixed_basal)" +
-                                "VALUES (@id, @profileId, @clientId, @radioAddress, @unitsPerMl," +
-                                "@medication, @valid_from, @valid_to, @assumedLot, @assumedSerial, @assumedFixedBasal)",
-            new
-            {
-                id = id.ToString("N"),
-                profileId = "0",
-                clientId = cc.ClientId.Value.ToString("N"),
-                radioAddress = radioAddress,
-                unitsPerMl = unitsPerMilliliter,
-                @medication = (int)medicationType,
-                valid_from = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                valid_to = (DateTimeOffset.Now + TimeSpan.FromHours(88)).ToUnixTimeMilliseconds(),
-                assumedLot = lot,
-                assumedSerial = serial,
-                assumedFixedBasal = activeFixedBasalRateTicks
-            });
-        }
+        _podLocks.TryAdd(pod.PodId, new AsyncLock());
+        _podModels.Add(podModel);
+        
+        //var accId = Guid.Parse("269d7830-fe9b-4641-8123-931846e45c9c");
+        //var clientId = Guid.Parse("ee843c96-a312-4d4b-b0cc-93e22d6e680e");
+        //var profileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b");
+
+        //newpod radio
+        // var r = new Random();
+        // var bn0 = r.Next(13);
+        // var bn1 = r.Next(16);
+        // var b0 = ((bn0 + 2) << 4) | bn1;
+        // var b123 = new byte[3];
+        // r.NextBytes(b123);
+        // RadioAddress = (uint)((b0 << 24) | (b123[0] << 16) | (b123[1] << 8) | b123[2]);
+
     }
     
-    public async Task<IPod?> GetPodAsync(Guid id)
+    public async Task<IPodModel?> GetPodAsync(Guid podId)
     {
-        return _activePods.FirstOrDefault(p => p.Id == id);
+        return _podModels.FirstOrDefault(p => p.Id == podId);
     }
 
     public async Task<IPodConnection> GetConnectionAsync(
-        IPod pod,
+        IPodModel podModel,
         CancellationToken cancellationToken = default)
     {
         var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
         if (radioConnection == null)
             throw new ApplicationException("No radios available");
 
-        var podAllocationLockDisposable = await pod.LockAsync(cancellationToken);
-        return new PodConnection(pod, radioConnection, podAllocationLockDisposable, _dataService, _configurationStore, _syncService);
+        var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
+        return new PodConnection(
+            podModel,
+            radioConnection,
+            allocationLockDisposable,
+            _configurationStore,
+            _syncService);
     }
 }

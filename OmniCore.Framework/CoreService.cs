@@ -12,36 +12,30 @@ public class CoreService : ICoreService
     public IRadioService RadioService { get; set; }
     public IAmqpService AmqpService { get; set; }
     public IPodService PodService { get; set; }
-    public IDataService DataService { get; set; }
     public ISyncService SyncService { get; set; }
     public IRaddService RaddService { get; set; }
-    private OcdbContext _ocdbContext { get; set; }
     public CoreService(IRadioService radioService,
         IAmqpService amqpService,
         IPodService podService,
-        IDataService dataService,
         ISyncService syncService,
-        IRaddService raddService,
-        OcdbContext ocdbContext)
+        IRaddService raddService)
     {
         RadioService = radioService;
         AmqpService = amqpService;
         PodService = podService;
-        DataService = dataService;
         SyncService = syncService;
         RaddService = raddService;
-        _ocdbContext = ocdbContext;
     }
 
     public async Task Start()
     {
         Debug.WriteLine("Core services starting");
 
-        await _ocdbContext.Database.MigrateAsync();
+        using (var ocdbContext = new OcdbContext())
+        {
+            await ocdbContext.TransferDb();
+        }
         
-        await Task.WhenAll(
-            DataService.Start()
-        );
         await Task.WhenAll(
             RadioService.Start(),
             PodService.Start(),
@@ -56,12 +50,11 @@ public class CoreService : ICoreService
     {
         Debug.WriteLine("Core services stopping");
         await Task.WhenAll(
-            RadioService.Stop(),
+            SyncService.Stop(),
+            RaddService.Stop(),
+            AmqpService.Stop(),
             PodService.Stop(),
-            AmqpService.Stop()
-        );
-        await Task.WhenAll(
-            DataService.Stop()
+            RadioService.Stop()
         );
         Debug.WriteLine("Core services stopped");
     }

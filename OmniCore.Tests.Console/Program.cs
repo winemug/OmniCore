@@ -12,18 +12,6 @@ using OmniCore.Services.Interfaces.Pod;
 using OmniCore.Tests;
 using Plugin.BLE.Abstractions.Extensions;
 
-using var dbc = new OcdbContext();
-dbc.Accounts.Add(new Account
-{
-    Email = "gidi",
-    Created = DateTimeOffset.Now,
-    LastUpdated = DateTimeOffset.Now,
-});
-
-foreach (var acc in dbc.Accounts)
-{
-    Console.WriteLine($"acc id: {acc.AccountId} email: {acc.Email}");
-}
 
 // {"MyProperty1":99,"MyProperty2":9999}
 
