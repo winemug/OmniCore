@@ -97,7 +97,7 @@ public class OcdbContext : DbContext
                 Sent = (byte[]) oMsg.send_data,
                 ReceiveEnd = DateTimeOffset.FromUnixTimeMilliseconds((long)oMsg.receive_end),
                 Received = (byte[]?) oMsg.receive_data,
-                Error = (CommunicationError) oMsg.exchange_result,
+                Status = (CommunicationStatus) oMsg.exchange_result,
                 IsSynced = false
             });
             Debug.WriteLine($"msg: {oMsg.pod_id} {oMsg.record_index}");
@@ -173,6 +173,6 @@ public class PodAction
     public byte[] Sent { get; set; } = null!;
     public DateTimeOffset ReceiveEnd { get; set; }
     public byte[]? Received { get; set; } 
-    public CommunicationError Error { get; set; }
+    public CommunicationStatus Status { get; set; }
     public bool IsSynced { get; set; }
 }

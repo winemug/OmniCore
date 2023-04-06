@@ -2,21 +2,10 @@ namespace OmniCore.Services.Interfaces.Pod;
 
 public class ExchangeResult
 {
-    public ExchangeResult(IPodMessage message)
-    {
-        Message = message;
-        if (message != null)
-            Error = CommunicationError.None;
-        else
-            Error = CommunicationError.Unknown;
-    }
-
-    public ExchangeResult(CommunicationError error)
-    {
-        Error = error;
-        Message = null;
-    }
-
-    public CommunicationError Error { get; }
-    public IPodMessage Message { get; }
+    public DateTimeOffset? SendStart { get; set; }
+    public DateTimeOffset? ReceiveStart { get; set; }
+    public IPodMessage? SentMessage { get; set; }
+    public IPodMessage? ReceivedMessage { get; set; }
+    public CommunicationStatus CommunicationStatus { get; set; }
+    public string ErrorText { get; set; }
 }

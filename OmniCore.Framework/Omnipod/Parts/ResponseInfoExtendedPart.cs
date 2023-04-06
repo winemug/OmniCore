@@ -46,7 +46,6 @@ public class ResponseInfoExtendedPart : ResponseInfoPart
     public int PulsesPending { get; }
     public int FaultEventCode { get; }
     public int FaultEventMinute { get; }
-
     public bool FaultPulseInformationInvalid { get; }
     public bool FaultOcclusion { get; }
     public bool FaultInsulinStateTable { get; }

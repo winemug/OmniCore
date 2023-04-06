@@ -26,10 +26,7 @@ public class ResponseStatusPart : MessagePart
         UnackedAlertsMask = (int)((d1 >> 23) & 0x0F);
         ActiveMinutes = (int)((d1 >> 10) & 0b0001111111111111);
         var pr = (int)(d1 & 0b0000001111111111);
-        if (pr == 0x3FF)
-            PulsesRemaining = null;
-        else
-            PulsesRemaining = pr;
+        PulsesRemaining = pr;
     }
 
     public override bool RequiresNonce => false;
@@ -41,7 +38,7 @@ public class ResponseStatusPart : MessagePart
     public PodProgress Progress { get; }
     public int PulsesDelivered { get; }
     public int PulsesPending { get; }
-    public int? PulsesRemaining { get; }
+    public int PulsesRemaining { get; }
     public int ActiveMinutes { get; }
     public bool Faulted { get; }
     public int UnackedAlertsMask { get; }

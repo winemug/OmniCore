@@ -8,18 +8,15 @@ namespace OmniCore.Services;
 
 public class RaddService : IRaddService
 {
-    private IDataService _dataService;
     private IPodService _podService;
     private IAmqpService _amqpService;
     private IRadioService _radioService;
     
     public RaddService(
-        IDataService dataService,
         IPodService podService,
         IAmqpService amqpService,
         IRadioService radioService)
     {
-        _dataService = dataService;
         _podService = podService;
         _amqpService = amqpService;
         _radioService = radioService;
@@ -93,13 +90,6 @@ public class RaddService : IRaddService
                             break;
                     }
                 }
-
-                var podId = Guid.NewGuid();
-                await _podService.ImportPodAsync(podId, rr.transfer_active_address.Value,
-                    200, MedicationType.Insulin,
-                    rr.transfer_active_lot.Value, rr.transfer_active_serial.Value,
-                    14);
-                
             }
             var pods = await _podService.GetPodsAsync();
             var podsmsg = new AmqpMessage
@@ -169,10 +159,14 @@ public class RaddService : IRaddService
             }
         }
 
-        var resp = new RaddResponse()
+        var resp = new RaddResponse
         {
-            success = success, request_id = rr.request_id, next_record_index=pod.NextRecordIndex,
-            minutes = pod.ActiveMinutes, remaining = pod.PulsesRemaining, delivered = pod.PulsesDelivered
+            success = success,
+            request_id = rr.request_id,
+            next_record_index=pod.NextRecordIndex,
+            minutes = pod.ActiveMinutes,
+            remaining = pod.PulsesRemaining,
+            delivered = pod.PulsesDelivered
         };
         var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
         await _amqpService.PublishMessage(respMessage);
@@ -212,11 +206,11 @@ public class RaddResponse
 {
     //public string? pod_id { get; set; }
     // public int? record_index { get; set; }
-    public string request_id { get; set; }
+    public string? request_id { get; set; }
     public bool success { get; set; }
     public int next_record_index { get; set; }
     public int? remaining { get; set; }
     
-    public int delivered { get; set; }
-    public int minutes { get; set; }
+    public int? delivered { get; set; }
+    public int? minutes { get; set; }
 }

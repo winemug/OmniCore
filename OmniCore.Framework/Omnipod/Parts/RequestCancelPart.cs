@@ -8,11 +8,13 @@ public class RequestCancelPart : MessagePart
 {
     public RequestCancelPart(
         BeepType beep,
+        bool cancelExtendedBolus,
         bool cancelBolus,
         bool cancelTempBasal,
         bool cancelBasal)
     {
         var b0 = (int)beep << 4;
+        b0 |= cancelExtendedBolus ? 0x08 : 0x00;
         b0 |= cancelBolus ? 0x04 : 0x00;
         b0 |= cancelTempBasal ? 0x02 : 0x00;
         b0 |= cancelBasal ? 0x01 : 0x00;
