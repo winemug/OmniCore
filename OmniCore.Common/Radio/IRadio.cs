@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniCore.Services.Interfaces.Pod;
 
 namespace OmniCore.Services.Interfaces.Radio;
 
@@ -13,7 +14,7 @@ public interface IRadio : IDisposable
     void Dispose();
     Task UpdateRssiAsync(CancellationToken cancellationToken = default);
 
-    Task<(RileyLinkResponse, byte[])> ExecuteCommandAsync(
+    Task<BleExchangeResult> ExecuteCommandAsync(
         RileyLinkCommand command,
         CancellationToken cancellationToken,
         params byte[] data);

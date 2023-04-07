@@ -19,14 +19,14 @@ namespace OmniCore.Services;
 public class PodConnection : IDisposable, IPodConnection
 {
     private bool _communicationNeedsClosing;
-    private readonly IPodModel _podModel;
+    private readonly PodModel _podModel;
     private readonly IDisposable _podLockDisposable;
     private readonly IRadioConnection _radioConnection;
     private readonly IConfigurationStore _configurationStore;
     private readonly ISyncService _syncService;
 
     public PodConnection(
-        IPodModel podModel,
+        PodModel podModel,
         IRadioConnection radioConnection,
         IDisposable podLockDisposable,
         IConfigurationStore configurationStore,
@@ -764,11 +764,12 @@ public class PodConnection : IDisposable, IPodConnection
         var messageBody = messageToSend.GetBody();
         var sendPacketCount = messageBody.Length / 31 + 1;
         var sendPacketIndex = 0;
-        IPodPacket receivedPacket = null;
+        IPodPacket? receivedPacket = null;
         var exchangeStarted = DateTimeOffset.Now;
         var nextPacketSequence = _podModel.NextPacketSequence;
         var nextMessageSequence = _podModel.NextMessageSequence;
         DateTimeOffset? firstPacketSent = null;
+        DateTimeOffset? lastPacketReceived = null;
         DateTimeOffset? lastPacketSent = null;
 
         var packetAddressIn = _podModel.Progress < PodProgress.Paired ? 0xFFFFFFFF : _podModel.RadioAddress;
@@ -793,23 +794,42 @@ public class PodConnection : IDisposable, IPodConnection
                 nextPacketSequence,
                 messageBody.Sub(byteStart, byteEnd));
 
-            receivedPacket = await TryExchangePackets(packetToSend, cancellationToken);
-            var now = DateTimeOffset.Now;
-            if (sendStart == null)
-                sendStart = DateTimeOffset.Now;
-            
-            lastPacketSent = now;
+            receivedPacket = await TryExchangePackets(packetToSend, cancellationToken, packetAddressIn);
+            var now = DateTimeOffset.UtcNow;
             if (!firstPacketSent.HasValue)
                 firstPacketSent = now;
+            if (receivedPacket != null)
+                lastPacketReceived = now;
 
-            if (receivedPacket == null || receivedPacket.Address != packetAddressIn)
+            if (receivedPacket == null)
             {
+                var referenceTime = lastPacketReceived ?? firstPacketSent.Value;
+                if (referenceTime < now - TimeSpan.FromSeconds(30))
+                    return new ExchangeResult
+                    {
+                        SendStart = sendStart,
+                        SentMessage = messageToSend,
+                        ReceiveStart = null,
+                        ReceiveResult = ResponseReceiveResult.NothingReceived,
+                        SendResult = RequestSendResult.FullySent,
+                        AcknowledgementResult = RequestAcknowledgementResult.Inconclusive,
+                        ReceivedMessage = null,
+                        ErrorText = "Connection timed out",
+                        Status = CommunicationStatus.NoResponse,
+                    };
+                
                 if (sendPacketIndex == 0 && firstPacketSent < now - TimeSpan.FromSeconds(30))
                     return new ExchangeResult
                     {
+                        SendStart = sendStart,
+                        SentMessage = messageToSend,
+                        ReceiveStart = null,
+                        ReceiveResult = ResponseReceiveResult.NothingReceived,
+                        SendResult = RequestSendResult.FullySent,
+                        AcknowledgementResult = RequestAcknowledgementResult.Inconclusive,
+                        ReceivedMessage = null,
                         ErrorText = "Connection timed out",
                         Status = CommunicationStatus.NoResponse,
-                        SendStart = sendStart,
                     };
                 if (sendPacketIndex > 0 && _podModel.LastRadioPacketReceived < now - TimeSpan.FromSeconds(30))
                 {
@@ -987,11 +1007,12 @@ public class PodConnection : IDisposable, IPodConnection
         _podModel.NextPacketSequence = (_podModel.NextPacketSequence + 1) % 32;
     }
 
-    private async Task<IPodPacket> TryExchangePackets(
+    private async Task<IPodPacket?> TryExchangePackets(
         IPodPacket packetToSend,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        uint matchAddress)
     {
-        IPodPacket received = null;
+        IPodPacket? received = null;
         Debug.WriteLine($"SEND: {packetToSend}");
         if (!_podModel.LastRadioPacketReceived.HasValue ||
             _podModel.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
@@ -1003,10 +1024,15 @@ public class PodConnection : IDisposable, IPodConnection
                 0, 3, 25, 0,
                 0, 250, 0, packetToSend, cancellationToken);
 
-        if (received != null)
-            Debug.WriteLine($"RCVD: {received}");
+        if (received != null && received.Address == matchAddress)
+        {
+            Debug.WriteLine($"RCVD OK--: {received}");
+            return received;
+        }
         else
-            Debug.WriteLine("RCVD: --------");
-        return received;
+        {
+            Debug.WriteLine($"RCVD FAIL: {received}");
+            return null;
+        }
     }
 }

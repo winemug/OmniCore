@@ -2,17 +2,10 @@ namespace OmniCore.Services.Interfaces.Pod;
 
 public enum CommunicationStatus
 {
-    NothingSent,
-    PartiallySentNoResponseReceived,
-    FullySentNoResponseReceived,
-    PartiallySentPodResponded,
-    ConnectionInterruptedSendIncomplete,
-    ConnectionInterruptedSendInconclusive,
-    ConnectionInterruptedReceiveIncomplete,
+    NoResponse,
+    ConnectionInterrupted,
     MessageSyncRequired,
-    ProtocolError,
-    UnidentifiedResponse,
-    Unknown
+    ProtocolError
 }
 
 

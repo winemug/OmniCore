@@ -4,18 +4,38 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Radio;
+using Plugin.BLE;
+using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.EventArgs;
 
 namespace OmniCore.Services;
 
 public class RadioService : IRadioService
 {
+    private Dictionary<Guid, AsyncLock> _radioLocks;
+    private Dictionary<Guid, IDevice?> _radioDevices;
     private List<Radio> _radios;
 
+    public RadioService()
+    {
+        _radioLocks = new Dictionary<Guid, AsyncLock>();
+        _radioDevices = new Dictionary<Guid, IDevice?>();
+        _radios = new List<Radio>();
+    }
     public async Task Start()
     {
+        var ble = CrossBluetoothLE.Current;
+        var adapter = ble.Adapter;
+        
+        ble.StateChanged += BleOnStateChanged;
+        adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
+        adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
+        adapter.DeviceDisconnected += AdapterOnDeviceDisconnected;
+        
         Debug.WriteLine("starting radios");
         _radios = new List<Radio>
         {
@@ -23,6 +43,12 @@ public class RadioService : IRadioService
             //new Radio(Guid.Parse("00000000-0000-0000-0000-886b0ff897cf"), "mod"),
             //new Radio(Guid.Parse("00000000-0000-0000-0000-c2c42b149fe4"), "ora"),
         };
+
+        foreach(var radio in _radios)
+            _radioLocks.Add(radio.Id, new AsyncLock());
+
+        foreach(var radio in _radios)
+            _radioDevices.Add(radio.Id, null);
     }
 
     public async Task Stop()
@@ -30,6 +56,31 @@ public class RadioService : IRadioService
         Debug.WriteLine("stopping radios");
         foreach (var radio in _radios) radio.Dispose();
         _radios = null;
+        var ble = CrossBluetoothLE.Current;
+        var adapter = ble.Adapter;
+        adapter.DeviceDisconnected -= AdapterOnDeviceDisconnected;
+        adapter.ScanTimeoutElapsed -= AdapterOnScanTimeoutElapsed;
+        adapter.DeviceDiscovered -= AdapterOnDeviceDiscovered;
+        ble.StateChanged -= BleOnStateChanged;
+    }
+
+    private void AdapterOnDeviceDisconnected(object? sender, DeviceEventArgs e)
+    {
+    }
+
+    private void BleOnStateChanged(object? sender, BluetoothStateChangedArgs e)
+    {
+        if (e.NewState == BluetoothState.On)
+        {
+        }
+    }
+
+    private void AdapterOnScanTimeoutElapsed(object? sender, EventArgs e)
+    {
+    }
+
+    private void AdapterOnDeviceDiscovered(object? sender, DeviceEventArgs e)
+    {
     }
 
     public async Task<IRadioConnection> GetIdealConnectionAsync(

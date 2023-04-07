@@ -55,7 +55,7 @@ public class PodMessage : IPodMessage
         return messageBody;
     }
 
-    public static PodMessage FromBody(Bytes messageBody)
+    public static PodMessage? FromBody(Bytes messageBody)
     {
         var message = new PodMessage();
         message.Body = messageBody;

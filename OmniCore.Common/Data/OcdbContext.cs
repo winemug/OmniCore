@@ -154,8 +154,6 @@ public class Pod
     public int UnitsPerMilliliter { get; set; }
     public uint? Lot { get; set; }
     public uint? Serial { get; set; }
-    
-    public bool IsImported { get; set; }
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? Removed { get; set; }
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;

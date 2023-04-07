@@ -6,11 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using OmniCore.Services.Interfaces;
+using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Pod;
 using OmniCore.Services.Interfaces.Radio;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
+using Plugin.BLE.Abstractions.Extensions;
+using Polly;
+using Polly.Timeout;
 using Trace = System.Diagnostics.Trace;
 
 namespace OmniCore.Services;
@@ -21,16 +26,16 @@ public class Radio : IRadio
     private readonly Task _connectionLoopTask;
     private readonly AsyncAutoResetEvent _connectionLostEvent = new(false);
 
-    private readonly CancellationTokenSource _connectionTaskCancellation = new();
+    private CancellationTokenSource? _connectionTaskCancellation = new();
     private readonly AsyncManualResetEvent _radioReadyEvent = new(false);
 
     private readonly AsyncManualResetEvent _responseCountUpdatedEvent = new(false);
     private readonly AsyncAutoResetEvent _rssiRequestedEvent = new(false);
-    private ICharacteristic _dataCharacteristic;
 
     private IDevice _device;
     private IService _mainService;
     private ICharacteristic _responseCountCharacteristic;
+    private ICharacteristic _dataCharacteristic;
     private TaskCompletionSource<int?> _rssiSource;
 
     public Radio(Guid id, string name)
@@ -39,7 +44,7 @@ public class Radio : IRadio
         Name = name;
         Rssi = null;
         _connectionLoopTask = Task.Run(() =>
-            ConnectionLoop(CrossBluetoothLE.Current.Adapter, _connectionTaskCancellation.Token));
+            ConnectionLoop(_connectionTaskCancellation.Token));
     }
 
     public Guid Id { get; }
@@ -53,8 +58,7 @@ public class Radio : IRadio
 
     public void Dispose()
     {
-        _connectionTaskCancellation.Cancel();
-        _connectionTaskCancellation.Dispose();
+        _connectionTaskCancellation?.Cancel();
         try
         {
             _connectionLoopTask.GetAwaiter().GetResult();
@@ -65,6 +69,11 @@ public class Radio : IRadio
         catch (Exception ex)
         {
             Trace.WriteLine($"Error disposing radio: {ex}");
+        }
+        finally
+        {
+            _connectionTaskCancellation?.Dispose();
+            _connectionTaskCancellation = null;
         }
     }
 
@@ -84,38 +93,36 @@ public class Radio : IRadio
         }
     }
 
-    public async Task<(RileyLinkResponse, byte[])> ExecuteCommandAsync(
-        RileyLinkCommand command,
-        CancellationToken cancellationToken,
-        params byte[] data)
+    private async Task ConnectionTask(CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            try
+        var adapter = CrossBluetoothLE.Current.Adapter;
+    }
+    private async Task<IDevice> TryConnectAsync(CancellationToken cancellationToken)
+    {
+        var retryPolicy = Policy
+            .Handle<Exception>(e => !(e is TaskCanceledException))
+            .WaitAndRetryForeverAsync(i =>
             {
-                await _radioReadyEvent.WaitAsync(cancellationToken);
-                return await ExecuteCommandInternalAsync(command, cancellationToken, data);
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error while bt comm: {e}");
-                _radioReadyEvent.Reset();
-                _connectionLostEvent.Set();
-                await Task.Delay(TimeSpan.FromSeconds(2));
-            }
-        }
+                if (i < 10)
+                    return TimeSpan.FromSeconds(i * 30);
+                return TimeSpan.FromSeconds(10 * 30);
+            });
+        
+        var timeoutPolicy = Policy.TimeoutAsync(30, TimeoutStrategy.Optimistic);
+        var policy = retryPolicy.WrapAsync(timeoutPolicy);
+
+        return await policy.ExecuteAsync(ct => CrossBluetoothLE.Current.Adapter
+            .ConnectToKnownDeviceAsync(Id,
+                new ConnectParameters(false, true),
+                ct), cancellationToken);
     }
 
-    private async Task<IDevice> TryConnectForeverAsync(IAdapter adapter, CancellationToken cancellationToken)
+    private async Task<IDevice> TryConnectForeverAsync(CancellationToken cancellationToken)
     {
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            adapter = CrossBluetoothLE.Current.Adapter;
+            var adapter = CrossBluetoothLE.Current.Adapter;
             IDevice device = null;
             try
             {
@@ -151,8 +158,9 @@ public class Radio : IRadio
         }
     }
 
-    private async Task ConnectionLoop(IAdapter adapter, CancellationToken cancellationToken)
+    private async Task ConnectionLoop(CancellationToken cancellationToken)
     {
+        var adapter = CrossBluetoothLE.Current.Adapter;
         adapter.DeviceConnectionLost += AdapterOnDeviceConnectionLost;
         try
         {
@@ -165,7 +173,7 @@ public class Radio : IRadio
                 _responseCountCharacteristic = null;
                 try
                 {
-                    _device = await TryConnectForeverAsync(adapter, cancellationToken);
+                    _device = await TryConnectForeverAsync(cancellationToken);
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                     _mainService = await _device.GetServiceAsync(RileyLinkGatt.ServiceMain, cancellationToken);
                     _dataCharacteristic =
@@ -388,7 +396,33 @@ public class Radio : IRadio
             RileyLinkCommand.SetModeRegisters, cancellationToken, rxParams));
     }
 
-    private async Task<(RileyLinkResponse, byte[])> ExecuteCommandInternalAsync(
+    public async Task<BleExchangeResult> ExecuteCommandAsync(
+        RileyLinkCommand command,
+        CancellationToken cancellationToken,
+        params byte[] data)
+    {
+        while (true)
+        {
+            try
+            {
+                await _radioReadyEvent.WaitAsync(cancellationToken);
+                return await ExecuteCommandInternalAsync(command, cancellationToken, data);
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error while bt comm: {e}");
+                _radioReadyEvent.Reset();
+                _connectionLostEvent.Set();
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
+        }
+    }
+    
+    private async Task<BleExchangeResult> ExecuteCommandInternalAsync(
         RileyLinkCommand command,
         CancellationToken cancellationToken,
         params byte[] data)
@@ -399,72 +433,60 @@ public class Radio : IRadio
         if (data.Length > 0)
             data.CopyTo(commandData, 2);
         _responseCountUpdatedEvent.Reset();
-        await TryWriteToCharacteristic(_dataCharacteristic, commandData, cancellationToken);
-        await _responseCountUpdatedEvent.WaitAsync(cancellationToken);
-        var response = await TryReadFromCharacteristic(_dataCharacteristic);
-        if (response.Length == 0)
-            return (RileyLinkResponse.NoResponse, null);
-        var responseCode = (RileyLinkResponse)response[0];
-        var responseData = response.Skip(1).ToArray();
-        return (responseCode, responseData);
+
+        var commResult = BleCommunicationResult.SendFailed;
+        try
+        {
+            await TryWriteToCharacteristic(_dataCharacteristic, commandData, cancellationToken);
+            commResult = BleCommunicationResult.ReceiveTimedOut;
+            await Policy.TimeoutAsync(TimeSpan.FromSeconds(15), TimeoutStrategy.Optimistic)
+                .ExecuteAsync(token => _responseCountUpdatedEvent.WaitAsync(token), cancellationToken);
+            commResult = BleCommunicationResult.ReceiveFailed;
+            var response = new Bytes(await TryReadFromCharacteristic(_dataCharacteristic)));
+            commResult = BleCommunicationResult.OK;
+            var responseCode = RileyLinkResponse.NoResponse;
+            if (response.Length > 0)
+                responseCode = (RileyLinkResponse)response[0];
+            return new BleExchangeResult
+            {
+                CommunicationResult = commResult,
+                ResponseCode = responseCode,
+                ResponseData = response.Sub(1)
+            };
+        }
+        catch (TaskCanceledException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            return new BleExchangeResult { CommunicationResult = commResult };
+        }
     }
 
 
     private async Task<byte[]> TryReadFromCharacteristic(ICharacteristic characteristic,
         CancellationToken cancellationToken = default)
     {
-        var retries = 0;
-        while (true)
-            try
-            {
-                return await characteristic.ReadAsync(cancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                retries++;
-                if (retries >= 5)
-                {
-                    throw new ApplicationException("Exceeded retry count", e);
-                }
-                    
-                await Task.Delay(TimeSpan.FromMilliseconds(150), cancellationToken);
-            }
+        var retryPolicy = Policy.Handle<Exception>(e => !(e is TaskCanceledException))
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromMilliseconds(50*attempt));
+        var timeoutPolicy = Policy.TimeoutAsync(10, TimeoutStrategy.Optimistic);
+        var policy = timeoutPolicy.WrapAsync(retryPolicy);
+
+        return await policy.ExecuteAsync(token => characteristic.ReadAsync(token), cancellationToken);
     }
 
     private async Task TryWriteToCharacteristic(ICharacteristic characteristic, byte[] data,
         CancellationToken cancellationToken = default)
     {
-        var retries = 0;
-        var success = false;
-        Exception ex = null;
-        while (!success)
-        {
-            try
-            {
-                success = await characteristic.WriteAsync(data, cancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                ex = e;
-            }
-
-            if (!success)
-            {
-                retries++;
-                if (retries >= 5)
-                {
-                    throw new ApplicationException("Exceeded retry count", ex);
-                }
-                await Task.Delay(TimeSpan.FromMilliseconds(150));
-            }
-        }
+        var retryPolicy = Policy.Handle<Exception>(e => !(e is TaskCanceledException))
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromMilliseconds(50*attempt));
+        var resultPolicy = Policy.HandleResult<bool>(r => !r)
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromMilliseconds(50*attempt));;
+        var timeoutPolicy = Policy.TimeoutAsync(10, TimeoutStrategy.Optimistic);
+        var policy = timeoutPolicy.WrapAsync(resultPolicy).WrapAsync(retryPolicy);
+        var writeResult = await policy.ExecuteAsync(token => characteristic.WriteAsync(data, cancellationToken), cancellationToken);
+        if (!writeResult)
+            throw new ApplicationException("BLE write returned false");
     }
 }

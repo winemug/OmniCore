@@ -31,20 +31,20 @@ public class PodModel : IPodModel
     public uint RadioAddress { get; }
     public int UnitsPerMilliliter { get; }
     public MedicationType Medication { get; }
-    // Runtime Info
-    public uint? Lot { get; set; }
-    public uint? Serial { get; set; }
     
-    public IPodTimeModel? PodTime { get; set; }
+    // Runtime Info
+    public PodProgress? Progress { get; }
+    public PodStatusModel? StatusModel { get; set; }
+    public DateTimeOffset? StatusUpdated { get; set; }
+    public PodFaultInfoModel? FaultInfoModel { get; set; }
+    public PodVersionModel? VersionModel { get; set; }
+    public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
+    public PodActivationParametersModel? ActivationParameters { get; set; }
+    public PodTimeModel? PodTime { get; set; }
     public int NextRecordIndex { get; set; }
     public int NextPacketSequence { get; set; }
     public int NextMessageSequence { get; set; }
-    public int? PulseVolumeMicroUnits { get; set; }
-    public int? MaximumLifeTimeHours { get; set; }
     public uint? LastNonce { get; set; }
-    public IPodStatusModel? Status { get; set; }
-    
-    public IPodFaultInfoModel? FaultInfo { get; set; }
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
 
     public async Task LoadResponses()
@@ -74,9 +74,14 @@ public class PodModel : IPodModel
 
     public async Task ProcessResultAsync(ExchangeResult result)
     {
-        if (result.Message == null)
-            return;
-        
+        if (result.SentMessage != null)
+            await ProcessMessageAsync(result.SentMessage, result.ReceiveStart);
+        if (result.ReceivedMessage != null)
+            await ProcessMessageAsync(result.ReceivedMessage);
+    }
+    
+    private async Task ProcessMessageAsync(IPodMessage message)
+    {
         foreach (var part in message.Parts)
         {
             if (part is ResponseErrorPart ep)
@@ -207,53 +212,5 @@ public class PodModel : IPodModel
     }
 }
 
-public class PodStatusModel : IPodStatusModel
-{
-    public PodProgress Progress { get; set; }
-    public bool Faulted { get; set; }
-    public bool ExtendedBolusActive { get; set; }
-    public bool ImmediateBolusActive { get; set;}
-    public bool TempBasalActive { get; set;}
-    public bool BasalActive { get; set;}
-    public int PulsesDelivered { get; set;}
-    public int PulsesPending { get; set;}
-    public int PulsesRemaining { get; set;} // 0x3FF -> over 50U
-    public int ActiveMinutes { get; set;}
-    public int UnackedAlertsMask { get; set; }
-    public DateTimeOffset Updated { get; set;}
-}
 
-public class PodFaultInfoModel : IPodFaultInfoModel
-{
-    public int FaultEventCode { get; }
-    public int FaultEventMinute { get; }
-    public bool FaultPulseInformationInvalid { get; }
-    public bool FaultOcclusion { get; }
-    public bool FaultInsulinStateTable { get; }
-    public int FaultOcclusionType { get; }
-    public bool FaultDuringImmediateBolus { get; }
-    public PodProgress ProgressBeforeFault { get; }
-    public int LastProgrammingCommandSequence { get; }
-}
 
-public class PodTimeModel : IPodTimeModel
-{
-    public DateTimeOffset ValueWhen { get; set; }
-    public TimeOnly Value { get; set; }
-    
-    TimeOnly IPodTimeModel.Now { get; set; }
-    public TimeOnly Then(DateTimeOffset when)
-    {
-        var timeDifference = DateTimeOffset.UtcNow - when;
-        return Value.Add(timeDifference);
-    }
-
-    public TimeOnly Now
-    {
-        get
-        {
-            var timeDifference = DateTimeOffset.UtcNow - ValueWhen;
-            return Value.Add(timeDifference);
-        }
-    }
-}
