@@ -13,8 +13,9 @@ public class ResponseStatusPart : MessagePart
         var b0 = data[0];
         var d0 = data.DWord(1);
         var d1 = data.DWord(5);
-        var pr = (int)(d1 & 0b0000001111111111);
+
         Progress = (PodProgress)(b0 & 0x0F);
+        Faulted = (d1 & 0x80000000) != 0;
         StatusModel = new PodStatusModel
         {
             ExtendedBolusActive = (b0 & 0b10000000) > 0,
@@ -26,15 +27,15 @@ public class ResponseStatusPart : MessagePart
             LastProgrammingCommandSequence = (int)((d0 >> 11) & 0b00001111),
             PulsesPending = (int)(d0 & 0b0000011111111111),
 
-            Faulted = (d1 & 0x80000000) != 0,
             UnackedAlertsMask = (int)((d1 >> 23) & 0x0F),
             ActiveMinutes = (int)((d1 >> 10) & 0b0001111111111111),
-            PulsesRemaining = pr,
+            PulsesRemaining = (int)(d1 & 0b0000001111111111),
         };
     }
 
     public override bool RequiresNonce => false;
     public override PodMessageType Type => PodMessageType.ResponseStatus;
-    public PodStatusModel StatusModel { get; init; }
-    public PodProgress Progress { get; init; }
+    public PodStatusModel StatusModel { get; set; }
+    public PodProgress Progress { get; set; }
+    public bool Faulted { get; set; }
 }

@@ -7,12 +7,12 @@ namespace OmniCore.Services.Interfaces.Radio;
 
 public interface IRadioConnection : IDisposable
 {
-    Task<IPodPacket?> TryGetPacket(
+    Task<BleExchangeResult> TryGetPacket(
         byte channel,
         uint timeoutMs,
         CancellationToken cancellationToken = default);
 
-    Task<bool> SendPacket(
+    Task<BleExchangeResult> SendPacket(
         byte channel,
         byte repeatCount,
         ushort delayMilliseconds,
@@ -20,7 +20,7 @@ public interface IRadioConnection : IDisposable
         IPodPacket packet,
         CancellationToken cancellationToken);
 
-    Task<IPodPacket?> SendAndTryGetPacket(
+    Task<BleExchangeResult> SendAndTryGetPacket(
         byte sendChannel,
         byte sendRepeatCount,
         ushort sendRepeatDelayMs,

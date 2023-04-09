@@ -4,16 +4,16 @@ namespace OmniCore.Common.Pod;
 
 public class PodStatusModel
 {
-    bool Faulted { get; set; }
     public bool ExtendedBolusActive { get; init; }
-    bool ImmediateBolusActive { get; init; }
-    bool TempBasalActive { get; init; }
-    bool BasalActive { get; init; }
+    public bool ImmediateBolusActive { get; init; }
+    public bool TempBasalActive { get; init; }
+    public bool BasalActive { get; init; }
     public int PulsesDelivered { get; init; }
     public int PulsesPending { get; init; }
     public int PulsesRemaining { get; init; }
     public int ActiveMinutes { get; init; }
     public int UnackedAlertsMask { get; set; }
+    public int LastProgrammingCommandSequence { get; set; }
 }
 
 public class PodFaultInfoModel
@@ -60,22 +60,23 @@ public class PodActivationParametersModel
     public int MaximumLifeTimeHours { get; init; }
 }
 
-public class PodTimeModel
+public class PodBasalModel
 {
-    public DateTimeOffset ValueWhen { get; set; }
-    public TimeOnly Value { get; set; }
-    public TimeOnly Then(DateTimeOffset when)
+    public DateTimeOffset PodTimeReference { get; set; }
+    public TimeOnly PodTimeReferenceValue { get; set; }
+    public TimeOnly PodTimeThen(DateTimeOffset when)
     {
         var timeDifference = DateTimeOffset.UtcNow - when;
-        return Value.Add(timeDifference);
+        return PodTimeReferenceValue.Add(timeDifference);
     }
-
-    public TimeOnly Now
+    public TimeOnly PodTimeNow
     {
         get
         {
-            var timeDifference = DateTimeOffset.UtcNow - ValueWhen;
-            return Value.Add(timeDifference);
+            var timeDifference = DateTimeOffset.UtcNow - PodTimeReference;
+            return PodTimeReferenceValue.Add(timeDifference);
         }
     }
+    
+    public int[] BasalSchedule { get; set; }
 }

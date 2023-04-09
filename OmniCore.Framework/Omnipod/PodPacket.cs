@@ -3,6 +3,7 @@ using System.Linq;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
+using OmniCore.Services.Interfaces.Radio;
 
 namespace OmniCore.Services;
 
@@ -68,7 +69,23 @@ public class PodPacket : IPodPacket
         return ManchesterCodec.Encode(radioData);
     }
 
-    public static PodPacket FromRadioData(Bytes data, int radioRssi)
+    public static PodPacket? FromExchangeResult(BleExchangeResult result, uint? expectedAddress = default)
+    {
+        if (result.CommunicationResult != BleCommunicationResult.OK ||
+            result.ResponseCode != RileyLinkResponse.CommandSuccess ||
+            result.ResponseData == null ||
+            result.ResponseData.Length < 2)
+            return null;
+        var rssi = ((sbyte)result.ResponseData[0] - 127) / 2; // -128 to 127
+
+        var data = result.ResponseData.Sub(2);
+        var pp = FromRadioData(data, rssi);
+        if (expectedAddress.HasValue && pp?.Address != expectedAddress)
+            return null;
+        return pp;
+    }
+    
+    public static PodPacket? FromRadioData(Bytes data, int radioRssi)
     {
         data = new Bytes(ManchesterCodec.Decode(data.ToArray()));
         if (data.Length < 6)

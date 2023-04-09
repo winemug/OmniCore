@@ -3,54 +3,59 @@ using OmniCore.Services.Interfaces.Radio;
 
 namespace OmniCore.Services.Interfaces.Pod;
 
-public class ExchangeResult
-{
-    public DateTimeOffset? SendStart { get; set; }
-    public DateTimeOffset? ReceiveStart { get; set; }
-    public IPodMessage? SentMessage { get; set; }
-    public IPodMessage? ReceivedMessage { get; set; }
-
-    public RequestSendResult SendResult { get; set; }
-    public RequestAcknowledgementResult AcknowledgementResult { get; set; }
-    public ResponseReceiveResult ReceiveResult { get; set; }
-    public CommunicationStatus Status { get; set; }
-    
-    public string ErrorText { get; set; }
+public class BleExchangeResult
+{ 
+    public BleCommunicationResult CommunicationResult { get; set; }
+    public DateTimeOffset? BleWriteCompleted { get; set; }
+    public DateTimeOffset? BleReadIndicated { get; set; }
+    public RileyLinkResponse? ResponseCode { get; set; }
+    public Bytes? ResponseData { get; set; }
+    public Exception? Exception { get; set; }
 }
 
-public class BleExchangeResult
+public class ExchangeResult
 {
-    public BleCommunicationResult CommunicationResult { get; init; }
-    public RileyLinkResponse? ResponseCode { get; init; }
-    public Bytes? ResponseData { get; init; }
+    public DateTimeOffset? RequestSentEarliest { get; set; }
+    public DateTimeOffset? RequestSentLatest { get; set; }
+    public IPodMessage? SentMessage { get; set; }
+    public IPodMessage? ReceivedMessage { get; set; }
+    public AcceptanceType Result { get; set; }
+    public string? ErrorText { get; set; }
+
+    public ExchangeResult WithResult(AcceptanceType? result = default, string? errorText = default)
+    {
+        if (result.HasValue)
+            this.Result = result.Value;
+        if (errorText != null)
+            this.ErrorText = errorText;
+        return this;
+    }
+}
+
+public enum AcceptanceType
+{
+    Accepted,
+    Inconclusive,
+    Ignored,
+    RejectedResyncRequired,
+    RejectedProtocolError,
+    RejectedNonceReseed,
+    RejectedErrorOccured,
+    RejectedFaultOccured,
+}
+
+public class BlePacketExchangeResult
+{
+    public IPodPacket Sent { get; set; }
+    public IPodPacket? Received { get; set; }
+    public bool BleConnectionSuccessful { get; set; }
 }
 
 public enum BleCommunicationResult
 {
     OK,
-    SendFailed,
-    ReceiveTimedOut,
-    ReceiveFailed,
+    WriteFailed,
+    IndicateTimedOut,
+    ReadFailed,
 }
 
-public enum RequestSendResult
-{
-    FullySent,
-    PartiallySent,
-    NothingSent,
-}
-
-public enum RequestAcknowledgementResult
-{
-    Acknowledged,
-    Inconclusive,
-    Rejected,
-    None,
-}
-
-public enum ResponseReceiveResult
-{
-    FullyReceived,
-    PartiallyReceived,
-    NothingReceived,
-}

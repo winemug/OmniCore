@@ -25,7 +25,7 @@ public class RadioConnection : IRadioConnection
         _radioLockDisposable?.Dispose();
     }
 
-    public async Task<IPodPacket> TryGetPacket(
+    public async Task<BleExchangeResult> TryGetPacket(
         byte channel,
         uint timeoutMs,
         CancellationToken cancellationToken = default)
@@ -34,23 +34,12 @@ public class RadioConnection : IRadioConnection
             .Append(channel)
             .Append(timeoutMs)
             .ToArray();
-        var (code, result) = await _radio.ExecuteCommandAsync(
+        return await _radio.ExecuteCommandAsync(
             RileyLinkCommand.GetPacket, cancellationToken,
             cmdParams);
-        if (code != RileyLinkResponse.CommandSuccess)
-            return null;
-
-        if (result.Length < 3)
-            return null;
-
-        var rssi = ((sbyte)result[0] - 127) / 2; // -128 to 127
-        var sequence = result[1];
-        // var seq = result[1];
-        var data = new Bytes(result.Skip(2).ToArray());
-        return PodPacket.FromRadioData(data, rssi);
     }
 
-    public async Task<bool> SendPacket(
+    public async Task<BleExchangeResult> SendPacket(
         byte channel,
         byte repeatCount,
         ushort delayMilliseconds,
@@ -65,13 +54,12 @@ public class RadioConnection : IRadioConnection
             .Append(preambleExtensionMs)
             .Append(packet.ToRadioData())
             .ToArray();
-        var (code, result) = await _radio.ExecuteCommandAsync(
+        return await _radio.ExecuteCommandAsync(
             RileyLinkCommand.SendPacket, cancellationToken,
             cmdParamsWithData);
-        return code == RileyLinkResponse.CommandSuccess;
     }
 
-    public async Task<IPodPacket> SendAndTryGetPacket(
+    public async Task<BleExchangeResult> SendAndTryGetPacket(
         byte sendChannel,
         byte sendRepeatCount,
         ushort sendRepeatDelayMs,
@@ -92,18 +80,8 @@ public class RadioConnection : IRadioConnection
             .Append(sendPreambleExtensionMs)
             .Append(packet.ToRadioData())
             .ToArray();
-        var (code, result) = await _radio.ExecuteCommandAsync(
+        return await _radio.ExecuteCommandAsync(
             RileyLinkCommand.SendAndListen, cancellationToken,
             cmdParamsWithData);
-        if (code != RileyLinkResponse.CommandSuccess)
-            return null;
-        if (result.Length < 3)
-            return null;
-
-        var rssi = ((sbyte)result[0] - 127) / 2; // -128 to 127
-        var sequence = result[1];
-
-        var data = new Bytes(result.Skip(2).ToArray());
-        return PodPacket.FromRadioData(data, rssi);
     }
 }

@@ -6,27 +6,27 @@ namespace OmniCore.Services.Interfaces.Pod;
 
 public interface IPodConnection : IDisposable
 {
-    Task<PodResponse> PrimePodAsync(DateOnly podDate, TimeOnly podTime, bool relaxDeliveryCrosschecks, CancellationToken cancellationToken);
-    Task<PodResponse> StartPodAsync(TimeOnly podTime, BasalRateEntry[] basalRateEntries, CancellationToken cancellationToken = default);
-    Task<PodResponse> ConfigureAlerts(
+    Task<PodRequestStatus> PrimePodAsync(DateOnly podDate, TimeOnly podTime, bool relaxDeliveryCrosschecks, CancellationToken cancellationToken);
+    Task<PodRequestStatus> StartPodAsync(TimeOnly podTime, BasalRateEntry[] basalRateEntries, CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> ConfigureAlerts(
         AlertConfiguration[] alertConfigurations,
         CancellationToken cancellationToken = default);
-    Task<PodResponse> UpdateStatus(CancellationToken cancellationToken = default);
-    Task<PodResponse> Beep(BeepType type, CancellationToken cancellationToken = default);
-    Task<PodResponse> SetBasalSchedule(
+    Task<PodRequestStatus> UpdateStatus(CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> Beep(BeepType type, CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> SetBasalSchedule(
         TimeOnly podTime,
         BasalRateEntry[] basalRateEntries,
         CancellationToken cancellationToken = default);
-    Task<PodResponse> SetTempBasal(
+    Task<PodRequestStatus> SetTempBasal(
         int hourlyRateMilliunits,
         int halfHourCount,
         CancellationToken cancellationToken = default);
-    Task<PodResponse> CancelTempBasal(CancellationToken cancellationToken = default);
-    Task<PodResponse> Bolus(
+    Task<PodRequestStatus> CancelTempBasal(CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> Bolus(
         int bolusPulses,
         int pulseIntervalSeconds,
         CancellationToken cancellationToken = default);
-    Task<PodResponse> CancelBolus(CancellationToken cancellationToken = default);
-    Task<PodResponse> Deactivate(CancellationToken cancellationToken = default);
-    Task<PodResponse> AcknowledgeAlerts(CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> CancelBolus(CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> Deactivate(CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> AcknowledgeAlerts(CancellationToken cancellationToken = default);
 }

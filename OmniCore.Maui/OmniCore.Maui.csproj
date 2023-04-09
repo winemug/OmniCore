@@ -50,6 +50,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Maui" Version="5.0.0" />
+        <PackageReference Include="LukeMauiFilePicker" Version="1.0.0" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
           <PrivateAssets>all</PrivateAssets>

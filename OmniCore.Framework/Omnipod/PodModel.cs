@@ -22,76 +22,119 @@ public class PodModel : IPodModel
     public PodModel(Pod pod)
     {
         InitializeNonceTable(0);
-        RadioAddress = pod.RadioAddress;
-        UnitsPerMilliliter = pod.UnitsPerMilliliter;
-        Medication = pod.Medication;
     }
 
     public Guid Id => _pod.PodId;
-    public uint RadioAddress { get; }
-    public int UnitsPerMilliliter { get; }
-    public MedicationType Medication { get; }
-    
+    public uint RadioAddress => _pod.RadioAddress;
+    public int UnitsPerMilliliter => _pod.UnitsPerMilliliter;
+    public MedicationType Medication => _pod.Medication;
+   
     // Runtime Info
-    public PodProgress? Progress { get; }
+    public PodProgress? Progress { get; set; }
+    public bool? Faulted { get; set; }
     public PodStatusModel? StatusModel { get; set; }
     public DateTimeOffset? StatusUpdated { get; set; }
     public PodFaultInfoModel? FaultInfoModel { get; set; }
     public PodVersionModel? VersionModel { get; set; }
     public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
-    public PodActivationParametersModel? ActivationParameters { get; set; }
-    public PodTimeModel? PodTime { get; set; }
+    public PodActivationParametersModel? ActivationParametersModel { get; set; }
+    public PodBasalModel? BasalModel { get; set; }
     public int NextRecordIndex { get; set; }
     public int NextPacketSequence { get; set; }
     public int NextMessageSequence { get; set; }
     public uint? LastNonce { get; set; }
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
 
-    public async Task LoadResponses()
+    public async Task Load()
     {
         NextRecordIndex = 0;
         using var ocdb = new OcdbContext();
-        await ocdb.Entry(_pod).Collection(p => p.Actions).LoadAsync();
 
-        foreach (var pa in _pod.Actions.OrderBy(pa => pa.Index))
+        var pas = ocdb.PodActions.Where(pa => pa.PodId == _pod.PodId)
+            .OrderBy(pa => pa.Index);
+
+        foreach (var pa in pas)
         {
             NextRecordIndex = pa.Index + 1;
-            if (pa.Received != null)
+            await ProcessActionAsync(pa);
+        }
+
+        if (_pod.ImportedProperties != null)
+        {
+            if (VersionModel == null)
             {
-                var podMessage = PodMessage.FromBody(new Bytes(pa.Received));
-                if (podMessage != null)
-                    await ProcessResponseAsync(podMessage);
+                VersionModel = new PodVersionModel
+                {
+                    Lot = _pod.ImportedProperties.Lot,
+                    Serial = _pod.ImportedProperties.Serial,
+                    AssignedAddress = _pod.RadioAddress,
+                    FirmwareVersionMajor = 0,
+                    FirmwareVersionMinor = 0,
+                    FirmwareVersionRevision = 0,
+                    HardwareVersionMajor = 0,
+                    HardwareVersionMinor = 0,
+                    HardwareVersionRevision = 0,
+                    ProductId = 0
+                };
+            }
+
+            if (ActivationParametersModel == null)
+            {
+                ActivationParametersModel = new PodActivationParametersModel
+                {
+                };
+            }
+
+            if (BasalModel == null)
+            {
+                var storedRates = _pod.ImportedProperties.ActiveBasalRates;
+                int[] basalRates;
+                if (storedRates.Length == 1)
+                {
+                    basalRates = new int[48];
+                    for (int i = 0; i < 48; i++)
+                        basalRates[i] = storedRates[0];
+                }
+                else
+                {
+                    basalRates = storedRates;
+                }
+
+                BasalModel = new PodBasalModel
+                {
+                    BasalSchedule = basalRates,
+                    PodTimeReferenceValue = _pod.ImportedProperties.PodTimeReferenceValue,
+                    PodTimeReference = _pod.ImportedProperties.PodTimeReference,
+                };
             }
         }
+    }
 
-        if (_pod.IsImported)
+    public async Task ProcessActionAsync(PodAction pa)
+    {
+        // TODO: SentData and inconclusive affirmations for received & future
+        if (pa.ReceivedData != null)
         {
-            Lot ??= _pod.Lot;
-            Serial ??= _pod.Serial;
-            Progress ??= PodProgress.Running;
+            var receivedRange = (pa.RequestSentLatest!.Value - pa.RequestSentEarliest!.Value);
+            var received = pa.RequestSentEarliest.Value + (receivedRange / 2);
+            var receivedMessage = PodMessage.FromBody(new Bytes(pa.ReceivedData));
+            if (receivedMessage != null)
+                await ProcessReceivedMessageAsync(receivedMessage, received);
         }
     }
-
-    public async Task ProcessResultAsync(ExchangeResult result)
-    {
-        if (result.SentMessage != null)
-            await ProcessMessageAsync(result.SentMessage, result.ReceiveStart);
-        if (result.ReceivedMessage != null)
-            await ProcessMessageAsync(result.ReceivedMessage);
-    }
     
-    private async Task ProcessMessageAsync(IPodMessage message)
+    private async Task ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
     {
         foreach (var part in message.Parts)
         {
             if (part is ResponseErrorPart ep)
                 ProcessError(ep);
             if (part is ResponseStatusPart sp)
-                ProcessStatus(sp);
+                ProcessStatus(sp, received);
             if (part is ResponseVersionPart rv)
                 ProcessVersion(rv);
             if (part is ResponseInfoPart ri)
-                ProcessInfo(ri);
+                ProcessInfo(ri, received);
         }
     }
 
@@ -120,48 +163,37 @@ public class PodModel : IPodModel
         InitializeNonceTable(seed);
     }
 
-    private void ProcessStatus(ResponseStatusPart part)
+    private void ProcessStatus(ResponseStatusPart part, DateTimeOffset received)
     {
-        Status = new PodStatusModel
-        {
-            Progress = part.Progress,
-            Faulted = part.Faulted,
-            ExtendedBolusActive = part.ExtendedBolusActive,
-            ImmediateBolusActive = part.ImmediateBolusActive,
-            TempBasalActive = part.TempBasalActive,
-            BasalActive = part.BasalActive,
-            PulsesDelivered = part.PulsesDelivered,
-            PulsesPending = part.PulsesPending,
-            PulsesRemaining = part.PulsesRemaining,
-            ActiveMinutes = part.ActiveMinutes,
-            UnackedAlertsMask = part.UnackedAlertsMask,
-            Updated = new DateTimeOffset()
-        };
+        StatusUpdated = received;
+        Progress = part.Progress;
+        Faulted = part.Faulted;
+        StatusModel = part.StatusModel;
     }
 
     private void ProcessVersion(ResponseVersionPart part)
     {
-        Lot = part.Lot;
-        Serial = part.Serial;
-        Progress = part.Progress;
-        if (part.PulseVolumeMicroUnits.HasValue)
-            PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
-        if (part.MaximumLifeTimeHours.HasValue)
-            MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
+        // Lot = part.Lot;
+        // Serial = part.Serial;
+        // Progress = part.Progress;
+        // if (part.PulseVolumeMicroUnits.HasValue)
+        //     PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
+        // if (part.MaximumLifeTimeHours.HasValue)
+        //     MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
     }
 
     private void ProcessError(ResponseErrorPart part)
     {
     }
 
-    private void ProcessInfo(ResponseInfoPart part)
+    private void ProcessInfo(ResponseInfoPart part, DateTimeOffset received)
     {
         if (part is ResponseInfoActivationPart pact)
             ProcessInfoActivation(pact);
         if (part is ResponseInfoAlertsPart pale)
             ProcessInfoAlerts(pale);
         if (part is ResponseInfoExtendedPart pext)
-            ProcessInfoExtended(pext);
+            ProcessInfoExtended(pext, received);
         if (part is ResponseInfoPulseLogRecentPart plr)
             ProcessInfoPulseLogRecent(plr);
         if (part is ResponseInfoPulseLogLastPart pll)
@@ -170,7 +202,7 @@ public class PodModel : IPodModel
             ProcessInfoPulseLogPrevious(plp);
     }
 
-    private void ProcessInfoExtended(ResponseInfoExtendedPart part)
+    private void ProcessInfoExtended(ResponseInfoExtendedPart part, DateTimeOffset received)
     {
     }
 

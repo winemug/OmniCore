@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using Dapper;
 using Microsoft.Data.Sqlite;
@@ -67,6 +68,7 @@ public class OcdbContext : DbContext
         Debug.WriteLine($"pods: {oPods.Count()}");
         foreach (var oPod in oPods)
         {
+            var now = DateTimeOffset.UtcNow;
             this.Pods.Add(new OmniCore.Common.Data.Pod
             {
                 PodId = Guid.Parse((string)oPod.id),
@@ -76,8 +78,15 @@ public class OcdbContext : DbContext
                 UnitsPerMilliliter = (int)oPod.units_per_ml,
                 Medication = (MedicationType)oPod.medication,
                 Created = DateTimeOffset.FromUnixTimeMilliseconds(oPod.valid_from),
-                Lot = oPod.assumed_lot,
-                Serial = oPod.assumed_serial,
+                ImportedProperties = new PodImportedProperties
+                {
+                    Lot = (uint)oPod.assumed_lot,
+                    Serial = (uint)oPod.assumed_serial,
+                    ActiveBasalRates = new int[] { (int)oPod.assumed_fixed_basal },
+                    PodTimeReferenceValue = new TimeOnly(now.Hour, now.Minute, now.Second,
+                        now.Millisecond, now.Microsecond),
+                    PodTimeReference = now
+                },
                 IsSynced = false
             });
             Debug.WriteLine($"pod: {oPod.id}");
@@ -93,11 +102,11 @@ public class OcdbContext : DbContext
                 PodId = Guid.Parse((string)oMsg.pod_id),
                 Index = (int)oMsg.record_index,
                 ClientId = clientId,
-                SendStart = DateTimeOffset.FromUnixTimeMilliseconds((long)oMsg.send_start),
-                Sent = (byte[]) oMsg.send_data,
-                ReceiveEnd = DateTimeOffset.FromUnixTimeMilliseconds((long)oMsg.receive_end),
-                Received = (byte[]?) oMsg.receive_data,
-                Status = (CommunicationStatus) oMsg.exchange_result,
+                Result = AcceptanceType.Inconclusive,
+                RequestSentEarliest = DateTimeOffset.FromUnixTimeMilliseconds((long)oMsg.send_start),
+                RequestSentLatest = DateTimeOffset.FromUnixTimeMilliseconds((long)oMsg.receive_end),
+                SentData = (byte[]) oMsg.send_data,
+                ReceivedData = (byte[]?) oMsg.receive_data, 
                 IsSynced = false
             });
             Debug.WriteLine($"msg: {oMsg.pod_id} {oMsg.record_index}");
@@ -152,13 +161,23 @@ public class Pod
     public uint RadioAddress { get; set; }
     public MedicationType Medication { get; set; }
     public int UnitsPerMilliliter { get; set; }
-    public uint? Lot { get; set; }
-    public uint? Serial { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public PodImportedProperties? ImportedProperties { get; set; }
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? Removed { get; set; }
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
     public bool IsSynced { get; set; }
     public List<PodAction> Actions { get; set; }
+}
+
+public class PodImportedProperties
+{
+    public uint Lot { get; set; }
+    public uint Serial { get; set; }
+    public int[] ActiveBasalRates { get; set; }
+    public DateTimeOffset PodTimeReference { get; set; }
+    public TimeOnly PodTimeReferenceValue { get; set; }
 }
 
 [PrimaryKey(nameof(PodId), nameof(Index))]
@@ -167,10 +186,10 @@ public class PodAction
     public Guid PodId { get; set; }
     public int Index { get; set; }
     public Guid ClientId { get; set; }
-    public DateTimeOffset SendStart { get; set; }
-    public byte[] Sent { get; set; } = null!;
-    public DateTimeOffset ReceiveEnd { get; set; }
-    public byte[]? Received { get; set; } 
-    public CommunicationStatus Status { get; set; }
+    public DateTimeOffset? RequestSentEarliest { get; set; }
+    public DateTimeOffset? RequestSentLatest { get; set; }
+    public byte[]? SentData { get; set; }
+    public byte[]? ReceivedData { get; set; }
+    public AcceptanceType Result { get; set; }
     public bool IsSynced { get; set; }
 }

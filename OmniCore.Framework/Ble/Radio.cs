@@ -281,10 +281,11 @@ public class Radio : IRadio
         _responseCountUpdatedEvent.Set();
     }
 
-    private void AssertRadioReturnResult((RileyLinkResponse, byte[]) r)
+    private void AssertRadioReturnResult(BleExchangeResult result)
     {
-        if (r.Item1 != RileyLinkResponse.CommandSuccess)
-            throw new ApplicationException($"Rileylink response {r.Item1}");
+        if (result.CommunicationResult != BleCommunicationResult.OK ||
+            result.ResponseCode != RileyLinkResponse.CommandSuccess)
+            throw new ApplicationException($"BLE comm error");
     }
 
     private async Task InitializeRadioParametersAsync(CancellationToken cancellationToken = default)
@@ -434,33 +435,33 @@ public class Radio : IRadio
             data.CopyTo(commandData, 2);
         _responseCountUpdatedEvent.Reset();
 
-        var commResult = BleCommunicationResult.SendFailed;
+        var result = new BleExchangeResult { CommunicationResult = BleCommunicationResult.WriteFailed };
         try
         {
             await TryWriteToCharacteristic(_dataCharacteristic, commandData, cancellationToken);
-            commResult = BleCommunicationResult.ReceiveTimedOut;
+            result.BleWriteCompleted = DateTimeOffset.UtcNow;
+            result.CommunicationResult = BleCommunicationResult.IndicateTimedOut;
+
             await Policy.TimeoutAsync(TimeSpan.FromSeconds(15), TimeoutStrategy.Optimistic)
                 .ExecuteAsync(token => _responseCountUpdatedEvent.WaitAsync(token), cancellationToken);
-            commResult = BleCommunicationResult.ReceiveFailed;
-            var response = new Bytes(await TryReadFromCharacteristic(_dataCharacteristic)));
-            commResult = BleCommunicationResult.OK;
-            var responseCode = RileyLinkResponse.NoResponse;
+            result.BleReadIndicated = DateTimeOffset.UtcNow;
+            result.CommunicationResult = BleCommunicationResult.ReadFailed;
+            var response = new Bytes(await TryReadFromCharacteristic(_dataCharacteristic, cancellationToken));
+            result.CommunicationResult = BleCommunicationResult.OK;
+
             if (response.Length > 0)
-                responseCode = (RileyLinkResponse)response[0];
-            return new BleExchangeResult
-            {
-                CommunicationResult = commResult,
-                ResponseCode = responseCode,
-                ResponseData = response.Sub(1)
-            };
+                result.ResponseCode = (RileyLinkResponse)response[0];
+            result.ResponseData = response.Sub(1);
+            return result;
         }
         catch (TaskCanceledException)
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return new BleExchangeResult { CommunicationResult = commResult };
+            result.Exception = e;
+            return result;
         }
     }
 

@@ -1,5 +1,8 @@
 using System;
 using Nito.AsyncEx;
+using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Pod;
+using OmniCore.Services.Interfaces.Radio;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;

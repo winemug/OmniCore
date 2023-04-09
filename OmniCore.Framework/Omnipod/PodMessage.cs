@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
+using Plugin.BLE.Abstractions;
 
 namespace OmniCore.Services;
 
@@ -57,8 +59,24 @@ public class PodMessage : IPodMessage
 
     public static PodMessage? FromBody(Bytes messageBody)
     {
+        try
+        {
+            return FromBodyInternal(messageBody);
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Message body parsing failed: {e}");
+            return null;
+        }
+    }
+    
+    private static PodMessage? FromBodyInternal(Bytes messageBody)
+    {
         var message = new PodMessage();
         message.Body = messageBody;
+
+        if (messageBody.Length < 8)
+            return null;
 
         var crcCalc = CrcUtil.Crc16(messageBody.Sub(0, messageBody.Length - 2).ToArray());
         var messageCrc = messageBody.Word(messageBody.Length - 2);
@@ -71,6 +89,10 @@ public class PodMessage : IPodMessage
         message.WithCriticalFollowup = (b0 & 0x80) > 0;
         message.Sequence = (b0 >> 2) & 0b00111111;
         var bodyLength = ((b0 & 0b00000011) << 8) | b1;
+
+        if (bodyLength != messageBody.Length - 6 - 2)
+            return null;
+        
         var bodyIdx = 0;
         message.Parts = new List<IMessagePart>();
         while (bodyIdx < bodyLength)
@@ -139,7 +161,7 @@ public class PodMessage : IPodMessage
         return message;
 
     }
-    public static PodMessage FromReceivedPackets(List<IPodPacket> receivedPackets)
+    public static PodMessage? FromReceivedPackets(List<IPodPacket> receivedPackets)
     {
         var messageBody = new Bytes();
         foreach (var rp in receivedPackets)
