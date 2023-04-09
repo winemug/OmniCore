@@ -123,7 +123,7 @@ public class PodModel : IPodModel
         }
     }
     
-    private async Task ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
+    public async Task ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
     {
         foreach (var part in message.Parts)
         {
