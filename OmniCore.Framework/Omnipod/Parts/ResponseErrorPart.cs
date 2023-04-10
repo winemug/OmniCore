@@ -14,7 +14,7 @@ public class ResponseErrorPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.ResponseError;
+    public override PodMessagePartType Type => PodMessagePartType.ResponseError;
 
     public byte ErrorCode { get; set; }
     public ushort ErrorValue { get; set; }

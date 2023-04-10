@@ -146,7 +146,7 @@ public class RequestInsulinSchedulePart : MessagePart
     }
 
     public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestInsulinSchedule;
+    public override PodMessagePartType Type => PodMessagePartType.RequestInsulinSchedule;
 
     private Bytes GetData(ScheduleType type,
         byte halfHourCount,

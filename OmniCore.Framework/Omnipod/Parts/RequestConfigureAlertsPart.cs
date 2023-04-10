@@ -6,7 +6,7 @@ namespace OmniCore.Services;
 public class RequestConfigureAlertsPart : MessagePart
 {
     public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestConfigureAlerts;
+    public override PodMessagePartType Type => PodMessagePartType.RequestConfigureAlerts;
 
     public RequestConfigureAlertsPart(AlertConfiguration[] alertConfigurations)
     {

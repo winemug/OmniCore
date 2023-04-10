@@ -6,7 +6,7 @@ namespace OmniCore.Services;
 public class RequestBasalPart : MessagePart
 {
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestBasal;
+    public override PodMessagePartType Type => PodMessagePartType.RequestBasal;
 
     public RequestBasalPart(BasalRateEntry[] basalRateEntries, TimeOnly podTime)
     {

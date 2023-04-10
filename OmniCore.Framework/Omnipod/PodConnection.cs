@@ -72,53 +72,61 @@ public class PodConnection : IDisposable, IPodConnection
         bool relaxDeliveryCrosschecks,
         CancellationToken cancellationToken)
     {
-        PodRequestStatus result = PodRequestStatus.Executed;
-        if (!_podModel.Progress.HasValue)
+        
+        PodRequestStatus result;
+        if (_podModel.VersionModel == null) // radio address not set (no recorded version response)
         {
             result = await SetRadioAddress(cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
         }
-        
-        Debug.Assert(_podModel.Progress.HasValue);
-        
-        if (_podModel.Progress > PodProgress.Priming)
+
+        if (_podModel.VersionModel == null) // must be set now
             return PodRequestStatus.RejectedByApp;
-        
-        if (_podModel.Progress == PodProgress.Paired)
+
+        if (_podModel.ActivationParametersModel == null) // actpar null, no long version info received
         {
             result = await SetupPod(podDate, podTime, 4, cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
         }
 
-        if (_podModel.Progress == PodProgress.Paired)
-        {
-            result = await ConfigureAlerts(new[]
-            {
-                new AlertConfiguration
-                {
-                    AlertIndex = 7,
-                    SetActive = true,
-                    AlertAfter = 5,
-                    AlertDurationMinutes = 55,
-                    BeepType = BeepType.Beep4x,
-                    BeepPattern = BeepPattern.OnceEveryFifteenMinutes
-                }
-            }, cancellationToken);
-            if (result != PodRequestStatus.Executed)
-                return result;
-        }
+        if (_podModel.ActivationParametersModel == null) // must be set now
+            return PodRequestStatus.RejectedByPod;
 
-        if (relaxDeliveryCrosschecks && _podModel.Progress == PodProgress.Paired)
-        {
-            result = await SetDeliveryFlags(0, 0, cancellationToken);
-            if (result != PodRequestStatus.Executed)
-                return result;
-        }
+        if (!_podModel.Progress.HasValue) // must be set now
+            return PodRequestStatus.RejectedByPod;
+
+        if (_podModel.Progress > PodProgress.Priming)
+            return PodRequestStatus.RejectedByPod;
         
         if (_podModel.Progress == PodProgress.Paired)
         {
+            if (_podModel.StatusModel == null) // config alerts not run if no status obtained so far
+            {
+                result = await ConfigureAlerts(new[]
+                {
+                    new AlertConfiguration
+                    {
+                        AlertIndex = 7,
+                        SetActive = true,
+                        AlertAfter = 5,
+                        AlertDurationMinutes = 55,
+                        BeepType = BeepType.Beep4x,
+                        BeepPattern = BeepPattern.OnceEveryFifteenMinutes
+                    }
+                }, cancellationToken);
+                if (result != PodRequestStatus.Executed)
+                    return result;
+            
+                if (relaxDeliveryCrosschecks) // setdeliveryflags will be skipped if configurealerts 
+                {
+                    result = await SetDeliveryFlags(0, 0, cancellationToken);
+                    if (result != PodRequestStatus.Executed)
+                        return result;
+                }
+            }
+            
             result = await Bolus(52, 1, cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
@@ -686,8 +694,8 @@ public class PodConnection : IDisposable, IPodConnection
             cancellationToken);
         
         if (er.ReceivedMessage != null &&
-            er.RequestSentEarliest.HasValue)
-            await _podModel.ProcessReceivedMessageAsync(er.ReceivedMessage, er.RequestSentEarliest.Value);
+            er.RequestSentLatest.HasValue)
+            await _podModel.ProcessReceivedMessageAsync(er.ReceivedMessage, er.RequestSentLatest.Value);
         
         await using (var ocdb = new OcdbContext())
         {
@@ -707,6 +715,7 @@ public class PodConnection : IDisposable, IPodConnection
         }
         
         await _syncService.SyncPodMessage(_podModel.Id, _podModel.NextRecordIndex);
+        
         _podModel.NextRecordIndex++;
 
         switch (er.Result)
@@ -967,14 +976,14 @@ public class PodConnection : IDisposable, IPodConnection
         _podModel.NextMessageSequence = (receivedMessageSequence + 1) % 16;
         
         er.Result = AcceptanceType.Inconclusive;
-        var firstPartMessageType = (PodMessageType)podFirstResponseData[0];
+        var firstPartMessageType = (PodMessagePartType)podFirstResponseData[0];
         switch (firstPartMessageType)
         {
-            case PodMessageType.ResponseStatus:
-            case PodMessageType.ResponseVersionInfo:
+            case PodMessagePartType.ResponseStatus:
+            case PodMessagePartType.ResponseVersionInfo:
                 er.Result = podMessageReceived == null ? AcceptanceType.Inconclusive : AcceptanceType.Accepted;
                 break;
-            case PodMessageType.ResponseInfo:
+            case PodMessagePartType.ResponseInfo:
                 if (podFirstResponseData.Length < 3)
                     er.Result = AcceptanceType.Inconclusive;
                 else
@@ -985,7 +994,7 @@ public class PodConnection : IDisposable, IPodConnection
                             er.Result = AcceptanceType.Inconclusive;
                         else
                         {
-                            if (messageToSend.Parts[0].Type == PodMessageType.RequestStatus
+                            if (messageToSend.Parts[0].Type == PodMessagePartType.RequestStatus
                                 && messageToSend.Parts[0].Data[0] == (byte)RequestStatusType.Extended)
                             {
                                 er.Result = podMessageReceived == null ? AcceptanceType.Inconclusive : AcceptanceType.Accepted;
@@ -1002,7 +1011,7 @@ public class PodConnection : IDisposable, IPodConnection
                     }
                 }
                 break;
-            case PodMessageType.ResponseError:
+            case PodMessagePartType.ResponseError:
                 if (podFirstResponseData.Length < 3)
                     er.Result = AcceptanceType.Inconclusive;
                 else

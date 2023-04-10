@@ -23,5 +23,5 @@ public class RequestCancelPart : MessagePart
     }
 
     public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestCancelDelivery;
+    public override PodMessagePartType Type => PodMessagePartType.RequestCancelDelivery;
 }

@@ -22,5 +22,5 @@ public class RequestSetupPodPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestSetupPod;
+    public override PodMessagePartType Type => PodMessagePartType.RequestSetupPod;
 }

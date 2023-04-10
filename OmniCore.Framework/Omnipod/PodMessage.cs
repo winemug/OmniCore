@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using OmniCore.Common.Pod;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
@@ -13,7 +14,7 @@ public class PodMessage : IPodMessage
     public uint Address { get; set; }
     public int Sequence { get; set; }
     public bool WithCriticalFollowup { get; set; }
-    public List<IMessagePart> Parts { get; set; }
+    public IMessageParts Parts { get; set; }
 
     public uint? AckAddressOverride { get; set; }
     public Bytes Body { get; set; }
@@ -21,7 +22,8 @@ public class PodMessage : IPodMessage
     public Bytes GetBody()
     {
         var bodyLength = 0;
-        foreach (var part in Parts)
+        var partsList = Parts.AsList();
+        foreach (var part in partsList)
         {
             if (part.RequiresNonce)
                 bodyLength += 4;
@@ -36,7 +38,7 @@ public class PodMessage : IPodMessage
         b0 |= (byte)((bodyLength >> 8) & 0x03);
         var b1 = (byte)(bodyLength & 0xff);
         messageBody.Append(new[] { b0, b1 });
-        foreach (var part in Parts)
+        foreach (var part in partsList)
         {
             messageBody.Append((byte)part.Type);
             if (part.RequiresNonce)
@@ -94,13 +96,13 @@ public class PodMessage : IPodMessage
             return null;
         
         var bodyIdx = 0;
-        message.Parts = new List<IMessagePart>();
+        var partsList = new List<IMessagePart>();
         while (bodyIdx < bodyLength)
         {
-            var mpType = (PodMessageType)messageBody[6 + bodyIdx];
+            var mpType = (PodMessagePartType)messageBody[6 + bodyIdx];
             Bytes mpData = null;
             var mpLength = 0;
-            if (mpType == PodMessageType.ResponseStatus)
+            if (mpType == PodMessagePartType.ResponseStatus)
             {
                 mpLength = messageBody.Length - 2 - 7;
                 mpData = messageBody.Sub(6 + bodyIdx + 1, messageBody.Length - 2);
@@ -113,50 +115,50 @@ public class PodMessage : IPodMessage
 
             switch (mpType)
             {
-                case PodMessageType.ResponseStatus:
-                    message.Parts.Add(new ResponseStatusPart(mpData));
+                case PodMessagePartType.ResponseStatus:
+                    partsList.Add(new ResponseStatusPart(mpData));
                     break;
-                case PodMessageType.ResponseError:
-                    message.Parts.Add(new ResponseErrorPart(mpData));
+                case PodMessagePartType.ResponseError:
+                    partsList.Add(new ResponseErrorPart(mpData));
                     break;
-                case PodMessageType.ResponseInfo:
+                case PodMessagePartType.ResponseInfo:
                     var riType = (RequestStatusType)mpData[0];
                     switch (riType)
                     {
                         case RequestStatusType.Alerts:
-                            message.Parts.Add(new ResponseInfoAlertsPart(mpData));
+                            partsList.Add(new ResponseInfoAlertsPart(mpData));
                             break;
                         case RequestStatusType.Extended:
-                            message.Parts.Add(new ResponseInfoExtendedPart(mpData));
+                            partsList.Add(new ResponseInfoExtendedPart(mpData));
                             break;
                         case RequestStatusType.PulseLogRecent:
-                            message.Parts.Add(new ResponseInfoPulseLogRecentPart(mpData));
+                            partsList.Add(new ResponseInfoPulseLogRecentPart(mpData));
                             break;
                         case RequestStatusType.Activation:
-                            message.Parts.Add(new ResponseInfoActivationPart(mpData));
+                            partsList.Add(new ResponseInfoActivationPart(mpData));
                             break;
                         case RequestStatusType.PulseLogLast:
-                            message.Parts.Add(new ResponseInfoPulseLogLastPart(mpData));
+                            partsList.Add(new ResponseInfoPulseLogLastPart(mpData));
                             break;
                         case RequestStatusType.PulseLogPrevious:
-                            message.Parts.Add(new ResponseInfoPulseLogPreviousPart(mpData));
+                            partsList.Add(new ResponseInfoPulseLogPreviousPart(mpData));
                             break;
                         default:
-                            message.Parts.Add(new MessagePart { Data = mpData, Type=mpType });
+                            partsList.Add(new MessagePart { Data = mpData, Type=mpType });
                             break;
                     }
-
                     break;
-                case PodMessageType.ResponseVersionInfo:
-                    message.Parts.Add(new ResponseVersionPart(mpData));
+                case PodMessagePartType.ResponseVersionInfo:
+                    partsList.Add(new ResponseVersionPart(mpData));
                     break;
                 default:
-                    message.Parts.Add(new MessagePart { Data = mpData, Type=mpType });
+                    partsList.Add(new MessagePart { Data = mpData, Type=mpType });
                     break;
             }
-
             bodyIdx = bodyIdx + 2 + mpLength;
         }
+
+        message.Parts = new MessageParts(partsList);
 
         return message;
 
@@ -173,7 +175,7 @@ public class PodMessage : IPodMessage
     {
         var sb = new StringBuilder();
         sb.Append($"Address: {Address:X} Sequence: {Sequence} Critical: {WithCriticalFollowup}");
-        foreach (var part in Parts)
+        foreach (var part in Parts.AsList())
             sb.Append($"\nPart: {part}");
         return sb.ToString();
     }

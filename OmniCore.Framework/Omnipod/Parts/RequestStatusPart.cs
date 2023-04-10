@@ -12,7 +12,7 @@ public class RequestStatusPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestStatus;
+    public override PodMessagePartType Type => PodMessagePartType.RequestStatus;
 }
 
 public enum RequestStatusType

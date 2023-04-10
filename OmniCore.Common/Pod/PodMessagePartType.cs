@@ -1,6 +1,6 @@
 namespace OmniCore.Services.Interfaces.Pod;
 
-public enum PodMessageType
+public enum PodMessagePartType
 {
     RequestSetupPod = 0x03,
     RequestAssignAddress = 0x07,

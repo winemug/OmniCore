@@ -21,6 +21,7 @@ public class PodModel : IPodModel
 
     public PodModel(Pod pod)
     {
+        _pod = pod;
         InitializeNonceTable(0);
     }
 
@@ -115,11 +116,13 @@ public class PodModel : IPodModel
         // TODO: SentData and inconclusive affirmations for received & future
         if (pa.ReceivedData != null)
         {
-            var receivedRange = (pa.RequestSentLatest!.Value - pa.RequestSentEarliest!.Value);
-            var received = pa.RequestSentEarliest.Value + (receivedRange / 2);
-            var receivedMessage = PodMessage.FromBody(new Bytes(pa.ReceivedData));
-            if (receivedMessage != null)
-                await ProcessReceivedMessageAsync(receivedMessage, received);
+            var received = pa.RequestSentLatest ?? pa.RequestSentEarliest;
+            if (received.HasValue)
+            {
+                var receivedMessage = PodMessage.FromBody(new Bytes(pa.ReceivedData));
+                if (receivedMessage != null)
+                    await ProcessReceivedMessageAsync(receivedMessage, received.Value);
+            }
         }
     }
     

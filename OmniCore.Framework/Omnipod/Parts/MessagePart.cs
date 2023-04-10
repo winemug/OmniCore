@@ -6,20 +6,20 @@ namespace OmniCore.Services;
 
 public class MessagePart : IMessagePart
 {
-    public virtual bool RequiresNonce { get; }
-    public virtual PodMessageType Type { get; set; }
+    public bool RequiresNonce { get; set;  }
+    public PodMessagePartType Type { get; set; }
     public uint Nonce { get; set; }
     public Bytes Data { get; set; }
 
-    public static MessagePart Parse(PodMessageType type, Bytes data)
+    public static MessagePart Parse(PodMessagePartType type, Bytes data)
     {
         switch (type)
         {
-            case PodMessageType.ResponseStatus:
+            case PodMessagePartType.ResponseStatus:
                 return new ResponseStatusPart(data);
-            case PodMessageType.ResponseError:
+            case PodMessagePartType.ResponseError:
                 return new ResponseErrorPart(data);
-            case PodMessageType.ResponseInfo:
+            case PodMessagePartType.ResponseInfo:
                 var riType = (RequestStatusType)data[0];
                 switch (riType)
                 {
@@ -38,7 +38,7 @@ public class MessagePart : IMessagePart
                 }
 
                 break;
-            case PodMessageType.ResponseVersionInfo:
+            case PodMessagePartType.ResponseVersionInfo:
                 return new ResponseVersionPart(data);
         }
 

@@ -29,5 +29,5 @@ public class RequestBeepConfigPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestBeepConfig;
+    public override PodMessagePartType Type => PodMessagePartType.RequestBeepConfig;
 }

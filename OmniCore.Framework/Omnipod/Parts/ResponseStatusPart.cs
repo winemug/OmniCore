@@ -34,7 +34,7 @@ public class ResponseStatusPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.ResponseStatus;
+    public override PodMessagePartType Type => PodMessagePartType.ResponseStatus;
     public PodStatusModel StatusModel { get; set; }
     public PodProgress Progress { get; set; }
     public bool Faulted { get; set; }

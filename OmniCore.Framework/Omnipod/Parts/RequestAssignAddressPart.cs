@@ -13,5 +13,5 @@ public class RequestAssignAddressPart : MessagePart
 
     public override bool RequiresNonce => false;
 
-    public override PodMessageType Type => PodMessageType.RequestAssignAddress;
+    public override PodMessagePartType Type => PodMessagePartType.RequestAssignAddress;
 }

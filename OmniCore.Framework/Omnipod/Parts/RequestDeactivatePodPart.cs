@@ -12,5 +12,5 @@ public class RequestDeactivatePodPart : MessagePart
     }
 
     public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestDeactivatePod;
+    public override PodMessagePartType Type => PodMessagePartType.RequestDeactivatePod;
 }

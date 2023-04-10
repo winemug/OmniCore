@@ -16,5 +16,5 @@ public class RequestBolusPart : MessagePart
     }
 
     public override bool RequiresNonce => false;
-    public override PodMessageType Type => PodMessageType.RequestBolus;
+    public override PodMessagePartType Type => PodMessagePartType.RequestBolus;
 }

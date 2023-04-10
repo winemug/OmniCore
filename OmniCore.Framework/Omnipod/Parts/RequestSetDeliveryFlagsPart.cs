@@ -5,8 +5,8 @@ namespace OmniCore.Services;
 
 public class RequestSetDeliveryFlagsPart : MessagePart
 {
-    public override bool RequiresNonce => true;
-    public override PodMessageType Type => PodMessageType.RequestSetDeliveryFlags;
+    public bool RequiresNonce => true;
+    public PodMessagePartType Type => PodMessagePartType.RequestSetDeliveryFlags;
 
     public RequestSetDeliveryFlagsPart(byte b16, byte b17)
     {
