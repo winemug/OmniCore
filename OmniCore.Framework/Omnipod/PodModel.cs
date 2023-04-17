@@ -31,15 +31,15 @@ public class PodModel : IPodModel
     public MedicationType Medication => _pod.Medication;
    
     // Runtime Info
-    public PodProgress? Progress { get; set; }
-    public bool? Faulted { get; set; }
+    public PodProgressModel? ProgressModel { get; set; }
     public PodStatusModel? StatusModel { get; set; }
-    public DateTimeOffset? StatusUpdated { get; set; }
     public PodFaultInfoModel? FaultInfoModel { get; set; }
     public PodVersionModel? VersionModel { get; set; }
     public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
     public PodBasalModel? BasalModel { get; set; }
+
+    public DateTimeOffset? StatusUpdated { get; set; }
     public int NextRecordIndex { get; set; }
     public int NextPacketSequence { get; set; }
     public int NextMessageSequence { get; set; }
@@ -169,8 +169,7 @@ public class PodModel : IPodModel
     private void ProcessStatus(ResponseStatusPart part, DateTimeOffset received)
     {
         StatusUpdated = received;
-        Progress = part.Progress;
-        Faulted = part.Faulted;
+        ProgressModel = part.ProgressModel;
         StatusModel = part.StatusModel;
     }
 

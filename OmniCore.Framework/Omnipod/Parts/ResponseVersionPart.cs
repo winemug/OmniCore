@@ -36,7 +36,11 @@ public class ResponseVersionPart : MessagePart
                 RadioLowGain = (data[16] >> 6) & 0b00000011,
                 Rssi = data[16] & 0b00111111,
             };
-            Progress = (PodProgress)data[7];
+            ProgressModel = new PodProgressModel
+            {
+                Progress = (PodProgress)data[7],
+                Faulted = data[14] > 9 && data[7] < 15
+            };
         }
 
         if (data.Length == 27)
@@ -66,13 +70,17 @@ public class ResponseVersionPart : MessagePart
                 Serial = data.DWord(19),
                 AssignedAddress = data.DWord(23),
             };
-            Progress = (PodProgress)data[14];
+            ProgressModel = new PodProgressModel
+            {
+                Progress = (PodProgress)data[14],
+                Faulted = data[14] > 9 && data[14] < 15
+            };
         }
     }
     
     public PodVersionModel? VersionModel { get; set; }
     public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
-    public PodProgress Progress { get; set; }
+    public PodProgressModel ProgressModel { get; set; }
 
 }

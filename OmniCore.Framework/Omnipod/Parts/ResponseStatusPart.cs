@@ -14,8 +14,11 @@ public class ResponseStatusPart : MessagePart
         var d0 = data.DWord(1);
         var d1 = data.DWord(5);
 
-        Progress = (PodProgress)(b0 & 0x0F);
-        Faulted = (d1 & 0x80000000) != 0;
+        ProgressModel = new PodProgressModel
+        {
+            Progress = (PodProgress)(b0 & 0x0F),
+            Faulted = (d1 & 0x80000000) != 0,
+        };
         StatusModel = new PodStatusModel
         {
             ExtendedBolusActive = (b0 & 0b10000000) > 0,
@@ -36,6 +39,5 @@ public class ResponseStatusPart : MessagePart
     public override bool RequiresNonce => false;
     public override PodMessagePartType Type => PodMessagePartType.ResponseStatus;
     public PodStatusModel StatusModel { get; set; }
-    public PodProgress Progress { get; set; }
-    public bool Faulted { get; set; }
+    public PodProgressModel ProgressModel { get; set; }
 }

@@ -6,18 +6,6 @@ namespace OmniCore.Services;
 
 public class PodMessageBuilder
 {
-    private uint _address;
-    private int _sequence;
-    private bool _criticalFollowUp = false;
-    private INonceProvider? _nonceProvider;
-    
-    public PodMessageBuilder(uint address, int sequence, INonceProvider? nonceProvider)
-    {
-        _address = address;
-        _sequence = sequence;
-        _nonceProvider = nonceProvider;
-    }
-
     public PodMessageBuilder WithCriticalFollowup()
     {
         _criticalFollowUp = true;
@@ -296,17 +284,23 @@ public class PodMessageBuilder
             });
     }
 
-    private PodMessage BuildMessage(IMessagePart part)
+    protected PodMessage BuildMessage(
+        uint address, int sequence, INonceProvider? nonceProvider,
+        IMessagePart part)
     {
         return BuildMessage(new MessageParts(part));
     }
 
-    private PodMessage BuildMessage(IMessagePart mainPart, IMessagePart subPart)
+    protected PodMessage BuildMessage(
+        uint address, int sequence, INonceProvider? nonceProvider,
+        IMessagePart mainPart, IMessagePart subPart)
     {
         return BuildMessage(new MessageParts(mainPart, subPart));
     }
 
-    private PodMessage BuildMessage(IMessageParts parts)
+    private PodMessage BuildMessage(
+        uint address, int sequence, INonceProvider? nonceProvider,
+        IMessageParts parts)
     {
         return new PodMessage
         {
