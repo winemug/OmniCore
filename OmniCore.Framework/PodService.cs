@@ -76,8 +76,11 @@ public class PodService : IPodService
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
-            Lot = lot,
-            Serial = serial
+            ImportedProperties = new PodImportedProperties
+            {
+                Lot = lot,
+                Serial = serial
+            }
         };
         ocdb.Pods.Add(pod);
         await ocdb.SaveChangesAsync();
@@ -103,23 +106,27 @@ public class PodService : IPodService
     
     public async Task<IPodModel?> GetPodAsync(Guid podId)
     {
-        return _podModels.FirstOrDefault(p => p.Id == podId);
+        //TODO:
+        throw new NotImplementedException();
+        // return _podModels.FirstOrDefault(p => p.Id == podId);
     }
 
     public async Task<IPodConnection> GetConnectionAsync(
         IPodModel podModel,
         CancellationToken cancellationToken = default)
     {
-        var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
-        if (radioConnection == null)
-            throw new ApplicationException("No radios available");
+        throw new NotImplementedException();
 
-        var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
-        return new PodConnection(
-            podModel,
-            radioConnection,
-            allocationLockDisposable,
-            _configurationStore,
-            _syncService);
+        //var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
+        //if (radioConnection == null)
+        //    throw new ApplicationException("No radios available");
+
+        //var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
+        //return new PodConnection(
+        //    podModel,
+        //    radioConnection,
+        //    allocationLockDisposable,
+        //    _configurationStore,
+        //    _syncService);
     }
 }

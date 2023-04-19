@@ -6,8 +6,8 @@ namespace OmniCore.Services;
 
 public class MessagePart : IMessagePart
 {
-    public bool RequiresNonce { get; set;  }
-    public PodMessagePartType Type { get; set; }
+    public virtual bool RequiresNonce { get; set; }
+    public virtual PodMessagePartType Type { get; set; }
     public uint Nonce { get; set; }
     public Bytes Data { get; set; }
 

@@ -10,7 +10,9 @@ namespace OmniCore.Common.Pod
 {
     public interface IMessageData
     {
-        PodMessagePartType MainPartType { get; }
-        PodMessagePartType? SubPartType { get; }
+        IMessageParts ToParts();
+        IMessageData FromParts(IMessageParts parts);
+        abstract static Predicate<IMessageParts> CanParse { get; }
+
     }
 }

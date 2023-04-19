@@ -16,6 +16,7 @@ public class NonceProvider : INonceProvider
         _lot = lot;
         _serial = serial;
         _lastNonce = lastNonce;
+        _nonceTable = new uint[18];
         InitializeNonceTable(0);
     }
     
@@ -53,7 +54,6 @@ public class NonceProvider : INonceProvider
 
     private void InitializeNonceTable(ushort seed)
     {
-        _nonceTable = new uint[18];
         _nonceTable[0] = (uint)(((_lot & 0xFFFF) + 0x55543DC3 + (_lot >> 16) + (seed & 0xFF)) & 0xFFFFFFFF);
         _nonceTable[1] = (uint)(((_serial & 0xFFFF) + 0xAAAAE44E + (_serial >> 16) + (seed >> 8)) & 0xFFFFFFFF);
         for (var i = 2; i < 18; i++) _nonceTable[i] = GenerateNonce();

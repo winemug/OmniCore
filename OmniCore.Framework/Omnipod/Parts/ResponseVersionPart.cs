@@ -83,4 +83,7 @@ public class ResponseVersionPart : MessagePart
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
     public PodProgressModel ProgressModel { get; set; }
 
+    public override bool RequiresNonce => false;
+
+    public override PodMessagePartType Type => PodMessagePartType.ResponseVersionInfo;
 }

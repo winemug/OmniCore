@@ -4,14 +4,32 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using MessagePack;
 using MessagePack.Resolvers;
-using Moq;
-using OmniCore.Common.Data;
-using OmniCore.Services;
-using OmniCore.Services.Interfaces.Core;
+using OmniCore.Framework.Omnipod.Messages;
 using OmniCore.Services.Interfaces.Pod;
-using OmniCore.Tests;
-using Plugin.BLE.Abstractions.Extensions;
+//using Moq;
+//using OmniCore.Common.Data;
+//using OmniCore.Framework.Omnipod.Messages;
+//using OmniCore.Services;
+//using OmniCore.Services.Interfaces.Core;
+//using OmniCore.Services.Interfaces.Pod;
+//using OmniCore.Tests;
+//using Plugin.BLE.Abstractions.Extensions;
 
+
+
+var body = new MessageBuilder()
+    .WithSequence(0)
+    .WithAddress(0x01020304)
+    .WithData(new BeepMessageData
+    {
+        BeepNow = BeepType.BeepBeep
+    }).Body;
+
+Console.WriteLine(body);
+
+var data = (BeepMessageData) new MessageBuilder().WithBody(body!).Data;
+
+Console.WriteLine($"Now: {data.BeepNow}");
 
 // {"MyProperty1":99,"MyProperty2":9999}
 

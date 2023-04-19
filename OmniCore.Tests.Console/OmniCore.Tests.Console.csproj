@@ -8,10 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OmniCore.Tests\OmniCore.Tests.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="MessagePack" Version="2.5.108" />
       <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
@@ -20,6 +16,11 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
       <PackageReference Include="Polly" Version="7.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\OmniCore.Common\OmniCore.Common.csproj" />
+      <ProjectReference Include="..\OmniCore.Framework\OmniCore.Framework.csproj" />
     </ItemGroup>
 
 </Project>

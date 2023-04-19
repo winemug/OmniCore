@@ -2,17 +2,27 @@
 using OmniCore.Services.Interfaces.Pod;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OmniCore.Common.Pod;
 
-public interface IMessage<T> where T : IMessageData
+public interface IMessage
 {
-    IMessage<T> WithAddress(uint address);
-    IMessage<T> WithSequence(int sequence);
-    IMessage<T> AsCritical();
-    IMessage<T> WithNonceProvider(INonceProvider nonceProvider);
-    IMessage<T> WithMessageData(T messageData);
+    //uint? Address { get; set; }
+    //int? Sequence { get; set; }
+    //bool Critical { get; set; }
+    //INonceProvider? NonceProvider { get; set; }
+
+    //IMessage WithAddress(uint address);
+    //IMessage WithSequence(int sequence);
+    //IMessage AsCritical();
+    //IMessage WithNonceProvider(INonceProvider nonceProvider);
+
+    //IMessageParts GetParts();
+    IMessage Parse(IMessageParts parts);
+    Bytes ToBody();
+    abstract static Predicate<IMessageParts> CanParse { get; }
 }
