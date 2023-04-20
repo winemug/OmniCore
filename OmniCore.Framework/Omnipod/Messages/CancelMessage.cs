@@ -11,7 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Messages
 {
-    public class CancelMessageData : IMessageData
+    public class CancelMessage : IMessageData
     {
         public BeepType Beep { get; set; }
         public bool CancelExtendedBolus { get; set; }

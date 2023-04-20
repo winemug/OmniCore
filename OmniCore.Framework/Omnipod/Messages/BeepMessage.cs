@@ -14,7 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Messages;
 
-public class BeepMessageData : IMessageData
+public class BeepMessage : IMessageData
 {
     public BeepType BeepNow { get; set; }
     public bool OnBasalStart { get; set; }

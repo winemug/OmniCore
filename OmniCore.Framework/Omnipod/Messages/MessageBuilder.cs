@@ -91,8 +91,9 @@ public class MessageBuilder
         var parts = new MessageParts(partsList);
 
         IMessageData? messageData = null;
-        messageData ??= TryParse<BeepMessageData>(parts);
-        messageData ??= TryParse<CancelMessageData>(parts);
+        messageData ??= TryParse<AckAlertsMessage>(parts);
+        messageData ??= TryParse<BeepMessage>(parts);
+        messageData ??= TryParse<CancelMessage>(parts);
 
         if (messageData == null)
             throw new ApplicationException();
