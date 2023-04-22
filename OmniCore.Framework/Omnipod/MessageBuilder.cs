@@ -98,6 +98,8 @@ public class MessageBuilder
         messageData ??= TryParse<CancelMessage>(parts);
         messageData ??= TryParse<DeactivateMessage>(parts);
         messageData ??= TryParse<SetAlertsMessage>(parts);
+        messageData ??= TryParse<SetClockMessage>(parts);
+        messageData ??= TryParse<SetDeliveryVerificationMessage>(parts);
 
         if (messageData == null)
             throw new ApplicationException();
