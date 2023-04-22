@@ -2,12 +2,6 @@
 using OmniCore.Services;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Messages;
 
@@ -17,9 +11,13 @@ public class SetAlertsMessage : IMessageData
 
     public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestConfigureAlerts;
 
-    public IMessageData FromParts(IMessageParts parts)
+    public SetAlertsMessage()
     {
         AlertConfigurations = new List<AlertConfiguration>();
+    }
+
+    public IMessageData FromParts(IMessageParts parts)
+    {
         var idx = 0;
         while (idx < parts.MainPart.Data.Length)
         {
@@ -50,6 +48,13 @@ public class SetAlertsMessage : IMessageData
     public IMessageParts ToParts()
     {
         var data = new Bytes();
+        if (!AlertConfigurations.Any())
+            throw new ApplicationException("Need to have at least one configuration");
+
+        if (AlertConfigurations.DistinctBy(x => x.AlertIndex).Count() != 
+            AlertConfigurations.Count())
+            throw new ApplicationException("Alert indices need to be unique");
+
         foreach (var alertConfiguration in AlertConfigurations)
         {
             var b0 = (alertConfiguration.AlertIndex & 0x07) << 4;
