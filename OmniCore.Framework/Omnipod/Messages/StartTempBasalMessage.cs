@@ -8,13 +8,25 @@ namespace OmniCore.Framework.Omnipod.Messages;
 
 public class StartTempBasalMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestTempBasal;
+    public static Predicate<IMessageParts> CanParse =>
+        (parts) => parts.MainPart.Type == PodMessagePartType.RequestTempBasal &&
+                   parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
 
     public int HalfHourCount { get; set; }
     public int PulsesPerHour { get; set; }
 
     public IMessageData FromParts(IMessageParts parts)
     {
+        var subData = parts.SubPart!.Data;
+        var schedules = ScheduleHelper.ParseScheduleData(subData);
+        HalfHourCount = 0;
+        foreach(var schedule in schedules )
+        {
+            HalfHourCount += schedule.BlockCount;
+        }
+        PulsesPerHour = (schedules[0].PulsesPerBlock * 2)
+            + (schedules[0].AddAlternatingExtraPulse ? 1 : 0);
+
         return this;
     }
 

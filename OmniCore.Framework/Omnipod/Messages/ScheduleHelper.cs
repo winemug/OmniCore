@@ -10,7 +10,37 @@ namespace OmniCore.Framework.Omnipod.Messages;
 
 public static class ScheduleHelper
 {
-    public static Bytes GetScheduleDataWithChecksum(byte halfHourCount,
+
+    public static InsulinSchedule[] ParseScheduleData(Bytes data)
+    {
+        var checksum = data[0];
+        var halfHourCount = data[1];
+        var initialDuration125ms = data[2];
+        var initialPulseCount = data[3];
+
+        var idx = 4;
+        var schedules = new List<InsulinSchedule>();
+        while (idx < data.Length)
+        {
+            var b0 = data[idx++];
+            var b1 = data[idx++];
+
+            var blockCount = (b0 >> 4) + 1;
+            var alternatingExtraPulse = (b0 & 0x08) > 0;
+            var pulsesPerBlock = (b0 & 0x07) << 8;
+            pulsesPerBlock |= b1;
+            schedules.Add(new InsulinSchedule
+            {
+                BlockCount = blockCount,
+                PulsesPerBlock = pulsesPerBlock,
+                AddAlternatingExtraPulse = alternatingExtraPulse
+            });
+        }
+        return schedules.ToArray();
+    }
+
+    public static Bytes GetScheduleDataWithChecksum(
+        byte halfHourCount,
         ushort initialDuration125ms,
         ushort initialPulseCount,
         InsulinSchedule[] schedules)

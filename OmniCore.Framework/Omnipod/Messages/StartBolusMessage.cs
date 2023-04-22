@@ -8,7 +8,9 @@ namespace OmniCore.Framework.Omnipod.Messages;
 
 public class StartBolusMesage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestBolus;
+    public static Predicate<IMessageParts> CanParse =>
+        (parts) => parts.MainPart.Type == PodMessagePartType.RequestBolus &&
+                   parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
 
     public int ImmediatePulseCount { get; set; }
     public long ImmediatePulseIntervalMs { get; set; }
