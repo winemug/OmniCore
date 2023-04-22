@@ -8,8 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Framework.Omnipod.Messages;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod;
 
 public class MessageBuilder
 {
@@ -24,25 +25,25 @@ public class MessageBuilder
 
     public MessageBuilder WithAddress(uint address)
     {
-        this.Address = address;
+        Address = address;
         return this;
     }
 
     public MessageBuilder WithSequence(int sequence)
     {
-        this.Sequence = sequence;
+        Sequence = sequence;
         return this;
     }
 
     public MessageBuilder WithNonceProvider(INonceProvider nonceProvider)
     {
-        this.NonceProvider = nonceProvider;
+        NonceProvider = nonceProvider;
         return this;
     }
 
     public MessageBuilder AsCritical()
     {
-        this.Critical = true;
+        Critical = true;
         return this;
     }
 
@@ -60,8 +61,8 @@ public class MessageBuilder
         var b0 = messageBody[4];
         var b1 = messageBody[5];
         var withCriticalFollowup = (b0 & 0x80) > 0;
-        var sequence = (b0 >> 2) & 0b00111111;
-        var bodyLength = ((b0 & 0b00000011) << 8) | b1;
+        var sequence = b0 >> 2 & 0b00111111;
+        var bodyLength = (b0 & 0b00000011) << 8 | b1;
 
         if (bodyLength != messageBody.Length - 6 - 2)
             throw new ApplicationException();
@@ -92,8 +93,11 @@ public class MessageBuilder
 
         IMessageData? messageData = null;
         messageData ??= TryParse<AckAlertsMessage>(parts);
+        messageData ??= TryParse<AssignAddressMessage>(parts);
         messageData ??= TryParse<BeepMessage>(parts);
         messageData ??= TryParse<CancelMessage>(parts);
+        messageData ??= TryParse<DeactivateMessage>(parts);
+        messageData ??= TryParse<SetAlertsMessage>(parts);
 
         if (messageData == null)
             throw new ApplicationException();
@@ -126,21 +130,21 @@ public class MessageBuilder
         {
             if (part.RequiresNonce)
             {
-                if (this.NonceProvider == null)
+                if (NonceProvider == null)
                     throw new ApplicationException("This message requires a nonce provider");
-                part.Nonce = this.NonceProvider.NextNonce();
+                part.Nonce = NonceProvider.NextNonce();
                 bodyLength += 4;
             }
             bodyLength += part.Data.Length + 2;
             msgParts.Add(part);
         }
 
-        var messageBody = new Bytes(this.Address.Value);
+        var messageBody = new Bytes(Address.Value);
         byte b0 = 0x00;
-        if (this.Critical)
+        if (Critical)
             b0 = 0x80;
-        b0 |= (byte)(this.Sequence << 2);
-        b0 |= (byte)((bodyLength >> 8) & 0x03);
+        b0 |= (byte)(Sequence << 2);
+        b0 |= (byte)(bodyLength >> 8 & 0x03);
         var b1 = (byte)(bodyLength & 0xff);
         messageBody.Append(new[] { b0, b1 });
         foreach (var part in partsList)
