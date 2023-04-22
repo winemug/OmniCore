@@ -4,7 +4,7 @@ using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod.Requests;
 
 public class StartBolusMesage : IMessageData
 {

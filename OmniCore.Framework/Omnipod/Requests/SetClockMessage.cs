@@ -4,7 +4,7 @@ using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
 using System;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod.Requests;
 
 public class SetClockMessage : IMessageData
 {

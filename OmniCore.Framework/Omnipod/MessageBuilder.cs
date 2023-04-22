@@ -92,10 +92,10 @@ public class MessageBuilder
         var parts = new MessageParts(partsList);
 
         IMessageData? messageData = null;
-        messageData ??= TryParse<AckAlertsMessage>(parts);
+        messageData ??= TryParse<AcknowledgeAlertsMessage>(parts);
         messageData ??= TryParse<AssignAddressMessage>(parts);
-        messageData ??= TryParse<BeepMessage>(parts);
-        messageData ??= TryParse<CancelMessage>(parts);
+        messageData ??= TryParse<SetActivityBeepMessage>(parts);
+        messageData ??= TryParse<StopDeliveryMessage>(parts);
         messageData ??= TryParse<DeactivateMessage>(parts);
         messageData ??= TryParse<GetStatusMessage>(parts);
         messageData ??= TryParse<SetAlertsMessage>(parts);

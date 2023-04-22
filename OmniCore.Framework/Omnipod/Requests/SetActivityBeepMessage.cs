@@ -12,9 +12,9 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod.Requests;
 
-public class BeepMessage : IMessageData
+public class SetActivityBeepMessage : IMessageData
 {
     public BeepType BeepNow { get; set; }
     public bool OnBasalStart { get; set; }

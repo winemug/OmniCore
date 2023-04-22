@@ -3,7 +3,7 @@ using OmniCore.Services;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod.Requests;
 
 public class SetAlertsMessage : IMessageData
 {

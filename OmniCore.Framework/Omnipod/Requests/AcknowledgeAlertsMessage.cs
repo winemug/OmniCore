@@ -9,15 +9,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Framework.Omnipod.Requests;
 
-public class AckAlertsMessage : IMessageData
+public class AcknowledgeAlertsMessage : IMessageData
 {
     public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestAcknowledgeAlerts;
 
     public bool[] AlertIndices { get; set; }
 
-    public AckAlertsMessage()
+    public AcknowledgeAlertsMessage()
     {
         AlertIndices = new bool[8];
     }
