@@ -61,14 +61,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Maui" Version="5.0.0" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
         <PackageReference Include="LukeMauiFilePicker" Version="1.0.0" />
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.4" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.5" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
         <PackageReference Include="Polly" Version="7.2.3" />
     </ItemGroup>
