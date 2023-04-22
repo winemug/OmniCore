@@ -97,9 +97,13 @@ public class MessageBuilder
         messageData ??= TryParse<BeepMessage>(parts);
         messageData ??= TryParse<CancelMessage>(parts);
         messageData ??= TryParse<DeactivateMessage>(parts);
+        messageData ??= TryParse<GetStatusMessage>(parts);
         messageData ??= TryParse<SetAlertsMessage>(parts);
         messageData ??= TryParse<SetClockMessage>(parts);
         messageData ??= TryParse<SetDeliveryVerificationMessage>(parts);
+        messageData ??= TryParse<StartBasalMessage>(parts);
+        messageData ??= TryParse<StartBolusMesage>(parts);
+        messageData ??= TryParse<StartTempBasalMessage>(parts);
 
         if (messageData == null)
             throw new ApplicationException();
