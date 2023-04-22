@@ -13,12 +13,19 @@ public class StartBolusMesage : IMessageData
                    parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
 
     public int ImmediatePulseCount { get; set; }
-    public long ImmediatePulseIntervalMs { get; set; }
+    public int ImmediatePulseIntervalMilliseconds { get; set; }
     public int ExtendedPulseCount { get; set; }
     public int ExtendedHalfHourCount { get; set; }
 
     public IMessageData FromParts(IMessageParts parts)
     {
+        var mainData = parts.MainPart.Data;
+        var totalPulses10 = mainData.Word(1);
+        var pulseInterval = mainData.DWord(3);
+
+        ImmediatePulseCount = totalPulses10 / 10;
+        ImmediatePulseIntervalMilliseconds = (int)(pulseInterval / 100);
+
         return this;
     }
 
@@ -27,7 +34,7 @@ public class StartBolusMesage : IMessageData
         var mainData = new Bytes();
         mainData.Append(0);
         ushort totalPulses10 = (ushort)(ImmediatePulseCount * 10);
-        uint pulseInterval = (uint)(ImmediatePulseIntervalMs * 100);
+        uint pulseInterval = (uint)(ImmediatePulseIntervalMilliseconds * 100);
         mainData.Append(totalPulses10).Append(pulseInterval).Append((ushort)0).Append((uint)0);
 
         var schedules = new[]
@@ -41,7 +48,7 @@ public class StartBolusMesage : IMessageData
         };
         var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
             1,
-            (ushort)(ImmediatePulseCount * ImmediatePulseIntervalMs / 125),
+            (ushort)(ImmediatePulseCount * ImmediatePulseIntervalMilliseconds / 125),
             (ushort)(ImmediatePulseCount),
             schedules);
 
