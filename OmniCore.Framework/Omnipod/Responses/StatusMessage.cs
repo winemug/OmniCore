@@ -1,15 +1,30 @@
-using OmniCore.Common.Pod;
-using OmniCore.Services.Interfaces;
-using OmniCore.Services.Interfaces.Entities;
+﻿using OmniCore.Common.Pod;
 using OmniCore.Services.Interfaces.Pod;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace OmniCore.Services;
+namespace OmniCore.Framework.Omnipod.Responses;
 
-public class ResponseStatusPart : MessagePart
+public class StatusMessage : IMessageData
 {
-    public ResponseStatusPart(Bytes data)
+    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.ResponseStatus;
+
+    public PodStatusModel StatusModel { get; set; }
+    public PodProgressModel ProgressModel { get; set; }
+
+    public StatusMessage()
     {
-        Data = data;
+        //StatusModel = new PodStatusModel();
+        //ProgressModel = new PodProgressModel();
+    }
+
+    public IMessageData FromParts(IMessageParts parts)
+    {
+        var data = parts.MainPart.Data;
         var b0 = data[0];
         var d0 = data.DWord(1);
         var d1 = data.DWord(5);
@@ -34,10 +49,11 @@ public class ResponseStatusPart : MessagePart
             ActiveMinutes = (int)((d1 >> 10) & 0b0001111111111111),
             PulsesRemaining = (int)(d1 & 0b0000001111111111),
         };
+        return this;
     }
 
-    public override bool RequiresNonce => false;
-    public override PodMessagePartType Type => PodMessagePartType.ResponseStatus;
-    public PodStatusModel StatusModel { get; set; }
-    public PodProgressModel ProgressModel { get; set; }
+    public IMessageParts ToParts()
+    {
+        throw new NotImplementedException();
+    }
 }

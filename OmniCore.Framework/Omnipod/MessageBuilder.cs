@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OmniCore.Framework.Omnipod.Messages;
+using OmniCore.Framework.Omnipod.Requests;
+using OmniCore.Framework.Omnipod.Responses;
 
 namespace OmniCore.Framework.Omnipod;
 
@@ -92,18 +94,28 @@ public class MessageBuilder
         var parts = new MessageParts(partsList);
 
         IMessageData? messageData = null;
+
+        messageData ??= TryParse<StatusMessage>(parts);
+        messageData ??= TryParse<NonceSyncMessage>(parts);
+        messageData ??= TryParse<StatusExtendedMessage>(parts);
+        messageData ??= TryParse<ErrorMessage>(parts);
+        messageData ??= TryParse<AlertInfoMessage>(parts);
+        messageData ??= TryParse<InitializationInfoMessage>(parts);
+        messageData ??= TryParse<VersionMessage>(parts);
+        messageData ??= TryParse<VersionExtendedMessage>(parts);
+
         messageData ??= TryParse<AcknowledgeAlertsMessage>(parts);
         messageData ??= TryParse<AssignAddressMessage>(parts);
-        messageData ??= TryParse<SetActivityBeepMessage>(parts);
-        messageData ??= TryParse<StopDeliveryMessage>(parts);
         messageData ??= TryParse<DeactivateMessage>(parts);
         messageData ??= TryParse<GetStatusMessage>(parts);
+        messageData ??= TryParse<SetActivityBeepMessage>(parts);
         messageData ??= TryParse<SetAlertsMessage>(parts);
         messageData ??= TryParse<SetClockMessage>(parts);
         messageData ??= TryParse<SetDeliveryVerificationMessage>(parts);
         messageData ??= TryParse<StartBasalMessage>(parts);
         messageData ??= TryParse<StartBolusMesage>(parts);
         messageData ??= TryParse<StartTempBasalMessage>(parts);
+        messageData ??= TryParse<StopDeliveryMessage>(parts);
 
         if (messageData == null)
             throw new ApplicationException();

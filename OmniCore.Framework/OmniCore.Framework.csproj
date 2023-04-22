@@ -52,8 +52,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Omnipod\Responses\" />
-  </ItemGroup>
-
 </Project>
