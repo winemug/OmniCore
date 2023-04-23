@@ -6,20 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmniCore.Framework.Omnipod.Responses
-{
-    internal class VersionExtendedMessage
-    {
-    }
-}
-using OmniCore.Common.Pod;
-using OmniCore.Services.Interfaces.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 

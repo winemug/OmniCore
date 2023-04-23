@@ -1,4 +1,5 @@
 ﻿using OmniCore.Common.Pod;
+using OmniCore.Framework.Omnipod.Messages;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
@@ -97,7 +98,7 @@ public class StartBasalMessage : IMessageData
         var avgPulseIntervalCurrentMs = 360000000 / hhPulses[currentHalfHour];
         mainData.Append((ushort)remainingHHPulses10).Append((uint)avgPulseIntervalCurrentMs).Append(pulseRecord);
 
-        var podTime125ms = podTime.Ticks * 1000 / 10 / 125;
+        var podTime125ms = CurrentTime.Ticks * 1000 / 10 / 125;
         var halfHour125ms = 30 * 60 * 1000 / 125;
         var spentCurrentHH125ms = podTime125ms % halfHour125ms;
         var toNextHH125ms = halfHour125ms - spentCurrentHH125ms;

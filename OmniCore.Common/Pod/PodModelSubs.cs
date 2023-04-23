@@ -24,15 +24,14 @@ public class PodStatusModel
 
 public class PodFaultInfoModel
 {
-    public int FaultEventCode { get; }
-    public int FaultEventMinute { get; }
-    bool FaultPulseInformationInvalid { get; }
-    bool FaultOcclusion { get; }
-    bool FaultInsulinStateTable { get; }
-    public int FaultOcclusionType { get; }
-    bool FaultDuringImmediateBolus { get; }
-    PodProgress ProgressBeforeFault { get; }
-    public int LastProgrammingCommandSequence { get; }
+    public int FaultEventCode { get; init; }
+    public int FaultEventMinute { get; init; }
+    public bool FaultPulseInformationInvalid { get; init; }
+    public bool FaultOcclusion { get; init; }
+    public bool FaultInsulinStateTable { get; init; }
+    public int FaultOcclusionType { get; init; }
+    public bool FaultDuringImmediateBolus { get; init; }
+    public PodProgress ProgressBeforeFault { get; init; }
 }
 
 public class PodVersionModel

@@ -11,11 +11,26 @@ using System.Threading.Tasks;
 using OmniCore.Framework.Omnipod.Messages;
 using OmniCore.Framework.Omnipod.Requests;
 using OmniCore.Framework.Omnipod.Responses;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Net;
 
 namespace OmniCore.Framework.Omnipod;
 
 public class MessageBuilder
 {
+    private class Message : IPodMessage
+    {
+        public uint Address { get; init; }
+
+        public int Sequence { get; init; }
+
+        public bool Critical { get; init; }
+
+        public Bytes Body { get; init; }
+
+        public IMessageData Data { get; init; }
+    }
+
     public uint? Address { get; private set; }
     public int? Sequence { get; private set; }
     public bool Critical { get; private set; }
@@ -49,7 +64,7 @@ public class MessageBuilder
         return this;
     }
 
-    public MessageBuilder WithBody(Bytes messageBody)
+    public IPodMessage Build(Bytes messageBody)
     {
         if (messageBody.Length < 8)
             throw new ApplicationException();
@@ -119,13 +134,15 @@ public class MessageBuilder
 
         if (messageData == null)
             throw new ApplicationException();
-        Body = messageBody;
-        Data = messageData;
-        Address = address;
-        Sequence = sequence;
-        Critical = withCriticalFollowup;
-        return this;
 
+        return new Message
+        {
+            Body = messageBody,
+            Data = messageData,
+            Address = address,
+            Sequence = sequence,
+            Critical = withCriticalFollowup,
+        };
     }
 
     private static IMessageData? TryParse<T>(IMessageParts parts) where T : IMessageData, new()
@@ -135,7 +152,7 @@ public class MessageBuilder
         return null;
     }
 
-    public MessageBuilder WithData(IMessageData messageData)
+    public IPodMessage Build(IMessageData messageData)
     {
         if (!Address.HasValue || !Sequence.HasValue)
             throw new ApplicationException("Address and sequence must be provided");
@@ -183,9 +200,13 @@ public class MessageBuilder
 
         var messageCrc = CrcUtil.Crc16(messageBody.ToArray());
         messageBody.Append(messageCrc);
-        Body = messageBody;
-        Data = messageData;
-
-        return this;
+        return new Message
+        {
+            Body = messageBody,
+            Data = messageData,
+            Address = this.Address.Value,
+            Sequence = this.Sequence.Value,
+            Critical = this.Critical,
+        };
     }
 }

@@ -27,7 +27,6 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .RegisterAppServices(platformInfo, platformService)
-            .ConfigureFilePicker()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -60,12 +59,10 @@ public static class MauiProgram
         mauiAppBuilder.Services.AddSingleton<RaddService>();
         mauiAppBuilder.Services.AddDbContext<OcdbContext>();
         
-
         mauiAppBuilder.Services.AddTransient<IRadio, Radio>();
         mauiAppBuilder.Services.AddTransient<IRadioConnection, RadioConnection >();
         mauiAppBuilder.Services.AddTransient<IPodModel, PodModel>();
         mauiAppBuilder.Services.AddTransient<IPodConnection, PodConnection>();
-        mauiAppBuilder.Services.AddTransient<IPodMessage, PodMessage>();
         mauiAppBuilder.Services.AddTransient<IPodPacket, PodPacket>();
         mauiAppBuilder.Services.AddTransient<IApiClient, ApiClient>();
 

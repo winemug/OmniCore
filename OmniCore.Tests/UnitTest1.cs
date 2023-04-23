@@ -1,4 +1,6 @@
 using Moq;
+using OmniCore.Framework.Omnipod.Requests;
+using OmniCore.Framework.Omnipod;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Pod;
@@ -9,31 +11,31 @@ namespace OmniCore.Tests
     public class Tests
     {
 
-        private IDataService _dataService;
-        private IRadioConnection _radioConnection;
-        private IPod _pod;
-        
         [SetUp]
         public void Setup()
         {
-            _dataService = new Mock<IDataService>().Object;
-            _pod = new Pod(_dataService);
-            _radioConnection = new MockRadioConnection(_pod);
         }
 
-        private async Task<PodConnection> GetPodConnectionAsync()
-        {
-            var podLock = await _pod.LockAsync(CancellationToken.None);
-            return new PodConnection(_pod, _radioConnection, podLock, _dataService);
-        }
-        
         [Test]
         public async Task Test1()
         {
-            using (var conn = await GetPodConnectionAsync())
-            {
-                await conn.UpdateStatus();
-            }
+            var message1 = new MessageBuilder()
+                .WithSequence(0)
+                .WithAddress(0x01020304)
+                .Build(new SetActivityBeepMessage
+                {
+                    BeepNow = BeepType.BeepBeep
+                });
+            var data1 = (SetActivityBeepMessage)message1.Data;
+
+            var message2 = new MessageBuilder().Build(message1.Body);
+            var data2 = (SetActivityBeepMessage)message2.Data;
+
+            Assert.That(message1.Sequence, Is.EqualTo(message2.Sequence));
+            Assert.That(message1.Address, Is.EqualTo(message2.Address));
+
+            Assert.That(data1.BeepNow, Is.EqualTo(data2.BeepNow));
+            Assert.That(data1.BeepNow, Is.EqualTo(data2.BeepNow));
         }
     }
 }

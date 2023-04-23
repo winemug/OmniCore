@@ -2,9 +2,12 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using MessagePack;
 using MessagePack.Resolvers;
+using OmniCore.Framework.Omnipod;
 using OmniCore.Framework.Omnipod.Messages;
+using OmniCore.Framework.Omnipod.Requests;
 using OmniCore.Services.Interfaces.Pod;
 //using Moq;
 //using OmniCore.Common.Data;
@@ -17,19 +20,20 @@ using OmniCore.Services.Interfaces.Pod;
 
 
 
-var body = new MessageBuilder()
+var message = new MessageBuilder()
     .WithSequence(0)
     .WithAddress(0x01020304)
-    .WithData(new BeepMessageData
+    .Build(new SetActivityBeepMessage
     {
         BeepNow = BeepType.BeepBeep
-    }).Body;
+    });
 
-Console.WriteLine(body);
+Console.WriteLine(JsonSerializer.Serialize(message));
 
-var data = (BeepMessageData) new MessageBuilder().WithBody(body!).Data;
+var message2 = new MessageBuilder().Build(message.Body);
 
-Console.WriteLine($"Now: {data.BeepNow}");
+Console.WriteLine(JsonSerializer.Serialize(message2));
+
 
 // {"MyProperty1":99,"MyProperty2":9999}
 

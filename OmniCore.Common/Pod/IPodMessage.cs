@@ -6,11 +6,9 @@ namespace OmniCore.Services.Interfaces.Pod;
 
 public interface IPodMessage
 {
-    uint Address { get; set; }
-    int Sequence { get; set; }
-    bool WithCriticalFollowup { get; set; }
-    IMessageParts Parts { get; set; }
-    uint? AckAddressOverride { get; set; }
-    Bytes Body { get; set; }
-    Bytes GetBody();
+    uint Address { get; }
+    int Sequence { get; }
+    bool Critical { get; }
+    Bytes Body { get; }
+    IMessageData Data { get; }
 }

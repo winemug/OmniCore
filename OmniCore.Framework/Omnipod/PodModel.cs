@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,8 @@ using Dapper;
 using Nito.AsyncEx;
 using OmniCore.Common.Data;
 using OmniCore.Common.Pod;
+using OmniCore.Framework.Omnipod;
+using OmniCore.Framework.Omnipod.Responses;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
@@ -118,89 +121,62 @@ public class PodModel : IPodModel
             var received = pa.RequestSentLatest ?? pa.RequestSentEarliest;
             if (received.HasValue)
             {
-                var receivedMessage = PodMessage.FromBody(new Bytes(pa.ReceivedData));
-                if (receivedMessage != null)
-                    await ProcessReceivedMessageAsync(receivedMessage, received.Value);
+                try
+                {
+                    var receivedMessage = new MessageBuilder().Build(new Bytes(pa.ReceivedData));
+                    ProcessReceivedMessageAsync(receivedMessage, received.Value);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error processing received message\n{ex}");
+                }
             }
         }
     }
     
-    public async Task ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
+    public void ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
     {
-        //foreach (var part in message.Parts)
-        //{
-        //    if (part is ResponseErrorPart ep)
-        //        ProcessError(ep);
-        //    if (part is ResponseStatusPart sp)
-        //        ProcessStatus(sp, received);
-        //    if (part is ResponseVersionPart rv)
-        //        ProcessVersion(rv);
-        //    if (part is ResponseInfoPart ri)
-        //        ProcessInfo(ri, received);
-        //}
+        var messageData = message.Data;
+        if (messageData is StatusMessage sm)
+            ProcessMessage(sm, received);
+        if (messageData is VersionMessage vm)
+            ProcessMessage(vm, received);
+        if (messageData is VersionExtendedMessage vem)
+            ProcessMessage(vem, received);
+        if (messageData is StatusExtendedMessage sem)
+            ProcessMessage(sem, received);
     }
 
-    private void ProcessStatus(ResponseStatusPart part, DateTimeOffset received)
+    private void ProcessMessage(StatusMessage md, DateTimeOffset received)
     {
         StatusUpdated = received;
-        ProgressModel = part.ProgressModel;
-        StatusModel = part.StatusModel;
+        ProgressModel = md.ProgressModel;
+        StatusModel = md.StatusModel;
     }
 
-    private void ProcessVersion(ResponseVersionPart part)
+    private void ProcessMessage(VersionMessage md, DateTimeOffset received)
     {
-        // Lot = part.Lot;
-        // Serial = part.Serial;
-        // Progress = part.Progress;
-        // if (part.PulseVolumeMicroUnits.HasValue)
-        //     PulseVolumeMicroUnits = part.PulseVolumeMicroUnits.Value;
-        // if (part.MaximumLifeTimeHours.HasValue)
-        //     MaximumLifeTimeHours = part.MaximumLifeTimeHours.Value;
+        VersionModel = md.VersionModel;
+        ProgressModel = md.ProgressModel;
+        RadioMeasurementsModel = md.RadioMeasurementsModel;
     }
 
-    private void ProcessError(ResponseErrorPart part)
+    private void ProcessMessage(VersionExtendedMessage md, DateTimeOffset received)
     {
+        VersionModel = md.VersionModel;
+        ProgressModel = md.ProgressModel;
+        ActivationParametersModel = md.ActivationParametersModel;
     }
 
-    private void ProcessInfo(ResponseInfoPart part, DateTimeOffset received)
+    private void ProcessMessage(StatusExtendedMessage md, DateTimeOffset received)
     {
-        if (part is ResponseInfoActivationPart pact)
-            ProcessInfoActivation(pact);
-        if (part is ResponseInfoAlertsPart pale)
-            ProcessInfoAlerts(pale);
-        if (part is ResponseInfoExtendedPart pext)
-            ProcessInfoExtended(pext, received);
-        if (part is ResponseInfoPulseLogRecentPart plr)
-            ProcessInfoPulseLogRecent(plr);
-        if (part is ResponseInfoPulseLogLastPart pll)
-            ProcessInfoPulseLogLast(pll);
-        if (part is ResponseInfoPulseLogPreviousPart plp)
-            ProcessInfoPulseLogPrevious(plp);
+        StatusUpdated = received;
+        ProgressModel = md.ProgressModel;
+        StatusModel = md.StatusModel;
+        RadioMeasurementsModel = md.RadioMeasurementsModel;
+        FaultInfoModel = md.FaultInfoModel;
     }
 
-    private void ProcessInfoExtended(ResponseInfoExtendedPart part, DateTimeOffset received)
-    {
-    }
-
-    private void ProcessInfoAlerts(ResponseInfoAlertsPart part)
-    {
-    }
-
-    private void ProcessInfoActivation(ResponseInfoActivationPart part)
-    {
-    }
-
-    private void ProcessInfoPulseLogPrevious(ResponseInfoPulseLogPreviousPart part)
-    {
-    }
-
-    private void ProcessInfoPulseLogLast(ResponseInfoPulseLogLastPart part)
-    {
-    }
-
-    private void ProcessInfoPulseLogRecent(ResponseInfoPulseLogRecentPart part)
-    {
-    }
 }
 
 
