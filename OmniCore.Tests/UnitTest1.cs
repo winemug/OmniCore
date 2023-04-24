@@ -22,14 +22,14 @@ namespace OmniCore.Tests
             var message1 = new MessageBuilder()
                 .WithSequence(0)
                 .WithAddress(0x01020304)
-                .Build(new SetActivityBeepMessage
+                .Build(new SetBeepingMessage
                 {
                     BeepNow = BeepType.BeepBeep
                 });
-            var data1 = (SetActivityBeepMessage)message1.Data;
+            var data1 = (SetBeepingMessage)message1.Data;
 
             var message2 = new MessageBuilder().Build(message1.Body);
-            var data2 = (SetActivityBeepMessage)message2.Data;
+            var data2 = (SetBeepingMessage)message2.Data;
 
             Assert.That(message1.Sequence, Is.EqualTo(message2.Sequence));
             Assert.That(message1.Address, Is.EqualTo(message2.Address));

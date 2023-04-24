@@ -7,18 +7,19 @@ namespace OmniCore.Framework.Omnipod.Requests;
 
 public class SetAlertsMessage : IMessageData
 {
-    public List<AlertConfiguration> AlertConfigurations { get; set; }
+    public AlertConfiguration[] AlertConfigurations { get; set; }
 
     public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestConfigureAlerts;
 
     public SetAlertsMessage()
     {
-        AlertConfigurations = new List<AlertConfiguration>();
+        AlertConfigurations = new AlertConfiguration[0];
     }
 
     public IMessageData FromParts(IMessageParts parts)
     {
         var idx = 0;
+        var alertConfigurations = new List<AlertConfiguration>();
         while (idx < parts.MainPart.Data.Length)
         {
             var b0 = parts.MainPart.Data[idx + 0];
@@ -39,9 +40,10 @@ public class SetAlertsMessage : IMessageData
                 BeepType = (BeepType)b3
             };
 
-            AlertConfigurations.Add(ac);
+            alertConfigurations.Add(ac);
             idx += 6;
         }
+        AlertConfigurations = alertConfigurations.ToArray();
         return this;
     }
 

@@ -123,7 +123,7 @@ public class MessageBuilder
         messageData ??= TryParse<AssignAddressMessage>(parts);
         messageData ??= TryParse<DeactivateMessage>(parts);
         messageData ??= TryParse<GetStatusMessage>(parts);
-        messageData ??= TryParse<SetActivityBeepMessage>(parts);
+        messageData ??= TryParse<SetBeepingMessage>(parts);
         messageData ??= TryParse<SetAlertsMessage>(parts);
         messageData ??= TryParse<SetClockMessage>(parts);
         messageData ??= TryParse<SetDeliveryVerificationMessage>(parts);

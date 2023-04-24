@@ -23,7 +23,7 @@ using OmniCore.Services.Interfaces.Pod;
 var message = new MessageBuilder()
     .WithSequence(0)
     .WithAddress(0x01020304)
-    .Build(new SetActivityBeepMessage
+    .Build(new SetBeepingMessage
     {
         BeepNow = BeepType.BeepBeep
     });

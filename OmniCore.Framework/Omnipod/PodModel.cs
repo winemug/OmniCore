@@ -18,8 +18,6 @@ namespace OmniCore.Services;
 
 public class PodModel : IPodModel
 {
-    private int NonceIndex;
-    private uint[] NonceTable;
     private Pod _pod;
 
     public PodModel(Pod pod)
@@ -40,6 +38,7 @@ public class PodModel : IPodModel
     public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
     public PodBasalModel? BasalModel { get; set; }
+    public NonceProvider? NonceProvider { get; set; }
 
     public DateTimeOffset? StatusUpdated { get; set; }
     public int NextRecordIndex { get; set; }
@@ -124,7 +123,7 @@ public class PodModel : IPodModel
                 try
                 {
                     var receivedMessage = new MessageBuilder().Build(new Bytes(pa.ReceivedData));
-                    ProcessReceivedMessageAsync(receivedMessage, received.Value);
+                    ProcessReceivedMessage(receivedMessage, received.Value);
                 }
                 catch (Exception ex)
                 {
@@ -134,7 +133,7 @@ public class PodModel : IPodModel
         }
     }
     
-    public void ProcessReceivedMessageAsync(IPodMessage message, DateTimeOffset received)
+    public void ProcessReceivedMessage(IPodMessage message, DateTimeOffset received)
     {
         var messageData = message.Data;
         if (messageData is StatusMessage sm)
@@ -176,8 +175,4 @@ public class PodModel : IPodModel
         RadioMeasurementsModel = md.RadioMeasurementsModel;
         FaultInfoModel = md.FaultInfoModel;
     }
-
 }
-
-
-
