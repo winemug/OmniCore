@@ -11,14 +11,14 @@ using OmniCore.Common.Data;
 namespace OmniCore.Common.Migrations
 {
     [DbContext(typeof(OcdbContext))]
-    [Migration("20230330222035_initial")]
+    [Migration("20230426215250_initial")]
     partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
             modelBuilder.Entity("OmniCore.Common.Data.Account", b =>
                 {
@@ -32,17 +32,7 @@ namespace OmniCore.Common.Migrations
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsSynced")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsVerified")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset>("LastUpdated")
@@ -51,16 +41,10 @@ namespace OmniCore.Common.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Phone")
                         .HasColumnType("TEXT");
 
                     b.HasKey("AccountId");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });
@@ -115,6 +99,9 @@ namespace OmniCore.Common.Migrations
                     b.Property<DateTimeOffset>("LastUpdated")
                         .HasColumnType("TEXT");
 
+                    b.Property<uint?>("Lot")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Medication")
                         .HasColumnType("INTEGER");
 
@@ -126,6 +113,9 @@ namespace OmniCore.Common.Migrations
 
                     b.Property<DateTimeOffset?>("Removed")
                         .HasColumnType("TEXT");
+
+                    b.Property<uint?>("Serial")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UnitsPerMilliliter")
                         .HasColumnType("INTEGER");
@@ -143,23 +133,25 @@ namespace OmniCore.Common.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsSynced")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("ReceiveEnd")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Received")
+                    b.Property<byte[]>("ReceivedData")
                         .HasColumnType("BLOB");
 
-                    b.Property<Guid>("RequestingClientId")
+                    b.Property<DateTimeOffset?>("RequestSentEarliest")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("SendStart")
+                    b.Property<DateTimeOffset?>("RequestSentLatest")
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Sent")
-                        .IsRequired()
+                    b.Property<int>("Result")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("SentData")
                         .HasColumnType("BLOB");
 
                     b.HasKey("PodId", "Index");
@@ -194,19 +186,20 @@ namespace OmniCore.Common.Migrations
 
                     b.HasKey("ProfileId");
 
-                    b.HasIndex("AccountId", "Name")
-                        .IsUnique();
+                    b.HasIndex("AccountId");
 
                     b.ToTable("Profiles");
                 });
 
             modelBuilder.Entity("OmniCore.Common.Data.Client", b =>
                 {
-                    b.HasOne("OmniCore.Common.Data.Account", null)
-                        .WithMany("Clients")
+                    b.HasOne("OmniCore.Common.Data.Account", "Account")
+                        .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("OmniCore.Common.Data.PodAction", b =>
@@ -218,9 +211,15 @@ namespace OmniCore.Common.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OmniCore.Common.Data.Account", b =>
+            modelBuilder.Entity("OmniCore.Common.Data.Profile", b =>
                 {
-                    b.Navigation("Clients");
+                    b.HasOne("OmniCore.Common.Data.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("OmniCore.Common.Data.Pod", b =>

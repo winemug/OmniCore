@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 using OmniCore.Common.Data;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
@@ -14,19 +15,24 @@ public class SyncService : ISyncService
 {
     private IAmqpService _amqpService;
     private IConfigurationStore _configurationStore;
+    private OcdbContext _ocdbContext;
     
     public SyncService(
         IAmqpService amqpService,
-        IConfigurationStore configurationStore)
+        IConfigurationStore configurationStore,
+        OcdbContext ocdbContext)
     {
         _amqpService = amqpService;
         _configurationStore = configurationStore;
+        _ocdbContext = ocdbContext;
     }
     public async Task Start()
     {
         var cc = await _configurationStore.GetConfigurationAsync();
-        using var ocdb = new OcdbContext();
-        foreach (var pod in ocdb.Pods.Where(p => !p.IsSynced))
+
+        var podsToSync = _ocdbContext.Pods.Where(p => !p.IsSynced).ToList();
+        var podActionsToSync = _ocdbContext.PodActions.Where(pa => !pa.IsSynced).ToList();
+        foreach (var pod in podsToSync)
         {
             var msg = new AmqpMessage
             {
@@ -41,7 +47,7 @@ public class SyncService : ISyncService
             await _amqpService.PublishMessage(msg);
         }
         
-        foreach (var podAction in ocdb.PodActions.Where(pa => !pa.IsSynced))
+        foreach (var podAction in podActionsToSync)
         {
             var msg = new AmqpMessage
             {
@@ -61,20 +67,16 @@ public class SyncService : ISyncService
     {
     }
 
-    private async Task OnPodSynced(OmniCore.Common.Data.Pod pod)
+    private async Task OnPodSynced(Pod pod)
     {
-        using var ocdb = new OcdbContext();
         pod.IsSynced = true;
-        ocdb.Update<OmniCore.Common.Data.Pod>(pod);
-        await ocdb.SaveChangesAsync();
+        await _ocdbContext.SaveChangesAsync();
     }
 
     private async Task OnPodActionSynced(PodAction podAction)
     {
-        using var ocdb = new OcdbContext();
         podAction.IsSynced = true;
-        ocdb.Update<PodAction>(podAction);
-        await ocdb.SaveChangesAsync();
+        await _ocdbContext.SaveChangesAsync();
     }
 
     public async Task SyncPodMessage(Guid podId, int recordIndex)
@@ -106,7 +108,7 @@ public class SyncService : ISyncService
             {
                 Text = JsonSerializer.Serialize(new
                 {
-                    type = nameof(OmniCore.Common.Data.Pod),
+                    type = nameof(Pod),
                     data = p
                 }),
                 Route = "sync",

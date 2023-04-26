@@ -144,7 +144,7 @@ public class AmqpService : IAmqpService
                 if (pendingConfirmations.IsEmpty)
                     processQueue = await _publishQueue.OutputAvailableAsync(cancellationToken);
                 else
-                    using (var queueTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
+                    using (var queueTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     {
                         try
                         {
@@ -178,31 +178,29 @@ public class AmqpService : IAmqpService
                         await _publishQueue.EnqueueAsync(message, cancellationToken);
                     }
                 }
-                else
+
+                var pendingCount = pendingConfirmations.Count();
+
+                if ((pendingCount > 0 && !processQueue) || pendingCount > 100)
                 {
-                    if (!pendingConfirmations.IsEmpty)
+                    try
                     {
-                        try
-                        {
-                            Debug.WriteLine("Starting confirmations");
-                            pubChannel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(15));
-                            Debug.WriteLine("Confirmation succeeded");
-                        }
-                        catch (Exception e)
-                        {
-                            Trace.WriteLine($"Error while confirming: {e}");
-                            foreach (var pendingMessage in pendingConfirmations.Values)
-                                _publishQueue.Enqueue(pendingMessage);
-                        }
-
-                        foreach (var message in pendingConfirmations.Values)
-                        {
-                            if (message.OnPublishConfirmed != null)
-                                message.OnPublishConfirmed(message);
-                        }
-
-                        pendingConfirmations.Clear();
+                        Debug.WriteLine("Starting confirmations");
+                        pubChannel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(15));
+                        Debug.WriteLine("Confirmation succeeded");
                     }
+                    catch (Exception e)
+                    {
+                        Trace.WriteLine($"Error while confirming: {e}");
+                        foreach (var pendingMessage in pendingConfirmations.Values)
+                            _publishQueue.Enqueue(pendingMessage);
+                    }
+                    foreach (var message in pendingConfirmations.Values)
+                    {
+                        if (message.OnPublishConfirmed != null)
+                            message.OnPublishConfirmed(message);
+                    }
+                    pendingConfirmations.Clear();
                 }
             }
             catch (TaskCanceledException)

@@ -60,55 +60,28 @@ public class PodModel : IPodModel
             NextRecordIndex = pa.Index + 1;
             await ProcessActionAsync(pa);
         }
-
-        if (_pod.ImportedProperties != null)
+        if (VersionModel == null && _pod.Lot.HasValue && _pod.Serial.HasValue)
         {
-            if (VersionModel == null)
+            VersionModel = new PodVersionModel
             {
-                VersionModel = new PodVersionModel
-                {
-                    Lot = _pod.ImportedProperties.Lot,
-                    Serial = _pod.ImportedProperties.Serial,
-                    AssignedAddress = _pod.RadioAddress,
-                    FirmwareVersionMajor = 0,
-                    FirmwareVersionMinor = 0,
-                    FirmwareVersionRevision = 0,
-                    HardwareVersionMajor = 0,
-                    HardwareVersionMinor = 0,
-                    HardwareVersionRevision = 0,
-                    ProductId = 0
-                };
-            }
+                Lot = _pod.Lot.Value,
+                Serial = _pod.Serial.Value,
+                AssignedAddress = _pod.RadioAddress,
+                FirmwareVersionMajor = 0,
+                FirmwareVersionMinor = 0,
+                FirmwareVersionRevision = 0,
+                HardwareVersionMajor = 0,
+                HardwareVersionMinor = 0,
+                HardwareVersionRevision = 0,
+                ProductId = 0
+            };
+        }
 
-            if (ActivationParametersModel == null)
+        if (ActivationParametersModel == null)
+        {
+            ActivationParametersModel = new PodActivationParametersModel
             {
-                ActivationParametersModel = new PodActivationParametersModel
-                {
-                };
-            }
-
-            if (BasalModel == null)
-            {
-                var storedRates = _pod.ImportedProperties.ActiveBasalRates;
-                int[] basalRates;
-                if (storedRates.Length == 1)
-                {
-                    basalRates = new int[48];
-                    for (int i = 0; i < 48; i++)
-                        basalRates[i] = storedRates[0];
-                }
-                else
-                {
-                    basalRates = storedRates;
-                }
-
-                BasalModel = new PodBasalModel
-                {
-                    BasalSchedule = basalRates,
-                    PodTimeReferenceValue = _pod.ImportedProperties.PodTimeReferenceValue,
-                    PodTimeReference = _pod.ImportedProperties.PodTimeReference,
-                };
-            }
+            };
         }
     }
 

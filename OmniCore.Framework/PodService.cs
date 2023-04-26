@@ -76,11 +76,8 @@ public class PodService : IPodService
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
-            ImportedProperties = new PodImportedProperties
-            {
-                Lot = lot,
-                Serial = serial
-            }
+            Lot = lot,
+            Serial = serial
         };
         ocdb.Pods.Add(pod);
         await ocdb.SaveChangesAsync();
