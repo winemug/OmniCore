@@ -398,6 +398,8 @@ public class PodConnection : IDisposable, IPodConnection
         Debug.Assert(_podModel.ProgressModel != null);
         Debug.Assert(_podModel.StatusModel != null);
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (_podModel.ProgressModel.Progress < PodProgress.Paired || _podModel.ProgressModel.Progress >= PodProgress.Faulted
             || _podModel.StatusModel.ImmediateBolusActive)
             return PodRequestStatus.RejectedByApp;
@@ -418,6 +420,8 @@ public class PodConnection : IDisposable, IPodConnection
         Debug.Assert(_podModel.ProgressModel != null);
         Debug.Assert(_podModel.StatusModel != null);
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (_podModel.ProgressModel.Progress < PodProgress.Paired || _podModel.ProgressModel.Progress >= PodProgress.Faulted
             || _podModel.StatusModel.ImmediateBolusActive)
             return PodRequestStatus.RejectedByApp;
@@ -435,6 +439,8 @@ public class PodConnection : IDisposable, IPodConnection
             return result;
         Debug.Assert(_podModel.ProgressModel != null);
         Debug.Assert(_podModel.StatusModel != null);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (_podModel.ProgressModel.Progress < PodProgress.Running || _podModel.ProgressModel.Progress >= PodProgress.Faulted
             || _podModel.StatusModel.ImmediateBolusActive || !_podModel.StatusModel.TempBasalActive)

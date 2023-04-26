@@ -38,8 +38,6 @@ public class MessageBuilder
     public IMessageData? Data { get; private set; }
     public Bytes? Body { get; private set; }
 
-    public static Predicate<IMessageParts> CanParse => throw new NotImplementedException();
-
     public MessageBuilder WithAddress(uint address)
     {
         Address = address;
