@@ -14,5 +14,5 @@ public class AmqpMessage
         get => Encoding.UTF8.GetString(Body);
         set => Body = Encoding.UTF8.GetBytes(value);
     }
-    public Action<AmqpMessage>? OnPublishConfirmed { get; set; }
+    public Func<Task>? OnPublishConfirmed { get; set; }
 }

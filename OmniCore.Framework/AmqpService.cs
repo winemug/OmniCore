@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -10,6 +11,7 @@ using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
+using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -82,32 +84,49 @@ public class AmqpService : IAmqpService
 
     private async Task AmqpTask(CancellationToken cancellationToken)
     {
-        var cf = new ConnectionFactory
+        while(true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await ConnectAndPublishLoop(cancellationToken);
+            }
+            catch(TaskCanceledException) { throw; }
+            catch(Exception e)
+            {
+                Trace.WriteLine($"Error while connectandpublish: {e.Message}");
+                await Task.Delay(5000);
+            }
+        }
+    }
+
+    private async Task ConnectAndPublishLoop(CancellationToken cancellationToken)
+    {
+        var connectionFactory = new ConnectionFactory
         {
             Uri = new Uri(Dsn),
-            DispatchConsumersAsync = true
+            DispatchConsumersAsync = true,
+            AutomaticRecoveryEnabled = false
         };
+        Debug.WriteLine("connecting");
+        using var connection = Policy<IConnection>
+            .Handle<Exception>()
+            .WaitAndRetryForever(
+            sleepDurationProvider: retries =>
+            {
+                return TimeSpan.FromSeconds(Math.Min(retries * 3, 60));
+            },
+            onRetry: (ex, ts) =>
+            {
+                Trace.WriteLine($"Error {ex}, waiting {ts} to reconnect");
+            }).Execute((_) => { return connectionFactory.CreateConnection(); }, cancellationToken);
+        Debug.WriteLine("connected");
 
-        IConnection connection = null;
-        try
-        {
-            while (connection == null)
-                try
-                {
-                    connection = cf.CreateConnection();
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine($"Connection failed {e}");
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-                }
-        }
-        catch (TaskCanceledException)
-        {
-            return;
-        }
+        using var pubChannel = connection.CreateModel();
+        pubChannel.ConfirmSelect();
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var subChannel = connection.CreateModel();
+        using var subChannel = connection.CreateModel();
         var consumer = new AsyncEventingBasicConsumer(subChannel);
         consumer.Received += async (sender, ea) =>
         {
@@ -132,86 +151,40 @@ public class AmqpService : IAmqpService
             await Task.Yield();
         };
         subChannel.BasicConsume(Queue, false, consumer);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var pendingConfirmations = new ConcurrentDictionary<ulong, AmqpMessage>();
-        var pubChannel = connection.CreateModel();
-        pubChannel.ConfirmSelect();
-
-        while (true)
+        while (await _publishQueue.OutputAvailableAsync(cancellationToken))
+        {
+            var message = await _publishQueue.DequeueAsync(cancellationToken);
+            // cancellation ignored below this point
             try
             {
-                var processQueue = false;
-                if (pendingConfirmations.IsEmpty)
-                    processQueue = await _publishQueue.OutputAvailableAsync(cancellationToken);
-                else
-                    using (var queueTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
-                    {
-                        try
-                        {
-                            processQueue = await _publishQueue.OutputAvailableAsync(queueTimeout.Token);
-                        }
-                        catch (TaskCanceledException)
-                        {
-                        }
-                    }
-
-                if (processQueue)
-                {
-                    var message = await _publishQueue.DequeueAsync(cancellationToken);
-                    var sequenceNo = pubChannel.NextPublishSeqNo;
-
-                    try
-                    {
-                        var properties = pubChannel.CreateBasicProperties();
-                        properties.MessageId = message.Id;
-                        properties.UserId = UserId;
-                        properties.Headers = message.Headers;
-                        pendingConfirmations.TryAdd(sequenceNo, message);
-                        pubChannel.BasicPublish(Exchange, message.Route, false,
-                            properties, message.Body);
-                        Debug.WriteLine($"published message: {message.Text}");
-                    }
-                    catch (Exception e)
-                    {
-                        Trace.WriteLine($"Error while publishing: {e}");
-                        pendingConfirmations.TryRemove(sequenceNo, out message);
-                        await _publishQueue.EnqueueAsync(message, cancellationToken);
-                    }
-                }
-
-                var pendingCount = pendingConfirmations.Count();
-
-                if ((pendingCount > 0 && !processQueue) || pendingCount > 100)
+                var properties = pubChannel.CreateBasicProperties();
+                var sequenceNo = pubChannel.NextPublishSeqNo;
+                Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
+                pubChannel.BasicPublish("e1", "", false,
+                    properties, Encoding.UTF8.GetBytes(message.Text));
+                Debug.WriteLine($"published");
+                pubChannel.WaitForConfirmsOrDie();
+                Debug.WriteLine($"confirmed");
+                if (message.OnPublishConfirmed != null)
                 {
                     try
                     {
-                        Debug.WriteLine("Starting confirmations");
-                        pubChannel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(15));
-                        Debug.WriteLine("Confirmation succeeded");
+                        await message.OnPublishConfirmed();
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
-                        Trace.WriteLine($"Error while confirming: {e}");
-                        foreach (var pendingMessage in pendingConfirmations.Values)
-                            _publishQueue.Enqueue(pendingMessage);
+                        Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
                     }
-                    foreach (var message in pendingConfirmations.Values)
-                    {
-                        if (message.OnPublishConfirmed != null)
-                            message.OnPublishConfirmed(message);
-                    }
-                    pendingConfirmations.Clear();
                 }
             }
-            catch (TaskCanceledException)
+            catch
             {
-                break;
+                await _publishQueue.EnqueueAsync(message);
+                throw;
             }
-
-        subChannel.Close();
-        pubChannel.Close();
-        connection.Close();
-        connection.Dispose();
+        }
     }
 
     private async Task<bool> ProcessMessage(AmqpMessage message)
