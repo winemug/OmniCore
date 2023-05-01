@@ -24,7 +24,7 @@ public class AcknowledgeAlertsMessage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
-        var data = parts.MainPart.Data;
+        var data = parts.MainPart.Data.Sub(4);
         var d0 = data.Byte(0);
         for (int i=0; i<8; i++)
         {

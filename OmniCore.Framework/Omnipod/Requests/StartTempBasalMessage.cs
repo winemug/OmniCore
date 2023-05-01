@@ -18,10 +18,10 @@ public class StartTempBasalMessage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
-        var subData = parts.SubPart!.Data;
-        var schedules = ScheduleHelper.ParseScheduleData(subData);
+        var subData = parts.SubPart!.Data.Sub(4);
+        var schedules = ScheduleHelper.ParseInsulinScheduleData(subData);
         HalfHourCount = 0;
-        foreach(var schedule in schedules )
+        foreach(var schedule in schedules.Skip(1))
         {
             HalfHourCount += schedule.BlockCount;
         }

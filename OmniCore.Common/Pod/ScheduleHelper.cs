@@ -1,4 +1,5 @@
-﻿using OmniCore.Services.Interfaces.Entities;
+﻿using OmniCore.Common.Pod;
+using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Pod;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,14 @@ namespace OmniCore.Framework.Omnipod.Messages;
 public static class ScheduleHelper
 {
 
-    public static InsulinSchedule[] ParseScheduleData(Bytes data)
+    public static InsulinSchedule[] ParseInsulinScheduleData(Bytes data)
     {
         var checksum = data[0];
         var halfHourCount = data[1];
-        var initialDuration125ms = data[2];
-        var initialPulseCount = data[3];
+        var initialDuration125ms = data.Word(2);
+        var initialPulseCount = data.Word(4);
 
-        var idx = 4;
+        var idx = 6;
         var schedules = new List<InsulinSchedule>();
         while (idx < data.Length)
         {
@@ -35,6 +36,22 @@ public static class ScheduleHelper
                 PulsesPerBlock = pulsesPerBlock,
                 AddAlternatingExtraPulse = alternatingExtraPulse
             });
+        }
+        return schedules.ToArray();
+    }
+
+    public static PulseSchedule[] ParsePulseScheduleData(Bytes data)
+    {
+        var idx = 0;
+        var schedules = new List<PulseSchedule>();
+        while (idx < data.Length)
+        {
+            schedules.Add(new PulseSchedule
+            {
+                CountDecipulses = data.Word(idx),
+                IntervalMicroseconds = data.DWord(idx + 2)
+            });
+            idx += 6;
         }
         return schedules.ToArray();
     }

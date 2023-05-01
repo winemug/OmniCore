@@ -20,13 +20,14 @@ public class SetAlertsMessage : IMessageData
     {
         var idx = 0;
         var alertConfigurations = new List<AlertConfiguration>();
-        while (idx < parts.MainPart.Data.Length)
+        var mainData = parts.MainPart.Data.Sub(4);
+        while (idx < mainData.Length)
         {
-            var b0 = parts.MainPart.Data[idx + 0];
-            var b1= parts.MainPart.Data[idx + 1];
-            var u0 = parts.MainPart.Data.Word(idx + 2);
-            var b2 = parts.MainPart.Data[idx + 4];
-            var b3 = parts.MainPart.Data[idx + 5];
+            var b0 = mainData[idx + 0];
+            var b1= mainData[idx + 1];
+            var u0 = mainData.Word(idx + 2);
+            var b2 = mainData[idx + 4];
+            var b3 = mainData[idx + 5];
 
             var ac = new AlertConfiguration
             {

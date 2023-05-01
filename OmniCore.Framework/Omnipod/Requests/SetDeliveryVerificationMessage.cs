@@ -14,8 +14,8 @@ public class SetDeliveryVerificationMessage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
-        VerificationFlag0 = parts.MainPart.Data[0];
-        VerificationFlag1 = parts.MainPart.Data[1];
+        VerificationFlag0 = parts.MainPart.Data[4];
+        VerificationFlag1 = parts.MainPart.Data[5];
         return this;
     }
 

@@ -40,7 +40,7 @@ namespace OmniCore.Framework.Omnipod.Requests
 
         public IMessageData FromParts(IMessageParts parts)
         {
-            var data = parts.MainPart.Data;
+            var data = parts.MainPart.Data.Sub(4);
             var b0 = data.Byte(0);
             StopExtendedBolus = (b0 & 0x08) > 0;
             StopBolus = (b0 & 0x04) > 0;
