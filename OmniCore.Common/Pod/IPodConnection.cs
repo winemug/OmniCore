@@ -15,7 +15,7 @@ public interface IPodConnection : IDisposable
     Task<PodRequestStatus> Beep(BeepType type, CancellationToken cancellationToken = default);
     Task<PodRequestStatus> SetBasalSchedule(
         TimeOnly podTime,
-        BasalRateEntry[] basalRateEntries,
+        int[] pulsesPerHour48HalfHours,
         CancellationToken cancellationToken = default);
     Task<PodRequestStatus> SetTempBasal(
         int hourlyRateMilliunits,

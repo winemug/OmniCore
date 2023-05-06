@@ -301,53 +301,41 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodRequestStatus> SetBasalSchedule(
             TimeOnly podTime,
-            BasalRateEntry[] basalRateEntries,
+            int[] pulsesPerHour48HalfHours,
             CancellationToken cancellationToken = default)
     {
-            //    if (!_podModel.Progress.HasValue)
-            //        return PodRequestStatus.RejectedByApp;
+        var result = await UpdateStatus(cancellationToken);
+        if (result != PodRequestStatus.Executed)
+            return result;
+        Debug.Assert(_podModel.ProgressModel != null);
+        Debug.Assert(_podModel.StatusModel != null);
 
-            //    if (_podModel.Progress < PodProgress.Primed || _podModel.Progress > PodProgress.RunningLow)
-            //        return PodRequestStatus.NotAllowed;
+        if (_podModel.ProgressModel.Progress < PodProgress.Primed
+            || _podModel.ProgressModel.Progress > PodProgress.RunningLow
+            || _podModel.ProgressModel.Faulted
+            || _podModel.StatusModel.ImmediateBolusActive)
+            return PodRequestStatus.RejectedByApp;
 
-            //    PodRequestStatus result;
-            //    result = await SendRequestAsync(false,
-            //        cancellationToken,
-            //        new[]
-            //        {
-            //            new RequestStatusPart(RequestStatusType.Default)
-            //        }
-            //    );
-            //    if (result != PodRequestStatus.Executed)
-            //        return result;
+        if (_podModel.StatusModel.BasalActive)
+        {
+            result = await SendRequestAsync(false,
+                cancellationToken,
+                new StopDeliveryMessage { StopBasal = true });
 
-            //    if (_podModel.BasalActive || _podModel.TempBasalActive || _podModel.ImmediateBolusActive || _podModel.ExtendedBolusActive)
-            //    {
-            //        result = await SendRequestAsync(false, cancellationToken,
-            //            new MessagePart[]
-            //            {
-            //                new RequestCancelPart(BeepType.NoSound,
-            //                    _podModel.ExtendedBolusActive.Value,
-            //                    _podModel.ImmediateBolusActive.Value,
-            //                    _podModel.TempBasalActive.Value,
-            //                    _podModel.BasalActive.Value)
-            //            });
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //        if (_podModel.BasalActive)
-            //            return PodRequestStatus.Error;
-            //    }
+            if (result != PodRequestStatus.Executed)
+                    return result;
+        }
 
-            //    return await SendRequestAsync(false,
-            //        cancellationToken,
-            //        new MessagePart[]
-            //        {
-            //            new RequestInsulinSchedulePart(basalRateEntries, podTime),
-            //            new RequestBasalPart(basalRateEntries, podTime)
-            //        }
-            //    );
+        if (_podModel.StatusModel.BasalActive)
+            return PodRequestStatus.RejectedByApp;
 
-            return PodRequestStatus.Inconclusive;
+        return await SendRequestAsync(false,
+            cancellationToken,
+            new StartBasalMessage
+            {
+                PodTime = podTime,
+                PulsesPerHour48HalfHours = pulsesPerHour48HalfHours,
+            });
     }
 
     public async Task<PodRequestStatus> AcknowledgeAlerts(CancellationToken cancellationToken = default)
