@@ -24,7 +24,7 @@ public interface IPodConnection : IDisposable
     Task<PodRequestStatus> CancelTempBasal(CancellationToken cancellationToken = default);
     Task<PodRequestStatus> Bolus(
         int bolusPulses,
-        int pulseIntervalSeconds,
+        int pulseIntervalMilliseconds,
         CancellationToken cancellationToken = default);
     Task<PodRequestStatus> CancelBolus(CancellationToken cancellationToken = default);
     Task<PodRequestStatus> Deactivate(CancellationToken cancellationToken = default);

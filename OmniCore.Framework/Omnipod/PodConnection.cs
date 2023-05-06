@@ -500,10 +500,10 @@ public class PodConnection : IDisposable, IPodConnection
 
     public async Task<PodRequestStatus> Bolus(
         int bolusPulses,
-        int pulseIntervalSeconds,
+        int pulseIntervalMilliseconds,
         CancellationToken cancellationToken = default)
     {
-        if (pulseIntervalSeconds < 2 || bolusPulses < 0 || bolusPulses > 1800 / pulseIntervalSeconds)
+        if (pulseIntervalMilliseconds < 2000 || bolusPulses < 0 || bolusPulses > 1800000 / pulseIntervalMilliseconds)
             return PodRequestStatus.RejectedByApp;
 
         var result = await UpdateStatus(cancellationToken);
@@ -526,7 +526,7 @@ public class PodConnection : IDisposable, IPodConnection
             new StartBolusMesage
             {
                 ImmediatePulseCount = bolusPulses,
-                ImmediatePulseIntervalMilliseconds = pulseIntervalSeconds * 1000
+                ImmediatePulseIntervalMilliseconds = pulseIntervalMilliseconds
             });
     }
 

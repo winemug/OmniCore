@@ -149,7 +149,7 @@ public class RaddService : IRaddService
 
             if (success && rr.bolus_ticks is > 0)
             {
-                var response = await podConnection.Bolus((int)rr.bolus_ticks, 2);
+                var response = await podConnection.Bolus((int)rr.bolus_ticks, 2000);
                 success = response == PodRequestStatus.Executed;
             }
 
