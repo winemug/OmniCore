@@ -162,7 +162,7 @@ public class AmqpService : IAmqpService
                 var properties = pubChannel.CreateBasicProperties();
                 var sequenceNo = pubChannel.NextPublishSeqNo;
                 Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                pubChannel.BasicPublish("e1", "", false,
+                pubChannel.BasicPublish(Exchange, "", false,
                     properties, Encoding.UTF8.GetBytes(message.Text));
                 Debug.WriteLine($"published");
                 pubChannel.WaitForConfirmsOrDie();

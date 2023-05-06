@@ -112,63 +112,62 @@ public class RaddService : IRaddService
         var success = true;
         using (var podConnection = await _podService.GetConnectionAsync(pod))
         {
-            if (rr.next_record_index != null)
+            if (rr.next_record_index != null && rr.next_record_index != 0)
             {
                 success = pod.NextRecordIndex == rr.next_record_index.Value;
             }
-            
-            //if (success && rr.update_status)
-            //{
-            //    var response = await podConnection.UpdateStatus();
-            //    success = response == PodRequestStatus.Executed;
-            //}
 
-            //if (success && rr.beep)
-            //{
-            //    var response = await podConnection.Beep(BeepType.BipBip);
-            //    success = response == PodRequestStatus.Executed;
-            //}
+            if (success && rr.update_status)
+            {
+                var response = await podConnection.UpdateStatus();
+                success = response == PodRequestStatus.Executed;
+            }
 
-            //if (success && rr.cancel_bolus)
-            //{
-            //    var response = await podConnection.CancelBolus();
-            //    success = response == PodRequestStatus.Executed;
-            //}
-            
-            //if (success && rr.cancel_temp)
-            //{
-            //    var response = await podConnection.CancelTempBasal();
-            //    success = response == PodRequestStatus.Executed;
-            //}
+            if (success && rr.beep)
+            {
+                var response = await podConnection.Beep(BeepType.BipBip);
+                success = response == PodRequestStatus.Executed;
+            }
 
-            //if (success && rr.temp_basal_ticks.HasValue && rr.temp_basal_half_hours.HasValue)
-            //{
-            //    var response = await podConnection.SetTempBasal(rr.temp_basal_ticks.Value, rr.temp_basal_half_hours.Value);
-            //    success = response == PodRequestStatus.Executed;
-            //}
+            if (success && rr.cancel_bolus)
+            {
+                var response = await podConnection.CancelBolus();
+                success = response == PodRequestStatus.Executed;
+            }
 
-            //if (success && rr.bolus_ticks is > 0)
-            //{
-            //    var response = await podConnection.Bolus((int)rr.bolus_ticks, 2);
-            //    success = response == PodRequestStatus.Executed;
-            //}
+            if (success && rr.cancel_temp)
+            {
+                var response = await podConnection.CancelTempBasal();
+                success = response == PodRequestStatus.Executed;
+            }
 
-            //if (success && rr.deactivate)
-            //{
-            //    var response = await podConnection.Deactivate();
-            //    success = response == PodRequestStatus.Executed;
-            //}
+            if (success && rr.temp_basal_ticks.HasValue && rr.temp_basal_half_hours.HasValue)
+            {
+                var response = await podConnection.SetTempBasal(rr.temp_basal_ticks.Value, rr.temp_basal_half_hours.Value);
+                success = response == PodRequestStatus.Executed;
+            }
+
+            if (success && rr.bolus_ticks is > 0)
+            {
+                var response = await podConnection.Bolus((int)rr.bolus_ticks, 2);
+                success = response == PodRequestStatus.Executed;
+            }
+
+            if (success && rr.deactivate)
+            {
+                var response = await podConnection.Deactivate();
+                success = response == PodRequestStatus.Executed;
+            }
         }
 
         var resp = new RaddResponse
         {
             success = success,
             request_id = rr.request_id,
-            // TODO:
-            //next_record_index=pod.NextRecordIndex,
-            //minutes = pod.ActiveMinutes,
-            //remaining = pod.PulsesRemaining,
-            //delivered = pod.PulsesDelivered
+            next_record_index = pod.NextRecordIndex,
+            minutes = pod.StatusModel?.ActiveMinutes,
+            remaining = pod.StatusModel?.PulsesRemaining,
+            delivered = pod.StatusModel?.PulsesDelivered
         };
         var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp), Id = message.Id };
         await _amqpService.PublishMessage(respMessage);

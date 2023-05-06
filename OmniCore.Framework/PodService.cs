@@ -36,15 +36,33 @@ public class PodService : IPodService
 
     public async Task Start()
     {
-        using var ocdb = new OcdbContext();
-        _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
-        _podModels = new ConcurrentBag<IPodModel>();
-        foreach (var pod in ocdb.Pods
-                     .Where(p => !p.Removed.HasValue)
-                     .Include(p => p.Actions))
+        try
         {
-            _podLocks.TryAdd(pod.PodId, new AsyncLock());
-            _podModels.Add(new PodModel(pod));
+            using var ocdb = new OcdbContext();
+            var bods = ocdb.Pods
+                         .Where(p => !p.Removed.HasValue).ToList()
+                         .OrderByDescending(p => p.Created);
+            _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
+            _podModels = new ConcurrentBag<IPodModel>();
+            foreach (var pod in bods)
+            {
+                if (pod.Created < DateTimeOffset.Now - TimeSpan.FromHours(82))
+                    continue;
+                var pm = new PodModel(pod);
+                await pm.LoadAsync();
+                if (pm.ProgressModel != null)
+                {
+                    if (pm.ProgressModel.Faulted || pm.ProgressModel.Progress >= PodProgress.Faulted)
+                        continue;
+                }
+
+                _podLocks.TryAdd(pod.PodId, new AsyncLock());
+                _podModels.Add(pm);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
         }
     }
 
@@ -103,27 +121,28 @@ public class PodService : IPodService
     
     public async Task<IPodModel?> GetPodAsync(Guid podId)
     {
-        //TODO:
-        throw new NotImplementedException();
-        // return _podModels.FirstOrDefault(p => p.Id == podId);
+        return _podModels.FirstOrDefault(p => p.Id == podId);
     }
 
     public async Task<IPodConnection> GetConnectionAsync(
         IPodModel podModel,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
+        if (radioConnection == null)
+            throw new ApplicationException("No radios available");
 
-        //var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
-        //if (radioConnection == null)
-        //    throw new ApplicationException("No radios available");
+        var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
+        var accId = Guid.Parse("269d7830-fe9b-4641-8123-931846e45c9c");
+        var clientId = Guid.Parse("ee843c96-a312-4d4b-b0cc-93e22d6e680e");
+        var profileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b");
 
-        //var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
-        //return new PodConnection(
-        //    podModel,
-        //    radioConnection,
-        //    allocationLockDisposable,
-        //    _configurationStore,
-        //    _syncService);
+        return new PodConnection(
+            clientId,
+            podModel,
+            radioConnection,
+            allocationLockDisposable,
+            _configurationStore,
+            _syncService);
     }
 }

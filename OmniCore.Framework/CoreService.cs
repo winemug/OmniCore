@@ -43,27 +43,23 @@ public class CoreService : ICoreService
         {
             Debug.WriteLine($"{ex.Message}");
         }
-        
-        await Task.WhenAll(
-            RadioService.Start(),
-            PodService.Start(),
-            AmqpService.Start(),
-            SyncService.Start(),
-            RaddService.Start()
-        );
+
+        await RadioService.Start();
+        await PodService.Start();
+        await SyncService.Start();
+        await RaddService.Start();
+        await AmqpService.Start();
         Debug.WriteLine("Core services started");
     }
 
     public async Task Stop()
     {
         Debug.WriteLine("Core services stopping");
-        await Task.WhenAll(
-            SyncService.Stop(),
-            RaddService.Stop(),
-            AmqpService.Stop(),
-            PodService.Stop(),
-            RadioService.Stop()
-        );
+        await AmqpService.Stop();
+        await RaddService.Stop();
+        await SyncService.Stop();
+        await PodService.Stop();
+        await RadioService.Stop();
         Debug.WriteLine("Core services stopped");
     }
 

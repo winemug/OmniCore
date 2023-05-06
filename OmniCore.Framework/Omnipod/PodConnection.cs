@@ -24,7 +24,7 @@ public class PodConnection : IDisposable, IPodConnection
 {
     private bool _communicationNeedsClosing;
     private Guid _requestingClientId;
-    private readonly PodModel _podModel;
+    private readonly IPodModel _podModel;
     private readonly IDisposable _podLockDisposable;
     private readonly IRadioConnection _radioConnection;
     private readonly IConfigurationStore _configurationStore;
@@ -32,7 +32,7 @@ public class PodConnection : IDisposable, IPodConnection
 
     public PodConnection(
         Guid requestingClientId,
-        PodModel podModel,
+        IPodModel podModel,
         IRadioConnection radioConnection,
         IDisposable podLockDisposable,
         IConfigurationStore configurationStore,
@@ -48,26 +48,26 @@ public class PodConnection : IDisposable, IPodConnection
 
     public void Dispose()
     {
-        //if (_communicationNeedsClosing)
-        //{
-        //    Task.Run(async () =>
-        //    {
-        //        try
-        //        {
-        //            await AckExchangeAsync();
-        //        }
-        //        finally
-        //        {
-        //            _radioConnection.Dispose();
-        //            _podLockDisposable.Dispose();
-        //        }
-        //    });
-        //}
-        //else
-        //{
-        //    _radioConnection.Dispose();
-        //    _podLockDisposable.Dispose();
-        //}
+        if (_communicationNeedsClosing)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await AckExchangeAsync();
+                }
+                finally
+                {
+                    _radioConnection.Dispose();
+                    _podLockDisposable.Dispose();
+                }
+            });
+        }
+        else
+        {
+            _radioConnection.Dispose();
+            _podLockDisposable.Dispose();
+        }
     }
 
 
@@ -714,6 +714,8 @@ public class PodConnection : IDisposable, IPodConnection
                 throw new ArgumentOutOfRangeException();
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // retry
         return await SendRequestAsync(
             critical,
@@ -760,7 +762,9 @@ public class PodConnection : IDisposable, IPodConnection
                 nextPacketSequence,
                 messageBody.Sub(byteStart, byteEnd));
 
-            var pe = await TryExchangePackets(packetToSend, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var pe = await TryExchangePackets(packetToSend, isLastPacket ? CancellationToken.None : cancellationToken);
             var receivedPacket = PodPacket.FromExchangeResult(pe, packetAddressIn);
             var packetCommandSent = (pe.CommunicationResult != BleCommunicationResult.WriteFailed);
             var bleConnectionFailed = (pe.CommunicationResult != BleCommunicationResult.OK);
@@ -857,7 +861,7 @@ public class PodConnection : IDisposable, IPodConnection
                 new Bytes(ackDataOutInterim)
             );
 
-            var pe = await TryExchangePackets(interimAck, cancellationToken);
+            var pe = await TryExchangePackets(interimAck, CancellationToken.None);
             var receivedPacket = PodPacket.FromExchangeResult(pe, packetAddressIn);
 
             if (receivedPacket == null)
@@ -1009,13 +1013,22 @@ public class PodConnection : IDisposable, IPodConnection
         CancellationToken cancellationToken)
     {
         Debug.WriteLine($"SEND: {packetToSend}");
+        BleExchangeResult result;
         if (!_podModel.LastRadioPacketReceived.HasValue ||
             _podModel.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
-            return await _radioConnection.SendAndTryGetPacket(
+        {
+            result = await _radioConnection.SendAndTryGetPacket(
                 0, 0, 0, 150,
                 0, 250, 0, packetToSend, cancellationToken);
-        return await _radioConnection.SendAndTryGetPacket(
-            0, 3, 25, 0,
-            0, 250, 0, packetToSend, cancellationToken);
+        }
+        else
+        {
+            result = await _radioConnection.SendAndTryGetPacket(
+                0, 3, 25, 0,
+                0, 250, 0, packetToSend, cancellationToken);
+        }
+        var received = PodPacket.FromExchangeResult(result);
+        Debug.WriteLine($"RCVD: {received}");
+        return result;
     }
 }

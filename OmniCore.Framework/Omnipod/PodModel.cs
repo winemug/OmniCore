@@ -38,7 +38,19 @@ public class PodModel : IPodModel
     public PodRadioMeasurementsModel? RadioMeasurementsModel { get; set; }
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
     public PodBasalModel? BasalModel { get; set; }
-    public NonceProvider? NonceProvider { get; set; }
+
+    private INonceProvider? _nonceProvider;
+    public INonceProvider? NonceProvider
+    {
+        get
+        {
+            if (_nonceProvider == null && VersionModel != null)
+            {
+                _nonceProvider = new NonceProvider(VersionModel.Lot, VersionModel.Serial);
+            }
+            return _nonceProvider;
+        }
+    }
 
     public DateTimeOffset? StatusUpdated { get; set; }
     public int NextRecordIndex { get; set; }
@@ -47,19 +59,21 @@ public class PodModel : IPodModel
     public uint? LastNonce { get; set; }
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
 
-    public async Task Load()
+    public async Task LoadAsync()
     {
         NextRecordIndex = 0;
         using var ocdb = new OcdbContext();
 
-        var pas = ocdb.PodActions.Where(pa => pa.PodId == _pod.PodId)
+        var pas = ocdb.PodActions
+            .Where(pa => pa.PodId == _pod.PodId)
             .OrderBy(pa => pa.Index);
 
         foreach (var pa in pas)
         {
             NextRecordIndex = pa.Index + 1;
-            await ProcessActionAsync(pa);
+            ProcessAction(pa);
         }
+
         if (VersionModel == null && _pod.Lot.HasValue && _pod.Serial.HasValue)
         {
             VersionModel = new PodVersionModel
@@ -75,17 +89,17 @@ public class PodModel : IPodModel
                 HardwareVersionRevision = 0,
                 ProductId = 0
             };
-        }
 
-        if (ActivationParametersModel == null)
-        {
-            ActivationParametersModel = new PodActivationParametersModel
+            if (ActivationParametersModel == null)
             {
-            };
+                ActivationParametersModel = new PodActivationParametersModel
+                {
+                };
+            }
         }
     }
 
-    public async Task ProcessActionAsync(PodAction pa)
+    private void ProcessAction(PodAction pa)
     {
         // TODO: SentData and inconclusive affirmations for received & future
         if (pa.ReceivedData != null)
@@ -96,6 +110,7 @@ public class PodModel : IPodModel
                 try
                 {
                     var receivedMessage = new MessageBuilder().Build(new Bytes(pa.ReceivedData));
+                    NextMessageSequence = (receivedMessage.Sequence + 1) % 16;
                     ProcessReceivedMessage(receivedMessage, received.Value);
                 }
                 catch (Exception ex)
