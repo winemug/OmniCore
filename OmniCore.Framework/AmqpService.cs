@@ -12,6 +12,7 @@ using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
 using Polly;
+using Polly.Timeout;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -58,6 +59,7 @@ public class AmqpService : IAmqpService
             _cts?.Cancel();
             _amqpTask?.GetAwaiter().GetResult();
         }
+        catch (TaskCanceledException) { }
         catch (Exception e)
         {
             Debug.WriteLine($"Error while cancelling core task: {e}");
@@ -106,7 +108,7 @@ public class AmqpService : IAmqpService
         {
             Uri = new Uri(Dsn),
             DispatchConsumersAsync = true,
-            AutomaticRecoveryEnabled = false
+            AutomaticRecoveryEnabled = false,
         };
         Debug.WriteLine("connecting");
         using var connection = Policy<IConnection>
@@ -153,36 +155,51 @@ public class AmqpService : IAmqpService
         subChannel.BasicConsume(Queue, false, consumer);
         cancellationToken.ThrowIfCancellationRequested();
 
-        while (await _publishQueue.OutputAvailableAsync(cancellationToken))
+
+        while (true)
         {
-            var message = await _publishQueue.DequeueAsync(cancellationToken);
-            // cancellation ignored below this point
+            var result = false;
             try
             {
-                var properties = pubChannel.CreateBasicProperties();
-                var sequenceNo = pubChannel.NextPublishSeqNo;
-                Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                pubChannel.BasicPublish(Exchange, "", false,
-                    properties, Encoding.UTF8.GetBytes(message.Text));
-                Debug.WriteLine($"published");
-                pubChannel.WaitForConfirmsOrDie();
-                Debug.WriteLine($"confirmed");
-                if (message.OnPublishConfirmed != null)
+                result = await Policy.TimeoutAsync(30)
+                    .ExecuteAsync((t) => _publishQueue.OutputAvailableAsync(t), cancellationToken);
+            }
+            catch (TimeoutRejectedException ex) { }
+
+            if (!connection.IsOpen)
+                break;
+
+            if (result)
+            {
+                var message = await _publishQueue.DequeueAsync(cancellationToken);
+                // cancellation ignored below this point
+                try
                 {
-                    try
+                    var properties = pubChannel.CreateBasicProperties();
+                    var sequenceNo = pubChannel.NextPublishSeqNo;
+                    Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
+                    pubChannel.BasicPublish(Exchange, "", false,
+                        properties, Encoding.UTF8.GetBytes(message.Text));
+                    Debug.WriteLine($"published");
+                    pubChannel.WaitForConfirmsOrDie();
+                    Debug.WriteLine($"confirmed");
+                    if (message.OnPublishConfirmed != null)
                     {
-                        await message.OnPublishConfirmed();
-                    }
-                    catch(Exception e)
-                    {
-                        Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
+                        try
+                        {
+                            await message.OnPublishConfirmed();
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
+                        }
                     }
                 }
-            }
-            catch
-            {
-                await _publishQueue.EnqueueAsync(message);
-                throw;
+                catch
+                {
+                    await _publishQueue.EnqueueAsync(message);
+                    throw;
+                }
             }
         }
     }
