@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Nito.AsyncEx;
 using OmniCore.Common.Data;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
@@ -15,8 +16,9 @@ public class SyncService : ISyncService
 {
     private IAmqpService _amqpService;
     private IConfigurationStore _configurationStore;
-    private OcdbContext _ocdbContext;
-    
+    private Task _syncTask;
+    private CancellationTokenSource _ctsSync;
+    private AsyncAutoResetEvent _syncTriggerEvent;
     public SyncService(
         IAmqpService amqpService,
         IConfigurationStore configurationStore,
@@ -24,96 +26,100 @@ public class SyncService : ISyncService
     {
         _amqpService = amqpService;
         _configurationStore = configurationStore;
-        _ocdbContext = ocdbContext;
+        _ctsSync = new CancellationTokenSource();
+        _syncTriggerEvent = new AsyncAutoResetEvent(true);
     }
     public async Task Start()
     {
         var cc = await _configurationStore.GetConfigurationAsync();
 
-        var podsToSync = _ocdbContext.Pods.Where(p => !p.IsSynced).ToList();
-        var podActionsToSync = _ocdbContext.PodActions.Where(pa => !pa.IsSynced).ToList();
-        //foreach (var pod in podsToSync)
-        //{
-        //    var msg = new AmqpMessage
-        //    {
-        //        Text = JsonSerializer.Serialize(new
-        //        {
-        //            type="Pod",
-        //            data=pod
-        //        }),
-        //        Route = "sync",
-        //        OnPublishConfirmed = async (msg) => await OnPodSynced(pod),
-        //    };
-        //    await _amqpService.PublishMessage(msg);
-        //}
-        
-        //foreach (var podAction in podActionsToSync)
-        //{
-        //    var msg = new AmqpMessage
-        //    {
-        //        Text = JsonSerializer.Serialize(new
-        //        {
-        //            type = nameof(PodAction),
-        //            data = podAction
-        //        }),
-        //        Route = "sync",
-        //        OnPublishConfirmed = async (msg) => await OnPodActionSynced(podAction),
-        //    };
-        //    await _amqpService.PublishMessage(msg);
-        //}
+        await using var context = new OcdbContext();
+        //context.Database.ExecuteSql($"UPDATE [Pods] SET [IsSynced] = 0");
+        //context.Database.ExecuteSql($"UPDATE [PodActions] SET [IsSynced] = 0");
+
+        var podsToSync = context.Pods.Where(p => !p.IsSynced).ToList();
+        foreach (var pod in podsToSync)
+        {
+            await _amqpService.PublishMessage(new AmqpMessage
+            {
+                Text = JsonSerializer.Serialize(new
+                {
+                    type = "Pod",
+                    data = pod
+                }),
+                Route = "sync",
+                OnPublishConfirmed = OnPodSynced(pod.PodId),
+            });
+        }
+        _syncTask = SyncPendingActions(_ctsSync.Token);
     }
 
     public async Task Stop()
     {
+        _ctsSync.Cancel();
+        if (_syncTask != null)
+        {
+            try
+            {
+                await _syncTask;
+            }
+            catch (TaskCanceledException)
+            {
+            }
+        }
     }
 
-    private async Task OnPodSynced(Pod pod)
+    private async Task SyncPendingActions(CancellationToken cancellationToken)
     {
-        pod.IsSynced = true;
-        await _ocdbContext.SaveChangesAsync();
+        while(true)
+        {
+            await _syncTriggerEvent.WaitAsync(cancellationToken);
+            await using var context = new OcdbContext();
+            var podActionsToSync = await context.PodActions.Where(pa => !pa.IsSynced).ToListAsync();
+            await context.DisposeAsync();
+
+            foreach (var podAction in podActionsToSync)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await _amqpService.PublishMessage(new AmqpMessage
+                {
+                    Text = JsonSerializer.Serialize(new
+                    {
+                        type = nameof(PodAction),
+                        data = podAction
+                    }),
+                    Route = "sync",
+                    OnPublishConfirmed = OnPodActionSynced(podAction.PodId, podAction.Index),
+                });
+                await Task.Yield();
+            }
+        }
     }
 
-    private async Task OnPodActionSynced(PodAction podAction)
+    public void TriggerSync()
     {
-        podAction.IsSynced = true;
-        await _ocdbContext.SaveChangesAsync();
+        _syncTriggerEvent.Set();
     }
 
-    public async Task SyncPodMessage(Guid podId, int recordIndex)
+    private async Task OnPodSynced(Guid podId)
     {
-        //var ocdb = new OcdbContext();
-        //var pa = ocdb.PodActions.FirstOrDefault(pa => pa.PodId == podId && pa.Index == recordIndex);
-        //if (pa != null)
-        //{
-        //    await _amqpService.PublishMessage(new AmqpMessage
-        //    {
-        //        Text = JsonSerializer.Serialize(new
-        //        {
-        //            type = nameof(PodAction),
-        //            data = pa
-        //        }),
-        //        Route = "sync",
-        //        OnPublishConfirmed = async (_) => await OnPodActionSynced(pa)
-        //    });
-        //}
+        await using var context = new OcdbContext();
+        var pod = await context.Pods.FirstOrDefaultAsync(p => p.PodId == podId);
+        if (pod != null)
+        {
+            pod.IsSynced = true;
+            await context.SaveChangesAsync();
+        }
     }
 
-    public async Task SyncPod(Guid podId)
+    private async Task OnPodActionSynced(Guid podId, int index)
     {
-        //var ocdb = new OcdbContext();
-        //var p = ocdb.Pods.FirstOrDefault(p => p.PodId == podId);
-        //if (p != null)
-        //{
-        //    await _amqpService.PublishMessage(new AmqpMessage
-        //    {
-        //        Text = JsonSerializer.Serialize(new
-        //        {
-        //            type = nameof(Pod),
-        //            data = p
-        //        }),
-        //        Route = "sync",
-        //        OnPublishConfirmed = async (_) => await OnPodSynced(p)
-        //    });
-        //}
+        await using var context = new OcdbContext();
+        var podAction = await context.PodActions.FirstOrDefaultAsync(pa => pa.PodId == podId && pa.Index == index);
+        if (podAction != null)
+        {
+            podAction.IsSynced = true;
+            await context.SaveChangesAsync();
+        }
     }
 }

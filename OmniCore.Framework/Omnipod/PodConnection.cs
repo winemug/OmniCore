@@ -601,7 +601,7 @@ public class PodConnection : IDisposable, IPodConnection
             );
     }
 
-        private async Task<PodRequestStatus> SendRequestAsync(
+private async Task<PodRequestStatus> SendRequestAsync(
         bool critical,
         CancellationToken cancellationToken,
         IMessageData messageData,
@@ -645,7 +645,7 @@ public class PodConnection : IDisposable, IPodConnection
             await ocdb.SaveChangesAsync(cancellationToken);
         }
 
-        await _syncService.SyncPodMessage(_podModel.Id, _podModel.NextRecordIndex);
+        _syncService.TriggerSync();
 
         _podModel.NextRecordIndex++;
 
@@ -728,8 +728,10 @@ public class PodConnection : IDisposable, IPodConnection
         DateTimeOffset? firstPacketSent = null;
         DateTimeOffset? lastPacketReceived = null;
 
-        var packetAddressIn = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
-        var packetAddressOut = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
+        //var packetAddressIn = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
+        //var packetAddressOut = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
+        var packetAddressIn = _podModel.RadioAddress;
+        var packetAddressOut = _podModel.RadioAddress;
         var ackDataOutInterim = _podModel.RadioAddress;
         var ackDataIn = _podModel.RadioAddress;
 

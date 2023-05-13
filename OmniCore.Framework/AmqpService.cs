@@ -27,14 +27,14 @@ public class AmqpService : IAmqpService
     
     private Task _amqpTask;
     private CancellationTokenSource _cts;
-    private readonly SortedList<DateTimeOffset, string> _processedMessages;
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
+    private readonly AsyncProducerConsumerQueue<Task> _confirmQueue;
 
     private ConcurrentBag<Func<AmqpMessage, Task<bool>>> _messageProcessors;
     public AmqpService()
     {
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
-        _processedMessages = new SortedList<DateTimeOffset, string>();
+        _confirmQueue = new AsyncProducerConsumerQueue<Task>();
         _messageProcessors = new ConcurrentBag<Func<AmqpMessage, Task<bool>>>();
     }
 
@@ -86,6 +86,7 @@ public class AmqpService : IAmqpService
 
     private async Task AmqpTask(CancellationToken cancellationToken)
     {
+        var confirmationsTask = ConfirmationsTask(cancellationToken);
         while(true)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -93,12 +94,33 @@ public class AmqpService : IAmqpService
             {
                 await ConnectAndPublishLoop(cancellationToken);
             }
-            catch(TaskCanceledException) { throw; }
+            catch(TaskCanceledException)
+            {
+                await confirmationsTask;
+                throw;
+            }
             catch(Exception e)
             {
                 Trace.WriteLine($"Error while connectandpublish: {e.Message}");
                 await Task.Delay(5000);
             }
+        }
+    }
+
+    private async Task ConfirmationsTask(CancellationToken cancellationToken)
+    {
+        while(await _confirmQueue.OutputAvailableAsync(cancellationToken))
+        {
+            var confirmTask = await _confirmQueue.DequeueAsync(cancellationToken);
+            try
+            {
+                await confirmTask;
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
+            }
+            await Task.Yield();
         }
     }
 
@@ -135,7 +157,6 @@ public class AmqpService : IAmqpService
             var message = new AmqpMessage
             {
                 Body = ea.Body.ToArray(),
-                Id = ea.BasicProperties.MessageId
             };
             try
             {
@@ -178,21 +199,12 @@ public class AmqpService : IAmqpService
                     var properties = pubChannel.CreateBasicProperties();
                     var sequenceNo = pubChannel.NextPublishSeqNo;
                     Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                    pubChannel.BasicPublish(Exchange, "", false,
+                    pubChannel.BasicPublish(Exchange, message.Route, false,
                         properties, Encoding.UTF8.GetBytes(message.Text));
-                    Debug.WriteLine($"published");
                     pubChannel.WaitForConfirmsOrDie();
-                    Debug.WriteLine($"confirmed");
                     if (message.OnPublishConfirmed != null)
                     {
-                        try
-                        {
-                            await message.OnPublishConfirmed();
-                        }
-                        catch (Exception e)
-                        {
-                            Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
-                        }
+                        await _confirmQueue.EnqueueAsync(message.OnPublishConfirmed);
                     }
                 }
                 catch
@@ -201,17 +213,12 @@ public class AmqpService : IAmqpService
                     throw;
                 }
             }
+            await Task.Yield();
         }
     }
 
     private async Task<bool> ProcessMessage(AmqpMessage message)
     {
-        if (!string.IsNullOrEmpty(message.Id) && _processedMessages.ContainsValue(message.Id))
-        {
-            Debug.WriteLine($"Message with id {message.Id} already processed");
-            return true;
-        }
-
         Debug.WriteLine($"Incoming amqp message: {message.Text}");
         var processed = false;
         foreach (var pf in _messageProcessors)
@@ -219,24 +226,12 @@ public class AmqpService : IAmqpService
             try
             {
                 processed = await pf(message);
-                if (processed)
-                {
-                    _processedMessages.Add(DateTimeOffset.Now, message.Id);
-                    break;
-                }
             }
             catch (Exception e)
             {
                 Trace.Write($"Error while processing {e}");
             }
         }
-
-        var keysToRemove = _processedMessages.Where(p =>
-                p.Key < DateTimeOffset.Now - TimeSpan.FromMinutes(15))
-            .Select(p => p.Key)
-            .ToArray();
-        foreach (var key in keysToRemove) _processedMessages.Remove(key);
-
         return processed;
     }
     
