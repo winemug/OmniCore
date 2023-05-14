@@ -924,7 +924,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
                             er.Result = AcceptanceType.Inconclusive;
                         else
                         {
-                            if (messageToSend.Data is GetStatusMessage gsm && gsm.StatusType == PodStatusType.Extended)
+                            if (messageToSend.Data is GetStatusMessage gsm && (gsm.StatusType == PodStatusType.Extended || gsm.StatusType == PodStatusType.Compact))
                             {
                                 er.Result = podMessageReceived == null ? AcceptanceType.Inconclusive : AcceptanceType.Accepted;
                             }
