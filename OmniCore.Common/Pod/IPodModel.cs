@@ -23,7 +23,7 @@ public interface IPodModel
     PodBasalModel? BasalModel { get; set; }
     INonceProvider? NonceProvider { get; }
 
-    DateTimeOffset? StatusUpdated { get; set; }
+    DateTimeOffset? Activated { get; set; }
     int NextRecordIndex { get; set; }
     int NextPacketSequence { get; set; }
     int NextMessageSequence { get; set; }

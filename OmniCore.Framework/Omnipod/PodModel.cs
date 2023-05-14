@@ -52,7 +52,7 @@ public class PodModel : IPodModel
         }
     }
 
-    public DateTimeOffset? StatusUpdated { get; set; }
+    public DateTimeOffset? Activated { get; set; }
     public int NextRecordIndex { get; set; }
     public int NextPacketSequence { get; set; }
     public int NextMessageSequence { get; set; }
@@ -136,7 +136,9 @@ public class PodModel : IPodModel
 
     private void ProcessMessage(StatusMessage md, DateTimeOffset received)
     {
-        StatusUpdated = received;
+        if (!md.ProgressModel.Faulted)
+            Activated = received - TimeSpan.FromMinutes(md.StatusModel.ActiveMinutes);
+
         ProgressModel = md.ProgressModel;
         StatusModel = md.StatusModel;
     }
@@ -157,7 +159,8 @@ public class PodModel : IPodModel
 
     private void ProcessMessage(StatusExtendedMessage md, DateTimeOffset received)
     {
-        StatusUpdated = received;
+        if (!md.ProgressModel.Faulted)
+            Activated = received - TimeSpan.FromMinutes(md.StatusModel.ActiveMinutes);
         ProgressModel = md.ProgressModel;
         StatusModel = md.StatusModel;
         RadioMeasurementsModel = md.RadioMeasurementsModel;

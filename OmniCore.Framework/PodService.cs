@@ -39,20 +39,24 @@ public class PodService : IPodService
         try
         {
             using var ocdb = new OcdbContext();
-            var bods = ocdb.Pods
-                         .Where(p => !p.Removed.HasValue).ToList()
-                         .OrderByDescending(p => p.Created);
             _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
             _podModels = new ConcurrentBag<IPodModel>();
-            foreach (var pod in bods)
+            var pods = ocdb.Pods
+                         .Where(p => !p.Removed.HasValue).ToList()
+                         .OrderByDescending(p => p.Created);
+            foreach (var pod in pods)
             {
                 if (pod.Created < DateTimeOffset.Now - TimeSpan.FromHours(82))
                     continue;
                 var pm = new PodModel(pod);
                 await pm.LoadAsync();
-                if (pm.ProgressModel != null)
+
+                if (pm.ProgressModel?.Progress == PodProgress.Deactivated)
+                    continue;
+
+                if (pm.Activated != null)
                 {
-                    if (pm.ProgressModel.Faulted || pm.ProgressModel.Progress >= PodProgress.Faulted)
+                    if (pm.Activated < DateTimeOffset.Now - TimeSpan.FromHours(82))
                         continue;
                 }
 
@@ -88,9 +92,14 @@ public class PodService : IPodService
     {
         var cc = await _configurationStore.GetConfigurationAsync();
         using var ocdb = new OcdbContext();
+        if (ocdb.Pods.Where(p => p.Lot == lot && p.Serial == serial).Any())
+            return;
+
         var pod = new Pod
         {
             PodId = id,
+            ClientId = cc.ClientId.Value,
+            ProfileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
@@ -99,24 +108,6 @@ public class PodService : IPodService
         };
         ocdb.Pods.Add(pod);
         await ocdb.SaveChangesAsync();
-        var podModel = new PodModel(pod);
-
-        _podLocks.TryAdd(pod.PodId, new AsyncLock());
-        _podModels.Add(podModel);
-        
-        //var accId = Guid.Parse("269d7830-fe9b-4641-8123-931846e45c9c");
-        //var clientId = Guid.Parse("ee843c96-a312-4d4b-b0cc-93e22d6e680e");
-        //var profileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b");
-
-        //newpod radio
-        // var r = new Random();
-        // var bn0 = r.Next(13);
-        // var bn1 = r.Next(16);
-        // var b0 = ((bn0 + 2) << 4) | bn1;
-        // var b123 = new byte[3];
-        // r.NextBytes(b123);
-        // RadioAddress = (uint)((b0 << 24) | (b123[0] << 16) | (b123[1] << 8) | b123[2]);
-
     }
     
     public async Task<IPodModel?> GetPodAsync(Guid podId)
