@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Dapper;
 using Microsoft.Data.Sqlite;
 using OmniCore.Services.Entities;
 

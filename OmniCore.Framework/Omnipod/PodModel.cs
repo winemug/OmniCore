@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using Nito.AsyncEx;
 using OmniCore.Common.Data;
 using OmniCore.Common.Pod;

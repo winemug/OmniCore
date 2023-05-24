@@ -182,6 +182,10 @@ public class Radio : IRadio
                         await _mainService.GetCharacteristicAsync(RileyLinkGatt.ServiceMainCharResponseCount);
                     Debug.WriteLine($"{Name} got chars");
 
+                    //var ledCharacteristic = await _mainService.GetCharacteristicAsync(RileyLinkGatt.ServiceMainCharLedMode);
+                    //await ledCharacteristic.WriteAsync(new byte[] { 0x01, 0x01 }, cancellationToken);
+                    //Debug.WriteLine($"led write complete");
+                    
                     _responseCountCharacteristic.ValueUpdated += ResponseCountCharacteristicOnValueUpdated;
                     await _responseCountCharacteristic.StartUpdatesAsync(cancellationToken);
 

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using OmniCore.Common.Data;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod;
@@ -605,6 +604,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
         bool critical,
         CancellationToken cancellationToken,
         IMessageData messageData,
+        bool broadcast = false,
         int authRetries = 0,
         int syncRetries = 0)
     {
@@ -613,7 +613,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
 
         var mb = new MessageBuilder()
             .WithSequence(_podModel.NextMessageSequence)
-            .WithAddress(_podModel.RadioAddress);
+            .WithAddress(broadcast ? 0xFFFFFFFF : _podModel.RadioAddress);
         if (critical)
             mb.AsCritical();
         if (_podModel.NonceProvider != null)
@@ -709,6 +709,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
             critical,
             cancellationToken,
             messageData,
+            broadcast,
             authRetries,
             syncRetries
         );
@@ -730,8 +731,8 @@ private async Task<PodRequestStatus> SendRequestAsync(
 
         //var packetAddressIn = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
         //var packetAddressOut = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? _podModel.RadioAddress : 0xFFFFFFFF;
-        var packetAddressIn = _podModel.RadioAddress;
-        var packetAddressOut = _podModel.RadioAddress;
+        var packetAddressIn = messageToSend.Address;
+        var packetAddressOut = messageToSend.Address;
         var ackDataOutInterim = _podModel.RadioAddress;
         var ackDataIn = _podModel.RadioAddress;
 
@@ -958,11 +959,12 @@ private async Task<PodRequestStatus> SendRequestAsync(
     }
 
     private async Task AckExchangeAsync(
+        bool broadcast = false,
         CancellationToken cancellationToken = default)
     {
-        var ackDataOutFinal = _podModel.ProgressModel?.Progress >= PodProgress.Paired ? 0x00000000 : _podModel.RadioAddress;
+        var ackDataOutFinal = broadcast ? _podModel.RadioAddress : 0x00000000;
         var finalAck = new PodPacket(
-            _podModel.RadioAddress,
+            broadcast ? 0xFFFFFFFF : _podModel.RadioAddress,
             PodPacketType.Ack,
             _podModel.NextPacketSequence,
             new Bytes(ackDataOutFinal));
@@ -971,26 +973,12 @@ private async Task<PodRequestStatus> SendRequestAsync(
         while (true)
         {
             Debug.WriteLine("Final ack sending");
-            var ber = await TryExchangePackets(finalAck, cancellationToken);
-            if (ber.CommunicationResult != BleCommunicationResult.OK)
-            {
-                successfulSendWithoutResponse = null;
-                continue;
-            }
-            var receivedPacket = PodPacket.FromExchangeResult(ber, _podModel.RadioAddress);
-            if (receivedPacket != null)
-            {
-                successfulSendWithoutResponse = null;
-                _podModel.LastRadioPacketReceived = ber.BleReadIndicated;
-                Debug.WriteLine("Final ack received response");
-            }
-            else
-            {
-                successfulSendWithoutResponse ??= ber.BleWriteCompleted;
-            }
+            var ber = await _radioConnection.SendAndTryGetPacket(
+                0, 3, 25, 0,
+                0, 1000, 0, finalAck, cancellationToken);
 
-            if (successfulSendWithoutResponse.HasValue
-                && successfulSendWithoutResponse < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(10))
+            var receivedPacket = PodPacket.FromExchangeResult(ber);
+            if (receivedPacket == null)
                 break;
         }
 

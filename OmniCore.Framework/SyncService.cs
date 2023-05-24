@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Common.Data;

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
 using OmniCore.Common.Data;
@@ -80,7 +79,7 @@ public class PodService : IPodService
 
     public async Task<List<IPodModel>> GetPodsAsync()
     {
-        return _podModels.ToList();
+        return _podModels.Reverse().ToList();
     }
     
     public async Task ImportPodAsync(Guid id,
