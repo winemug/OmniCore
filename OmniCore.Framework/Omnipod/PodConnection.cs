@@ -77,226 +77,264 @@ public class PodConnection : IDisposable, IPodConnection
         CancellationToken cancellationToken)
     {
 
-        //PodRequestStatus result;
-        //    if (_podModel.VersionModel == null) // radio address not set (no recorded version response)
-        //    {
-        //        result = await SetRadioAddress(cancellationToken);
-        //        if (result != PodRequestStatus.Executed)
-        //            return result;
-        //    }
+        Debug.WriteLine($"Prime started");
+        PodRequestStatus result;
+        if (_podModel.VersionModel == null) // radio address not set (no recorded version response)
+        {
 
-        //    if (_podModel.VersionModel == null) // must be set now
-        //        return PodRequestStatus.RejectedByApp;
+            Debug.WriteLine($"Version Info missing, assigning address");
+            result = await SendRequestAsync(false,
+                        cancellationToken,
+                        new AssignAddressMessage
+                        {
+                            Address = _podModel.RadioAddress
+                        },
+                        true
+                    );
+            if (result != PodRequestStatus.Executed)
+                return result;
+            Debug.WriteLine($"Assignment done");
+        }
 
-        //    if (_podModel.ActivationParametersModel == null) // actpar null, no long version info received
-        //    {
-        //        result = await SetupPod(podDate, podTime, 4, cancellationToken);
-        //        if (result != PodRequestStatus.Executed)
-        //            return result;
-        //    }
+        if (_podModel.VersionModel == null) // must be set now
+            return PodRequestStatus.RejectedByApp;
 
-        //    if (_podModel.ActivationParametersModel == null) // must be set now
-        //        return PodRequestStatus.RejectedByPod;
+        Debug.WriteLine($"Version info verified");
 
-        //    if (!_podModel.Progress.HasValue) // must be set now
-        //        return PodRequestStatus.RejectedByPod;
+        if (_podModel.ActivationParametersModel == null) // actpar null, no long version info received
+        {
+            Debug.WriteLine($"Act parameters missing, setting clock");
+            result = await SendRequestAsync(false, cancellationToken,
+                new SetClockMessage
+                {
+                    RadioAddress = _podModel.RadioAddress,
+                    Date = podDate,
+                    Time = podTime,
+                    PacketTimeout = 50,
+                    Lot = _podModel.VersionModel.Lot,
+                    Serial = _podModel.VersionModel.Serial,
+                },
+                true);
 
-        //    if (_podModel.Progress > PodProgress.Priming)
-        //        return PodRequestStatus.RejectedByPod;
+            if (result != PodRequestStatus.Executed)
+                return result;
+            Debug.WriteLine($"Set clock done");
+        }
 
-        //    if (_podModel.Progress == PodProgress.Paired)
-        //    {
-        //        if (_podModel.StatusModel == null) // config alerts not run if no status obtained so far
-        //        {
-        //            result = await ConfigureAlerts(new[]
-        //            {
-        //                new AlertConfiguration
-        //                {
-        //                    AlertIndex = 7,
-        //                    SetActive = true,
-        //                    AlertAfter = 5,
-        //                    AlertDurationMinutes = 55,
-        //                    BeepType = BeepType.Beep4x,
-        //                    BeepPattern = BeepPattern.OnceEveryFifteenMinutes
-        //                }
-        //            }, cancellationToken);
-        //            if (result != PodRequestStatus.Executed)
-        //                return result;
+        if (_podModel.ActivationParametersModel == null) // must be set now
+            return PodRequestStatus.RejectedByPod;
 
-        //            if (relaxDeliveryCrosschecks) // setdeliveryflags will be skipped if configurealerts 
-        //            {
-        //                result = await SetDeliveryFlags(0, 0, cancellationToken);
-        //                if (result != PodRequestStatus.Executed)
-        //                    return result;
-        //            }
-        //        }
+        Debug.WriteLine($"Act param verified");
+        if (_podModel.ProgressModel == null) // must be set now
+            return PodRequestStatus.RejectedByPod;
 
-        //        result = await Bolus(52, 1, cancellationToken);
-        //        if (result != PodRequestStatus.Executed)
-        //            return result;
-        //        Debug.Assert(_podModel.StatusModel != null);
-        //        if (!_podModel.StatusModel.ImmediateBolusActive ||
-        //            _podModel.Progress != PodProgress.Priming)
-        //            return PodRequestStatus.RejectedByApp;
+        Debug.WriteLine($"Progress exists");
+        if (_podModel.ProgressModel.Progress > PodProgress.Priming)
+            return PodRequestStatus.RejectedByPod;
 
-        //        await Task.Delay(TimeSpan.FromSeconds(52));
-        //        result = await UpdateStatus(cancellationToken);
-        //        if (result != PodRequestStatus.Executed)
-        //            return result;
-        //    }
+        Debug.WriteLine($"Progress exists");
+        if (_podModel.ProgressModel.Progress == PodProgress.Paired)
+        {
+            Debug.WriteLine($"Progress paired");
 
-        //    if (!_podModel.PulsesPending.HasValue)
-        //        return PodRequestStatus.Error;
+            if (_podModel.StatusModel == null) // config alerts not run if no status obtained so far
+            {
+                Debug.WriteLine($"Config alerts not run, running");
+                result = await SendRequestAsync(false, cancellationToken,
+                    new SetAlertsMessage
+                    {
+                        AlertConfigurations = new[]
+                        {
+                            new AlertConfiguration
+                            {
+                                AlertIndex = 7,
+                                SetActive = true,
+                                AlertAfter = 5,
+                                AlertDurationMinutes = 55,
+                                BeepType = BeepType.Beep4x,
+                                BeepPattern = BeepPattern.OnceEveryFifteenMinutes
+                            }
+                        }
+                    });
 
-        //    if (_podModel.Progress == PodProgress.Priming)
-        //    {
-        //        await Task.Delay(TimeSpan.FromSeconds(_podModel.PulsesPending.Value + 2));
-        //        result = await UpdateStatus(cancellationToken);
-        //        if (result != PodRequestStatus.Executed)
-        //            return result;
-        //        if (_podModel.Progress != PodProgress.Primed)
-        //            return PodRequestStatus.Error;
-        //    }
+                if (result != PodRequestStatus.Executed)
+                    return result;
 
-        //    if (_podModel.Progress != PodProgress.Primed)
-        //        return PodRequestStatus.Error;
+                Debug.WriteLine($"Config alerts done");
+                if (relaxDeliveryCrosschecks) // note: setdeliveryflags will be skipped if configurealerts failed
+                {
+                    Debug.WriteLine($"Relax checks running");
+                    result = await SendRequestAsync(false, cancellationToken,
+                        new SetDeliveryVerificationMessage
+                        { VerificationFlag0 = 0,
+                            VerificationFlag1 = 0 });
+                    if (result != PodRequestStatus.Executed)
+                        return result;
+                    Debug.WriteLine($"Relax checks did run");
+                }
+            }
 
-        //    return PodRequestStatus.Executed;
-        return PodRequestStatus.Inconclusive;
+            Debug.WriteLine($"Starting prime bolus");
+
+            result = await SendRequestAsync(false, cancellationToken,
+                new StartBolusMesage
+                {
+                    ImmediatePulseCount = 52,
+                    ImmediatePulseIntervalMilliseconds = 1000,
+                    ExtendedPulseCount = 0,
+                    ExtendedHalfHourCount = 0
+                });
+            if (result != PodRequestStatus.Executed)
+                return result;
+
+            Debug.WriteLine($"Started prime bolus");
+
+            Debug.Assert(_podModel.StatusModel != null);
+            if (!_podModel.StatusModel.ImmediateBolusActive ||
+                _podModel.ProgressModel.Progress != PodProgress.Priming)
+                return PodRequestStatus.RejectedByApp;
+
+            Debug.WriteLine($"Awaiting prime bolus completion 55 seconds");
+            await Task.Delay(TimeSpan.FromSeconds(55));
+        }
+
+        Debug.WriteLine($"Update status");
+        result = await UpdateStatus(cancellationToken);
+        if (result != PodRequestStatus.Executed)
+            return result;
+        Debug.WriteLine($"Updated");
+
+        Debug.Assert(_podModel.StatusModel != null);
+
+        if (_podModel.ProgressModel.Progress == PodProgress.Priming)
+        {
+            Debug.WriteLine($"Still priming, waiting {_podModel.StatusModel.PulsesPending+3} seconds");
+            await Task.Delay(TimeSpan.FromSeconds(_podModel.StatusModel.PulsesPending + 3));
+            Debug.WriteLine($"Updating status");
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodRequestStatus.Executed)
+                return result;
+            Debug.WriteLine($"Updated");
+        }
+
+        if (_podModel.ProgressModel.Progress != PodProgress.Primed)
+            return PodRequestStatus.RejectedByApp;
+
+        Debug.WriteLine($"Prime complete");
+        return PodRequestStatus.Executed;
     }
 
     public async Task<PodRequestStatus> StartPodAsync(
             TimeOnly podTime,
-            BasalRateEntry[] basalRateEntries,
+            int[] pulsesPerHour48HalfHours,
             CancellationToken cancellationToken = default)
     {
-            //    if (!_podModel.Progress.HasValue)
-            //        return PodRequestStatus.RejectedByApp;
+        if (_podModel.ProgressModel == null)
+            return PodRequestStatus.RejectedByApp;
 
-            //    if (!_podModel.Progress.HasValue || !_podModel.Faulted.HasValue
-            //        || _podModel.Faulted.Value)
-            //        return PodRequestStatus.NotAllowed;
-            //    if (_podModel.Progress < PodProgress.Primed)
-            //        return PodRequestStatus.NotAllowed;
-            //    if (_podModel.Progress >= PodProgress.Running)
-            //        return PodRequestStatus.NotAllowed;
+        if (_podModel.ProgressModel.Faulted)
+            return PodRequestStatus.RejectedByApp;
 
-            //    PodRequestStatus result;
-            //    if (_podModel.Progress == PodProgress.Primed)
-            //    {
-            //        result = await SetBasalSchedule(podTime, basalRateEntries, cancellationToken);
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //        if (_podModel.Progress != PodProgress.BasalSet)
-            //            return PodRequestStatus.Error;
-            //    }
+        if (_podModel.ProgressModel.Progress < PodProgress.Primed)
+            return PodRequestStatus.RejectedByApp;
+        if (_podModel.ProgressModel.Progress >= PodProgress.Running)
+            return PodRequestStatus.RejectedByApp;
 
-            //    if (_podModel.Progress == PodProgress.BasalSet)
-            //    {
-            //        result = await ConfigureAlerts(new[]
-            //        {
-            //            new AlertConfiguration
-            //            {
-            //                AlertIndex = 7,
-            //                SetActive = false,
-            //                AlertAfter = 0,
-            //                AlertDurationMinutes = 0,
-            //                BeepType = BeepType.NoSound,
-            //                BeepPattern = BeepPattern.Once
-            //            },
-            //            new AlertConfiguration
-            //            {
-            //                AlertIndex = 0,
-            //                SetActive = false,
-            //                SetAutoOff = true,
-            //                AlertAfter = 0,
-            //                AlertDurationMinutes = 15,
-            //                BeepType = BeepType.BipBeep4x,
-            //                BeepPattern = BeepPattern.OnceEveryMinuteForFifteenMinutes
-            //            }
-            //        }, cancellationToken);
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //        if (_podModel.Faulted.Value)
-            //            return PodRequestStatus.Error;
+        PodRequestStatus result;
+        if (_podModel.ProgressModel.Progress == PodProgress.Primed)
+        {
+            Debug.WriteLine($"Pod is primed, setting basal");
 
-            //        result = await Bolus(10, 1, cancellationToken);
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //        if (_podModel.Faulted.Value)
-            //            return PodRequestStatus.Error;
+            result = await SendRequestAsync(false, cancellationToken,
+                new StartBasalMessage
+                {
+                    PulsesPerHour48HalfHours = pulsesPerHour48HalfHours
+                });
+            if (result != PodRequestStatus.Executed)
+                return result;
+            if (_podModel.ProgressModel.Progress != PodProgress.BasalSet)
+                return PodRequestStatus.RejectedByApp;
+            Debug.WriteLine($"basal set");
+        }
 
-            //        if (!_podModel.ImmediateBolusActive.HasValue ||
-            //            !_podModel.ImmediateBolusActive.Value ||
-            //            _podModel.Progress != PodProgress.Inserting ||
-            //            _podModel.Faulted.Value)
-            //            return PodRequestStatus.Error;
+        if (_podModel.ProgressModel.Progress == PodProgress.BasalSet)
+        {
+            Debug.WriteLine($"configuring alerts");
+            result = await SendRequestAsync(false, cancellationToken,
+                new SetAlertsMessage
+                {
+                    AlertConfigurations = new[]
+                    {
+                        new AlertConfiguration
+                        {
+                            AlertIndex = 7,
+                            SetActive = false,
+                            AlertAfter = 0,
+                            AlertDurationMinutes = 0,
+                            BeepType = BeepType.NoSound,
+                            BeepPattern = BeepPattern.Once
+                        },
+                        new AlertConfiguration
+                        {
+                            AlertIndex = 0,
+                            SetActive = false,
+                            SetAutoOff = true,
+                            AlertAfter = 0,
+                            AlertDurationMinutes = 15,
+                            BeepType = BeepType.BipBeep4x,
+                            BeepPattern = BeepPattern.OnceEveryMinuteForFifteenMinutes
+                        }
+                    }
+                });
 
-            //        await Task.Delay(TimeSpan.FromSeconds(10));
+            if (result != PodRequestStatus.Executed)
+                return result;
 
-            //        result = await UpdateStatus(cancellationToken);
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //    }
+            Debug.WriteLine($"configured, inserting");
 
-            //    if (_podModel.Progress == PodProgress.Inserting)
-            //    {
-            //        await Task.Delay(TimeSpan.FromSeconds(_podModel.PulsesPending + 2));
-            //        result = await UpdateStatus(cancellationToken);
-            //        if (result != PodRequestStatus.Executed)
-            //            return result;
-            //        if (_podModel.Progress != PodProgress.Running)
-            //            return PodRequestStatus.Error;
-            //    }
+            result = await SendRequestAsync(false, cancellationToken,
+                new StartBolusMesage
+                {
+                    ImmediatePulseCount = 10,
+                    ImmediatePulseIntervalMilliseconds = 1000,
+                    ExtendedPulseCount = 0,
+                    ExtendedHalfHourCount = 0
+                });
+            if (result != PodRequestStatus.Executed)
+                return result;
 
-            //    return PodRequestStatus.Executed;
-            //}
+            if (_podModel.ProgressModel.Progress != PodProgress.Inserting)
+                return PodRequestStatus.RejectedByApp;
+            Debug.WriteLine($"insertion confirmed, waiting");
 
-            //private async Task<PodRequestStatus> SetRadioAddress(CancellationToken cancellationToken = default)
-            //{
-            //    if (_podModel.Progress.HasValue)
-            //        return PodRequestStatus.RejectedByApp;
+            await Task.Delay(TimeSpan.FromSeconds(13));
 
-            //    return await SendRequestAsync(false,
-            //        cancellationToken,
-            //        new[]
-            //        {
-            //            new RequestAssignAddressPart(_podModel.RadioAddress)
-            //        }
-            //    );
-            //}
+            Debug.WriteLine($"update status");
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodRequestStatus.Executed)
+                return result;
+            Debug.WriteLine($"updated");
+        }
 
-            //private async Task<PodRequestStatus> SetupPod(DateOnly podDate, TimeOnly podTime,
-            //    int packetTimeout = 0, CancellationToken cancellationToken = default)
-            //{
-            //    if (!_podModel.Progress.HasValue)
-            //        return PodRequestStatus.RejectedByApp;
+        Debug.Assert(_podModel.StatusModel != null);
 
-            //    if (_podModel.Progress != PodProgress.Paired)
-            //        return PodRequestStatus.NotAllowed;
+        if (_podModel.ProgressModel.Progress == PodProgress.Inserting)
+        {
+            Debug.WriteLine($"waiting for insert to complete");
 
-            //    if (!_podModel.Lot.HasValue || !_podModel.Serial.HasValue)
-            //        return PodRequestStatus.NotAllowed;
+            await Task.Delay(TimeSpan.FromSeconds(_podModel.StatusModel.PulsesPending + 2));
+            result = await UpdateStatus(cancellationToken);
+            if (result != PodRequestStatus.Executed)
+                return result;
+            Debug.WriteLine($"wait finished");
+        }
 
-            //    return await SendRequestAsync(false,
-            //        cancellationToken,
-            //        new[]
-            //        {
-            //            new RequestSetupPodPart(_podModel.RadioAddress,
-            //                _podModel.Lot.Value, _podModel.Serial.Value, packetTimeout,
-            //                podDate.Year, podDate.Month, podDate.Day, podTime.Hour, podTime.Minute)
-            //        }
-            //    );
-            return PodRequestStatus.Inconclusive;
+        if (_podModel.ProgressModel.Progress != PodProgress.Running)
+            return PodRequestStatus.RejectedByApp;
+        Debug.WriteLine($"all donesies");
+        return PodRequestStatus.Executed;
     }
 
-    private async Task<PodRequestStatus> SetDeliveryFlags(byte b16, byte b17, CancellationToken cancellationToken = default)
-    {
-        return await SendRequestAsync(false,
-            cancellationToken,
-            new SetDeliveryVerificationMessage { VerificationFlag0 = b16, VerificationFlag1 = b17 }
-            );
-    }
 
     public async Task<PodRequestStatus> SetBasalSchedule(
             TimeOnly podTime,

@@ -82,6 +82,29 @@ public class PodService : IPodService
         return _podModels.Reverse().ToList();
     }
     
+    public async Task<Guid> NewPodAsync(int unitsPerMilliliter,
+        MedicationType medicationType)
+    {
+        var cc = await _configurationStore.GetConfigurationAsync();
+        using var ocdb = new OcdbContext();
+
+        var b = new byte[4];
+        b[0] = 0x22;
+        new Random().NextBytes(b[1..4]);
+        var pod = new Pod
+        {
+            PodId = Guid.NewGuid(),
+            ClientId = cc.ClientId.Value,
+            ProfileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
+            RadioAddress = (uint)(b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]),
+            UnitsPerMilliliter = unitsPerMilliliter,
+            Medication = medicationType,
+        };
+        ocdb.Pods.Add(pod);
+        await ocdb.SaveChangesAsync();
+        return pod.PodId;
+    }
+
     public async Task ImportPodAsync(Guid id,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,

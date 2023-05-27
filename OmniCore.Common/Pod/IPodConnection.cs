@@ -7,7 +7,7 @@ namespace OmniCore.Services.Interfaces.Pod;
 public interface IPodConnection : IDisposable
 {
     Task<PodRequestStatus> PrimePodAsync(DateOnly podDate, TimeOnly podTime, bool relaxDeliveryCrosschecks, CancellationToken cancellationToken);
-    Task<PodRequestStatus> StartPodAsync(TimeOnly podTime, BasalRateEntry[] basalRateEntries, CancellationToken cancellationToken = default);
+    Task<PodRequestStatus> StartPodAsync(TimeOnly podTime, int[] basalRateTicks, CancellationToken cancellationToken = default);
     Task<PodRequestStatus> ConfigureAlerts(
         AlertConfiguration[] alertConfigurations,
         CancellationToken cancellationToken = default);

@@ -5,6 +5,8 @@ namespace OmniCore.Services.Interfaces.Core;
 
 public interface IPodService : ICoreService
 {
+    Task<Guid> NewPodAsync(int unitsPerMilliliter,
+        MedicationType medicationType);
     Task ImportPodAsync(Guid id,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
