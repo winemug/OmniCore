@@ -67,7 +67,7 @@ public class MessageBuilder
         if (messageBody.Length < 8)
             throw new ApplicationException();
 
-        var crcCalc = CrcUtil.Crc16(messageBody.Sub(0, messageBody.Length - 2).ToArray());
+        var crcCalc = CrcUtil.Crc16(messageBody.Sub(0, messageBody.Length - 2));
         var messageCrc = messageBody.Word(messageBody.Length - 2);
         if (crcCalc != messageCrc)
             throw new ApplicationException();
@@ -196,7 +196,7 @@ public class MessageBuilder
             messageBody.Append(part.Data);
         }
 
-        var messageCrc = CrcUtil.Crc16(messageBody.ToArray());
+        var messageCrc = CrcUtil.Crc16(messageBody);
         messageBody.Append(messageCrc);
         return new Message
         {

@@ -15,6 +15,8 @@ public class StartBolusMesage : IMessageData
 
     public int ImmediatePulseCount { get; set; }
     public int ImmediatePulseIntervalMilliseconds { get; set; }
+    
+    public bool SpecialBolus { get; set; }
     public int ExtendedPulseCount { get; set; }
     public int ExtendedHalfHourCount { get; set; }
 
@@ -36,24 +38,70 @@ public class StartBolusMesage : IMessageData
         mainData.Append(0);
         ushort totalPulses10 = (ushort)(ImmediatePulseCount * 10);
         uint pulseInterval = (uint)(ImmediatePulseIntervalMilliseconds * 100);
-        mainData.Append(totalPulses10).Append(pulseInterval).Append((ushort)0).Append((uint)0);
+        Bytes subData;
 
-        var schedules = new[]
+        
+        if (SpecialBolus && ImmediatePulseCount > 2)
         {
-            new InsulinSchedule
+            uint waitInterval = 10 * 1000 * 100;
+            int aPulse = ImmediatePulseCount / 2;
+            int bPulse = ImmediatePulseCount - aPulse - 1;
+            ushort aPulses10 = (ushort)(aPulse * 10);
+            ushort bPulses10 = (ushort)(bPulse * 10);
+            mainData.Append(aPulses10).Append(pulseInterval).Append((ushort)10).Append(waitInterval);
+            mainData.Append(bPulses10).Append(pulseInterval);
+            var schedules = new[]
             {
-                BlockCount = 1,
-                AddAlternatingExtraPulse = false,
-                PulsesPerBlock = ImmediatePulseCount
-            }
-        };
-        var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
-            1,
-            (ushort)(ImmediatePulseCount * ImmediatePulseIntervalMilliseconds / 125),
-            (ushort)(ImmediatePulseCount),
-            schedules);
+                new InsulinSchedule
+                {
+                    BlockCount = 1,
+                    AddAlternatingExtraPulse = false,
+                    PulsesPerBlock = aPulse
+                },
+                new InsulinSchedule
+                {
+                    BlockCount = 1,
+                    AddAlternatingExtraPulse = false,
+                    PulsesPerBlock = 1
+                },
+                new InsulinSchedule
+                {
+                    BlockCount = 1,
+                    AddAlternatingExtraPulse = false,
+                    PulsesPerBlock = bPulse
+                }
+            };
+            var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
+                2,
+                (ushort)(aPulse * ImmediatePulseIntervalMilliseconds / 125),
+                (ushort)(aPulse),
+                schedules);
 
-        var subData = new Bytes(2).Append(scheduleData);
+            subData = new Bytes(2).Append(scheduleData);
+
+        }
+        else
+        {
+            mainData.Append(totalPulses10).Append(pulseInterval).Append((ushort)0).Append((uint)0);
+            var schedules = new[]
+            {
+                new InsulinSchedule
+                {
+                    BlockCount = 1,
+                    AddAlternatingExtraPulse = false,
+                    PulsesPerBlock = ImmediatePulseCount
+                }
+            };
+            var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
+                1,
+                (ushort)(ImmediatePulseCount * ImmediatePulseIntervalMilliseconds / 125),
+                (ushort)(ImmediatePulseCount),
+                schedules);
+
+            subData = new Bytes(2).Append(scheduleData);
+        }
+
+
 
         return new MessageParts(
             new MessagePart

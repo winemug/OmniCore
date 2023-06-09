@@ -9,5 +9,5 @@ public interface IPodPacket
     PodPacketType Type { get; set; }
     int Sequence { get; set; }
     Bytes Data { get; set; }
-    byte[] ToRadioData();
+    Bytes ToRadioData();
 }

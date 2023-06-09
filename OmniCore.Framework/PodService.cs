@@ -21,7 +21,7 @@ public class PodService : IPodService
     private IConfigurationStore _configurationStore;
     private ISyncService _syncService;
     private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
-    private ConcurrentBag<IPodModel> _podModels;
+    private List<IPodModel> _podModels;
 
     public PodService(
         IRadioService radioService,
@@ -39,26 +39,28 @@ public class PodService : IPodService
         {
             using var ocdb = new OcdbContext();
             _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
-            _podModels = new ConcurrentBag<IPodModel>();
+            _podModels = new List<IPodModel>();
             var pods = ocdb.Pods
                          .Where(p => !p.Removed.HasValue).ToList()
                          .OrderByDescending(p => p.Created);
             foreach (var pod in pods)
             {
-                if (pod.Created < DateTimeOffset.Now - TimeSpan.FromHours(82))
-                    continue;
+                // if (pod.Created < DateTimeOffset.UtcNow - TimeSpan.FromHours(82))
+                //     continue;
+                
                 var pm = new PodModel(pod);
                 await pm.LoadAsync();
 
-                if (pm.ProgressModel?.Progress == PodProgress.Deactivated)
-                    continue;
+                // if (pm.ProgressModel?.Progress == PodProgress.Deactivated)
+                //     continue;
 
-                if (pm.Activated != null)
-                {
-                    if (pm.Activated < DateTimeOffset.Now - TimeSpan.FromHours(82))
-                        continue;
-                }
+                // if (pm.Activated != null)
+                // {
+                //     if (pm.Activated < DateTimeOffset.UtcNow - TimeSpan.FromHours(82))
+                //         continue;
+                // }
 
+                Debug.WriteLine($"Adding PodId: {pod.PodId} Created: {pod.Created}");
                 _podLocks.TryAdd(pod.PodId, new AsyncLock());
                 _podModels.Add(pm);
             }
@@ -71,15 +73,35 @@ public class PodService : IPodService
 
     public async Task Stop()
     {
-        foreach (var podLock in _podLocks.Values)
-        {
-            await podLock.LockAsync();
-        }
+        // foreach (var podLock in _podLocks.Values)
+        // {
+        //     await podLock.LockAsync();
+        // }
     }
 
     public async Task<List<IPodModel>> GetPodsAsync()
     {
-        return _podModels.Reverse().ToList();
+        return _podModels;
+    }
+
+    public async Task RemovePodAsync(Guid podId, DateTimeOffset? removeTime = null)
+    {
+        if (!removeTime.HasValue)
+            removeTime = DateTimeOffset.UtcNow;
+
+        if (_podLocks.ContainsKey(podId))
+        {
+            _podLocks.Remove(podId, out _);
+            var pm = _podModels.First(p => p.Id == podId);
+            _podModels.Remove(pm);
+        }
+        
+        using var ocdb = new OcdbContext();
+        var pod = ocdb.Pods
+            .First(p => p.PodId == podId);
+        pod.Removed = removeTime;
+        pod.IsSynced = false;
+        await ocdb.SaveChangesAsync();
     }
     
     public async Task<Guid> NewPodAsync(int unitsPerMilliliter,
@@ -89,8 +111,7 @@ public class PodService : IPodService
         using var ocdb = new OcdbContext();
 
         var b = new byte[4];
-        b[0] = 0x22;
-        new Random().NextBytes(b[1..4]);
+        new Random().NextBytes(b);
         var pod = new Pod
         {
             PodId = Guid.NewGuid(),
@@ -102,6 +123,11 @@ public class PodService : IPodService
         };
         ocdb.Pods.Add(pod);
         await ocdb.SaveChangesAsync();
+
+        var pm = new PodModel(pod);
+        _podLocks.TryAdd(pod.PodId, new AsyncLock());
+        _podModels.Add(pm);
+        
         return pod.PodId;
     }
 

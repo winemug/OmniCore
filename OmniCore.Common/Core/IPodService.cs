@@ -7,6 +7,8 @@ public interface IPodService : ICoreService
 {
     Task<Guid> NewPodAsync(int unitsPerMilliliter,
         MedicationType medicationType);
+
+    Task RemovePodAsync(Guid podId, DateTimeOffset? removeTime = null);
     Task ImportPodAsync(Guid id,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,

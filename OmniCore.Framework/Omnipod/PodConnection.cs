@@ -538,6 +538,7 @@ public class PodConnection : IDisposable, IPodConnection
     public async Task<PodRequestStatus> Bolus(
         int bolusPulses,
         int pulseIntervalMilliseconds,
+        bool special = false,
         CancellationToken cancellationToken = default)
     {
         if (pulseIntervalMilliseconds < 2000 || bolusPulses < 0 || bolusPulses > 1800000 / pulseIntervalMilliseconds)
@@ -563,7 +564,8 @@ public class PodConnection : IDisposable, IPodConnection
             new StartBolusMesage
             {
                 ImmediatePulseCount = bolusPulses,
-                ImmediatePulseIntervalMilliseconds = pulseIntervalMilliseconds
+                ImmediatePulseIntervalMilliseconds = pulseIntervalMilliseconds,
+                SpecialBolus = special
             });
     }
 
@@ -895,7 +897,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
 
             if (receivedPacket == null)
             {
-                if (_podModel.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
+                if (_podModel.LastRadioPacketReceived < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(30))
                 {
                     er.ErrorText = "Pod response partially received due to timeout";
                     break; // timed out, exit receive loop
@@ -904,7 +906,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
             }
 
             Debug.Assert(receivedPacket != null);
-            _podModel.LastRadioPacketReceived = DateTimeOffset.Now;
+            _podModel.LastRadioPacketReceived = DateTimeOffset.UtcNow;
             if (receivedPacket.Sequence != (nextPacketSequence + 1) % 32)
                 continue; // sequence mismatch, continue receive loop
 
@@ -1008,19 +1010,39 @@ private async Task<PodRequestStatus> SendRequestAsync(
             new Bytes(ackDataOutFinal));
 
         DateTimeOffset? successfulSendWithoutResponse = null;
-        while (true)
+        bool sendFinalAck = true;
+        var lastHeard = DateTimeOffset.UtcNow;
+        while (DateTimeOffset.UtcNow - lastHeard < TimeSpan.FromSeconds(3))
         {
-            Debug.WriteLine("Final ack sending");
-            var ber = await _radioConnection.SendAndTryGetPacket(
-                0, 3, 25, 0,
-                0, 1000, 0, finalAck, cancellationToken);
+            BleExchangeResult ber;
+            if (sendFinalAck) 
+            {
+                Debug.WriteLine("Final ack sending and waiting");
+                ber = await _radioConnection.SendAndTryGetPacket(
+                    0, 1, 50, 0,
+                    0, 310, 0, finalAck, cancellationToken);
+            }
+            else
+            {
+                Debug.WriteLine("Final ack waiting");
+                ber = await _radioConnection.TryGetPacket(
+                    0, 540);
+            }
 
             var receivedPacket = PodPacket.FromExchangeResult(ber);
-            if (receivedPacket == null)
-                break;
+            if (receivedPacket != null)
+            {
+                sendFinalAck = true;
+                lastHeard = DateTimeOffset.UtcNow;
+            }
+            else
+            {
+                sendFinalAck = false;
+            }
         }
 
         Debug.WriteLine("Final send complete");
+        _podModel.LastRadioPacketReceived = null;
         _podModel.NextPacketSequence = (_podModel.NextPacketSequence + 1) % 32;
     }
 
@@ -1028,23 +1050,28 @@ private async Task<PodRequestStatus> SendRequestAsync(
         IPodPacket packetToSend,
         CancellationToken cancellationToken)
     {
-        Debug.WriteLine($"SEND: {packetToSend}");
-        BleExchangeResult result;
+        BleExchangeResult? result = null;
+        PodPacket? received = null;
         if (!_podModel.LastRadioPacketReceived.HasValue ||
-            _podModel.LastRadioPacketReceived < DateTimeOffset.Now - TimeSpan.FromSeconds(30))
+            _podModel.LastRadioPacketReceived < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(30))
         {
+            Debug.WriteLine($"SEND: {packetToSend} with preamble");
             result = await _radioConnection.SendAndTryGetPacket(
-                0, 0, 0, 150,
-                0, 250, 0, packetToSend, cancellationToken);
+                0, 0, 0, 25,
+                0, 60, 20, packetToSend, cancellationToken);
+            received = PodPacket.FromExchangeResult(result);
         }
+
         else
+        //if (received == null)
         {
+            Debug.WriteLine($"SEND: {packetToSend} no preamble");
             result = await _radioConnection.SendAndTryGetPacket(
-                0, 3, 25, 0,
-                0, 250, 0, packetToSend, cancellationToken);
+                0, 0, 0, 0,
+                0, 95, 10, packetToSend, cancellationToken);
+            received = PodPacket.FromExchangeResult(result);
         }
-        var received = PodPacket.FromExchangeResult(result);
         Debug.WriteLine($"RCVD: {received}");
-        return result;
+        return result!;
     }
 }

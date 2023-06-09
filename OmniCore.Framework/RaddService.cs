@@ -149,7 +149,7 @@ public class RaddService : IRaddService
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.bolus_ticks is > 0)
+                if (success && rr.bolus_ticks is > 0 && !rr.test_bolus)
                 {
                     var response = await podConnection.Bolus((int)rr.bolus_ticks, 2000);
                     success = response == PodRequestStatus.Executed;
@@ -159,6 +159,25 @@ public class RaddService : IRaddService
                 {
                     var response = await podConnection.Deactivate();
                     success = response == PodRequestStatus.Executed;
+                }
+                
+                if (success && rr.remove)
+                {
+                    success = false;
+                    try
+                    {
+                        await _podService.RemovePodAsync(Guid.Parse(rr.pod_id));
+                        success = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+
+                if (success && rr.test_bolus && rr.bolus_ticks is > 0)
+                {
+                    await podConnection.Bolus((int)rr.bolus_ticks, 2000, true);
                 }
             }
         }
@@ -204,6 +223,8 @@ public class RaddRequest
     public bool cancel_temp { get; set; }
     public bool cancel_bolus { get; set; }
     public bool deactivate { get; set; }
+    public bool remove { get; set; }
+    public bool test_bolus { get; set; }
 }
 
 public class RaddResponse

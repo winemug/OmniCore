@@ -1,3 +1,5 @@
+using OmniCore.Services.Interfaces.Entities;
+
 namespace OmniCore.Services;
 
 internal static class CrcUtil
@@ -71,14 +73,14 @@ internal static class CrcUtil
         0x0208, 0x820d, 0x8207, 0x0202
     };
 
-    public static ushort Crc16(byte[] data)
+    public static ushort Crc16(Bytes data)
     {
         var crc = 0;
         for (var i = 0; i < data.Length; i++) crc = (crc >> 8) ^ Crc16Table[(crc ^ data[i]) & 0xff];
         return (ushort)crc;
     }
 
-    public static byte Crc8(byte[] data)
+    public static byte Crc8(Bytes data)
     {
         var crc = 0;
         for (var i = 0; i < data.Length; i++) crc = (crc >> 8) ^ Crc8Table[(crc ^ data[i]) & 0xff];

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OmniCore.Services.Interfaces.Entities;
 
 namespace OmniCore.Services;
 
@@ -36,34 +37,36 @@ public static class ManchesterCodec
         return e;
     }
 
-    public static byte[] Decode(byte[] data)
+    public static Bytes Decode(Bytes data)
     {
         var len = data.Length;
         if (len % 2 != 0)
             len = len - 1;
-        var decoded = new byte[len / 2];
+        var decoded = new Bytes();
 
         for (var i = 0; i < len; i += 2)
         {
-            var e = (data[i] << 8) | data[i + 1];
-            if (!DecodeDictionary.ContainsKey((ushort)e))
-                return new ArraySegment<byte>(decoded, 0, i / 2).ToArray();
-            decoded[i / 2] = DecodeDictionary[(ushort)e];
+            var e = data.Word(i);
+            if (!DecodeDictionary.ContainsKey(e))
+                return decoded;
+            decoded.Append(DecodeDictionary[(ushort)e]);
         }
 
         return decoded;
     }
 
-    public static byte[] Encode(byte[] data)
+    public static Bytes Encode(Bytes data, int padLength = 0)
     {
+        var encoded = new Bytes();
         var len = data.Length;
-        var encoded = new byte[len * 2];
-
         for (var i = 0; i < len; i++)
         {
-            var e = EncodeDictionary[data[i]];
-            encoded[2 * i] = (byte)((e >> 8) & 0xFF);
-            encoded[2 * i + 1] = (byte)(e & 0xFF);
+            encoded.Append(EncodeDictionary[data[i]]);
+        }
+
+        for (var i = len; i < padLength; i++)
+        {
+            encoded.Append((ushort)0x0000);
         }
 
         return encoded;
