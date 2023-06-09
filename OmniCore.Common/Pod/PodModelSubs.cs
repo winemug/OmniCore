@@ -52,7 +52,7 @@ public class PodRadioMeasurementsModel
 {
     public int RadioLowGain { get; init; }
     public int Rssi { get; init; }
-    DateTimeOffset Received { get; }
+    private DateTimeOffset Received { get; set; }
 }
 
 public class PodActivationParametersModel

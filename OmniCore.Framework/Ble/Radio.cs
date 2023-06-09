@@ -470,7 +470,7 @@ public class Radio : IRadio
     }
 
 
-    private async Task<byte[]> TryReadFromCharacteristic(ICharacteristic characteristic,
+    private async Task<byte[]?> TryReadFromCharacteristic(ICharacteristic characteristic,
         CancellationToken cancellationToken = default)
     {
         var retryPolicy = Policy.Handle<Exception>(e => !(e is TaskCanceledException))
@@ -478,7 +478,8 @@ public class Radio : IRadio
         var timeoutPolicy = Policy.TimeoutAsync(10, TimeoutStrategy.Optimistic);
         var policy = timeoutPolicy.WrapAsync(retryPolicy);
 
-        return await policy.ExecuteAsync(token => characteristic.ReadAsync(token), cancellationToken);
+        var (data, _) = await policy.ExecuteAsync(token => characteristic.ReadAsync(token), cancellationToken);
+        return data;
     }
 
     private async Task TryWriteToCharacteristic(ICharacteristic characteristic, byte[] data,
@@ -486,12 +487,12 @@ public class Radio : IRadio
     {
         var retryPolicy = Policy.Handle<Exception>(e => !(e is TaskCanceledException))
             .WaitAndRetryAsync(4, attempt => TimeSpan.FromMilliseconds(50*attempt));
-        var resultPolicy = Policy.HandleResult<bool>(r => !r)
+        var resultPolicy = Policy.HandleResult<int>(r => r != 0)
             .WaitAndRetryAsync(4, attempt => TimeSpan.FromMilliseconds(50*attempt));;
         var timeoutPolicy = Policy.TimeoutAsync(10, TimeoutStrategy.Optimistic);
         var policy = timeoutPolicy.WrapAsync(resultPolicy).WrapAsync(retryPolicy);
         var writeResult = await policy.ExecuteAsync(token => characteristic.WriteAsync(data, cancellationToken), cancellationToken);
-        if (!writeResult)
-            throw new ApplicationException("BLE write returned false");
+        if (writeResult != 0)
+            throw new ApplicationException($"BLE write returned {writeResult}");
     }
 }

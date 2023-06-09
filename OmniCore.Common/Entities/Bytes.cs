@@ -28,9 +28,10 @@ public class Bytes : IComparable<Bytes>
         Append(val);
     }
 
-    public Bytes(byte[] val) : this()
+    public Bytes(byte[]? val) : this()
     {
-        Append(val);
+        if (val != null)
+            Append(val);
     }
 
     public Bytes(Bytes b) : this()

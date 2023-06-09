@@ -32,25 +32,25 @@ public class SyncService : ISyncService
     {
         var cc = await _configurationStore.GetConfigurationAsync();
 
-        await using var context = new OcdbContext();
+        // await using var context = new OcdbContext();
         //context.Database.ExecuteSql($"UPDATE [Pods] SET [IsSynced] = 0");
         //context.Database.ExecuteSql($"UPDATE [PodActions] SET [IsSynced] = 0");
 
-        var podsToSync = context.Pods.Where(p => !p.IsSynced).ToList();
-        foreach (var pod in podsToSync)
-        {
-            await _amqpService.PublishMessage(new AmqpMessage
-            {
-                Text = JsonSerializer.Serialize(new
-                {
-                    type = "Pod",
-                    data = pod
-                }),
-                Route = "sync",
-                OnPublishConfirmed = OnPodSynced(pod.PodId),
-            });
-        }
-        _syncTask = SyncPendingActions(_ctsSync.Token);
+        // var podsToSync = context.Pods.Where(p => !p.IsSynced).ToList();
+        // foreach (var pod in podsToSync)
+        // {
+        //     await _amqpService.PublishMessage(new AmqpMessage
+        //     {
+        //         Text = JsonSerializer.Serialize(new
+        //         {
+        //             type = "Pod",
+        //             data = pod
+        //         }),
+        //         Route = "sync",
+        //         OnPublishConfirmed = OnPodSynced(pod.PodId),
+        //     });
+        // }
+        _syncTask = SyncTask(_ctsSync.Token);
     }
 
     public async Task Stop()
@@ -68,14 +68,31 @@ public class SyncService : ISyncService
         }
     }
 
-    private async Task SyncPendingActions(CancellationToken cancellationToken)
+    private async Task SyncTask(CancellationToken cancellationToken)
     {
         while(true)
         {
             await _syncTriggerEvent.WaitAsync(cancellationToken);
             await using var context = new OcdbContext();
+            var podsToSync = await context.Pods.Where(p => !p.IsSynced).ToListAsync();
             var podActionsToSync = await context.PodActions.Where(pa => !pa.IsSynced).ToListAsync();
             await context.DisposeAsync();
+
+            foreach (var pod in podsToSync)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await _amqpService.PublishMessage(new AmqpMessage
+                {
+                    Text = JsonSerializer.Serialize(new
+                    {
+                        type = nameof(Pod),
+                        data = pod
+                    }),
+                    Route = "sync",
+                    OnPublishConfirmed = OnPodSynced(pod.PodId),
+                });
+                await Task.Yield();
+            }
 
             foreach (var podAction in podActionsToSync)
             {

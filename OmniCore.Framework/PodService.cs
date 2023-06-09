@@ -102,6 +102,7 @@ public class PodService : IPodService
         pod.Removed = removeTime;
         pod.IsSynced = false;
         await ocdb.SaveChangesAsync();
+        _syncService.TriggerSync();
     }
     
     public async Task<Guid> NewPodAsync(int unitsPerMilliliter,
@@ -127,7 +128,7 @@ public class PodService : IPodService
         var pm = new PodModel(pod);
         _podLocks.TryAdd(pod.PodId, new AsyncLock());
         _podModels.Add(pm);
-        
+        _syncService.TriggerSync();
         return pod.PodId;
     }
 
@@ -156,6 +157,10 @@ public class PodService : IPodService
         };
         ocdb.Pods.Add(pod);
         await ocdb.SaveChangesAsync();
+        _syncService.TriggerSync();
+        var pm = new PodModel(pod);
+        _podLocks.TryAdd(pod.PodId, new AsyncLock());
+        _podModels.Add(pm);
     }
     
     public async Task<IPodModel?> GetPodAsync(Guid podId)
