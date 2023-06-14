@@ -20,34 +20,29 @@ namespace OmniCore.Services;
 
 public class AmqpService : IAmqpService
 {
-    public string Dsn { get; set; }
-    public string Exchange { get; set; }
-    public string Queue { get; set; }
-    public string UserId { get; set; }
-    
     private Task _amqpTask;
     private CancellationTokenSource _cts;
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
     private readonly AsyncProducerConsumerQueue<Task> _confirmQueue;
 
     private ConcurrentBag<Func<AmqpMessage, Task<bool>>> _messageProcessors;
-    public AmqpService()
+
+    private IAppConfiguration _appConfiguration;
+    private EndpointDefinition _endpoint;
+    public AmqpService(IAppConfiguration appConfiguration)
     {
+        _appConfiguration = appConfiguration;
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _confirmQueue = new AsyncProducerConsumerQueue<Task>();
         _messageProcessors = new ConcurrentBag<Func<AmqpMessage, Task<bool>>>();
     }
 
-    public void SetEndpoint(AmqpEndpoint endpoint)
-    {
-        Dsn = endpoint.Dsn;
-        Exchange = endpoint.Exchange;
-        Queue = endpoint.Queue;
-        UserId = endpoint.UserId;
-    }
-    
     public async Task Start()
     {
+        if (_appConfiguration.Endpoint == null)
+            throw new ApplicationException("No endpoint information");
+
+        _endpoint = _appConfiguration.Endpoint;
         _cts = new CancellationTokenSource();
         _amqpTask = Task.Run(async () => await AmqpTask(_cts.Token));
     }
@@ -128,7 +123,7 @@ public class AmqpService : IAmqpService
     {
         var connectionFactory = new ConnectionFactory
         {
-            Uri = new Uri(Dsn),
+            Uri = new Uri(_endpoint.Dsn),
             DispatchConsumersAsync = true,
             AutomaticRecoveryEnabled = false,
         };
@@ -173,7 +168,7 @@ public class AmqpService : IAmqpService
             }
             await Task.Yield();
         };
-        subChannel.BasicConsume(Queue, false, consumer);
+        subChannel.BasicConsume(_endpoint.Queue, false, consumer);
         cancellationToken.ThrowIfCancellationRequested();
 
 
@@ -199,7 +194,7 @@ public class AmqpService : IAmqpService
                     var properties = pubChannel.CreateBasicProperties();
                     var sequenceNo = pubChannel.NextPublishSeqNo;
                     Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                    pubChannel.BasicPublish(Exchange, message.Route, false,
+                    pubChannel.BasicPublish(_endpoint.Exchange, message.Route, false,
                         properties, Encoding.UTF8.GetBytes(message.Text));
                     pubChannel.WaitForConfirmsOrDie();
                     if (message.OnPublishConfirmed != null)

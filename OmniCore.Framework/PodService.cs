@@ -18,23 +18,25 @@ namespace OmniCore.Services;
 public class PodService : IPodService
 {
     private IRadioService _radioService;
-    private IConfigurationStore _configurationStore;
     private ISyncService _syncService;
+    private IAppConfiguration _appConfiguration;
+    
     private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
     private List<IPodModel> _podModels;
 
     public PodService(
         IRadioService radioService,
-        IConfigurationStore configurationStore,
+        IAppConfiguration appConfiguration,
         ISyncService syncService)
     {
         _radioService = radioService;
-        _configurationStore = configurationStore;
+        _appConfiguration = appConfiguration;
         _syncService = syncService;
     }
 
     public async Task Start()
     {
+        // TODO: fix starting
         try
         {
             using var ocdb = new OcdbContext();
@@ -79,8 +81,12 @@ public class PodService : IPodService
         // }
     }
 
-    public async Task<List<IPodModel>> GetPodsAsync()
+    public async Task<List<IPodModel>> GetPodsAsync(Guid? profileId)
     {
+        if (profileId == null)
+            return _podModels;
+        
+        //TODO: profile filter
         return _podModels;
     }
 
@@ -105,19 +111,23 @@ public class PodService : IPodService
         _syncService.TriggerSync();
     }
     
-    public async Task<Guid> NewPodAsync(int unitsPerMilliliter,
+    public async Task<Guid> NewPodAsync(
+        Guid profileId,
+        int unitsPerMilliliter,
         MedicationType medicationType)
     {
-        var cc = await _configurationStore.GetConfigurationAsync();
-        using var ocdb = new OcdbContext();
+        if (_appConfiguration.Authorization == null)
+            throw new ApplicationException("Client not registered");
 
+        using var ocdb = new OcdbContext();
+        
         var b = new byte[4];
         new Random().NextBytes(b);
         var pod = new Pod
         {
             PodId = Guid.NewGuid(),
-            ClientId = cc.ClientId.Value,
-            ProfileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
+            ClientId = _appConfiguration.Authorization.ClientId,
+            ProfileId = profileId,
             RadioAddress = (uint)(b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]),
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
@@ -132,23 +142,26 @@ public class PodService : IPodService
         return pod.PodId;
     }
 
-    public async Task ImportPodAsync(Guid id,
+    public async Task ImportPodAsync(
+        Guid profileId,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
         uint lot,
         uint serial
         )
     {
-        var cc = await _configurationStore.GetConfigurationAsync();
+        if (_appConfiguration.Authorization == null)
+            throw new ApplicationException("Client not registered");
+        
         using var ocdb = new OcdbContext();
         if (ocdb.Pods.Where(p => p.Lot == lot && p.Serial == serial).Any())
             return;
 
         var pod = new Pod
         {
-            PodId = id,
-            ClientId = cc.ClientId.Value,
-            ProfileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
+            PodId = Guid.NewGuid(),
+            ClientId = _appConfiguration.Authorization.ClientId,
+            ProfileId = profileId, 
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
             Medication = medicationType,
@@ -172,21 +185,21 @@ public class PodService : IPodService
         IPodModel podModel,
         CancellationToken cancellationToken = default)
     {
+        if (_appConfiguration.Authorization == null)
+            throw new ApplicationException("Client not registered");
+        
         var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
         if (radioConnection == null)
             throw new ApplicationException("No radios available");
 
         var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
-        var accId = Guid.Parse("269d7830-fe9b-4641-8123-931846e45c9c");
-        var clientId = Guid.Parse("ee843c96-a312-4d4b-b0cc-93e22d6e680e");
-        var profileId = Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b");
+        var clientId = _appConfiguration.Authorization.ClientId;
 
         return new PodConnection(
             clientId,
             podModel,
             radioConnection,
             allocationLockDisposable,
-            _configurationStore,
             _syncService);
     }
 }

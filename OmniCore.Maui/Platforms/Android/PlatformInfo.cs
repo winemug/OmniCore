@@ -33,6 +33,12 @@ namespace OmniCore.Maui.Services
             return false;
         }
 
+        public string GetUserName()
+        {
+            //TODO:
+            return "";
+        }
+
         //public PlatformInfo()
         //{
         //    Platform = "Android";

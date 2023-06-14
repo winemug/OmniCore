@@ -27,7 +27,6 @@ public class PodConnection : IDisposable, IPodConnection
     private readonly IPodModel _podModel;
     private readonly IDisposable _podLockDisposable;
     private readonly IRadioConnection _radioConnection;
-    private readonly IConfigurationStore _configurationStore;
     private readonly ISyncService _syncService;
 
     public PodConnection(
@@ -35,14 +34,12 @@ public class PodConnection : IDisposable, IPodConnection
         IPodModel podModel,
         IRadioConnection radioConnection,
         IDisposable podLockDisposable,
-        IConfigurationStore configurationStore,
         ISyncService syncService)
     {
         _requestingClientId = requestingClientId;
         _podModel = podModel;
         _radioConnection = radioConnection;
         _podLockDisposable = podLockDisposable;
-        _configurationStore = configurationStore;
         _syncService = syncService;
     }
 

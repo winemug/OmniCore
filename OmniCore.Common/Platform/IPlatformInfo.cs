@@ -7,4 +7,5 @@ public interface IPlatformInfo
     //string Platform { get; }
     //string OsVersion { get; }
     Task<bool> VerifyPermissions();
+    string GetUserName();
 }

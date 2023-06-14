@@ -4,11 +4,20 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:OmniCore.Maui.Views"
-    Shell.FlyoutBehavior="Disabled">
+    Shell.FlyoutBehavior="Flyout">
 
-    <ShellContent
-        Title="Test"
-        ContentTemplate="{DataTemplate views:TestPage}"
-        Route="TestPage" />
+    <FlyoutItem>
+        <ShellContent
+            Title="Test"
+            ContentTemplate="{DataTemplate views:TestPage}"
+            Route="TestPage" />
+    </FlyoutItem>
+
+    <FlyoutItem>
+        <ShellContent
+            Title="Test2"
+            ContentTemplate="{DataTemplate views:TestPage2}"
+            Route="TestPage" />
+    </FlyoutItem>
 
 </Shell>

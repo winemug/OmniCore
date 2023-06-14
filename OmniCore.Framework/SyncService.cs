@@ -14,42 +14,19 @@ namespace OmniCore.Services;
 public class SyncService : ISyncService
 {
     private IAmqpService _amqpService;
-    private IConfigurationStore _configurationStore;
     private Task _syncTask;
     private CancellationTokenSource _ctsSync;
     private AsyncAutoResetEvent _syncTriggerEvent;
     public SyncService(
         IAmqpService amqpService,
-        IConfigurationStore configurationStore,
         OcdbContext ocdbContext)
     {
         _amqpService = amqpService;
-        _configurationStore = configurationStore;
         _ctsSync = new CancellationTokenSource();
         _syncTriggerEvent = new AsyncAutoResetEvent(true);
     }
     public async Task Start()
     {
-        var cc = await _configurationStore.GetConfigurationAsync();
-
-        // await using var context = new OcdbContext();
-        //context.Database.ExecuteSql($"UPDATE [Pods] SET [IsSynced] = 0");
-        //context.Database.ExecuteSql($"UPDATE [PodActions] SET [IsSynced] = 0");
-
-        // var podsToSync = context.Pods.Where(p => !p.IsSynced).ToList();
-        // foreach (var pod in podsToSync)
-        // {
-        //     await _amqpService.PublishMessage(new AmqpMessage
-        //     {
-        //         Text = JsonSerializer.Serialize(new
-        //         {
-        //             type = "Pod",
-        //             data = pod
-        //         }),
-        //         Route = "sync",
-        //         OnPublishConfirmed = OnPodSynced(pod.PodId),
-        //     });
-        // }
         _syncTask = SyncTask(_ctsSync.Token);
     }
 
