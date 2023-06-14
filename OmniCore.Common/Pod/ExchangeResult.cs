@@ -1,5 +1,6 @@
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Radio;
+using OmniCore.Shared.Enums;
 
 namespace OmniCore.Services.Interfaces.Pod;
 
@@ -30,18 +31,6 @@ public class ExchangeResult
             this.ErrorText = errorText;
         return this;
     }
-}
-
-public enum AcceptanceType
-{
-    Accepted,
-    Inconclusive,
-    Ignored,
-    RejectedResyncRequired,
-    RejectedProtocolError,
-    RejectedNonceReseed,
-    RejectedErrorOccured,
-    RejectedFaultOccured,
 }
 
 public class BlePacketExchangeResult
