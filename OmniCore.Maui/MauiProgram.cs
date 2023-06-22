@@ -43,12 +43,11 @@ public static class MauiProgram
     public static MauiAppBuilder RegisterAppServices(this MauiAppBuilder mauiAppBuilder,
         IPlatformInfo platformInfo, IPlatformService platformService)
     {
-	    var vmvMapper = new ViewModelViewMapper();
 	    
-	    vmvMapper.AddMapping<TestPage, TestViewModel>(mauiAppBuilder);
-        vmvMapper.AddMapping<TestPage2, TestViewModel2>(mauiAppBuilder);
+        mauiAppBuilder.AddMapping<WelcomePage, WelcomeViewModel>();
+        mauiAppBuilder.AddMapping<TestPage, TestViewModel>();
+        mauiAppBuilder.AddMapping<TestPage2, TestViewModel2>();
 	    
-	    mauiAppBuilder.Services.AddSingleton(vmvMapper);
 	    mauiAppBuilder.Services.AddSingleton<AppShell>();
         mauiAppBuilder.Services.AddSingleton<IAppConfiguration, AppConfiguration>();
         

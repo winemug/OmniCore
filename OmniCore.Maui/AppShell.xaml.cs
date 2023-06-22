@@ -6,11 +6,11 @@ namespace OmniCore.Maui;
 
 public partial class AppShell : Shell
 {
-    private ViewModelViewMapper _mapper;
     private BaseViewModel _activeViewModel;
-    public AppShell(ViewModelViewMapper mapper)
+    private IServiceProvider _serviceProvider;
+    public AppShell(IServiceProvider serviceProvider)
     {
-        _mapper = mapper;
+        _serviceProvider = serviceProvider;
         InitializeComponent();
     }
     protected override async void OnNavigating(ShellNavigatingEventArgs args)
@@ -25,7 +25,8 @@ public partial class AppShell : Shell
     protected override async void OnNavigated(ShellNavigatedEventArgs args)
     {
         Debug.WriteLine($"OnNavigated");
-        _activeViewModel = _mapper.GetViewModel(CurrentPage.GetType(), Handler.MauiContext.Services);
+
+        _activeViewModel = _serviceProvider.GetViewModel(CurrentPage.GetType());
         await _activeViewModel.OnAppearing();
         CurrentPage.BindingContext = _activeViewModel;
     }

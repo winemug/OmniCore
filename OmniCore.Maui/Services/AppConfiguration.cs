@@ -31,26 +31,6 @@ public class AppConfiguration : IAppConfiguration
         set => Preferences.Set(nameof(ClientName), value);
     }
 
-    private ApiAuthorization? _authorization;
-    public ApiAuthorization? Authorization
-    {
-        get
-        {
-            if (_authorization == null)
-            {
-                var val = Preferences.Get(nameof(Authorization), null);
-                _authorization = JsonSerializerWrapper.TryDeserialize<ApiAuthorization>(val);
-            }
-            return _authorization;
-        }
-        set
-        {
-            _authorization = value;
-            var strVal = JsonSerializerWrapper.TrySerialize(value);
-            Preferences.Set(nameof(Authorization), strVal);
-        }
-    }
-
     private EndpointDefinition? _endpoint;
     public EndpointDefinition? Endpoint
     {

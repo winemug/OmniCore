@@ -1,10 +1,10 @@
 using OmniCore.Services.Interfaces.Amqp;
+using OmniCore.Shared.Api;
 
 namespace OmniCore.Common.Api;
 
 public interface IApiClient : IDisposable
 {
-    Task AuthorizeAccountAsync(string email, string password);
-    Task RegisterClientAsync();
-    Task<AmqpEndpoint> GetClientEndpointAsync();
+    Task<ClientRegistrationResponse?> RegisterClientAsync(ClientRegistrationRequest clientRegistrationRequest,
+        CancellationToken cancellationToken = default);
 }
