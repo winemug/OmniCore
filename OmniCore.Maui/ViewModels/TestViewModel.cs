@@ -1,72 +1,109 @@
 using System.Diagnostics;
 using System.Windows.Input;
-using Dapper;
 using OmniCore.Common.Api;
+using OmniCore.Framework.Omnipod.Requests;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Platform;
+using OmniCore.Services.Interfaces.Pod;
 
-namespace OmniCore.Maui.ViewModels
+namespace OmniCore.Maui.ViewModels;
+public class TestViewModel : BaseViewModel
 {
-    public class TestViewModel : BaseViewModel
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string ClientName { get; set; }
+    public ICommand NewPodCommand { get; set; }
+    public ICommand PrimeCommand { get; set; }
+    public ICommand StartCommand { get; set; }
+    public ICommand StopCommand { get; set; }
+
+    private IPlatformService _platformService;
+    private IPlatformInfo _platformInfo;
+    private IAmqpService _amqpService;
+    private IApiClient _apiClient;
+    private IPodService _podService;
+    private IRadioService _radioService;
+    private IAppConfiguration _appConfiguration;
+
+    public TestViewModel(
+        IAppConfiguration appConfiguration,
+        IPlatformService platformService,
+        IPlatformInfo platformInfo,
+        IAmqpService amqpService,
+        IApiClient apiClient,
+        IPodService podService,
+        IRadioService radioService)
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public ICommand SchlemmCommand { get; set; }
-        public ICommand FiskCommand { get; set; }
-        public ICommand CheckPermissionsCommand { get; set; }
-        
-        private IConfigurationStore _configurationStore;
-        private IPlatformService _platformService;
-        private IPlatformInfo _platformInfo;
-        private IAmqpService _amqpService;
-        public TestViewModel(IConfigurationStore configurationStore,
-            IPlatformService platformService,
-            IPlatformInfo platformInfo,
-            IAmqpService amqpService)
-        {
-            _configurationStore = configurationStore;
-            _platformService = platformService;
-            _platformInfo = platformInfo;
-            _amqpService = amqpService;
-            SchlemmCommand = new Command(async () => await ExecuteGo());
-            FiskCommand = new Command(async () => await ExecuteStop());
-            CheckPermissionsCommand = new Command(async () => await CheckPermissions());
-        }
+        _appConfiguration = appConfiguration;
+        _platformService = platformService;
+        _platformInfo = platformInfo;
+        _amqpService = amqpService;
+        _apiClient = apiClient;
+        _podService = podService;
+        _radioService = radioService;
 
-        private async Task CheckPermissions()
-        {
-            await _platformInfo.VerifyPermissions();
-        }
-        private async Task ExecuteGo()
-        {
-            var cc = await _configurationStore.GetConfigurationAsync();
-            using (var ac = new ApiClient(_configurationStore))
-            {
-                if (!cc.ClientId.HasValue)
-                {
-                    Debug.WriteLine($"Client registration");
-                    await ac.AuthorizeAccountAsync(Email, Password);
-                    await ac.RegisterClientAsync();
-                }
-            
-                Debug.WriteLine($"ClientId: {cc.ClientId}");
-                var erp = await ac.GetClientEndpointAsync();
-                _amqpService.Dsn = erp.dsn;
-                _amqpService.Exchange = erp.exchange;
-                _amqpService.Queue = erp.queue;
-                _amqpService.UserId = erp.user_id;
-            }
-            
-            _platformService.StartService();
-        }
+        StopCommand = new Command(async () => await ExecuteStop());
+        NewPodCommand = new Command(async () => await ExecuteNewPod());
+        PrimeCommand = new Command(async () => await ExecutePrime());
+        StartCommand = new Command(async () => await ExecuteStartPod());
+    }
 
-        private async Task ExecuteStop()
+    public override async ValueTask OnAppearing()
+    {
+        _platformService.StartService();
+    }
+ 
+    private async Task ExecuteStop()
+    {
+        _platformService.StopService();
+    }
+
+    private async Task ExecuteNewPod()
+    {
+        // newPodId = await _podService.NewPodAsync(200, MedicationType.Insulin);
+        await _podService.NewPodAsync(
+            Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
+            200,
+            MedicationType.Insulin);
+        // var pods = await _podService.GetPodsAsync();
+        // var pod = pods[1];
+        // using (var pc = await _podService.GetConnectionAsync(pod))
+        // {
+        //     await pc.Deactivate();
+        // }
+    }
+    
+    private async Task ExecutePrime()
+    {
+        var pods = await _podService.GetPodsAsync();
+        var pod = pods[0];
+        using (var pc = await _podService.GetConnectionAsync(pod))
         {
-            _platformService.StopService();
+            var now = DateTime.Now;
+            var res = await pc.PrimePodAsync(new DateOnly(now.Year, now.Month, now.Day),
+                new TimeOnly(now.Hour, now.Minute, now.Second),
+                true, CancellationToken.None);
         }
     }
+
+    private async Task ExecuteStartPod()
+    {
+        var pods = await _podService.GetPodsAsync();
+        var pod = pods[0];
+        using (var pc = await _podService.GetConnectionAsync(pod))
+        {
+            var now = DateTime.Now;
+            var basalRateTicks = new int[48];
+            for (int i = 0; i < 48; i++)
+                basalRateTicks[i] = 16;
+
+            var res = await pc.StartPodAsync(
+                new TimeOnly(now.Hour, now.Minute, now.Second), basalRateTicks);
+        }
+    }
+
 }

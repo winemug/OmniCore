@@ -4,13 +4,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Maui.Views.TestPage">
     <ContentPage.Content>
-        <VerticalStackLayout>
-            <Label>This is a test page</Label>
-            <Button Text="Check Permissions" Command="{Binding CheckPermissionsCommand}"/>
-            <Entry Text="{Binding Email}"/>
-            <Entry Text="{Binding Password}"/>
-            <Button Text="SCHLEMM" Command="{Binding SchlemmCommand}"/>
-            <Button Text="FISK" Command="{Binding FiskCommand}"/>
+        <VerticalStackLayout Spacing="48">
+            <Button Text="Stop" Command="{Binding StopCommand}"/>
+            <Button Text="New" Command="{Binding NewPodCommand}"/>
+            <Button Text="Prime" Command="{Binding PrimeCommand}"/>
+            <Button Text="Start" Command="{Binding StartCommand}"/>
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

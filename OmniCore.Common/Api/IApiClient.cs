@@ -5,6 +5,7 @@ namespace OmniCore.Common.Api;
 
 public interface IApiClient : IDisposable
 {
-    Task<ClientRegistrationResponse?> RegisterClientAsync(ClientRegistrationRequest clientRegistrationRequest,
-        CancellationToken cancellationToken = default);
+    Task<TResponse?> PostRequestAsync<TRequest, TResponse>(string route, TRequest request,
+        CancellationToken cancellationToken = default) where TResponse : ApiResponse;
+
 }

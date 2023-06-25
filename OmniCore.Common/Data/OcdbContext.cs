@@ -24,7 +24,7 @@ public class OcdbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite($"Data Source={DbPath}").EnableDetailedErrors(true).EnableSensitiveDataLogging(true);
+        options.UseSqlite($"Data Source={DbPath}"); //.EnableDetailedErrors(true).EnableSensitiveDataLogging(true);
     }
 }
     

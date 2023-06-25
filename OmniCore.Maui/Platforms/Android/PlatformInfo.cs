@@ -39,6 +39,11 @@ namespace OmniCore.Maui.Services
             return "";
         }
 
+        public string GetVersion()
+        {
+            return "1.0.0.0";
+        }
+
         //public PlatformInfo()
         //{
         //    Platform = "Android";

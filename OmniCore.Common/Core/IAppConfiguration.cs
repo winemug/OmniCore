@@ -2,15 +2,15 @@ namespace OmniCore.Services.Interfaces.Core;
 
 public interface IAppConfiguration
 {
+    string? AccountEmail { get; set; }
+    bool AccountVerified { get; set; }
     string ClientName { get; set; }
     Uri ApiAddress { get; }
-    EndpointDefinition? Endpoint { get; set; }
+    ClientAuthorization? ClientAuthorization { get; set; } 
 }
 
-public record EndpointDefinition
+public record ClientAuthorization
 {
     public Guid ClientId { get; init; }
-    public string Dsn { get; init; }
-    public string Queue { get; init; }
-    public string Exchange { get; init; }
+    public byte[] Token { get; init; }
 }

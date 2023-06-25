@@ -1,10 +1,9 @@
 using System.Text.Json;
 using OmniCore.Services.Interfaces.Core;
-using Microsoft.Maui.Storage;
 using OmniCore.Services.Interfaces.Platform;
 using OmniCore.Shared.Extensions;
 
-namespace OmniCore.Maui;
+namespace OmniCore.Maui.Services;
 
 public class AppConfiguration : IAppConfiguration
 {
@@ -15,10 +14,22 @@ public class AppConfiguration : IAppConfiguration
     }
     
 #if DEBUG
-    public Uri ApiAddress => new Uri("http://192.168.1.50:8000");
+    public Uri ApiAddress => new Uri("http://192.168.1.50:5097");
 #else
     public Uri ApiAddress => new Uri("https://api.balya.net:8080");
 #endif
+    public string? AccountEmail
+    {
+        get => Preferences.Get(nameof(AccountEmail), null);
+        set => Preferences.Set(nameof(AccountEmail), value);
+    }
+
+    public bool AccountVerified
+    {
+        get => Preferences.Get(nameof(AccountVerified), false);
+        set => Preferences.Set(nameof(AccountVerified), value);
+    }
+
     public string ClientName
     {
         get
@@ -30,25 +41,25 @@ public class AppConfiguration : IAppConfiguration
         }
         set => Preferences.Set(nameof(ClientName), value);
     }
-
-    private EndpointDefinition? _endpoint;
-    public EndpointDefinition? Endpoint
+    
+    private ClientAuthorization? _clientAuthorization;
+    public ClientAuthorization? ClientAuthorization
     {
         get
         {
-            if (_endpoint == null)
+            if (_clientAuthorization == null)
             {
-                var val = Preferences.Get(nameof(Endpoint), null);
-                _endpoint = JsonSerializerWrapper.TryDeserialize<EndpointDefinition>(val);
+                var val = Preferences.Get(nameof(ClientAuthorization), null);
+                _clientAuthorization = JsonSerializerWrapper.TryDeserialize<ClientAuthorization>(val);
             }
 
-            return _endpoint;
+            return _clientAuthorization;
         }
         set
         {
-            _endpoint = value;
+            _clientAuthorization = value;
             var strVal = JsonSerializerWrapper.TrySerialize(value);
-            Preferences.Set(nameof(Endpoint), strVal);
+            Preferences.Set(nameof(ClientAuthorization), strVal);
         }
     }
 }

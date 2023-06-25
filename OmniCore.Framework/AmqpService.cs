@@ -7,10 +7,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
+using OmniCore.Common.Api;
 using OmniCore.Services.Interfaces;
 using OmniCore.Services.Interfaces.Amqp;
 using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
+using OmniCore.Services.Interfaces.Platform;
+using OmniCore.Shared.Api;
 using Polly;
 using Polly.Timeout;
 using RabbitMQ.Client;
@@ -22,16 +25,24 @@ public class AmqpService : IAmqpService
 {
     private Task _amqpTask;
     private CancellationTokenSource _cts;
+    
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
     private readonly AsyncProducerConsumerQueue<Task> _confirmQueue;
 
     private ConcurrentBag<Func<AmqpMessage, Task<bool>>> _messageProcessors;
 
     private IAppConfiguration _appConfiguration;
-    private EndpointDefinition _endpoint;
-    public AmqpService(IAppConfiguration appConfiguration)
+    private IApiClient _apiClient;
+    private IPlatformInfo _platformInfo;
+
+    public AmqpService(IAppConfiguration appConfiguration,
+        IApiClient apiClient,
+        IPlatformInfo platformInfo)
     {
         _appConfiguration = appConfiguration;
+        _apiClient = apiClient;
+        _platformInfo = platformInfo;
+        
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _confirmQueue = new AsyncProducerConsumerQueue<Task>();
         _messageProcessors = new ConcurrentBag<Func<AmqpMessage, Task<bool>>>();
@@ -39,12 +50,8 @@ public class AmqpService : IAmqpService
 
     public async Task Start()
     {
-        if (_appConfiguration.Endpoint == null)
-            throw new ApplicationException("No endpoint information");
-
-        _endpoint = _appConfiguration.Endpoint;
         _cts = new CancellationTokenSource();
-        _amqpTask = Task.Run(async () => await AmqpTask(_cts.Token));
+        _amqpTask = Task.Run(async () => await StartJoin(_cts.Token));
     }
 
     public async Task Stop()
@@ -79,15 +86,52 @@ public class AmqpService : IAmqpService
         }
     }
 
-    private async Task AmqpTask(CancellationToken cancellationToken)
+    private async Task StartJoin(CancellationToken cancellationToken)
     {
+        while (_appConfiguration.ClientAuthorization == null)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+        }
+
+        AmqpEndpointDefinition? endpointDefinition = null;
+        while (true)
+        {
+            try
+            {
+                var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
+                    Routes.ClientJoinRequestRoute, new ClientJoinRequest
+                    {
+                        Id = _appConfiguration.ClientAuthorization.ClientId,
+                        Token = _appConfiguration.ClientAuthorization.Token,
+                        Version = _platformInfo.GetVersion(),
+                    }, cancellationToken);
+                if (result is { Success: true })
+                {
+                    endpointDefinition = new AmqpEndpointDefinition
+                    {
+                        Dsn = result.Dsn,
+                        Exchange = result.Exchange,
+                        Queue = result.Queue,
+                        UserId = result.Username
+                    };
+                    break;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+        }
+        
         var confirmationsTask = ConfirmationsTask(cancellationToken);
         while(true)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                await ConnectAndPublishLoop(cancellationToken);
+                await ConnectAndPublishLoop(endpointDefinition, cancellationToken);
             }
             catch(TaskCanceledException)
             {
@@ -119,11 +163,12 @@ public class AmqpService : IAmqpService
         }
     }
 
-    private async Task ConnectAndPublishLoop(CancellationToken cancellationToken)
+    private async Task ConnectAndPublishLoop(AmqpEndpointDefinition endpointDefinition,
+        CancellationToken cancellationToken)
     {
         var connectionFactory = new ConnectionFactory
         {
-            Uri = new Uri(_endpoint.Dsn),
+            Uri = new Uri(endpointDefinition.Dsn),
             DispatchConsumersAsync = true,
             AutomaticRecoveryEnabled = false,
         };
@@ -168,7 +213,7 @@ public class AmqpService : IAmqpService
             }
             await Task.Yield();
         };
-        subChannel.BasicConsume(_endpoint.Queue, false, consumer);
+        subChannel.BasicConsume(endpointDefinition.Queue, false, consumer);
         cancellationToken.ThrowIfCancellationRequested();
 
 
@@ -192,9 +237,10 @@ public class AmqpService : IAmqpService
                 try
                 {
                     var properties = pubChannel.CreateBasicProperties();
+                    properties.UserId = endpointDefinition.UserId;
                     var sequenceNo = pubChannel.NextPublishSeqNo;
                     Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                    pubChannel.BasicPublish(_endpoint.Exchange, message.Route, false,
+                    pubChannel.BasicPublish(endpointDefinition.Exchange, message.Route, false,
                         properties, Encoding.UTF8.GetBytes(message.Text));
                     pubChannel.WaitForConfirmsOrDie();
                     if (message.OnPublishConfirmed != null)

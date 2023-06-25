@@ -116,7 +116,7 @@ public class PodService : IPodService
         int unitsPerMilliliter,
         MedicationType medicationType)
     {
-        if (_appConfiguration.Authorization == null)
+        if (_appConfiguration.ClientAuthorization == null)
             throw new ApplicationException("Client not registered");
 
         using var ocdb = new OcdbContext();
@@ -126,7 +126,7 @@ public class PodService : IPodService
         var pod = new Pod
         {
             PodId = Guid.NewGuid(),
-            ClientId = _appConfiguration.Authorization.ClientId,
+            ClientId = _appConfiguration.ClientAuthorization.ClientId,
             ProfileId = profileId,
             RadioAddress = (uint)(b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]),
             UnitsPerMilliliter = unitsPerMilliliter,
@@ -150,7 +150,7 @@ public class PodService : IPodService
         uint serial
         )
     {
-        if (_appConfiguration.Authorization == null)
+        if (_appConfiguration.ClientAuthorization == null)
             throw new ApplicationException("Client not registered");
         
         using var ocdb = new OcdbContext();
@@ -160,7 +160,7 @@ public class PodService : IPodService
         var pod = new Pod
         {
             PodId = Guid.NewGuid(),
-            ClientId = _appConfiguration.Authorization.ClientId,
+            ClientId = _appConfiguration.ClientAuthorization.ClientId,
             ProfileId = profileId, 
             RadioAddress = radioAddress,
             UnitsPerMilliliter = unitsPerMilliliter,
@@ -185,7 +185,7 @@ public class PodService : IPodService
         IPodModel podModel,
         CancellationToken cancellationToken = default)
     {
-        if (_appConfiguration.Authorization == null)
+        if (_appConfiguration.ClientAuthorization == null)
             throw new ApplicationException("Client not registered");
         
         var radioConnection = await _radioService.GetIdealConnectionAsync(cancellationToken);
@@ -193,7 +193,7 @@ public class PodService : IPodService
             throw new ApplicationException("No radios available");
 
         var allocationLockDisposable = await _podLocks[podModel.Id].LockAsync(cancellationToken);
-        var clientId = _appConfiguration.Authorization.ClientId;
+        var clientId = _appConfiguration.ClientAuthorization.ClientId;
 
         return new PodConnection(
             clientId,
