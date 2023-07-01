@@ -1,0 +1,2 @@
+namespace OmniCore.Common.Pod;
+

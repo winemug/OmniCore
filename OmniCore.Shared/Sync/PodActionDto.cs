@@ -1,6 +1,6 @@
 using OmniCore.Shared.Enums;
 
-namespace OmniCore.Shared.Records;
+namespace OmniCore.Shared.Sync;
 
 public record PodActionDto
 {

@@ -1,6 +1,6 @@
-using OmniCore.Services.Interfaces.Pod;
+using OmniCore.Shared.Enums;
 
-namespace OmniCore.Shared.Records;
+namespace OmniCore.Shared.Sync;
 
 public record PodDto
 {

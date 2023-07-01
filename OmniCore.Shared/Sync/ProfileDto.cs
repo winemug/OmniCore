@@ -1,4 +1,4 @@
-namespace OmniCore.Shared.Records;
+namespace OmniCore.Shared.Sync;
 
 public record ProfileDto
 {

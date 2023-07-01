@@ -1,4 +1,4 @@
-namespace OmniCore.Services.Interfaces.Pod;
+namespace OmniCore.Shared.Enums;
 
 public enum MedicationType
 {
