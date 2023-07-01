@@ -2,7 +2,7 @@ using OmniCore.Common.Core;
 
 namespace OmniCore.Maui.ViewModels;
 
-public class PodViewModel : BaseViewModel
+public class PodViewModel
 {
     private IPodService _podService;
     

@@ -12,22 +12,48 @@ public class AppConfiguration : IAppConfiguration
     {
         _platformInfo = platformInfo;
     }
-    
+
+    public string ApiAddress
+    {
+        get
+        {
 #if DEBUG
-    public Uri ApiAddress => new Uri("http://192.168.1.50:5097");
+    var defaultAddress = "http://192.168.1.50:5097";
 #else
-    public Uri ApiAddress => new Uri("https://api.balya.net:8080");
+    var defaultAddress = "https://api.balya.net:8080";
 #endif
+            return Preferences.Get(nameof(ApiAddress), defaultAddress);
+        }
+        set
+        {
+            if (value != null)
+                Preferences.Set(nameof(ApiAddress), value);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+// #if DEBUG
+//     public Uri ApiAddress => new Uri("http://192.168.1.50:5097");
+// #else
+//     public Uri ApiAddress => new Uri("https://api.balya.net:8080");
+// #endif
     public string? AccountEmail
     {
         get => Preferences.Get(nameof(AccountEmail), null);
-        set => Preferences.Set(nameof(AccountEmail), value);
+        set
+        {
+            Preferences.Set(nameof(AccountEmail), value);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public bool AccountVerified
     {
         get => Preferences.Get(nameof(AccountVerified), false);
-        set => Preferences.Set(nameof(AccountVerified), value);
+        set
+        {
+            Preferences.Set(nameof(AccountVerified), value);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public string ClientName
@@ -39,7 +65,11 @@ public class AppConfiguration : IAppConfiguration
                 name = _platformInfo.GetUserName();
             return name;
         }
-        set => Preferences.Set(nameof(ClientName), value);
+        set
+        {
+            Preferences.Set(nameof(ClientName), value);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
     
     private ClientAuthorization? _clientAuthorization;
@@ -60,6 +90,8 @@ public class AppConfiguration : IAppConfiguration
             _clientAuthorization = value;
             var strVal = JsonSerializerWrapper.TrySerialize(value);
             Preferences.Set(nameof(ClientAuthorization), strVal);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
+    public event EventHandler? ConfigurationChanged;
 }

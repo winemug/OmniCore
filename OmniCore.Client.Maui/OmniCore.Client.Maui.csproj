@@ -63,11 +63,11 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Maui" Version="5.2.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
         <PackageReference Include="Polly" Version="7.2.4" />
     </ItemGroup>
@@ -75,6 +75,7 @@
     <ItemGroup>
       <ProjectReference Include="..\OmniCore.Client.Common\OmniCore.Client.Common.csproj" />
       <ProjectReference Include="..\OmniCore.Client.Framework\OmniCore.Client.Framework.csproj" />
+      <ProjectReference Include="..\OmniCore.Client.Model\OmniCore.Client.Model.csproj" />
     </ItemGroup>
 
     <ItemGroup>

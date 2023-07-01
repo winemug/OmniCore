@@ -16,7 +16,7 @@ public class ApiClient : IApiClient
         _appConfiguration = appConfiguration;
         _httpClient = new HttpClient
         {
-            BaseAddress = appConfiguration.ApiAddress
+            BaseAddress = new Uri(appConfiguration.ApiAddress, UriKind.Absolute)
         };
     }
     public async Task<TResponse?> PostRequestAsync<TRequest, TResponse>(string route, TRequest request,

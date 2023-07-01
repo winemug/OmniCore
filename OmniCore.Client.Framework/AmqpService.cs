@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Api;
@@ -14,56 +17,84 @@ using RabbitMQ.Client.Events;
 
 namespace OmniCore.Framework;
 
-public class AmqpService : IAmqpService
+public class AmqpService : BackgroundService, IAmqpService
 {
-    private Task _amqpTask;
-    private CancellationTokenSource _cts;
-    
     private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
     private readonly AsyncProducerConsumerQueue<Task?> _confirmQueue;
+    private readonly AsyncManualResetEvent _clientConfigured;
 
-    private ConcurrentBag<Func<AmqpMessage, Task<bool>>> _messageProcessors;
-
+    private readonly ILogger<AmqpService> _logger;
     private IAppConfiguration _appConfiguration;
     private IApiClient _apiClient;
     private IPlatformInfo _platformInfo;
 
-    public AmqpService(IAppConfiguration appConfiguration,
+    public event EventHandler<bool> ReadyStateChanged;
+
+    private bool _serviceReady;
+    public bool ServiceReady
+    {
+        get
+        {
+            return _serviceReady;
+        }
+        private set
+        {
+            _serviceReady = value;
+            ReadyStateChanged?.Invoke(this, value);
+        }
+    }
+
+    public AmqpService(
+        ILogger<AmqpService> logger,
+        IAppConfiguration appConfiguration,
         IApiClient apiClient,
         IPlatformInfo platformInfo)
     {
+        _serviceReady = false;
+        _clientConfigured = new AsyncManualResetEvent();
+        _logger = logger;
         _appConfiguration = appConfiguration;
         _apiClient = apiClient;
         _platformInfo = platformInfo;
         
         _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
         _confirmQueue = new AsyncProducerConsumerQueue<Task?>();
-        _messageProcessors = new ConcurrentBag<Func<AmqpMessage, Task<bool>>>();
     }
 
-    public async Task Start()
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _cts = new CancellationTokenSource();
-        _amqpTask = Task.Run(async () => await StartJoin(_cts.Token));
+        _appConfiguration.ConfigurationChanged += OnConfigurationChanged;
+        while (true)
+        {
+            try
+            {
+                await _clientConfigured.WaitAsync(stoppingToken);
+                var endpoint = await GetEndpoint(stoppingToken);
+                if (endpoint == null)
+                    throw new ApplicationException("Null received for endpoint definition");
+                await ConnectToEndpoint(endpoint, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in main loop");
+                await Task.Delay(5000, stoppingToken);
+            }
+        }
+        _appConfiguration.ConfigurationChanged -= OnConfigurationChanged;
     }
 
-    public async Task Stop()
+    private void OnConfigurationChanged(object? sender, EventArgs e)
     {
-        try
+        if (_appConfiguration.ClientAuthorization == null)
         {
-            _cts?.Cancel();
-            _amqpTask?.GetAwaiter().GetResult();
+            _clientConfigured.Reset();
+            return;
         }
-        catch (TaskCanceledException) { }
-        catch (Exception e)
-        {
-            Debug.WriteLine($"Error while cancelling core task: {e}");
-        }
-        finally
-        {
-            _cts?.Dispose();
-            _cts = null;
-        }
+        _clientConfigured.Set();
     }
 
     public async Task PublishMessage(AmqpMessage message)
@@ -79,45 +110,44 @@ public class AmqpService : IAmqpService
         }
     }
 
-    private async Task StartJoin(CancellationToken cancellationToken)
+    private async Task<AmqpEndpointDefinition?> GetEndpoint(CancellationToken cancellationToken)
     {
-        while (_appConfiguration.ClientAuthorization == null)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-        }
-
-        AmqpEndpointDefinition? endpointDefinition = null;
-        while (true)
-        {
-            try
-            {
-                var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
-                    Routes.ClientJoinRequestRoute, new ClientJoinRequest
-                    {
-                        Id = _appConfiguration.ClientAuthorization.ClientId,
-                        Token = _appConfiguration.ClientAuthorization.Token,
-                        Version = _platformInfo.GetVersion(),
-                    }, cancellationToken);
-                if (result is { Success: true })
-                {
-                    endpointDefinition = new AmqpEndpointDefinition
-                    {
-                        Dsn = result.Dsn,
-                        Exchange = result.Exchange,
-                        Queue = result.Queue,
-                        UserId = result.Username
-                    };
-                    break;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-        }
+        if (_appConfiguration.ClientAuthorization == null)
+            return null;
         
+        AmqpEndpointDefinition? endpointDefinition = null;
+        try
+        {
+            var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
+                Routes.ClientJoinRequestRoute, new ClientJoinRequest
+                {
+                    Id = _appConfiguration.ClientAuthorization.ClientId,
+                    Token = _appConfiguration.ClientAuthorization.Token,
+                    Version = _platformInfo.GetVersion(),
+                }, cancellationToken);
+            if (result is { Success: true })
+            {
+                endpointDefinition = new AmqpEndpointDefinition
+                {
+                    Dsn = result.Dsn,
+                    Exchange = result.Exchange,
+                    Queue = result.Queue,
+                    UserId = result.Username
+                };
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "while retrieving endpoint");
+            throw;
+        }
+        return endpointDefinition;
+    }
+
+    private async Task ConnectToEndpoint(
+        AmqpEndpointDefinition endpointDefinition,
+        CancellationToken cancellationToken)
+    {
         var confirmationsTask = ConfirmationsTask(cancellationToken);
         while(true)
         {
@@ -184,28 +214,36 @@ public class AmqpService : IAmqpService
         cancellationToken.ThrowIfCancellationRequested();
 
         using var subChannel = connection.CreateModel();
+
         var consumer = new AsyncEventingBasicConsumer(subChannel);
         consumer.Received += async (sender, ea) =>
         {
+            //TODO:
             var message = new AmqpMessage
             {
                 Body = ea.Body.ToArray(),
+                DeliveryTag = ea.DeliveryTag
             };
-            try
-            {
-                bool success = await ProcessMessage(message);
-                if (success)
-                    subChannel.BasicAck(ea.DeliveryTag, false);
-                else
-                    subChannel.BasicNack(ea.DeliveryTag, false, true);
-            }
-            catch (Exception e)
-            {
-                subChannel.BasicNack(ea.DeliveryTag, false, true);
-                Trace.WriteLine($"Message processing failed: {e}");
-            }
+
+            subChannel.BasicAck(ea.DeliveryTag, false);
             await Task.Yield();
+            //try
+            //{
+
+            //    bool success = await ProcessMessage(message);
+            //    if (success)
+            //        subChannel.BasicAck(ea.DeliveryTag, false);
+            //    else
+            //        subChannel.BasicNack(ea.DeliveryTag, false, true);
+            //}
+            //catch (Exception e)
+            //{
+            //    subChannel.BasicNack(ea.DeliveryTag, false, true);
+            //    Trace.WriteLine($"Message processing failed: {e}");
+            //}
+            //await Task.Yield();
         };
+
         subChannel.BasicConsume(endpointDefinition.Queue, false, consumer);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -236,10 +274,10 @@ public class AmqpService : IAmqpService
                     pubChannel.BasicPublish(endpointDefinition.Exchange, message.Route, false,
                         properties, Encoding.UTF8.GetBytes(message.Text));
                     pubChannel.WaitForConfirmsOrDie();
-                    if (message.OnPublishConfirmed != null)
-                    {
-                        await _confirmQueue.EnqueueAsync(message.OnPublishConfirmed);
-                    }
+                    //if (message.OnPublishConfirmed != null)
+                    //{
+                    //    await _confirmQueue.EnqueueAsync(message.OnPublishConfirmed);
+                    //}
                 }
                 catch
                 {
@@ -249,28 +287,5 @@ public class AmqpService : IAmqpService
             }
             await Task.Yield();
         }
-    }
-
-    private async Task<bool> ProcessMessage(AmqpMessage message)
-    {
-        Debug.WriteLine($"Incoming amqp message: {message.Text}");
-        var processed = false;
-        foreach (var pf in _messageProcessors)
-        {
-            try
-            {
-                processed = await pf(message);
-            }
-            catch (Exception e)
-            {
-                Trace.Write($"Error while processing {e}");
-            }
-        }
-        return processed;
-    }
-    
-    public void RegisterMessageProcessor(Func<AmqpMessage, Task<bool>> function)
-    {
-        _messageProcessors.Add(function);
     }
 }

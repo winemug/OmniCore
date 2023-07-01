@@ -5,8 +5,9 @@ public interface IAppConfiguration
     string? AccountEmail { get; set; }
     bool AccountVerified { get; set; }
     string ClientName { get; set; }
-    Uri ApiAddress { get; }
-    ClientAuthorization? ClientAuthorization { get; set; } 
+    string ApiAddress { get; set; }
+    ClientAuthorization? ClientAuthorization { get; set; }
+    event EventHandler ConfigurationChanged;
 }
 
 public record ClientAuthorization

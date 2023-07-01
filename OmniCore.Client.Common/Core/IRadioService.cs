@@ -2,7 +2,7 @@ using OmniCore.Common.Radio;
 
 namespace OmniCore.Common.Core;
 
-public interface IRadioService : ICoreService
+public interface IRadioService
 {
     Task<IRadioConnection> GetIdealConnectionAsync(
         CancellationToken cancellationToken = default);

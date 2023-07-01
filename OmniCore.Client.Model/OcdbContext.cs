@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using OmniCore.Shared.Enums;
 
-namespace OmniCore.Common.Data;
+namespace OmniCore.Client.Model;
 
 public class OcdbContext : DbContext
 {
@@ -21,9 +21,13 @@ public class OcdbContext : DbContext
         DbPath = Path.Join(path, "ocefcore.sqlite");
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    protected override async void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite($"Data Source={DbPath}"); //.EnableDetailedErrors(true).EnableSensitiveDataLogging(true);
+        options.UseSqlite($"Data Source={DbPath}");
+#if DEBUG
+        options.EnableDetailedErrors(true).EnableSensitiveDataLogging(true);
+#endif
+        await Database.EnsureCreatedAsync();
     }
 }
     

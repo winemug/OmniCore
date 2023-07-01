@@ -3,7 +3,7 @@ using OmniCore.Common.Platform;
 
 namespace OmniCore.Maui.ViewModels;
 
-public class SetupPermissionsModel : BaseViewModel
+public class SetupPermissionsModel
 {
     private IPlatformService _platformService;
     private IPlatformInfo _platformInfo;

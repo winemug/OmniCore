@@ -6,7 +6,7 @@ using OmniCore.Common.Platform;
 using OmniCore.Shared.Api;
 
 namespace OmniCore.Maui.ViewModels;
-public partial class TestViewModel2 : BaseViewModel
+public partial class TestViewModel2
 {
     private IAppConfiguration _appConfiguration;
     private IPlatformService _platformService;

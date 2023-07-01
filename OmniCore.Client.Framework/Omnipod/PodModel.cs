@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using OmniCore.Common.Data;
+using OmniCore.Client.Model;
 using OmniCore.Common.Entities;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod.Responses;

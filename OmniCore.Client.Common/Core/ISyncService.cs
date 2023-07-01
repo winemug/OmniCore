@@ -1,6 +1,6 @@
 namespace OmniCore.Common.Core;
 
-public interface ISyncService : ICoreService
+public interface ISyncService
 {
     void TriggerSync();
 }

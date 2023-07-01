@@ -11,33 +11,37 @@ namespace OmniCore.Maui
     public class AndroidForegroundService : Service
     {
         private bool _isStarted;
+
         private Task _startingTask = null;
         private Task _stoppingTask = null;
         private void Start()
         {
-            lock (this)
-            {
-                if ((_startingTask == null || !_startingTask.IsCompletedSuccessfully) &&
-                    (_stoppingTask == null || _stoppingTask.IsCompletedSuccessfully))
-                {
-                    var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
-                    _stoppingTask = null;
-                    _startingTask = coreService.Start();
-                }
-            }
+            // TODO:
+            //lock (this)
+            //{
+            //    if ((_startingTask == null || !_startingTask.IsCompletedSuccessfully) &&
+            //        (_stoppingTask == null || _stoppingTask.IsCompletedSuccessfully))
+            //    {
+            //        var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
+            //        _stoppingTask = null;
+            //        _startingTask = coreService.Start();
+            //    }
+            //}
         }
 
         private void Stop()
         {
-            lock (this)
-            {
-                if (_stoppingTask == null && _startingTask != null && _startingTask.IsCompletedSuccessfully)
-                {
-                    var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
-                    _startingTask = null;
-                    _stoppingTask = coreService.Stop();
-                }
-            }
+            // TODO:
+
+            //lock (this)
+            //{
+            //    if (_stoppingTask == null && _startingTask != null && _startingTask.IsCompletedSuccessfully)
+            //    {
+            //        var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
+            //        _startingTask = null;
+            //        _stoppingTask = coreService.Stop();
+            //    }
+            //}
         }
 
         public override IBinder OnBind(Intent intent)

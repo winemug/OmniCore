@@ -6,7 +6,7 @@ using OmniCore.Common.Platform;
 using OmniCore.Shared.Enums;
 
 namespace OmniCore.Maui.ViewModels;
-public class TestViewModel : BaseViewModel
+public class TestViewModel
 {
     public string Email { get; set; }
     public string Password { get; set; }
@@ -47,11 +47,6 @@ public class TestViewModel : BaseViewModel
         StartCommand = new Command(async () => await ExecuteStartPod());
     }
 
-    public override async ValueTask OnAppearing()
-    {
-        _platformService.StartService();
-    }
- 
     private async Task ExecuteStop()
     {
         _platformService.StopService();

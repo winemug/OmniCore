@@ -1,15 +1,16 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Microsoft.Extensions.Hosting;
 using Nito.AsyncEx;
+using OmniCore.Client.Model;
 using OmniCore.Common.Core;
-using OmniCore.Common.Data;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod;
 using OmniCore.Shared.Enums;
 
 namespace OmniCore.Framework;
 
-public class PodService : IPodService
+public class PodService : BackgroundService, IPodService
 {
     private IRadioService _radioService;
     private ISyncService _syncService;
@@ -17,6 +18,10 @@ public class PodService : IPodService
     
     private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
     private List<IPodModel> _podModels;
+
+    public event EventHandler<bool> ReadyStateChanged;
+
+    public bool ServiceReady => throw new NotImplementedException();
 
     public PodService(
         IRadioService radioService,
@@ -26,6 +31,12 @@ public class PodService : IPodService
         _radioService = radioService;
         _appConfiguration = appConfiguration;
         _syncService = syncService;
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        //TODO:
+        throw new NotImplementedException();
     }
 
     public async Task Start()

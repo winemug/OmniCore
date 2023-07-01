@@ -4,7 +4,7 @@ using OmniCore.Shared.Enums;
 
 namespace OmniCore.Common.Core;
 
-public interface IPodService : ICoreService
+public interface IPodService
 {
     Task<Guid> NewPodAsync(
         Guid profileId,

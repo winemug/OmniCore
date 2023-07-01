@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Nito.AsyncEx;
+using OmniCore.Client.Model;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
-using OmniCore.Common.Data;
 
 namespace OmniCore.Framework;
 
@@ -13,9 +13,13 @@ public class SyncService : ISyncService
     private Task _syncTask;
     private CancellationTokenSource _ctsSync;
     private AsyncAutoResetEvent _syncTriggerEvent;
+
+    public event EventHandler<bool> ReadyStateChanged;
+
+    public bool ServiceReady => throw new NotImplementedException();
+
     public SyncService(
-        IAmqpService amqpService,
-        OcdbContext ocdbContext)
+        IAmqpService amqpService)
     {
         _amqpService = amqpService;
         _ctsSync = new CancellationTokenSource();
@@ -62,7 +66,7 @@ public class SyncService : ISyncService
                         data = pod
                     }),
                     Route = "sync",
-                    OnPublishConfirmed = OnPodSynced(pod.PodId),
+                    //OnPublishConfirmed = OnPodSynced(pod.PodId),
                 });
                 await Task.Yield();
             }
@@ -78,7 +82,7 @@ public class SyncService : ISyncService
                         data = podAction
                     }),
                     Route = "sync",
-                    OnPublishConfirmed = OnPodActionSynced(podAction.PodId, podAction.Index),
+                    //OnPublishConfirmed = OnPodActionSynced(podAction.PodId, podAction.Index),
                 });
                 await Task.Yield();
             }
@@ -110,5 +114,15 @@ public class SyncService : ISyncService
             podAction.IsSynced = true;
             await context.SaveChangesAsync();
         }
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

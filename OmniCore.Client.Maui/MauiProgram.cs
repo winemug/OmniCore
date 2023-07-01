@@ -1,11 +1,17 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using OmniCore.Common.Api;
-using OmniCore.Common.Data;
+using OmniCore.Common.Core;
 using OmniCore.Common.Platform;
+using OmniCore.Common.Pod;
+using OmniCore.Common.Radio;
+using OmniCore.Framework;
+using OmniCore.Framework.Api;
+using OmniCore.Framework.Ble;
+using OmniCore.Framework.Omnipod;
 using OmniCore.Maui.Services;
 using OmniCore.Maui.ViewModels;
-using OmniCore.Maui.Views;
+
 
 namespace OmniCore.Maui;
 
@@ -13,22 +19,39 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        return CreateMauiApp(null, null);
-    }
-
-    public static MauiApp CreateMauiApp(IPlatformInfo platformInfo, IPlatformService platformService)
-    {
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .RegisterAppServices()
-            .RegisterPlatformServices()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+        
+        builder.Services
+            .AddSingleton<CoreNavigationService>()
+            .AddTransient<SetupPermissionsModel>()
+            .AddTransient<TestViewModel>()
+            .AddTransient<TestViewModel2>()
+	        
+            .AddSingleton<AppShell>()
+
+            .AddSingleton<IAppConfiguration, AppConfiguration>()
+
+            //.AddSingleton<IPodService, PodService>()
+            //.AddSingleton<IRadioService, RadioService>()
+            .AddSingleton<IAmqpService, AmqpService>()
+            //.AddSingleton<ISyncService, SyncService>()
+            
+            .AddTransient<IRadio, Radio>()
+            .AddTransient<IRadioConnection, RadioConnection >()
+            .AddTransient<IPodModel, PodModel>()
+            .AddTransient<IPodConnection, PodConnection>()
+            .AddTransient<IPodPacket, PodPacket>()
+            .AddTransient<IApiClient, ApiClient>();
+
+        builder.RegisterPlatformServices();
 
 #if DEBUG
         builder.Logging.AddDebug();

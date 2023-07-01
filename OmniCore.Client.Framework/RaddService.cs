@@ -12,7 +12,11 @@ public class RaddService : IRaddService
     private IPodService _podService;
     private IAmqpService _amqpService;
     private IRadioService _radioService;
-    
+
+    public event EventHandler<bool> ReadyStateChanged;
+
+    public bool ServiceReady => throw new NotImplementedException();
+
     public RaddService(
         IPodService podService,
         IAmqpService amqpService,
@@ -25,7 +29,8 @@ public class RaddService : IRaddService
 
     public async Task Start()
     {
-        _amqpService.RegisterMessageProcessor(ProcessMessageAsync);
+        //TODO:
+        //_amqpService.RegisterMessageProcessor(ProcessMessageAsync);
     }
 
     public async Task Stop()
@@ -197,6 +202,16 @@ public class RaddService : IRaddService
 
         return true;
         
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }
 
