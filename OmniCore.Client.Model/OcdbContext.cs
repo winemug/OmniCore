@@ -8,11 +8,12 @@ namespace OmniCore.Client.Model;
 
 public class OcdbContext : DbContext
 {
-    public DbSet<Account> Accounts { get; set; } = null!;
+    //public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<Client> Clients { get; set; } = null!;
     public DbSet<Profile> Profiles { get; set; } = null!;
     public DbSet<Pod> Pods { get; set; } = null!;
     public DbSet<PodAction> PodActions { get; set; } = null!;
+    public DbSet<Radio> Radios { get; set; } = null!;
     public string DbPath { get; }
     public OcdbContext()
     {
@@ -31,27 +32,27 @@ public class OcdbContext : DbContext
     }
 }
     
-public class Account
-{
-    public Guid AccountId { get; set; }
-    public string? Name { get; set; }
-    public string? Country { get; set; }
-    public string? Phone { get; set; }
-    public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
-    public bool IsSynced { get; set; }
-}
+// public class Account
+// {
+//     public Guid AccountId { get; set; }
+//     public string? Name { get; set; }
+//     public string? Country { get; set; }
+//     public string? Phone { get; set; }
+//     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+//     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
+//     public bool IsSynced { get; set; }
+// }
 
 public class Client
 {
     public Guid ClientId { get; set; }
-    public Guid AccountId { get; set; }
+    // public Guid AccountId { get; set; }
     public string Name { get; set; }
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
     public bool IsDeleted { get; set; }
     public bool IsSynced { get; set; }
-    public Account Account { get; set; }
+    //public Account Account { get; set; }
 }
 
 public class Profile
@@ -63,7 +64,7 @@ public class Profile
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
     public bool IsDeleted { get; set; }
     public bool IsSynced { get; set; }
-    public Account Account { get; set; }
+    //public Account Account { get; set; }
 }
 
 public class Pod
@@ -82,7 +83,7 @@ public class Pod
     public DateTimeOffset? Removed { get; set; }
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
     public bool IsSynced { get; set; }
-    public List<PodAction> Actions { get; set; }
+    //public List<PodAction> Actions { get; set; }
 }
 
 
@@ -98,4 +99,13 @@ public class PodAction
     public byte[]? ReceivedData { get; set; }
     public AcceptanceType Result { get; set; }
     public bool IsSynced { get; set; }
+}
+
+public class Radio
+{
+    public Guid RadioId { get; set; }
+    
+    public Guid Mac { get; set; }
+    
+    public string Name { get; set; }
 }

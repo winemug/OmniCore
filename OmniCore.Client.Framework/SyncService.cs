@@ -58,7 +58,7 @@ public class SyncService : ISyncService
             foreach (var pod in podsToSync)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await _amqpService.PublishMessage(new AmqpMessage
+                _amqpService.PublishMessage(new AmqpMessage
                 {
                     Text = JsonSerializer.Serialize(new
                     {
@@ -74,7 +74,7 @@ public class SyncService : ISyncService
             foreach (var podAction in podActionsToSync)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await _amqpService.PublishMessage(new AmqpMessage
+                _amqpService.PublishMessage(new AmqpMessage
                 {
                     Text = JsonSerializer.Serialize(new
                     {

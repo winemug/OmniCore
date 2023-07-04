@@ -84,7 +84,7 @@ public class RaddService : IRaddService
                                     success = false
                                 })
                         };
-                        await _amqpService.PublishMessage(msg);
+                        _amqpService.PublishMessage(msg);
                         return true;
                     }
 
@@ -109,7 +109,7 @@ public class RaddService : IRaddService
                         success = true
                     })
             };
-            await _amqpService.PublishMessage(podsmsg);
+            _amqpService.PublishMessage(podsmsg);
             return true;
         }
         
@@ -198,7 +198,7 @@ public class RaddService : IRaddService
             delivered = pod?.StatusModel?.PulsesDelivered
         };
         var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp) };
-        await _amqpService.PublishMessage(respMessage);
+        _amqpService.PublishMessage(respMessage);
 
         return true;
         

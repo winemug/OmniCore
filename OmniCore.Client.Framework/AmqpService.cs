@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Nito.AsyncEx;
+using Microsoft.VisualStudio.Threading;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Api;
 using OmniCore.Common.Core;
@@ -19,8 +20,10 @@ namespace OmniCore.Framework;
 
 public class AmqpService : BackgroundService, IAmqpService
 {
-    private readonly AsyncProducerConsumerQueue<AmqpMessage> _publishQueue;
-    private readonly AsyncProducerConsumerQueue<Task?> _confirmQueue;
+    private readonly AsyncQueue<AmqpMessage> _pendingPublish;
+    private readonly AsyncQueue<AmqpMessage> _pendingNotifyPublished;
+
+    private readonly AsyncManualResetEvent _publishRequested;
     private readonly AsyncManualResetEvent _clientConfigured;
 
     private readonly ILogger<AmqpService> _logger;
@@ -28,37 +31,21 @@ public class AmqpService : BackgroundService, IAmqpService
     private IApiClient _apiClient;
     private IPlatformInfo _platformInfo;
 
-    public event EventHandler<bool> ReadyStateChanged;
-
-    private bool _serviceReady;
-    public bool ServiceReady
-    {
-        get
-        {
-            return _serviceReady;
-        }
-        private set
-        {
-            _serviceReady = value;
-            ReadyStateChanged?.Invoke(this, value);
-        }
-    }
-
     public AmqpService(
         ILogger<AmqpService> logger,
         IAppConfiguration appConfiguration,
         IApiClient apiClient,
         IPlatformInfo platformInfo)
     {
-        _serviceReady = false;
+        _publishRequested = new AsyncManualResetEvent();
         _clientConfigured = new AsyncManualResetEvent();
         _logger = logger;
         _appConfiguration = appConfiguration;
         _apiClient = apiClient;
         _platformInfo = platformInfo;
         
-        _publishQueue = new AsyncProducerConsumerQueue<AmqpMessage>();
-        _confirmQueue = new AsyncProducerConsumerQueue<Task?>();
+        _pendingPublish = new AsyncQueue<AmqpMessage>();
+        _pendingNotifyPublished = new AsyncQueue<AmqpMessage>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -81,7 +68,7 @@ public class AmqpService : BackgroundService, IAmqpService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in main loop");
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(30000, stoppingToken);
             }
         }
         _appConfiguration.ConfigurationChanged -= OnConfigurationChanged;
@@ -97,17 +84,9 @@ public class AmqpService : BackgroundService, IAmqpService
         _clientConfigured.Set();
     }
 
-    public async Task PublishMessage(AmqpMessage message)
+    public void PublishMessage(AmqpMessage message)
     {
-        try
-        {
-            await _publishQueue.EnqueueAsync(message);
-        }
-        catch (Exception e)
-        {
-            Trace.WriteLine($"Error enqueuing message {e}");
-            throw;
-        }
+        _pendingPublish.Enqueue(message);
     }
 
     private async Task<AmqpEndpointDefinition?> GetEndpoint(CancellationToken cancellationToken)
@@ -148,7 +127,6 @@ public class AmqpService : BackgroundService, IAmqpService
         AmqpEndpointDefinition endpointDefinition,
         CancellationToken cancellationToken)
     {
-        var confirmationsTask = ConfirmationsTask(cancellationToken);
         while(true)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -158,7 +136,6 @@ public class AmqpService : BackgroundService, IAmqpService
             }
             catch(TaskCanceledException)
             {
-                await confirmationsTask;
                 throw;
             }
             catch(Exception e)
@@ -166,23 +143,6 @@ public class AmqpService : BackgroundService, IAmqpService
                 Trace.WriteLine($"Error while connectandpublish: {e.Message}");
                 await Task.Delay(5000);
             }
-        }
-    }
-
-    private async Task ConfirmationsTask(CancellationToken cancellationToken)
-    {
-        while(await _confirmQueue.OutputAvailableAsync(cancellationToken))
-        {
-            var confirmTask = await _confirmQueue.DequeueAsync(cancellationToken);
-            try
-            {
-                await confirmTask;
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine($"Error in user function handling publish confirmation: {e.Message}");
-            }
-            await Task.Yield();
         }
     }
 
@@ -215,77 +175,80 @@ public class AmqpService : BackgroundService, IAmqpService
 
         using var subChannel = connection.CreateModel();
 
-        var consumer = new AsyncEventingBasicConsumer(subChannel);
-        consumer.Received += async (sender, ea) =>
-        {
-            //TODO:
-            var message = new AmqpMessage
-            {
-                Body = ea.Body.ToArray(),
-                DeliveryTag = ea.DeliveryTag
-            };
-
-            subChannel.BasicAck(ea.DeliveryTag, false);
-            await Task.Yield();
-            //try
-            //{
-
-            //    bool success = await ProcessMessage(message);
-            //    if (success)
-            //        subChannel.BasicAck(ea.DeliveryTag, false);
-            //    else
-            //        subChannel.BasicNack(ea.DeliveryTag, false, true);
-            //}
-            //catch (Exception e)
-            //{
-            //    subChannel.BasicNack(ea.DeliveryTag, false, true);
-            //    Trace.WriteLine($"Message processing failed: {e}");
-            //}
-            //await Task.Yield();
-        };
-
+        var consumer = new AmqpConsumer();
         subChannel.BasicConsume(endpointDefinition.Queue, false, consumer);
         cancellationToken.ThrowIfCancellationRequested();
 
-
-        while (true)
+        if (!_pendingPublish.IsEmpty)
+            _publishRequested.Set();
+        
+        while(true)
         {
-            var result = false;
-            try
+            while (true)
             {
-                result = await Policy.TimeoutAsync(30)
-                    .ExecuteAsync((t) => _publishQueue.OutputAvailableAsync(t), cancellationToken);
+                await _publishRequested.WaitAsync(cancellationToken);
+                _publishRequested.Reset();
+                await Task.Delay(3000, cancellationToken);
+                if (!_publishRequested.IsSet || _pendingPublish.Count > 10)
+                    break;
             }
-            catch (TimeoutRejectedException ex) { }
 
-            if (!connection.IsOpen)
-                break;
-
-            if (result)
+            var published = new List<AmqpMessage>(_pendingPublish.Count);
+            while (!_pendingPublish.IsEmpty)
             {
-                var message = await _publishQueue.DequeueAsync(cancellationToken);
-                // cancellation ignored below this point
+                var message = await _pendingPublish.DequeueAsync(cancellationToken);
                 try
                 {
                     var properties = pubChannel.CreateBasicProperties();
-                    properties.UserId = endpointDefinition.UserId;
+                    properties.UserId = message.UserId;
                     var sequenceNo = pubChannel.NextPublishSeqNo;
                     Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
-                    pubChannel.BasicPublish(endpointDefinition.Exchange, message.Route, false,
+                    pubChannel.BasicPublish(message.Exchange, message.Route, false,
                         properties, Encoding.UTF8.GetBytes(message.Text));
-                    pubChannel.WaitForConfirmsOrDie();
-                    //if (message.OnPublishConfirmed != null)
-                    //{
-                    //    await _confirmQueue.EnqueueAsync(message.OnPublishConfirmed);
-                    //}
+                    message.Sequence = sequenceNo;
+                    published.Add(message);
                 }
                 catch
                 {
-                    await _publishQueue.EnqueueAsync(message);
+                    _pendingPublish.Enqueue(message);
                     throw;
                 }
             }
-            await Task.Yield();
+
+            try
+            {
+                pubChannel.WaitForConfirmsOrDie();
+            }
+            catch (Exception)
+            {
+                foreach(var msg in published)
+                    _pendingPublish.Enqueue(msg);
+                throw;
+            }
+            
+            foreach(var msg in published)
+                _pendingNotifyPublished.Enqueue(msg);
         }
+    }
+}
+public class AmqpConsumer : AsyncDefaultBasicConsumer
+{
+    public override async Task HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, ReadOnlyMemory<byte> body)
+    {
+        var message = new AmqpMessage
+        {
+            Tag = deliveryTag,
+            Route = routingKey,
+            UserId = properties.UserId,
+            Body = body.ToArray()
+        };
+
+        //TODO: process
+        message.Acknowledge = true;
+        //
+        if (message.Acknowledge)
+            Model.BasicAck(message.Tag, false);
+        else
+            Model.BasicNack(message.Tag, false, true);
     }
 }

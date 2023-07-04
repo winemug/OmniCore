@@ -4,5 +4,5 @@ namespace OmniCore.Common.Core;
 
 public interface IAmqpService
 {
-    Task PublishMessage(AmqpMessage message);
+    void PublishMessage(AmqpMessage message);
 }
