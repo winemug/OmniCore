@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Hosting;
+using Microsoft.VisualStudio.Threading;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
 using OmniCore.Common.Pod;
@@ -7,15 +9,11 @@ using OmniCore.Framework.Omnipod;
 
 namespace OmniCore.Framework;
 
-public class RaddService : IRaddService
+public class RaddService : BackgroundService, IRaddService
 {
     private IPodService _podService;
     private IAmqpService _amqpService;
     private IRadioService _radioService;
-
-    public event EventHandler<bool> ReadyStateChanged;
-
-    public bool ServiceReady => throw new NotImplementedException();
 
     public RaddService(
         IPodService podService,
@@ -27,15 +25,9 @@ public class RaddService : IRaddService
         _radioService = radioService;
     }
 
-    public async Task Start()
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //TODO:
-        //_amqpService.RegisterMessageProcessor(ProcessMessageAsync);
-    }
-
-    public async Task Stop()
-    {
-        throw new NotImplementedException();
+        await stoppingToken.WaitHandle;
     }
 
     public async Task<bool> ProcessMessageAsync(AmqpMessage message)
@@ -202,16 +194,6 @@ public class RaddService : IRaddService
 
         return true;
         
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }
 

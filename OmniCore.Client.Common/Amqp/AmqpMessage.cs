@@ -4,9 +4,10 @@ namespace OmniCore.Common.Amqp;
 
 public class AmqpMessage
 {
+    public DateTimeOffset? DeferToLatest { get; set; }
+    public ulong PublishSequence { get; set; }
+    public Func<Task>? WhenPublished { get; set; }
     public ulong Tag { get; set; }
-    public bool Acknowledge { get; set; }
-    public ulong Sequence { get; set; }
     public string? Exchange { get; set; }
     public string? Queue { get; set; }
     public string? Route { get; set; } = "";

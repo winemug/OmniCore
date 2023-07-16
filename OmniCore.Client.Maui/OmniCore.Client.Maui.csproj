@@ -11,10 +11,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!-- Display name -->
-        <ApplicationTitle>OmniCore.Maui</ApplicationTitle>
+        <ApplicationTitle>OmniCore</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.omnicore.maui</ApplicationId>
+        <ApplicationId>net.balya.omnicore.maui</ApplicationId>
         <ApplicationIdGuid>473EECF0-4EAF-4DF9-A5D4-1350F91AB9BF</ApplicationIdGuid>
 
         <!-- Versions -->

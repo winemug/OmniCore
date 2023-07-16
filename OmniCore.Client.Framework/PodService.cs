@@ -1,8 +1,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualStudio.Threading;
 using Nito.AsyncEx;
 using OmniCore.Client.Model;
+using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod;
@@ -14,31 +16,35 @@ public class PodService : BackgroundService, IPodService
 {
     private IRadioService _radioService;
     private ISyncService _syncService;
+    private readonly IAmqpService _amqpService;
     private IAppConfiguration _appConfiguration;
     
     private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
     private List<IPodModel> _podModels;
 
-    public event EventHandler<bool> ReadyStateChanged;
-
-    public bool ServiceReady => throw new NotImplementedException();
-
     public PodService(
         IRadioService radioService,
         IAppConfiguration appConfiguration,
-        ISyncService syncService)
+        ISyncService syncService,
+        IAmqpService amqpService)
     {
         _radioService = radioService;
         _appConfiguration = appConfiguration;
         _syncService = syncService;
+        _amqpService = amqpService;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //TODO:
-        throw new NotImplementedException();
+        _amqpService.RegisterMessageHandler(HandleMessageAsync);
+        await stoppingToken.WaitHandle;
     }
-
+    
+    private async Task<bool> HandleMessageAsync(AmqpMessage message)
+    {
+        return false;
+    }
+    
     public async Task Start()
     {
         // TODO: fix starting

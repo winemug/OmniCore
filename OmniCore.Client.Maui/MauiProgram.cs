@@ -40,10 +40,14 @@ public static class MauiProgram
             .AddSingleton<IAppConfiguration, AppConfiguration>()
 
             //.AddSingleton<IPodService, PodService>()
-            //.AddSingleton<IRadioService, RadioService>()
+
+            .AddSingleton<IRadioService, RadioService>()
             .AddSingleton<IAmqpService, AmqpService>()
-            //.AddSingleton<ISyncService, SyncService>()
-            
+            .AddSingleton<ISyncService, SyncService>()
+            .AddHostedService<AmqpService>(serviceProvider => (AmqpService)serviceProvider.GetService<IAmqpService>())
+            .AddHostedService<SyncService>(serviceProvider => (SyncService)serviceProvider.GetService<ISyncService>())
+            .AddHostedService<RadioService>(serviceProvider => (RadioService)serviceProvider.GetService<IRadioService>())
+
             .AddTransient<IRadio, Radio>()
             .AddTransient<IRadioConnection, RadioConnection >()
             .AddTransient<IPodModel, PodModel>()

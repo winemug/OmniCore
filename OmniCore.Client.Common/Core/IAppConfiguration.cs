@@ -1,3 +1,5 @@
+using OmniCore.Common.Amqp;
+
 namespace OmniCore.Common.Core;
 
 public interface IAppConfiguration
@@ -7,6 +9,7 @@ public interface IAppConfiguration
     string ClientName { get; set; }
     string ApiAddress { get; set; }
     ClientAuthorization? ClientAuthorization { get; set; }
+    AmqpEndpointDefinition? Endpoint { get; set; }
     event EventHandler ConfigurationChanged;
 }
 

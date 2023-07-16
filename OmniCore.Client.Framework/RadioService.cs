@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualStudio.Threading;
 using Nito.AsyncEx;
 using OmniCore.Common.Core;
 using OmniCore.Common.Radio;
@@ -15,9 +16,6 @@ public class RadioService : BackgroundService, IRadioService
     private Dictionary<Guid, AsyncLock> _radioLocks;
     private Dictionary<Guid, IDevice?> _radioDevices;
     private List<Radio> _radios;
-
-    public event EventHandler<bool> ReadyStateChanged;
-
     public RadioService()
     {
         _radioLocks = new Dictionary<Guid, AsyncLock>();
@@ -30,27 +28,26 @@ public class RadioService : BackgroundService, IRadioService
         var ble = CrossBluetoothLE.Current;
         var adapter = ble.Adapter;
         
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            ble.StateChanged += BleOnStateChanged;
-            adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
-            adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
-            adapter.DeviceDisconnected += AdapterOnDeviceDisconnected;
+        ble.StateChanged += BleOnStateChanged;
+        adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
+        adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
+        adapter.DeviceDisconnected += AdapterOnDeviceDisconnected;
 
-            Debug.WriteLine("starting radios");
-            _radios = new List<Radio>
+        Debug.WriteLine("starting radios");
+        _radios = new List<Radio>
         {
             new(Guid.Parse("00000000-0000-0000-0000-bc33acb95371"), "ema")
             //new Radio(Guid.Parse("00000000-0000-0000-0000-886b0ff897cf"), "mod"),
             //new Radio(Guid.Parse("00000000-0000-0000-0000-c2c42b149fe4"), "ora"),
         };
 
-            foreach (var radio in _radios)
-                _radioLocks.Add(radio.Id, new AsyncLock());
+        foreach (var radio in _radios)
+            _radioLocks.Add(radio.Id, new AsyncLock());
 
-            foreach (var radio in _radios)
-                _radioDevices.Add(radio.Id, null);
-        }
+        foreach (var radio in _radios)
+            _radioDevices.Add(radio.Id, null);
+
+        await stoppingToken.WaitHandle;
 
         Debug.WriteLine("stopping radios");
         foreach (var radio in _radios)

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
 using OmniCore.Common.Platform;
 using OmniCore.Shared.Extensions;
@@ -31,11 +32,6 @@ public class AppConfiguration : IAppConfiguration
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
-// #if DEBUG
-//     public Uri ApiAddress => new Uri("http://192.168.1.50:5097");
-// #else
-//     public Uri ApiAddress => new Uri("https://api.balya.net:8080");
-// #endif
     public string? AccountEmail
     {
         get => Preferences.Get(nameof(AccountEmail), null);
@@ -90,6 +86,28 @@ public class AppConfiguration : IAppConfiguration
             _clientAuthorization = value;
             var strVal = JsonSerializerWrapper.TrySerialize(value);
             Preferences.Set(nameof(ClientAuthorization), strVal);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private AmqpEndpointDefinition? _endpoint;
+    public AmqpEndpointDefinition? Endpoint
+    {
+        get
+        {
+            if (_endpoint == null)
+            {
+                var val = Preferences.Get(nameof(Endpoint), null);
+                _endpoint = JsonSerializerWrapper.TryDeserialize<AmqpEndpointDefinition>(val);
+            }
+
+            return _endpoint;
+        }
+        set
+        {
+            _endpoint = value;
+            var strVal = JsonSerializerWrapper.TrySerialize(value);
+            Preferences.Set(nameof(Endpoint), strVal);
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }

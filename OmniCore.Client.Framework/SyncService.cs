@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Nito.AsyncEx;
 using OmniCore.Client.Model;
 using OmniCore.Common.Amqp;
@@ -7,86 +8,68 @@ using OmniCore.Common.Core;
 
 namespace OmniCore.Framework;
 
-public class SyncService : ISyncService
+public class SyncService : BackgroundService, ISyncService
 {
     private IAmqpService _amqpService;
-    private Task _syncTask;
-    private CancellationTokenSource _ctsSync;
     private AsyncAutoResetEvent _syncTriggerEvent;
-
-    public event EventHandler<bool> ReadyStateChanged;
-
-    public bool ServiceReady => throw new NotImplementedException();
 
     public SyncService(
         IAmqpService amqpService)
     {
         _amqpService = amqpService;
-        _ctsSync = new CancellationTokenSource();
         _syncTriggerEvent = new AsyncAutoResetEvent(true);
-    }
-    public async Task Start()
-    {
-        _syncTask = SyncTask(_ctsSync.Token);
+        _amqpService.RegisterMessageHandler(HandleMessageAsync);
     }
 
-    public async Task Stop()
+    private async Task<bool> HandleMessageAsync(AmqpMessage message)
     {
-        _ctsSync.Cancel();
-        if (_syncTask != null)
-        {
-            try
-            {
-                await _syncTask;
-            }
-            catch (TaskCanceledException)
-            {
-            }
-        }
+        return false;
     }
-
-    private async Task SyncTask(CancellationToken cancellationToken)
+    
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while(true)
-        {
-            await _syncTriggerEvent.WaitAsync(cancellationToken);
-            await using var context = new OcdbContext();
-            var podsToSync = await context.Pods.Where(p => !p.IsSynced).ToListAsync();
-            var podActionsToSync = await context.PodActions.Where(pa => !pa.IsSynced).ToListAsync();
-            await context.DisposeAsync();
+        await _syncTriggerEvent.WaitAsync(stoppingToken);
 
-            foreach (var pod in podsToSync)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                _amqpService.PublishMessage(new AmqpMessage
-                {
-                    Text = JsonSerializer.Serialize(new
-                    {
-                        type = nameof(Pod),
-                        data = pod
-                    }),
-                    Route = "sync",
-                    //OnPublishConfirmed = OnPodSynced(pod.PodId),
-                });
-                await Task.Yield();
-            }
-
-            foreach (var podAction in podActionsToSync)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                _amqpService.PublishMessage(new AmqpMessage
-                {
-                    Text = JsonSerializer.Serialize(new
-                    {
-                        type = nameof(PodAction),
-                        data = podAction
-                    }),
-                    Route = "sync",
-                    //OnPublishConfirmed = OnPodActionSynced(podAction.PodId, podAction.Index),
-                });
-                await Task.Yield();
-            }
-        }
+        // while(true)
+        // {
+        //     await using var context = new OcdbContext();
+        //     var podsToSync = await context.Pods.Where(p => !p.IsSynced).ToListAsync(stoppingToken);
+        //     var podActionsToSync = await context.PodActions.Where(pa => !pa.IsSynced)
+        //         .ToListAsync(stoppingToken);
+        //     await context.DisposeAsync();
+        //
+        //     foreach (var pod in podsToSync)
+        //     {
+        //         stoppingToken.ThrowIfCancellationRequested();
+        //         _amqpService.PublishMessage(new AmqpMessage
+        //         {
+        //             Text = JsonSerializer.Serialize(new
+        //             {
+        //                 type = nameof(Pod),
+        //                 data = pod
+        //             }),
+        //             Route = "sync",
+        //             WhenPublished = () => OnPodSynced(pod.PodId),
+        //         });
+        //         await Task.Yield();
+        //     }
+        //
+        //     foreach (var podAction in podActionsToSync)
+        //     {
+        //         stoppingToken.ThrowIfCancellationRequested();
+        //         _amqpService.PublishMessage(new AmqpMessage
+        //         {
+        //             Text = JsonSerializer.Serialize(new
+        //             {
+        //                 type = nameof(PodAction),
+        //                 data = podAction
+        //             }),
+        //             Route = "sync",
+        //             WhenPublished = () => OnPodActionSynced(podAction.PodId, podAction.Index),
+        //         });
+        //         await Task.Yield();
+        //     }
+        // }
     }
 
     public void TriggerSync()
@@ -114,15 +97,5 @@ public class SyncService : ISyncService
             podAction.IsSynced = true;
             await context.SaveChangesAsync();
         }
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }
