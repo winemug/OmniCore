@@ -30,12 +30,12 @@ public static class MauiProgram
             });
         
         builder.Services
+            .AddSingleton<AppShell>()
             .AddSingleton<CoreNavigationService>()
             .AddTransient<SetupPermissionsModel>()
             .AddTransient<TestViewModel>()
             .AddTransient<TestViewModel2>()
 	        
-            .AddSingleton<AppShell>()
 
             .AddSingleton<IAppConfiguration, AppConfiguration>()
 
@@ -50,6 +50,7 @@ public static class MauiProgram
 
             .AddTransient<IRadio, Radio>()
             .AddTransient<IRadioConnection, RadioConnection >()
+
             .AddTransient<IPodModel, PodModel>()
             .AddTransient<IPodConnection, PodConnection>()
             .AddTransient<IPodPacket, PodPacket>()

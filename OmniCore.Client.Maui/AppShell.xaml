@@ -6,7 +6,8 @@
     xmlns:views="clr-namespace:OmniCore.Maui.Views"
     Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent
-        Title="OmniCore"
-        ContentTemplate="{DataTemplate views:RootPage}"/>
+    <ShellContent Title="Status" ContentTemplate="{DataTemplate views:RootPage}"/>
+    <ShellContent Title="Profile" ContentTemplate="{DataTemplate views:RootPage}"/>
+    <ShellContent Title="Settings" ContentTemplate="{DataTemplate views:RootPage}"/>
+    <ShellContent Title="About" ContentTemplate="{DataTemplate views:RootPage}"/>
 </Shell>
