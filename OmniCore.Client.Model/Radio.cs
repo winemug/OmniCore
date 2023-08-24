@@ -6,5 +6,5 @@ public class Radio
 
     public Guid Mac { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 }

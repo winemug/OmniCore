@@ -19,8 +19,8 @@ public class VersionExtendedMessage : IMessageData
         ActivationParametersModel = new PodActivationParametersModel
         {
             PulseVolumeMicroUnits = data.Word(0),
-            PulseRatePer125ms = data[2],
-            PrimingPulseRatePer125ms = data[3],
+            PulseRatePer125Ms = data[2],
+            PrimingPulseRatePer125Ms = data[3],
             PrimingPulseCount = data[4],
             CannulaInsertPulseCount = data[5],
             MaximumLifeTimeHours = data[6]

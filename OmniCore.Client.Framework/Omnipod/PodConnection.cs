@@ -137,7 +137,7 @@ public class PodConnection : IDisposable, IPodConnection
                                 SetActive = true,
                                 AlertAfter = 5,
                                 AlertDurationMinutes = 55,
-                                BeepType = BeepType.Beep4x,
+                                BeepType = BeepType.Beep4X,
                                 BeepPattern = BeepPattern.OnceEveryFifteenMinutes
                             }
                         }
@@ -269,7 +269,7 @@ public class PodConnection : IDisposable, IPodConnection
                             SetAutoOff = true,
                             AlertAfter = 0,
                             AlertDurationMinutes = 15,
-                            BeepType = BeepType.BipBeep4x,
+                            BeepType = BeepType.BipBeep4X,
                             BeepPattern = BeepPattern.OnceEveryMinuteForFifteenMinutes
                         }
                     }
@@ -654,7 +654,7 @@ public class PodConnection : IDisposable, IPodConnection
         if (er.ReceivedMessage != null && er.RequestSentLatest.HasValue)
             _podModel.ProcessReceivedMessage(er.ReceivedMessage, er.RequestSentLatest.Value);
 
-        await using (var ocdb = new OcdbContext())
+        await using (var ocdb = new OcDbContext())
         {
             await ocdb.PodActions.AddAsync(new PodAction
             {
@@ -787,7 +787,7 @@ public class PodConnection : IDisposable, IPodConnection
             var pe = await TryExchangePackets(packetToSend, isLastPacket ? CancellationToken.None : cancellationToken);
             var receivedPacket = PodPacket.FromExchangeResult(pe, packetAddressIn);
             var packetCommandSent = pe.CommunicationResult != BleCommunicationResult.WriteFailed;
-            var bleConnectionFailed = pe.CommunicationResult != BleCommunicationResult.OK;
+            var bleConnectionFailed = pe.CommunicationResult != BleCommunicationResult.Ok;
 
             if (isLastPacket && packetCommandSent)
             {

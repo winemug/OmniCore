@@ -53,23 +53,23 @@ public class ScheduleRequest
 
         var microLiters = preSplitSchedule.Units / unitsPerMicroliter;
         var pulses10 = microLiters * 10 / microLitersPerPulse;
-        var pulses10int = (long)pulses10;
-        var intervalTicks = preSplitSchedule.Duration.Ticks / pulses10int;
+        var pulses10Int = (long)pulses10;
+        var intervalTicks = preSplitSchedule.Duration.Ticks / pulses10Int;
 
-        var pulsesCarriedOver = pulses10 - pulses10int;
+        var pulsesCarriedOver = pulses10 - pulses10Int;
 
         Debug.WriteLine(
-            $"Interval #0: Deliver {pulses10int} pulses at {intervalTicks}. CarryOver: {pulsesCarriedOver}");
+            $"Interval #0: Deliver {pulses10Int} pulses at {intervalTicks}. CarryOver: {pulsesCarriedOver}");
 
         foreach (var schedule in schedules)
         {
             microLiters = schedule.Units / unitsPerMicroliter;
             pulses10 = microLiters * 10 / microLitersPerPulse + pulsesCarriedOver;
-            pulses10int = (long)pulses10;
+            pulses10Int = (long)pulses10;
 
-            intervalTicks = schedule.Duration.Ticks / pulses10int;
-            var pulseTicks = new long[pulses10int];
-            for (var i = 0; i < pulses10int; i++)
+            intervalTicks = schedule.Duration.Ticks / pulses10Int;
+            var pulseTicks = new long[pulses10Int];
+            for (var i = 0; i < pulses10Int; i++)
                 pulseTicks[i] = (i + 1) * intervalTicks;
 
             long t0 = 0;

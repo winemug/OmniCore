@@ -63,10 +63,10 @@ public class MessageBuilder
         var partsList = new List<IMessagePart>();
         while (bodyIdx < bodyLength)
         {
-            var DType = (PodMessagePartType)messageBody[6 + bodyIdx];
+            var dType = (PodMessagePartType)messageBody[6 + bodyIdx];
             Bytes mpData = null;
             var mpLength = 0;
-            if (DType == PodMessagePartType.ResponseStatus)
+            if (dType == PodMessagePartType.ResponseStatus)
             {
                 mpLength = messageBody.Length - 2 - 7;
                 mpData = messageBody.Sub(6 + bodyIdx + 1, messageBody.Length - 2);
@@ -77,7 +77,7 @@ public class MessageBuilder
                 mpData = messageBody.Sub(6 + bodyIdx + 2, 6 + bodyIdx + 2 + mpLength);
             }
 
-            partsList.Add(new MessagePart { Data = mpData, Type = DType });
+            partsList.Add(new MessagePart { Data = mpData, Type = dType });
             bodyIdx = bodyIdx + 2 + mpLength;
         }
 

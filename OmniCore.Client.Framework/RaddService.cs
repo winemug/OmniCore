@@ -36,12 +36,12 @@ public class RaddService : BackgroundService, IRaddService
         if (rr == null)
             return false;
 
-        if (string.IsNullOrEmpty(rr.pod_id))
+        if (string.IsNullOrEmpty(rr.PodId))
         {
-            if (rr.transfer_active_serial.HasValue && rr.transfer_active_lot.HasValue)
+            if (rr.TransferActiveSerial.HasValue && rr.TransferActiveLot.HasValue)
             {
-                uint? acquired_address = null;
-                if (!rr.transfer_active_address.HasValue)
+                uint? acquiredAddress = null;
+                if (!rr.TransferActiveAddress.HasValue)
                 {
                     using var rc = await _radioService.GetIdealConnectionAsync();
                     for (var k = 0; k < 3; k++)
@@ -53,23 +53,23 @@ public class RaddService : BackgroundService, IRaddService
                             if (packet != null)
                             {
                                 Debug.WriteLine($"Packet: {packet}");
-                                if (acquired_address.HasValue && acquired_address.Value != packet.Address) break;
-                                acquired_address = packet.Address;
+                                if (acquiredAddress.HasValue && acquiredAddress.Value != packet.Address) break;
+                                acquiredAddress = packet.Address;
                             }
                         }
 
-                        if (acquired_address.HasValue)
+                        if (acquiredAddress.HasValue)
                             break;
                     }
 
-                    if (!acquired_address.HasValue)
+                    if (!acquiredAddress.HasValue)
                     {
                         var msg = new AmqpMessage
                         {
                             Text = JsonSerializer.Serialize(
                                 new
                                 {
-                                    rr.request_id,
+                                    request_id = rr.RequestId,
                                     success = false
                                 })
                         };
@@ -77,7 +77,7 @@ public class RaddService : BackgroundService, IRaddService
                         return true;
                     }
 
-                    rr.transfer_active_address = acquired_address;
+                    rr.TransferActiveAddress = acquiredAddress;
 
                     while (true)
                     {
@@ -94,7 +94,7 @@ public class RaddService : BackgroundService, IRaddService
                 Text = JsonSerializer.Serialize(
                     new
                     {
-                        rr.request_id,
+                        request_id = rr.RequestId,
                         pod_ids = pods.Select(p => p.Id.ToString("N")).ToList(),
                         success = true
                     })
@@ -104,63 +104,63 @@ public class RaddService : BackgroundService, IRaddService
         }
 
 
-        var pod = await _podService.GetPodAsync(Guid.Parse(rr.pod_id));
+        var pod = await _podService.GetPodAsync(Guid.Parse(rr.PodId));
         var success = pod != null;
         if (success)
             using (var podConnection = await _podService.GetConnectionAsync(pod))
             {
-                if (success && rr.next_record_index != null && rr.next_record_index != 0)
-                    success = pod.NextRecordIndex == rr.next_record_index.Value;
+                if (success && rr.NextRecordIndex != null && rr.NextRecordIndex != 0)
+                    success = pod.NextRecordIndex == rr.NextRecordIndex.Value;
 
-                if (success && rr.update_status)
+                if (success && rr.UpdateStatus)
                 {
                     var response = await podConnection.UpdateStatus();
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.beep)
+                if (success && rr.Beep)
                 {
                     var response = await podConnection.Beep(BeepType.BipBip);
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.cancel_bolus)
+                if (success && rr.CancelBolus)
                 {
                     var response = await podConnection.CancelBolus();
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.cancel_temp)
+                if (success && rr.CancelTemp)
                 {
                     var response = await podConnection.CancelTempBasal();
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.temp_basal_ticks.HasValue && rr.temp_basal_half_hours.HasValue)
+                if (success && rr.TempBasalTicks.HasValue && rr.TempBasalHalfHours.HasValue)
                 {
                     var response =
-                        await podConnection.SetTempBasal(rr.temp_basal_ticks.Value, rr.temp_basal_half_hours.Value);
+                        await podConnection.SetTempBasal(rr.TempBasalTicks.Value, rr.TempBasalHalfHours.Value);
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.bolus_ticks is > 0 && !rr.test_bolus)
+                if (success && rr.BolusTicks is > 0 && !rr.TestBolus)
                 {
-                    var response = await podConnection.Bolus((int)rr.bolus_ticks, 2000);
+                    var response = await podConnection.Bolus((int)rr.BolusTicks, 2000);
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.deactivate)
+                if (success && rr.Deactivate)
                 {
                     var response = await podConnection.Deactivate();
                     success = response == PodRequestStatus.Executed;
                 }
 
-                if (success && rr.remove)
+                if (success && rr.Remove)
                 {
                     success = false;
                     try
                     {
-                        await _podService.RemovePodAsync(Guid.Parse(rr.pod_id));
+                        await _podService.RemovePodAsync(Guid.Parse(rr.PodId));
                         success = true;
                     }
                     catch (Exception e)
@@ -169,18 +169,18 @@ public class RaddService : BackgroundService, IRaddService
                     }
                 }
 
-                if (success && rr.test_bolus && rr.bolus_ticks is > 0)
-                    await podConnection.Bolus((int)rr.bolus_ticks, 2000, true);
+                if (success && rr.TestBolus && rr.BolusTicks is > 0)
+                    await podConnection.Bolus((int)rr.BolusTicks, 2000, true);
             }
 
         var resp = new RaddResponse
         {
-            success = success,
-            request_id = rr.request_id,
-            next_record_index = pod?.NextRecordIndex,
-            minutes = pod?.StatusModel?.ActiveMinutes,
-            remaining = pod?.StatusModel?.PulsesRemaining,
-            delivered = pod?.StatusModel?.PulsesDelivered
+            Success = success,
+            RequestId = rr.RequestId,
+            NextRecordIndex = pod?.NextRecordIndex,
+            Minutes = pod?.StatusModel?.ActiveMinutes,
+            Remaining = pod?.StatusModel?.PulsesRemaining,
+            Delivered = pod?.StatusModel?.PulsesDelivered
         };
         var respMessage = new AmqpMessage { Text = JsonSerializer.Serialize(resp) };
         _amqpService.PublishMessage(respMessage);

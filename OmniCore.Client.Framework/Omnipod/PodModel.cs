@@ -64,7 +64,7 @@ public class PodModel : IPodModel
     public async Task LoadAsync()
     {
         NextRecordIndex = 0;
-        using var ocdb = new OcdbContext();
+        using var ocdb = new OcDbContext();
 
         var pas = ocdb.PodActions
             .Where(pa => pa.PodId == _pod.PodId)

@@ -16,8 +16,8 @@ public interface IPodService
         Guid profileId,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
-        uint Lot,
-        uint Serial);
+        uint lot,
+        uint serial);
 
     Task<List<IPodModel>> GetPodsAsync(Guid? profileId = null);
     Task<IPodModel?> GetPodAsync(Guid podId);

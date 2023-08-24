@@ -8,7 +8,7 @@ public static class ScheduleHelper
     {
         var checksum = data[0];
         var halfHourCount = data[1];
-        var initialDuration125ms = data.Word(2);
+        var initialDuration125Ms = data.Word(2);
         var initialPulseCount = data.Word(4);
 
         var idx = 6;
@@ -52,7 +52,7 @@ public static class ScheduleHelper
 
     public static Bytes GetScheduleDataWithChecksum(
         byte halfHourCount,
-        ushort initialDuration125ms,
+        ushort initialDuration125Ms,
         ushort initialPulseCount,
         InsulinSchedule[] schedules)
     {
@@ -75,19 +75,19 @@ public static class ScheduleHelper
             }
         }
 
-        var header = new Bytes(halfHourCount).Append(initialDuration125ms).Append(initialPulseCount);
+        var header = new Bytes(halfHourCount).Append(initialDuration125Ms).Append(initialPulseCount);
         var checksum = header[0] + header[1] + header[2] + header[3] + header[4];
 
-        var hh_idx = 0;
+        var hhIdx = 0;
         foreach (var schedule in schedules)
             for (var i = 0; i < schedule.BlockCount; i++)
             {
                 var pw = schedule.PulsesPerBlock;
-                if (schedule.AddAlternatingExtraPulse && hh_idx % 2 == 1)
+                if (schedule.AddAlternatingExtraPulse && hhIdx % 2 == 1)
                     pw += 1;
                 checksum += (pw >> 8) & 0xFF;
                 checksum += pw & 0xFF;
-                hh_idx++;
+                hhIdx++;
             }
 
         return new Bytes((ushort)checksum).Append(header).Append(elements);

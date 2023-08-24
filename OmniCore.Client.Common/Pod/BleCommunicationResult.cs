@@ -2,7 +2,7 @@
 
 public enum BleCommunicationResult
 {
-    OK,
+    Ok,
     WriteFailed,
     IndicateTimedOut,
     ReadFailed

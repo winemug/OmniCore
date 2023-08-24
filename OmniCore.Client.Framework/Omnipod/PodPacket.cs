@@ -56,7 +56,7 @@ public class PodPacket : IPodPacket
 
     public static PodPacket? FromExchangeResult(BleExchangeResult result, uint? expectedAddress = default)
     {
-        if (result.CommunicationResult != BleCommunicationResult.OK ||
+        if (result.CommunicationResult != BleCommunicationResult.Ok ||
             result.ResponseCode != RileyLinkResponse.CommandSuccess ||
             result.ResponseData == null ||
             result.ResponseData.Length < 2)

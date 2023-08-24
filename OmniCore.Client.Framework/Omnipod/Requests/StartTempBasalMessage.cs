@@ -45,27 +45,27 @@ public class StartTempBasalMessage : IMessageData
         }
         else
         {
-            var pulses10remaining = totalPulses10;
-            while (pulses10remaining > 0)
+            var pulses10Remaining = totalPulses10;
+            while (pulses10Remaining > 0)
             {
-                var pulses10record = pulses10remaining;
-                if (pulses10remaining > 0xFFFF)
+                var pulses10Record = pulses10Remaining;
+                if (pulses10Remaining > 0xFFFF)
                 {
                     if (hhPulses10 > 0xFFFF)
                     {
-                        pulses10record = 0XFFFF;
+                        pulses10Record = 0XFFFF;
                     }
                     else
                     {
                         var hhCountFitting = 0xFFFF / hhPulses10;
                         if (hhCountFitting % 2 == 0)
                             hhCountFitting--;
-                        pulses10record = hhCountFitting * hhPulses10;
+                        pulses10Record = hhCountFitting * hhPulses10;
                     }
                 }
 
-                pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
-                pulses10remaining -= pulses10record;
+                pulseRecord.Append((ushort)pulses10Record).Append((uint)avgPulseIntervalMs);
+                pulses10Remaining -= pulses10Record;
             }
         }
 

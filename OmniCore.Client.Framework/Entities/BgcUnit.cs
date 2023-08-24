@@ -2,6 +2,6 @@
 
 public enum BgcUnit
 {
-    mgDl = 0,
-    mmolL = 1
+    MgDl = 0,
+    MmolL = 1
 }

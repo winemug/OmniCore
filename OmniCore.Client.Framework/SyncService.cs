@@ -78,7 +78,7 @@ public class SyncService : BackgroundService, ISyncService
 
     private async Task OnPodSynced(Guid podId)
     {
-        await using var context = new OcdbContext();
+        await using var context = new OcDbContext();
         var pod = await context.Pods.FirstOrDefaultAsync(p => p.PodId == podId);
         if (pod != null)
         {
@@ -89,7 +89,7 @@ public class SyncService : BackgroundService, ISyncService
 
     private async Task OnPodActionSynced(Guid podId, int index)
     {
-        await using var context = new OcdbContext();
+        await using var context = new OcDbContext();
         var podAction = await context.PodActions.FirstOrDefaultAsync(pa => pa.PodId == podId && pa.Index == index);
         if (podAction != null)
         {

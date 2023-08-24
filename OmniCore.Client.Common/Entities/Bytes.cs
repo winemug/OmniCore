@@ -5,8 +5,8 @@ namespace OmniCore.Common.Entities;
 
 public class Bytes : IComparable<Bytes>
 {
-    private const int PAGE_SIZE = 256;
-    public byte[] ByteBuffer = new byte[PAGE_SIZE];
+    private const int PageSize = 256;
+    public byte[] ByteBuffer = new byte[PageSize];
 
     public Bytes()
     {
@@ -79,7 +79,7 @@ public class Bytes : IComparable<Bytes>
     {
         if (Length + size > ByteBuffer.Length)
         {
-            var newBuffer = new byte[((Length + size) / PAGE_SIZE + 1) * PAGE_SIZE];
+            var newBuffer = new byte[((Length + size) / PageSize + 1) * PageSize];
             Buffer.BlockCopy(ByteBuffer, 0, newBuffer, 0, Length);
             ByteBuffer = newBuffer;
         }

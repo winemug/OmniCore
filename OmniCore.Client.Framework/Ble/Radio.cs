@@ -303,7 +303,7 @@ public class Radio : IRadio
 
     private void AssertRadioReturnResult(BleExchangeResult result)
     {
-        if (result.CommunicationResult != BleCommunicationResult.OK ||
+        if (result.CommunicationResult != BleCommunicationResult.Ok ||
             result.ResponseCode != RileyLinkResponse.CommandSuccess)
             throw new ApplicationException("BLE comm error");
     }
@@ -320,41 +320,41 @@ public class Radio : IRadio
 
         var commonRegisters = new Dictionary<RileyLinkRadioRegister, byte>
         {
-            { RileyLinkRadioRegister.SYNC1, 0xA5 },
-            { RileyLinkRadioRegister.SYNC0, 0x5A },
-            { RileyLinkRadioRegister.PKTLEN, 0x50 },
-            { RileyLinkRadioRegister.PKTCTRL1, 0x20 },
-            { RileyLinkRadioRegister.PKTCTRL0, 0x00 },
-            { RileyLinkRadioRegister.ADDR, 0x00 },
-            { RileyLinkRadioRegister.CHANNR, 0x00 },
+            { RileyLinkRadioRegister.Sync1, 0xA5 },
+            { RileyLinkRadioRegister.Sync0, 0x5A },
+            { RileyLinkRadioRegister.Pktlen, 0x50 },
+            { RileyLinkRadioRegister.Pktctrl1, 0x20 },
+            { RileyLinkRadioRegister.Pktctrl0, 0x00 },
+            { RileyLinkRadioRegister.Addr, 0x00 },
+            { RileyLinkRadioRegister.Channr, 0x00 },
 
-            { RileyLinkRadioRegister.FSCTRL1, 0x0F },
-            { RileyLinkRadioRegister.FSCTRL0, 0x00 },
+            { RileyLinkRadioRegister.Fsctrl1, 0x0F },
+            { RileyLinkRadioRegister.Fsctrl0, 0x00 },
 
-            { RileyLinkRadioRegister.MDMCFG4, 0xBA },
-            { RileyLinkRadioRegister.MDMCFG3, 0xB9 },
-            { RileyLinkRadioRegister.MDMCFG2, 0x12 },
-            { RileyLinkRadioRegister.MDMCFG1, 0x43 },
-            { RileyLinkRadioRegister.MDMCFG0, 0x11 },
+            { RileyLinkRadioRegister.Mdmcfg4, 0xBA },
+            { RileyLinkRadioRegister.Mdmcfg3, 0xB9 },
+            { RileyLinkRadioRegister.Mdmcfg2, 0x12 },
+            { RileyLinkRadioRegister.Mdmcfg1, 0x43 },
+            { RileyLinkRadioRegister.Mdmcfg0, 0x11 },
 
-            { RileyLinkRadioRegister.MCSM2, 0x07 },
-            { RileyLinkRadioRegister.MCSM1, 0x30 },
-            { RileyLinkRadioRegister.MCSM0, 0x19 },
+            { RileyLinkRadioRegister.Mcsm2, 0x07 },
+            { RileyLinkRadioRegister.Mcsm1, 0x30 },
+            { RileyLinkRadioRegister.Mcsm0, 0x19 },
 
-            { RileyLinkRadioRegister.FOCCFG, 0x17 },
-            { RileyLinkRadioRegister.BSCFG, 0x6C },
-            { RileyLinkRadioRegister.AGCCTRL2, 0x43 },
-            { RileyLinkRadioRegister.AGCCTRL1, 0x40 },
-            { RileyLinkRadioRegister.AGCCTRL0, 0x91 },
-            { RileyLinkRadioRegister.FREND1, 0x56 },
-            { RileyLinkRadioRegister.FREND0, 0x10 },
+            { RileyLinkRadioRegister.Foccfg, 0x17 },
+            { RileyLinkRadioRegister.Bscfg, 0x6C },
+            { RileyLinkRadioRegister.Agcctrl2, 0x43 },
+            { RileyLinkRadioRegister.Agcctrl1, 0x40 },
+            { RileyLinkRadioRegister.Agcctrl0, 0x91 },
+            { RileyLinkRadioRegister.Frend1, 0x56 },
+            { RileyLinkRadioRegister.Frend0, 0x10 },
 
-            { RileyLinkRadioRegister.FSCAL3, 0xE9 },
-            { RileyLinkRadioRegister.FSCAL2, 0x2A },
-            { RileyLinkRadioRegister.FSCAL1, 0x00 },
-            { RileyLinkRadioRegister.FSCAL0, 0x1F },
-            { RileyLinkRadioRegister.TEST1, 0x31 },
-            { RileyLinkRadioRegister.TEST0, 0x09 },
+            { RileyLinkRadioRegister.Fscal3, 0xE9 },
+            { RileyLinkRadioRegister.Fscal2, 0x2A },
+            { RileyLinkRadioRegister.Fscal1, 0x00 },
+            { RileyLinkRadioRegister.Fscal0, 0x1F },
+            { RileyLinkRadioRegister.Test1, 0x31 },
+            { RileyLinkRadioRegister.Test0, 0x09 },
 
 // 0xC0 +10
 // 0xC8 +7
@@ -366,23 +366,23 @@ public class Radio : IRadio
 // 0x1D -15
 // 0x0E -20
 // 0x12 -30        
-            { RileyLinkRadioRegister.PA_TABLE0, 0x60 }
+            { RileyLinkRadioRegister.PaTable0, 0x60 }
         };
 
         var rxRegisters = new Dictionary<RileyLinkRadioRegister, byte>
         {
-            { RileyLinkRadioRegister.DEVIATN, 0x46 },
-            { RileyLinkRadioRegister.FREQ2, 0x12 },
-            { RileyLinkRadioRegister.FREQ1, 0x14 },
-            { RileyLinkRadioRegister.FREQ0, 0x77 }
+            { RileyLinkRadioRegister.Deviatn, 0x46 },
+            { RileyLinkRadioRegister.Freq2, 0x12 },
+            { RileyLinkRadioRegister.Freq1, 0x14 },
+            { RileyLinkRadioRegister.Freq0, 0x77 }
         };
 
         var txRegisters = new Dictionary<RileyLinkRadioRegister, byte>
         {
-            { RileyLinkRadioRegister.DEVIATN, 0x50 },
-            { RileyLinkRadioRegister.FREQ2, 0x12 },
-            { RileyLinkRadioRegister.FREQ1, 0x14 },
-            { RileyLinkRadioRegister.FREQ0, 0x56 }
+            { RileyLinkRadioRegister.Deviatn, 0x50 },
+            { RileyLinkRadioRegister.Freq2, 0x12 },
+            { RileyLinkRadioRegister.Freq1, 0x14 },
+            { RileyLinkRadioRegister.Freq0, 0x56 }
         };
 
         foreach (var rkv in commonRegisters)
@@ -441,7 +441,7 @@ public class Radio : IRadio
             result.BleReadIndicated = DateTimeOffset.UtcNow;
             result.CommunicationResult = BleCommunicationResult.ReadFailed;
             var response = new Bytes(await TryReadFromCharacteristic(_dataCharacteristic, cancellationToken));
-            result.CommunicationResult = BleCommunicationResult.OK;
+            result.CommunicationResult = BleCommunicationResult.Ok;
 
             if (response.Length > 0)
                 result.ResponseCode = (RileyLinkResponse)response[0];

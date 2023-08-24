@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OmniCore.Client.Model;
 
-public class OcdbContext : DbContext
+public class OcDbContext : DbContext
 {
-    public OcdbContext()
+    public OcDbContext()
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
@@ -17,7 +17,7 @@ public class OcdbContext : DbContext
     public DbSet<Pod> Pods { get; set; } = null!;
     public DbSet<PodAction> PodActions { get; set; } = null!;
     public DbSet<Radio> Radios { get; set; } = null!;
-    public string DbPath { get; }
+    private string DbPath { get; }
 
     protected override async void OnConfiguring(DbContextOptionsBuilder options)
     {

@@ -50,43 +50,43 @@ public class StartBasalMessage : IMessageData
         mainData.Append(0).Append(0);
 
         var pulseRecord = new Bytes();
-        var currentHH = 0;
+        var currentHh = 0;
         var hhAvgPulses10 = new int[48];
 
         foreach (var schedule in schedules)
         {
-            var totalPulses10remaining = 10 * schedule.PulsesPerBlock * schedule.BlockCount
+            var totalPulses10Remaining = 10 * schedule.PulsesPerBlock * schedule.BlockCount
                                          + (schedule.AddAlternatingExtraPulse ? 10 : 0) *
-                                         (schedule.BlockCount / 2 + currentHH % 2);
+                                         (schedule.BlockCount / 2 + currentHh % 2);
 
-            var hhPulses10 = totalPulses10remaining / schedule.BlockCount;
+            var hhPulses10 = totalPulses10Remaining / schedule.BlockCount;
 
             var avgPulseIntervalMs = 1800 * 1000 * 1000 / hhPulses10;
-            var pulses10record = totalPulses10remaining;
-            while (totalPulses10remaining > 0)
+            var pulses10Record = totalPulses10Remaining;
+            while (totalPulses10Remaining > 0)
             {
-                if (totalPulses10remaining > 0xFFFF)
+                if (totalPulses10Remaining > 0xFFFF)
                 {
                     if (hhPulses10 > 0xFFFF)
                     {
-                        pulses10record = 0XFFFF;
+                        pulses10Record = 0XFFFF;
                     }
                     else
                     {
                         var hhCountFitting = 0xFFFF / hhPulses10;
-                        if (hhCountFitting % 2 + currentHH % 2 == 0)
+                        if (hhCountFitting % 2 + currentHh % 2 == 0)
                             hhCountFitting--;
-                        pulses10record = hhCountFitting * hhPulses10;
+                        pulses10Record = hhCountFitting * hhPulses10;
                     }
                 }
 
-                pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
-                totalPulses10remaining -= pulses10record;
+                pulseRecord.Append((ushort)pulses10Record).Append((uint)avgPulseIntervalMs);
+                totalPulses10Remaining -= pulses10Record;
             }
 
-            for (var i = currentHH; i < currentHH + schedule.BlockCount; i++) hhAvgPulses10[i] = hhPulses10;
+            for (var i = currentHh; i < currentHh + schedule.BlockCount; i++) hhAvgPulses10[i] = hhPulses10;
 
-            currentHH += schedule.BlockCount;
+            currentHh += schedule.BlockCount;
         }
 
         var currentHalfHour = PodTime.Hour * 2;
@@ -94,27 +94,27 @@ public class StartBasalMessage : IMessageData
 
         var podTimeMs = PodTime.Ticks / 10;
         var halfHourMs = 1800 * 1000 * 1000;
-        var spentCurrentHHMs = podTimeMs % halfHourMs;
-        var toNextHHMs = halfHourMs - spentCurrentHHMs;
+        var spentCurrentHhMs = podTimeMs % halfHourMs;
+        var toNextHhMs = halfHourMs - spentCurrentHhMs;
 
-        var currentHHPulses10 = hhAvgPulses10[currentHalfHour];
-        var remainingHHPulses10 = currentHHPulses10 - currentHHPulses10 * spentCurrentHHMs / halfHourMs;
+        var currentHhPulses10 = hhAvgPulses10[currentHalfHour];
+        var remainingHhPulses10 = currentHhPulses10 - currentHhPulses10 * spentCurrentHhMs / halfHourMs;
 
-        var avgPulseIntervalCurrentMs = 1800 * 1000 * 1000 / currentHHPulses10;
-        mainData.Append((ushort)remainingHHPulses10).Append((uint)avgPulseIntervalCurrentMs).Append(pulseRecord);
+        var avgPulseIntervalCurrentMs = 1800 * 1000 * 1000 / currentHhPulses10;
+        mainData.Append((ushort)remainingHhPulses10).Append((uint)avgPulseIntervalCurrentMs).Append(pulseRecord);
 
-        var podTime125ms = PodTime.Ticks / 10 / 1000 / 125;
-        var halfHour125ms = 30 * 60 * 1000 / 125;
-        var spentCurrentHH125ms = podTime125ms % halfHour125ms;
-        var toNextHH125ms = halfHour125ms - spentCurrentHH125ms;
+        var podTime125Ms = PodTime.Ticks / 10 / 1000 / 125;
+        var halfHour125Ms = 30 * 60 * 1000 / 125;
+        var spentCurrentHh125Ms = podTime125Ms % halfHour125Ms;
+        var toNextHh125Ms = halfHour125Ms - spentCurrentHh125Ms;
 
-        var currentHHPulses = hhPulses[currentHalfHour];
-        var remainingHHPulses = currentHHPulses - currentHHPulses * spentCurrentHH125ms / halfHour125ms;
+        var currentHhPulses = hhPulses[currentHalfHour];
+        var remainingHhPulses = currentHhPulses - currentHhPulses * spentCurrentHh125Ms / halfHour125Ms;
 
         var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
             (byte)currentHalfHour,
-            (ushort)toNextHH125ms,
-            (ushort)remainingHHPulses,
+            (ushort)toNextHh125Ms,
+            (ushort)remainingHhPulses,
             schedules);
 
         var subData = new Bytes(0).Append(scheduleData);

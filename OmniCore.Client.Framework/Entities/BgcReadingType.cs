@@ -2,6 +2,6 @@
 
 public enum BgcReadingType
 {
-    CGM = 0,
+    Cgm = 0,
     Manual = 1
 }
