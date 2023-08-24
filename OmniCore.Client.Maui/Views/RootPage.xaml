@@ -4,6 +4,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Maui.Views.RootPage">
     <ContentPage.Content>
-        
+
     </ContentPage.Content>
 </ContentPage>

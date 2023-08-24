@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace OmniCore.Common.Amqp;
 
-namespace OmniCore.Common.Amqp
+public record AmqpMessageReceivedMessage
 {
-    public record AmqpMessageReceivedMessage
-    {
-        public AmqpMessage Message { get; init; }
-    }
+    public AmqpMessage Message { get; init; }
 }

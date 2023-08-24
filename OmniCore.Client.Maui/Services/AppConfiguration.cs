@@ -1,4 +1,3 @@
-using System.Text.Json;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
 using OmniCore.Common.Platform;
@@ -8,7 +7,11 @@ namespace OmniCore.Maui.Services;
 
 public class AppConfiguration : IAppConfiguration
 {
-    private IPlatformInfo _platformInfo;
+    private ClientAuthorization? _clientAuthorization;
+
+    private AmqpEndpointDefinition? _endpoint;
+    private readonly IPlatformInfo _platformInfo;
+
     public AppConfiguration(IPlatformInfo platformInfo)
     {
         _platformInfo = platformInfo;
@@ -19,7 +22,7 @@ public class AppConfiguration : IAppConfiguration
         get
         {
 #if DEBUG
-    var defaultAddress = "http://192.168.1.50:5097";
+            var defaultAddress = "http://192.168.1.50:5097";
 #else
     var defaultAddress = "https://api.balya.net:8080";
 #endif
@@ -32,6 +35,7 @@ public class AppConfiguration : IAppConfiguration
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
+
     public string? AccountEmail
     {
         get => Preferences.Get(nameof(AccountEmail), null);
@@ -67,8 +71,7 @@ public class AppConfiguration : IAppConfiguration
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
-    
-    private ClientAuthorization? _clientAuthorization;
+
     public ClientAuthorization? ClientAuthorization
     {
         get
@@ -90,7 +93,6 @@ public class AppConfiguration : IAppConfiguration
         }
     }
 
-    private AmqpEndpointDefinition? _endpoint;
     public AmqpEndpointDefinition? Endpoint
     {
         get
@@ -111,5 +113,6 @@ public class AppConfiguration : IAppConfiguration
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
+
     public event EventHandler? ConfigurationChanged;
 }

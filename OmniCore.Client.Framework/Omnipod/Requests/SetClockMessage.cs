@@ -1,20 +1,20 @@
-﻿using OmniCore.Common.Pod;
-using System;
-using OmniCore.Common.Entities;
+﻿using OmniCore.Common.Entities;
+using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod.Parts;
 
 namespace OmniCore.Framework.Omnipod.Requests;
 
 public class SetClockMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestSetupPod;
-
     public int PacketTimeout { get; set; } = 50;
     public uint RadioAddress { get; set; }
     public uint Lot { get; set; }
     public uint Serial { get; set; }
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestSetupPod;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -54,7 +54,7 @@ public class SetClockMessage : IMessageData
             {
                 Type = PodMessagePartType.RequestSetupPod,
                 RequiresNonce = false,
-                Data = data,
+                Data = data
             });
     }
 }

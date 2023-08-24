@@ -1,23 +1,17 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class VersionMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) =>
-            parts.MainPart.Type == PodMessagePartType.ResponseVersionInfo &&
-            parts.MainPart.Data.Length == 21;
-
     public PodVersionModel VersionModel { get; set; }
     public PodRadioMeasurementsModel RadioMeasurementsModel { get; set; }
     public PodProgressModel ProgressModel { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts =>
+            parts.MainPart.Type == PodMessagePartType.ResponseVersionInfo &&
+            parts.MainPart.Data.Length == 21;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -34,13 +28,13 @@ public class VersionMessage : IMessageData
             ProductId = data[6],
             Lot = data.DWord(8),
             Serial = data.DWord(12),
-            AssignedAddress = data.DWord(17),
+            AssignedAddress = data.DWord(17)
         };
 
         RadioMeasurementsModel = new PodRadioMeasurementsModel
         {
             RadioLowGain = (data[16] >> 6) & 0b00000011,
-            Rssi = data[16] & 0b00111111,
+            Rssi = data[16] & 0b00111111
         };
         ProgressModel = new PodProgressModel
         {

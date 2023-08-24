@@ -30,7 +30,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <Nullable>enable</Nullable>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-android33.0|AnyCPU'">
@@ -41,63 +41,63 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4"/>
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
 
         <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
+        <MauiImage Include="Resources\Images\*"/>
 
         <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*" />
+        <MauiFont Include="Resources\Fonts\*"/>
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Resources\Images\pod.svg" />
-      <None Remove="Resources\Images\pod_outline.svg" />
+        <None Remove="Resources\Images\pod.svg"/>
+        <None Remove="Resources\Images\pod_outline.svg"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Maui" Version="5.2.0" />
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="5.2.0"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
-        <PackageReference Include="Polly" Version="7.2.4" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0"/>
+        <PackageReference Include="Polly" Version="7.2.4"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OmniCore.Client.Common\OmniCore.Client.Common.csproj" />
-      <ProjectReference Include="..\OmniCore.Client.Framework\OmniCore.Client.Framework.csproj" />
-      <ProjectReference Include="..\OmniCore.Client.Model\OmniCore.Client.Model.csproj" />
+        <ProjectReference Include="..\OmniCore.Client.Common\OmniCore.Client.Common.csproj"/>
+        <ProjectReference Include="..\OmniCore.Client.Framework\OmniCore.Client.Framework.csproj"/>
+        <ProjectReference Include="..\OmniCore.Client.Model\OmniCore.Client.Model.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <AndroidResource Update="Platforms\Android\Resources\xml\network_security_config.xml">
-        <SubType>Designer</SubType>
-        <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-      </AndroidResource>
+        <AndroidResource Update="Platforms\Android\Resources\xml\network_security_config.xml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+        </AndroidResource>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Platforms\iOS\MauiAppBuilderExtensions.cs">
-        <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
-      </Compile>
-      <Compile Update="Platforms\MacCatalyst\MauiAppBuilderExtensions.cs">
-        <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
-      </Compile>
-      <Compile Update="Platforms\Tizen\MauiAppBuilderExtensions.cs">
-        <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-      </Compile>
-      <Compile Update="Platforms\Windows\MauiAppBuilderExtensions.cs">
-        <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
-      </Compile>
+        <Compile Update="Platforms\iOS\MauiAppBuilderExtensions.cs">
+            <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
+        </Compile>
+        <Compile Update="Platforms\MacCatalyst\MauiAppBuilderExtensions.cs">
+            <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
+        </Compile>
+        <Compile Update="Platforms\Tizen\MauiAppBuilderExtensions.cs">
+            <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+        </Compile>
+        <Compile Update="Platforms\Windows\MauiAppBuilderExtensions.cs">
+            <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
+        </Compile>
     </ItemGroup>
 
 </Project>

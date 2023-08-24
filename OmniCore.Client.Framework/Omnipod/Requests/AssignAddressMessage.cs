@@ -1,20 +1,15 @@
-﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Common.Entities;
+﻿using OmniCore.Common.Entities;
+using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod.Parts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Requests;
 
 public class AssignAddressMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestAssignAddress;
-
     public uint Address { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestAssignAddress;
 
     public IMessageData FromParts(IMessageParts parts)
     {

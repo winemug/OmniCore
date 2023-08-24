@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace OmniCore.Common.Pod
+namespace OmniCore.Common.Pod;
+
+public interface IMessageData
 {
-    public interface IMessageData
-    {
-        IMessageParts ToParts();
-        IMessageData FromParts(IMessageParts parts);
+    [JsonIgnore] static abstract Predicate<IMessageParts> CanParse { get; }
 
-        [JsonIgnore]
-        abstract static Predicate<IMessageParts> CanParse { get; }
-
-    }
+    IMessageParts ToParts();
+    IMessageData FromParts(IMessageParts parts);
 }

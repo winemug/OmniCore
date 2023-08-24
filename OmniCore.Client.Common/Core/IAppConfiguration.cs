@@ -12,9 +12,3 @@ public interface IAppConfiguration
     AmqpEndpointDefinition? Endpoint { get; set; }
     event EventHandler ConfigurationChanged;
 }
-
-public record ClientAuthorization
-{
-    public Guid ClientId { get; init; }
-    public byte[] Token { get; init; }
-}

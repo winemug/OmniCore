@@ -69,7 +69,7 @@ public class PodPacket : IPodPacket
             return null;
         return pp;
     }
-    
+
     public static PodPacket? FromRadioData(Bytes data, int radioRssi)
     {
         var decodedData = ManchesterCodec.Decode(data);

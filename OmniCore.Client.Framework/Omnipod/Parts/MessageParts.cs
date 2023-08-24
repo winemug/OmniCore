@@ -4,9 +4,6 @@ namespace OmniCore.Framework.Omnipod.Parts;
 
 public class MessageParts : IMessageParts
 {
-    public IMessagePart MainPart { get; set; }
-    public IMessagePart? SubPart { get; set; }
-
     public MessageParts(IMessagePart singlePart)
     {
         MainPart = singlePart;
@@ -17,7 +14,7 @@ public class MessageParts : IMessageParts
         MainPart = mainPart;
         SubPart = subPart;
     }
-    
+
     public MessageParts(List<IMessagePart> partsList)
     {
         if (partsList.Count == 1)
@@ -34,6 +31,9 @@ public class MessageParts : IMessageParts
             throw new ApplicationException("Invalid part list");
         }
     }
+
+    public IMessagePart MainPart { get; set; }
+    public IMessagePart? SubPart { get; set; }
 
     public List<IMessagePart> AsList()
     {

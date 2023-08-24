@@ -6,9 +6,8 @@ namespace OmniCore.Framework.Omnipod.Requests;
 
 public class GetStatusMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestStatus;
-
     public PodStatusType StatusType { get; set; }
+    public static Predicate<IMessageParts> CanParse => parts => parts.MainPart.Type == PodMessagePartType.RequestStatus;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -23,7 +22,7 @@ public class GetStatusMessage : IMessageData
             {
                 Type = PodMessagePartType.RequestStatus,
                 RequiresNonce = false,
-                Data = new Bytes((byte)StatusType),
+                Data = new Bytes((byte)StatusType)
             });
     }
 }

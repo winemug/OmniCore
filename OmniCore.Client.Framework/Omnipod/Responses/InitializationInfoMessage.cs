@@ -1,26 +1,20 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class InitializationInfoMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) =>
-            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
-            parts.MainPart.Data[0] == (byte)PodStatusType.Activation;
-
     public int FaultCode { get; set; }
     public int FaultMinute { get; set; }
     public uint Zero0 { get; set; }
     public uint Zero1 { get; set; }
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts =>
+            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
+            parts.MainPart.Data[0] == (byte)PodStatusType.Activation;
 
     public IMessageData FromParts(IMessageParts parts)
     {

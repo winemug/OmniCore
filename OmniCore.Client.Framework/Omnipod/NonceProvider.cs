@@ -4,13 +4,12 @@ namespace OmniCore.Framework.Omnipod;
 
 public class NonceProvider : INonceProvider
 {
-    private int _nonceIndex;
-    private uint[] _nonceTable;
-
     private uint? _lastNonce;
-    private uint _lot;
-    private uint _serial;
-    
+    private readonly uint _lot;
+    private int _nonceIndex;
+    private readonly uint[] _nonceTable;
+    private readonly uint _serial;
+
     public NonceProvider(uint lot, uint serial, uint? lastNonce = default)
     {
         _lot = lot;
@@ -19,7 +18,7 @@ public class NonceProvider : INonceProvider
         _nonceTable = new uint[18];
         InitializeNonceTable(0);
     }
-    
+
     public uint NextNonce()
     {
         if (!_lastNonce.HasValue)
@@ -40,11 +39,12 @@ public class NonceProvider : INonceProvider
 
     public void SyncNonce(ushort syncWord, int syncMessageSequence)
     {
-        uint w = (ushort)(_lastNonce.Value & 0xFFFF) + (uint)(CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF)
-                                                     + (uint)(_lot & 0xFFFF) + (uint)(_serial & 0xFFFF);
+        var w = (ushort)(_lastNonce.Value & 0xFFFF) + (uint)(CrcUtil.Crc16Table[syncMessageSequence] & 0xFFFF)
+                                                    + (_lot & 0xFFFF) + (_serial & 0xFFFF);
         var seed = (ushort)(((w & 0xFFFF) ^ syncWord) & 0xff);
         InitializeNonceTable(seed);
     }
+
     private uint GenerateNonce()
     {
         _nonceTable[0] = ((_nonceTable[0] >> 16) + (_nonceTable[0] & 0xFFFF) * 0x5D7F) & 0xFFFFFFFF;

@@ -12,12 +12,12 @@ namespace OmniCore.Framework.Omnipod;
 
 public class PodConnection : IDisposable, IPodConnection
 {
-    private bool _communicationNeedsClosing;
-    private Guid _requestingClientId;
-    private readonly IPodModel _podModel;
     private readonly IDisposable _podLockDisposable;
+    private readonly IPodModel _podModel;
     private readonly IRadioConnection _radioConnection;
     private readonly ISyncService _syncService;
+    private bool _communicationNeedsClosing;
+    private readonly Guid _requestingClientId;
 
     public PodConnection(
         Guid requestingClientId,
@@ -64,34 +64,32 @@ public class PodConnection : IDisposable, IPodConnection
         bool relaxDeliveryCrosschecks,
         CancellationToken cancellationToken)
     {
-
-        Debug.WriteLine($"Prime started");
+        Debug.WriteLine("Prime started");
         PodRequestStatus result;
         if (_podModel.VersionModel == null) // radio address not set (no recorded version response)
         {
-
-            Debug.WriteLine($"Version Info missing, assigning address");
+            Debug.WriteLine("Version Info missing, assigning address");
             result = await SendRequestAsync(false,
-                        cancellationToken,
-                        new AssignAddressMessage
-                        {
-                            Address = _podModel.RadioAddress
-                        },
-                        true
-                    );
+                cancellationToken,
+                new AssignAddressMessage
+                {
+                    Address = _podModel.RadioAddress
+                },
+                true
+            );
             if (result != PodRequestStatus.Executed)
                 return result;
-            Debug.WriteLine($"Assignment done");
+            Debug.WriteLine("Assignment done");
         }
 
         if (_podModel.VersionModel == null) // must be set now
             return PodRequestStatus.RejectedByApp;
 
-        Debug.WriteLine($"Version info verified");
+        Debug.WriteLine("Version info verified");
 
         if (_podModel.ActivationParametersModel == null) // actpar null, no long version info received
         {
-            Debug.WriteLine($"Act parameters missing, setting clock");
+            Debug.WriteLine("Act parameters missing, setting clock");
             result = await SendRequestAsync(false, cancellationToken,
                 new SetClockMessage
                 {
@@ -100,34 +98,34 @@ public class PodConnection : IDisposable, IPodConnection
                     Time = podTime,
                     PacketTimeout = 50,
                     Lot = _podModel.VersionModel.Lot,
-                    Serial = _podModel.VersionModel.Serial,
+                    Serial = _podModel.VersionModel.Serial
                 },
                 true);
 
             if (result != PodRequestStatus.Executed)
                 return result;
-            Debug.WriteLine($"Set clock done");
+            Debug.WriteLine("Set clock done");
         }
 
         if (_podModel.ActivationParametersModel == null) // must be set now
             return PodRequestStatus.RejectedByPod;
 
-        Debug.WriteLine($"Act param verified");
+        Debug.WriteLine("Act param verified");
         if (_podModel.ProgressModel == null) // must be set now
             return PodRequestStatus.RejectedByPod;
 
-        Debug.WriteLine($"Progress exists");
+        Debug.WriteLine("Progress exists");
         if (_podModel.ProgressModel.Progress > PodProgress.Priming)
             return PodRequestStatus.RejectedByPod;
 
-        Debug.WriteLine($"Progress exists");
+        Debug.WriteLine("Progress exists");
         if (_podModel.ProgressModel.Progress == PodProgress.Paired)
         {
-            Debug.WriteLine($"Progress paired");
+            Debug.WriteLine("Progress paired");
 
             if (_podModel.StatusModel == null) // config alerts not run if no status obtained so far
             {
-                Debug.WriteLine($"Config alerts not run, running");
+                Debug.WriteLine("Config alerts not run, running");
                 result = await SendRequestAsync(false, cancellationToken,
                     new SetAlertsMessage
                     {
@@ -148,21 +146,23 @@ public class PodConnection : IDisposable, IPodConnection
                 if (result != PodRequestStatus.Executed)
                     return result;
 
-                Debug.WriteLine($"Config alerts done");
+                Debug.WriteLine("Config alerts done");
                 if (relaxDeliveryCrosschecks) // note: setdeliveryflags will be skipped if configurealerts failed
                 {
-                    Debug.WriteLine($"Relax checks running");
+                    Debug.WriteLine("Relax checks running");
                     result = await SendRequestAsync(false, cancellationToken,
                         new SetDeliveryVerificationMessage
-                        { VerificationFlag0 = 0,
-                            VerificationFlag1 = 0 });
+                        {
+                            VerificationFlag0 = 0,
+                            VerificationFlag1 = 0
+                        });
                     if (result != PodRequestStatus.Executed)
                         return result;
-                    Debug.WriteLine($"Relax checks did run");
+                    Debug.WriteLine("Relax checks did run");
                 }
             }
 
-            Debug.WriteLine($"Starting prime bolus");
+            Debug.WriteLine("Starting prime bolus");
 
             result = await SendRequestAsync(false, cancellationToken,
                 new StartBolusMesage
@@ -175,47 +175,47 @@ public class PodConnection : IDisposable, IPodConnection
             if (result != PodRequestStatus.Executed)
                 return result;
 
-            Debug.WriteLine($"Started prime bolus");
+            Debug.WriteLine("Started prime bolus");
 
             Debug.Assert(_podModel.StatusModel != null);
             if (!_podModel.StatusModel.ImmediateBolusActive ||
                 _podModel.ProgressModel.Progress != PodProgress.Priming)
                 return PodRequestStatus.RejectedByApp;
 
-            Debug.WriteLine($"Awaiting prime bolus completion 55 seconds");
+            Debug.WriteLine("Awaiting prime bolus completion 55 seconds");
             await Task.Delay(TimeSpan.FromSeconds(55));
         }
 
-        Debug.WriteLine($"Update status");
+        Debug.WriteLine("Update status");
         result = await UpdateStatus(cancellationToken);
         if (result != PodRequestStatus.Executed)
             return result;
-        Debug.WriteLine($"Updated");
+        Debug.WriteLine("Updated");
 
         Debug.Assert(_podModel.StatusModel != null);
 
         if (_podModel.ProgressModel.Progress == PodProgress.Priming)
         {
-            Debug.WriteLine($"Still priming, waiting {_podModel.StatusModel.PulsesPending+3} seconds");
+            Debug.WriteLine($"Still priming, waiting {_podModel.StatusModel.PulsesPending + 3} seconds");
             await Task.Delay(TimeSpan.FromSeconds(_podModel.StatusModel.PulsesPending + 3));
-            Debug.WriteLine($"Updating status");
+            Debug.WriteLine("Updating status");
             result = await UpdateStatus(cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
-            Debug.WriteLine($"Updated");
+            Debug.WriteLine("Updated");
         }
 
         if (_podModel.ProgressModel.Progress != PodProgress.Primed)
             return PodRequestStatus.RejectedByApp;
 
-        Debug.WriteLine($"Prime complete");
+        Debug.WriteLine("Prime complete");
         return PodRequestStatus.Executed;
     }
 
     public async Task<PodRequestStatus> StartPodAsync(
-            TimeOnly podTime,
-            int[] pulsesPerHour48HalfHours,
-            CancellationToken cancellationToken = default)
+        TimeOnly podTime,
+        int[] pulsesPerHour48HalfHours,
+        CancellationToken cancellationToken = default)
     {
         if (_podModel.ProgressModel == null)
             return PodRequestStatus.RejectedByApp;
@@ -231,7 +231,7 @@ public class PodConnection : IDisposable, IPodConnection
         PodRequestStatus result;
         if (_podModel.ProgressModel.Progress == PodProgress.Primed)
         {
-            Debug.WriteLine($"Pod is primed, setting basal");
+            Debug.WriteLine("Pod is primed, setting basal");
 
             result = await SendRequestAsync(false, cancellationToken,
                 new StartBasalMessage
@@ -242,12 +242,12 @@ public class PodConnection : IDisposable, IPodConnection
                 return result;
             if (_podModel.ProgressModel.Progress != PodProgress.BasalSet)
                 return PodRequestStatus.RejectedByApp;
-            Debug.WriteLine($"basal set");
+            Debug.WriteLine("basal set");
         }
 
         if (_podModel.ProgressModel.Progress == PodProgress.BasalSet)
         {
-            Debug.WriteLine($"configuring alerts");
+            Debug.WriteLine("configuring alerts");
             result = await SendRequestAsync(false, cancellationToken,
                 new SetAlertsMessage
                 {
@@ -278,7 +278,7 @@ public class PodConnection : IDisposable, IPodConnection
             if (result != PodRequestStatus.Executed)
                 return result;
 
-            Debug.WriteLine($"configured, inserting");
+            Debug.WriteLine("configured, inserting");
 
             result = await SendRequestAsync(false, cancellationToken,
                 new StartBolusMesage
@@ -293,41 +293,41 @@ public class PodConnection : IDisposable, IPodConnection
 
             if (_podModel.ProgressModel.Progress != PodProgress.Inserting)
                 return PodRequestStatus.RejectedByApp;
-            Debug.WriteLine($"insertion confirmed, waiting");
+            Debug.WriteLine("insertion confirmed, waiting");
 
             await Task.Delay(TimeSpan.FromSeconds(13));
 
-            Debug.WriteLine($"update status");
+            Debug.WriteLine("update status");
             result = await UpdateStatus(cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
-            Debug.WriteLine($"updated");
+            Debug.WriteLine("updated");
         }
 
         Debug.Assert(_podModel.StatusModel != null);
 
         if (_podModel.ProgressModel.Progress == PodProgress.Inserting)
         {
-            Debug.WriteLine($"waiting for insert to complete");
+            Debug.WriteLine("waiting for insert to complete");
 
             await Task.Delay(TimeSpan.FromSeconds(_podModel.StatusModel.PulsesPending + 2));
             result = await UpdateStatus(cancellationToken);
             if (result != PodRequestStatus.Executed)
                 return result;
-            Debug.WriteLine($"wait finished");
+            Debug.WriteLine("wait finished");
         }
 
         if (_podModel.ProgressModel.Progress != PodProgress.Running)
             return PodRequestStatus.RejectedByApp;
-        Debug.WriteLine($"all donesies");
+        Debug.WriteLine("all donesies");
         return PodRequestStatus.Executed;
     }
 
 
     public async Task<PodRequestStatus> SetBasalSchedule(
-            TimeOnly podTime,
-            int[] pulsesPerHour48HalfHours,
-            CancellationToken cancellationToken = default)
+        TimeOnly podTime,
+        int[] pulsesPerHour48HalfHours,
+        CancellationToken cancellationToken = default)
     {
         var result = await UpdateStatus(cancellationToken);
         if (result != PodRequestStatus.Executed)
@@ -348,7 +348,7 @@ public class PodConnection : IDisposable, IPodConnection
                 new StopDeliveryMessage { StopBasal = true });
 
             if (result != PodRequestStatus.Executed)
-                    return result;
+                return result;
         }
 
         if (_podModel.StatusModel.BasalActive)
@@ -359,7 +359,7 @@ public class PodConnection : IDisposable, IPodConnection
             new StartBasalMessage
             {
                 PodTime = podTime,
-                PulsesPerHour48HalfHours = pulsesPerHour48HalfHours,
+                PulsesPerHour48HalfHours = pulsesPerHour48HalfHours
             });
     }
 
@@ -378,7 +378,7 @@ public class PodConnection : IDisposable, IPodConnection
             return PodRequestStatus.RejectedByApp;
 
         var md = new AcknowledgeAlertsMessage();
-        for (int i = 0; i < 8; i++)
+        for (var i = 0; i < 8; i++)
             md.AlertIndices[i] = true;
 
         return await SendRequestAsync(false,
@@ -600,7 +600,6 @@ public class PodConnection : IDisposable, IPodConnection
 
         if (_podModel.ProgressModel.Progress <= PodProgress.Faulted
             && !_podModel.ProgressModel.Faulted)
-        {
             if (_podModel.StatusModel.BasalActive
                 || _podModel.StatusModel.TempBasalActive
                 || _podModel.StatusModel.ImmediateBolusActive
@@ -619,16 +618,15 @@ public class PodConnection : IDisposable, IPodConnection
                 if (result != PodRequestStatus.Executed)
                     return result;
             }
-        }
 
         return await SendRequestAsync(
             false,
             cancellationToken,
             new DeactivateMessage()
-            );
+        );
     }
 
-private async Task<PodRequestStatus> SendRequestAsync(
+    private async Task<PodRequestStatus> SendRequestAsync(
         bool critical,
         CancellationToken cancellationToken,
         IMessageData messageData,
@@ -690,17 +688,20 @@ private async Task<PodRequestStatus> SendRequestAsync(
                     syncRetries++;
                     break;
                 }
+
                 _communicationNeedsClosing = false;
                 return PodRequestStatus.RejectedByPod;
 
             case AcceptanceType.RejectedNonceReseed:
-                if (er.ReceivedMessage?.Data is NonceSyncMessage nsm && authRetries < 2 && _podModel.NonceProvider != null)
+                if (er.ReceivedMessage?.Data is NonceSyncMessage nsm && authRetries < 2 &&
+                    _podModel.NonceProvider != null)
                 {
                     _podModel.NextMessageSequence = initialMessageSequence;
                     _podModel.NonceProvider.SyncNonce(nsm.SyncWord, initialMessageSequence);
                     authRetries++;
                     break;
                 }
+
                 _communicationNeedsClosing = true;
                 return PodRequestStatus.RejectedByPod;
 
@@ -769,7 +770,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
         // Send
         while (sendPacketIndex < sendPacketCount)
         {
-            var isLastPacket = (sendPacketIndex == sendPacketCount - 1);
+            var isLastPacket = sendPacketIndex == sendPacketCount - 1;
             var byteStart = sendPacketIndex * 31;
             var byteEnd = byteStart + 31;
             if (messageBody.Length < byteEnd)
@@ -785,8 +786,8 @@ private async Task<PodRequestStatus> SendRequestAsync(
 
             var pe = await TryExchangePackets(packetToSend, isLastPacket ? CancellationToken.None : cancellationToken);
             var receivedPacket = PodPacket.FromExchangeResult(pe, packetAddressIn);
-            var packetCommandSent = (pe.CommunicationResult != BleCommunicationResult.WriteFailed);
-            var bleConnectionFailed = (pe.CommunicationResult != BleCommunicationResult.OK);
+            var packetCommandSent = pe.CommunicationResult != BleCommunicationResult.WriteFailed;
+            var bleConnectionFailed = pe.CommunicationResult != BleCommunicationResult.OK;
 
             if (isLastPacket && packetCommandSent)
             {
@@ -807,9 +808,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
             {
                 var referenceTime = lastPacketReceived ?? firstPacketSent.Value;
                 if (referenceTime < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(30))
-                {
                     return er.WithResult(null, "Timed out"); // out
-                }
                 continue; // send loop
             }
 
@@ -839,17 +838,14 @@ private async Task<PodRequestStatus> SendRequestAsync(
             {
                 // interim send packet
                 if (receivedPacket.Type != PodPacketType.Ack)
-                {
                     return er.WithResult(AcceptanceType.RejectedProtocolError,
                         "Pod didn't respond with expected packet type");
-                }
 
                 if (receivedPacket.Data.DWord(0) != ackDataIn)
-                {
                     return er.WithResult(AcceptanceType.RejectedProtocolError,
                         "Pod didn't respond with expected ack data");
-                }
             }
+
             sendPacketIndex++;
         } // send loop
 
@@ -890,6 +886,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
                     er.ErrorText = "Pod response partially received due to timeout";
                     break; // timed out, exit receive loop
                 }
+
                 continue; // not timed out yet, continue receive loop
             }
 
@@ -917,10 +914,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
 
         _podModel.NextPacketSequence = nextPacketSequence;
         var receivedMessageBody = new Bytes();
-        foreach(var packet in podResponsePackets)
-        {
-            receivedMessageBody.Append(packet.Data);
-        }
+        foreach (var packet in podResponsePackets) receivedMessageBody.Append(packet.Data);
 
         IPodMessage? podMessageReceived = null;
         try
@@ -931,7 +925,6 @@ private async Task<PodRequestStatus> SendRequestAsync(
         }
         catch (Exception ex)
         {
-
         }
 
         er.Result = AcceptanceType.Inconclusive;
@@ -944,23 +937,28 @@ private async Task<PodRequestStatus> SendRequestAsync(
                 break;
             case PodMessagePartType.ResponseInfo:
                 if (podFirstResponseData.Length < 3)
+                {
                     er.Result = AcceptanceType.Inconclusive;
+                }
                 else
                 {
                     if (podFirstResponseData[2] == (byte)PodStatusType.Extended)
                     {
                         if (podFirstResponseData.Length < 10)
+                        {
                             er.Result = AcceptanceType.Inconclusive;
+                        }
                         else
                         {
-                            if (messageToSend.Data is GetStatusMessage gsm && (gsm.StatusType == PodStatusType.Extended || gsm.StatusType == PodStatusType.Compact))
-                            {
-                                er.Result = podMessageReceived == null ? AcceptanceType.Inconclusive : AcceptanceType.Accepted;
-                            }
+                            if (messageToSend.Data is GetStatusMessage gsm &&
+                                (gsm.StatusType == PodStatusType.Extended || gsm.StatusType == PodStatusType.Compact))
+                                er.Result = podMessageReceived == null
+                                    ? AcceptanceType.Inconclusive
+                                    : AcceptanceType.Accepted;
                             else
-                            {
-                                er.Result = podFirstResponseData[3] == (byte)PodProgress.Deactivated ? AcceptanceType.Accepted : AcceptanceType.RejectedFaultOccured;
-                            }
+                                er.Result = podFirstResponseData[3] == (byte)PodProgress.Deactivated
+                                    ? AcceptanceType.Accepted
+                                    : AcceptanceType.RejectedFaultOccured;
                         }
                     }
                     else
@@ -968,12 +966,12 @@ private async Task<PodRequestStatus> SendRequestAsync(
                         er.Result = AcceptanceType.Accepted;
                     }
                 }
+
                 break;
             case PodMessagePartType.ResponseError:
                 if (podFirstResponseData.Length < 3)
                     er.Result = AcceptanceType.Inconclusive;
-                else
-                    if (podFirstResponseData[2] == 0x14)
+                else if (podFirstResponseData[2] == 0x14)
                     er.Result = AcceptanceType.RejectedNonceReseed;
                 else
                     er.Result = AcceptanceType.RejectedErrorOccured;
@@ -998,12 +996,12 @@ private async Task<PodRequestStatus> SendRequestAsync(
             new Bytes(ackDataOutFinal));
 
         DateTimeOffset? successfulSendWithoutResponse = null;
-        bool sendFinalAck = true;
+        var sendFinalAck = true;
         var lastHeard = DateTimeOffset.UtcNow;
         while (DateTimeOffset.UtcNow - lastHeard < TimeSpan.FromSeconds(3))
         {
             BleExchangeResult ber;
-            if (sendFinalAck) 
+            if (sendFinalAck)
             {
                 Debug.WriteLine("Final ack sending and waiting");
                 ber = await _radioConnection.SendAndTryGetPacket(
@@ -1051,7 +1049,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
         }
 
         else
-        //if (received == null)
+            //if (received == null)
         {
             Debug.WriteLine($"SEND: {packetToSend} no preamble");
             result = await _radioConnection.SendAndTryGetPacket(
@@ -1059,6 +1057,7 @@ private async Task<PodRequestStatus> SendRequestAsync(
                 0, 95, 10, packetToSend, cancellationToken);
             received = PodPacket.FromExchangeResult(result);
         }
+
         Debug.WriteLine($"RCVD: {received}");
         return result!;
     }

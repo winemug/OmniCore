@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Windows.Input;
 using OmniCore.Common.Api;
 using OmniCore.Common.Core;
@@ -6,18 +5,17 @@ using OmniCore.Common.Platform;
 using OmniCore.Shared.Api;
 
 namespace OmniCore.Maui.ViewModels;
-public partial class TestViewModel2
+
+public class TestViewModel2
 {
-    private IAppConfiguration _appConfiguration;
-    private IPlatformService _platformService;
-    private IPlatformInfo _platformInfo;
     private IAmqpService _amqpService;
+    private readonly IApiClient _apiClient;
+    private readonly IAppConfiguration _appConfiguration;
+    private readonly IPlatformInfo _platformInfo;
+    private readonly IPlatformService _platformService;
     private IPodService _podService;
     private IRadioService _radioService;
-    private IApiClient _apiClient;
 
-    public ICommand TestCommand1 { get; set; }
-    public ICommand TestCommand2 { get; set; }
     public TestViewModel2(
         IAppConfiguration appConfiguration,
         IPlatformService platformService,
@@ -38,27 +36,31 @@ public partial class TestViewModel2
         TestCommand2 = new Command(async () => ExecuteTestCommand2());
     }
 
+    public ICommand TestCommand1 { get; set; }
+    public ICommand TestCommand2 { get; set; }
+
     public async void ExecuteTestCommand2()
     {
         _appConfiguration.AccountEmail = null;
         _appConfiguration.AccountVerified = false;
         _appConfiguration.ClientAuthorization = null;
     }
+
     public async void ExecuteTestCommand1()
     {
         await _platformInfo.VerifyPermissions(false);
-       
+
         var email = "gggggg@balya.net";
         var password = "jjjj";
         var code = "0000";
         var clientName = "bbbb";
-        
+
         if (_appConfiguration.AccountEmail == null)
         {
             var result = await _apiClient.PostRequestAsync<AccountRegistrationRequest, ApiResponse>(
                 Routes.AccountRegistrationRequestRoute, new AccountRegistrationRequest
                 {
-                    Email = email,
+                    Email = email
                 });
             if (result is not { Success: true })
                 return;
@@ -72,7 +74,7 @@ public partial class TestViewModel2
                 {
                     Email = _appConfiguration.AccountEmail,
                     Password = password,
-                    Code = code,
+                    Code = code
                 });
             if (result is not { Success: true })
                 return;
@@ -98,7 +100,7 @@ public partial class TestViewModel2
                 Token = result.Token
             };
         }
-        
+
         _platformService.StartService();
     }
 }

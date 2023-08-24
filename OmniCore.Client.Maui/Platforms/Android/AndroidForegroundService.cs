@@ -1,7 +1,6 @@
 using Android.App;
 using Android.Content;
 using Android.OS;
-using OmniCore.Common.Core;
 using static Android.App.Notification;
 
 namespace OmniCore.Maui
@@ -14,6 +13,7 @@ namespace OmniCore.Maui
 
         private Task _startingTask = null;
         private Task _stoppingTask = null;
+
         private void Start()
         {
             // TODO:
@@ -87,6 +87,7 @@ namespace OmniCore.Maui
                         Start();
                         _isStarted = true;
                     }
+
                     return StartCommandResult.Sticky;
                 case "stop":
                     if (_isStarted)
@@ -96,6 +97,7 @@ namespace OmniCore.Maui
                         StopForeground(true);
                         StopSelf();
                     }
+
                     return StartCommandResult.NotSticky;
             }
 
@@ -111,6 +113,7 @@ namespace OmniCore.Maui
                 StopForeground(true);
                 StopSelf();
             }
+
             base.OnDestroy();
         }
     }

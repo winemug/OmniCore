@@ -13,9 +13,10 @@ namespace OmniCore.Framework;
 
 public class RadioService : BackgroundService, IRadioService
 {
-    private Dictionary<Guid, AsyncLock> _radioLocks;
-    private Dictionary<Guid, IDevice?> _radioDevices;
+    private readonly Dictionary<Guid, IDevice?> _radioDevices;
+    private readonly Dictionary<Guid, AsyncLock> _radioLocks;
     private List<Radio> _radios;
+
     public RadioService()
     {
         _radioLocks = new Dictionary<Guid, AsyncLock>();
@@ -23,11 +24,48 @@ public class RadioService : BackgroundService, IRadioService
         _radios = new List<Radio>();
     }
 
+    public async Task<IRadioConnection> GetIdealConnectionAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (_radios.Count == 0)
+            return null;
+        if (_radios.Count == 1)
+            return await GetConnectionAsync(_radios[0], cancellationToken);
+
+        await Task.WhenAll(_radios.Select(r => r.UpdateRssiAsync(cancellationToken)));
+
+        var radio = _radios.Where(r => r.Rssi.HasValue)
+            .OrderByDescending(r => r.Rssi).FirstOrDefault();
+
+        if (radio == null)
+            return null;
+
+        return await GetConnectionAsync(radio, cancellationToken);
+    }
+
+    public async Task<IRadioConnection> GetConnectionByNameAsync(string name,
+        CancellationToken cancellationToken = default)
+    {
+        var radio = _radios.Where(r => r.Name == name).FirstOrDefault();
+        if (radio == null)
+            return null;
+        return await GetConnectionAsync(radio, cancellationToken);
+    }
+
+    public async Task<IRadioConnection> GetConnectionByIdAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var radio = _radios.Where(r => r.Id == id).FirstOrDefault();
+        if (radio == null)
+            return null;
+        return await GetConnectionAsync(radio, cancellationToken);
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var ble = CrossBluetoothLE.Current;
         var adapter = ble.Adapter;
-        
+
         ble.StateChanged += BleOnStateChanged;
         adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
         adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
@@ -79,47 +117,9 @@ public class RadioService : BackgroundService, IRadioService
     {
     }
 
-    public async Task<IRadioConnection> GetIdealConnectionAsync(
-        CancellationToken cancellationToken = default)
-    {
-        if (_radios.Count == 0)
-            return null;
-        if (_radios.Count == 1)
-            return await GetConnectionAsync(_radios[0], cancellationToken);
-
-        await Task.WhenAll(_radios.Select(r => r.UpdateRssiAsync(cancellationToken)));
-
-        var radio = _radios.Where(r => r.Rssi.HasValue)
-            .OrderByDescending(r => r.Rssi).FirstOrDefault();
-
-        if (radio == null)
-            return null;
-
-        return await GetConnectionAsync(radio, cancellationToken);
-    }
-
-    public async Task<IRadioConnection> GetConnectionByNameAsync(string name,
-        CancellationToken cancellationToken = default)
-    {
-        var radio = _radios.Where(r => r.Name == name).FirstOrDefault();
-        if (radio == null)
-            return null;
-        return await GetConnectionAsync(radio, cancellationToken);
-    }
-
-    public async Task<IRadioConnection> GetConnectionByIdAsync(Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        var radio = _radios.Where(r => r.Id == id).FirstOrDefault();
-        if (radio == null)
-            return null;
-        return await GetConnectionAsync(radio, cancellationToken);
-    }
-
     private async Task<IRadioConnection> GetConnectionAsync(Radio radio, CancellationToken cancellationToken)
     {
         var allocationLockDisposable = await radio.LockAsync(cancellationToken);
         return new RadioConnection(radio, allocationLockDisposable);
     }
-
 }

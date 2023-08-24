@@ -1,30 +1,26 @@
 ﻿using OmniCore.Common.Entities;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod.Parts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Requests;
 
 public class StartTempBasalMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) => parts.MainPart.Type == PodMessagePartType.RequestTempBasal &&
-                   parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
-
     public int HalfHourCount { get; set; }
     public int PulsesPerHour { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestTempBasal &&
+                 parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
 
     public IMessageData FromParts(IMessageParts parts)
     {
         var subData = parts.SubPart!.Data.Sub(4);
         var schedules = ScheduleHelper.ParseInsulinScheduleData(subData);
         HalfHourCount = 0;
-        foreach(var schedule in schedules.Skip(1))
-        {
-            HalfHourCount += schedule.BlockCount;
-        }
-        PulsesPerHour = (schedules[0].PulsesPerBlock * 2)
-            + (schedules[0].AddAlternatingExtraPulse ? 1 : 0);
+        foreach (var schedule in schedules.Skip(1)) HalfHourCount += schedule.BlockCount;
+        PulsesPerHour = schedules[0].PulsesPerBlock * 2
+                        + (schedules[0].AddAlternatingExtraPulse ? 1 : 0);
 
         return this;
     }
@@ -44,7 +40,7 @@ public class StartTempBasalMessage : IMessageData
         var pulseRecord = new Bytes();
         if (totalPulses10 == 0)
         {
-            for (int i = 0; i < HalfHourCount; i++)
+            for (var i = 0; i < HalfHourCount; i++)
                 pulseRecord.Append((ushort)0).Append((uint)avgPulseIntervalMs);
         }
         else
@@ -56,7 +52,9 @@ public class StartTempBasalMessage : IMessageData
                 if (pulses10remaining > 0xFFFF)
                 {
                     if (hhPulses10 > 0xFFFF)
+                    {
                         pulses10record = 0XFFFF;
+                    }
                     else
                     {
                         var hhCountFitting = 0xFFFF / hhPulses10;
@@ -65,10 +63,12 @@ public class StartTempBasalMessage : IMessageData
                         pulses10record = hhCountFitting * hhPulses10;
                     }
                 }
+
                 pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
                 pulses10remaining -= pulses10record;
             }
         }
+
         mainData.Append(pulseRecord.Sub(0, 6)).Append(pulseRecord);
 
         var schedules = new[]
@@ -94,13 +94,13 @@ public class StartTempBasalMessage : IMessageData
             {
                 Type = PodMessagePartType.RequestTempBasal,
                 RequiresNonce = false,
-                Data = mainData,
+                Data = mainData
             },
             new MessagePart
             {
                 Type = PodMessagePartType.RequestInsulinSchedule,
                 RequiresNonce = true,
-                Data = subData,
+                Data = subData
             });
     }
 }

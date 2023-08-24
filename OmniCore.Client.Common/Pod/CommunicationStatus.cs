@@ -8,7 +8,6 @@ public enum CommunicationStatus
     ProtocolError
 }
 
-
 // Pod not responded
 // Pod responded but weirdly
 
@@ -23,10 +22,7 @@ public enum CommunicationStatus
 // Request partially sent
 // Request fully sent
 
-
 // RequestAccepted
-
-
 
 // ConnectionEvents
 
@@ -41,7 +37,6 @@ public enum CommunicationStatus
 // BLE read failed
 // BLE write failed
 
-
 // POD sent partial request
 // POD received partial OK
 // POD sent full request
@@ -51,4 +46,3 @@ public enum CommunicationStatus
 // POD sent partial OK
 // POD received full response
 // POD sent full OK
-

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Windows.Input;
 using OmniCore.Common.Api;
 using OmniCore.Common.Core;
@@ -6,23 +5,17 @@ using OmniCore.Common.Platform;
 using OmniCore.Shared.Enums;
 
 namespace OmniCore.Maui.ViewModels;
+
 public class TestViewModel
 {
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public string ClientName { get; set; }
-    public ICommand NewPodCommand { get; set; }
-    public ICommand PrimeCommand { get; set; }
-    public ICommand StartCommand { get; set; }
-    public ICommand StopCommand { get; set; }
-
-    private IPlatformService _platformService;
-    private IPlatformInfo _platformInfo;
     private IAmqpService _amqpService;
     private IApiClient _apiClient;
-    private IPodService _podService;
-    private IRadioService _radioService;
     private IAppConfiguration _appConfiguration;
+    private IPlatformInfo _platformInfo;
+
+    private readonly IPlatformService _platformService;
+    private readonly IPodService _podService;
+    private IRadioService _radioService;
 
     public TestViewModel(
         IAppConfiguration appConfiguration,
@@ -47,6 +40,14 @@ public class TestViewModel
         StartCommand = new Command(async () => await ExecuteStartPod());
     }
 
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string ClientName { get; set; }
+    public ICommand NewPodCommand { get; set; }
+    public ICommand PrimeCommand { get; set; }
+    public ICommand StartCommand { get; set; }
+    public ICommand StopCommand { get; set; }
+
     private async Task ExecuteStop()
     {
         _platformService.StopService();
@@ -66,7 +67,7 @@ public class TestViewModel
         //     await pc.Deactivate();
         // }
     }
-    
+
     private async Task ExecutePrime()
     {
         var pods = await _podService.GetPodsAsync();
@@ -88,12 +89,11 @@ public class TestViewModel
         {
             var now = DateTime.Now;
             var basalRateTicks = new int[48];
-            for (int i = 0; i < 48; i++)
+            for (var i = 0; i < 48; i++)
                 basalRateTicks[i] = 16;
 
             var res = await pc.StartPodAsync(
                 new TimeOnly(now.Hour, now.Minute, now.Second), basalRateTicks);
         }
     }
-
 }

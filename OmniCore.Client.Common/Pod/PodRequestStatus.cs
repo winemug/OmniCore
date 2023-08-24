@@ -6,5 +6,5 @@ public enum PodRequestStatus
     Inconclusive,
     NotSubmitted,
     RejectedByApp,
-    RejectedByPod,
+    RejectedByPod
 }

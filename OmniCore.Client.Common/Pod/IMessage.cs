@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Common.Entities;
+﻿using OmniCore.Common.Entities;
 
 namespace OmniCore.Common.Pod;
 
 public interface IMessage
 {
+    static abstract Predicate<IMessageParts> CanParse { get; }
     //uint? Address { get; set; }
     //int? Sequence { get; set; }
     //bool Critical { get; set; }
@@ -23,5 +18,4 @@ public interface IMessage
     //IMessageParts GetParts();
     IMessage Parse(IMessageParts parts);
     Bytes ToBody();
-    abstract static Predicate<IMessageParts> CanParse { get; }
 }

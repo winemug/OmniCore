@@ -27,13 +27,8 @@ public class CoreNavigationService
     public async Task<Page> GetMainPage()
     {
         if (!await _platformInfo.VerifyPermissions(true))
-        {
-            return GetPage<SetupPermissionsPage,SetupPermissionsModel>();
-        }
-        else
-        {
-            return GetPage<TestPage, TestViewModel>();
-        }
+            return GetPage<SetupPermissionsPage, SetupPermissionsModel>();
+        return GetPage<TestPage, TestViewModel>();
     }
 
     private Page GetPage<TPage, TModel>()

@@ -1,25 +1,14 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class StatusMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.ResponseStatus;
-
     public PodStatusModel StatusModel { get; set; }
     public PodProgressModel ProgressModel { get; set; }
 
-    public StatusMessage()
-    {
-        //StatusModel = new PodStatusModel();
-        //ProgressModel = new PodProgressModel();
-    }
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.ResponseStatus;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -31,7 +20,7 @@ public class StatusMessage : IMessageData
         ProgressModel = new PodProgressModel
         {
             Progress = (PodProgress)(b0 & 0x0F),
-            Faulted = (d1 & 0x80000000) != 0,
+            Faulted = (d1 & 0x80000000) != 0
         };
         StatusModel = new PodStatusModel
         {
@@ -46,7 +35,7 @@ public class StatusMessage : IMessageData
 
             UnackedAlertsMask = (int)((d1 >> 23) & 0x0F),
             ActiveMinutes = (int)((d1 >> 10) & 0b0001111111111111),
-            PulsesRemaining = (int)(d1 & 0b0000001111111111),
+            PulsesRemaining = (int)(d1 & 0b0000001111111111)
         };
         return this;
     }

@@ -62,7 +62,7 @@ namespace OmniCore.Maui.Services
         //}
 
         private async Task<PermissionStatus> CheckAndRequest<T>(bool silent) where T : BasePermission, new()
-        { 
+        {
             //Debug.WriteLine($"----Permission Check Start-----");
             //Debug.WriteLine($"Checking permission {typeof(T).Name}");
             var status = await Permissions.CheckStatusAsync<T>();
@@ -78,6 +78,7 @@ namespace OmniCore.Maui.Services
             return status;
         }
     }
+
     public class BluetoothPermissions : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
@@ -87,7 +88,7 @@ namespace OmniCore.Maui.Services
                     (global::Android.Manifest.Permission.Bluetooth, false),
                     (global::Android.Manifest.Permission.BluetoothAdmin, false),
                     (global::Android.Manifest.Permission.AccessBackgroundLocation, true),
-                    (global::Android.Manifest.Permission.AccessFineLocation, true),
+                    (global::Android.Manifest.Permission.AccessFineLocation, true)
                 }.ToArray()
                 : new List<(string androidPermission, bool isRuntime)>
                 {
@@ -95,22 +96,22 @@ namespace OmniCore.Maui.Services
                     (global::Android.Manifest.Permission.BluetoothScan, true)
                 }.ToArray();
     }
-    
+
     public class ForegroundPermissions : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
             new List<(string androidPermission, bool isRuntime)>
             {
-                (global::Android.Manifest.Permission.ForegroundService, true),
+                (global::Android.Manifest.Permission.ForegroundService, true)
             }.ToArray();
     }
-    
+
     public class NotificationPermissions : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
             new List<(string androidPermission, bool isRuntime)>
             {
-                (global::Android.Manifest.Permission.PostNotifications, true),
+                (global::Android.Manifest.Permission.PostNotifications, true)
             }.ToArray();
     }
 }

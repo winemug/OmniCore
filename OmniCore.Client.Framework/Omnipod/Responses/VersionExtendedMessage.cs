@@ -1,23 +1,17 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class VersionExtendedMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) =>
-            parts.MainPart.Type == PodMessagePartType.ResponseVersionInfo &&
-            parts.MainPart.Data.Length == 27;
-
     public PodVersionModel VersionModel { get; set; }
     public PodActivationParametersModel ActivationParametersModel { get; set; }
     public PodProgressModel ProgressModel { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts =>
+            parts.MainPart.Type == PodMessagePartType.ResponseVersionInfo &&
+            parts.MainPart.Data.Length == 27;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -29,7 +23,7 @@ public class VersionExtendedMessage : IMessageData
             PrimingPulseRatePer125ms = data[3],
             PrimingPulseCount = data[4],
             CannulaInsertPulseCount = data[5],
-            MaximumLifeTimeHours = data[6],
+            MaximumLifeTimeHours = data[6]
         };
 
         VersionModel = new PodVersionModel
@@ -45,7 +39,7 @@ public class VersionExtendedMessage : IMessageData
             ProductId = data[13],
             Lot = data.DWord(15),
             Serial = data.DWord(19),
-            AssignedAddress = data.DWord(23),
+            AssignedAddress = data.DWord(23)
         };
         ProgressModel = new PodProgressModel
         {

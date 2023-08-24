@@ -46,7 +46,7 @@ public static class ManchesterCodec
             var e = data.Word(i);
             if (!DecodeDictionary.ContainsKey(e))
                 return decoded;
-            decoded.Append(DecodeDictionary[(ushort)e]);
+            decoded.Append(DecodeDictionary[e]);
         }
 
         return decoded;
@@ -56,15 +56,9 @@ public static class ManchesterCodec
     {
         var encoded = new Bytes();
         var len = data.Length;
-        for (var i = 0; i < len; i++)
-        {
-            encoded.Append(EncodeDictionary[data[i]]);
-        }
+        for (var i = 0; i < len; i++) encoded.Append(EncodeDictionary[data[i]]);
 
-        for (var i = len; i < padLength; i++)
-        {
-            encoded.Append((ushort)0x0000);
-        }
+        for (var i = len; i < padLength; i++) encoded.Append((ushort)0x0000);
 
         return encoded;
     }

@@ -1,15 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using OmniCore.Common.Entities;
 using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using OmniCore.Common.Entities;
 using OmniCore.Framework.Omnipod.Parts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Requests;
 
@@ -26,7 +17,8 @@ public class SetBeepingMessage : IMessageData
     public bool OnExtendedBolusEnd { get; set; }
     public int ExtendedBolusBeepInterval { get; set; }
 
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestBeepConfig;
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestBeepConfig;
 
     public IMessageParts ToParts()
     {
@@ -65,11 +57,10 @@ public class SetBeepingMessage : IMessageData
         OnTempBasalEnd = (d0 & 0x00004000) > 0;
         OnExtendedBolusStart = (d0 & 0x00000080) > 0;
         OnExtendedBolusEnd = (d0 & 0x00000040) > 0;
-        BasalBeepInterval = (int)(d0 >> 16 & 0b00111111);
-        TempBasalBeepInterval = (int)(d0 >> 8 & 0b00111111);
+        BasalBeepInterval = (int)((d0 >> 16) & 0b00111111);
+        TempBasalBeepInterval = (int)((d0 >> 8) & 0b00111111);
         ExtendedBolusBeepInterval = (int)(d0 & 0b00111111);
-        BeepNow = (BeepType)(d0 >> 24 & 0X0F);
+        BeepNow = (BeepType)((d0 >> 24) & 0X0F);
         return this;
     }
-
 }

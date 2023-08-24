@@ -1,6 +1,4 @@
-﻿using OmniCore.Maui.Services;
-
-namespace OmniCore.Maui;
+﻿namespace OmniCore.Maui;
 
 public partial class App : Application
 {

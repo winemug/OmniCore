@@ -1,22 +1,16 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class AlertInfoMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) =>
-            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
-            parts.MainPart.Data[0] == (byte)PodStatusType.Alerts;
-
     public ushort[] Alerts = new ushort[8];
     public ushort Unknown0 { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts =>
+            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
+            parts.MainPart.Data[0] == (byte)PodStatusType.Alerts;
 
     public IMessageData FromParts(IMessageParts parts)
     {

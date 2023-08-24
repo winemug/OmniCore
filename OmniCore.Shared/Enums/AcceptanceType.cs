@@ -9,5 +9,5 @@ public enum AcceptanceType
     RejectedProtocolError,
     RejectedNonceReseed,
     RejectedErrorOccured,
-    RejectedFaultOccured,
+    RejectedFaultOccured
 }

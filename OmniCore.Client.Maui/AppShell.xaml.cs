@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using OmniCore.Maui.Services;
-using OmniCore.Maui.ViewModels;
-
-namespace OmniCore.Maui;
+﻿namespace OmniCore.Maui;
 
 public partial class AppShell : Shell
 {

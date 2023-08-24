@@ -1,40 +1,19 @@
-﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OmniCore.Common.Entities;
+using OmniCore.Common.Pod;
+using OmniCore.Framework.Omnipod.Parts;
 using OmniCore.Framework.Omnipod.Requests;
 using OmniCore.Framework.Omnipod.Responses;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Net;
-using OmniCore.Common.Entities;
-using OmniCore.Framework.Omnipod.Parts;
 
 namespace OmniCore.Framework.Omnipod;
 
 public class MessageBuilder
 {
-    private class Message : IPodMessage
-    {
-        public uint Address { get; init; }
-
-        public int Sequence { get; init; }
-
-        public bool Critical { get; init; }
-
-        public Bytes Body { get; init; }
-
-        public IMessageData Data { get; init; }
-    }
-
     public uint? Address { get; private set; }
     public int? Sequence { get; private set; }
     public bool Critical { get; private set; }
     public INonceProvider? NonceProvider { get; private set; }
-    public IMessageData? Data { get; private set; }
-    public Bytes? Body { get; private set; }
+    public IMessageData? Data { get; }
+    public Bytes? Body { get; }
 
     public MessageBuilder WithAddress(uint address)
     {
@@ -74,8 +53,8 @@ public class MessageBuilder
         var b0 = messageBody[4];
         var b1 = messageBody[5];
         var withCriticalFollowup = (b0 & 0x80) > 0;
-        var sequence = b0 >> 2 & 0b00111111;
-        var bodyLength = (b0 & 0b00000011) << 8 | b1;
+        var sequence = (b0 >> 2) & 0b00111111;
+        var bodyLength = ((b0 & 0b00000011) << 8) | b1;
 
         if (bodyLength != messageBody.Length - 6 - 2)
             throw new ApplicationException();
@@ -137,7 +116,7 @@ public class MessageBuilder
             Data = messageData,
             Address = address,
             Sequence = sequence,
-            Critical = withCriticalFollowup,
+            Critical = withCriticalFollowup
         };
     }
 
@@ -166,6 +145,7 @@ public class MessageBuilder
                 part.Nonce = NonceProvider.NextNonce();
                 bodyLength += 4;
             }
+
             bodyLength += part.Data.Length + 2;
             msgParts.Add(part);
         }
@@ -175,7 +155,7 @@ public class MessageBuilder
         if (Critical)
             b0 = 0x80;
         b0 |= (byte)(Sequence << 2);
-        b0 |= (byte)(bodyLength >> 8 & 0x03);
+        b0 |= (byte)((bodyLength >> 8) & 0x03);
         var b1 = (byte)(bodyLength & 0xff);
         messageBody.Append(new[] { b0, b1 });
         foreach (var part in partsList)
@@ -200,9 +180,22 @@ public class MessageBuilder
         {
             Body = messageBody,
             Data = messageData,
-            Address = this.Address.Value,
-            Sequence = this.Sequence.Value,
-            Critical = this.Critical,
+            Address = Address.Value,
+            Sequence = Sequence.Value,
+            Critical = Critical
         };
+    }
+
+    private class Message : IPodMessage
+    {
+        public uint Address { get; init; }
+
+        public int Sequence { get; init; }
+
+        public bool Critical { get; init; }
+
+        public Bytes Body { get; init; }
+
+        public IMessageData Data { get; init; }
     }
 }

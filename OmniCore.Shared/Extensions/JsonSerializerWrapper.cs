@@ -18,13 +18,13 @@ public static class JsonSerializerWrapper
 
         return null;
     }
-    
+
     public static string? TrySerialize<T>(T? obj) where T : class
     {
         try
         {
             if (obj != null)
-                return JsonSerializer.Serialize<T>(obj);
+                return JsonSerializer.Serialize(obj);
         }
         catch (Exception)
         {

@@ -5,10 +5,10 @@
              x:Class="OmniCore.Maui.Views.TestPage">
     <ContentPage.Content>
         <VerticalStackLayout Spacing="48">
-            <Button Text="Stop" Command="{Binding StopCommand}"/>
-            <Button Text="New" Command="{Binding NewPodCommand}"/>
-            <Button Text="Prime" Command="{Binding PrimeCommand}"/>
-            <Button Text="Start" Command="{Binding StartCommand}"/>
+            <Button Text="Stop" Command="{Binding StopCommand}" />
+            <Button Text="New" Command="{Binding NewPodCommand}" />
+            <Button Text="Prime" Command="{Binding PrimeCommand}" />
+            <Button Text="Start" Command="{Binding StartCommand}" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

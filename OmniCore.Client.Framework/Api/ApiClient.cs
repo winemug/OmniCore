@@ -10,7 +10,10 @@ public class ApiClient : IApiClient
 {
     private IAppConfiguration _appConfiguration;
 
-    private HttpClient _httpClient;
+    private bool _disposed;
+
+    private readonly HttpClient _httpClient;
+
     public ApiClient(IAppConfiguration appConfiguration)
     {
         _appConfiguration = appConfiguration;
@@ -19,6 +22,7 @@ public class ApiClient : IApiClient
             BaseAddress = new Uri(appConfiguration.ApiAddress, UriKind.Absolute)
         };
     }
+
     public async Task<TResponse?> PostRequestAsync<TRequest, TResponse>(string route, TRequest request,
         CancellationToken cancellationToken = default) where TResponse : ApiResponse
     {
@@ -36,10 +40,8 @@ public class ApiClient : IApiClient
         {
             return null;
         }
-        
     }
 
-    private bool _disposed;
     public void Dispose()
     {
         if (!_disposed)

@@ -9,7 +9,8 @@ namespace OmniCore.Framework.Omnipod;
 
 public class PodModel : IPodModel
 {
-    private Pod _pod;
+    private INonceProvider? _nonceProvider;
+    private readonly Pod _pod;
 
     public PodModel(Pod pod)
     {
@@ -20,7 +21,7 @@ public class PodModel : IPodModel
     public uint RadioAddress => _pod.RadioAddress;
     public int UnitsPerMilliliter => _pod.UnitsPerMilliliter;
     public MedicationType Medication => _pod.Medication;
-   
+
     // Runtime Info
     public PodProgressModel? ProgressModel { get; set; }
     public PodStatusModel? StatusModel { get; set; }
@@ -30,15 +31,12 @@ public class PodModel : IPodModel
     public PodActivationParametersModel? ActivationParametersModel { get; set; }
     public PodBasalModel? BasalModel { get; set; }
 
-    private INonceProvider? _nonceProvider;
     public INonceProvider? NonceProvider
     {
         get
         {
             if (_nonceProvider == null && VersionModel != null)
-            {
                 _nonceProvider = new NonceProvider(VersionModel.Lot, VersionModel.Serial);
-            }
             return _nonceProvider;
         }
     }
@@ -49,6 +47,19 @@ public class PodModel : IPodModel
     public int NextMessageSequence { get; set; }
     public uint? LastNonce { get; set; }
     public DateTimeOffset? LastRadioPacketReceived { get; set; }
+
+    public void ProcessReceivedMessage(IPodMessage message, DateTimeOffset received)
+    {
+        var messageData = message.Data;
+        if (messageData is StatusMessage sm)
+            ProcessMessage(sm, received);
+        if (messageData is VersionMessage vm)
+            ProcessMessage(vm, received);
+        if (messageData is VersionExtendedMessage vem)
+            ProcessMessage(vem, received);
+        if (messageData is StatusExtendedMessage sem)
+            ProcessMessage(sem, received);
+    }
 
     public async Task LoadAsync()
     {
@@ -81,12 +92,7 @@ public class PodModel : IPodModel
                 ProductId = 0
             };
 
-            if (ActivationParametersModel == null)
-            {
-                ActivationParametersModel = new PodActivationParametersModel
-                {
-                };
-            }
+            if (ActivationParametersModel == null) ActivationParametersModel = new PodActivationParametersModel();
         }
     }
 
@@ -97,7 +103,6 @@ public class PodModel : IPodModel
         {
             var received = pa.RequestSentLatest ?? pa.RequestSentEarliest;
             if (received.HasValue)
-            {
                 try
                 {
                     var receivedMessage = new MessageBuilder().Build(new Bytes(pa.ReceivedData));
@@ -108,21 +113,7 @@ public class PodModel : IPodModel
                 {
                     Debug.WriteLine($"Error processing received message\n{ex}");
                 }
-            }
         }
-    }
-    
-    public void ProcessReceivedMessage(IPodMessage message, DateTimeOffset received)
-    {
-        var messageData = message.Data;
-        if (messageData is StatusMessage sm)
-            ProcessMessage(sm, received);
-        if (messageData is VersionMessage vm)
-            ProcessMessage(vm, received);
-        if (messageData is VersionExtendedMessage vem)
-            ProcessMessage(vem, received);
-        if (messageData is StatusExtendedMessage sem)
-            ProcessMessage(sem, received);
     }
 
     private void ProcessMessage(StatusMessage md, DateTimeOffset received)

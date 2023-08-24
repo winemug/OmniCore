@@ -4,7 +4,6 @@ namespace OmniCore.Common.Pod;
 
 public static class ScheduleHelper
 {
-
     public static InsulinSchedule[] ParseInsulinScheduleData(Bytes data)
     {
         var checksum = data[0];
@@ -30,6 +29,7 @@ public static class ScheduleHelper
                 AddAlternatingExtraPulse = alternatingExtraPulse
             });
         }
+
         return schedules.ToArray();
     }
 
@@ -46,6 +46,7 @@ public static class ScheduleHelper
             });
             idx += 6;
         }
+
         return schedules.ToArray();
     }
 
@@ -103,7 +104,7 @@ public static class ScheduleHelper
             PulsesPerBlock = hhPulses[0]
         };
 
-        int currentBlock = 0;
+        var currentBlock = 0;
         foreach (var hhPulse in hhPulses)
         {
             var oldBlockCount = schedule.BlockCount;
@@ -113,44 +114,34 @@ public static class ScheduleHelper
             if (schedule.BlockCount < 2)
             {
                 if (schedule.PulsesPerBlock == hhPulse)
-                {
                     schedule = new InsulinSchedule
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = false,
                         PulsesPerBlock = oldPulsesPerBlock
                     };
-                }
                 else if (schedule.PulsesPerBlock == hhPulse - currentBlock % 2)
-                {
                     schedule = new InsulinSchedule
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = true,
                         PulsesPerBlock = oldPulsesPerBlock
                     };
-                }
                 else
-                {
                     addNewSchedule = true;
-                }
             }
             else
             {
                 var hhPulsesCompare = oldAlternatingMode ? hhPulse - currentBlock % 2 : hhPulse;
                 if (schedule.PulsesPerBlock == hhPulsesCompare)
-                {
                     schedule = new InsulinSchedule
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = oldAlternatingMode,
                         PulsesPerBlock = oldPulsesPerBlock
                     };
-                }
                 else
-                {
                     addNewSchedule = true;
-                }
             }
 
             if (addNewSchedule)
@@ -163,8 +154,10 @@ public static class ScheduleHelper
                     PulsesPerBlock = hhPulse
                 };
             }
+
             currentBlock++;
         }
+
         schedules.Add(schedule);
         return schedules.ToArray();
     }

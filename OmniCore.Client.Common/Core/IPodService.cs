@@ -1,4 +1,3 @@
-
 using OmniCore.Common.Pod;
 using OmniCore.Shared.Enums;
 
@@ -12,12 +11,14 @@ public interface IPodService
         MedicationType medicationType);
 
     Task RemovePodAsync(Guid podId, DateTimeOffset? removeTime = null);
+
     Task ImportPodAsync(
         Guid profileId,
         uint radioAddress, int unitsPerMilliliter,
         MedicationType medicationType,
         uint Lot,
         uint Serial);
+
     Task<List<IPodModel>> GetPodsAsync(Guid? profileId = null);
     Task<IPodModel?> GetPodAsync(Guid podId);
 

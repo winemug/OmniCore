@@ -6,7 +6,8 @@ namespace OmniCore.Framework.Omnipod.Requests;
 
 public class DeactivateMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestDeactivatePod;
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestDeactivatePod;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -20,7 +21,7 @@ public class DeactivateMessage : IMessageData
             {
                 Type = PodMessagePartType.RequestDeactivatePod,
                 RequiresNonce = true,
-                Data = new Bytes(),
+                Data = new Bytes()
             });
     }
 }

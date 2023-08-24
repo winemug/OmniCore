@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.Runtime;
-using OmniCore.Maui.Services;
 
 namespace OmniCore.Maui;
 

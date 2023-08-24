@@ -1,10 +1,7 @@
 #if ANDROID
 using Android.Content;
-using Android.Views;
-using Android.Runtime;
 #endif
 using Android.OS;
-using Microsoft.Maui.Controls.PlatformConfiguration;
 using OmniCore.Common.Platform;
 
 namespace OmniCore.Maui.Services

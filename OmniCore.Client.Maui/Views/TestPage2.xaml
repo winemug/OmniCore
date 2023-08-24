@@ -3,13 +3,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Maui.Views.TestPage2"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:OmniCore.Maui.ViewModels"
              x:DataType="viewModels:TestViewModel2">
     <ContentPage.Content>
         <VerticalStackLayout Padding="20">
-            <Button Text="T1" Command="{Binding TestCommand1}"/>
-            <Button Text="T2" Command="{Binding TestCommand2}"/>
+            <Button Text="T1" Command="{Binding TestCommand1}" />
+            <Button Text="T2" Command="{Binding TestCommand2}" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

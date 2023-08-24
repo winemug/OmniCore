@@ -7,8 +7,9 @@
              x:DataType="viewModels:SetupPermissionsModel">
     <ContentPage.Content>
         <VerticalStackLayout>
-            <Label Text="Hello and Welcome\nPlease click the button below to grant permissions to the OmniCore application."/>
-            <Button Command="{Binding VerifyPermissionsCommand}" Text="Verify Permissions"/>
+            <Label
+                Text="Hello and Welcome\nPlease click the button below to grant permissions to the OmniCore application." />
+            <Button Command="{Binding VerifyPermissionsCommand}" Text="Verify Permissions" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

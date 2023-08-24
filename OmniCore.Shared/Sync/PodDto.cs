@@ -16,5 +16,4 @@ public record PodDto
 
     public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? Removed { get; init; }
-
 }

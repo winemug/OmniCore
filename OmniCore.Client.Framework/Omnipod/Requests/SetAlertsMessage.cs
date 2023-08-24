@@ -6,14 +6,15 @@ namespace OmniCore.Framework.Omnipod.Requests;
 
 public class SetAlertsMessage : IMessageData
 {
-    public AlertConfiguration[] AlertConfigurations { get; set; }
-
-    public static Predicate<IMessageParts> CanParse => (parts) => parts.MainPart.Type == PodMessagePartType.RequestConfigureAlerts;
-
     public SetAlertsMessage()
     {
         AlertConfigurations = new AlertConfiguration[0];
     }
+
+    public AlertConfiguration[] AlertConfigurations { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestConfigureAlerts;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -23,7 +24,7 @@ public class SetAlertsMessage : IMessageData
         while (idx < mainData.Length)
         {
             var b0 = mainData[idx + 0];
-            var b1= mainData[idx + 1];
+            var b1 = mainData[idx + 1];
             var u0 = mainData.Word(idx + 2);
             var b2 = mainData[idx + 4];
             var b3 = mainData[idx + 5];
@@ -43,6 +44,7 @@ public class SetAlertsMessage : IMessageData
             alertConfigurations.Add(ac);
             idx += 6;
         }
+
         AlertConfigurations = alertConfigurations.ToArray();
         return this;
     }
@@ -53,7 +55,7 @@ public class SetAlertsMessage : IMessageData
         if (!AlertConfigurations.Any())
             throw new ApplicationException("Need to have at least one configuration");
 
-        if (AlertConfigurations.DistinctBy(x => x.AlertIndex).Count() != 
+        if (AlertConfigurations.DistinctBy(x => x.AlertIndex).Count() !=
             AlertConfigurations.Count())
             throw new ApplicationException("Alert indices need to be unique");
 
@@ -74,12 +76,14 @@ public class SetAlertsMessage : IMessageData
             var b3 = (byte)alertConfiguration.BeepType;
             data.Append((ushort)u0).Append(b2).Append(b3);
         }
+
         return new MessageParts(
             new MessagePart
             {
                 Type = PodMessagePartType.RequestConfigureAlerts,
                 RequiresNonce = true,
                 Data = data
-            }); ;
+            });
+        ;
     }
 }

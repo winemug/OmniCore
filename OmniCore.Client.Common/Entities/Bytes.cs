@@ -153,7 +153,7 @@ public class Bytes : IComparable<Bytes>
     {
         if (end <= start || start >= Length)
             return new byte[0];
-        
+
         var arr = new byte[end - start];
         Buffer.BlockCopy(ByteBuffer, start, arr, 0, end - start);
         return arr;

@@ -6,5 +6,5 @@ public enum RileyLinkResponse
     UnknownCommand = 0x22,
     RxTimeout = 0xaa,
     CommandInterrupted = 0xbb,
-    CommandSuccess = 0xdd,
+    CommandSuccess = 0xdd
 }

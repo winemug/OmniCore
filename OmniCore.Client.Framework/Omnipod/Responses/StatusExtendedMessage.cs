@@ -1,25 +1,18 @@
 ﻿using OmniCore.Common.Pod;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Responses;
 
 public class StatusExtendedMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) =>
-            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
-            parts.MainPart.Data[0] == (byte)PodStatusType.Extended;
-
     public PodProgressModel ProgressModel { get; set; }
     public PodStatusModel StatusModel { get; set; }
     public PodFaultInfoModel FaultInfoModel { get; set; }
     public PodRadioMeasurementsModel RadioMeasurementsModel { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts =>
+            parts.MainPart.Type == PodMessagePartType.ResponseInfo &&
+            parts.MainPart.Data[0] == (byte)PodStatusType.Extended;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -41,7 +34,7 @@ public class StatusExtendedMessage : IMessageData
             PulsesDelivered = data.Word(6),
             PulsesRemaining = data.Word(11),
             ActiveMinutes = data.Word(13),
-            UnackedAlertsMask = data[15],
+            UnackedAlertsMask = data[15]
         };
 
         FaultInfoModel = new PodFaultInfoModel
@@ -53,7 +46,7 @@ public class StatusExtendedMessage : IMessageData
             FaultInsulinStateTable = (data[17] & 0x80) != 0,
             FaultOcclusionType = (data[17] & 0x60) >> 5,
             FaultDuringImmediateBolus = (data[17] & 0x10) != 0,
-            ProgressBeforeFault = (PodProgress)(data[17] & 0xF),
+            ProgressBeforeFault = (PodProgress)(data[17] & 0xF)
             //ProgressBeforeFault2 = (PodProgress)data[19],
             //Unknown0 = data.Word(20),
         };
@@ -61,7 +54,7 @@ public class StatusExtendedMessage : IMessageData
         RadioMeasurementsModel = new PodRadioMeasurementsModel
         {
             RadioLowGain = (data[18] & 0xC0) >> 6,
-            Rssi = data[18] & 0b00111111,
+            Rssi = data[18] & 0b00111111
         };
 
         return this;

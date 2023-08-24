@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Nito.AsyncEx;
@@ -10,8 +9,8 @@ namespace OmniCore.Framework;
 
 public class SyncService : BackgroundService, ISyncService
 {
-    private IAmqpService _amqpService;
-    private AsyncAutoResetEvent _syncTriggerEvent;
+    private readonly IAmqpService _amqpService;
+    private readonly AsyncAutoResetEvent _syncTriggerEvent;
 
     public SyncService(
         IAmqpService amqpService)
@@ -21,11 +20,16 @@ public class SyncService : BackgroundService, ISyncService
         _amqpService.RegisterMessageHandler(HandleMessageAsync);
     }
 
+    public void TriggerSync()
+    {
+        _syncTriggerEvent.Set();
+    }
+
     private async Task<bool> HandleMessageAsync(AmqpMessage message)
     {
         return false;
     }
-    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await _syncTriggerEvent.WaitAsync(stoppingToken);
@@ -70,11 +74,6 @@ public class SyncService : BackgroundService, ISyncService
         //         await Task.Yield();
         //     }
         // }
-    }
-
-    public void TriggerSync()
-    {
-        _syncTriggerEvent.Set();
     }
 
     private async Task OnPodSynced(Guid podId)

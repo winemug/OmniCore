@@ -17,7 +17,7 @@
 //        _podModel = podModel;
 //        _receivedPackets = new List<IPodPacket>();
 //    }
-    
+
 //    public void Dispose()
 //    {
 //    }
@@ -46,7 +46,7 @@
 //            _receivedPackets.Add(packet);
 //            _receivedMessage = PodMessage.FromReceivedPackets(_receivedPackets);
 //        }
-        
+
 //        if (sendPacket == null)
 //            await Task.Delay((int)(listenTimeoutMs * (listenRetryCount+1)));
 //        else
@@ -56,3 +56,4 @@
 //        return sendPacket;
 //    }
 //}
+

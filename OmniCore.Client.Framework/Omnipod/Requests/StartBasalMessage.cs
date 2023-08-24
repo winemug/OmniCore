@@ -1,23 +1,22 @@
 ﻿using OmniCore.Common.Entities;
 using OmniCore.Common.Pod;
 using OmniCore.Framework.Omnipod.Parts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OmniCore.Framework.Omnipod.Requests;
 
 public class StartBasalMessage : IMessageData
 {
-    public static Predicate<IMessageParts> CanParse =>
-        (parts) => parts.MainPart.Type == PodMessagePartType.RequestBasal &&
-                   parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
-
-    public TimeOnly PodTime { get; set; }
-    public int[] PulsesPerHour48HalfHours { get; set; }
-
     public StartBasalMessage()
     {
         PulsesPerHour48HalfHours = new int[48];
     }
+
+    public TimeOnly PodTime { get; set; }
+    public int[] PulsesPerHour48HalfHours { get; set; }
+
+    public static Predicate<IMessageParts> CanParse =>
+        parts => parts.MainPart.Type == PodMessagePartType.RequestBasal &&
+                 parts.SubPart?.Type == PodMessagePartType.RequestInsulinSchedule;
 
     public IMessageData FromParts(IMessageParts parts)
     {
@@ -51,13 +50,14 @@ public class StartBasalMessage : IMessageData
         mainData.Append(0).Append(0);
 
         var pulseRecord = new Bytes();
-        int currentHH = 0;
+        var currentHH = 0;
         var hhAvgPulses10 = new int[48];
 
         foreach (var schedule in schedules)
         {
             var totalPulses10remaining = 10 * schedule.PulsesPerBlock * schedule.BlockCount
-                + (schedule.AddAlternatingExtraPulse ? 10 : 0) * ((schedule.BlockCount / 2) + (currentHH % 2));
+                                         + (schedule.AddAlternatingExtraPulse ? 10 : 0) *
+                                         (schedule.BlockCount / 2 + currentHH % 2);
 
             var hhPulses10 = totalPulses10remaining / schedule.BlockCount;
 
@@ -68,7 +68,9 @@ public class StartBasalMessage : IMessageData
                 if (totalPulses10remaining > 0xFFFF)
                 {
                     if (hhPulses10 > 0xFFFF)
+                    {
                         pulses10record = 0XFFFF;
+                    }
                     else
                     {
                         var hhCountFitting = 0xFFFF / hhPulses10;
@@ -77,23 +79,18 @@ public class StartBasalMessage : IMessageData
                         pulses10record = hhCountFitting * hhPulses10;
                     }
                 }
+
                 pulseRecord.Append((ushort)pulses10record).Append((uint)avgPulseIntervalMs);
                 totalPulses10remaining -= pulses10record;
             }
 
-            for(int i = currentHH; i < currentHH+schedule.BlockCount; i++)
-            {
-                hhAvgPulses10[i] = hhPulses10;
-            }
+            for (var i = currentHH; i < currentHH + schedule.BlockCount; i++) hhAvgPulses10[i] = hhPulses10;
 
             currentHH += schedule.BlockCount;
         }
 
         var currentHalfHour = PodTime.Hour * 2;
-        if (PodTime.Minute >= 30)
-        {
-            currentHalfHour++;
-        }
+        if (PodTime.Minute >= 30) currentHalfHour++;
 
         var podTimeMs = PodTime.Ticks / 10;
         var halfHourMs = 1800 * 1000 * 1000;
@@ -101,7 +98,7 @@ public class StartBasalMessage : IMessageData
         var toNextHHMs = halfHourMs - spentCurrentHHMs;
 
         var currentHHPulses10 = hhAvgPulses10[currentHalfHour];
-        var remainingHHPulses10 = currentHHPulses10 - (currentHHPulses10 * spentCurrentHHMs / halfHourMs);
+        var remainingHHPulses10 = currentHHPulses10 - currentHHPulses10 * spentCurrentHHMs / halfHourMs;
 
         var avgPulseIntervalCurrentMs = 1800 * 1000 * 1000 / currentHHPulses10;
         mainData.Append((ushort)remainingHHPulses10).Append((uint)avgPulseIntervalCurrentMs).Append(pulseRecord);
@@ -112,7 +109,7 @@ public class StartBasalMessage : IMessageData
         var toNextHH125ms = halfHour125ms - spentCurrentHH125ms;
 
         var currentHHPulses = hhPulses[currentHalfHour];
-        var remainingHHPulses = currentHHPulses - (currentHHPulses * spentCurrentHH125ms / halfHour125ms);
+        var remainingHHPulses = currentHHPulses - currentHHPulses * spentCurrentHH125ms / halfHour125ms;
 
         var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
             (byte)currentHalfHour,
@@ -128,13 +125,13 @@ public class StartBasalMessage : IMessageData
             {
                 Type = PodMessagePartType.RequestBasal,
                 RequiresNonce = false,
-                Data = mainData,
+                Data = mainData
             },
             new MessagePart
             {
                 Type = PodMessagePartType.RequestInsulinSchedule,
                 RequiresNonce = true,
-                Data = subData,
+                Data = subData
             });
     }
 }
