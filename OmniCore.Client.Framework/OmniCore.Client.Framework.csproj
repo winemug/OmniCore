@@ -8,15 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
-        <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.6.40"/>
+        <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30" />
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2"/>
-        <PackageReference Include="Plugin.BLE" Version="3.0.0-beta.4"/>
+        <PackageReference Include="Plugin.BLE" Version="3.0.0-beta.5" />
         <PackageReference Include="Polly" Version="7.2.4"/>
         <PackageReference Include="RabbitMQ.Client" Version="6.5.0"/>
         <PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0"/>
