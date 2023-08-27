@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
         <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30" />
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2"/>

@@ -10,6 +10,7 @@ using OmniCore.Framework.Ble;
 using OmniCore.Framework.Omnipod;
 using OmniCore.Maui.Services;
 using OmniCore.Maui.ViewModels;
+using OmniCore.Maui.Views;
 
 namespace OmniCore.Maui;
 
@@ -28,27 +29,30 @@ public static class MauiProgram
             });
 
         builder.Services
-            .AddSingleton<AppShell>()
-            .AddSingleton<CoreNavigationService>()
-            .AddTransient<SetupPermissionsModel>()
-            .AddTransient<TestViewModel>()
-            .AddTransient<TestViewModel2>()
+            .AddSingleton<NavigationService>()
             .AddSingleton<IAppConfiguration, AppConfiguration>()
-
             //.AddSingleton<IPodService, PodService>()
             .AddSingleton<IRadioService, RadioService>()
             .AddSingleton<IAmqpService, AmqpService>()
             .AddSingleton<ISyncService, SyncService>()
+            
             .AddHostedService<AmqpService>(serviceProvider => (AmqpService)serviceProvider.GetService<IAmqpService>())
             .AddHostedService<SyncService>(serviceProvider => (SyncService)serviceProvider.GetService<ISyncService>())
-            .AddHostedService<RadioService>(
-                serviceProvider => (RadioService)serviceProvider.GetService<IRadioService>())
+            .AddHostedService<RadioService>(serviceProvider => (RadioService)serviceProvider.GetService<IRadioService>())
+            
             .AddTransient<IRadio, Radio>()
             .AddTransient<IRadioConnection, RadioConnection>()
             .AddTransient<IPodModel, PodModel>()
             .AddTransient<IPodConnection, PodConnection>()
             .AddTransient<IPodPacket, PodPacket>()
-            .AddTransient<IApiClient, ApiClient>();
+            .AddTransient<IApiClient, ApiClient>()
+
+            .AddTransient<AccountLoginViewModel>()
+            .AddTransient<SetupPermissionsModel>()
+            .AddTransient<TestViewModel>()
+            .AddTransient<TestViewModel2>()
+
+            .AddTransient<AccountLoginPage>();
 
         builder.RegisterPlatformServices();
 
