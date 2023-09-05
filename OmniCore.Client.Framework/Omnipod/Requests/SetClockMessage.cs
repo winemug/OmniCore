@@ -19,19 +19,19 @@ public class SetClockMessage : IMessageData
     public IMessageData FromParts(IMessageParts parts)
     {
         var data = parts.MainPart.Data;
-        PacketTimeout = data[1];
+        PacketTimeout = data[5];
 
-        var month = data[2];
-        var day = data[3];
-        var year = data[4] + 2000;
+        var month = data[6];
+        var day = data[7];
+        var year = data[8] + 2000;
         Date = new DateOnly(year, month, day);
 
-        var hour = data[5];
-        var minute = data[6];
+        var hour = data[9];
+        var minute = data[10];
         Time = new TimeOnly(hour, minute, 0);
 
-        Lot = data.DWord(7);
-        Serial = data.DWord(11);
+        Lot = data.DWord(11);
+        Serial = data.DWord(12);
         return this;
     }
 
