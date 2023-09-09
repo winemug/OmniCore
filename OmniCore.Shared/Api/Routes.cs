@@ -2,8 +2,8 @@ namespace OmniCore.Shared.Api;
 
 public static class Routes
 {
-    public const string AccountRegistrationRequestRoute = "/account/register";
-    public const string AccountVerificationRequestRoute = "/account/verify";
-    public const string ClientRegistrationRequestRoute = "/client/register";
-    public const string ClientJoinRequestRoute = "/client/join";
+    public const string AccountRegistration = "/account/register";
+    public const string AccountVerification = "/account/verify";
+    public const string ClientRegistration = "/client/register";
+    public const string ClientJoin = "/client/join";
 }
