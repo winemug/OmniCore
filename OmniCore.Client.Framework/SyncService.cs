@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Nito.AsyncEx;
 using OmniCore.Client.Model;
 using OmniCore.Common.Amqp;
@@ -7,7 +6,7 @@ using OmniCore.Common.Core;
 
 namespace OmniCore.Framework;
 
-public class SyncService : BackgroundService, ISyncService
+public class SyncService : ISyncService
 {
     private readonly IAmqpService _amqpService;
     private readonly AsyncAutoResetEvent _syncTriggerEvent;
@@ -30,7 +29,7 @@ public class SyncService : BackgroundService, ISyncService
         return false;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await _syncTriggerEvent.WaitAsync(stoppingToken);
 

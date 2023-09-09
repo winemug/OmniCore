@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.Threading;
 using OmniCore.Common.Amqp;
 using OmniCore.Common.Core;
@@ -9,7 +8,7 @@ using OmniCore.Framework.Omnipod;
 
 namespace OmniCore.Framework;
 
-public class RaddService : BackgroundService, IRaddService
+public class RaddService : IRaddService
 {
     private readonly IAmqpService _amqpService;
     private readonly IPodService _podService;
@@ -25,7 +24,7 @@ public class RaddService : BackgroundService, IRaddService
         _radioService = radioService;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await stoppingToken.WaitHandle;
     }

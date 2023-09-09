@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using OmniCore.Common.Amqp;
@@ -13,17 +12,17 @@ using RabbitMQ.Client;
 
 namespace OmniCore.Framework;
 
-public class AmqpService : BackgroundService, IAmqpService
+public class AmqpService : IAmqpService
 {
+    private readonly IApiClient _apiClient;
+    private readonly IAppConfiguration _appConfiguration;
     private readonly AsyncManualResetEvent _clientConfigured;
 
     private readonly ILogger<AmqpService> _logger;
     private readonly SynchronizedCollection<Func<AmqpMessage, Task<bool>>> _messageHandlers;
+    private readonly IPlatformInfo _platformInfo;
     private readonly AsyncQueue<AmqpMessage> _publishConfirmNotifyQueue;
     private readonly AsyncQueue<AmqpMessage> _publishRequestQueue;
-    private readonly IApiClient _apiClient;
-    private readonly IAppConfiguration _appConfiguration;
-    private readonly IPlatformInfo _platformInfo;
 
     public AmqpService(
         ILogger<AmqpService> logger,
@@ -53,7 +52,7 @@ public class AmqpService : BackgroundService, IAmqpService
         _publishRequestQueue.Enqueue(message);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var notificationTask = PublishNotificationsAsync(stoppingToken);
         _appConfiguration.ConfigurationChanged += OnConfigurationChanged;
@@ -110,7 +109,7 @@ public class AmqpService : BackgroundService, IAmqpService
         try
         {
             var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
-                Routes.ClientJoinRequestRoute, new ClientJoinRequest
+                Routes.ClientJoin, new ClientJoinRequest
                 {
                     Id = _appConfiguration.ClientAuthorization.ClientId,
                     Token = _appConfiguration.ClientAuthorization.Token,

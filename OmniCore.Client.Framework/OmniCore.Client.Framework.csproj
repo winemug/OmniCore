@@ -8,10 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
-        <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30" />
+        <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30"/>
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2"/>
-        <PackageReference Include="Plugin.BLE" Version="3.0.0-beta.5" />
+        <PackageReference Include="Plugin.BLE" Version="3.0.0-beta.5"/>
         <PackageReference Include="Polly" Version="7.2.4"/>
         <PackageReference Include="RabbitMQ.Client" Version="6.5.0"/>
         <PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0"/>

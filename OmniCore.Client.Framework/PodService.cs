@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.Threading;
 using Nito.AsyncEx;
 using OmniCore.Client.Model;
@@ -12,15 +11,15 @@ using OmniCore.Shared.Enums;
 
 namespace OmniCore.Framework;
 
-public class PodService : BackgroundService, IPodService
+public class PodService : IPodService
 {
     private readonly IAmqpService _amqpService;
     private readonly IAppConfiguration _appConfiguration;
+    private readonly IRadioService _radioService;
+    private readonly ISyncService _syncService;
 
     private ConcurrentDictionary<Guid, AsyncLock> _podLocks;
     private List<IPodModel> _podModels;
-    private readonly IRadioService _radioService;
-    private readonly ISyncService _syncService;
 
     public PodService(
         IRadioService radioService,
@@ -156,7 +155,7 @@ public class PodService : BackgroundService, IPodService
             _syncService);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _amqpService.RegisterMessageHandler(HandleMessageAsync);
         await stoppingToken.WaitHandle;

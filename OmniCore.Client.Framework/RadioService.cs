@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.Threading;
 using Nito.AsyncEx;
 using OmniCore.Common.Core;
@@ -11,7 +10,7 @@ using Plugin.BLE.Abstractions.EventArgs;
 
 namespace OmniCore.Framework;
 
-public class RadioService : BackgroundService, IRadioService
+public class RadioService : IRadioService
 {
     private readonly Dictionary<Guid, IDevice?> _radioDevices;
     private readonly Dictionary<Guid, AsyncLock> _radioLocks;
@@ -61,7 +60,7 @@ public class RadioService : BackgroundService, IRadioService
         return await GetConnectionAsync(radio, cancellationToken);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var ble = CrossBluetoothLE.Current;
         var adapter = ble.Adapter;
