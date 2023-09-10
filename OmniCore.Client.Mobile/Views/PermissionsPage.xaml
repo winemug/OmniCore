@@ -19,6 +19,6 @@
                 IsEnabled="{Binding Battery}"/>
         <Button Text="Data"  Command="{Binding RequestBackgroundDataExemptionCommand}"
                 IsEnabled="{Binding Data}"/>
-
+        <Button Text="Continue" Command="{Binding ContinueCommand}"/>
     </VerticalStackLayout>
 </ContentPage>

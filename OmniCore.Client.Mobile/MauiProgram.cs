@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Services;
 using OmniCore.Client.Mobile.ViewModels;
 using OmniCore.Client.Mobile.Views;
@@ -25,10 +26,11 @@ namespace OmniCore.Client.Mobile
 #endif
 
             builder.Services
-                .AddTransient<PermissionsPage>()
-                .AddTransient<PermissionsViewModel>()
+                .AddViewViewModel<PermissionsPage, PermissionsViewModel>()
+                .AddViewViewModel<AccountLoginPage, AccountLoginViewModel>()
 
-                .AddSingleton<NavigationService>();
+                .AddSingleton<ILifeCycleEventHandler, LifeCycleEventHandler>()
+                .AddSingleton<INavigationService, NavigationService>();
 
             builder.Services.RegisterPlatformServices();
 
