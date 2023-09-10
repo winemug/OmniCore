@@ -10,9 +10,15 @@
             Text="Permissions"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        <Button Text="Check" Command="{Binding CheckPermissionsCommand}"/>
-        <Label Text="{Binding PermissionStatusResult}"/>
-        <Button Text="Check" Command="{Binding RequestPermissionsCommand}"/>
-        <Label Text="{Binding PermissionRequestResult}"/>
+
+        <Button Text="Bluetooth" Command="{Binding RequestBluetoothPermissionCommand}"
+                IsEnabled="{Binding Bluetooth}"/>
+        <Button Text="Foreground" Command="{Binding RequestForegroundPermissionCommand}"
+                IsEnabled="{Binding Foreground}"/>
+        <Button Text="Battery"  Command="{Binding RequestBatteryOptimizationExemptionCommand}"
+                IsEnabled="{Binding Battery}"/>
+        <Button Text="Data"  Command="{Binding RequestBackgroundDataExemptionCommand}"
+                IsEnabled="{Binding Data}"/>
+
     </VerticalStackLayout>
 </ContentPage>

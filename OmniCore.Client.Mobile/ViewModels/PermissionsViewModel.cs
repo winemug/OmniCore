@@ -20,14 +20,54 @@ public partial class PermissionsViewModel : ObservableObject
     [ObservableProperty] private string? _permissionStatusResult;
     [ObservableProperty] private string? _permissionRequestResult;
 
+    [ObservableProperty] private bool _bluetooth;
+    [ObservableProperty] private bool _foreground;
+    [ObservableProperty] private bool _battery;
+    [ObservableProperty] private bool _data;
+
     public PermissionsViewModel(IPlatformPermissionService platformPermissionService)
     {
         _platformPermissionService = platformPermissionService;
+        UpdateChecks();
+    }
+
+    [RelayCommand]
+    private async void UpdateChecks()
+    {
+        Bluetooth = await _platformPermissionService.RequiresBluetoothPermissionAsync();
+        Foreground = await _platformPermissionService.RequiresForegroundPermissionAsync();
+        Battery = await _platformPermissionService.IsBatteryOptimizedAsync();
+        Data = await _platformPermissionService.IsBackgroundDataRestrictedAsync();
+    }
+
+    [RelayCommand]
+    private async void RequestBluetoothPermission()
+    {
+        Bluetooth = !await _platformPermissionService.RequestBluetoothPermissionAsync();
+    }
+
+    [RelayCommand]
+    private async void RequestForegroundPermission()
+    {
+        Foreground = !await _platformPermissionService.RequestForegroundPermissionAsync();
+    }
+
+    [RelayCommand]
+    private async void RequestBatteryOptimizationExemption()
+    {
+        Battery = await _platformPermissionService.TryExemptFromBatteryOptimization();
+    }
+
+    [RelayCommand]
+    private async void RequestBackgroundDataExemption()
+    {
+        Data = await _platformPermissionService.TryExemptFromBackgroundDataRestriction();
     }
 
     [RelayCommand]
     private async void CheckPermissions()
     {
+
         var sb = new StringBuilder();
         foreach (var (permissionName, isRuntime) in new[]
                  {
@@ -72,6 +112,7 @@ public partial class PermissionsViewModel : ObservableObject
         }
 
         PermissionRequestResult = sb.ToString();
+
     }
 
     private async Task<string> GetPermissionStatusAsync(string permissionName, bool isRuntime)

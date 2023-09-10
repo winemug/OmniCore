@@ -3,9 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Android.App;
+using Android.Content;
+using Android.Net;
 using Android.OS;
+using Android.Provider;
 using AndroidX.Core.App;
 using OmniCore.Client.Interfaces.Services;
+using static Microsoft.Maui.ApplicationModel.Platform;
+using Intent = Android.Content.Intent;
+using Uri = Android.Net.Uri;
 
 namespace OmniCore.Client.Mobile.Services
 {
@@ -13,12 +20,68 @@ namespace OmniCore.Client.Mobile.Services
     {
         public async Task<bool> RequiresBluetoothPermissionAsync()
         {
-            return await Permissions.CheckStatusAsync<BluetoothPermission>() == PermissionStatus.Granted;
+            return await Permissions.CheckStatusAsync<BluetoothPermission>() != PermissionStatus.Granted;
         }
 
         public async Task<bool> RequestBluetoothPermissionAsync()
         {
             return await Permissions.RequestAsync<BluetoothPermission>() == PermissionStatus.Granted;
+        }
+
+        public async Task<bool> RequiresForegroundPermissionAsync()
+        {
+            return await Permissions.CheckStatusAsync<ForegroundPermission>() != PermissionStatus.Granted;
+        }
+
+        public async Task<bool> RequestForegroundPermissionAsync()
+        {
+            return await Permissions.RequestAsync<ForegroundPermission>() == PermissionStatus.Granted;
+        }
+
+        public async Task<bool> IsBatteryOptimizedAsync()
+        {
+            var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
+            return !pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName);
+        }
+
+        public async Task<bool> TryExemptFromBatteryOptimization()
+        {
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            {
+                Platform.CurrentActivity?.StartActivity(new Intent(Settings.ActionRequestIgnoreBatteryOptimizations, Uri.Parse($"package:{MauiApplication.Current.PackageName}")));
+            }
+            else
+            {
+                Platform.CurrentActivity?.StartActivity(new Intent(Settings.ActionIgnoreBatteryOptimizationSettings));
+            }
+            return true;
+        }
+
+        public async Task<bool> IsBackgroundDataRestrictedAsync()
+        {
+            var cm = (ConnectivityManager)MauiApplication.Current.GetSystemService(Context.ConnectivityService);
+            if (!cm.IsActiveNetworkMetered)
+                return false;
+
+            return cm.RestrictBackgroundStatus switch
+            {
+                RestrictBackgroundStatus.Disabled or RestrictBackgroundStatus.Whitelisted => false,
+                _ => true,
+            };
+        }
+
+        public async Task<bool> TryExemptFromBackgroundDataRestriction()
+        {
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            {
+                MauiApplication.Current.StartActivity(new Intent(Settings.ActionIgnoreBackgroundDataRestrictionsSettings, Uri.Parse($"package:{MauiApplication.Current.PackageName}")));
+            }
+            else
+            {
+                MauiApplication.Current.StartActivity(new Intent(Settings.ActionIgnoreBackgroundDataRestrictionsSettings));
+            }
+            return true;
         }
 
         public async Task<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime)
@@ -54,6 +117,16 @@ namespace OmniCore.Client.Mobile.Services
                 (global::Android.Manifest.Permission.BluetoothConnect, true),
                 (global::Android.Manifest.Permission.BluetoothScan, true)
             };
+    }
+
+    public class ForegroundPermission: Permissions.BasePlatformPermission
+    {
+        public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
+            new (string androidPermission, bool isRuntime)[]
+                {
+                    (global::Android.Manifest.Permission.ForegroundService, true),
+                    (global::Android.Manifest.Permission.PostNotifications, true),
+                };
     }
 
     public class MyPermission : Permissions.BasePlatformPermission
