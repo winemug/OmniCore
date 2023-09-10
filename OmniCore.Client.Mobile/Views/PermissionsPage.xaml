@@ -5,7 +5,7 @@
              Title="PermissionsPage">
     <VerticalStackLayout>
         <Label 
-            Text="Permissione"
+            Text="Permissions"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
     </VerticalStackLayout>

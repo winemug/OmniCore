@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
 using OmniCore.Client.Mobile.Services;
 using OmniCore.Client.Mobile.ViewModels;
 using OmniCore.Client.Mobile.Views;
@@ -12,6 +13,7 @@ namespace OmniCore.Client.Mobile
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
