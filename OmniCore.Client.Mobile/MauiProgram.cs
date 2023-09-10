@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using OmniCore.Client.Mobile.Services;
+using OmniCore.Client.Mobile.ViewModels;
+using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile
 {
@@ -18,6 +21,12 @@ namespace OmniCore.Client.Mobile
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+            builder.Services
+                .AddTransient<PermissionsPage>()
+                .AddTransient<PermissionsViewModel>()
+
+                .AddSingleton<NavigationService>();
 
             return builder.Build();
         }

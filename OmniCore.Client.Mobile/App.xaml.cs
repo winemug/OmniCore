@@ -1,12 +1,18 @@
-﻿namespace OmniCore.Client.Mobile
+﻿using OmniCore.Client.Mobile.Services;
+using OmniCore.Client.Mobile.ViewModels;
+using OmniCore.Client.Mobile.Views;
+
+namespace OmniCore.Client.Mobile
 {
     public partial class App : Application
     {
-        public App()
+
+        public App(NavigationService navigationService)
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            MainPage = navigationService.NavigationPage;
+            navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
         }
     }
 }

@@ -5,7 +5,7 @@
              Title="PermissionsPage">
     <VerticalStackLayout>
         <Label 
-            Text="Welcome to .NET MAUI!"
+            Text="Permissione"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
     </VerticalStackLayout>
