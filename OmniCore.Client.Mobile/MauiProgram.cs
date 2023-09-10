@@ -30,6 +30,8 @@ namespace OmniCore.Client.Mobile
 
                 .AddSingleton<NavigationService>();
 
+            builder.Services.RegisterPlatformServices();
+
             return builder.Build();
         }
     }

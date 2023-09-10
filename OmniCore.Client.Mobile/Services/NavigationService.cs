@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace OmniCore.Client.Mobile.Services;
 
@@ -19,7 +20,9 @@ public class NavigationService
         _serviceProvider = serviceProvider;
     }
 
-    public Task PushAsync<TView, TModel>() where TView : Page
+    public Task PushAsync<TView, TModel>()
+        where TView : Page
+        where TModel : ObservableObject
     {
         var view = _serviceProvider.GetRequiredService<TView>();
         var model = _serviceProvider.GetRequiredService<TModel>();

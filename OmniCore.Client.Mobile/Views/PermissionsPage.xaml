@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:OmniCore.Client.Mobile.ViewModels"
              x:Class="OmniCore.Client.Mobile.Views.PermissionsPage"
-             Title="PermissionsPage">
+             Title="PermissionsPage"
+             x:DataType="viewModels:PermissionsViewModel">
     <VerticalStackLayout>
         <Label 
             Text="Permissions"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+        <Button Text="Check" Command="{Binding CheckPermissionCommand}"/>
+        <Label Text="{Binding PermissionResult}"/>
     </VerticalStackLayout>
 </ContentPage>

@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Shared", "OmniCore
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Model", "OmniCore.Client.Model\OmniCore.Client.Model.csproj", "{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Client.Mobile", "OmniCore.Client.Mobile\OmniCore.Client.Mobile.csproj", "{3FA4D60D-28CE-47BA-8EC6-03784FA690FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Mobile", "OmniCore.Client.Mobile\OmniCore.Client.Mobile.csproj", "{3FA4D60D-28CE-47BA-8EC6-03784FA690FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Client.Interfaces", "OmniCore.Client.Interfaces\OmniCore.Client.Interfaces.csproj", "{05C2EBF0-F3AA-4CCC-A52A-40C67ED8DBD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{3FA4D60D-28CE-47BA-8EC6-03784FA690FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA4D60D-28CE-47BA-8EC6-03784FA690FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3FA4D60D-28CE-47BA-8EC6-03784FA690FC}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{05C2EBF0-F3AA-4CCC-A52A-40C67ED8DBD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05C2EBF0-F3AA-4CCC-A52A-40C67ED8DBD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05C2EBF0-F3AA-4CCC-A52A-40C67ED8DBD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05C2EBF0-F3AA-4CCC-A52A-40C67ED8DBD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

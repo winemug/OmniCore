@@ -5,15 +5,30 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using OmniCore.Client.Interfaces.Services;
+using OmniCore.Client.Mobile.Services;
+#pragma warning disable MVVMTK0039
 
 namespace OmniCore.Client.Mobile.ViewModels;
 
-public class PermissionsViewModel : INotifyPropertyChanged
+public partial class PermissionsViewModel : ObservableObject
 {
-    public event PropertyChangedEventHandler PropertyChanged;
+    private readonly IPlatformPermissionService _platformPermissionService;
+    [ObservableProperty] private string? _permissionName;
 
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    [ObservableProperty] private string? _permissionResult;
+
+    public PermissionsViewModel(IPlatformPermissionService platformPermissionService)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        _platformPermissionService = platformPermissionService;
     }
+
+    [RelayCommand]
+    private async void CheckPermission()
+    {
+        PermissionResult = _platformPermissionService.GetPermissionStatusAsync("").ToString();
+    }
+
 }
