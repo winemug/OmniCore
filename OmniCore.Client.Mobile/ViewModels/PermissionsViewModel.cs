@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Services;
-#pragma warning disable MVVMTK0039
 
 namespace OmniCore.Client.Mobile.ViewModels;
 
@@ -28,7 +27,15 @@ public partial class PermissionsViewModel : ObservableObject
     [RelayCommand]
     private async void CheckPermission()
     {
-        PermissionResult = _platformPermissionService.GetPermissionStatusAsync("").ToString();
+        try
+        {
+            var r = await _platformPermissionService.GetPermissionStatusAsync("");
+            PermissionResult = r.ToString();
+        }
+        catch (Exception e)
+        {
+            PermissionResult = e.Message;
+        }
     }
 
 }
