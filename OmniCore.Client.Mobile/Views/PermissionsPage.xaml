@@ -10,7 +10,9 @@
             Text="Permissions"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        <Button Text="Check" Command="{Binding CheckPermissionCommand}"/>
-        <Label Text="{Binding PermissionResult}"/>
+        <Button Text="Check" Command="{Binding CheckPermissionsCommand}"/>
+        <Label Text="{Binding PermissionStatusResult}"/>
+        <Button Text="Check" Command="{Binding RequestPermissionsCommand}"/>
+        <Label Text="{Binding PermissionRequestResult}"/>
     </VerticalStackLayout>
 </ContentPage>

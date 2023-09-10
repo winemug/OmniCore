@@ -7,5 +7,8 @@ using System.Threading.Tasks;
 namespace OmniCore.Client.Interfaces.Services;
 public interface IPlatformPermissionService
 {
-    Task<PermissionStatus> GetPermissionStatusAsync(string permissionId);
+    Task<bool> RequiresBluetoothPermissionAsync();
+    Task<bool> RequestBluetoothPermissionAsync();
+    Task<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime);
+    Task<PermissionStatus> RequestPermissionAsync(string permissionId);
 }
