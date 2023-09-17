@@ -29,7 +29,7 @@ namespace OmniCore.Client.Mobile
                 .AddViewViewModel<PermissionsPage, PermissionsViewModel>()
                 .AddViewViewModel<AccountLoginPage, AccountLoginViewModel>()
 
-                .AddSingleton<ILifeCycleEventHandler, LifeCycleEventHandler>()
+                .AddSingleton<ICoreService, CoreService>()
                 .AddSingleton<INavigationService, NavigationService>();
 
             builder.Services.RegisterPlatformServices();

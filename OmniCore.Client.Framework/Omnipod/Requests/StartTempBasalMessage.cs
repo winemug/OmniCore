@@ -8,6 +8,7 @@ public class StartTempBasalMessage : IMessageData
 {
     public int HalfHourCount { get; set; }
     public int PulsesPerHour { get; set; }
+    public PulseSchedule Schedule { get; set; }
 
     public static Predicate<IMessageParts> CanParse =>
         parts => parts.MainPart.Type == PodMessagePartType.RequestTempBasal &&
@@ -15,12 +16,14 @@ public class StartTempBasalMessage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
+        Schedule = ScheduleHelper.ParsePulseSchedule(parts.MainPart.Data, false, false);
+        
         var subData = parts.SubPart!.Data.Sub(4);
-        var schedules = ScheduleHelper.ParseInsulinScheduleData(subData);
+        var iss = ScheduleHelper.ParseInsulinScheduleData(subData);
         HalfHourCount = 0;
-        foreach (var schedule in schedules.Skip(1)) HalfHourCount += schedule.BlockCount;
-        PulsesPerHour = schedules[0].PulsesPerBlock * 2
-                        + (schedules[0].AddAlternatingExtraPulse ? 1 : 0);
+        foreach (var schedule in iss.Entries.Skip(1)) HalfHourCount += schedule.BlockCount;
+        PulsesPerHour = iss.Entries[0].PulsesPerBlock * 2
+                        + (iss.Entries[0].AddAlternatingExtraPulse ? 1 : 0);
 
         return this;
     }
@@ -73,7 +76,7 @@ public class StartTempBasalMessage : IMessageData
 
         var schedules = new[]
         {
-            new InsulinSchedule
+            new InsulinScheduleEntry
             {
                 BlockCount = HalfHourCount,
                 AddAlternatingExtraPulse = PulsesPerHour % 2 == 1,

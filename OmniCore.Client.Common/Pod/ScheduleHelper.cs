@@ -1,18 +1,62 @@
-﻿using OmniCore.Common.Entities;
+﻿using System.Formats.Tar;
+using OmniCore.Common.Entities;
 
 namespace OmniCore.Common.Pod;
 
+
+// 1A Insulin Schedule
+// (long) nonce
+// (byte) Table No: 00 Basal, 01 Temp Basal, 02 Bolus
+// (dword) checksum
+
+// (byte) Basal: Current HalfHour of Day
+//        Temp: Count of "total, i.e. resulting" Halfhours (excluding initial)
+//        Bolus: 1+Extended half hours
+// (word) Duration of initial schedule, in Seconds * 8
+// (word) Total pulses in initial schedule, Pulses
+
+// Schedule entry (repeated)
+// (word)
+// 1 bit: Flag for extra pulse "each alternate half hour" // whether hourcount or what really
+// 3 bits: Half Hour Repeats (min 1, max 8) (3bits+1)
+// 2 bits: Unused?
+// 10 bits: Total Pulses in block
+
+// Bolus:??? Repeated entry for the initial duration pulses, as if it's an half hour. 
+
+
+// Pulse Schedule 13 16 17
+
+// BASAL
+// (byte) beep
+// (byte) (basal) hh index for which initial, (temp) 00, (bolus) **** NO SUCH FIELD ***
+//        (temp) 0
+
+// (word) Remaining pulses*10 (basal, temp), immediate total pulses*10 (bolus) 0 if no immediate bolus
+// (dword) Microseconds until next pulse/10 (max 0x6b49d200), (bolus) 0x30d40 (2 secs) even if no immediate bolus
+
+// (word) Total pulses*10
+// (dword) Microseconds interval between pulses (max 0x6b49d200)
+
+// TEMP
+
+
 public static class ScheduleHelper
 {
-    public static InsulinSchedule[] ParseInsulinScheduleData(Bytes data)
+    public static InsulinSchedule ParseInsulinScheduleData(Bytes data)
     {
-        var checksum = data[0];
-        var halfHourCount = data[1];
-        var initialDuration125Ms = data.Word(2);
-        var initialPulseCount = data.Word(4);
+        var iss = new InsulinSchedule();
+        
+        var tableNumber = data[0];
+        var halfHourIndicator = data[3];
+        var initialDuration125Ms = data.Word(4);
+        var initialPulseCount = data.Word(6);
 
-        var idx = 6;
-        var schedules = new List<InsulinSchedule>();
+        iss.InitialDurationMilliseconds = (ulong)(initialDuration125Ms) * 125;
+        iss.InitialDurationPulseCount = initialPulseCount;
+        iss.HalfHourIndicator = halfHourIndicator;
+        var idx = 8;
+        var schedules = new List<InsulinScheduleEntry>();
         while (idx < data.Length)
         {
             var b0 = data[idx++];
@@ -22,7 +66,7 @@ public static class ScheduleHelper
             var alternatingExtraPulse = (b0 & 0x08) > 0;
             var pulsesPerBlock = (b0 & 0x07) << 8;
             pulsesPerBlock |= b1;
-            schedules.Add(new InsulinSchedule
+            schedules.Add(new InsulinScheduleEntry
             {
                 BlockCount = blockCount,
                 PulsesPerBlock = pulsesPerBlock,
@@ -30,31 +74,46 @@ public static class ScheduleHelper
             });
         }
 
-        return schedules.ToArray();
+        iss.Entries = schedules.ToArray();
+        return iss;
     }
 
-    public static PulseSchedule[] ParsePulseScheduleData(Bytes data)
+    public static PulseSchedule ParsePulseSchedule(Bytes mainData, bool rolling, bool bolus)
     {
-        var idx = 0;
-        var schedules = new List<PulseSchedule>();
-        while (idx < data.Length)
+        var idx = 2;
+        if (bolus)
+            idx = 1;            
+        var schedules = new List<PulseScheduleEntry>();
+        while (idx < mainData.Length)
         {
-            schedules.Add(new PulseSchedule
+            schedules.Add(new PulseScheduleEntry
             {
-                CountDecipulses = data.Word(idx),
-                IntervalMicroseconds = data.DWord(idx + 2)
+                CountDecipulses = mainData.Word(idx),
+                IntervalMicroseconds = mainData.DWord(idx + 2)
             });
             idx += 6;
         }
 
-        return schedules.ToArray();
+        if (bolus)
+            return new PulseSchedule(
+                schedules[0].CountDecipulses,
+                schedules[0].IntervalMicroseconds,
+                0,
+                schedules.ToArray(),
+                rolling);
+        return new PulseSchedule(
+            schedules[0].CountDecipulses,
+            schedules[0].IntervalMicroseconds,
+            mainData[1],
+            schedules.Skip(1).ToArray(),
+            rolling);
     }
 
     public static Bytes GetScheduleDataWithChecksum(
         byte halfHourCount,
         ushort initialDuration125Ms,
         ushort initialPulseCount,
-        InsulinSchedule[] schedules)
+        InsulinScheduleEntry[] schedules)
     {
         var elements = new Bytes();
         foreach (var schedule in schedules)
@@ -93,11 +152,11 @@ public static class ScheduleHelper
         return new Bytes((ushort)checksum).Append(header).Append(elements);
     }
 
-    public static InsulinSchedule[] GetConsecutiveSchedules(int[] hhPulses)
+    public static InsulinScheduleEntry[] GetConsecutiveSchedules(int[] hhPulses)
     {
-        List<InsulinSchedule> schedules = new();
+        List<InsulinScheduleEntry> schedules = new();
 
-        var schedule = new InsulinSchedule
+        var schedule = new InsulinScheduleEntry
         {
             BlockCount = 0,
             AddAlternatingExtraPulse = false,
@@ -114,14 +173,14 @@ public static class ScheduleHelper
             if (schedule.BlockCount < 2)
             {
                 if (schedule.PulsesPerBlock == hhPulse)
-                    schedule = new InsulinSchedule
+                    schedule = new InsulinScheduleEntry
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = false,
                         PulsesPerBlock = oldPulsesPerBlock
                     };
                 else if (schedule.PulsesPerBlock == hhPulse - currentBlock % 2)
-                    schedule = new InsulinSchedule
+                    schedule = new InsulinScheduleEntry
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = true,
@@ -134,7 +193,7 @@ public static class ScheduleHelper
             {
                 var hhPulsesCompare = oldAlternatingMode ? hhPulse - currentBlock % 2 : hhPulse;
                 if (schedule.PulsesPerBlock == hhPulsesCompare)
-                    schedule = new InsulinSchedule
+                    schedule = new InsulinScheduleEntry
                     {
                         BlockCount = oldBlockCount + 1,
                         AddAlternatingExtraPulse = oldAlternatingMode,
@@ -147,7 +206,7 @@ public static class ScheduleHelper
             if (addNewSchedule)
             {
                 schedules.Add(schedule);
-                schedule = new InsulinSchedule
+                schedule = new InsulinScheduleEntry
                 {
                     BlockCount = 1,
                     AddAlternatingExtraPulse = false,

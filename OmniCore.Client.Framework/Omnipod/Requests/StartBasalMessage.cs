@@ -13,6 +13,8 @@ public class StartBasalMessage : IMessageData
 
     public TimeOnly PodTime { get; set; }
     public int[] PulsesPerHour48HalfHours { get; set; }
+    
+    public PulseSchedule Schedule { get; set; }
 
     public static Predicate<IMessageParts> CanParse =>
         parts => parts.MainPart.Type == PodMessagePartType.RequestBasal &&
@@ -20,6 +22,7 @@ public class StartBasalMessage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
+        Schedule = ScheduleHelper.ParsePulseSchedule(parts.MainPart.Data, true, false);
         return this;
     }
 
@@ -91,17 +94,17 @@ public class StartBasalMessage : IMessageData
 
         var currentHalfHour = PodTime.Hour * 2;
         if (PodTime.Minute >= 30) currentHalfHour++;
+        var nextHalfHour = currentHalfHour + 1;
+        var nextHalfHourTime = new TimeOnly(nextHalfHour / 2, nextHalfHour % 2 == 0 ? 0 : 30);
 
-        var podTimeMs = PodTime.Ticks / 10;
-        var halfHourMs = 1800 * 1000 * 1000;
-        var spentCurrentHhMs = podTimeMs % halfHourMs;
-        var toNextHhMs = halfHourMs - spentCurrentHhMs;
-
+        var halfHourMs = (double)1800 * 1000;
+        var podTimeSpentMs = (nextHalfHourTime - PodTime).TotalMilliseconds;
+        var podTimeRemainingMs = halfHourMs - podTimeSpentMs;
+        
         var currentHhPulses10 = hhAvgPulses10[currentHalfHour];
-        var remainingHhPulses10 = currentHhPulses10 - currentHhPulses10 * spentCurrentHhMs / halfHourMs;
+        var remainingHhPulses10 = currentHhPulses10 * podTimeRemainingMs / halfHourMs;
 
-        var avgPulseIntervalCurrentMs = 1800 * 1000 * 1000 / currentHhPulses10;
-        mainData.Append((ushort)remainingHhPulses10).Append((uint)avgPulseIntervalCurrentMs).Append(pulseRecord);
+        mainData.Append((ushort)remainingHhPulses10).Append((uint)podTimeRemainingMs / 125).Append(pulseRecord);
 
         var podTime125Ms = PodTime.Ticks / 10 / 1000 / 125;
         var halfHour125Ms = 30 * 60 * 1000 / 125;
@@ -113,7 +116,7 @@ public class StartBasalMessage : IMessageData
 
         var scheduleData = ScheduleHelper.GetScheduleDataWithChecksum(
             (byte)currentHalfHour,
-            (ushort)toNextHh125Ms,
+            (ushort)(podTimeRemainingMs/125),
             (ushort)remainingHhPulses,
             schedules);
 

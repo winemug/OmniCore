@@ -1,8 +1,9 @@
-namespace OmniCore.Common.Pod;
+﻿namespace OmniCore.Common.Pod;
 
-public struct InsulinSchedule
+public class InsulinSchedule
 {
-    public int BlockCount { get; set; } // 8 bits
-    public bool AddAlternatingExtraPulse { get; set; }
-    public int PulsesPerBlock { get; set; } // 10bits
+    public InsulinScheduleEntry[] Entries { get; set; }
+    public ulong InitialDurationMilliseconds { get; set; }
+    public ushort InitialDurationPulseCount { get; set; }
+    public byte HalfHourIndicator { get; set; }
 }

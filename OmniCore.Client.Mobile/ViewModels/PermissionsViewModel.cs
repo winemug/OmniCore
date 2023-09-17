@@ -14,7 +14,7 @@ using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile.ViewModels;
 
-public partial class PermissionsViewModel : ObservableObject, IViewModel
+public partial class PermissionsViewModel : BaseViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IPlatformPermissionService _platformPermissionService;

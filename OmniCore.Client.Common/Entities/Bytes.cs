@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OmniCore.Common.Entities;
 
@@ -45,14 +46,20 @@ public class Bytes : IComparable<Bytes>
 
     public Bytes(string hexString) : this()
     {
-        if (hexString.Length % 2 != 0)
+        var r = new Regex("[abcdefABCDEF0123456789]");
+        var sb = new StringBuilder();
+        foreach (Match match in r.Matches(hexString))
+        {
+            sb.Append(match.Value);
+        }
+
+        var strSan = sb.ToString(); 
+        if (strSan.Length % 2 != 0)
             throw new ArgumentException();
-
-        hexString = hexString.ToUpperInvariant();
-
-        var bytes = new byte[hexString.Length / 2];
-        for (var i = 0; i < hexString.Length / 2; i += 1)
-            bytes[i] = byte.Parse(hexString.Substring(i * 2, 2), NumberStyles.HexNumber);
+        
+        var bytes = new byte[strSan.Length / 2];
+        for (var i = 0; i < strSan.Length / 2; i += 1)
+            bytes[i] = byte.Parse($"{strSan[i*2]}{strSan[i*2+1]}", NumberStyles.HexNumber);
 
         Append(bytes);
     }

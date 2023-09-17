@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\OmniCore.Server.Model\OmniCore.Server.Model.csproj" />
         <ProjectReference Include="..\OmniCore.Client.Common\OmniCore.Client.Common.csproj"/>
         <ProjectReference Include="..\OmniCore.Client.Framework\OmniCore.Client.Framework.csproj"/>
     </ItemGroup>

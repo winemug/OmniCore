@@ -9,7 +9,7 @@ using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile.ViewModels;
-public partial class AccountLoginViewModel : ObservableObject, IViewModel<int>
+public partial class AccountLoginViewModel : BaseViewModel<int>
 {
     private readonly INavigationService _navigationService;
 
@@ -24,17 +24,7 @@ public partial class AccountLoginViewModel : ObservableObject, IViewModel<int>
         await _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
     }
 
-    public ValueTask InitializeAsync(int data)
-    {
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask BindView(Page page)
+    public override ValueTask InitializeAsync(int data)
     {
         return ValueTask.CompletedTask;
     }

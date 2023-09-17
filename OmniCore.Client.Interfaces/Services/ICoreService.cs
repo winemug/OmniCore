@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace OmniCore.Client.Interfaces.Services;
-public interface ILifeCycleEventHandler
+public interface ICoreService
 {
-    ValueTask OnActivatedAsync();
     ValueTask OnCreatedAsync();
+    ValueTask OnActivatedAsync();
     ValueTask OnDeactivatedAsync();
     ValueTask OnStoppedAsync();
     ValueTask OnResumedAsync();

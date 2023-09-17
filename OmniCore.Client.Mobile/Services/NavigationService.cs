@@ -12,20 +12,20 @@ namespace OmniCore.Client.Mobile.Services;
 
 public class NavigationService : INavigationService
 {
-    private readonly IServiceProvider _serviceProvider;
     public NavigationPage NavigationPage { get; }
     public INavigation Navigation => this.NavigationPage.Navigation;
+
+    private IViewModel? _activeModel;
+    private Page? _activeView;
+    private readonly IServiceProvider _serviceProvider;
 
     public NavigationService(
         IServiceProvider serviceProvider)
     {
         NavigationPage = new NavigationPage();
         _serviceProvider = serviceProvider;
-    }
-
-    public ValueTask OnCreatedAsync()
-    {
-        return PushAsync<PermissionsPage, PermissionsViewModel>();
+        _activeModel = null;
+        _activeView = null;
     }
 
     public async ValueTask PushAsync<TView, TModel>()
@@ -33,8 +33,12 @@ public class NavigationService : INavigationService
         where TModel : IViewModel
     {
         var model = _serviceProvider.GetRequiredService<TModel>();
-
         var view = _serviceProvider.GetRequiredService<TView>();
+        if (_activeModel != null)
+            await _activeModel.DisposeAsync();
+        _activeModel = model;
+        _activeView = view;
+        
         view.BindingContext = model;
         await model.BindView(view);
         await Navigation.PushAsync(view);
@@ -45,12 +49,15 @@ public class NavigationService : INavigationService
         where TModel : IViewModel<TModelData>
     {
         var model = _serviceProvider.GetRequiredService<TModel>();
-        await model.InitializeAsync(data);
-
         var view = _serviceProvider.GetRequiredService<TView>();
+        if (_activeModel != null)
+            await _activeModel.DisposeAsync();
+        _activeModel = model;
+        _activeView = view;
+
+        await model.InitializeAsync(data);
         view.BindingContext = model;
         await model.BindView(view);
         await Navigation.PushAsync(view);
     }
-
 }

@@ -11,7 +11,7 @@ public class ScheduleRequest
     private int _initialDecipulseIntervalMicroseconds;
     private int _initialDecipulses;
 
-    private List<InsulinSchedule> _schedules = new();
+    private List<InsulinScheduleEntry> _schedules = new();
 
 
     public ScheduleRequest ForBolus(int pulseCount, int intervalMilliseconds)
@@ -88,9 +88,9 @@ public class ScheduleRequest
         }
     }
 
-    private InsulinSchedule GetSchedule(int decipulses, int blockCount)
+    private InsulinScheduleEntry GetSchedule(int decipulses, int blockCount)
     {
-        return new InsulinSchedule
+        return new InsulinScheduleEntry
         {
             BlockCount = blockCount,
             PulsesPerBlock = decipulses / 10,

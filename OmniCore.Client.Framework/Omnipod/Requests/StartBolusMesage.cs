@@ -12,6 +12,8 @@ public class StartBolusMesage : IMessageData
     public bool SpecialBolus { get; set; }
     public int ExtendedPulseCount { get; set; }
     public int ExtendedHalfHourCount { get; set; }
+    
+    public PulseSchedule Schedule { get; set; }
 
     public static Predicate<IMessageParts> CanParse =>
         parts => parts.MainPart.Type == PodMessagePartType.RequestBolus &&
@@ -19,6 +21,7 @@ public class StartBolusMesage : IMessageData
 
     public IMessageData FromParts(IMessageParts parts)
     {
+        Schedule = ScheduleHelper.ParsePulseSchedule(parts.MainPart.Data, false, true);
         var mainData = parts.MainPart.Data;
         var totalPulses10 = mainData.Word(1);
         var pulseInterval = mainData.DWord(3);
@@ -49,19 +52,19 @@ public class StartBolusMesage : IMessageData
             mainData.Append(bPulses10).Append(pulseInterval);
             var schedules = new[]
             {
-                new InsulinSchedule
+                new InsulinScheduleEntry
                 {
                     BlockCount = 1,
                     AddAlternatingExtraPulse = false,
                     PulsesPerBlock = aPulse
                 },
-                new InsulinSchedule
+                new InsulinScheduleEntry
                 {
                     BlockCount = 1,
                     AddAlternatingExtraPulse = false,
                     PulsesPerBlock = 1
                 },
-                new InsulinSchedule
+                new InsulinScheduleEntry
                 {
                     BlockCount = 1,
                     AddAlternatingExtraPulse = false,
@@ -81,7 +84,7 @@ public class StartBolusMesage : IMessageData
             mainData.Append(totalPulses10).Append(pulseInterval).Append((ushort)0).Append((uint)0);
             var schedules = new[]
             {
-                new InsulinSchedule
+                new InsulinScheduleEntry
                 {
                     BlockCount = 1,
                     AddAlternatingExtraPulse = false,
