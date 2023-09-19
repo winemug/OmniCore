@@ -12,13 +12,13 @@
             HorizontalOptions="Center" />
 
         <Button Text="Bluetooth" Command="{Binding RequestBluetoothPermissionCommand}"
-                IsEnabled="{Binding Bluetooth}"/>
+                IsEnabled="{Binding BluetoothPermissionRequired}"/>
         <Button Text="Foreground" Command="{Binding RequestForegroundPermissionCommand}"
-                IsEnabled="{Binding Foreground}"/>
+                IsEnabled="{Binding ForegroundPermissionRequired}"/>
         <Button Text="Battery"  Command="{Binding RequestBatteryOptimizationExemptionCommand}"
-                IsEnabled="{Binding Battery}"/>
+                IsEnabled="{Binding RequestBatteryOptimizationExemptionRequired}"/>
         <Button Text="Data"  Command="{Binding RequestBackgroundDataExemptionCommand}"
-                IsEnabled="{Binding Data}"/>
+                IsEnabled="{Binding BackgroundDataExemptionRequired}"/>
         <Button Text="Continue" Command="{Binding ContinueCommand}"/>
     </VerticalStackLayout>
 </ContentPage>

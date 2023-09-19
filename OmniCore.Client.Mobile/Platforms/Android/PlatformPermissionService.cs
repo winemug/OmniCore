@@ -18,33 +18,33 @@ namespace OmniCore.Client.Mobile.Services
 {
     public class PlatformPermissionService : IPlatformPermissionService
     {
-        public async Task<bool> RequiresBluetoothPermissionAsync()
+        public async ValueTask<bool> RequiresBluetoothPermissionAsync()
         {
             return await Permissions.CheckStatusAsync<BluetoothPermission>() != PermissionStatus.Granted;
         }
 
-        public async Task<bool> RequestBluetoothPermissionAsync()
+        public async ValueTask<bool> RequestBluetoothPermissionAsync()
         {
             return await Permissions.RequestAsync<BluetoothPermission>() == PermissionStatus.Granted;
         }
 
-        public async Task<bool> RequiresForegroundPermissionAsync()
+        public async ValueTask<bool> RequiresForegroundPermissionAsync()
         {
             return await Permissions.CheckStatusAsync<ForegroundPermission>() != PermissionStatus.Granted;
         }
 
-        public async Task<bool> RequestForegroundPermissionAsync()
+        public async ValueTask<bool> RequestForegroundPermissionAsync()
         {
             return await Permissions.RequestAsync<ForegroundPermission>() == PermissionStatus.Granted;
         }
 
-        public async Task<bool> IsBatteryOptimizedAsync()
+        public async ValueTask<bool> IsBatteryOptimizedAsync()
         {
             var pm = (PowerManager)MauiApplication.Current.GetSystemService(Context.PowerService);
             return !pm.IsIgnoringBatteryOptimizations(MauiApplication.Current.PackageName);
         }
 
-        public async Task<bool> TryExemptFromBatteryOptimization()
+        public async ValueTask<bool> TryExemptFromBatteryOptimization()
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
             {
@@ -57,7 +57,7 @@ namespace OmniCore.Client.Mobile.Services
             return true;
         }
 
-        public async Task<bool> IsBackgroundDataRestrictedAsync()
+        public async ValueTask<bool> IsBackgroundDataRestrictedAsync()
         {
             var cm = (ConnectivityManager)MauiApplication.Current.GetSystemService(Context.ConnectivityService);
             if (!cm.IsActiveNetworkMetered)
@@ -70,7 +70,7 @@ namespace OmniCore.Client.Mobile.Services
             };
         }
 
-        public async Task<bool> TryExemptFromBackgroundDataRestriction()
+        public async ValueTask<bool> TryExemptFromBackgroundDataRestriction()
         {
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
@@ -84,7 +84,7 @@ namespace OmniCore.Client.Mobile.Services
             return true;
         }
 
-        public async Task<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime)
+        public async ValueTask<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime)
         {
             MyPermission.IsRuntime = isRuntime;
             MyPermission.PermissionId = permissionId;
@@ -93,7 +93,7 @@ namespace OmniCore.Client.Mobile.Services
             return (status, shouldShowRationale);
         }
 
-        public async Task<PermissionStatus> RequestPermissionAsync(string permissionId)
+        public async ValueTask<PermissionStatus> RequestPermissionAsync(string permissionId)
         {
             MyPermission.IsRuntime = true;
             MyPermission.PermissionId = permissionId;

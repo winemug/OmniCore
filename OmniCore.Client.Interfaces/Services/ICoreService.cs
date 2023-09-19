@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace OmniCore.Client.Interfaces.Services;
 public interface ICoreService
 {
-    ValueTask OnCreatedAsync();
-    ValueTask OnActivatedAsync();
-    ValueTask OnDeactivatedAsync();
-    ValueTask OnStoppedAsync();
-    ValueTask OnResumedAsync();
-    ValueTask OnDestroyingAsync();
+    Task OnCreatedAsync();
+    Task OnActivatedAsync();
+    Task OnDeactivatedAsync();
+    Task OnStoppedAsync();
+    Task OnResumedAsync();
+    Task OnDestroyingAsync();
 }

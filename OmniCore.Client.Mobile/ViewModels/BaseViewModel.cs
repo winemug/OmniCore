@@ -9,18 +9,24 @@ namespace OmniCore.Client.Mobile.ViewModels;
 
 public abstract class BaseViewModel<T> : BaseViewModel, IViewModel<T>
 {
-    public abstract ValueTask InitializeAsync(T data);
+    public abstract Task LoadDataAsync(T data);
 }
 
 public class BaseViewModel : ObservableObject, IViewModel
 {
-    public virtual ValueTask DisposeAsync()
+    public virtual Task OnNavigatingTo()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public virtual ValueTask BindView(Page page)
+    public virtual Task OnNavigatingAway()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
+    }
+
+    public virtual Task BindToView(Page page)
+    {
+        page.BindingContext = this;
+        return Task.CompletedTask;
     }
 }

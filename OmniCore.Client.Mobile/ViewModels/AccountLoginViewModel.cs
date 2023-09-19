@@ -19,13 +19,13 @@ public partial class AccountLoginViewModel : BaseViewModel<int>
     }
 
     [RelayCommand]
-    public async void Continue()
+    private async Task ContinueAsync()
     {
         await _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
     }
 
-    public override ValueTask InitializeAsync(int data)
+    public override Task LoadDataAsync(int data)
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 }

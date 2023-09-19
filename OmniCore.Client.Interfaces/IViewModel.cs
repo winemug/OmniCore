@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 public interface IViewModel<in TData> : IViewModel
 {
-    ValueTask InitializeAsync(TData data);
+    Task LoadDataAsync(TData data);
 }
 
-public interface IViewModel : IAsyncDisposable
+public interface IViewModel
 {
-    ValueTask BindView(Page page);
+    Task OnNavigatingTo();
+    Task OnNavigatingAway();
+    Task BindToView(Page page);
 }

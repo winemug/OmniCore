@@ -12,38 +12,41 @@ namespace OmniCore.Client.Mobile.Services;
 public class CoreService : ICoreService
 {
     private readonly INavigationService _navigationService;
+    private readonly IPlatformPermissionService _permissionService;
 
-    public CoreService(INavigationService navigationService)
+    public CoreService(INavigationService navigationService,
+        IPlatformPermissionService permissionService)
     {
         _navigationService = navigationService;
+        _permissionService = permissionService;
     }
-    public ValueTask OnCreatedAsync()
+    public Task OnCreatedAsync()
     {
         return _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
     }
 
-    public ValueTask OnActivatedAsync()
+    public Task OnActivatedAsync()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public ValueTask OnDeactivatedAsync()
+    public Task OnDeactivatedAsync()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public ValueTask OnStoppedAsync()
+    public Task OnStoppedAsync()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public ValueTask OnResumedAsync()
+    public Task OnResumedAsync()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public ValueTask OnDestroyingAsync()
+    public Task OnDestroyingAsync()
     {
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 }

@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 namespace OmniCore.Client.Interfaces.Services;
 public interface IPlatformPermissionService
 {
-    Task<bool> RequiresBluetoothPermissionAsync();
-    Task<bool> RequestBluetoothPermissionAsync();
+    ValueTask<bool> RequiresBluetoothPermissionAsync();
+    ValueTask<bool> RequestBluetoothPermissionAsync();
 
-    Task<bool> RequiresForegroundPermissionAsync();
-    Task<bool> RequestForegroundPermissionAsync();
+    ValueTask<bool> RequiresForegroundPermissionAsync();
+    ValueTask<bool> RequestForegroundPermissionAsync();
 
-    Task<bool> IsBatteryOptimizedAsync();
-    Task<bool> TryExemptFromBatteryOptimization();
+    ValueTask<bool> IsBatteryOptimizedAsync();
+    ValueTask<bool> TryExemptFromBatteryOptimization();
 
-    Task<bool> IsBackgroundDataRestrictedAsync();
-    Task<bool> TryExemptFromBackgroundDataRestriction();
+    ValueTask<bool> IsBackgroundDataRestrictedAsync();
+    ValueTask<bool> TryExemptFromBackgroundDataRestriction();
 
-    Task<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime);
-    Task<PermissionStatus> RequestPermissionAsync(string permissionId);
+    ValueTask<(PermissionStatus, bool)> GetPermissionStatusAsync(string permissionId, bool isRuntime);
+    ValueTask<PermissionStatus> RequestPermissionAsync(string permissionId);
 }

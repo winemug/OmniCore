@@ -22,10 +22,10 @@ public partial class PermissionsViewModel : BaseViewModel
     [ObservableProperty] private string? _permissionStatusResult;
     [ObservableProperty] private string? _permissionRequestResult;
 
-    [ObservableProperty] private bool _bluetooth;
-    [ObservableProperty] private bool _foreground;
-    [ObservableProperty] private bool _battery;
-    [ObservableProperty] private bool _data;
+    [ObservableProperty] private bool _bluetoothPermissionRequired;
+    [ObservableProperty] private bool _foregroundPermissionRequired;
+    [ObservableProperty] private bool _requestBatteryOptimizationExemptionRequired;
+    [ObservableProperty] private bool _backgroundDataExemptionRequired;
 
     public PermissionsViewModel(
         INavigationService navigationService,
@@ -34,123 +34,51 @@ public partial class PermissionsViewModel : BaseViewModel
         _navigationService = navigationService;
         _platformPermissionService = platformPermissionService;
     }
-
-    public ValueTask DisposeAsync()
+    private async Task ReadPermissionsAsync()
     {
-        return ValueTask.CompletedTask;
+        BluetoothPermissionRequired = await _platformPermissionService.RequiresBluetoothPermissionAsync();
+        ForegroundPermissionRequired = await _platformPermissionService.RequiresForegroundPermissionAsync();
+        RequestBatteryOptimizationExemptionRequired = await _platformPermissionService.IsBatteryOptimizedAsync();
+        BackgroundDataExemptionRequired = await _platformPermissionService.IsBackgroundDataRestrictedAsync();
     }
 
-    public async ValueTask BindView(Page page)
+    public override Task OnNavigatingTo()
     {
-        await Update();
+        return ReadPermissionsAsync();
     }
 
     [RelayCommand]
-    private async void Continue()
+    private async Task RequestBluetoothPermission()
+    {
+        await _platformPermissionService.RequestBluetoothPermissionAsync();
+        await ReadPermissionsAsync();
+    }
+
+    [RelayCommand]
+    private async Task RequestForegroundPermission()
+    {
+        await _platformPermissionService.RequestForegroundPermissionAsync();
+        await ReadPermissionsAsync();
+    }
+
+    [RelayCommand]
+    private async Task RequestBatteryOptimizationExemption()
+    {
+        await _platformPermissionService.TryExemptFromBatteryOptimization();
+        await ReadPermissionsAsync();
+    }
+
+    [RelayCommand]
+    private async Task RequestBackgroundDataExemption()
+    {
+        await _platformPermissionService.TryExemptFromBackgroundDataRestriction();
+        await ReadPermissionsAsync();
+    }
+
+    [RelayCommand]
+    private async Task Continue()
     {
         await _navigationService.PushAsync<AccountLoginPage, AccountLoginViewModel, int>(3);
     }
-
-    [RelayCommand]
-    private async void UpdateChecks()
-    {
-        await Update();
-    }
-
-    private async ValueTask Update()
-    {
-        Bluetooth = await _platformPermissionService.RequiresBluetoothPermissionAsync();
-        Foreground = await _platformPermissionService.RequiresForegroundPermissionAsync();
-        Battery = await _platformPermissionService.IsBatteryOptimizedAsync();
-        Data = await _platformPermissionService.IsBackgroundDataRestrictedAsync();
-    }
-
-    [RelayCommand]
-    private async void RequestBluetoothPermission()
-    {
-        Bluetooth = !await _platformPermissionService.RequestBluetoothPermissionAsync();
-    }
-
-    [RelayCommand]
-    private async void RequestForegroundPermission()
-    {
-        Foreground = !await _platformPermissionService.RequestForegroundPermissionAsync();
-    }
-
-    [RelayCommand]
-    private async void RequestBatteryOptimizationExemption()
-    {
-        Battery = await _platformPermissionService.TryExemptFromBatteryOptimization();
-    }
-
-    [RelayCommand]
-    private async void RequestBackgroundDataExemption()
-    {
-        Data = await _platformPermissionService.TryExemptFromBackgroundDataRestriction();
-    }
-
-    //[RelayCommand]
-    //private async void CheckPermissions()
-    //{
-
-    //    var sb = new StringBuilder();
-    //    foreach (var (permissionName, isRuntime) in new[]
-    //             {
-    //                 ("android.permission.BLUETOOTH", false),
-    //                 ("android.permission.BLUETOOTH_ADMIN", false),
-    //                 ("android.permission.BLUETOOTH_ADVERTISE", false),
-    //                 ("android.permission.BLUETOOTH_CONNECT", true),
-    //                 ("android.permission.BLUETOOTH_SCAN", true)
-    //             })
-    //    {
-    //        var resultText = await GetPermissionStatusAsync(permissionName, isRuntime);
-    //        sb.Append(permissionName).Append(" ").AppendLine(resultText);
-    //    }
-
-    //    PermissionStatusResult = sb.ToString();
-    //}
-
-    //[RelayCommand]
-    //private async void RequestPermissions()
-    //{
-    //    var sb = new StringBuilder();
-    //    foreach (var permissionName in new[]
-    //             {
-    //                 "android.permission.BLUETOOTH",
-    //                 "android.permission.BLUETOOTH_ADMIN",
-    //                 "android.permission.BLUETOOTH_ADVERTISE",
-    //                 "android.permission.BLUETOOTH_CONNECT",
-    //                 "android.permission.BLUETOOTH_PRIVILEGED",
-    //                 "android.permission.BLUETOOTH_SCAN",
-    //             })
-    //    {
-    //        sb.Append(permissionName).Append(" ");
-    //        try
-    //        {
-    //            var r = await _platformPermissionService.RequestPermissionAsync(permissionName);
-    //            sb.AppendLine(r.ToString());
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            sb.AppendLine(e.Message);
-    //        }
-    //    }
-
-    //    PermissionRequestResult = sb.ToString();
-
-    //}
-
-    //private async Task<string> GetPermissionStatusAsync(string permissionName, bool isRuntime)
-    //{
-    //    try
-    //    {
-    //        var r = await _platformPermissionService.GetPermissionStatusAsync(permissionName, isRuntime);
-    //        return $"{r.Item1.ToString()} RationaleReq: {r.Item2}";
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        return e.Message;
-    //    }
-    //}
 
 }

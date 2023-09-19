@@ -28,36 +28,46 @@ public class NavigationService : INavigationService
         _activeView = null;
     }
 
-    public async ValueTask PushAsync<TView, TModel>()
+    public async Task PushAsync<TView, TModel>()
         where TView : Page
         where TModel : IViewModel
     {
-        var model = _serviceProvider.GetRequiredService<TModel>();
-        var view = _serviceProvider.GetRequiredService<TView>();
-        if (_activeModel != null)
-            await _activeModel.DisposeAsync();
-        _activeModel = model;
-        _activeView = view;
-        
-        view.BindingContext = model;
-        await model.BindView(view);
-        await Navigation.PushAsync(view);
+        await PushAsync<TView, TModel>();
     }
 
-    public async ValueTask PushAsync<TView, TModel, TModelData>(TModelData data)
+    public async Task PushAsync<TView, TModel, TModelData>(TModelData? data = default)
         where TView : Page
         where TModel : IViewModel<TModelData>
     {
+        if (_activeModel != null)
+        {
+            await _activeModel.OnNavigatingAway();
+        }
+
         var model = _serviceProvider.GetRequiredService<TModel>();
         var view = _serviceProvider.GetRequiredService<TView>();
-        if (_activeModel != null)
-            await _activeModel.DisposeAsync();
+
         _activeModel = model;
         _activeView = view;
 
-        await model.InitializeAsync(data);
-        view.BindingContext = model;
-        await model.BindView(view);
+
+        if (data != null)
+        {
+            await model.LoadDataAsync(data);
+        }
+
+        await model.BindToView(view);
+        await model.OnNavigatingTo();
         await Navigation.PushAsync(view);
+    }
+
+    private async Task TryDisposeModel(IViewModel? model)
+    {
+        if (model == null)
+            return;
+        if (model is IAsyncDisposable asyncDisposable)
+            await asyncDisposable.DisposeAsync();
+        if (model is IDisposable disposable)
+            disposable.Dispose();
     }
 }
