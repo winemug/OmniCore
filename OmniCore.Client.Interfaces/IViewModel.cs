@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace OmniCore.Client.Interfaces;
 
-public interface IViewModel<in TData> : IViewModel
+public interface IDataViewModel<T> : IViewModel
 {
-    Task LoadDataAsync(TData data);
+    Task LoadDataAsync(T data);
 }
 
 public interface IViewModel
 {
+    Task OnPaused();
+    Task OnResumed();
     Task OnNavigatingTo();
     Task OnNavigatingAway();
     Task BindToView(Page page);

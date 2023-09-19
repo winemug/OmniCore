@@ -12,11 +12,13 @@ public interface INavigationService
     NavigationPage NavigationPage { get; }
     INavigation Navigation { get; }
 
-    Task PushAsync<TView, TModel>() where TView : Page
-        where TModel : IViewModel;
-
-    Task PushAsync<TView, TModel, TModelData>(TModelData? data)
+    Task AppWindowActivated();
+    Task AppWindowDeactivated();
+    Task PushViewAsync<TView, TModel>()
         where TView : Page
-        where TModel : IViewModel<TModelData>;
-
+        where TModel : IViewModel;
+    Task PushDataViewAsync<TView, TModel, TModelData>(TModelData data)
+        where TView : Page
+        where TModel : IDataViewModel<TModelData>
+        where TModelData : notnull;
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OmniCore.Client.Interfaces;
 
 namespace OmniCore.Client.Mobile.Services
 {

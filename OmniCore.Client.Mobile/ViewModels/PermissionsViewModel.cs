@@ -14,7 +14,7 @@ using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile.ViewModels;
 
-public partial class PermissionsViewModel : BaseViewModel
+public partial class PermissionsViewModel : ViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IPlatformPermissionService _platformPermissionService;
@@ -26,6 +26,8 @@ public partial class PermissionsViewModel : BaseViewModel
     [ObservableProperty] private bool _foregroundPermissionRequired;
     [ObservableProperty] private bool _requestBatteryOptimizationExemptionRequired;
     [ObservableProperty] private bool _backgroundDataExemptionRequired;
+
+    [ObservableProperty] private bool _canContinue;
 
     public PermissionsViewModel(
         INavigationService navigationService,
@@ -40,9 +42,16 @@ public partial class PermissionsViewModel : BaseViewModel
         ForegroundPermissionRequired = await _platformPermissionService.RequiresForegroundPermissionAsync();
         RequestBatteryOptimizationExemptionRequired = await _platformPermissionService.IsBatteryOptimizedAsync();
         BackgroundDataExemptionRequired = await _platformPermissionService.IsBackgroundDataRestrictedAsync();
+        CanContinue = !(BluetoothPermissionRequired | ForegroundPermissionRequired |
+                       RequestBatteryOptimizationExemptionRequired | BackgroundDataExemptionRequired);
     }
 
     public override Task OnNavigatingTo()
+    {
+        return ReadPermissionsAsync();
+    }
+
+    public override Task OnResumed()
     {
         return ReadPermissionsAsync();
     }
@@ -51,34 +60,30 @@ public partial class PermissionsViewModel : BaseViewModel
     private async Task RequestBluetoothPermission()
     {
         await _platformPermissionService.RequestBluetoothPermissionAsync();
-        await ReadPermissionsAsync();
     }
 
     [RelayCommand]
     private async Task RequestForegroundPermission()
     {
         await _platformPermissionService.RequestForegroundPermissionAsync();
-        await ReadPermissionsAsync();
     }
 
     [RelayCommand]
     private async Task RequestBatteryOptimizationExemption()
     {
         await _platformPermissionService.TryExemptFromBatteryOptimization();
-        await ReadPermissionsAsync();
     }
 
     [RelayCommand]
     private async Task RequestBackgroundDataExemption()
     {
         await _platformPermissionService.TryExemptFromBackgroundDataRestriction();
-        await ReadPermissionsAsync();
     }
 
     [RelayCommand]
     private async Task Continue()
     {
-        await _navigationService.PushAsync<AccountLoginPage, AccountLoginViewModel, int>(3);
+        await _navigationService.PushDataViewAsync<AccountLoginPage, AccountLoginViewModel, int>(3);
     }
 
 }

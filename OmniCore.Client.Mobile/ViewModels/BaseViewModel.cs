@@ -4,25 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using OmniCore.Client.Interfaces;
 
 namespace OmniCore.Client.Mobile.ViewModels;
 
-public abstract class BaseViewModel<T> : BaseViewModel, IViewModel<T>
+public abstract class DataViewModel<T> : ViewModel, IDataViewModel<T>
 {
     public abstract Task LoadDataAsync(T data);
 }
 
-public class BaseViewModel : ObservableObject, IViewModel
+public class ViewModel : ObservableObject, IViewModel
 {
-    public virtual Task OnNavigatingTo()
-    {
-        return Task.CompletedTask;
-    }
+    public virtual Task OnResumed() => Task.CompletedTask;
+    public virtual Task OnPaused() => Task.CompletedTask;
 
-    public virtual Task OnNavigatingAway()
-    {
-        return Task.CompletedTask;
-    }
+    public virtual Task OnNavigatingTo() => Task.CompletedTask;
+
+    public virtual Task OnNavigatingAway() => Task.CompletedTask;
 
     public virtual Task BindToView(Page page)
     {

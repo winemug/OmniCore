@@ -19,6 +19,6 @@
                 IsEnabled="{Binding RequestBatteryOptimizationExemptionRequired}"/>
         <Button Text="Data"  Command="{Binding RequestBackgroundDataExemptionCommand}"
                 IsEnabled="{Binding BackgroundDataExemptionRequired}"/>
-        <Button Text="Continue" Command="{Binding ContinueCommand}"/>
+        <Button Text="Continue" Command="{Binding ContinueCommand}" IsEnabled="{Binding CanContinue}"/>
     </VerticalStackLayout>
 </ContentPage>

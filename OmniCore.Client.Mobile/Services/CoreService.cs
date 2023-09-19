@@ -22,17 +22,17 @@ public class CoreService : ICoreService
     }
     public Task OnCreatedAsync()
     {
-        return _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
+        return _navigationService.PushViewAsync<PermissionsPage, PermissionsViewModel>();
     }
 
     public Task OnActivatedAsync()
     {
-        return Task.CompletedTask;
+        return _navigationService.AppWindowActivated();
     }
 
     public Task OnDeactivatedAsync()
     {
-        return Task.CompletedTask;
+        return _navigationService.AppWindowDeactivated();
     }
 
     public Task OnStoppedAsync()

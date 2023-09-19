@@ -9,7 +9,7 @@ using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile.ViewModels;
-public partial class AccountLoginViewModel : BaseViewModel<int>
+public partial class AccountLoginViewModel : DataViewModel<int>
 {
     private readonly INavigationService _navigationService;
 
@@ -21,7 +21,7 @@ public partial class AccountLoginViewModel : BaseViewModel<int>
     [RelayCommand]
     private async Task ContinueAsync()
     {
-        await _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
+        await _navigationService.PushViewAsync<PermissionsPage, PermissionsViewModel>();
     }
 
     public override Task LoadDataAsync(int data)
