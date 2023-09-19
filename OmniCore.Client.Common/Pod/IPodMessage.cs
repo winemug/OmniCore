@@ -8,5 +8,5 @@ public interface IPodMessage
     int Sequence { get; }
     bool Critical { get; }
     Bytes Body { get; }
-    IMessageData Data { get; }
+    IMessageData? Data { get; }
 }

@@ -17,7 +17,6 @@ public class StartTempBasalMessage : IMessageData
     public IMessageData FromParts(IMessageParts parts)
     {
         Schedule = ScheduleHelper.ParsePulseSchedule(parts.MainPart.Data, false, false);
-        
         var subData = parts.SubPart!.Data.Sub(4);
         var iss = ScheduleHelper.ParseInsulinScheduleData(subData);
         HalfHourCount = 0;

@@ -107,9 +107,6 @@ public class MessageBuilder
         messageData ??= TryParse<StartTempBasalMessage>(parts);
         messageData ??= TryParse<StopDeliveryMessage>(parts);
 
-        if (messageData == null)
-            throw new ApplicationException();
-
         return new Message
         {
             Body = messageBody,
@@ -123,7 +120,14 @@ public class MessageBuilder
     private static IMessageData? TryParse<T>(IMessageParts parts) where T : IMessageData, new()
     {
         if (T.CanParse(parts))
-            return new T().FromParts(parts);
+            try
+            {
+                return new T().FromParts(parts);
+            }
+            catch
+            {
+                return null;
+            }
         return null;
     }
 
