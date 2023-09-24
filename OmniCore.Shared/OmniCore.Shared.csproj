@@ -8,10 +8,5 @@
 
 
 
-    <ItemGroup>
-      <Folder Include="Framework\Api\" />
-      <Folder Include="Framework\Ble\" />
-      <Folder Include="Framework\Data\" />
-    </ItemGroup>
 
 </Project>
