@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
+      <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
     </ItemGroup>
 
 </Project>
