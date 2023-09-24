@@ -1,6 +1,6 @@
 using OmniCore.Shared.Api;
 
-namespace OmniCore.Common.Api;
+namespace OmniCore.Client.Interfaces.Services;
 
 public interface IApiClient : IDisposable
 {

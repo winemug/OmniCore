@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Framework", "OmniCore.Client.Framework\OmniCore.Client.Framework.csproj", "{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Common", "OmniCore.Client.Common\OmniCore.Client.Common.csproj", "{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Tests", "OmniCore.Client.Tests\OmniCore.Client.Tests.csproj", "{9753D6A5-A18D-4556-9206-6B274A0970A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Shared", "OmniCore.Shared\OmniCore.Shared.csproj", "{348790C3-E275-4B99-80AF-D18719450FE5}"
@@ -23,14 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{50E0CA31-CA2D-4EDC-9AA8-37A7392F8952}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Release|Any CPU.ActiveCfg = Release|Any CPU

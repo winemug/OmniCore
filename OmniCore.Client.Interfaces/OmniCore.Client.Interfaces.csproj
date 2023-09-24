@@ -32,4 +32,8 @@
 	  </Compile>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
+	</ItemGroup>
+
 </Project>

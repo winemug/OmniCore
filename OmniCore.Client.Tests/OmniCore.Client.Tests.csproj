@@ -26,9 +26,9 @@
         <PackageReference Include="Polly" Version="7.2.4" />
     </ItemGroup>
 
+
     <ItemGroup>
-        <ProjectReference Include="..\OmniCore.Client.Common\OmniCore.Client.Common.csproj" />
-        <ProjectReference Include="..\OmniCore.Client.Framework\OmniCore.Client.Framework.csproj" />
+      <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
     </ItemGroup>
 
 </Project>

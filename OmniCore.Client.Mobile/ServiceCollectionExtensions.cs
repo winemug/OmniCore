@@ -18,15 +18,5 @@ namespace OmniCore.Client.Mobile.Services
             serviceCollection.AddTransient<TViewModel>();
             return serviceCollection;
         }
-
-        //public static IServiceCollection
-        //    AddTransient<TPage, TViewModel, TViewModelData>(this IServiceCollection serviceCollection)
-        //    where TPage : Page
-        //    where TViewModel : class, IViewModel<TViewModelData>
-        //{
-        //    serviceCollection.AddTransient<TPage>();
-        //    serviceCollection.AddTransient<TViewModel>();
-        //    return serviceCollection;
-        //}
     }
 }

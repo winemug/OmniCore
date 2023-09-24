@@ -121,7 +121,7 @@
 	  <Compile Update="Platforms\Windows\ServiceCollectionExtensions.cs">
 	    <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
 	  </Compile>
-	  <Compile Update="Services\ServiceCollectionExtensions.cs">
+	  <Compile Update="ServiceCollectionExtensions.cs">
 	    <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
 	  </Compile>
 	</ItemGroup>
@@ -134,5 +134,6 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
+
 
 </Project>

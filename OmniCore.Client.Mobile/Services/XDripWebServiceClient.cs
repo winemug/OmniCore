@@ -1,5 +1,3 @@
-namespace OmniCore.Framework.Api;
-
 //public class XDripWebServiceClient
 //{
 //    private Guid _clientId;

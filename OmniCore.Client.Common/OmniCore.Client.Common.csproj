@@ -35,4 +35,12 @@
       <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <Folder Include="Amqp\" />
+      <Folder Include="Cgm\" />
+      <Folder Include="Core\" />
+      <Folder Include="Entities\" />
+    </ItemGroup>
+
 </Project>

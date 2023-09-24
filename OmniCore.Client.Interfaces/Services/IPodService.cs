@@ -1,7 +1,7 @@
 using OmniCore.Common.Pod;
 using OmniCore.Shared.Enums;
 
-namespace OmniCore.Common.Core;
+namespace OmniCore.Client.Interfaces.Services;
 
 public interface IPodService
 {

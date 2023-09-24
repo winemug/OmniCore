@@ -1,6 +1,6 @@
 using OmniCore.Common.Radio;
 
-namespace OmniCore.Common.Core;
+namespace OmniCore.Client.Interfaces.Services;
 
 public interface IRadioService
 {
