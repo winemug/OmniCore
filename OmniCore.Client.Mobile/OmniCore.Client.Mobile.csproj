@@ -105,6 +105,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\OmniCore.Client.Interfaces\OmniCore.Client.Interfaces.csproj" />
+	  <ProjectReference Include="..\OmniCore.Client.Model\OmniCore.Client.Model.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

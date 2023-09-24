@@ -29,6 +29,4 @@ public partial class App : Application
         window.Destroying += async (_, _) => { await _coreService.OnDestroyingAsync(); };
         return window;
     }
-
-    //await _navigationService.PushAsync<PermissionsPage, PermissionsViewModel>();
 }

@@ -54,7 +54,7 @@ public class PodService : IPodService
             _podModels.Remove(pm);
         }
 
-        using var ocdb = new OcDbContext();
+        using var ocdb = new MobileDbContext();
         var pod = ocdb.Pods
             .First(p => p.PodId == podId);
         pod.Removed = removeTime;
@@ -71,7 +71,7 @@ public class PodService : IPodService
         if (_appConfiguration.ClientAuthorization == null)
             throw new ApplicationException("Client not registered");
 
-        using var ocdb = new OcDbContext();
+        using var ocdb = new MobileDbContext();
 
         var b = new byte[4];
         new Random().NextBytes(b);
@@ -105,7 +105,7 @@ public class PodService : IPodService
         if (_appConfiguration.ClientAuthorization == null)
             throw new ApplicationException("Client not registered");
 
-        using var ocdb = new OcDbContext();
+        using var ocdb = new MobileDbContext();
         if (ocdb.Pods.Where(p => p.Lot == lot && p.Serial == serial).Any())
             return;
 
@@ -171,7 +171,7 @@ public class PodService : IPodService
         // TODO: fix starting
         try
         {
-            using var ocdb = new OcDbContext();
+            using var ocdb = new MobileDbContext();
             _podLocks = new ConcurrentDictionary<Guid, AsyncLock>();
             _podModels = new List<IPodModel>();
             var pods = ocdb.Pods

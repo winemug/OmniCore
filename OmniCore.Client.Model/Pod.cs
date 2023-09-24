@@ -19,5 +19,4 @@ public class Pod
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
 
     public bool IsSynced { get; set; }
-    //public List<PodAction> Actions { get; set; }
 }
