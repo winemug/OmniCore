@@ -1,10 +1,10 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
-namespace OmniCore.Shared.Extensions;
+namespace OmniCore.Client.Mobile;
 
-public static class JsonSerializerWrapper
+public static class JsonSerializerExtensions
 {
-    public static T? TryDeserialize<T>(string? json) where T : class
+    public static T? TryDeserialize<T>(this string? json) where T : class
     {
         try
         {
@@ -19,7 +19,7 @@ public static class JsonSerializerWrapper
         return null;
     }
 
-    public static string? TrySerialize<T>(T? obj) where T : class
+    public static string? TrySerialize<T>(this T? obj) where T : class
     {
         try
         {

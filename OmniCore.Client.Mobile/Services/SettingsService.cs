@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using OmniCore.Client.Interfaces.Services;
-using OmniCore.Shared.Extensions;
 
 namespace OmniCore.Client.Mobile.Services;
 
@@ -77,7 +76,7 @@ public class SettingsService : ISettingsService
             if (_clientAuthorization == null)
             {
                 var val = Preferences.Get(nameof(ClientAuthorization), null);
-                _clientAuthorization = JsonSerializerWrapper.TryDeserialize<ClientAuthorization>(val);
+                _clientAuthorization = val.TryDeserialize<ClientAuthorization>();
             }
 
             return _clientAuthorization;
@@ -85,7 +84,7 @@ public class SettingsService : ISettingsService
         set
         {
             _clientAuthorization = value;
-            var strVal = JsonSerializerWrapper.TrySerialize(value);
+            var strVal = value.TrySerialize();
             Preferences.Set(nameof(ClientAuthorization), strVal);
             OnPropertyChanged();
         }
@@ -98,7 +97,7 @@ public class SettingsService : ISettingsService
             if (_endpoint == null)
             {
                 var val = Preferences.Get(nameof(Endpoint), null);
-                _endpoint = JsonSerializerWrapper.TryDeserialize<AmqpEndpointDefinition>(val);
+                _endpoint = val.TryDeserialize<AmqpEndpointDefinition>();
             }
 
             return _endpoint;
@@ -106,7 +105,7 @@ public class SettingsService : ISettingsService
         set
         {
             _endpoint = value;
-            var strVal = JsonSerializerWrapper.TrySerialize(value);
+            var strVal = value.TrySerialize();
             Preferences.Set(nameof(Endpoint), strVal);
             OnPropertyChanged();
         }
