@@ -18,6 +18,7 @@ public partial class PermissionsViewModel : ViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IPlatformPermissionService _platformPermissionService;
+    private readonly ICoreService _coreService;
 
     [ObservableProperty] private string? _permissionStatusResult;
     [ObservableProperty] private string? _permissionRequestResult;
@@ -31,10 +32,12 @@ public partial class PermissionsViewModel : ViewModel
 
     public PermissionsViewModel(
         INavigationService navigationService,
-        IPlatformPermissionService platformPermissionService)
+        IPlatformPermissionService platformPermissionService,
+        ICoreService coreService)
     {
         _navigationService = navigationService;
         _platformPermissionService = platformPermissionService;
+        _coreService = coreService;
     }
     private async Task ReadPermissionsAsync()
     {
@@ -83,7 +86,7 @@ public partial class PermissionsViewModel : ViewModel
     [RelayCommand]
     private async Task Continue()
     {
-        await _navigationService.PushDataViewAsync<AccountLoginPage, AccountLoginViewModel, int>(3);
+        await _coreService.InteractiveStartAsync();
     }
 
 }

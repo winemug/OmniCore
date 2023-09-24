@@ -11,9 +11,24 @@ using OmniCore.Client.Interfaces.Services;
 namespace OmniCore.Client.Mobile.Platforms.Android;
 public class PlatformForegroundService : IPlatformForegroundService
 {
-    public Task<IDisposable> RunInForegroundAsync()
+    public void StartForeground()
     {
-        throw new NotImplementedException();
+        var activity = MauiApplication.Context;
+        var intent = new Intent(activity, typeof(AndroidForegroundService));
+        intent.SetAction(AndroidForegroundService.StartAction);
+
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            activity.StartForegroundService(intent);
+        else
+            activity.StartService(intent);
+    }
+
+    public void StopForeground()
+    {
+        var activity = MauiApplication.Context;
+        var intent = new Intent(activity, typeof(AndroidForegroundService));
+        intent.SetAction(AndroidForegroundService.StopAction);
+        activity.StartService(intent);
     }
 }
 
@@ -24,42 +39,32 @@ public class PlatformForegroundService : IPlatformForegroundService
                                  global::Android.Content.PM.ForegroundService.TypeConnectedDevice)]
 public class AndroidForegroundService : Service
 {
+    public const string StartAction = "start";
+    public const string StopAction = "stop";
     private bool _isStarted;
 
-    private void Start()
-    {
-
-    }
-
-    private void Stop()
-    {
-
-    }
     private void RegisterForegroundService()
     {
-        //if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-        //{
-        //    var notificationManager = GetSystemService(NotificationService) as NotificationManager;
-        //    var channel = new NotificationChannel("background", "Background notification",
-        //        NotificationImportance.Low);
-        //    notificationManager.CreateNotificationChannel(channel);
-        //}
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+        {
+            var notificationManager = GetSystemService(NotificationService) as NotificationManager;
+            var channel = new NotificationChannel("background", "Background notification",
+                NotificationImportance.Low);
+            notificationManager.CreateNotificationChannel(channel);
+        }
+        // this.PackageManager.GetLaunchIntentForPackage();
+        //  var launchIntent = new Intent(this, typeof(MainActivity));
+        //  showAppIntent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTask);
+        //  var showAppPendingIntent = PendingIntent.GetActivity(this, 0, showAppIntent, PendingIntentFlags.UpdateCurrent);
 
+        var notification = new Notification.Builder(this, "background")
+            .SetContentTitle("OmniCore")
+            .SetContentText("OmniCore is running in the background.")
+            // .SetContentIntent(showAppPendingIntent)
+            .SetOngoing(true)
+            .Build();
 
-        // this.PackageManager.GetLaunchIntentForPackage()
-        // var launchIntent = new Intent(this, typeof(MainActivity));
-        // showAppIntent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTask);
-        // var showAppPendingIntent = PendingIntent.GetActivity(this, 0, showAppIntent, PendingIntentFlags.UpdateCurrent);
-
-        //var notification = new Builder(this, "background")
-        //    .SetContentTitle("OmniCore")
-        //    .SetContentText("OmniCore is running in the background.")
-        //    // .SetContentIntent(showAppPendingIntent)
-        //    .SetOngoing(true)
-        //    .Build();
-
-        // Enlist this instance of the service as a foreground service
-        //StartForeground(100, notification);
+        StartForeground(100, notification);
     }
 
     public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -69,15 +74,13 @@ public class AndroidForegroundService : Service
             case "start":
                 if (!_isStarted)
                 {
-                    RegisterForegroundService();
-                    Start();
                     _isStarted = true;
+                    RegisterForegroundService();
                 }
                 return StartCommandResult.Sticky;
             case "stop":
                 if (_isStarted)
                 {
-                    Stop();
                     _isStarted = false;
                     StopForeground(true);
                     StopSelf();
@@ -93,7 +96,6 @@ public class AndroidForegroundService : Service
     {
         if (_isStarted)
         {
-            Stop();
             _isStarted = false;
             StopForeground(true);
             StopSelf();

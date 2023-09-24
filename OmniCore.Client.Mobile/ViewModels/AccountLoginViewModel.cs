@@ -9,23 +9,26 @@ using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Views;
 
 namespace OmniCore.Client.Mobile.ViewModels;
-public partial class AccountLoginViewModel : DataViewModel<int>
+public partial class AccountLoginViewModel : ViewModel
 {
     private readonly INavigationService _navigationService;
+    private readonly ICoreService _coreService;
 
-    public AccountLoginViewModel(INavigationService  navigationService)
+    public AccountLoginViewModel(INavigationService  navigationService,
+        ICoreService coreService)
     {
         _navigationService = navigationService;
+        _coreService = coreService;
     }
 
     [RelayCommand]
     private async Task ContinueAsync()
     {
-        await _navigationService.PushViewAsync<PermissionsPage, PermissionsViewModel>();
-    }
+        using (var _ = _coreService.ForegroundActivityContext())
+        {
+            await Task.Delay(7500);
+        }
 
-    public override Task LoadDataAsync(int data)
-    {
-        return Task.CompletedTask;
+        await _coreService.InteractiveStartAsync();
     }
 }

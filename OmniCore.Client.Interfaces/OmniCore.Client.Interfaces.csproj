@@ -18,4 +18,18 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+
+	<ItemGroup>
+	  <Folder Include="Platforms\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Services\IPlatformForegroundService.cs">
+	    <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
+	  </Compile>
+	  <Compile Update="Services\IPlatformPermissionService.cs">
+	    <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
+	  </Compile>
+	</ItemGroup>
+
 </Project>

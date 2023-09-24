@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace OmniCore.Client.Interfaces.Services;
 public interface ICoreService
 {
+    IDisposable ForegroundActivityContext();
+    Task InteractiveStartAsync();
     Task OnCreatedAsync();
     Task OnActivatedAsync();
     Task OnDeactivatedAsync();

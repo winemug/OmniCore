@@ -8,6 +8,7 @@ namespace OmniCore.Client.Interfaces.Services
 {
     public interface IPlatformForegroundService
     {
-        Task<IDisposable> RunInForegroundAsync();
+        void StartForeground();
+        void StopForeground();
     }
 }

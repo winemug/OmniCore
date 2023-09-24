@@ -32,6 +32,7 @@ namespace OmniCore.Client.Mobile
                 .AddDbContext<MobileDbContext>(optionsBuilder =>
                 {
                     optionsBuilder.UseSqlite(
+                        "Data Source=" +
                         Path.Join(
                             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                             "oc.sqlite"));
