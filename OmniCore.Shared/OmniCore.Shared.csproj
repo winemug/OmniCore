@@ -10,8 +10,5 @@
 
 
 
-    <ItemGroup>
-      <Folder Include="Pod\" />
-    </ItemGroup>
 
 </Project>
