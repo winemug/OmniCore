@@ -1,8 +1,8 @@
 ﻿namespace OmniCore.Client.Model;
 
-public class Client
+public class User
 {
-    public Guid ClientId { get; set; }
+    public Guid UserId { get; set; }
 
     public string? Name { get; set; }
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;

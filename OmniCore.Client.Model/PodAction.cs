@@ -8,7 +8,7 @@ public class PodAction
 {
     public Guid PodId { get; set; }
     public int Index { get; set; }
-    public Guid ClientId { get; set; }
+    public Guid UserId { get; set; }
     public DateTimeOffset? RequestSentEarliest { get; set; }
     public DateTimeOffset? RequestSentLatest { get; set; }
     public byte[]? SentData { get; set; }

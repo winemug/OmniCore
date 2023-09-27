@@ -6,7 +6,7 @@ public class Pod
 {
     public Guid PodId { get; set; }
     public Guid ProfileId { get; set; }
-    public Guid ClientId { get; set; }
+    public Guid UserId { get; set; }
     public uint RadioAddress { get; set; }
     public MedicationType Medication { get; set; }
     public int UnitsPerMilliliter { get; set; }
