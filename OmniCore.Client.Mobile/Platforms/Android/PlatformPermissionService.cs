@@ -109,13 +109,13 @@ namespace OmniCore.Client.Mobile.Services
             {
                 (global::Android.Manifest.Permission.Bluetooth, false),
                 (global::Android.Manifest.Permission.BluetoothAdmin, false),
-                (global::Android.Manifest.Permission.AccessBackgroundLocation, true),
-                (global::Android.Manifest.Permission.AccessFineLocation, true)
+                (global::Android.Manifest.Permission.AccessFineLocation, true),
             } :
             new (string androidPermission, bool isRuntime)[]
             {
                 (global::Android.Manifest.Permission.BluetoothConnect, true),
-                (global::Android.Manifest.Permission.BluetoothScan, true)
+                (global::Android.Manifest.Permission.BluetoothScan, true),
+                (global::Android.Manifest.Permission.AccessFineLocation, true),
             };
     }
 
