@@ -1,5 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Xml;
+using Nito.AsyncEx;
 using OmniCore.Client.Interfaces.Services;
 
 namespace OmniCore.Client.Mobile.Services;
@@ -10,106 +13,48 @@ public class SettingsService : ISettingsService
 
     private AmqpEndpointDefinition? _endpoint;
 
+    private ConcurrentDictionary<string, AsyncManualResetEvent> _keyValueChangedEvents;
+
     public SettingsService()
     {
+        _keyValueChangedEvents = new ConcurrentDictionary<string, AsyncManualResetEvent>();
     }
 
-    public string ApiAddress
+    private void EnsureKeyEvent(string key)
     {
-        get
-        {
-#if DEBUG
-            var defaultAddress = "http://192.168.1.50:5097";
-#else
-    var defaultAddress = "https://api.balya.net:8080";
-#endif
-            return Preferences.Get(nameof(ApiAddress), defaultAddress);
-        }
-        set
-        {
-            if (value != null)
-                Preferences.Set(nameof(ApiAddress), value);
-            OnPropertyChanged();
-        }
+
     }
 
-    public string? AccountEmail
+    public async Task<string?> WaitForValueChangedAsync(string key, CancellationToken cancellationToken)
     {
-        get => Preferences.Get(nameof(AccountEmail), null);
-        set
-        {
-            Preferences.Set(nameof(AccountEmail), value);
-            OnPropertyChanged();
-        }
+        var resetEvent = _keyValueChangedEvents.GetOrAdd(key, s => new AsyncManualResetEvent());
+        await resetEvent.WaitAsync(cancellationToken);
+        return Get(key, (string?) null);
     }
 
-    public bool AccountVerified
+    public string? Get(string key, string? defaultValue = null) => Preferences.Get(key, defaultValue);
+    public void Set(string key, string? value) => Preferences.Set(key, value);
+
+    public int Get(string key, int defaultValue = default) => Preferences.Get(key, defaultValue);
+    public void Set(string key, int value) => Preferences.Set(key, value);
+
+    public long Get(string key, long defaultValue = default) => Preferences.Get(key, defaultValue);
+    public void Set(string key, long value) => Preferences.Set(key, value);
+
+    public bool Get(string key, bool defaultValue = default) => Preferences.Get(key, defaultValue);
+    public void Set(string key, bool value) => Preferences.Set(key, value);
+
+    public T? Get<T>(string key, T? defaultValue = null) where T : class, new()
     {
-        get => Preferences.Get(nameof(AccountVerified), false);
-        set
-        {
-            Preferences.Set(nameof(AccountVerified), value);
-            OnPropertyChanged();
-        }
+        var strVal = Get(key, defaultValue.TrySerialize());
+        return strVal.TryDeserialize<T>();
     }
 
-    public string ClientName
+    public void Set<T>(string key, T? value) where T : class, new()
     {
-        get
-        {
-            var name = Preferences.Get(nameof(ClientName), null);
-            if (name == null)
-                name = "what a user";
-            return name;
-        }
-        set
-        {
-            Preferences.Set(nameof(ClientName), value);
-            OnPropertyChanged();
-        }
+        Set(key, value.TrySerialize());
     }
 
-    public ClientAuthorization? ClientAuthorization
-    {
-        get
-        {
-            if (_clientAuthorization == null)
-            {
-                var val = Preferences.Get(nameof(ClientAuthorization), null);
-                _clientAuthorization = val.TryDeserialize<ClientAuthorization>();
-            }
-
-            return _clientAuthorization;
-        }
-        set
-        {
-            _clientAuthorization = value;
-            var strVal = value.TrySerialize();
-            Preferences.Set(nameof(ClientAuthorization), strVal);
-            OnPropertyChanged();
-        }
-    }
-
-    public AmqpEndpointDefinition? Endpoint
-    {
-        get
-        {
-            if (_endpoint == null)
-            {
-                var val = Preferences.Get(nameof(Endpoint), null);
-                _endpoint = val.TryDeserialize<AmqpEndpointDefinition>();
-            }
-
-            return _endpoint;
-        }
-        set
-        {
-            _endpoint = value;
-            var strVal = value.TrySerialize();
-            Preferences.Set(nameof(Endpoint), strVal);
-            OnPropertyChanged();
-        }
-    }
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

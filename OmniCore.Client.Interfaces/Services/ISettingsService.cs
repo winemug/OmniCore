@@ -4,12 +4,16 @@ namespace OmniCore.Client.Interfaces.Services;
 
 public interface ISettingsService : INotifyPropertyChanged
 {
-    string? AccountEmail { get; set; }
-    bool AccountVerified { get; set; }
-    string ClientName { get; set; }
-    string ApiAddress { get; set; }
-    ClientAuthorization? ClientAuthorization { get; set; }
-    AmqpEndpointDefinition? Endpoint { get; set; }
+    string? Get(string key, string? defaultValue = null);
+    void Set(string key, string? value);
+    int Get(string key, int defaultValue = default);
+    void Set(string key, int value);
+    long Get(string key, long defaultValue = default);
+    void Set(string key, long value);
+    bool Get(string key, bool defaultValue = default);
+    void Set(string key, bool value);
+    T? Get<T>(string key, T? defaultValue = null) where T : class, new();
+    void Set<T>(string key, T? value) where T : class, new();
 }
 
 public record ClientAuthorization
@@ -18,10 +22,10 @@ public record ClientAuthorization
     public byte[] Token { get; init; }
 }
 
-public record AmqpEndpointDefinition
+public class AmqpEndpointDefinition
 {
-    public string UserId { get; init; }
-    public string Dsn { get; init; }
-    public string Queue { get; init; }
-    public string Exchange { get; init; }
+    public string UserId { get; set; }
+    public string Dsn { get; set; }
+    public string Queue { get; set; }
+    public string Exchange { get; set; }
 }

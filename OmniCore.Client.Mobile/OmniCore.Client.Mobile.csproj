@@ -101,6 +101,7 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
 		<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
 		<PackageReference Include="Plugin.BLE" Version="3.0.0-rc.1" />
 	</ItemGroup>

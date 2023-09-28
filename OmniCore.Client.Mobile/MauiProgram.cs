@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using OmniCore.Client.Interfaces.Services;
@@ -30,7 +31,6 @@ namespace OmniCore.Client.Mobile
 		builder.Logging.AddDebug();
 #endif
 
-
             builder.Services
                 .AddDbContext<MobileDbContext>(optionsBuilder =>
                 {
@@ -40,6 +40,10 @@ namespace OmniCore.Client.Mobile
                             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                             "oc.sqlite"));
                 })
+
+                .Configure<AmqpEndpointDefinition>(
+                    builder.Configuration.GetSection(nameof(AmqpEndpointDefinition)))
+
                 .AddViewViewModel<PermissionsPage, PermissionsViewModel>()
                 .AddViewViewModel<AccountLoginPage, AccountLoginViewModel>()
                 .AddViewViewModel<ListRadiosPage, ListRadiosViewModel>()
