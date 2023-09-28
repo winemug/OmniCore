@@ -26,9 +26,10 @@ public partial class AccountLoginViewModel : ViewModel
     {
         using (var _ = _coreService.ForegroundActivityContext())
         {
-            await Task.Delay(7500);
+            await Task.Delay(1500);
         }
 
-        await _coreService.InteractiveStartAsync();
+        await _navigationService.PushViewAsync<ListRadiosPage, ListRadiosViewModel>();
+        //await _coreService.InteractiveStartAsync();
     }
 }

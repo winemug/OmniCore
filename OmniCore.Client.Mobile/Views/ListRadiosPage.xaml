@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:OmniCore.Client.Mobile.ViewModels"
+             xmlns:services="clr-namespace:OmniCore.Client.Interfaces.Services;assembly=OmniCore.Client.Interfaces"
+             x:Class="OmniCore.Client.Mobile.Views.ListRadiosPage"
+             x:DataType="viewModels:ListRadiosViewModel">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout>
+                <Button Text="Start Search" Command="{Binding StartSearchCommand}"/>
+                <Button Text="Stop Search" Command="{Binding StopSearchCommand}"/>
+                <CollectionView ItemsSource="{Binding BleDevices}" VerticalScrollBarVisibility="Default">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="services:IBleDevice">
+                            <Grid Padding="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Text="{Binding AddressText}"/>
+                                <Label Grid.Column="1" Text="{Binding Name}"/>
+                                <Label Grid.Column="2" Text="{Binding LastRssi}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

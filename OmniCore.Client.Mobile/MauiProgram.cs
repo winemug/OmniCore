@@ -1,11 +1,14 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Nito.AsyncEx;
 using OmniCore.Client.Interfaces.Services;
 using OmniCore.Client.Mobile.Services;
 using OmniCore.Client.Mobile.ViewModels;
 using OmniCore.Client.Mobile.Views;
 using OmniCore.Client.Model;
+using Plugin.BLE;
+using Plugin.BLE.Abstractions.Contracts;
 
 namespace OmniCore.Client.Mobile
 {
@@ -39,13 +42,17 @@ namespace OmniCore.Client.Mobile
                 })
                 .AddViewViewModel<PermissionsPage, PermissionsViewModel>()
                 .AddViewViewModel<AccountLoginPage, AccountLoginViewModel>()
+                .AddViewViewModel<ListRadiosPage, ListRadiosViewModel>()
 
                 .AddSingleton<ICoreService, CoreService>()
                 .AddSingleton<ISettingsService, SettingsService>()
-                .AddSingleton<INavigationService, NavigationService>();
+                .AddSingleton<INavigationService, NavigationService>()
 
-            builder.Services.RegisterPlatformServices();
+                .AddSingleton<AsyncLazy<IBluetoothLE>>(new AsyncLazy<IBluetoothLE>(() => Task.FromResult(CrossBluetoothLE.Current)))
+                .AddSingleton<IBleService, BleService>()
+                .AddTransient<IBleDevice, BleDevice>()
 
+                .RegisterPlatformServices();
             return builder.Build();
         }
     }

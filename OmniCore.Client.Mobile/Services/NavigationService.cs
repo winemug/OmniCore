@@ -72,6 +72,6 @@ public class NavigationService : INavigationService
         await model.BindToView(view);
         await model.OnNavigatingTo();
         _activeModel = model;
-        await Navigation.PushAsync(view);
+        await Navigation.PushAsync(view, true);
     }
 }
