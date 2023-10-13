@@ -11,8 +11,11 @@ namespace OmniCore.Client.Mobile.ViewModels
 {
     public class SettingsViewModel : ViewModel
     {
-        public SettingsViewModel()
+        private readonly ISettingsService _settingsService;
+
+        public SettingsViewModel(ISettingsService settingsService)
         {
+            _settingsService = settingsService;
         }
     }
 }

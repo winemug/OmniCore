@@ -9,48 +9,45 @@ namespace OmniCore.Client.Mobile.Services;
 
 public class SettingsService : ISettingsService
 {
-    private ClientAuthorization? _clientAuthorization;
-
-    private AmqpEndpointDefinition? _endpoint;
-
-    private ConcurrentDictionary<string, AsyncManualResetEvent> _keyValueChangedEvents;
-
-    public SettingsService()
+    public ClientAuthorization? Authorization
     {
-        _keyValueChangedEvents = new ConcurrentDictionary<string, AsyncManualResetEvent>();
+        get => Get<ClientAuthorization>(nameof(ClientAuthorization));
+        set
+        {
+            Set(nameof(ClientAuthorization), value);
+            OnPropertyChanged();
+        }
     }
 
-    private void EnsureKeyEvent(string key)
+    public AmqpEndpointDefinition? EndpointDefinition
     {
-
+        get => Get<AmqpEndpointDefinition>(nameof(AmqpEndpointDefinition));
+        set
+        {
+            Set(nameof(AmqpEndpointDefinition), value);
+            OnPropertyChanged();
+        }
     }
 
-    public async Task<string?> WaitForValueChangedAsync(string key, CancellationToken cancellationToken)
-    {
-        var resetEvent = _keyValueChangedEvents.GetOrAdd(key, s => new AsyncManualResetEvent());
-        await resetEvent.WaitAsync(cancellationToken);
-        return Get(key, (string?) null);
-    }
+    private string? Get(string key, string? defaultValue = null) => Preferences.Get(key, defaultValue);
+    private void Set(string key, string? value) => Preferences.Set(key, value);
 
-    public string? Get(string key, string? defaultValue = null) => Preferences.Get(key, defaultValue);
-    public void Set(string key, string? value) => Preferences.Set(key, value);
+    private int Get(string key, int defaultValue = default) => Preferences.Get(key, defaultValue);
+    private void Set(string key, int value) => Preferences.Set(key, value);
 
-    public int Get(string key, int defaultValue = default) => Preferences.Get(key, defaultValue);
-    public void Set(string key, int value) => Preferences.Set(key, value);
+    private long Get(string key, long defaultValue = default) => Preferences.Get(key, defaultValue);
+    private void Set(string key, long value) => Preferences.Set(key, value);
 
-    public long Get(string key, long defaultValue = default) => Preferences.Get(key, defaultValue);
-    public void Set(string key, long value) => Preferences.Set(key, value);
+    private bool Get(string key, bool defaultValue = default) => Preferences.Get(key, defaultValue);
+    private void Set(string key, bool value) => Preferences.Set(key, value);
 
-    public bool Get(string key, bool defaultValue = default) => Preferences.Get(key, defaultValue);
-    public void Set(string key, bool value) => Preferences.Set(key, value);
-
-    public T? Get<T>(string key, T? defaultValue = null) where T : class, new()
+    private T? Get<T>(string key, T? defaultValue = null) where T : class, new()
     {
         var strVal = Get(key, defaultValue.TrySerialize());
         return strVal.TryDeserialize<T>();
     }
 
-    public void Set<T>(string key, T? value) where T : class, new()
+    private void Set<T>(string key, T? value) where T : class, new()
     {
         Set(key, value.TrySerialize());
     }
