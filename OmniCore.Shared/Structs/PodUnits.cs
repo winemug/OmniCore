@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Client.Mobile.Implementations;
+﻿namespace OmniCore.Shared.Structs;
 
 public struct PodUnits
 {
@@ -6,16 +6,16 @@ public struct PodUnits
     public int DeciPulses { get; }
     public int Pulses { get; }
 
-    public PodUnits(Decimal internationalUnits, int unitsPerMilliliter, int pulseVolumeNanoliters = 500)
+    public PodUnits(decimal internationalUnits, int unitsPerMilliliter, int pulseVolumeNanoliters = 500)
     {
         // var pulsesPerMilliter = (1000 * 1000) / pulseVolumeNanoliters;
         // var unitsPerPulses = unitsPerMilliliter / pulsesPerMilliter;
         // var totalPulses = internationalUnits / unitsPerPulses;
 
         // var totalPulses = internationalUnits / (unitsPerMilliliter / ((1000 * 1000) / pulseVolumeNanoliters));
-        
+
         // var totalPulses = (internationalUnits * ((1000 * 1000) / pulseVolumeNanoliters)) / (unitsPerMilliliter);
-        
+
         //var totalPulses = (internationalUnits * 1000 * 1000 / pulseVolumeNanoliters) / (unitsPerMilliliter);
         // var totalPulses = (internationalUnits * 1000 * 1000) / (pulseVolumeNanoliters * unitsPerMilliliter);
         // var totalPulses = internationalUnits * 1000000 / (pulseVolumeNanoliters * unitsPerMilliliter);

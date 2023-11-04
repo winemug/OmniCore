@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace OmniCore.Common.Entities;
+namespace OmniCore.Shared;
 
 public class Bytes : IComparable<Bytes>
 {
@@ -48,18 +48,15 @@ public class Bytes : IComparable<Bytes>
     {
         var r = new Regex("[abcdefABCDEF0123456789]");
         var sb = new StringBuilder();
-        foreach (Match match in r.Matches(hexString))
-        {
-            sb.Append(match.Value);
-        }
+        foreach (Match match in r.Matches(hexString)) sb.Append(match.Value);
 
-        var strSan = sb.ToString(); 
+        var strSan = sb.ToString();
         if (strSan.Length % 2 != 0)
             throw new ArgumentException();
-        
+
         var bytes = new byte[strSan.Length / 2];
         for (var i = 0; i < strSan.Length / 2; i += 1)
-            bytes[i] = byte.Parse($"{strSan[i*2]}{strSan[i*2+1]}", NumberStyles.HexNumber);
+            bytes[i] = byte.Parse($"{strSan[i * 2]}{strSan[i * 2 + 1]}", NumberStyles.HexNumber);
 
         Append(bytes);
     }

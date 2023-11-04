@@ -1,4 +1,4 @@
-namespace OmniCore.Common.Radio;
+namespace OmniCore.Shared.Enums;
 
 public enum RileyLinkResponse
 {

@@ -6,9 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-
-
-
+    <ItemGroup>
+      <Folder Include="Remove\" />
+    </ItemGroup>
 
 
 </Project>

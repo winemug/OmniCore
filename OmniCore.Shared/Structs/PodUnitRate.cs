@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Client.Mobile.Implementations;
+﻿namespace OmniCore.Shared.Structs;
 
 public struct PodUnitRate
 {
@@ -16,6 +16,6 @@ public struct PodUnitRate
 
     public PodUnitRate(PodUnits totalUnits, int halfHours)
     {
-        MilliPulsesPerHour = (long)(totalUnits.MilliPulses * 2 / halfHours);
+        MilliPulsesPerHour = totalUnits.MilliPulses * 2 / halfHours;
     }
 }

@@ -1,7 +1,6 @@
-﻿using OmniCore.Common.Entities;
-using OmniCore.Common.Radio;
+﻿using OmniCore.Shared.Enums;
 
-namespace OmniCore.Common.Pod;
+namespace OmniCore.Shared.Entities;
 
 public class BleExchangeResult
 {

@@ -1,4 +1,4 @@
-namespace OmniCore.Common.Pod;
+namespace OmniCore.Shared.Enums;
 
 public enum PodPacketType
 {

@@ -1,4 +1,6 @@
-﻿namespace OmniCore.Client.Mobile.Implementations;
+﻿using OmniCore.Shared.Structs;
+
+namespace OmniCore.Client.Implementation;
 
 public class PodBasalSchedule
 {

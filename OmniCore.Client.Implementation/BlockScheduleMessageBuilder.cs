@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Client.Mobile.Implementation;
+﻿namespace OmniCore.Client.Implementation;
 
 public class BlockScheduleMessageBuilder
 {

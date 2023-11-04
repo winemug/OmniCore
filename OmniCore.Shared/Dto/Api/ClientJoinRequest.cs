@@ -1,4 +1,4 @@
-namespace OmniCore.Shared.Api;
+namespace OmniCore.Shared.Dto.Api;
 
 public record ClientJoinRequest
 {

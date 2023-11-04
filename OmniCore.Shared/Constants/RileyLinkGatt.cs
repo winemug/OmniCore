@@ -1,4 +1,4 @@
-namespace OmniCore.Common.Radio;
+namespace OmniCore.Shared.Constants;
 
 public static class RileyLinkGatt
 {

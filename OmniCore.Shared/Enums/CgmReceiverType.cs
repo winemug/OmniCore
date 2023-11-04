@@ -1,4 +1,4 @@
-namespace OmniCore.Common.Cgm;
+namespace OmniCore.Shared.Enums;
 
 public enum CgmReceiverType
 {

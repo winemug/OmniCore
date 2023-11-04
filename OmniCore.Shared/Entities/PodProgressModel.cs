@@ -1,4 +1,6 @@
-namespace OmniCore.Common.Pod;
+using OmniCore.Shared.Enums;
+
+namespace OmniCore.Shared.Entities;
 
 public class PodProgressModel
 {

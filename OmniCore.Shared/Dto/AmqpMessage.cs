@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace OmniCore.Common.Amqp;
+namespace OmniCore.Shared.Dto;
 
 public class AmqpMessage
 {

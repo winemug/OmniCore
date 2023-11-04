@@ -1,6 +1,7 @@
 ﻿using System.Text;
+using OmniCore.Shared.Enums;
 
-namespace OmniCore.Framework.Entities;
+namespace OmniCore.Shared.Entities;
 
 public class BgcEntry
 {

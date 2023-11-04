@@ -1,4 +1,4 @@
-﻿namespace OmniCore.Framework.Entities;
+﻿namespace OmniCore.Shared.Enums;
 
 public enum BgcReadingType
 {
