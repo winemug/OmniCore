@@ -32,12 +32,12 @@ public class ResponseVersionInfo : IMessagePart
              FirmwareVersionMinor = span[4],
              FirmwareVersionRevision = span[5],
              ProductId = span[6],
+             Progress = (PodProgress)span[7],
              Lot = span[8..].Read32(),
              Serial = span[12..].Read32(),
-             AssignedAddress = span[17..].Read32(),
              RadioLowGain = (int)span[16..].ReadBits(0, 2),
              Rssi = (int)span[16..].ReadBits(2, 6),
-             Progress = (PodProgress)span[7..].ReadBits(4, 4)
+             AssignedAddress = span[17..].Read32()
          };
     }
 
