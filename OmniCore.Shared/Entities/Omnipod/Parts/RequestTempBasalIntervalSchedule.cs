@@ -7,21 +7,21 @@ namespace OmniCore.Framework.Omnipod.Parts;
 public class RequestTempBasalIntervalSchedule : IMessagePart
 {
     public required ushort LeadPulses10Count { get; set; }
-    public required uint LeadPulseDelayMicroseconds { get; set; }
+    public required uint LeadPulse10DelayMicroseconds { get; set; }
     public byte CurrentIntervalIndex { get; set; }
-    public required PulseInterval[] PulseIntervals { get; set; }
+    public required PulseInterval[] Pulse10Intervals { get; set; }
     public bool BeepWhenSet { get; set; }
     public bool BeepWhenFinished { get; set; }
 
     public static IMessagePart ToInstance(Span<byte> span)
     {
-        return new RequestBasalIntervalSchedule
+        return new RequestTempBasalIntervalSchedule
         {
             BeepWhenSet = span[0] == 0x80,
             CurrentIntervalIndex = span[1],
             LeadPulses10Count = span[2..].Read16(),
-            LeadPulseDelayMicroseconds = span[4..].Read32(),
-            PulseIntervals = GetPulseIntervals(span[8..])
+            LeadPulse10DelayMicroseconds = span[4..].Read32(),
+            Pulse10Intervals = GetPulseIntervals(span[8..])
         };
     }
     public int ToBytes(Span<byte> span)
@@ -32,10 +32,10 @@ public class RequestTempBasalIntervalSchedule : IMessagePart
             span[0] |= 0x40;
         span[1] = CurrentIntervalIndex;
         span[2..].Write16(LeadPulses10Count);
-        span[4..].Write32(LeadPulseDelayMicroseconds);
+        span[4..].Write32(LeadPulse10DelayMicroseconds);
 
         int idx = 8;
-        foreach (var interval in PulseIntervals)
+        foreach (var interval in Pulse10Intervals)
         {
             span[idx..].Write16(interval.Pulse10Count);
             idx += 2;

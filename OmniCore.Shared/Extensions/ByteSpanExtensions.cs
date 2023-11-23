@@ -108,11 +108,16 @@ public static class ByteSpanExtensions
             val3);
     }
 
-    public static string ToFormattedString(this Span<byte> buffer)
+    public static string ToFormattedString(this Span<byte> buffer, bool spaced = false)
     {
         var sb = new StringBuilder();
-        foreach (var b in buffer)
-            sb.Append(b.ToString("X2")).Append(" ");
+        for(int i=0; i<buffer.Length; i++)
+        {
+            var b = buffer[i];
+            sb.Append(b.ToString("X2"));
+            if (spaced && i < buffer.Length - 1)
+                sb.Append(" ");
+        }
         return sb.ToString();
     }
 }

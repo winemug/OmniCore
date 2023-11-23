@@ -20,8 +20,8 @@ public class RequestBlockSchedule : IMessagePart
         else
             span[3] = (byte)PulseCountList.Length;
 
-        span[4..].Write16((UInt16)LeadBlockPulseCount);
-        span[6..].Write16((UInt16)LeadBlockDuration125Milliseconds);
+        span[4..].Write16((UInt16)LeadBlockDuration125Milliseconds);
+        span[6..].Write16((UInt16)LeadBlockPulseCount);
 
         var len = PackPulsesIntoPulseBlockSchedule(PulseCountList, span[8..]) + 8;
 
@@ -39,8 +39,8 @@ public class RequestBlockSchedule : IMessagePart
         {
             TableIndex = span[0],
             CurrentExpandedBlockIndex = span[3],
-            LeadBlockPulseCount = span[4..].Read16(),
-            LeadBlockDuration125Milliseconds = span[6..].Read16(),
+            LeadBlockDuration125Milliseconds = span[4..].Read16(),
+            LeadBlockPulseCount = span[6..].Read16(),
             PulseCountList = GetPulseCountList(span[8..])
         };
     }
