@@ -6,31 +6,29 @@ namespace OmniCore.Client
     public partial class App : Application
     {
         private readonly NavigationService navigationService;
+        private readonly AppService appService;
 
-        public App(NavigationService navigationService)
+        public App(NavigationService navigationService,
+            AppService appService)
         {
             InitializeComponent();
 
             MainPage = navigationService.NavigationPage;
             this.navigationService = navigationService;
+            this.appService = appService;
         }
 
         protected override Window CreateWindow(IActivationState activationState)
         {
             var window = base.CreateWindow(activationState);
 
-            //window.Created += async (_, _) => { await navigationService.OnCreatedAsync(); };
-            window.Activated += async (_, _) => { await navigationService.AppWindowActivated(); };
-            window.Deactivated += async (_, _) => { await navigationService.AppWindowDeactivated(); };
-            //window.Stopped += async (_, _) => { await navigationService.OnStoppedAsync(); };
-            //window.Resumed += async (_, _) => { await navigationService.OnResumedAsync(); };
-            //window.Destroying += async (_, _) => { await navigationService.OnDestroyingAsync(); };
+            window.Created += async (_, _) => { await appService.OnWindowCreatedAsync(); };
+            window.Activated += async (_, _) => { await appService.OnWindowActivatedAsync(); };
+            window.Deactivated += async (_, _) => { await appService.OnWindowDeactivatedAsync(); };
+            window.Stopped += async (_, _) => { await appService.OnStoppedAsync(); };
+            window.Resumed += async (_, _) => { await appService.OnResumedAsync(); };
+            window.Destroying += async (_, _) => { await appService.OnDestroyingAsync(); };
             return window;
-        }
-
-        protected override async void OnStart()
-        {
-            await navigationService.PushViewAsync<EmptyPage>();
         }
     }
 }

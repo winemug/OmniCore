@@ -55,13 +55,13 @@ public class NavigationService
         await NavigateTo(model, view);
     }
 
-    public async Task AppWindowActivated()
+    public async Task AppWindowActivatedAsync()
     {
         if (_activeModel != null)
             await _activeModel.OnResumed();
     }
 
-    public async Task AppWindowDeactivated()
+    public async Task AppWindowDeactivatedAsync()
     {
         if (_activeModel != null)
             await _activeModel.OnPaused();
