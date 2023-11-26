@@ -5,8 +5,6 @@ VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Shared", "OmniCore.Shared\OmniCore.Shared.csproj", "{348790C3-E275-4B99-80AF-D18719450FE5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Model", "OmniCore.Client.Model\OmniCore.Client.Model.csproj", "{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Client.Tests", "OmniCore.Client.Tests\OmniCore.Client.Tests.csproj", "{CA8F5B54-32D4-4DBA-9EA2-3BDD1F222221}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Client", "OmniCore.Client\OmniCore.Client.csproj", "{CD9C95F7-AE3B-432F-AEDA-17244D424091}"
@@ -21,10 +19,6 @@ Global
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3EFEB23-B621-47FD-9FF4-74C3294C6B94}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CA8F5B54-32D4-4DBA-9EA2-3BDD1F222221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CA8F5B54-32D4-4DBA-9EA2-3BDD1F222221}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA8F5B54-32D4-4DBA-9EA2-3BDD1F222221}.Release|Any CPU.ActiveCfg = Release|Any CPU
