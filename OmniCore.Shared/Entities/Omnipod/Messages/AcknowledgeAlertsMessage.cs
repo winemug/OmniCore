@@ -1,8 +1,6 @@
-﻿using OmniCore.Framework.Omnipod.Parts;
-using OmniCore.Shared;
-using OmniCore.Shared.Enums;
+﻿using OmniCore.Shared.Entities.Omnipod.Parts;
 
-namespace OmniCore.Framework.Omnipod.Messages;
+namespace OmniCore.Shared.Entities.Omnipod.Messages;
 
 public class AcknowledgeAlertsMessage
 {

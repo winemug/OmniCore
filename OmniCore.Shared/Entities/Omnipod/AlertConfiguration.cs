@@ -1,6 +1,6 @@
 using OmniCore.Shared.Enums;
 
-namespace OmniCore.Shared.Entities;
+namespace OmniCore.Shared.Entities.Omnipod;
 
 public class AlertConfiguration
 {

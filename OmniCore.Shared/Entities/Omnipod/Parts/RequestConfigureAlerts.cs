@@ -1,10 +1,7 @@
-﻿using OmniCore.Shared;
-using OmniCore.Shared.Entities;
-using OmniCore.Shared.Entities.Omnipod.Parts;
-using OmniCore.Shared.Enums;
+﻿using OmniCore.Shared.Enums;
 using OmniCore.Shared.Extensions;
 
-namespace OmniCore.Framework.Omnipod.Parts;
+namespace OmniCore.Shared.Entities.Omnipod.Parts;
 
 public class RequestConfigureAlerts : IMessagePart
 {

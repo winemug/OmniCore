@@ -1,7 +1,4 @@
-﻿using OmniCore.Shared.Entities.Omnipod.Parts;
-using OmniCore.Shared.Enums;
-
-namespace OmniCore.Framework.Omnipod.Parts;
+﻿namespace OmniCore.Shared.Entities.Omnipod.Parts;
 
 public class RequestDeactivatePod : IMessagePart
 {

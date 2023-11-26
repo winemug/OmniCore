@@ -1,6 +1,4 @@
-using OmniCore.Shared;
-
-namespace OmniCore.Framework.Omnipod;
+namespace OmniCore.Shared.Entities.Omnipod;
 
 public static class ManchesterCodec
 {

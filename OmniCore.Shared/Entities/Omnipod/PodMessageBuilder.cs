@@ -2,8 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using OmniCore.Framework.Omnipod;
-using OmniCore.Framework.Omnipod.Parts;
 using OmniCore.Shared.Entities.Omnipod.Parts;
 using OmniCore.Shared.Enums;
 using OmniCore.Shared.Extensions;

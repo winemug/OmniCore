@@ -1,9 +1,4 @@
-﻿using OmniCore.Shared;
-using OmniCore.Shared.Entities.Omnipod.Parts;
-using OmniCore.Shared.Enums;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace OmniCore.Framework.Omnipod.Parts;
+﻿namespace OmniCore.Shared.Entities.Omnipod.Parts;
 
 public class RequestAcknowledgeAlerts : IMessagePart
 {

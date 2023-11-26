@@ -1,5 +1,4 @@
-﻿using OmniCore.Framework.Omnipod.Parts;
-using OmniCore.Shared.Entities.Omnipod.Parts;
+﻿using OmniCore.Shared.Entities.Omnipod.Parts;
 using OmniCore.Shared.Enums;
 using System;
 using System.Collections.Generic;

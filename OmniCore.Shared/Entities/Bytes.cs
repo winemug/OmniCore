@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace OmniCore.Shared;
+namespace OmniCore.Shared.Entities;
 
 public class Bytes : IComparable<Bytes>
 {

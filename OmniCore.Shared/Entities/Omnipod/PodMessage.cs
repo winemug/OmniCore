@@ -1,6 +1,4 @@
-﻿using OmniCore.Shared.Entities.Omnipod.Parts;
-
-namespace OmniCore.Framework.Omnipod;
+﻿namespace OmniCore.Shared.Entities.Omnipod;
 
 public class PodMessage
 {

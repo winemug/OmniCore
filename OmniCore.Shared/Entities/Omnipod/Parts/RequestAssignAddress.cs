@@ -1,8 +1,6 @@
-﻿using OmniCore.Shared.Entities.Omnipod.Parts;
-using OmniCore.Shared.Enums;
-using OmniCore.Shared.Extensions;
+﻿using OmniCore.Shared.Extensions;
 
-namespace OmniCore.Framework.Omnipod.Parts;
+namespace OmniCore.Shared.Entities.Omnipod.Parts;
 
 public class RequestAssignAddress : IMessagePart
 {
