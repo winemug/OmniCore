@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using OmniCore.Client.Platforms;
 
 namespace OmniCore.Client
 {
@@ -14,7 +15,7 @@ namespace OmniCore.Client
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
+            builder.Services.RegisterPlatformServices();
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
