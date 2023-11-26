@@ -1,4 +1,4 @@
-using OmniCore.Client.Mobile.Implementations;
+using OmniCore.Shared.Structs;
 
 namespace OmniCore.Client.Tests
 {
