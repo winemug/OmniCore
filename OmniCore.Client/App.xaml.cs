@@ -1,12 +1,14 @@
-﻿namespace OmniCore.Client
+﻿using OmniCore.Client.Views;
+
+namespace OmniCore.Client
 {
     public partial class App : Application
     {
-        public App()
+        public App(EmptyPage emptyPage)
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            MainPage = emptyPage;
         }
     }
 }
