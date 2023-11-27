@@ -1,4 +1,5 @@
-﻿using OmniCore.Client.ViewModels;
+﻿using OmniCore.Client.Abstractions.Services;
+using OmniCore.Client.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Client.Services;
 
-public class NavigationService
+public class NavigationService : IAppEventsSubscriber
 {
     public NavigationPage NavigationPage { get; }
     public INavigation Navigation => this.NavigationPage.Navigation;
@@ -15,15 +16,16 @@ public class NavigationService
     private ViewModel? _activeModel;
     private readonly IServiceProvider _serviceProvider;
 
-    public NavigationService(
-        IServiceProvider serviceProvider)
+    public NavigationService(IServiceProvider serviceProvider,
+        AppEventsService appEventsService)
     {
         NavigationPage = new NavigationPage();
         _serviceProvider = serviceProvider;
         _activeModel = null;
+        appEventsService.Subscribe(this);
     }
 
-    public async Task PushViewAsync<TView>()
+    public async ValueTask PushViewAsync<TView>()
     where TView : Page
     {
         await NavigateAway(_activeModel);
@@ -31,7 +33,7 @@ public class NavigationService
         await NavigateTo(view);
     }
 
-    public async Task PushViewAsync<TView, TModel>()
+    public async ValueTask PushViewAsync<TView, TModel>()
         where TView : Page
         where TModel : ViewModel
     {
@@ -41,7 +43,7 @@ public class NavigationService
         await NavigateTo(model, view);
     }
 
-    public async Task PushDataViewAsync<TView, TModel, TModelData>(TModelData data)
+    public async ValueTask PushDataViewAsync<TView, TModel, TModelData>(TModelData data)
         where TView : Page
         where TModel : DataViewModel<TModelData>
         where TModelData : notnull
@@ -55,19 +57,7 @@ public class NavigationService
         await NavigateTo(model, view);
     }
 
-    public async Task AppWindowActivatedAsync()
-    {
-        if (_activeModel != null)
-            await _activeModel.OnResumed();
-    }
-
-    public async Task AppWindowDeactivatedAsync()
-    {
-        if (_activeModel != null)
-            await _activeModel.OnPaused();
-    }
-
-    private async Task NavigateAway(ViewModel? model)
+    private async ValueTask NavigateAway(ViewModel? model)
     {
         if (model != null)
         {
@@ -79,17 +69,51 @@ public class NavigationService
         }
     }
 
-    private async Task NavigateTo(Page view)
+    private async ValueTask NavigateTo(Page view)
     {
         _activeModel = null;
         await Navigation.PushAsync(view, true);
     }
 
-    private async Task NavigateTo(ViewModel model, Page view)
+    private async ValueTask NavigateTo(ViewModel model, Page view)
     {
         await model.BindToView(view);
         await model.OnNavigatingTo();
         _activeModel = model;
         await Navigation.PushAsync(view, true);
+    }
+
+    public ValueTask OnAppResumedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask OnAppStoppedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask OnDestroyingAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask OnWindowActivatedAsync()
+    {
+        if (_activeModel != null)
+            return _activeModel.OnResumed();
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask OnWindowCreatedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask OnWindowDeactivatedAsync()
+    {
+        if (_activeModel != null)
+            return _activeModel.OnPaused();
+        return ValueTask.CompletedTask;
     }
 }

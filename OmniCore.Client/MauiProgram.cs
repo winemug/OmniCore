@@ -28,6 +28,7 @@ public static class MauiProgram
 
             .AddSingleton<NavigationService>()
             .AddSingleton<AppService>()
+            .AddSingleton<AppEventsService>()
 
             .RegisterPlatformServices();
 

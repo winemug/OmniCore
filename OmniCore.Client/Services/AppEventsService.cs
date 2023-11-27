@@ -1,5 +1,4 @@
 ﻿using OmniCore.Client.Abstractions.Services;
-using OmniCore.Client.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +7,20 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Client.Services;
 
-public class AppService : IAppEventsSubscriber
+public class AppEventsService : IAppEventsSubscriber
 {
-    private readonly NavigationService navigationService;
-
-    public AppService(NavigationService navigationService)
+    public void Subscribe(IAppEventsSubscriber subscriber)
     {
-        this.navigationService = navigationService;
+
     }
 
+    public void Unsubscribe(IAppEventsSubscriber subscriber)
+    {
+
+    }
     public ValueTask OnWindowCreatedAsync()
     {
-        return navigationService.PushViewAsync<EmptyPage>();
+        return ValueTask.CompletedTask;
     }
 
     public ValueTask OnWindowActivatedAsync()

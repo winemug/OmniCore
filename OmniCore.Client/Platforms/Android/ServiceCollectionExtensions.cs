@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OmniCore.Client.Abstractions.Services;
+using OmniCore.Client.Platforms.Android;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +11,8 @@ public static partial class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterPlatformServices(this IServiceCollection serviceCollection)
     {
-        return serviceCollection;
+        return serviceCollection
+            .AddSingleton<IPlatformForegroundService, PlatformForegroundService>()
+            .AddSingleton<IPlatformPermissionService, PlatformPermissionService>();
     }
 }

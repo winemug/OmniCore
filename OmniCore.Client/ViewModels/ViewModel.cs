@@ -9,16 +9,16 @@ namespace OmniCore.Client.ViewModels;
 
 public class ViewModel : ObservableObject
 {
-    public virtual Task OnResumed() => Task.CompletedTask;
-    public virtual Task OnPaused() => Task.CompletedTask;
+    public virtual ValueTask OnResumed() => ValueTask.CompletedTask;
+    public virtual ValueTask OnPaused() => ValueTask.CompletedTask;
 
-    public virtual Task OnNavigatingTo() => Task.CompletedTask;
+    public virtual ValueTask OnNavigatingTo() => ValueTask.CompletedTask;
 
-    public virtual Task OnNavigatingAway() => Task.CompletedTask;
+    public virtual ValueTask OnNavigatingAway() => ValueTask.CompletedTask;
 
-    public virtual Task BindToView(Page page)
+    public virtual ValueTask BindToView(Page page)
     {
         page.BindingContext = this;
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

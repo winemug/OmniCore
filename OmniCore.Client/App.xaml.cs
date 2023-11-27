@@ -6,28 +6,28 @@ namespace OmniCore.Client
     public partial class App : Application
     {
         private readonly NavigationService navigationService;
-        private readonly AppService appService;
+        private readonly AppEventsService appEventsService;
 
         public App(NavigationService navigationService,
-            AppService appService)
+            AppEventsService appEventsService)
         {
             InitializeComponent();
 
             MainPage = navigationService.NavigationPage;
             this.navigationService = navigationService;
-            this.appService = appService;
+            this.appEventsService = appEventsService;
         }
 
         protected override Window CreateWindow(IActivationState activationState)
         {
             var window = base.CreateWindow(activationState);
 
-            window.Created += async (_, _) => { await appService.OnWindowCreatedAsync(); };
-            window.Activated += async (_, _) => { await appService.OnWindowActivatedAsync(); };
-            window.Deactivated += async (_, _) => { await appService.OnWindowDeactivatedAsync(); };
-            window.Stopped += async (_, _) => { await appService.OnStoppedAsync(); };
-            window.Resumed += async (_, _) => { await appService.OnResumedAsync(); };
-            window.Destroying += async (_, _) => { await appService.OnDestroyingAsync(); };
+            window.Created += async (_, _) => { await appEventsService.OnWindowCreatedAsync(); };
+            window.Activated += async (_, _) => { await appEventsService.OnWindowActivatedAsync(); };
+            window.Deactivated += async (_, _) => { await appEventsService.OnWindowDeactivatedAsync(); };
+            window.Stopped += async (_, _) => { await appEventsService.OnAppStoppedAsync(); };
+            window.Resumed += async (_, _) => { await appEventsService.OnAppResumedAsync(); };
+            window.Destroying += async (_, _) => { await appEventsService.OnDestroyingAsync(); };
             return window;
         }
     }
