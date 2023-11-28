@@ -93,7 +93,7 @@ public class NavigationService : IAppEventsSubscriber
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask OnDestroyingAsync()
+    public ValueTask OnAppDestroyingAsync()
     {
         return ValueTask.CompletedTask;
     }

@@ -12,9 +12,10 @@ public class AppService : IAppEventsSubscriber
 {
     private readonly NavigationService navigationService;
 
-    public AppService(NavigationService navigationService)
+    public AppService(NavigationService navigationService, AppEventsService appEventsService)
     {
         this.navigationService = navigationService;
+        appEventsService.Subscribe(this);
     }
 
     public ValueTask OnWindowCreatedAsync()
@@ -42,7 +43,7 @@ public class AppService : IAppEventsSubscriber
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask OnDestroyingAsync()
+    public ValueTask OnAppDestroyingAsync()
     {
         return ValueTask.CompletedTask;
     }

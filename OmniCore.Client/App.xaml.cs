@@ -27,7 +27,7 @@ namespace OmniCore.Client
             window.Deactivated += async (_, _) => { await appEventsService.OnWindowDeactivatedAsync(); };
             window.Stopped += async (_, _) => { await appEventsService.OnAppStoppedAsync(); };
             window.Resumed += async (_, _) => { await appEventsService.OnAppResumedAsync(); };
-            window.Destroying += async (_, _) => { await appEventsService.OnDestroyingAsync(); };
+            window.Destroying += async (_, _) => { await appEventsService.OnAppDestroyingAsync(); };
             return window;
         }
     }

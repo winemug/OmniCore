@@ -5,7 +5,7 @@ namespace OmniCore.Client.Abstractions.Services
     {
         ValueTask OnAppResumedAsync();
         ValueTask OnAppStoppedAsync();
-        ValueTask OnDestroyingAsync();
+        ValueTask OnAppDestroyingAsync();
         ValueTask OnWindowActivatedAsync();
         ValueTask OnWindowCreatedAsync();
         ValueTask OnWindowDeactivatedAsync();
