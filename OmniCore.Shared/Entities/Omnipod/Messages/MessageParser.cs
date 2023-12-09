@@ -25,11 +25,11 @@ public static class MessageParser
             case PodMessagePartType.RequestAcknowledgeAlerts:
                 return RequestAcknowledgeAlerts.ToInstance(span[6..]);
             case PodMessagePartType.RequestBasal:
-                return RequestBasalIntervalSchedule.ToInstance(span[2..]);
+                return RequestIntervalSchedule.ToInstance(span[2..], true);
             case PodMessagePartType.RequestTempBasal:
-                return RequestTempBasalIntervalSchedule.ToInstance(span[2..]);
+                return RequestIntervalSchedule.ToInstance(span[2..], true);
             case PodMessagePartType.RequestBolus:
-                return RequestBolusIntervalSchedule.ToInstance(span[2..]);
+                return RequestIntervalSchedule.ToInstance(span[2..], false);
             case PodMessagePartType.RequestConfigureAlerts:
                 return RequestConfigureAlerts.ToInstance(span[6..]);
             case PodMessagePartType.RequestInsulinSchedule:

@@ -27,8 +27,6 @@ public static class MauiProgram
             .AddTransient<EmptyPage>()
 
             .AddSingleton<NavigationService>()
-            .AddSingleton<AppService>()
-            .AddSingleton<AppEventsService>()
 
             .RegisterPlatformServices();
 

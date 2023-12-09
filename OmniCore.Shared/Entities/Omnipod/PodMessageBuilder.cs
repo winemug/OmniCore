@@ -103,13 +103,13 @@ public class PodMessageBuilder
                     part = RequestStatus.ToInstance(span[start..end]);
                     break;
                 case PodMessagePartType.RequestBasal:
-                    part = RequestBasalIntervalSchedule.ToInstance(span[start..end]);
+                    part = RequestIntervalSchedule.ToInstance(span[start..end], true);
                     break;
                 case PodMessagePartType.RequestTempBasal:
-                    part = RequestTempBasalIntervalSchedule.ToInstance(span[start..end]);
+                    part = RequestIntervalSchedule.ToInstance(span[start..end], true);
                     break;
                 case PodMessagePartType.RequestBolus:
-                    part = RequestBolusIntervalSchedule.ToInstance(span[start..end]);
+                    part = RequestIntervalSchedule.ToInstance(span[start..end], false);
                     break;
                 case PodMessagePartType.RequestBeepConfig:
                     part = RequestBeepConfig.ToInstance(span[start..end]);

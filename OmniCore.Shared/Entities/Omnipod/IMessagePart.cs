@@ -2,5 +2,4 @@
 
 public interface IMessagePart
 {
-    int ToBytes(Span<byte> span);
 }

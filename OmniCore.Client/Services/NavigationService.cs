@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OmniCore.Client.Services;
 
-public class NavigationService : IAppEventsSubscriber
+public class NavigationService
 {
     public NavigationPage NavigationPage { get; }
     public INavigation Navigation => this.NavigationPage.Navigation;
@@ -16,13 +16,11 @@ public class NavigationService : IAppEventsSubscriber
     private ViewModel? _activeModel;
     private readonly IServiceProvider _serviceProvider;
 
-    public NavigationService(IServiceProvider serviceProvider,
-        AppEventsService appEventsService)
+    public NavigationService(IServiceProvider serviceProvider)
     {
         NavigationPage = new NavigationPage();
         _serviceProvider = serviceProvider;
         _activeModel = null;
-        appEventsService.Subscribe(this);
     }
 
     public async ValueTask PushViewAsync<TView>()
@@ -82,31 +80,10 @@ public class NavigationService : IAppEventsSubscriber
         _activeModel = model;
         await Navigation.PushAsync(view, true);
     }
-
-    public ValueTask OnAppResumedAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask OnAppStoppedAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask OnAppDestroyingAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
-
     public ValueTask OnWindowActivatedAsync()
     {
         if (_activeModel != null)
             return _activeModel.OnResumed();
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask OnWindowCreatedAsync()
-    {
         return ValueTask.CompletedTask;
     }
 
