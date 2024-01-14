@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows.Input;
 using OmniCore.Common.Api;
+using OmniCore.Common.Data;
 using OmniCore.Framework.Omnipod.Requests;
 using OmniCore.Services;
 using OmniCore.Services.Interfaces;
@@ -9,6 +10,8 @@ using OmniCore.Services.Interfaces.Core;
 using OmniCore.Services.Interfaces.Entities;
 using OmniCore.Services.Interfaces.Platform;
 using OmniCore.Services.Interfaces.Pod;
+using OmniCore.Shared.Api;
+using Org.Apache.Http.Client.Params;
 
 namespace OmniCore.Maui.ViewModels;
 public class TestViewModel : BaseViewModel
@@ -50,10 +53,31 @@ public class TestViewModel : BaseViewModel
         NewPodCommand = new Command(async () => await ExecuteNewPod());
         PrimeCommand = new Command(async () => await ExecutePrime());
         StartCommand = new Command(async () => await ExecuteStartPod());
+
+        if (_appConfiguration.AccountEmail == null)
+        {
+            _appConfiguration.AccountEmail = "barisk@gmail.com";
+        }
+
+        if (!_appConfiguration.AccountVerified)
+        {
+            _appConfiguration.AccountVerified = true;
+        }
+
+        if (_appConfiguration.ClientAuthorization == null)
+        {
+            _appConfiguration.ClientAuthorization = new ClientAuthorization
+            {
+                ClientId = new Guid("EE843C96-A312-4D4B-B0CC-93E22D6E680E"),
+                Token = new byte[16]
+            };
+        }
     }
 
     public override async ValueTask OnAppearing()
     {
+        using var context = new OcdbContext();
+        await context.Database.EnsureCreatedAsync();
         _platformService.StartService();
     }
  
@@ -64,11 +88,7 @@ public class TestViewModel : BaseViewModel
 
     private async Task ExecuteNewPod()
     {
-        // newPodId = await _podService.NewPodAsync(200, MedicationType.Insulin);
-        await _podService.NewPodAsync(
-            Guid.Parse("7d799596-3f6d-48e2-ac65-33ca6396788b"),
-            200,
-            MedicationType.Insulin);
+        var podId = await _podService.NewPodAsync(new Guid("7D799596-3F6D-48E2-AC65-33CA6396788B"), 100, MedicationType.Insulin);
         // var pods = await _podService.GetPodsAsync();
         // var pod = pods[1];
         // using (var pc = await _podService.GetConnectionAsync(pod))
@@ -99,7 +119,7 @@ public class TestViewModel : BaseViewModel
             var now = DateTime.Now;
             var basalRateTicks = new int[48];
             for (int i = 0; i < 48; i++)
-                basalRateTicks[i] = 16;
+                basalRateTicks[i] = 12;
 
             var res = await pc.StartPodAsync(
                 new TimeOnly(now.Hour, now.Minute, now.Second), basalRateTicks);

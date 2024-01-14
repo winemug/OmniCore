@@ -83,11 +83,8 @@ public class PodService : IPodService
 
     public async Task<List<IPodModel>> GetPodsAsync(Guid? profileId)
     {
-        if (profileId == null)
-            return _podModels;
-        
         //TODO: profile filter
-        return _podModels;
+        return _podModels.OrderByDescending(pm => pm.Created).ToList();
     }
 
     public async Task RemovePodAsync(Guid podId, DateTimeOffset? removeTime = null)

@@ -4,6 +4,7 @@ namespace OmniCore.Services.Interfaces.Amqp;
 
 public class AmqpMessage
 {
+    public string? Type { get; set; }
     public string Route { get; set; } = "";
     public byte[] Body { get; set; } = new byte[0];
 

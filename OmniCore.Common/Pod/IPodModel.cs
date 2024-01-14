@@ -9,6 +9,7 @@ namespace OmniCore.Services.Interfaces.Pod;
 public interface IPodModel
 {
     Guid Id { get; }
+    DateTimeOffset Created { get; }
     uint RadioAddress { get; }
     int UnitsPerMilliliter { get; }
     MedicationType Medication { get; }

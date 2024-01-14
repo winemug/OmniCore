@@ -9,9 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Framework", "OmniC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Common", "OmniCore.Common\OmniCore.Common.csproj", "{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Tests", "OmniCore.Tests\OmniCore.Tests.csproj", "{9753D6A5-A18D-4556-9206-6B274A0970A0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniCore.Shared", "OmniCore.Shared\OmniCore.Shared.csproj", "{348790C3-E275-4B99-80AF-D18719450FE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniCore.Shared", "OmniCore.Shared\OmniCore.Shared.csproj", "{348790C3-E275-4B99-80AF-D18719450FE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +31,6 @@ Global
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C29F0184-0DF4-4228-83C7-09FBDD5A92BD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9753D6A5-A18D-4556-9206-6B274A0970A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{348790C3-E275-4B99-80AF-D18719450FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -25,6 +25,7 @@ public class PodModel : IPodModel
     }
 
     public Guid Id => _pod.PodId;
+    public DateTimeOffset Created => _pod.Created;
     public uint RadioAddress => _pod.RadioAddress;
     public int UnitsPerMilliliter => _pod.UnitsPerMilliliter;
     public MedicationType Medication => _pod.Medication;
