@@ -9,7 +9,7 @@
     <FlyoutItem>
         <ShellContent
             Title="Test2"
-            ContentTemplate="{DataTemplate views:TestPage2}"
+            ContentTemplate="{DataTemplate views:TestPage}"
             Route="TestPage" />
     </FlyoutItem>
 

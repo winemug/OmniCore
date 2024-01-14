@@ -85,7 +85,6 @@ public class AmqpService : IAmqpService
             throw;
         }
     }
-
     private async Task StartJoin(CancellationToken cancellationToken)
     {
         while (_appConfiguration.ClientAuthorization == null)
@@ -93,37 +92,39 @@ public class AmqpService : IAmqpService
             await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         }
 
-        AmqpEndpointDefinition? endpointDefinition = null;
-        while (true)
+        AmqpEndpointDefinition? endpointDefinition = new AmqpEndpointDefinition
         {
-            try
-            {
-                var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
-                    Routes.ClientJoinRequestRoute, new ClientJoinRequest
-                    {
-                        Id = _appConfiguration.ClientAuthorization.ClientId,
-                        Token = _appConfiguration.ClientAuthorization.Token,
-                        Version = _platformInfo.GetVersion(),
-                    }, cancellationToken);
-                if (result is { Success: true })
-                {
-                    endpointDefinition = new AmqpEndpointDefinition
-                    {
-                        Dsn = result.Dsn,
-                        Exchange = result.Exchange,
-                        Queue = result.Queue,
-                        UserId = result.Username
-                    };
-                    break;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-        }
+        };
+        //while (true)
+        //{
+        //    try
+        //    {
+        //        var result = await _apiClient.PostRequestAsync<ClientJoinRequest, ClientJoinResponse>(
+        //            Routes.ClientJoinRequestRoute, new ClientJoinRequest
+        //            {
+        //                Id = _appConfiguration.ClientAuthorization.ClientId,
+        //                Token = _appConfiguration.ClientAuthorization.Token,
+        //                Version = _platformInfo.GetVersion(),
+        //            }, cancellationToken);
+        //        if (result is { Success: true })
+        //        {
+        //            endpointDefinition = new AmqpEndpointDefinition
+        //            {
+        //                Dsn = result.Dsn,
+        //                Exchange = result.Exchange,
+        //                Queue = result.Queue,
+        //                UserId = result.Username
+        //            };
+        //            break;
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //        throw;
+        //    }
+        //    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+        //}
         
         var confirmationsTask = ConfirmationsTask(cancellationToken);
         while(true)
@@ -141,7 +142,7 @@ public class AmqpService : IAmqpService
             catch(Exception e)
             {
                 Trace.WriteLine($"Error while connectandpublish: {e.Message}");
-                await Task.Delay(5000);
+                await Task.Delay(15000);
             }
         }
     }
@@ -196,6 +197,7 @@ public class AmqpService : IAmqpService
         {
             var message = new AmqpMessage
             {
+                Type = ea.BasicProperties.Type,
                 Body = ea.Body.ToArray(),
             };
             try
@@ -238,6 +240,7 @@ public class AmqpService : IAmqpService
                 {
                     var properties = pubChannel.CreateBasicProperties();
                     properties.UserId = endpointDefinition.UserId;
+                    properties.Type = message.Type;
                     var sequenceNo = pubChannel.NextPublishSeqNo;
                     Debug.WriteLine($"publishing seq {sequenceNo} {message.Text}");
                     pubChannel.BasicPublish(endpointDefinition.Exchange, message.Route, false,
@@ -267,12 +270,15 @@ public class AmqpService : IAmqpService
             try
             {
                 processed = await pf(message);
+                if (processed)
+                    break;
             }
             catch (Exception e)
             {
                 Trace.Write($"Error while processing {e}");
             }
         }
+        return true;
         return processed;
     }
     

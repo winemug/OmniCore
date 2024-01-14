@@ -34,6 +34,9 @@ public class RaddService : IRaddService
 
     public async Task<bool> ProcessMessageAsync(AmqpMessage message)
     {
+        if (message.Type != null)
+            return false;
+
         var rr = JsonSerializer.Deserialize<RaddRequest>(message.Text);
         if (rr == null)
             return false;
@@ -151,7 +154,8 @@ public class RaddService : IRaddService
 
                 if (success && rr.bolus_ticks is > 0 && !rr.test_bolus)
                 {
-                    var response = await podConnection.Bolus((int)rr.bolus_ticks, 2000);
+                    var interval = rr.bolus_interval ?? 2000;
+                    var response = await podConnection.Bolus((int)rr.bolus_ticks, interval);
                     success = response == PodRequestStatus.Executed;
                 }
 
@@ -218,6 +222,7 @@ public class RaddRequest
     public bool beep { get; set; }
     public bool update_status { get; set; }
     public int? bolus_ticks { get; set; }
+    public int? bolus_interval { get; set; }
     public int? temp_basal_ticks { get; set; }
     public int? temp_basal_half_hours { get; set; }
     public bool cancel_temp { get; set; }
