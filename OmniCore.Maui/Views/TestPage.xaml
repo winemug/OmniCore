@@ -4,11 +4,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OmniCore.Maui.Views.TestPage">
     <ContentPage.Content>
-        <VerticalStackLayout Spacing="48">
-            <Button Text="Stop" Command="{Binding StopCommand}"/>
-            <Button Text="New" Command="{Binding NewPodCommand}"/>
-            <Button Text="Prime" Command="{Binding PrimeCommand}"/>
-            <Button Text="Start" Command="{Binding StartCommand}"/>
-        </VerticalStackLayout>
+        <StackLayout Orientation="Vertical" Padding="15" Margin="30" Spacing="30">
+            <Button Text="Stop" Command="{Binding StopCommand}" WidthRequest="100" HorizontalOptions="Center"/>
+            <Button Text="New" Command="{Binding NewPodCommand}"  WidthRequest="100" HorizontalOptions="Center"/>
+            <Button Text="Prime" Command="{Binding PrimeCommand}" WidthRequest="100" HorizontalOptions="Center"/>
+            <Button Text="Start" Command="{Binding StartCommand}" WidthRequest="100" HorizontalOptions="Center"/>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

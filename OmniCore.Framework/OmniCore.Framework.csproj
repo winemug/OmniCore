@@ -26,13 +26,4 @@
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Microsoft.Maui.Controls">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Maui.Controls.Ref.win\7.0.59\ref\net7.0-windows10.0.19041\Microsoft.Maui.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Maui.Essentials">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Maui.Essentials.Ref.ios\7.0.59\ref\net7.0-ios13.6\Microsoft.Maui.Essentials.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

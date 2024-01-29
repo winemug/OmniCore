@@ -29,7 +29,6 @@ public class RaddService : IRaddService
 
     public async Task Stop()
     {
-        throw new NotImplementedException();
     }
 
     public async Task<bool> ProcessMessageAsync(AmqpMessage message)

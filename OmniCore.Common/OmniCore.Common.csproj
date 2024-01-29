@@ -19,15 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.Maui.Controls">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Maui.Controls.Ref.maccatalyst\7.0.59\ref\net7.0-maccatalyst13.5\Microsoft.Maui.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Android">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.Android.Ref.33\33.0.26\ref\net7.0\Mono.Android.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\OmniCore.Shared\OmniCore.Shared.csproj" />
   </ItemGroup>
 

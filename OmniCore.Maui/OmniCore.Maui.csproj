@@ -21,22 +21,31 @@
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
 
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">28.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">30.0</SupportedOSPlatformVersion>
     </PropertyGroup>
 
     <PropertyGroup>
       <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-android33.0|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android34.0|AnyCPU'">
+      <AndroidKeyStore>False</AndroidKeyStore>
+      <AndroidEnableMultiDex>False</AndroidEnableMultiDex>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-android33.0|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android34.0|AnyCPU'">
+      <AndroidPackageFormat>apk</AndroidPackageFormat>
+      <AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+      <AndroidKeyStore>False</AndroidKeyStore>
+      <AndroidEnableMultiDex>False</AndroidEnableMultiDex>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </MauiIcon>
+        <MauiIcon Include="Resources\AppIcon\appiconfg.svg" />
 
         <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
@@ -52,6 +61,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Resources\AppIcon\appiconfg.svg" />
       <None Remove="Resources\Images\pod.svg" />
       <None Remove="Resources\Images\pod_outline.svg" />
     </ItemGroup>
@@ -65,6 +75,8 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
         <PackageReference Include="Polly" Version="8.2.1" />
+        <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.3" />
+        <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>
@@ -78,13 +90,4 @@
         <Generator>MSBuild:UpdateGeneratedFiles</Generator>
       </AndroidResource>
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.6" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.6" />
-    </ItemGroup>
-
 </Project>
