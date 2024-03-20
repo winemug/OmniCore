@@ -6,9 +6,9 @@
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" Padding="15" Margin="30" Spacing="30">
             <Button Text="Stop" Command="{Binding StopCommand}" WidthRequest="100" HorizontalOptions="Center"/>
-            <Button Text="New" Command="{Binding NewPodCommand}"  WidthRequest="100" HorizontalOptions="Center"/>
+            <!--<Button Text="New" Command="{Binding NewPodCommand}"  WidthRequest="100" HorizontalOptions="Center"/>
             <Button Text="Prime" Command="{Binding PrimeCommand}" WidthRequest="100" HorizontalOptions="Center"/>
-            <Button Text="Start" Command="{Binding StartCommand}" WidthRequest="100" HorizontalOptions="Center"/>
+            <Button Text="Start" Command="{Binding StartCommand}" WidthRequest="100" HorizontalOptions="Center"/>-->
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

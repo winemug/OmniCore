@@ -32,7 +32,7 @@ public class SyncService : ISyncService
     public async Task Start()
     {
         _syncTask = SyncTask(_ctsSync.Token);
-        _amqpService.RegisterMessageProcessor(ProcessMessageAsync);
+        //_amqpService.RegisterMessageProcessor(ProcessMessageAsync);
     }
 
     public async Task<bool> ProcessMessageAsync(AmqpMessage message)
@@ -198,6 +198,12 @@ public class SyncService : ISyncService
         if (pod != null)
         {
             pod.IsSynced = true;
+            if (pod.Removed != null)
+            {
+                await context.PodActions.Where(pa => pa.PodId == pod.PodId).ExecuteDeleteAsync();
+                await context.Pods.Where(p => p.PodId == pod.PodId).ExecuteDeleteAsync();
+            }
+
             await context.SaveChangesAsync();
         }
     }
