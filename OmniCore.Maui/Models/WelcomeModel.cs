@@ -8,9 +8,34 @@ namespace OmniCore.Maui.Models;
 public partial class WelcomeModel(IPlatformService platformService, IPlatformInfo platformInfo)
     : PageModel
 {
-    [RelayCommand]
-    private async Task Kommando()
+    protected override Task Appearing()
     {
+        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(Appearing)}");
+        return Task.CompletedTask;
+    }
+
+    protected override Task NavigatedTo()
+    {
+        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(NavigatedTo)}");
+        return Task.CompletedTask;
+    }
+
+    protected override Task NavigatedFrom()
+    {
+        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(NavigatedFrom)}");
+        return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task StartService()
+    {
+        platformService.StartService();
+    }
+
+    [RelayCommand]
+    private async Task StopService()
+    {
+        platformService.StopService();
     }
 
 }

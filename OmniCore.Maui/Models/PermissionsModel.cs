@@ -1,41 +1,46 @@
-using System.Diagnostics;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OmniCore.Services.Interfaces.Platform;
 
 namespace OmniCore.Maui.Models;
 
-public partial class PermissionsModel : PageModel
+public partial class PermissionsModel(IPlatformService platformService) : PageModel
 {
     [ObservableProperty] List<DynamicPermission> _dynamicPermissions =
     [
         new DynamicPermission(permissionName: "android.permission.INTERNET", true),
         new DynamicPermission(permissionName: "android.permission.ACCESS_NETWORK_STATE", true),
-        new DynamicPermission(permissionName: "android.permission.CHANGE_NETWORK_STATE", true),
         
         new DynamicPermission(permissionName: "android.permission.BLUETOOTH_CONNECT", true),
         new DynamicPermission(permissionName: "android.permission.BLUETOOTH_SCAN", true),
         
         new DynamicPermission(permissionName: "android.permission.POST_NOTIFICATIONS", true),
         new DynamicPermission(permissionName: "android.permission.FOREGROUND_SERVICE", true),
-        new DynamicPermission(permissionName: "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE", true),
+        new DynamicPermission(permissionName: "android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED", true),
+        new DynamicPermission(permissionName: "android.permission.USE_EXACT_ALARM", true),
     ];
 
     protected override async Task Appearing()
     {
-        await Check();
-        base.OnPropertyChanged(nameof(DynamicPermissions));
-    }
-
-    private async Task Check()
-    {
-        foreach (var permission in _dynamicPermissions)
+        foreach (var permission in DynamicPermissions)
         {
             await permission.UpdateStatusAsync();
         }
     }
+
+    [RelayCommand]
+    public async Task RequestAllPermissions()
+    {
+        foreach (var permission in DynamicPermissions)
+        {
+            await permission.RequestAndUpdateStatusAsync();
+        }
+    }
 }
-public class DynamicPermission : Permissions.BasePlatformPermission
+public class DynamicPermission : Permissions.BasePlatformPermission, INotifyPropertyChanged
 {
     private readonly string _permissionName;
     private readonly bool _isRuntime;
@@ -61,11 +66,19 @@ public class DynamicPermission : Permissions.BasePlatformPermission
     public async Task UpdateStatusAsync()
     {
         _lastStatus = await CheckStatusAsync();
+        OnPropertyChanged(nameof(IsGranted));
     }
 
     public async Task RequestAndUpdateStatusAsync()
     {
         _lastStatus = await RequestAsync();
+        OnPropertyChanged(nameof(IsGranted));
     }
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

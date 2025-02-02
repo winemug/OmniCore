@@ -9,6 +9,7 @@
              Title="Welcome Home">
     <VerticalStackLayout>
         <Label Text="This here"/>
-        <Button Text="Kommandore" Command="{Binding KommandoCommand}"/>
+        <Button Text="Start Service" Command="{Binding StartServiceCommand}"/>
+        <Button Text="Stop Service" Command="{Binding StopServiceCommand}"/>
     </VerticalStackLayout>
 </ContentPage>

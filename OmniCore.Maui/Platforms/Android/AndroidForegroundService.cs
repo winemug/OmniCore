@@ -7,7 +7,7 @@ using static Android.App.Notification;
 
 namespace OmniCore.Maui
 {
-    [Service(ForegroundServiceType = global::Android.Content.PM.ForegroundService.TypeConnectedDevice)]
+    [Service(ForegroundServiceType = global::Android.Content.PM.ForegroundService.TypeSystemExempted)]
     public class AndroidForegroundService : Service
     {
         private bool _isStarted;

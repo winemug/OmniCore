@@ -27,12 +27,6 @@ public static class PageModelExtensions
 {
     public static Page WithModel(this Page page, PageModel model)
     {
-        var behavior = new EventToCommandBehavior
-        {
-            EventName = nameof(Page.NavigatedTo),
-            Command = model.NavigatedToCommand
-        };
-
         page.Behaviors(
             new EventToCommandBehavior
             {

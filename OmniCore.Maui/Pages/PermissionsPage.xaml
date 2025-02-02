@@ -6,27 +6,32 @@
              xmlns:models="clr-namespace:OmniCore.Maui.Models"
              x:Class="OmniCore.Maui.Pages.PermissionsPage"
              x:DataType="models:PermissionsModel">
-    <CollectionView ItemsSource="{Binding DynamicPermissions}">
-        <CollectionView.Resources>
-            <Color x:Key="TrueColor">#309930</Color>
-            <Color x:Key="FalseColor">#E04040</Color>
-            <toolkit:BoolToObjectConverter x:Key="IsGrantedConverter" 
-                                           TrueObject="{StaticResource TrueColor}" 
-                                           FalseObject="{StaticResource FalseColor}"/>
-        </CollectionView.Resources>
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="models:DynamicPermission">
-                <Label Text="{Binding ShortName}"
-                       TextColor="{Binding IsGranted,
+    <ScrollView>
+        <VerticalStackLayout>
+            <CollectionView ItemsSource="{Binding DynamicPermissions}">
+                <CollectionView.Resources>
+                    <Color x:Key="TrueColor">#309930</Color>
+                    <Color x:Key="FalseColor">#E04040</Color>
+                    <toolkit:BoolToObjectConverter x:Key="IsGrantedConverter" 
+                                                   TrueObject="{StaticResource TrueColor}" 
+                                                   FalseObject="{StaticResource FalseColor}"/>
+                </CollectionView.Resources>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:DynamicPermission">
+                        <Label Text="{Binding ShortName}"
+                               TextColor="{Binding IsGranted,
                        Converter={StaticResource IsGrantedConverter}}"
-                       BackgroundColor="#404040"
-                       Margin="2,4,2,4"
-                >
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding RequestAndUpdateCommand}"/>
-                    </Label.GestureRecognizers>
-                </Label>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+                               BackgroundColor="#404040"
+                               Margin="2,4,2,4"
+                        >
+                            <!-- <Label.GestureRecognizers> -->
+                            <!--     <TapGestureRecognizer Command="{Binding RequestAndUpdateCommand}"/> -->
+                            <!-- </Label.GestureRecognizers> -->
+                        </Label>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="Request All" Command="{Binding RequestAllPermissionsCommand}"/>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
