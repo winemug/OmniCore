@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using OmniCore.Maui.Constants;
 using Plugin.BLE;
@@ -10,57 +12,107 @@ namespace OmniCore.Maui.Services;
 public class BleService
 {
     private readonly IBluetoothLE _ble;
-    private readonly IAdapter _adapter;
+    private Dictionary<Guid, BleDevice> _devices;
+    public ObservableCollection<BleDevice> BleDevices { get; set; }
 
-    public BleService()
+    public BleService(IBluetoothLE ble)
     {
-        _ble = CrossBluetoothLE.Current;
-        _adapter = CrossBluetoothLE.Current.Adapter;
+        _ble = ble;
+        _devices = new Dictionary<Guid, BleDevice>();
+        // AddInitialDevices(_ble.Adapter.BondedDevices);
+        // AddInitialDevices(_ble.Adapter.ConnectedDevices);
+        // AddInitialDevices(_ble.Adapter.DiscoveredDevices);
+        BleDevices = new ObservableCollection<BleDevice>(_devices.Values);
+
         _ble.StateChanged += BluetoothOnStateChanged;
-        _adapter.DeviceConnected += AdapterOnDeviceConnected;
-        _adapter.DeviceAdvertised += AdapterOnDeviceAdvertised;
-        _adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
-        _adapter.DeviceDisconnected += AdapterOnDeviceDisconnected;
-        _adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
+        _ble.Adapter.DeviceConnected += AdapterOnDeviceConnected;
+        _ble.Adapter.DeviceAdvertised += AdapterOnDeviceAdvertised;
+        _ble.Adapter.DeviceDiscovered += AdapterOnDeviceDiscovered;
+        _ble.Adapter.DeviceDisconnected += AdapterOnDeviceDisconnected;
+        _ble.Adapter.ScanTimeoutElapsed += AdapterOnScanTimeoutElapsed;
+
+        StartScanning();
     }
 
-    private void AdapterOnScanTimeoutElapsed(object? sender, EventArgs e)
+    private void AddInitialDevices(IReadOnlyList<IDevice>? devices)
     {
-        Debug.WriteLine($"{nameof(BleService)}: OnScanTimeoutElapsed");
-    }
-
-    private void AdapterOnDeviceDisconnected(object? sender, DeviceEventArgs e)
-    {
-        Debug.WriteLine($"{nameof(BleService)}: OnDeviceDisconnected");
-    }
-
-    private void AdapterOnDeviceDiscovered(object? sender, DeviceEventArgs e)
-    {
-        Debug.WriteLine($"{nameof(BleService)}: OnDeviceDiscovered");
-    }
-
-    private void AdapterOnDeviceAdvertised(object? sender, DeviceEventArgs e)
-    {
-        Debug.WriteLine($"{nameof(BleService)}: OnDeviceAdvertised");
-    }
-
-    private void AdapterOnDeviceConnected(object? sender, DeviceEventArgs e)
-    {
-        Debug.WriteLine($"{nameof(BleService)}: OnDeviceConnected");
+        if (devices == null)
+            return;
+        foreach (var device in devices)
+        {
+            if (!_devices.ContainsKey(device.Id))
+            {
+                var bleDevice = new BleDevice(device);
+                _devices.Add(device.Id, bleDevice);
+            }
+        }
     }
 
     private void BluetoothOnStateChanged(object? sender, BluetoothStateChangedArgs e)
     {
         Debug.WriteLine($"{nameof(BleService)}: Bluetooth state changed from {e.OldState} to {e.NewState}");
+        StartScanning();
     }
 
-    public async Task Search()
+    private void AdapterOnScanTimeoutElapsed(object? sender, EventArgs e)
     {
-        _adapter.ScanMode = ScanMode.LowLatency;
-        _adapter.ScanTimeout = 10000;
-        _adapter.ScanMatchMode = ScanMatchMode.STICKY;
-        Debug.WriteLine("Start scan");
-        await _adapter.StartScanningForDevicesAsync();
-        Debug.WriteLine("Started");
+        Debug.WriteLine($"{nameof(BleService)}: Scan timed out, device count: {_devices.Count}");
+        MainThread.InvokeOnMainThreadAsync(StartScanning);
+    }
+
+    private void AdapterOnDeviceDiscovered(object? sender, DeviceEventArgs e)
+    {
+        var bleDevice = GetBleDevice(e.Device);
+        bleDevice?.AdapterEvent(AdapterDeviceEvent.Discovered, e.Device);
+    }
+
+    private void AdapterOnDeviceAdvertised(object? sender, DeviceEventArgs e)
+    {
+        var bleDevice = GetBleDevice(e.Device);
+        bleDevice?.AdapterEvent(AdapterDeviceEvent.Advertised, e.Device);
+    }
+
+    private void AdapterOnDeviceConnected(object? sender, DeviceEventArgs e)
+    {
+        var bleDevice = GetBleDevice(e.Device);
+        bleDevice?.AdapterEvent(AdapterDeviceEvent.Connected, e.Device);
+    }
+
+    private void AdapterOnDeviceDisconnected(object? sender, DeviceEventArgs e)
+    {
+        var bleDevice = GetBleDevice(e.Device);
+        bleDevice?.AdapterEvent(AdapterDeviceEvent.Disconnected, e.Device);
+    }
+
+    private BleDevice? GetBleDevice(IDevice device)
+    {
+        lock (_devices)
+        {
+            if (!_devices.TryGetValue(device.Id, out var bleDevice))
+            {
+                bleDevice = new BleDevice(device);
+                _devices.Add(device.Id, bleDevice);
+                BleDevices.Add(bleDevice);
+            }
+            return bleDevice;
+        }
+    }
+    
+    public void StartScanning()
+    {
+        if (_ble.IsAvailable && _ble.IsOn && !_ble.Adapter.IsScanning)
+        {
+            Debug.WriteLine($"Starting scan");
+            _ = MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                _ble.Adapter.ScanMode = ScanMode.Balanced;
+                _ble.Adapter.ScanTimeout = 30000;
+                _ble.Adapter.ScanMatchMode = ScanMatchMode.AGRESSIVE;
+                return _ble.Adapter.StartScanningForDevicesAsync((ScanFilterOptions)null, device =>
+                {
+                    return (device.Id == Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CA"));
+                }, false, CancellationToken.None);
+            });
+        }
     }
 }

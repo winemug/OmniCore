@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using OmniCore.Maui.Models;
 using OmniCore.Maui.PageModels;
 using OmniCore.Maui.Services;
+using Plugin.BLE;
+using Plugin.BLE.Abstractions.Contracts;
 using HomePageModel = OmniCore.Maui.PageModels.HomePageModel;
 using PermissionsPageModel = OmniCore.Maui.PageModels.PermissionsPageModel;
 
@@ -39,6 +41,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<RadiosPageModel>();
 
         builder.Services.AddSingleton<BleService>();
+        builder.Services.AddSingleton<IBluetoothLE>(CrossBluetoothLE.Current);
 
         builder.Services.RegisterPlatformServices();
         return builder.Build();
