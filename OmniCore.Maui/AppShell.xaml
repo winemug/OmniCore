@@ -8,17 +8,22 @@
     Title="OmniCore">
 
     <ShellContent
+        Title="Home"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pages:HomePage}"
+        Route="home" />
+    
+    <ShellContent
+        Title="Radios"
+        Icon="{StaticResource IconProjects}"
+        ContentTemplate="{DataTemplate pages:RadiosPage}"
+        Route="radios" />
+    
+    <ShellContent
         Title="Permissions"
         Icon="{StaticResource IconRibbon}"
         ContentTemplate="{DataTemplate pages:PermissionsPage}"
         Route="permissions" />
     
-    <ShellContent
-        Title="Welcome"
-        Icon="{StaticResource IconDashboard}"
-        ContentTemplate="{DataTemplate pages:WelcomePage}"
-        Route="welcome" />
 
-
-    
 </Shell>

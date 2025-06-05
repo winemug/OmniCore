@@ -2,6 +2,10 @@
 using Fonts;
 using Microsoft.Extensions.Logging;
 using OmniCore.Maui.Models;
+using OmniCore.Maui.PageModels;
+using OmniCore.Maui.Services;
+using HomePageModel = OmniCore.Maui.PageModels.HomePageModel;
+using PermissionsPageModel = OmniCore.Maui.PageModels.PermissionsPageModel;
 
 namespace OmniCore.Maui;
 
@@ -30,8 +34,11 @@ public static class MauiProgram
         builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
 
-        builder.Services.AddSingleton<WelcomeModel>();
-        builder.Services.AddSingleton<PermissionsModel>();
+        builder.Services.AddSingleton<HomePageModel>();
+        builder.Services.AddSingleton<PermissionsPageModel>();
+        builder.Services.AddSingleton<RadiosPageModel>();
+
+        builder.Services.AddSingleton<BleService>();
 
         builder.Services.RegisterPlatformServices();
         return builder.Build();

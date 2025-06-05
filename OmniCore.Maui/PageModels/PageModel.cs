@@ -1,9 +1,9 @@
-using Android.Media;
 using CommunityToolkit.Maui.Behaviors;
+using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Markup;
-namespace OmniCore.Maui.Models;
+
+namespace OmniCore.Maui.PageModels;
 
 public abstract partial class PageModel : ObservableObject
 {

@@ -1,28 +1,27 @@
 using System.Diagnostics;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using OmniCore.Services.Interfaces.Platform;
+using OmniCore.Maui.Interfaces;
 
-namespace OmniCore.Maui.Models;
+namespace OmniCore.Maui.PageModels;
 
-public partial class WelcomeModel(IPlatformService platformService, IPlatformInfo platformInfo)
-    : PageModel
+public partial class HomePageModel(IPlatformService platformService, IPlatformInfo platformInfo)
+    : PageModels.PageModel
 {
     protected override Task Appearing()
     {
-        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(Appearing)}");
+        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(Appearing)}");
         return Task.CompletedTask;
     }
 
     protected override Task NavigatedTo()
     {
-        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(NavigatedTo)}");
+        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(NavigatedTo)}");
         return Task.CompletedTask;
     }
 
     protected override Task NavigatedFrom()
     {
-        Debug.WriteLine($"{nameof(WelcomeModel)}.{nameof(NavigatedFrom)}");
+        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(NavigatedFrom)}");
         return Task.CompletedTask;
     }
 

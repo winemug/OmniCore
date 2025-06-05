@@ -5,9 +5,7 @@ using Android.Runtime;
 #endif
 using Android.OS;
 using Microsoft.Maui.Controls.PlatformConfiguration;
-using OmniCore.Services.Interfaces;
-using OmniCore.Services.Interfaces.Core;
-using OmniCore.Services.Interfaces.Platform;
+using OmniCore.Maui.Interfaces;
 
 namespace OmniCore.Maui.Services
 {

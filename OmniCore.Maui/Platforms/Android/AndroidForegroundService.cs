@@ -2,7 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using OmniCore.Services.Interfaces.Core;
 using static Android.App.Notification;
 
 namespace OmniCore.Maui
@@ -11,41 +10,13 @@ namespace OmniCore.Maui
     public class AndroidForegroundService : Service
     {
         private bool _isStarted;
-        private Task _startingTask = null;
-        private Task _stoppingTask = null;
-        private void Start()
-        {
-            lock (this)
-            {
-                if ((_startingTask == null || !_startingTask.IsCompletedSuccessfully) &&
-                    (_stoppingTask == null || _stoppingTask.IsCompletedSuccessfully))
-                {
-                    var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
-                    _stoppingTask = null;
-                    _startingTask = coreService.Start();
-                }
-            }
-        }
-
-        private void Stop()
-        {
-            lock (this)
-            {
-                if (_stoppingTask == null && _startingTask != null && _startingTask.IsCompletedSuccessfully)
-                {
-                    var coreService = MauiApplication.Current.Services.GetService<ICoreService>();
-                    _startingTask = null;
-                    _stoppingTask = coreService.Stop();
-                }
-            }
-        }
-
+        private Task? _startTask;
         public override IBinder OnBind(Intent intent)
         {
             return new Binder();
         }
 
-        private void RegisterForegroundService()
+        private Notification GetForegroundNotification()
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
@@ -61,15 +32,12 @@ namespace OmniCore.Maui
             // showAppIntent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTask);
             // var showAppPendingIntent = PendingIntent.GetActivity(this, 0, showAppIntent, PendingIntentFlags.UpdateCurrent);
 
-            var notification = new Builder(this, "background")
+            return new Builder(this, "background")
                 .SetContentTitle("OmniCore")
                 .SetContentText("OmniCore is running in the background.")
                 // .SetContentIntent(showAppPendingIntent)
                 .SetOngoing(true)
                 .Build();
-
-            // Enlist this instance of the service as a foreground service
-            StartForeground(100, notification, ForegroundService.TypeSystemExempted);
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -79,35 +47,32 @@ namespace OmniCore.Maui
                 case "start":
                     if (!_isStarted)
                     {
-                        RegisterForegroundService();
-                        Start();
+                        var notification = GetForegroundNotification();
+                        StartForeground(100, notification, ForegroundService.TypeSystemExempted);
+
+                        // if (_startTask == null)
+                        // {
+                        //     var coreService = IPlatformApplication.Current!.Services.GetRequiredService<ICoreService>();
+                        //     _startTask = coreService.Start();
+                        // }
                         _isStarted = true;
                     }
                     return StartCommandResult.Sticky;
                 case "stop":
                     if (_isStarted)
                     {
-                        Stop();
-                        _isStarted = false;
-                        StopForeground(true);
+                        _startTask?.Wait();
+                        _startTask = null;
+                        // var coreService = IPlatformApplication.Current!.Services.GetRequiredService<ICoreService>();
+                        // coreService.Stop().Wait();
+                        StopForeground(StopForegroundFlags.Remove);
                         StopSelf();
+                        _isStarted = false;
                     }
                     return StartCommandResult.NotSticky;
             }
 
             return StartCommandResult.ContinuationMask;
-        }
-
-        public override void OnDestroy()
-        {
-            if (_isStarted)
-            {
-                Stop();
-                _isStarted = false;
-                StopForeground(true);
-                StopSelf();
-            }
-            base.OnDestroy();
         }
     }
 }

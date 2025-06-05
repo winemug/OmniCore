@@ -4,8 +4,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:OmniCore.Maui.Models"
+             xmlns:pageModels="clr-namespace:OmniCore.Maui.PageModels"
              x:Class="OmniCore.Maui.Pages.PermissionsPage"
-             x:DataType="models:PermissionsModel">
+             x:DataType="pageModels:PermissionsPageModel">
     <ScrollView>
         <VerticalStackLayout>
             <CollectionView ItemsSource="{Binding DynamicPermissions}">
@@ -17,7 +18,7 @@
                                                    FalseObject="{StaticResource FalseColor}"/>
                 </CollectionView.Resources>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:DynamicPermission">
+                    <DataTemplate x:DataType="models:DynamicPermissionModel">
                         <Label Text="{Binding ShortName}"
                                TextColor="{Binding IsGranted,
                        Converter={StaticResource IsGrantedConverter}}"

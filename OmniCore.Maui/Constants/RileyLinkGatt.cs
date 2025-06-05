@@ -1,6 +1,4 @@
-using System;
-
-namespace OmniCore.Services.Interfaces.Radio;
+namespace OmniCore.Maui.Constants;
 
 public static class RileyLinkGatt
 {

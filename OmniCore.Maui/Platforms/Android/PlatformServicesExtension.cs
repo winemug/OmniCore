@@ -1,5 +1,5 @@
+using OmniCore.Maui.Interfaces;
 using OmniCore.Maui.Services;
-using OmniCore.Services.Interfaces.Platform;
 
 namespace OmniCore.Maui;
 
