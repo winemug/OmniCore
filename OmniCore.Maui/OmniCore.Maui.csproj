@@ -1,18 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net9.0-android</TargetFrameworks>
-        <OutputType>Exe</OutputType>
+		<!-- ;net9.0-ios removed-->
+		<TargetFrameworks>net9.0-android</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
         <RootNamespace>OmniCore.Maui</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
-
         <Nullable>enable</Nullable>
 
         <!-- https://github.com/CommunityToolkit/Maui/issues/2205 -->
         <NoWarn>XC0103</NoWarn>
-        <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+
+		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
         
         <!-- Display name -->
         <ApplicationTitle>OmniCore</ApplicationTitle>
@@ -28,45 +30,23 @@
         <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
         <WindowsPackageType>None</WindowsPackageType>
 
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		
         <LangVersion>preview</LangVersion>
 
-<!--        <Version>1.0.5</Version>-->
-<!--        <AssemblyVersion>1.0.5</AssemblyVersion>-->
-<!--        <FileVersion>1.0.5</FileVersion>-->
-
-<!--        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>-->
-<!--        <RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>-->
     </PropertyGroup>
-
-<!--    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android34.0|AnyCPU'">-->
-<!--      <AndroidKeyStore>False</AndroidKeyStore>-->
-<!--      <AndroidEnableMultiDex>False</AndroidEnableMultiDex>-->
-<!--    </PropertyGroup>-->
-
-<!--    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android34.0|AnyCPU'">-->
-<!--      <AndroidPackageFormat>apk</AndroidPackageFormat>-->
-<!--      <AndroidKeyStore>False</AndroidKeyStore>-->
-<!--      <AndroidEnableMultiDex>False</AndroidEnableMultiDex>-->
-<!--    </PropertyGroup>-->
-
-<!--    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android35.0|AnyCPU'">-->
-<!--      <ApplicationTitle>OmniCore</ApplicationTitle>-->
-<!--      <ApplicationId>net.balya.omnicore</ApplicationId>-->
-<!--    </PropertyGroup>-->
-
-<!--    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">-->
-<!--      <ApplicationTitle>OmniCore</ApplicationTitle>-->
-<!--      <ApplicationId>net.balya.omnicore</ApplicationId>-->
-<!--    </PropertyGroup>-->
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#17171a" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#17171a" BaseSize="128,128" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
@@ -92,6 +72,7 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
         <PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.5" />
+        <PackageReference Include="Xamarin.Firebase.Messaging" Version="124.1.1.2" />
     </ItemGroup>
     
     <ItemGroup>

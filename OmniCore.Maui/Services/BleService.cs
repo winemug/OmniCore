@@ -105,13 +105,15 @@ public class BleService
             Debug.WriteLine($"Starting scan");
             _ = MainThread.InvokeOnMainThreadAsync(() =>
             {
-                _ble.Adapter.ScanMode = ScanMode.Balanced;
+                _ble.Adapter.ScanMode = ScanMode.LowPower;
                 _ble.Adapter.ScanTimeout = 30000;
-                _ble.Adapter.ScanMatchMode = ScanMatchMode.AGRESSIVE;
+                _ble.Adapter.ScanMatchMode = ScanMatchMode.STICKY;
                 return _ble.Adapter.StartScanningForDevicesAsync((ScanFilterOptions)null, device =>
                 {
-                    return (device.Id == Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CA"));
-                }, false, CancellationToken.None);
+                    return true;
+                    //return (device.Id == Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CA"));
+                    //return (device.Id == Guid.Parse("00000000-0000-0000-0000-88680FF897CF"));
+                }, true, CancellationToken.None);
             });
         }
     }
