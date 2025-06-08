@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "819349310531",
+    "firebase_url": "https://omnicore17.firebaseio.com",
+    "project_id": "omnicore17",
+    "storage_bucket": "omnicore17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819349310531:android:5bab3f5eaab2897c2118f6",
+        "android_client_info": {
+          "package_name": "net.balya.omnicore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB498_ZQ-h6EcDI46tDz3TCtja8t6TyB0E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

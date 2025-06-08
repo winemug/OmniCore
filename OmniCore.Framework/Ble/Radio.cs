@@ -300,6 +300,30 @@ public class Radio : IRadio
             RileyLinkCommand.SetPreamble,
             cancellationToken, 0x66, 0x65));
 
+
+        // aaps bs:
+        // updateRegister(CC111XRegister.pktctrl1, 0x20);
+        // updateRegister(CC111XRegister.agcctrl0, 0x00);
+        // updateRegister(CC111XRegister.fsctrl1, 0x06);
+        // updateRegister(CC111XRegister.mdmcfg4, 0xCA);
+        // updateRegister(CC111XRegister.mdmcfg3, 0xBC);
+        // updateRegister(CC111XRegister.mdmcfg2, 0x06);
+        // updateRegister(CC111XRegister.mdmcfg1, 0x70);
+        // updateRegister(CC111XRegister.mdmcfg0, 0x11);
+        // updateRegister(CC111XRegister.deviatn, 0x44);
+        // updateRegister(CC111XRegister.mcsm0, 0x18);
+        // updateRegister(CC111XRegister.foccfg, 0x17);
+        // updateRegister(CC111XRegister.fscal3, 0xE9);
+        // updateRegister(CC111XRegister.fscal2, 0x2A);
+        // updateRegister(CC111XRegister.fscal1, 0x00);
+        // updateRegister(CC111XRegister.fscal0, 0x1F);
+        //
+        // updateRegister(CC111XRegister.test1, 0x31);
+        // updateRegister(CC111XRegister.test0, 0x09);
+        // updateRegister(CC111XRegister.paTable0, 0x84);
+        // updateRegister(CC111XRegister.sync1, 0xA5);
+        // updateRegister(CC111XRegister.sync0, 0x5A);
+        //
         var commonRegisters = new Dictionary<RileyLinkRadioRegister, byte>
         {
             { RileyLinkRadioRegister.SYNC1, 0xA5 },

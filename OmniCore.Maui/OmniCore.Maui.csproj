@@ -57,6 +57,8 @@
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <None Remove="Platforms\Android\google-services.json" />
+        <GoogleServicesJson Include="Platforms\Android\google-services.json" />
         <MauiImage Update="Resources\Images\dotnet_bot.png">
           <Resize>True</Resize>
           <BaseSize>300,185</BaseSize>
