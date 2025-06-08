@@ -97,6 +97,17 @@ public class BleService
             return bleDevice;
         }
     }
+
+    private static readonly Guid KnownDeviceEma = Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CA");
+    private static readonly Guid KnownDeviceRlink = Guid.Parse("00000000-0000-0000-0000-88680FF897CF");
+    private static readonly Guid KnownDeviceOrange = Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CB");
+
+    private static readonly Guid[] KnownDevices = new[]
+    {
+        KnownDeviceEma,
+        KnownDeviceRlink,
+        KnownDeviceOrange
+    };
     
     public void StartScanning()
     {
@@ -105,15 +116,10 @@ public class BleService
             Debug.WriteLine($"Starting scan");
             _ = MainThread.InvokeOnMainThreadAsync(() =>
             {
-                _ble.Adapter.ScanMode = ScanMode.LowPower;
+                _ble.Adapter.ScanMode = ScanMode.Balanced;
                 _ble.Adapter.ScanTimeout = 30000;
                 _ble.Adapter.ScanMatchMode = ScanMatchMode.STICKY;
-                return _ble.Adapter.StartScanningForDevicesAsync((ScanFilterOptions)null, device =>
-                {
-                    return true;
-                    //return (device.Id == Guid.Parse("00000000-0000-0000-0000-BC33ACB8F4CA"));
-                    //return (device.Id == Guid.Parse("00000000-0000-0000-0000-88680FF897CF"));
-                }, true, CancellationToken.None);
+                return _ble.Adapter.StartScanningForDevicesAsync((ScanFilterOptions?)null, device => KnownDevices.Contains(device.Id), true, CancellationToken.None);
             });
         }
     }
