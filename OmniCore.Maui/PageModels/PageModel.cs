@@ -7,6 +7,7 @@ namespace OmniCore.Maui.PageModels;
 
 public abstract partial class PageModel : ObservableObject
 {
+
     [RelayCommand]
     protected virtual async Task NavigatedTo()
     {

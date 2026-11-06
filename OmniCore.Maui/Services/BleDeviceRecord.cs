@@ -5,13 +5,21 @@ namespace OmniCore.Maui.Services;
 
 public record BleDeviceRecord
 {
-    public string Name { get; set; }
+    public BleDeviceEvent Event { get; set; }
+    public bool Connected { get; set; }
     public int Rssi { get; set; }
-    public DeviceState State { get; set; }
-    public IReadOnlyList<AdvertisementRecord> AdvertisementRecords { get; set; }
-    public bool IsConnectable { get; set; }
-    public bool SupportsIsConnectable { get; set; }
-    public DeviceBondState BondState { get; set; }
     public DateTimeOffset Time { get; set; }
-    public AdapterDeviceEvent RecordEvent { get; set; }
+    public DeviceState State { get; set; }
+    public DeviceBondState BondState { get; set; }
+}
+
+public enum BleDeviceEvent
+{
+    Advertised,
+    Discovered,
+    Connected,
+    ConnectionError,
+    ConnectionLost,
+    BondStateChanged,
+    Disconnected
 }

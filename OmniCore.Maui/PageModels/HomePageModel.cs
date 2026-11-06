@@ -1,40 +1,31 @@
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using OmniCore.Maui.Interfaces;
+using OmniCore.Maui.Services;
 
 namespace OmniCore.Maui.PageModels;
 
-public partial class HomePageModel(IPlatformService platformService, IPlatformInfo platformInfo)
-    : PageModels.PageModel
+public partial class HomePageModel : PageModels.PageModel
 {
-    protected override Task Appearing()
-    {
-        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(Appearing)}");
-        return Task.CompletedTask;
-    }
+    private readonly IPlatformService _platformService;
 
-    protected override Task NavigatedTo()
+    /// <inheritdoc/>
+    public HomePageModel(IPlatformService platformService, TestRunService testRunService)
     {
-        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(NavigatedTo)}");
-        return Task.CompletedTask;
-    }
-
-    protected override Task NavigatedFrom()
-    {
-        Debug.WriteLine($"{nameof(HomePageModel)}.{nameof(NavigatedFrom)}");
-        return Task.CompletedTask;
+        _platformService = platformService;
+        testRunService.StartTests();
     }
 
     [RelayCommand]
     private async Task StartService()
     {
-        platformService.StartService();
+        _platformService.StartService();
     }
 
     [RelayCommand]
     private async Task StopService()
     {
-        platformService.StopService();
+        _platformService.StopService();
     }
 
 }

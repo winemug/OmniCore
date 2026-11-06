@@ -1,82 +1,75 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OmniCore.Maui.Models;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 
 namespace OmniCore.Maui.Services;
 
-public partial class BleDevice : ObservableObject
+public partial class BleDevice(Guid id) : ObservableObject
 {
-    public Guid Id { get; }
+    public Guid Id { get; } = id;
 
     public string FriendlyId =>
         string.Join(':', Id.ToByteArray(true)[new Range(10, 16)] .Select(b => b.ToString("X2")));
 
-    [ObservableProperty]
-    public Color _signalColor;
-
-
-    [ObservableProperty] public string _name;
-    [ObservableProperty] public int _rssi;
-    public List<BleDeviceRecord> Records { get; }
+    public List<BleDeviceCharacteristic> Characteristics { get; } = new();
+    public ConcurrentDictionary<AdvertisementRecordType, byte[]> AdvertisementRecords { get; } = new();
+    public List<BleDeviceRecord> StateRecords { get; init; } = new();
     
-    public BleDevice(IDevice device)
-    {
-        Id = device.Id;
-        Name = device.Name;
-        Rssi = device.Rssi;
-        var record = new BleDeviceRecord()
-        {
-            Name = device.Name,
-            State = device.State,
-            Rssi = device.Rssi,
-            AdvertisementRecords = device.AdvertisementRecords,
-            SupportsIsConnectable = device.SupportsIsConnectable,
-            IsConnectable = device.IsConnectable,
-            BondState = device.BondState,
-            Time = DateTimeOffset.UtcNow,
-            RecordEvent = AdapterDeviceEvent.None,
-        };
-        Records = new List<BleDeviceRecord>();
-        Records.Add(record);
-    }
+    [ObservableProperty] private string? _name;
 
-    public void AdapterEvent(AdapterDeviceEvent adapterDeviceEvent, IDevice device)
+    public void AddDeviceEvent(BleDeviceEvent deviceEvent, IDevice device)
     {
-        var record = new BleDeviceRecord()
-        {
-            Name = device.Name,
-            State = device.State,
-            Rssi = device.Rssi,
-            AdvertisementRecords = device.AdvertisementRecords,
-            SupportsIsConnectable = device.SupportsIsConnectable,
-            IsConnectable = device.IsConnectable,
-            BondState = device.BondState,
-            Time = DateTimeOffset.UtcNow,
-            RecordEvent = adapterDeviceEvent,
-        };
-        Records.Add(record);
-        // State = device.State;
         if (!string.IsNullOrWhiteSpace(device.Name))
             Name = device.Name;
-        Rssi = device.Rssi;
-        byte a = (byte)int.Clamp(256 + Rssi*2, 0, 255);
-        SignalColor = new Color(a, a,a);
-        // if (device.AdvertisementRecords.Any())
-        //     AdvertisementRecords = device.AdvertisementRecords;
-        // IsConnectable = device.IsConnectable;
-        // SupportsIsConnectable = device.SupportsIsConnectable;
-        // BondState = device.BondState;
-        // LastUpdate = DateTimeOffset.UtcNow;
-        // LastEvent = adapterDeviceEvent;
-    }
-}
 
-public enum AdapterDeviceEvent
-{
-    Discovered,
-    Advertised,
-    Connected,
-    Disconnected,
-    None
+        if (device.AdvertisementRecords != null)
+            foreach (var record in device.AdvertisementRecords)
+            {
+                AdvertisementRecords.AddOrUpdate(record.Type,
+                    (_) => record.Data,
+                    (_, _) => record.Data);
+            }
+        
+        StateRecords.Add(new BleDeviceRecord
+        {
+            Event = deviceEvent,
+            State = device.State,
+            BondState = device.BondState,
+            Rssi = device.Rssi,
+            Time = DateTimeOffset.Now
+        });
+    }
+    
+    private async Task DiscoverServices(IDevice device)
+    {
+        try
+        {
+            Debug.WriteLine("Discovering services..");
+            Characteristics.Clear();
+            var services = await device.GetServicesAsync();
+            if (services != null)
+            {
+                foreach (var service in services)
+                {
+                    var characteristics = await service.GetCharacteristicsAsync();
+                    if (characteristics != null)
+                        foreach (var characteristic in characteristics)
+                        {
+                            Characteristics.Add(new BleDeviceCharacteristic(characteristic));
+                        }
+                }
+            }
+            _discoveryFinished = true;
+            Debug.WriteLine("End of service discovery.");
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Error during service discovery: {e.Message}");
+            _discoveryFinished = false;
+        }
+    }
 }

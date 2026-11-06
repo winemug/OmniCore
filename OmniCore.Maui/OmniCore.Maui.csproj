@@ -2,7 +2,7 @@
 
     <PropertyGroup>
 		<!-- ;net9.0-ios removed-->
-		<TargetFrameworks>net9.0-android</TargetFrameworks>
+		<TargetFramework>net9.0-android</TargetFramework>
 
 		<OutputType>Exe</OutputType>
         <RootNamespace>OmniCore.Maui</RootNamespace>

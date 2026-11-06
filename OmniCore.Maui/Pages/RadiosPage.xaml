@@ -8,27 +8,21 @@
              x:Class="OmniCore.Maui.Pages.RadiosPage"
              x:DataType="pageModels:RadiosPageModel">
     <ContentPage.Content>
-        <ScrollView>
-            <VerticalStackLayout Spacing="2">
-                <CollectionView ItemsSource="{Binding Radios}">
+        <VerticalStackLayout>
+            <Button Text="Start Scan" Command="{Binding StartScanCommand}"/>
+            <ScrollView>
+                <CollectionView ItemsSource="{Binding Radios}" SelectionMode="None">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:BleDevice">
                             <HorizontalStackLayout Spacing="8">
-                                <Label TextColor="{Binding SignalColor}" Text="{Binding FriendlyId}"/>
-                                <Label TextColor="{Binding SignalColor}" Text="{Binding Name}">
-                                    <Label.GestureRecognizers>
-                                        <!-- <TapGestureRecognizer Command="{Binding RequestAndUpdateCommand}"/> -->
-                                    </Label.GestureRecognizers>
-                                </Label>
+                                <Label Text="{Binding FriendlyId}"/>
+                                <Label Text="{Binding Name}"/>
                                 <Label TextColor="{Binding SignalColor}" Text="{Binding Rssi}"/>
                             </HorizontalStackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-                
-                <!-- -->
-                
-            </VerticalStackLayout>
-        </ScrollView>
+            </ScrollView>
+        </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

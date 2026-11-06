@@ -43,6 +43,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<BleService>();
         builder.Services.AddSingleton<IBluetoothLE>(CrossBluetoothLE.Current);
 
+        builder.Services.AddSingleton<TestRunService>();
         builder.Services.RegisterPlatformServices();
         return builder.Build();
     }
